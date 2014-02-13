@@ -20,15 +20,15 @@ RUN apt-get update --fix-missing -f -y && apt-get upgrade -f -y && apt-get dist-
 
 # Install dependencies
 # RUN sudo add-apt-repository ppa:kernel-ppa/ppa
-RUN apt-get install --fix-missing -y ntp apt-utils python-pip python-dev python-openssl supervisor git sudo ssh openssh-server vim inotify-tools screen build-essential libgmp-dev libgmp3-dev libcrypto++-dev cmake libboost-all-dev automake libtool libleveldb-dev yasm unzip libminiupnpc-dev
+RUN apt-get install --fix-missing -y ntp apt-utils python-pip python-dev python-openssl supervisor git sudo ssh openssh-server vim inotify-tools screen build-essential libgmp-dev libgmp3-dev libcrypto++-dev cmake libboost-all-dev automake libtool libleveldb-dev yasm unzip libminiupnpc-dev python-qt4 qt5-qmake qtbase5-dev qtbase5-dev-tools
 
 # Build specific dependencies
 RUN mkdir /ethereum && mkdir /ethereum/cryptopp562 && cd /ethereum/cryptopp562 && wget http://www.cryptopp.com/cryptopp562.zip && unzip cryptopp562.zip && make
 
-RUN cd /ethereum && wget http://gavwood.com/secp256k1.tar.bz2 && tar xjf secp256k1.tar.bz2 && cd secp256k1 && ./configure && make
+# RUN cd /ethereum && wget http://gavwood.com/secp256k1.tar.bz2 && tar xjf secp256k1.tar.bz2 && cd secp256k1 && ./configure && make
 
 # Clone latest Ethereum
-RUN cd /ethereum && git clone https://github.com/ethereum/cpp-ethereum.git && cd cpp-ethereum && git checkout remotes/origin/poc-1
+RUN cd /ethereum && git clone https://github.com/ethereum/cpp-ethereum.git && cd cpp-ethereum && git checkout remotes/origin/poc-2
 
 # Install Python libraries
 # RUN pip install pip-tools boto simplejson pycrypto txrequests requests
@@ -64,17 +64,19 @@ startsecs=0\n\
 # Start Ethereum with some variables, was grabbing them from files on a multi-user setup but you can just set them up for single use
 RUN /bin/echo -e "#!/bin/bash\n\
 export ZG_ETHEREUM_PORT=30303\n\
-export ZG_ETHEREUM_PEER=\n\
+export ZG_ETHEREUM_PEER=54.200.78.45\n\
 export ZG_ETHEREUM_PEERS=5\n\
 export ZG_ETHEREUM_TYPE=full\n\
 export ZG_ETHEREUM_MINE=on\n\
+# locale-gen en_US en_US.UTF-8\n\
+export LC_ALL=\"en_US.UTF-8\"\n\
 exec >/dev/tty 2>/dev/tty </dev/tty\n\
 # while [ 1 ]; do # From Ethereum build instructions, not a good idea here.\n\
-# # Might want to set ZG_ETHEREUM_PEER to some peer for it to connect for now.\n\
+# # ZG_ETHEREUM_PEER is set to 54.200.78.45. TODO use http://www.ethereum.org/servers.txt\n\
 # -l 30303 # Can force 30303.\n\
 # -u <YourIPaddress> -l 30304 # Maybe that'll work sometimes\n\
-HOME=/ethereum screen -s /bin/bash -dmS ethereum /ethereum/cpp-ethereum/cpp-ethereum-build/eth/eth -l \$ZG_ETHEREUM_PORT -p 30303 -o \$ZG_ETHEREUM_TYPE -x \$ZG_ETHEREUM_PEERS -v 9 -m \$ZG_ETHEREUM_MINE > /ethereum/log/eth.log\n\
-mv /ethereum/log/eth.log /ethereum/log/eth.log-\$(date +%F_%T)\n\
+HOME=/ethereum screen -L -s /bin/bash -dmS ethereum /ethereum/cpp-ethereum/cpp-ethereum-build/eth/eth -l \$ZG_ETHEREUM_PORT -p 30303 -o \$ZG_ETHEREUM_TYPE -x \$ZG_ETHEREUM_PEERS -v 9 -m \$ZG_ETHEREUM_MINE \$ZG_ETHEREUM_PEER\n\
+# mv /ethereum/screenlog.0 /ethereum/log/eth.log-\$(date +%F_%T)\n\
 # done\n\
 " > /ethereum/server.sh
 RUN chmod +x /ethereum/server.sh
@@ -88,9 +90,6 @@ RUN /bin/echo -e "#!/bin/bash\n\
 cp -f /ethereum/log/authorized_keys /root/.ssh/authorized_keys && chmod 644 /root/.ssh/authorized_keys\n\
 sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config && sed -ri 's/#UsePAM no/UsePAM no/g' /etc/ssh/sshd_config\n\
 /usr/sbin/sshd\n\
-# cd /ethereum/log\n\
-# exec >/dev/tty 2>/dev/tty </dev/tty\n\
-# screen -s /bin/bash -dmS ethereum_log tail -f /ethereum/log/eth.log | less\n\
 " > /ethereum/launch-ssh.sh
 RUN chmod +x /ethereum/launch-ssh.sh
 
