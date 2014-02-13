@@ -1,0 +1,9 @@
+html {
+  background-color: #05050F; /* rgb(5,5,15) */
+}
+
+body {
+  font-family: "Courier New", sans-serif;
+  font-size: 1.4667em;
+  -webkit-font-weight: 600;
+}
