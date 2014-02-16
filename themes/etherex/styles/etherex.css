@@ -3,7 +3,72 @@ html {
 }
 
 body {
-  font-family: "Courier New", sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: 1.4667em;
   -webkit-font-weight: 600;
 }
+
+/*
+
+h4 {
+  font-weight: 500;
+}
+
+.progress .bar {
+  height: auto;
+  margin-bottom: 1em;
+}
+
+.progress .filled {
+  background-color: #353535;
+}
+
+#logo_title:before {
+  content: '';
+}
+
+#logo_title:after {
+  content: '';
+}
+
+.messages {
+  font-weight: bold;
+}
+
+input[type=submit],
+.button {
+  font-weight: bold;
+  margin-top: 1em;
+}
+
+.uc-price-display {
+  float: none;
+}
+
+#zerobot-status a,
+#zerobot-status b {
+  display: inline;
+}
+
+#center,
+.sidebar {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+input.form-text,
+textarea,
+select {
+  background: rgba(0, 0, 0, 0.95);
+}
+
+table h1, table h2, table h3, table h4 {
+  margin: 0;
+}
+
+table caption h2, table caption h3 {
+  margin-top: 0.5em;
+}
+
+.satoshi { font-family: sans-serif; }
+
+*/
