@@ -8,6 +8,11 @@ body {
   -webkit-font-weight: 600;
 }
 
+#center,
+.sidebar {
+  background: rgba(0, 0, 0, 0.65);
+}
+
 /*
 
 h4 {
