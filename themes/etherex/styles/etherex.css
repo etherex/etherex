@@ -17,7 +17,8 @@ body {
   font-family: "Open Sans", sans-serif;
 }
 
-#logo_title {
+#logo_title a:link,
+#logo_title a:visited {
   text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.33);
 }
 
