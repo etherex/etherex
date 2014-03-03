@@ -32,12 +32,12 @@
         <div class="terms">
           <?php print $terms ?>
         </div>
-      <?php endif;?>
       <?php if ($links): ?>
         <div class="links">
           <?php print $links; ?>
         </div>
       <?php endif; ?>
+      <?php endif;?>
     </footer>
   <?php endif;?>
 
