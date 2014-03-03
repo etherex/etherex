@@ -26,13 +26,13 @@
     <?php print $content ?>
   </div>
 
-  <?php if (!empty($terms) || !empty($links)): ?>
+  <?php if (!empty($terms)): ?>
     <footer class="meta clearfix">
       <?php if ($terms): ?>
         <div class="terms">
           <?php print $terms ?>
         </div>
-      <?php if ($links): ?>
+      <?php if (!empty($links)): ?>
         <div class="links">
           <?php print $links; ?>
         </div>
