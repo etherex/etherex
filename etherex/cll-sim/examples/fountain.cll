@@ -1,0 +1,8 @@
+if tx.value < 1000 * block.basefee:
+    stop
+to = tx.data[0]
+value = tx.value - 1000 * block.basefee
+if block.address_balance(to) == 0:
+    mktx(to, value, 0, 0)
+else:
+    mktx(tx.sender, value, 0, 0)

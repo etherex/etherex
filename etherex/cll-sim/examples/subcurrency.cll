@@ -1,0 +1,15 @@
+if tx.value < 100 * block.basefee:
+    stop
+elif contract.storage[1000]:
+    from = tx.sender
+    to = tx.data[0]
+    value = tx.data[1]
+    if to <= 1000:
+        stop
+    if contract.storage[from] < value:
+        stop
+    contract.storage[from] = contract.storage[from] - value
+    contract.storage[to] = contract.storage[to] + value
+else:
+    contract.storage[MYCREATOR] = 10^18
+    contract.storage[1000] = 1

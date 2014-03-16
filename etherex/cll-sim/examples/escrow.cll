@@ -1,0 +1,16 @@
+if tx.value < 100 * block.basefee:
+    stop
+
+state = contract.storage[1000]
+if state == 0 and tx.value >= PRICE:
+    contract.storage[1000] = 1
+    contract.storage[1001] = tx.sender
+    contract.storage[1002] = tx.value
+    contract.storage[1003] = block.timestamp
+else if state == 1:
+    if tx.sender == VERIFIER:
+        mktx(MERCHANT, contract.storage[1002], 0, 0)
+        contract.storage[1000] = 2
+    else if block.timestamp > 30 * 86400 + contract.storage[1003]:
+        mktx(contract.storage[1001], contract.storage[1002], 0, 0)
+        contract.storage[1000] = 3
