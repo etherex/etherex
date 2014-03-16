@@ -27,6 +27,13 @@ This repository contains the code that runs the exchange on Ethereum as a set of
 Refer to the [compiler](https://github.com/ethereum/compiler) and [simulator](https://github.com/jorisbontje/cll-sim) for their respective usage.
 
 
+##Requirements
+
+```
+pip install -r requirements.txt
+```
+
+
 ## License
 
 Released under the MIT License.
