@@ -1,0 +1,3 @@
+int i = 1000
+while(true):
+  contract.storage[i] = i + 1
