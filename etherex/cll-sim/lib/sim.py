@@ -30,8 +30,11 @@ log = logging.info
 
 class Block(object):
 
-    def __init__(self, timestamp=0):
+    def __init__(self, timestamp=0, difficulty= 2 ** 22, number=1, parenthash="parenthash"):
         self.timestamp = timestamp
+        self.difficulty = difficulty
+        self.number = number
+        self.parenthash = parenthash
         self._storages = defaultdict(Storage)
         self._balances = defaultdict(int)
 
