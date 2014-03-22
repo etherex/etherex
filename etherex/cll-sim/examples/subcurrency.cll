@@ -1,15 +1,15 @@
 if tx.value < 100 * block.basefee:
-    stop
+    stop // Insufficient fee
 elif contract.storage[1000]:
-    from = tx.sender
+    frm = tx.sender
     to = tx.data[0]
     value = tx.data[1]
     if to <= 1000:
         stop
-    if contract.storage[from] < value:
-        stop
-    contract.storage[from] = contract.storage[from] - value
+    if contract.storage[frm] < value:
+        stop // Insufficient funds, bob has 1000 needs 1001
+    contract.storage[frm] = contract.storage[frm] - value
     contract.storage[to] = contract.storage[to] + value
 else:
-    contract.storage[MYCREATOR] = 10^18
-    contract.storage[1000] = 1
+    contract.storage[tx.sender] = 10^18
+    contract.storage[1000] = 1 // "Initializing storage for creator %s" % MYCREATOR

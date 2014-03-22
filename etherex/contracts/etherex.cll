@@ -1,33 +1,33 @@
 if tx.value < 1000 * block.basefee:
-    stop
+    stop // Insufficient fee
 status = contract.storage[1000]
 if status == 0:
     owners = array(3)
-    owners[0] = 1 # caktux
-    owners[1] = 2 # eoar
-    owners[2] = 3 # fabrezio
+    owners[0] = 1 // "caktux"
+    owners[1] = 2 // "eoar"
+    owners[2] = 3 // "fabrezio"
     contract.storage[1000] = 1
     contract.storage[1001] = owners
     contract.storage[1002] = array(0)
     contract.storage[1003] = array(0)
 if tx.datan == 0:
-    stop
+    stop // No data to process
 cm = 1
 while cm > 0:
     if cm == 1:
         if tx.data[0] == 1 and tx.data[1] < 1 * 10 ^ 7:
-            stop
+            stop // "Insufficient BTC"
         if tx.data[0] == 2 and tx.value < 1 * 10 ^ 21:
-            stop
+            stop // "Insufficient ETH"
     cm = cm - 1
 ops = array(5)
-ops[0] = 1 # "BUY"
-ops[1] = 2 # "SELL"
-ops[2] = 3 # "DEPOSIT"
-ops[3] = 4 # "WITHDRAW"
-ops[4] = 5 # "CANCEL"
+ops[0] = 1 // "BUY"
+ops[1] = 2 // "SELL"
+ops[2] = 3 // "DEPOSIT"
+ops[3] = 4 // "WITHDRAW"
+ops[4] = 5 // "CANCEL"
 markets = array(1)
-markets[0] = 1 # "ETH/BTC"
+markets[0] = 1 // "ETH/BTC"
 if tx.data[0] == 1:
     buybook = contract.storage[1002]
     newbuy = array(2)
@@ -37,7 +37,7 @@ if tx.data[0] == 1:
     contract.storage[1002] = buybook
     contract.storage[1004] = contract.storage[1004] + tx.data[1]
 elif tx.data[0] == 2:
-    sellbook = contract.storage[1003] # sellbook = sellbook + [tx.sender, tx.data[1]]
+    sellbook = contract.storage[1003] // sellbook = sellbook + [tx.sender, tx.data[1]]
     newsell = array(2)
     newsell[0] = tx.sender
     newsell[1] = tx.data[1]
@@ -45,8 +45,8 @@ elif tx.data[0] == 2:
     contract.storage[1003] = sellbook
     contract.storage[1005] = contract.storage[1005] + tx.value
 elif tx.data[0] == 3:
-    stop
+    stop // Not implemented yet
 elif tx.data[0] == 4:
-    stop
+    stop // Not implemented yet
 elif tx.data[0] == 5:
-    stop
+    stop // Not implemented yet

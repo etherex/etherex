@@ -99,16 +99,29 @@ class Contract(object):
 class HLL(Contract):\n\
     def run(self, tx, contract, block):\n'
         with open(script) as fp:
-            for l, line in enumerate(fp):
-                # Stops and logs
-                # TODO - comments as stop/log messages
-                line = line.replace("stop", "stop('line %d')" % l)
+            for i, line in enumerate(fp):
+                # Use comments for stop and log messages
+                l = line.strip()
+                if l.startswith("stop"):
+                    # Line number as default stop message
+                    s = "line " + str(i)
+                    if '//' in line:
+                        s = l.split("//")[1].strip()
+                    line = line.split("stop")[0] + "stop('%s')\n" % s
+                elif "//" in line:
+                    s = l.split("//")[1].strip()
+                    indent = len(line) - len(line.lstrip())
+                    line = line.split("//")[0]
+                    line += "\n" + '        ' + " " * indent + "log('%s')\n" % ("@ line " + str(i) + ": " + s)
 
                 # Indent
                 closure += '        ' + line
 
         # Exponents
         closure = closure.replace("^", "**")
+
+        # Comments
+        closure = closure.replace("//", "#")
 
         closure_module = imp.new_module('hll')
         exec(closure, closure_module.__dict__)

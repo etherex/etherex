@@ -8,6 +8,7 @@ class EtherEx(Contract):
     def run(self, tx, contract, block): # pass
         hll = "contracts/etherex.cll"
         Contract.load(self, hll, tx, contract, block)
+
     #     if tx.value < 1000 * block.basefee:
     #         stop("Insufficient fee")
     #     status = contract.storage[1000]
