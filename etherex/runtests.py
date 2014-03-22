@@ -5,13 +5,13 @@ print '\n'
 print '==================='
 print 'Compiler tests'
 print '==================='
-subprocess.call(["compiler/runtests.py"])
+subprocess.call(["python", "compiler/runtests.py"])
 
 print '\n'
 print '==================='
 print 'EtherEx simulations'
 print '==================='
-subprocess.call(["cll-sim/run.py", "simulations/etherex.py"])
+subprocess.call(["cll-sim/run.py", "simulations/etherex.py"]) # , "contracts/etherex.cll"])
 
 print '\n'
 print '==================='

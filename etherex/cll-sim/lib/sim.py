@@ -1,4 +1,7 @@
 from collections import defaultdict
+import os
+import sys
+import imp
 import inspect
 import logging
 from operator import itemgetter
@@ -25,6 +28,9 @@ def mktx(recipient, amount, datan, data):
 
 def stop(reason):
     raise Stop(reason)
+
+def array(n):
+    return [None] * n
 
 log = logging.info
 
@@ -64,7 +70,7 @@ class Contract(object):
 
     @property
     def address(self):
-        return "myaddress"
+        return hex(id(self))
 
     @property
     def contract(self):
@@ -88,6 +94,26 @@ class Contract(object):
     def run(self, tx, contract, block):
         raise NotImplementedError("Should have implemented this")
 
+    def load(self, script, tx, contract, block):
+        closure = 'from sim import Block, Contract, Simulation, Tx, log, mktx, stop, array\n\
+class HLL(Contract):\n\
+    def run(self, tx, contract, block):\n'
+        with open(script) as fp:
+            for l, line in enumerate(fp):
+                # Stops and logs
+                # TODO - comments as stop/log messages
+                line = line.replace("stop", "stop('line %d')" % l)
+
+                # Indent
+                closure += '        ' + line
+
+        # Exponents
+        closure = closure.replace("^", "**")
+
+        closure_module = imp.new_module('hll')
+        exec(closure, closure_module.__dict__)
+        h = closure_module.HLL()
+        h.run(tx, contract, block)
 
 class Simulation(object):
 

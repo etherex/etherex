@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+import os
 import cllcompiler
-t = open('compiler/tests.txt').readlines()
+t = open(os.path.dirname(os.path.realpath(__file__)) + '/tests.txt').readlines()
 i = 0
 while 1:
     o = []
@@ -11,10 +11,13 @@ while 1:
     print '================='
     text = '\n'.join(o).replace('\n\n','\n')
     print text
-    ast = cllcompiler.parse_lines(o)
+    ast = cllcompiler.parse(text)
     print "AST:",ast
     print ""
-    code = cllcompiler.assemble(cllcompiler.compile_stmt(ast))
+    aevm = cllcompiler.compile_to_aevm(ast)
+    print "AEVM:",' '.join([str(x) for x in aevm])
+    print ""
+    code = cllcompiler.assemble(aevm)
     print "Output:",' '.join([str(x) for x in code])
     if i >= len(t):
         break

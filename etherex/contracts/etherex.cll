@@ -1,75 +1,52 @@
-if tx.value < 200 * block.basefee:
+if tx.value < 1000 * block.basefee:
     stop
-if tx.value < 1000 * 10 ^ 18:
+status = contract.storage[1000]
+if status == 0:
+    owners = array(3)
+    owners[0] = 1 # caktux
+    owners[1] = 2 # eoar
+    owners[2] = 3 # fabrezio
+    contract.storage[1000] = 1
+    contract.storage[1001] = owners
+    contract.storage[1002] = array(0)
+    contract.storage[1003] = array(0)
+if tx.datan == 0:
     stop
-k = 1000
-owners = 3
-ownercount = contract.storage[k + owners + 1]
-if ownercount < owners:
-    if tx.value < 1 * 10 ^ 18:
-        stop
-    contract.storage[k + ownercount] = tx.sender
-    contract.storage[k + owners] = ownerbalance + tx.value - block.basefee * 200
-    contract.storage[k + owners + 1] = ownercount + 1
-elif ownercount >= owners:
-    feevalue = tx.value - ((tx.value - 2 * 200 * block.basefee) * 1.05)
-    if tx.value < 5 * (2 * 200 * block.basefee) + feevalue:
-        stop
-    buyvalue = tx.data[0]
-    sellvalue = tx.data[1]
-    owner = tx.sender
-    ownerbuy = 0
-    ownersell = 0
-    buy = 0
-    buyers = 2
-    sell = 1
-    sellers = 3
-    exfee = k * block.basefee
-    fees = (5 * 200 * block.basefee) - exfee
-    valuelessfees = tx.value - fees
-    ownerbalance = contract.storage[k + owners]
-    orderbook = contract.storage[k + owners + 2]
-    ownerbuy = orderbook[buy]
-    ownersell = orderbook[sell]
-    ownersellers = orderbook[buyers]
-    ownerbuyers = orderbook[sellers]
-    if buyvalue > 0:
-        contract.storage([k + owners + 2])[buy] = ownerbuy + valuelessfees
-        contract.storage([k + owners + 2])[buyers] = ownerbuyers + tx.sender
-    if ownerbuy:
-        valuelessfees = ownerbuy + valuelessfees
-    if sellvalue > 0:
-        contract.storage([k + owners + 2])[sell] = ownersell + valuelessfees
-        contract.storage([k + owners + 2])[sellers] = ownersellers + tx.sender
-    if ownersell:
-        valuelessfees = ownersell + valuelessfees
-    i = 0
-    while ownersell[i] > 0:
-        offervalue = ownersell[i]
-        if ownersell:
-            if buyvalue > 0 and offervalue > 0:
-                if offervalue >= valuelessfees:
-                    contract.storage([k + owners + 2])[sell] = ownersell - valuelessfees
-                    contract.storage([k + owners + 2])[buy] = offervalue - valuelessfees
-                    mktx(tx.sender, valuelessfees * 2, 0, 0)
-                    mktx(ownersellers[0], exfee * 0.1, 0, 0)
-        i = i + 1
-    i = 0
-    while ownerbuy[i] > 0:
-        offervalue = ownersell[i]
-        if ownerbuy:
-            if sellvalue > 0 and offervalue > 0:
-                if offervalue >= valuelessfees:
-                    contract.storage([k + owners + 2])[sell] = ownersell - valuelessfees
-                    contract.storage([k + owners + 2])[buy] = offervalue - valuelessfees
-                    mktx(tx.sender, exfee * 0.1, 0, 0)
-                    mktx(ownerbuyers[0], valuelessfees * 2, 0, 0)
-        i = i + 1
-    profit = ownerbalance + exfee - (exfee * 0.1) - (3 * 10 ^ 18)
-    newbalance = ownerbalance + profit
-    if profit > owners * 2000 and block.address_balance[contract.address] > ownerbalance:
-        contract.storage[k + owners] = ownerbalance - profit
-        while owner in owners:
-            mktx(contract.storage[k + owner], profit / owners, 0, 0)
-    else:
-        contract.storage[k + owners] = ownerbalance + exfee
+cm = 1
+while cm > 0:
+    if cm == 1:
+        if tx.data[0] == 1 and tx.data[1] < 1 * 10 ^ 7:
+            stop
+        if tx.data[0] == 2 and tx.value < 1 * 10 ^ 21:
+            stop
+    cm = cm - 1
+ops = array(5)
+ops[0] = 1 # "BUY"
+ops[1] = 2 # "SELL"
+ops[2] = 3 # "DEPOSIT"
+ops[3] = 4 # "WITHDRAW"
+ops[4] = 5 # "CANCEL"
+markets = array(1)
+markets[0] = 1 # "ETH/BTC"
+if tx.data[0] == 1:
+    buybook = contract.storage[1002]
+    newbuy = array(2)
+    newbuy[0] = tx.sender
+    newbuy[1] = tx.data[1]
+    buybook = buybook + newbuy
+    contract.storage[1002] = buybook
+    contract.storage[1004] = contract.storage[1004] + tx.data[1]
+elif tx.data[0] == 2:
+    sellbook = contract.storage[1003] # sellbook = sellbook + [tx.sender, tx.data[1]]
+    newsell = array(2)
+    newsell[0] = tx.sender
+    newsell[1] = tx.data[1]
+    sellbook = sellbook + newsell
+    contract.storage[1003] = sellbook
+    contract.storage[1005] = contract.storage[1005] + tx.value
+elif tx.data[0] == 3:
+    stop
+elif tx.data[0] == 4:
+    stop
+elif tx.data[0] == 5:
+    stop

@@ -6,6 +6,9 @@ def spaces(ln):
     while spaces < len(ln) and ln[spaces] == ' ': spaces += 1
     return spaces
 
+def parse(document):
+    return parse_lines(document.split('\n'))
+
 # Parse the statement-level structure, including if and while statements
 def parse_lines(lns):
     o = []
@@ -60,10 +63,12 @@ def parse_lines(lns):
 # Converts something like "b[4] = x+2 > y*-3" to
 # [ 'b', '[', '4', ']', '=', 'x', '+', '2', '>', 'y', '*', '-', '3' ]
 def chartype(c):
-    if c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._':
+    if c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.':
         return 'alphanum'
     elif c in '\t ': return 'space'
     elif c in '()[]': return 'brack'
+    elif c == '"': return 'dquote'
+    elif c == "'": return 'squote'
     else: return 'symb'
 
 def tokenize(ln):
@@ -72,6 +77,10 @@ def tokenize(ln):
     o = []
     global cur
     cur = ''
+    # Quotes
+    if '//' in ln: ln = ln[:ln.find('//')]
+    if '#' in ln: ln = ln[:ln.find('#')]
+    # Finish a token and start a new one
     def nxt():
         global cur
         if len(cur) >= 2 and cur[-1] == '-':
@@ -79,18 +88,42 @@ def tokenize(ln):
         elif len(cur.strip()) >= 1:
             o.append(cur)
         cur = ''
+    # Main loop
     while i < len(ln):
         c = chartype(ln[i])
-        if c == 'brack' or tp == 'brack': nxt()
-        elif c == 'space': nxt()
-        elif c != 'space' and tp == 'space': nxt()
-        elif c == 'symb' and tp != 'symb': nxt()
-        elif c == 'alphanum' and tp == 'symb': nxt()
-        cur += ln[i]
-        tp = c
-        i += 1
+        # Inside a string
+        if tp == 'squote' or tp == "dquote":
+            if c == tp:
+                cur += ln[i]
+                nxt()
+                i += 1
+                tp = 'space'
+            elif ln[i:i+2] == '\\x':
+                cur += ln[i+2:i+4].decode('hex')
+                i += 4
+            elif ln[i:i+2] == '\\n':
+                cur += '\x0a'
+                i += 2
+            elif ln[i] == '\\':
+                cur += ln[i+1]
+                i += 2
+            else:
+                cur += ln[i]
+                i += 1
+        # Not inside a string
+        else:
+            if c == 'brack' or tp == 'brack': nxt()
+            elif c == 'space': nxt()
+            elif c != 'space' and tp == 'space': nxt()
+            elif c == 'symb' and tp != 'symb': nxt()
+            elif c == 'alphanum' and tp == 'symb': nxt()
+            elif c == 'squote' or c == "dquote": nxt()
+            cur += ln[i]
+            tp = c
+            i += 1
     nxt()
     if o[-1] in [':',':\n','\n']: o.pop()
+    if tp in ['squote','dquote']: raise Exception("Unclosed string: "+ln)
     return o
 
 # This is the part where we turn a token list into an abstract syntax tree
@@ -112,6 +145,7 @@ precedence = {
     '&&': 6,
     'or': 7,
     '||': 7,
+    '!': 0
 }
 
 def toktype(token):
@@ -119,10 +153,11 @@ def toktype(token):
     elif token in ['(','[']: return 'lparen'
     elif token in [')',']']: return 'rparen'
     elif token == ',': return 'comma'
+    elif token == ':': return 'colon'
     elif token in ['!']: return 'monop' 
     elif not isinstance(token,str): return 'compound'
     elif token in precedence: return 'op'
-    elif re.match('^[0-9a-z\-\._]*$',token): return 'alphanum'
+    elif re.match('^[0-9a-z\-\.]*$',token): return 'alphanum'
     else: raise Exception("Invalid token: "+token)
 
 # https://en.wikipedia.org/wiki/Shunting-yard_algorithm
@@ -184,13 +219,16 @@ def shunting_yard(tokens):
             stack.append(tok)
         elif typ == 'comma':
             while len(stack) and stack[-1] != 'lparen': popstack(stack,oq)
+        elif typ == 'colon':
+            while len(stack) and stack[-1] != 'lparen': popstack(stack,oq)
+            oq.append(tok)
         #print 'iq',iq,'stack',stack,'oq',oq
     while len(stack):
         popstack(stack,oq)
     if len(oq) == 1:
         return oq[0]
     else:
-        return [ 'multi' ] + oq
+        raise Exception("Wrong number of items left on stack")
 
 def parse_line(ln):
     tokens = tokenize(ln.strip())
@@ -202,18 +240,8 @@ def parse_line(ln):
         return [ 'else if', shunting_yard(tokens[1:]) ]
     elif len(tokens) == 1 and tokens[0] == 'else':
         return [ 'else' ]
-    elif tokens[0] in ['mktx','suicide','stop']:
+    elif tokens[0] in ['mkcall','create','suicide','stop','return']:
         return shunting_yard(tokens)
     else:
         eqplace = tokens.index('=')
-        pre = 0
-        i = 0
-        while i < eqplace:
-            try: nextcomma = i + tokens[i:].index(',')
-            except: nextcomma = eqplace
-            pre += 1
-            i = nextcomma+1
-        if pre == 1:
-            return [ 'set', shunting_yard(tokens[:eqplace]), shunting_yard(tokens[eqplace+1:]) ]
-        else:
-            return [ 'mset', shunting_yard(tokens[:eqplace]), shunting_yard(tokens[eqplace+1:]) ]
+        return [ 'set', shunting_yard(tokens[:eqplace]), shunting_yard(tokens[eqplace+1:]) ]
