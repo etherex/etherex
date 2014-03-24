@@ -58,7 +58,7 @@ def frombytes(b):
 
 def is_numberlike(b):
     if isinstance(b,(str,unicode)):
-        if re.match('^[0-9\-]*$',b):
+        if re.match('^[0-9\-]*$',b) or b.startswith('0x'):
             return True
         if b[0] in ["'",'"'] and b[-1] in ["'",'"'] and b[0] == b[-1]:
             return True
@@ -66,6 +66,7 @@ def is_numberlike(b):
 
 def numberize(b):
     if b[0] in ["'",'"']: return frombytes(b[1:-1])
+    elif b.startswith("0x"): return int(b, 16)
     else: return int(b)
 
 # Left-expressions can either be:

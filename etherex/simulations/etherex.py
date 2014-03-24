@@ -148,3 +148,6 @@ class EtherExRun(Simulation):
     #     # block.contract_storage(self.contract.D)[self.contract.O] = tx.sender
     #     # block.contract_storage(self.contract.D)[self.contract.B] = tx.value - (2 * 200 * block.basefee)
     #     self.run(tx, self.contract, block)
+
+    def test_storage_result(self):
+        self.log(self.contract.storage)

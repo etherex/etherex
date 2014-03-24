@@ -79,7 +79,6 @@ def tokenize(ln):
     cur = ''
     # Quotes
     if '//' in ln: ln = ln[:ln.find('//')]
-    if '#' in ln: ln = ln[:ln.find('#')]
     # Finish a token and start a new one
     def nxt():
         global cur
@@ -158,6 +157,7 @@ def toktype(token):
     elif not isinstance(token,str): return 'compound'
     elif token in precedence: return 'op'
     elif re.match('^[0-9a-z\-\.]*$',token): return 'alphanum'
+    elif isinstance(token, str): return 'alphanum'
     else: raise Exception("Invalid token: "+token)
 
 # https://en.wikipedia.org/wiki/Shunting-yard_algorithm

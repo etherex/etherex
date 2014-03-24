@@ -1,7 +1,5 @@
 from collections import defaultdict
-import os
-import sys
-import imp
+import os, sys, imp
 import inspect
 import logging
 from operator import itemgetter
@@ -95,36 +93,87 @@ class Contract(object):
         raise NotImplementedError("Should have implemented this")
 
     def load(self, script, tx, contract, block):
-        closure = 'from sim import Block, Contract, Simulation, Tx, log, mktx, stop, array\n\
-class HLL(Contract):\n\
-    def run(self, tx, contract, block):\n'
-        with open(script) as fp:
-            for i, line in enumerate(fp):
-                # Use comments for stop and log messages
-                l = line.strip()
-                if l.startswith("stop"):
-                    # Line number as default stop message
-                    s = "line " + str(i)
-                    if '//' in line:
+        if hasattr(self, "closure_module") and inspect.ismodule(self.closure_module):
+            closure = self.closure
+            closure_module = self.closure_module
+        else:
+            log("Loading %s" % script)
+
+            closure = """
+from sim import Block, Contract, Simulation, Tx, log, mktx, stop, array
+class HLL(Contract):
+    def run(self, tx, contract, block):
+"""
+            baseindent = "        "
+
+            with open(script) as fp:
+                for i, line in enumerate(fp):
+                    # Use comments for stop and log messages
+                    l = line.strip()
+                    if l.startswith("stop"):
+                        # Line number as default stop message
+                        s = "line " + str(i)
+                        if '//' in line:
+                            s = l.split("//")[1].strip()
+                            if not s.startswith('"'):
+                                s = '"' + s + '"'
+                        line = line.split("stop")[0] + "stop(%s)\n" % s
+                    elif "define" in line:
+                        sp = l.split("//")
+                        s = sp[1].strip()
+                        r = s.split("define")[1].strip().split("=")
+                        indent = " " * (len(line) - len(line.lstrip()))
+                        line = indent
+                        if l.split("//")[0].strip().endswith(":"):
+                            line += "    "
+                        line += "log('@ line %d: %s" % (i, s)
+                        r[1] = str(r[1])
+                        if isinstance(r[0], str):
+                            line += ", %%s as hex: 0x%%s' %% (%s," % r[1]
+                            line += "%s.encode('hex')) + " % r[1]
+                            line += "', as int: %d' % "
+                            line += "int(%s.encode('hex'), 16))\n" % r[1]
+                        else:
+                            line += "')\n"
+                        line += baseindent + indent + sp[0].replace(r[0].strip(), r[1].strip(), 1) + "\n"
+                    elif "//" in line:
                         s = l.split("//")[1].strip()
-                    line = line.split("stop")[0] + "stop('%s')\n" % s
-                elif "//" in line:
-                    s = l.split("//")[1].strip()
-                    indent = len(line) - len(line.lstrip())
-                    line = line.split("//")[0]
-                    line += "\n" + '        ' + " " * indent + "log('%s')\n" % ("@ line " + str(i) + ": " + s)
+                        if s.startswith('"'):
+                            s = "log('@ line %d: ' + %s)\n" % (i, s)
+                        else:
+                            s = "log('@ line %d: %s')\n" % (i, s)
+                        line = line.split("//")[0] + "\n"
+                        if l.split("//")[0].strip().endswith(":"):
+                            line += "    "
+                        indent = " " * (len(line) - len(line.lstrip()))
+                        line += baseindent + indent + s
 
-                # Indent
-                closure += '        ' + line
+                    # Indent
+                    closure += baseindent + line
 
-        # Exponents
-        closure = closure.replace("^", "**")
+            # Exponents
+            closure = closure.replace("^", "**")
 
-        # Comments
-        closure = closure.replace("//", "#")
+            # Hex
+            closure = closure.replace("hex(", "str(")
 
-        closure_module = imp.new_module('hll')
-        exec(closure, closure_module.__dict__)
+            # Comments
+            closure = closure.replace("//", "#")
+
+            # Initialize module
+            closure_module = imp.new_module('hll')
+
+            # Pass txs and constants
+            for i, c in self.__dict__.items():
+                closure_module.__dict__[i] = c
+
+            # Set self.closure_module for reuse and self.closure for export
+            self.closure = closure
+            self.closure_module = closure_module
+
+            # Execute and run
+            exec(closure, closure_module.__dict__)
+
         h = closure_module.HLL()
         h.run(tx, contract, block)
 

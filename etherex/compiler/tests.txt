@@ -37,3 +37,8 @@ else:
 ================
 a = bytes(45)
 b = array(3)
+sa = 0xec2be90307254c5540453419282add242c177941
+contract.storage[sa] = 0xec2be90307254c5540453419282add242c177941
+sb = contract.storage[sa]
+if sa == sb:
+    contract.storage[sb] = sa
