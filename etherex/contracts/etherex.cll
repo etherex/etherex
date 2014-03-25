@@ -8,33 +8,71 @@ if status == 1:
         stop // "Invalid operation"
     if tx.data[0] < 4 and tx.datan < 3:
         stop // "Missing market ID"
-    if tx.data[1] > 256^256 or tx.data[2] > 256^2:
+    amount = tx.data[1] // "Trade amount: %d" % amount
+    if amount > 256^256 or tx.data[2] > 1:
         stop // "Values out of range"
-    market = contract.storage[1002]
-    mc = 0 // "Verify minimum trade amounts"
-    while mc < 1:
-        if mc == 0:
-            if tx.data[0] == 1 and tx.data[1] < market[1]:
-                stop // "Minimum BTC trade amount not met, minimum is %s, asked %d" % (market[1], tx.data[1])
-            if tx.data[0] == 2 and tx.value < market[2]:
-                stop // "Minimum ETH trade amount not met, minimum is %s, asked %d" % (market[2], tx.value)
-        mc = mc + 1
-    if tx.data[0] == 1: // "BUY"
-        buybook = contract.storage[1003]
-        newbuy = array(2)
-        newbuy[0] = tx.sender
-        newbuy[1] = tx.data[1]
-        buybook = buybook + newbuy
-        contract.storage[1003] = buybook
-        contract.storage[1005] = contract.storage[1005] + tx.data[1]
-    elif tx.data[0] == 2: // "SELL"
-        sellbook = contract.storage[1004]
-        newsell = array(2)
-        newsell[0] = tx.sender
-        newsell[1] = tx.value
-        sellbook = sellbook + newsell
-        contract.storage[1004] = sellbook
-        contract.storage[1006] = contract.storage[1006] + tx.value
+    markets = contract.storage[1002]
+    cm = 0 // "Verifing minimum trade amounts..."
+    if tx.data[0] > 0 and tx.data[0] < 3:
+        while cm < 1:
+            market = markets[cm]
+            if cm == 0:
+                if tx.data[0] == 1 and amount < market[1]:
+                    stop // "Minimum BTC trade amount not met, minimum is %s, got %d" % (market[1], amount)
+                if tx.data[0] == 2 and tx.value < market[2]:
+                    stop // "Minimum ETH trade amount not met, minimum is %s, got %d" % (market[2], tx.value)
+                if tx.data[0] < 2: // "Trade amounts OK for %s" % market[0]
+                    tk = 1005
+                else:
+                    tk = 1004
+                hk = amount
+                book = contract.storage[hk] // "Current amount book: %s" % book
+                if book == 0:
+                    book = array(1)
+                    book[0] = 1
+                else:
+                    book[0] = book[0] + 1
+                bookadd = array(4)
+                bookadd[0] = tx.data[0]
+                bookadd[1] = amount
+                bookadd[2] = cm
+                bookadd[3] = tx.sender
+                ba = array(1)
+                ba[0] = bookadd
+                book = book + ba
+                contract.storage[hk] = book
+                contract.storage[tk] = contract.storage[tk] + amount // "Trade recorded, processing"
+                bl = book[0]
+                c = 1
+                while c <= bl:
+                    curbook = book[c]
+                    if curbook[2] == cm:
+                        if tx.data[0] == 1 and curbook[0] == 2:
+                            if amount <= curbook[1]: // "Buying %d from balance of %d from %s" % (amount, curbook[1], curbook[3])
+                                curbook[1] = curbook[1] - amount
+                                if curbook[1] == 0:
+                                    curbook = array(0)
+                            elif amount > curbook[1]: // "Buying balance of %d from %s" % (curbook[1], curbook[3])
+                                book[0] = book[0] - 1
+                                curbook = array(0)
+                                book = book[-1]
+                            book[c] = curbook
+                            contract.storage[hk] = book
+                            contract.storage[tk] = contract.storage[tk] - amount
+                        elif tx.data[0] == 2 and curbook[0] == 1:
+                            if amount >= curbook[1]: // "Selling %d from balance of %d to %s" % (curbook[1], amount, curbook[3])
+                                curbook[1] = 0
+                                amount = amount - curbook[1]
+                                if curbook[1] == 0:
+                                    curbook = array(0)
+                            elif amount < curbook[1]: // "Selling balance of %d to %s" % (amount, curbook[3])
+                                book[0] = book[0] - 1
+                                book = book[-1]
+                            book[c] = curbook
+                            contract.storage[hk] = book
+                            contract.storage[tk] = contract.storage[tk] - amount
+                    c = c + 1
+            cm = cm + 1
     elif tx.data[0] == 3: // "DEPOSIT"
         stop // "Not implemented yet"
     elif tx.data[0] == 4: // "WITHDRAW"
@@ -50,13 +88,19 @@ else:
     owners[1] = 0xec2be90307254c5540453419282add242c177941 // define 0xec2be90307254c5540453419282add242c177941=EOAR
     owners[2] = 0x4272203a4343e0edf81eff450bd0f305fd2a3965 // define 0x4272203a4343e0edf81eff450bd0f305fd2a3965=FAB
     contract.storage[1001] = owners
+    markets = array(2)
     market = array(3)
     market[0] = "ETH/BTC"
-    market[1] = 1 * 10 ^ 7
+    market[1] = 1 * 10 ^ 7 // "Minimum mBTC trade: %s" % ((market[1] / (10 ** 7)) * 100)
+    market[2] = 1 * 10 ^ 21 // "Minimum ETH trade: %d" % (market[2] / (10 ** 21))
+    markets[0] = market
+    market = array(3)
+    market[0] = "ETH/XETH"
+    market[1] = 1 * 10 ^ 10 // "Minimum XETH trade: %d" % (market[1] / (10 ** 8))
     market[2] = 1 * 10 ^ 21
-    contract.storage[1002] = market
-    contract.storage[1003] = array(0) // "ETH/BTC buybook"
-    contract.storage[1004] = array(0) // "ETH/BTC sellbook"
-    contract.storage[1005] = tx.value / 3 // "ETH base funds"
-    contract.storage[1006] = tx.value / (3 * 1000) // "BTC base funds @ 1000 ETH/BTC"
+    markets[1] = market
+    contract.storage[1002] = markets
+    contract.storage[1003] = tx.value / 3 // "ETH base funds"
+    contract.storage[1004] = tx.value / 3 // "ETH running funds"
+    contract.storage[1005] = tx.value / (3 * 1000 * 10 ^ 21) // "BTC base funds @ 1000 ETH/BTC: %d BTC" % (tx.value / (3 * 1000 * 10 ** 21))
     contract.storage[1000] = 1 // "EtherEx initialized"

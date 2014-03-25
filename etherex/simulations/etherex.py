@@ -23,7 +23,7 @@ class EtherExRun(Simulation):
 
     def test_creation(self):
         block = Block(timestamp=self.ts_zero)
-        tx = Tx(sender='caktux', value=1 * 10 ** 18, data=[0])
+        tx = Tx(sender='caktux', value=3000 * 10 ** 21, data=[0])
         self.run(tx, self.contract, block)
         # tx = Tx(sender='eoar', value=1 * 10 ** 18)
         # self.run(tx, self.contract, block)
@@ -75,6 +75,11 @@ class EtherExRun(Simulation):
         # assert len(self.contract.txs) == 1
         # assert self.contract.txs == [('bob', 5000 * 10 ** 18, 0, 0)]
 
+    def test_sell_invalid(self):
+        # block = Block(timestamp=self.ts_zero + 10 * 86400 + 1)
+        tx = Tx(sender='eoar', value=1500 * 10 ** 18, data=[2, 1500 * 10 ** 18, 3])
+        self.run(tx, self.contract)
+
     def test_sell_market_one(self):
         # block = Block(timestamp=self.ts_zero + 10 * 86400 + 1)
         tx = Tx(sender='eoar', value=1500 * 10 ** 18, data=[2, 1500 * 10 ** 18, 1])
@@ -82,14 +87,14 @@ class EtherExRun(Simulation):
 
     def test_buy_one(self):
         block = Block(timestamp=self.ts_zero + 15 * 86400 + 1)
-        tx = Tx(sender='eoar', value=1200 * 10 ** 18, data=[1200 * 10 ** 18, 0, 0])
+        tx = Tx(sender='eoar', value=1200 * 10 ** 18, data=[1, 1000, 1])
         # block.contract_storage(self.contract.D)[self.contract.O] = tx.sender
         # block.contract_storage(self.contract.D)[self.contract.B] = tx.value - (2 * 200 * block.basefee)
         self.run(tx, self.contract, block)
 
     def test_buy_two(self):
         block = Block(timestamp=self.ts_zero + 20 * 86400 + 1)
-        tx = Tx(sender='fabrezio', value=4200 * 10 ** 18, data=[4200 * 10 ** 18, 0, 0])
+        tx = Tx(sender='fabrezio', value=4200 * 10 ** 18, data=[1, 1000, 1])
         # block.contract_storage(self.contract.D)[self.contract.O] = tx.sender
         # block.contract_storage(self.contract.D)[self.contract.B] = tx.value - (2 * 200 * block.basefee)
         self.run(tx, self.contract, block)
@@ -98,28 +103,28 @@ class EtherExRun(Simulation):
 
     def test_sell_two(self):
         block = Block(timestamp=self.ts_zero + 25 * 86400 + 1)
-        tx = Tx(sender='eoar', value=8000 * 10 ** 21, data=[0, 8000 * 10 ** 18, 0])
+        tx = Tx(sender='eoar', value=8000 * 10 ** 21, data=[2, 8000 * 10 ** 18, 1])
         # block.contract_storage(self.contract.D)[self.contract.O] = tx.sender
         # block.contract_storage(self.contract.D)[self.contract.S] = tx.value - (2 * 200 * block.basefee)
         self.run(tx, self.contract, block)
 
     def test_buy_three(self):
         block = Block(timestamp=self.ts_zero + 26 * 86400 + 1)
-        tx = Tx(sender='fabrezio', value=5000 * 10 ** 18, data=[5000 * 10 ** 18, 0, 0])
+        tx = Tx(sender='fabrezio', value=5000 * 10 ** 18, data=[1, 1000, 1])
         # block.contract_storage(self.contract.D)[self.contract.O] = tx.sender
         # block.contract_storage(self.contract.D)[self.contract.B] = tx.value - (2 * 200 * block.basefee)
         self.run(tx, self.contract, block)
 
     def test_sell_three(self):
         block = Block(timestamp=self.ts_zero + 28 * 86400 + 1)
-        tx = Tx(sender='eoar', value=20000 * 10 ** 18, data=[0, 20000 * 10 ** 18, 0])
+        tx = Tx(sender='eoar', value=20000 * 10 ** 18, data=[2, 20000 * 10 ** 18, 1])
         # block.contract_storage(self.contract.D)[self.contract.O] = tx.sender
         # block.contract_storage(self.contract.D)[self.contract.S] = tx.value - (2 * 200 * block.basefee)
         self.run(tx, self.contract, block)
 
     def test_buy_four(self):
         block = Block(timestamp=self.ts_zero + 30 * 86400 + 1)
-        tx = Tx(sender='fabrezio', value=2500 * 10 ** 18, data=[2500 * 10 ** 18, 0, 0])
+        tx = Tx(sender='fabrezio', value=2500 * 10 ** 18, data=[1, 1000, 1])
         # block.contract_storage(self.contract.D)[self.contract.O] = tx.sender
         # block.contract_storage(self.contract.D)[self.contract.B] = tx.value - (2 * 200 * block.basefee)
         self.run(tx, self.contract, block)

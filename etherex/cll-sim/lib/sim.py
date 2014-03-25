@@ -24,6 +24,8 @@ def mktx(recipient, amount, datan, data):
     logging.info("Sending tx to %s of %s" % (recipient, amount))
     self.txs.append((recipient, amount, datan, data))
 
+mkcall = lambda *args, **kwargs: mktx('static', *args, **kwargs)
+
 def stop(reason):
     raise Stop(reason)
 
@@ -100,7 +102,7 @@ class Contract(object):
             log("Loading %s" % script)
 
             closure = """
-from sim import Block, Contract, Simulation, Tx, log, mktx, stop, array
+from sim import Block, Contract, Simulation, Tx, log, mkcall, stop, array
 class HLL(Contract):
     def run(self, tx, contract, block):
 """
@@ -198,7 +200,7 @@ class Simulation(object):
             block = Block()
 
         method_name = inspect.stack()[1][3]
-        logging.info("RUN %s: %s" % (method_name, tx))
+        logging.info("RUN %s: %s" % (method_name.replace('_', ' ').capitalize(), tx))
 
         contract.txs = []
 

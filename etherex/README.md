@@ -34,6 +34,15 @@ pip install -r requirements.txt
 ```
 
 
+##API (tx.data format) [TBD]
+
+`operation amount marketid`
+
+Operations: `1=BUY`, `2=SELL`, `3=DEPOSIT`, `4=WITHDRAW`, `5=CANCEL`
+Amounts: wei for ETH and satoshi for BTC
+Market IDs: `1=ETH/BTC`, `2=ETH/XETH`
+
+
 ## License
 
 Released under the MIT License.
