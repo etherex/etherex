@@ -1,52 +1,62 @@
 if tx.value < 1000 * block.basefee:
-    stop // Insufficient fee
+    stop // "Insufficient fee"
 status = contract.storage[1000]
-if status == 0:
+if status == 1:
+    if tx.datan < 2:
+        stop // "No data to process"
+    if tx.data[0] < 1 or tx.data[0] > 5:
+        stop // "Invalid operation"
+    if tx.data[0] < 4 and tx.datan < 3:
+        stop // "Missing market ID"
+    if tx.data[1] > 256^256 or tx.data[2] > 256^2:
+        stop // "Values out of range"
+    market = contract.storage[1002]
+    mc = 0 // "Verify minimum trade amounts"
+    while mc < 1:
+        if mc == 0:
+            if tx.data[0] == 1 and tx.data[1] < market[1]:
+                stop // "Minimum BTC trade amount not met, minimum is %s, asked %d" % (market[1], tx.data[1])
+            if tx.data[0] == 2 and tx.value < market[2]:
+                stop // "Minimum ETH trade amount not met, minimum is %s, asked %d" % (market[2], tx.value)
+        mc = mc + 1
+    if tx.data[0] == 1: // "BUY"
+        buybook = contract.storage[1003]
+        newbuy = array(2)
+        newbuy[0] = tx.sender
+        newbuy[1] = tx.data[1]
+        buybook = buybook + newbuy
+        contract.storage[1003] = buybook
+        contract.storage[1005] = contract.storage[1005] + tx.data[1]
+    elif tx.data[0] == 2: // "SELL"
+        sellbook = contract.storage[1004]
+        newsell = array(2)
+        newsell[0] = tx.sender
+        newsell[1] = tx.value
+        sellbook = sellbook + newsell
+        contract.storage[1004] = sellbook
+        contract.storage[1006] = contract.storage[1006] + tx.value
+    elif tx.data[0] == 3: // "DEPOSIT"
+        stop // "Not implemented yet"
+    elif tx.data[0] == 4: // "WITHDRAW"
+        stop // "Not implemented yet"
+    elif tx.data[0] == 5: // "CANCEL"
+        stop // "Not implemented yet"
+    else:
+        stop // "Uncaught invalid operation"
+    stop // "Execute trades - TODO"
+else:
     owners = array(3)
-    owners[0] = 1 // "caktux"
-    owners[1] = 2 // "eoar"
-    owners[2] = 3 // "fabrezio"
-    contract.storage[1000] = 1
+    owners[0] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31 // define 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31=CAK
+    owners[1] = 0xec2be90307254c5540453419282add242c177941 // define 0xec2be90307254c5540453419282add242c177941=EOAR
+    owners[2] = 0x4272203a4343e0edf81eff450bd0f305fd2a3965 // define 0x4272203a4343e0edf81eff450bd0f305fd2a3965=FAB
     contract.storage[1001] = owners
-    contract.storage[1002] = array(0)
-    contract.storage[1003] = array(0)
-if tx.datan == 0:
-    stop // No data to process
-cm = 1
-while cm > 0:
-    if cm == 1:
-        if tx.data[0] == 1 and tx.data[1] < 1 * 10 ^ 7:
-            stop // "Insufficient BTC"
-        if tx.data[0] == 2 and tx.value < 1 * 10 ^ 21:
-            stop // "Insufficient ETH"
-    cm = cm - 1
-ops = array(5)
-ops[0] = 1 // "BUY"
-ops[1] = 2 // "SELL"
-ops[2] = 3 // "DEPOSIT"
-ops[3] = 4 // "WITHDRAW"
-ops[4] = 5 // "CANCEL"
-markets = array(1)
-markets[0] = 1 // "ETH/BTC"
-if tx.data[0] == 1:
-    buybook = contract.storage[1002]
-    newbuy = array(2)
-    newbuy[0] = tx.sender
-    newbuy[1] = tx.data[1]
-    buybook = buybook + newbuy
-    contract.storage[1002] = buybook
-    contract.storage[1004] = contract.storage[1004] + tx.data[1]
-elif tx.data[0] == 2:
-    sellbook = contract.storage[1003] // sellbook = sellbook + [tx.sender, tx.data[1]]
-    newsell = array(2)
-    newsell[0] = tx.sender
-    newsell[1] = tx.data[1]
-    sellbook = sellbook + newsell
-    contract.storage[1003] = sellbook
-    contract.storage[1005] = contract.storage[1005] + tx.value
-elif tx.data[0] == 3:
-    stop // Not implemented yet
-elif tx.data[0] == 4:
-    stop // Not implemented yet
-elif tx.data[0] == 5:
-    stop // Not implemented yet
+    market = array(3)
+    market[0] = "ETH/BTC"
+    market[1] = 1 * 10 ^ 7
+    market[2] = 1 * 10 ^ 21
+    contract.storage[1002] = market
+    contract.storage[1003] = array(0) // "ETH/BTC buybook"
+    contract.storage[1004] = array(0) // "ETH/BTC sellbook"
+    contract.storage[1005] = tx.value / 3 // "ETH base funds"
+    contract.storage[1006] = tx.value / (3 * 1000) // "BTC base funds @ 1000 ETH/BTC"
+    contract.storage[1000] = 1 // "EtherEx initialized"
