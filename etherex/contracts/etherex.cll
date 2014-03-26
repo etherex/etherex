@@ -28,10 +28,12 @@ if status == 1:
                 hk = amount
                 book = contract.storage[hk] // "Current amount book: %s" % book
                 if book == 0:
-                    book = array(1)
-                    book[0] = 1
+                    book = array(2)
+                    book[0] = 2
+                    book[1] = 1
                 else:
                     book[0] = book[0] + 1
+                    book[1] = book[1] + 1
                 bookadd = array(4)
                 bookadd[0] = tx.data[0]
                 bookadd[1] = amount
@@ -43,34 +45,45 @@ if status == 1:
                 contract.storage[hk] = book
                 contract.storage[tk] = contract.storage[tk] + amount // "Trade recorded, processing"
                 bl = book[0]
-                c = 1
+                bn = book[1]
+                c = 2
                 while c <= bl:
                     curbook = book[c]
                     if curbook[2] == cm:
                         if tx.data[0] == 1 and curbook[0] == 2:
-                            if amount <= curbook[1]: // "Buying %d from balance of %d from %s" % (amount, curbook[1], curbook[3])
+                            if amount < curbook[1]: // "Buying %d from balance of %d from %s" % (amount, curbook[1], curbook[3])
                                 curbook[1] = curbook[1] - amount
+                                amount = 0
                                 if curbook[1] == 0:
+                                    book[1] = bn - 1
                                     curbook = array(0)
-                            elif amount > curbook[1]: // "Buying balance of %d from %s" % (curbook[1], curbook[3])
-                                book[0] = book[0] - 1
-                                curbook = array(0)
-                                book = book[-1]
-                            book[c] = curbook
-                            contract.storage[hk] = book
-                            contract.storage[tk] = contract.storage[tk] - amount
-                        elif tx.data[0] == 2 and curbook[0] == 1:
-                            if amount >= curbook[1]: // "Selling %d from balance of %d to %s" % (curbook[1], amount, curbook[3])
-                                curbook[1] = 0
+                            elif amount >= curbook[1]: // "Buying balance of %d from %s" % (curbook[1], curbook[3])
                                 amount = amount - curbook[1]
-                                if curbook[1] == 0:
-                                    curbook = array(0)
-                            elif amount < curbook[1]: // "Selling balance of %d to %s" % (amount, curbook[3])
-                                book[0] = book[0] - 1
-                                book = book[-1]
-                            book[c] = curbook
+                                book[1] = bn - 1
+                                curbook = array(0)
+                            book[c] = curbook // "Amount left to process: %d" % amount
+                            if amount == 0:
+                                book[1] = book[1] - 1
+                                book[bl] = array(0)
+                                c = bl
                             contract.storage[hk] = book
-                            contract.storage[tk] = contract.storage[tk] - amount
+                            contract.storage[tk] = contract.storage[tk] - (bookadd[1] - amount)
+                        elif tx.data[0] == 2 and curbook[0] == 1:
+                            if amount > curbook[1]: // "Selling %d from balance of %d to %s" % (curbook[1], amount, curbook[3])
+                                amount = amount - curbook[1]
+                                curbook[1] = curbook[1] - amount
+                                book[1] = bn - 1
+                            elif amount <= curbook[1]: // "Selling balance of %d to %s" % (amount, curbook[3])
+                                curbook = array(0)
+                                book[1] = bn - 1
+                                amount = 0
+                            book[c] = curbook // "Amount left to process: %d" % amount
+                            if amount == 0:
+                                book[1] = book[1] - 1
+                                book[bl] = array(0)
+                                c = bl
+                            contract.storage[hk] = book
+                            contract.storage[tk] = contract.storage[tk] - (bookadd[1] - amount)
                     c = c + 1
             cm = cm + 1
     elif tx.data[0] == 3: // "DEPOSIT"
@@ -91,7 +104,7 @@ else:
     markets = array(2)
     market = array(3)
     market[0] = "ETH/BTC"
-    market[1] = 1 * 10 ^ 7 // "Minimum mBTC trade: %s" % ((market[1] / (10 ** 7)) * 100)
+    market[1] = 1 * 10 ^ 7 // "Minimum mBTC trade: %d" % (market[1] / (10 ** 5))
     market[2] = 1 * 10 ^ 21 // "Minimum ETH trade: %d" % (market[2] / (10 ** 21))
     markets[0] = market
     market = array(3)
@@ -100,7 +113,7 @@ else:
     market[2] = 1 * 10 ^ 21
     markets[1] = market
     contract.storage[1002] = markets
-    contract.storage[1003] = tx.value / 3 // "ETH base funds"
-    contract.storage[1004] = tx.value / 3 // "ETH running funds"
-    contract.storage[1005] = tx.value / (3 * 1000 * 10 ^ 21) // "BTC base funds @ 1000 ETH/BTC: %d BTC" % (tx.value / (3 * 1000 * 10 ** 21))
+    contract.storage[1003] = tx.value / 3 // "ETH base funds: %d ETH" % ((tx.value / 3) / 10 ** 21)
+    contract.storage[1004] = tx.value / 3 // "ETH running funds: %d ETH" % ((tx.value / 3) / 10 ** 21)
+    contract.storage[1005] = tx.value / 3 // "XETH running funds: %d XETH" % ((tx.value / 3) / 10 ** 21)
     contract.storage[1000] = 1 // "EtherEx initialized"
