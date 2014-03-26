@@ -1,5 +1,5 @@
 from sim import Block, Contract, Simulation, Tx, log, mkcall, stop
-import time
+# import time
 
 class EtherEx(Contract):
     """EtherEx contract"""
@@ -12,10 +12,10 @@ class EtherEx(Contract):
 class EtherExRun(Simulation):
 
     contract = EtherEx(CAK="caktux", EOAR="eoar", FAB="fabrezio")
-    ts = time.time()
+    # ts = time.time()
 
     def test_insufficient_fee(self):
-        # block = Block(timestamp=self.ts_zero + 15 * 86400 + 1)
+        # block = Block(timestamp=self.ts + 15 * 86400 + 1)
         tx = Tx(sender='caktux', value=10, data=[0])
         self.run(tx, self.contract)
         assert self.stopped == 'Insufficient fee'

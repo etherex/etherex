@@ -62,11 +62,11 @@ if status == 1:
                 curbook = book[c]
                 if curbook == 0: // "Skipping 1 record"
                     c = c + 1
-                elif ca == bn: // "No more trades to check, skipping..."
+                elif ca == bn: // "No more trades to check"
                     c = bl
                 else:
                     if curbook[4] == mk:
-                        if tx.data[0] == 1 and curbook[0] == 2: // "Buying..."
+                        if tx.data[0] == 1 and curbook[0] == 2:
                             ia = amount
                             if amount < curbook[2]: // "Buying %d from balance of %d from %s" % (amount, curbook[2], curbook[3])
                                 curbook[2] = curbook[2] - amount
@@ -84,7 +84,7 @@ if status == 1:
                                 c = bl
                             contract.storage[hk] = book
                             contract.storage[tk] = contract.storage[tk] - (ia - amount)
-                        elif tx.data[0] == 2 and curbook[0] == 1: // "Selling..."
+                        elif tx.data[0] == 2 and curbook[0] == 1:
                             ia = amount
                             if amount > curbook[2]: // "Selling %d from balance of %d to %s" % (curbook[2], amount, curbook[3])
                                 amount = amount - curbook[2]
