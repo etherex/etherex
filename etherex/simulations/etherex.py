@@ -28,7 +28,6 @@ class EtherExRun(Simulation):
         assert self.contract.storage[5000] == 1
         assert self.contract.storage[5001] == ['caktux', 'eoar', 'fabrezio']
         assert self.stopped == 'EtherEx initialized'
-        self.log(self.contract.storage)
 
     def test_insufficient_btc(self):
         tx = Tx(sender='caktux', value=1000, data=[1, 1 * 10 ** 6, 1000, 1])
