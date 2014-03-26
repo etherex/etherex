@@ -2,17 +2,21 @@ if tx.value < 1000 * block.basefee:
     stop // "Insufficient fee"
 status = contract.storage[5000]
 if status == 1:
-    if tx.datan < 2:
+    if tx.datan < 1:
         stop // "No data to process"
     if tx.data[0] < 1 or tx.data[0] > 5:
         stop // "Invalid operation"
     if tx.data[0] < 3:
-        if tx.datan < 4:
-            stop // "Missing market ID"
+        if tx.datan < 2:
+            stop // "Missing amount"
+        if tx.data[1] < 1:
+            stop // "Invalid amount"
         if tx.datan < 3:
             stop // "Missing price"
         if tx.data[2] < 1:
             stop // "Invalid price"
+        if tx.datan < 4:
+            stop // "Missing market ID"
     amount = tx.data[1] // "Trade amount: %d" % amount
     price = tx.data[2] // "Trade price: %d" % price
     if amount > 256^256 or price > 256^256 or tx.data[3] > 1 or tx.datan > 4:
@@ -53,24 +57,24 @@ if status == 1:
             bl = book[0]
             bn = book[1]
             c = 2
-            ca = 1
+            ca = 0
             while c <= bl:
                 curbook = book[c]
-                if curbook == 0:
+                if curbook == 0: // "Skipping 1 record"
                     c = c + 1
-                elif ca == bn:
+                elif ca == bn: // "No more trades to check, skipping..."
                     c = bl
                 else:
                     if curbook[4] == mk:
-                        if tx.data[0] == 1 and curbook[0] == 2:
+                        if tx.data[0] == 1 and curbook[0] == 2: // "Buying..."
+                            ia = amount
                             if amount < curbook[2]: // "Buying %d from balance of %d from %s" % (amount, curbook[2], curbook[3])
                                 curbook[2] = curbook[2] - amount
                                 amount = 0
-                                if curbook[1] == 0:
-                                    book[1] = bn - 1
-                                    curbook = 0
                             elif amount >= curbook[2]: // "Buying balance of %d from %s" % (curbook[2], curbook[3])
                                 amount = amount - curbook[2]
+                                bookadd[2] = amount
+                                book[c] = bookadd
                                 book[1] = bn - 1
                                 curbook = 0
                             book[c] = curbook // "Amount left to process: %d" % amount
@@ -79,12 +83,14 @@ if status == 1:
                                 book[bl] = 0
                                 c = bl
                             contract.storage[hk] = book
-                            contract.storage[tk] = contract.storage[tk] - (bookadd[2] - amount)
-                        elif tx.data[0] == 2 and curbook[0] == 1:
+                            contract.storage[tk] = contract.storage[tk] - (ia - amount)
+                        elif tx.data[0] == 2 and curbook[0] == 1: // "Selling..."
+                            ia = amount
                             if amount > curbook[2]: // "Selling %d from balance of %d to %s" % (curbook[2], amount, curbook[3])
                                 amount = amount - curbook[2]
+                                bookadd[2] = amount
+                                book[c] = bookadd
                                 curbook = 0
-                                book[1] = bn - 1
                             elif amount <= curbook[2]: // "Selling balance of %d to %s" % (amount, curbook[3])
                                 curbook[2] = curbook[2] - amount
                                 book[1] = bn - 1
@@ -98,10 +104,9 @@ if status == 1:
                                 book[bl] = 0
                                 c = bl
                             contract.storage[hk] = book
-                            contract.storage[tk] = contract.storage[tk] - (bookadd[2] - amount)
-                        else:
-                            stop // "Uncaught trade operation"
-                c = c + 1
+                            contract.storage[tk] = contract.storage[tk] - (ia - amount)
+                    c = c + 1
+                ca = ca + 1
     elif tx.data[0] == 3: // "DEPOSIT"
         stop // "Not implemented yet"
     elif tx.data[0] == 4: // "WITHDRAW"
@@ -133,4 +138,5 @@ else:
     contract.storage[5003] = tx.value / 3 // "ETH base funds: %d ETH" % deposit
     contract.storage[5004] = tx.value / 3 // "ETH running funds: %d ETH" % deposit
     contract.storage[5005] = tx.value / 3 // "XETH running funds: %d XETH" % deposit
-    contract.storage[5000] = 1 // "EtherEx initialized"
+    contract.storage[5000] = 1
+    stop // "EtherEx initialized"
