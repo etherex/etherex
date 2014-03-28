@@ -13,7 +13,5 @@ elif contract.storage[1000]: // Running contract...
         contract.storage[frm] = contract.storage[frm] - value
         contract.storage[to] = contract.storage[to] + value
 else:
-    owner = "616c696365"
-    contract.storage[0x616c696365] = 10^18 // #define tx.sender=MYCREATOR
+    contract.storage[tx.sender] = 10^18 // #define tx.sender=MYCREATOR
     contract.storage[1000] = 1 // "Initializing storage for creator %s" % tx.sender
-    contract.storage[1001] = bytes(0x616c696365)
