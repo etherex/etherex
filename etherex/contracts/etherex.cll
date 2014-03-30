@@ -13,7 +13,7 @@ if status == 1:
             stop // "Invalid amount"
         elif tx.datan < 3:
             stop // "Missing price"
-        elif tx.data[2] < 1:
+        elif tx.data[2] < 1 * 10 ^ 8:
             stop // "Invalid price"
         elif tx.datan < 4:
             stop // "Missing market ID"
@@ -32,7 +32,7 @@ if status == 1:
                 stop // "Minimum BTC trade amount not met, minimum is %s, got %d" % (market[1], amount)
             if tx.data[0] == 2 and tx.value < market[2]:
                 stop // "Minimum ETH trade amount not met, minimum is %s, got %d" % (market[2], tx.value)
-            hk = price + 10000 // "Trade amounts OK for %s" % market[0]
+            hk = price // "Trade amounts OK for %s" % market[0]
             book = contract.storage[hk] // "Current price orderbook: %s" % book
             if book == 0:
                 book = array(2)
@@ -53,81 +53,106 @@ if status == 1:
             contract.storage[hk] = book // "Trade recorded, checking price indexes"
             indexes = contract.storage[5003]
             index = indexes[mk]
-            indexcount = index[0]
+            indexcount = index[0] // "Current index count: %d" % indexcount
             priceindexed = 0
-            while indexcount > 2: // "Check %d at index %d" % (index[indexcount - 1], indexcount)
-                if index[indexcount - 1] == price: // "Price already indexed @ %d %s at index %d" % (index[indexcount - 1], market[0], indexcount)
-                    index[1] = index[1] + 1
+            replaceindex = 0
+            while indexcount > 0:
+                priceindex = index[indexcount] // "Check %s at index %d" % (index[indexcount], indexcount)
+                if priceindex[1] == price: // "Price already indexed @ %d %s at index %d" % (priceindex[1] / (1 * 10 ** 8), market[0], indexcount)
+                    priceindex[0] = priceindex[0] + 1
+                    index[indexcount] = priceindex
                     indexes[mk] = index
                     contract.storage[5003] = indexes
                     ik = indexcount
                     priceindexed = 1
-                    indexcount = 1
-                else:
-                    indexcount = indexcount - 1
+                    indexcount = 0
+                elif priceindex[0] == 0:
+                    replaceindex = indexcount
+                indexcount = indexcount - 1
             if priceindexed == 0:
-                newindex = array(1)
-                newindex[0] = price // "Updating price indexes: %s with %s" % (indexes, newindex)
+                newindex = array(2)
+                newindex[0] = 1
+                newindex[1] = price
                 index[0] = index[0] + 1
-                index[1] = index[1] + 1
-                indexes[mk] = index + newindex
+                newaindex = array(1)
+                newaindex[0] = newindex
+                if replaceindex > 0: // "Replacing price index %d from %s with %s" % (replaceindex, indexes, newindex)
+                    index[replaceindex] = newaindex
+                    indexes[mk] = index
+                else: // "Adding price index %s to %s" % (newindex, indexes)
+                    indexes[mk] = index + newaindex
                 contract.storage[5003] = indexes
-                ik = indexcount
-            booknonce = book[0]
-            booklength = book[1]
-            count = 2
-            countedall = 0
-            while count <= booknonce:
-                curbook = book[count]
-                if curbook == 0: // "Skipping 1 record"
-                    count = count + 1
-                elif countedall == booklength: // "No more trades to check"
-                    count = booknonce
-                else:
-                    if curbook[4] == mk:
-                        if tx.data[0] == 1 and curbook[0] == 2:
-                            if amount < curbook[2]: // "Buying %d from balance of %d from %s" % (amount, curbook[2], curbook[3])
-                                curbook[2] = curbook[2] - amount
-                                amount = 0
-                            elif amount >= curbook[2]: // "Buying balance of %d from %s" % (curbook[2], curbook[3])
-                                amount = amount - curbook[2]
-                                bookadd[2] = amount
-                                book[count] = bookadd
-                                book[1] = booklength - 1
-                                curbook = 0
-                            book[count] = curbook // "Amount left to process: %d" % amount
-                            if amount == 0: // "Trade processed, executing"
-                                book[1] = book[1] - 1
-                                book[booknonce] = 0
-                                index[1] = index[1] - 2
-                                indexes[mk] = index
-                                contract.storage[5003] = indexes
-                                count = booknonce
-                            contract.storage[hk] = book
-                        elif tx.data[0] == 2 and curbook[0] == 1:
-                            if amount > curbook[2]: // "Selling %d from balance of %d to %s" % (curbook[2], amount, curbook[3])
-                                amount = amount - curbook[2]
-                                bookadd[2] = amount
-                                book[count] = bookadd
-                                curbook = 0
-                            elif amount <= curbook[2]: // "Selling balance of %d to %s" % (amount, curbook[3])
-                                curbook[2] = curbook[2] - amount
-                                book[1] = booklength - 1
-                                amount = 0
-                                if curbook[2] == 0:
-                                    curbook = 0
+                ik = index[0]
+            else:
+                booknonce = book[0]
+                booklength = book[1]
+                count = 2
+                countedall = 0
+                while count <= booknonce:
+                    curbook = book[count]
+                    if curbook == 0: // "Skipping 1 record"
+                        count = count + 1
+                    elif countedall == booklength: // "No more trades to check"
+                        count = booknonce
+                    else:
+                        if curbook[4] == mk:
+                            if tx.data[0] == 1 and curbook[0] == 2:
+                                if amount < curbook[2]: // "Buying %d from balance of %d from %s" % (amount, curbook[2], curbook[3])
+                                    curbook[2] = curbook[2] - amount
+                                    amount = 0
+                                elif amount >= curbook[2]: // "Buying balance of %d from %s" % (curbook[2], curbook[3])
+                                    amount = amount - curbook[2]
+                                    bookadd[2] = amount
+                                    book[count] = bookadd
                                     book[1] = booklength - 1
-                            book[count] = curbook // "Amount left to process: %d" % amount
-                            if amount == 0: // "Trade processed, executing"
-                                book[1] = book[1] - 1
-                                book[booknonce] = 0
-                                index[1] = index[1] - 2
+                                    curbook = 0
+                                book[count] = curbook // "Amount left to process: %d" % amount
+                                if amount == 0: // "Trade processed, executing"
+                                    book[1] = book[1] - 1
+                                    book[booknonce] = 0
+                                    count = booknonce
+                                lowerindex = 1
+                                if curbook == 0 and amount == 0:
+                                    lowerindex = 2
+                                priceindex = index[ik] // "Updating index %s from key %d" % (priceindex, ik)
+                                priceindex[0] = priceindex[0] - lowerindex
+                                if priceindex[0] < 1:
+                                    index[0] = index[0] - 1
+                                index[ik] = priceindex // "to %s" % priceindex
                                 indexes[mk] = index
                                 contract.storage[5003] = indexes
-                                count = booknonce
-                            contract.storage[hk] = book
-                    count = count + 1
-                    countedall = countedall + 1
+                                contract.storage[hk] = book
+                            elif tx.data[0] == 2 and curbook[0] == 1:
+                                if amount > curbook[2]: // "Selling %d from balance of %d to %s" % (curbook[2], amount, curbook[3])
+                                    amount = amount - curbook[2]
+                                    bookadd[2] = amount
+                                    book[count] = bookadd
+                                    curbook = 0
+                                elif amount <= curbook[2]: // "Selling balance of %d to %s" % (amount, curbook[3])
+                                    curbook[2] = curbook[2] - amount
+                                    book[1] = booklength - 1
+                                    amount = 0
+                                    if curbook[2] == 0:
+                                        curbook = 0
+                                        book[1] = booklength - 1
+                                book[count] = curbook // "Amount left to process: %d" % amount
+                                if amount == 0: // "Trade processed, executing"
+                                    book[1] = book[1] - 1
+                                    book[booknonce] = 0
+                                    count = booknonce
+                                lowerindex = 1
+                                if curbook == 0 and amount == 0:
+                                    lowerindex = 2
+                                priceindex = index[ik] // "Updating index %s from key %d" % (priceindex, ik)
+                                priceindex[0] = priceindex[0] - lowerindex
+                                if priceindex[0] < 1:
+                                    index[0] = index[0] - 1
+                                index[ik] = priceindex // "to %s" % priceindex
+                                indexes[mk] = index
+                                contract.storage[5003] = indexes
+                                contract.storage[hk] = book
+                        count = count + 1
+                        countedall = countedall + 1
     elif tx.data[0] == 3: // "DEPOSIT"
         stop // "Not implemented yet"
     elif tx.data[0] == 4: // "WITHDRAW"
@@ -151,16 +176,14 @@ else:
     marketa[0] = "ETH/BTC"
     marketa[1] = 1 * 10 ^ 7 // "Minimum mBTC trade: %d" % (marketa[1] / (10 ** 5))
     marketa[2] = 1 * 10 ^ 21 // "Minimum ETH trade: %d" % (marketa[2] / (10 ** 21))
-    ia = array(2)
-    ia[0] = 2
-    ia[1] = 0
+    ia = array(1)
+    ia[0] = 0
     marketb = array(3)
     marketb[0] = "ETH/XETH"
     marketb[1] = 1 * 10 ^ 21 // "Minimum XETH trade: %d" % (marketb[1] / (10 ** 21))
     marketb[2] = 1 * 10 ^ 21
-    ib = array(2)
-    ib[0] = 2
-    ib[1] = 0
+    ib = array(1)
+    ib[0] = 0
     indexes[0] = ia
     indexes[1] = ib
     markets[0] = marketa
