@@ -76,8 +76,13 @@ class EtherExRun(Simulation):
         self.run(tx, self.contract)
         assert self.stopped == "Missing market ID"
 
+    def test_missing_market_id(self):
+        tx = Tx(sender='eoar', value=1000 * 10 ** 21, data=[1, 1, 1, 2])
+        self.run(tx, self.contract)
+        assert self.stopped == "Invalid market ID"
+
     def test_out_of_range(self):
-        tx = Tx(sender='eoar', value=1000 * 10 ** 21, data=[1, 1000 * 10 ** 21, 1, 3])
+        tx = Tx(sender='eoar', value=1000 * 10 ** 21, data=[1, 1000 * 10 ** 21, 256**256+1, 1])
         self.run(tx, self.contract)
         assert self.stopped.endswith("out of range")
 

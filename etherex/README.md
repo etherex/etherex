@@ -38,7 +38,8 @@ pip install -r requirements.txt
 
 API
 ---
-The API is the format of the data field for the Ethereum transactions.
+* The API is the format of the data field for the Ethereum transactions.
+* You only need an Ethereum client to use the API.
 
 ### Trades (buy / sell)
 ```
@@ -70,10 +71,10 @@ Allowed values:
 * Amount in satoshi for BTC
 
 ### Prices
-Optional but required for trades
+* Price in ETH/BTC * 10 ^ 8, as integer
+* Price in ETH/XETH * 10 ^ 8, as integer
 
 ### Market IDs
-Optional but required for trades
 Allowed values
 ```
 1 = ETH/BTC
@@ -88,14 +89,14 @@ Allowed values
 ```
 
 ### Examples
-Buy 1000 ETH for 1.2 BTC
+Buy 1000 ETH at 1200 ETH/BTC (for 1.2 BTC)
 ```
-1 1000000000000000000000 120000000 1
+1 1000000000000000000000 120000000000 1
 ```
 
-Sell 1000 ETH for 1.2 BTC
+Sell 1000 ETH at 1200 ETH/BTC (for 1.2 BTC)
 ```
-2 1000000000000000000000 120000000 1
+2 1000000000000000000000 120000000000 1
 ```
 
 Deposit 1 BTC
@@ -125,6 +126,7 @@ TODO
 ----
 * Link price indexes to orderbook and check for lower/higher bids
 * Remove array values instead of setting them to 0, maybe combine first and second indexes of arrays then
+* Combine/optimize buy/sell operations in while loop
 * Make ETH/XETH transactions
 * Trigger BTC transactions
 * Fees
