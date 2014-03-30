@@ -4,12 +4,14 @@ EtherEx
 Decentralized exchange built on Ethereum.
 
 
-##About
+About
+-----
 
 This repository contains the code that runs the exchange on Ethereum as a set of contracts, along with tests, simulations, tools and documentation.
 
 
-##Components
+Components
+----------
 
 * contracts: CLL contracts running EtherEx
 * simulations: Python simulations for EtherEx
@@ -18,8 +20,8 @@ This repository contains the code that runs the exchange on Ethereum as a set of
 * tests: extra tests
 
 
-##Running tests
-
+Running tests
+-------------
 ```
 ./runtests.py
 ```
@@ -27,20 +29,33 @@ This repository contains the code that runs the exchange on Ethereum as a set of
 Refer to the [compiler](https://github.com/ethereum/compiler) and [simulator](https://github.com/jorisbontje/cll-sim) for their respective usage.
 
 
-##Requirements
-
+Requirements
+------------
 ```
 pip install -r requirements.txt
 ```
 
 
-##API (tx.data format) [TBD]
+API
+---
+The API is the format of the data field for the Ethereum transactions.
 
+### Trades (buy / sell)
 ```
-<operation> <amount> [price] [marketid]
+<operation> <amount> <price> <marketid>
 ```
 
-###Operations
+### Deposits / Withdrawals
+```
+<operation> <amount> <currency>
+```
+
+### Cancellations
+```
+<operation> <id>
+```
+
+### Operations
 Allowed values:
 ```
 1 = BUY
@@ -50,20 +65,75 @@ Allowed values:
 5 = CANCEL
 ```
 
-###Amounts
+### Amounts
 * Amount in wei for ETH or XETH
 * Amount in satoshi for BTC
 
-###Prices
+### Prices
 Optional but required for trades
 
-###Market IDs
+### Market IDs
 Optional but required for trades
 Allowed values
 ```
 1 = ETH/BTC
 2 = ETH/XETH
 ```
+
+### Currencies
+```
+1 = ETH
+2 = BTC
+3 = XETH
+```
+
+### Examples
+Buy 1000 ETH for 1.2 BTC
+```
+1 1000000000000000000000 120000000 1
+```
+
+Sell 1000 ETH for 1.2 BTC
+```
+2 1000000000000000000000 120000000 1
+```
+
+Deposit 1 BTC
+```
+3 100000000 2
+```
+
+Withdraw 1 ETH
+```
+4 1000000000000000000 1
+```
+
+Cancel operation
+```
+5 12345678901234567890
+```
+
+
+Notes
+-----
+* Your Ethereum address is used as your identity
+* You can only make trades for your address
+* Balances can't be transferred
+
+
+TODO
+----
+* Link price indexes to orderbook and check for lower/higher bids
+* Remove array values instead of setting them to 0, maybe combine first and second indexes of arrays then
+* Make ETH/XETH transactions
+* Trigger BTC transactions
+* Fees
+* Per user address storage, possible conflicts with price indexes
+* Pending queue for deposits/withdrawals
+* Deposit/withdrawal confirmation handling
+* GGF
+* Thousands more tests
+* ... and then some
 
 
 ## License
