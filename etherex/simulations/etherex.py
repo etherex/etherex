@@ -130,5 +130,14 @@ class EtherExRun(Simulation):
         tx = Tx(sender='fabrezio', value=2500 * 10 ** 18, data=[1, 2500 * 10 ** 18, 900 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
+    def test_sell_sixth(self):
+        tx = Tx(sender='eoar', value=2500 * 10 ** 18, data=[2, 500 * 10 ** 18, 1000 * 10 ** 8, 1])
+        self.run(tx, self.contract)
+
+    def test_index_replacing(self):
+        tx = Tx(sender='fabrezio', value=2500 * 10 ** 18, data=[2, 2500 * 10 ** 18, 950 * 10 ** 8, 1])
+        self.run(tx, self.contract)
+        assert self.contract.storage[5003] == [[4, [[1, 95000000000]], [1, 120000000000], [1, 110000000000], [1, 90000000000]], [0]]
+
     def test_storage_result(self):
         self.log(self.contract.storage)

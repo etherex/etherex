@@ -28,9 +28,9 @@ if status == 1:
         mk = tx.data[3] - 1
         market = markets[mk]
         if mk == 0: // "Verifing minimum trade amounts..."
-            if tx.data[0] == 1 and amount < market[1]:
+            if tx.data[0] == 1 and amount < market[1]: // "TODO - Check BTC balances"
                 stop // "Minimum BTC trade amount not met, minimum is %s, got %d" % (market[1], amount)
-            if tx.data[0] == 2 and tx.value < market[2]:
+            if tx.data[0] == 2 and tx.value < market[2]: // "TODO - Check XETH balances"
                 stop // "Minimum ETH trade amount not met, minimum is %s, got %d" % (market[2], tx.value)
             hk = price // "Trade amounts OK for %s" % market[0]
             book = contract.storage[hk] // "Current price orderbook: %s" % book
@@ -49,8 +49,15 @@ if status == 1:
             bookadd[4] = mk
             ba = array(1)
             ba[0] = bookadd
-            book = book + ba
-            contract.storage[hk] = book // "Trade recorded, checking price indexes"
+            booknonce = book[0]
+            booklength = book[1]
+            if book[booknonce - 1] == 0: // "Last trade filled, replacing empty data"
+                booknonce = booknonce - 1
+                book[0] = book[0] - 1
+                book[booknonce] = bookadd
+            else:
+                book = book + ba
+            contract.storage[hk] = book // "Trade added, checking price indexes"
             indexes = contract.storage[5003]
             index = indexes[mk]
             indexcount = index[0] // "Current index count: %d" % indexcount
@@ -73,25 +80,34 @@ if status == 1:
                 newindex = array(2)
                 newindex[0] = 1
                 newindex[1] = price
-                index[0] = index[0] + 1
                 newaindex = array(1)
                 newaindex[0] = newindex
                 if replaceindex > 0: // "Replacing price index %d from %s with %s" % (replaceindex, indexes, newindex)
                     index[replaceindex] = newaindex
                     indexes[mk] = index
                 else: // "Adding price index %s to %s" % (newindex, indexes)
+                    index[0] = index[0] + 1
                     indexes[mk] = index + newaindex
                 contract.storage[5003] = indexes
                 ik = index[0]
             else:
-                booknonce = book[0]
-                booklength = book[1]
                 count = 2
                 countedall = 0
                 while count <= booknonce:
                     curbook = book[count]
-                    if curbook == 0: // "Skipping 1 record"
-                        count = count + 1
+                    if curbook == 0: // "Shifting records of empty book index # %s by %d" % (count, booknonce - count)
+                        shiftby = booknonce - count
+                        if shiftby > 0:
+                            countshift = 0
+                            while shiftby > 0:
+                                book[count + countshift] = book[count + countshift + 1]
+                                shiftby = shiftby - 1
+                                countshift = countshift + 1
+                            book[0] = book[0] - 1
+                            book[-1] = 0
+                            contract.storage[hk] = book
+                        else:
+                            count = count + 1
                     elif countedall == booklength: // "No more trades to check"
                         count = booknonce
                     else:
@@ -116,8 +132,6 @@ if status == 1:
                                     lowerindex = 2
                                 priceindex = index[ik] // "Updating index %s from key %d" % (priceindex, ik)
                                 priceindex[0] = priceindex[0] - lowerindex
-                                if priceindex[0] < 1:
-                                    index[0] = index[0] - 1
                                 index[ik] = priceindex // "to %s" % priceindex
                                 indexes[mk] = index
                                 contract.storage[5003] = indexes
@@ -145,8 +159,6 @@ if status == 1:
                                     lowerindex = 2
                                 priceindex = index[ik] // "Updating index %s from key %d" % (priceindex, ik)
                                 priceindex[0] = priceindex[0] - lowerindex
-                                if priceindex[0] < 1:
-                                    index[0] = index[0] - 1
                                 index[ik] = priceindex // "to %s" % priceindex
                                 indexes[mk] = index
                                 contract.storage[5003] = indexes
@@ -175,13 +187,13 @@ else:
     indexes = array(2)
     marketa[0] = "ETH/BTC"
     marketa[1] = 1 * 10 ^ 7 // "Minimum mBTC trade: %d" % (marketa[1] / (10 ** 5))
-    marketa[2] = 1 * 10 ^ 21 // "Minimum ETH trade: %d" % (marketa[2] / (10 ** 21))
+    marketa[2] = 1 * 10 ^ 19 // "Minimum ETH trade: %d" % (marketa[2] / (10 ** 18))
     ia = array(1)
     ia[0] = 0
     marketb = array(3)
     marketb[0] = "ETH/XETH"
-    marketb[1] = 1 * 10 ^ 21 // "Minimum XETH trade: %d" % (marketb[1] / (10 ** 21))
-    marketb[2] = 1 * 10 ^ 21
+    marketb[1] = 1 * 10 ^ 19 // "Minimum XETH trade: %d" % (marketb[1] / (10 ** 18))
+    marketb[2] = 1 * 10 ^ 19
     ib = array(1)
     ib[0] = 0
     indexes[0] = ia
