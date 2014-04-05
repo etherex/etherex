@@ -17,7 +17,7 @@ print '\n'
 print '==================='
 print 'EtherEx LVM'
 print '==================='
-subprocess.call(["compiler/cllcompiler.py", "contracts/etherex.cll"])
+subprocess.call(["compiler/compiler.py", "contracts/etherex.cll"])
 
 print '\n'
 print '==================='

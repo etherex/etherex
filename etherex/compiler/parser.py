@@ -6,6 +6,7 @@ def spaces(ln):
     while spaces < len(ln) and ln[spaces] == ' ': spaces += 1
     return spaces
 
+# Main parse function
 def parse(document):
     return parse_lines(document.split('\n'))
 
@@ -21,16 +22,16 @@ def parse_lines(lns):
             continue
         if spaces(main) > 0:
             raise Exception("Line "+str(i)+" indented too much!")
-        # Grab the child block
+        # Grab the child block of an if statement
         start_child_block = i+1
-        spacesmin = 99999999
+        indent = 99999999
         i += 1
         while i < len(lns):
             sp = spaces(lns[i])
             if sp == 0: break
-            spacesmin = min(sp,spacesmin)
+            indent = min(sp,indent)
             i += 1
-        child_block = map(lambda x:x[spacesmin:],lns[start_child_block:i])
+        child_block = map(lambda x:x[indent:],lns[start_child_block:i])
         # Calls parse_line to parse the individual line
         out = parse_line(main)
         # Include the child block into the parsed expression
@@ -60,8 +61,7 @@ def parse_lines(lns):
             o.append(out)
     return o[0] if len(o) == 1 else ['seq'] + o
 
-# Converts something like "b[4] = x+2 > y*-3" to
-# [ 'b', '[', '4', ']', '=', 'x', '+', '2', '>', 'y', '*', '-', '3' ]
+# Tokens contain one or more chars of the same type, with a few exceptions
 def chartype(c):
     if c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.':
         return 'alphanum'
@@ -71,13 +71,15 @@ def chartype(c):
     elif c == "'": return 'squote'
     else: return 'symb'
 
+# Converts something like "b[4] = x+2 > y*-3" to
+# [ 'b', '[', '4', ']', '=', 'x', '+', '2', '>', 'y', '*', '-', '3' ]
 def tokenize(ln):
     tp = 'space'
     i = 0
     o = []
     global cur
     cur = ''
-    # Quotes
+    # Comments
     if '//' in ln: ln = ln[:ln.find('//')]
     # Finish a token and start a new one
     def nxt():
@@ -149,18 +151,39 @@ precedence = {
 
 def toktype(token):
     if token is None: return None
-    elif token in ['(','[']: return 'lparen'
-    elif token in [')',']']: return 'rparen'
+    elif token in ['(','[']: return 'left_paren'
+    elif token in [')',']']: return 'right_paren'
     elif token == ',': return 'comma'
     elif token == ':': return 'colon'
-    elif token in ['!']: return 'monop' 
+    elif token in ['!']: return 'unary_operation' 
     elif not isinstance(token,str): return 'compound'
-    elif token in precedence: return 'op'
+    elif token in precedence: return 'binary_operation'
     elif re.match('^[0-9a-z\-\.]*$',token): return 'alphanum'
     elif isinstance(token, str): return 'alphanum'
     else: raise Exception("Invalid token: "+token)
 
 # https://en.wikipedia.org/wiki/Shunting-yard_algorithm
+#
+# The algorithm works by maintaining three stacks: iq, stack, oq. Initially,
+# the tokens are placed in order on the iq. Then, one by one, the tokens are
+# processed. Values are moved immediately to the output queue. Operators are
+# pushed onto the stack, but if an operator comes along with lower precendence
+# then all operators on the stack with higher precedence are applied first.
+# For example:
+# iq = 2 + 3 * 5 + 7, stack = \, oq = \
+# iq = + 3 * 5 + 7, stack = \, oq = 2
+# iq = 3 * 5 + 7, stack = +, oq = 2
+# iq = * 5 + 7, stack = +, oq = 2 3
+# iq = 5 + 7, stack = + *, oq = 2 3 (since * > + in precedence)
+# iq = + 7, stack = + *, oq = 2 3 5
+# iq = 7, stack = + +, oq = 2 [* 3 5] (since + > * in precedence)
+# iq = \, stack = + +, oq = 2 [* 3 5] 7
+# iq = \, stack = +, oq = 2 [+ [* 3 5] 7]
+# iq = \, stack = \, oq = [+ 2 [+ [* 3 5] 7] ]
+#
+# Functions, where function arguments begin with a left bracket preceded by
+# the function name, are separated by commas, and end with a right bracket,
+# are also included in this algorithm, though in a different way
 def shunting_yard(tokens):
     iq = [x for x in tokens]
     oq = []
@@ -170,24 +193,27 @@ def shunting_yard(tokens):
     # reverse polish notation. Here, we try to be slightly more ambitious
     # and build up the AST directly on the output queue
     # eg. say oq = [ 2, 5, 3 ] and we add "+" then "*"
-    # we get first [ 2, [ +, 5, 3 ] ] then [ *, 2, [ +, 5, 3 ] ]
+    # we get first [ 2, [ +, 5, 3 ] ] then [ [ *, 2, [ +, 5, 3 ] ] ]
     def popstack(stack,oq):
         tok = stack.pop()
         typ = toktype(tok)
-        if typ == 'op':
+        if typ == 'binary_operation':
             a,b = oq.pop(), oq.pop()
             oq.append([ tok, b, a])
-        elif typ == 'monop':
+        elif typ == 'unary_operation':
             a = oq.pop()
             oq.append([ tok, a ])
-        elif typ == 'rparen':
+        elif typ == 'right_paren':
             args = []
-            while toktype(oq[-1]) != 'lparen': args.insert(0,oq.pop())
+            while toktype(oq[-1]) != 'left_paren':
+                args.insert(0,oq.pop())
             oq.pop()
-            if tok == ']':
+            if tok == ']' and args[0] != 'id':
                 oq.append(['access'] + args)
+            elif tok == ']':
+                oq.append(['array_lit'] + args[1:])
             elif tok == ')' and len(args) and args[0] != 'id':
-                oq.append(['fun'] + args)
+                oq.append(args)
             else:
                 oq.append(args[1])
     # The main loop
@@ -197,38 +223,55 @@ def shunting_yard(tokens):
         typ = toktype(tok)
         if typ == 'alphanum':
             oq.append(tok)
-        elif typ == 'lparen':
-            if toktype(prev) != 'alphanum': oq.append('id')
+        elif typ == 'left_paren':
+            # Handle cases like 3 * (2 + 5) by using 'id' as a default function
+            # name
+            if toktype(prev) != 'alphanum' and toktype(prev) != 'rparen':
+                oq.append('id')
+            # Say the statement is "... f(45...". At the start, we would have f
+            # as the last item on the oq. So we move it onto the stack, put the
+            # leftparen on the oq, and move f back to the stack, so we have ( f
+            # as the last two items on the oq. We also put the leftparen on the
+            # stack so we have a separator on both the stack and the oq
             stack.append(oq.pop())
             oq.append(tok)
             oq.append(stack.pop())
             stack.append(tok)
-        elif typ == 'rparen':
-            while len(stack) and toktype(stack[-1]) != 'lparen':
+        elif typ == 'right_paren':
+            # eg. f(27, 3 * 5 + 4). First, we finish evaluating all the
+            # arithmetic inside the last argument. Then, we run popstack
+            # to coalesce all of the function arguments sitting on the
+            # oq into a single list
+            while len(stack) and toktype(stack[-1]) != 'left_paren':
                 popstack(stack,oq)
             if len(stack):
                 stack.pop()
             stack.append(tok)
             popstack(stack,oq)
-        elif typ == 'monop' or typ == 'op':
-            if tok == '-' and toktype(prev) not in [ 'alphanum', 'rparen' ]:
+        elif typ == 'unary_operation' or typ == 'binary_operation':
+            # -5 -> 0 - 5
+            if tok == '-' and toktype(prev) not in ['alphanum', 'right_paren']:
                 oq.append('0')
+            # Handle BEDMAS operator precedence
             prec = precedence[tok]
-            while len(stack) and toktype(stack[-1]) == 'op' and precedence[stack[-1]] < prec:
+            while len(stack) and toktype(stack[-1]) == 'binary_operation' and precedence[stack[-1]] < prec:
                 popstack(stack,oq)
             stack.append(tok)
         elif typ == 'comma':
-            while len(stack) and stack[-1] != 'lparen': popstack(stack,oq)
+            # Finish evaluating all arithmetic before the comma
+            while len(stack) and toktype(stack[-1]) != 'left_paren':
+                popstack(stack,oq)
         elif typ == 'colon':
-            while len(stack) and stack[-1] != 'lparen': popstack(stack,oq)
+            # Colon is like a comma except it stays in the argument list
+            while len(stack) and toktype(stack[-1]) != 'right_paren':
+                popstack(stack,oq)
             oq.append(tok)
-        #print 'iq',iq,'stack',stack,'oq',oq
     while len(stack):
         popstack(stack,oq)
     if len(oq) == 1:
         return oq[0]
     else:
-        raise Exception("Wrong number of items left on stack")
+        raise Exception("Wrong number of items left on stack: "+str(oq))
 
 def parse_line(ln):
     tokens = tokenize(ln.strip())
@@ -240,8 +283,8 @@ def parse_line(ln):
         return [ 'else if', shunting_yard(tokens[1:]) ]
     elif len(tokens) == 1 and tokens[0] == 'else':
         return [ 'else' ]
-    elif tokens[0] in ['mkcall','create','suicide','stop','return']:
-        return shunting_yard(tokens)
-    else:
+    elif '=' in tokens:
         eqplace = tokens.index('=')
         return [ 'set', shunting_yard(tokens[:eqplace]), shunting_yard(tokens[eqplace+1:]) ]
+    else:
+        return shunting_yard(tokens)

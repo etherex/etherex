@@ -93,6 +93,8 @@ class EtherExRun(Simulation):
     def test_sell_second(self):
         tx = Tx(sender="eoar", value=1 * 10 ** 21, data=[2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
+        self.log(self.contract.storage)
+        self.log("--------------------")
 
     def test_buy_first(self):
         tx = Tx(sender="fabrezio", value=1000, data=[1, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
@@ -101,22 +103,28 @@ class EtherExRun(Simulation):
     def test_buy_second(self):
         tx = Tx(sender='caktux', value=1500 * 10 ** 18, data=[1, 1500 * 10 ** 18, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
+        self.log(self.contract.storage)
+        self.log("--------------------")
 
     def test_sell_third(self):
         tx = Tx(sender='eoar', value=1500 * 10 ** 18, data=[2, 1500 * 10 ** 18, 1200 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_buy_fourth(self):
-        tx = Tx(sender='eoar', value=1200 * 10 ** 18, data=[1, 1200 * 10 ** 18, 1200 * 10 ** 8, 1])
+        tx = Tx(sender='caktux', value=1200 * 10 ** 18, data=[1, 1200 * 10 ** 18, 1200 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_buy_fifth(self):
         tx = Tx(sender='fabrezio', value=4200 * 10 ** 18, data=[1, 4000 * 10 ** 18, 1100 * 10 ** 8, 1])
         self.run(tx, self.contract)
+        self.log(self.contract.storage)
+        self.log("--------------------")
 
     def test_sell_fourth(self):
         tx = Tx(sender='eoar', value=8000 * 10 ** 21, data=[2, 8000 * 10 ** 18, 1100 * 10 ** 8, 1])
         self.run(tx, self.contract)
+        self.log(self.contract.storage)
+        self.log("--------------------")
 
     def test_buy_sixth(self):
         tx = Tx(sender='fabrezio', value=5000 * 10 ** 18, data=[1, 4500 * 10 ** 18, 1100 * 10 ** 8, 1])
@@ -137,7 +145,16 @@ class EtherExRun(Simulation):
     def test_index_replacing(self):
         tx = Tx(sender='fabrezio', value=2500 * 10 ** 18, data=[2, 2500 * 10 ** 18, 950 * 10 ** 8, 1])
         self.run(tx, self.contract)
-        assert self.contract.storage[5003] == [[4, [[1, 95000000000]], [1, 120000000000], [1, 110000000000], [1, 90000000000]], [0]]
+        # assert self.contract.storage[5003] == [[4, [[1, 95000000000]], [1, 120000000000], [1, 110000000000], [1, 90000000000]], [0]]
+
+    def test_other_amount(self):
+        tx = Tx(sender='caktux', value=2500 * 10 ** 18, data=[1, 2500 * 10 ** 18, 1100 * 10 ** 8, 1])
+        self.run(tx, self.contract)
+
+
+    # def test_sell_seventh(self):
+    #     tx = Tx(sender='caktux', value=5000 * 10 ** 18, data=[2, 5000 * 10 ** 18, 1100 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
 
     def test_storage_result(self):
         self.log(self.contract.storage)

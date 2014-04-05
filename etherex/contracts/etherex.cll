@@ -59,24 +59,54 @@ if status == 1:
                 book = book + ba
             contract.storage[hk] = book // "Trade added, checking price indexes"
             indexes = contract.storage[5003]
-            index = indexes[mk]
-            indexcount = index[0] // "Current index count: %d" % indexcount
+            index = indexes[mk] // "Indexed prices: %s" % index
+            indexcount = index[0]
             priceindexed = 0
             replaceindex = 0
+            tradeat = array(2)
+            tradeat[0] = 1
+            tradeat[1] = price
+            bestprice = price
+            ir = 0
+            ik = 0
             while indexcount > 0:
-                priceindex = index[indexcount] // "Check %s at index %d" % (index[indexcount], indexcount)
-                if priceindex[1] == price: // "Price already indexed @ %d %s at index %d" % (priceindex[1] / (1 * 10 ** 8), market[0], indexcount)
-                    priceindex[0] = priceindex[0] + 1
-                    index[indexcount] = priceindex
-                    indexes[mk] = index
-                    contract.storage[5003] = indexes
-                    ik = indexcount
-                    priceindexed = 1
-                    indexcount = 0
-                elif priceindex[0] == 0:
+                ik = indexcount
+                priceindex = index[indexcount] // "Current index: %s" % priceindex
+                if priceindex == 0:
+                    indexcount = indexcount - 1
                     replaceindex = indexcount
+                else:
+                    indexedprices = priceindex[0]
+                    currentprice = priceindex[1]
+                    if currentprice == 0:
+                        indexcount = indexcount - 1
+                    elif currentprice == price: // "Price already indexed @ %d %s at index %d" % (currentprice / (1 * 10 ** 8), market[0], indexcount)
+                        priceindex[0] = indexedprices + 1
+                        index[indexcount] = priceindex
+                        indexes[mk] = index
+                        contract.storage[5003] = indexes
+                        ik = indexcount
+                        priceindexed = 1
+                        indexcount = 0
+                    else:
+                        if tx.data[0] == 1 and currentprice < price: // "Price index of %s below buy price, checking..." % priceindex[1]
+                            if priceindexed == 0:
+                                ik = indexcount
+                            ir = indexcount
+                            addindex = array(1)
+                            addindex[0] = currentprice
+                            tradeat[0] = tradeat[0] + 1
+                            tradeat = tradeat + addindex
+                        if tx.data[0] == 2 and priceindex[1] > price: // "Price index of %s above sell price, checking..." % priceindex[1]
+                            if priceindexed == 0:
+                                ik = indexcount
+                            ir = indexcount
+                            addindex = array(1)
+                            addindex[0] = priceindex[1]
+                            tradeat[0] = tradeat[0] + 1
+                            tradeat = tradeat + addindex
                 indexcount = indexcount - 1
-            if priceindexed == 0:
+            if priceindexed == 0: // "Indexing new price"
                 newindex = array(2)
                 newindex[0] = 1
                 newindex[1] = price
@@ -89,26 +119,23 @@ if status == 1:
                     index[0] = index[0] + 1
                     indexes[mk] = index + newaindex
                 contract.storage[5003] = indexes
-                ik = index[0]
-            else:
+            while tradeat[0] > 0: // "Indexed prices: %s" % tradeat
+                tk = tradeat[0]
+                currentprice = tradeat[tk] // "Trading at: %s" % currentprice
+                hk = currentprice
+                if hk > 0:
+                    book = contract.storage[hk]
+                if book > 0:
+                    booknonce = book[0]
+                    booklength = book[1]
                 count = 2
                 countedall = 0
                 while count <= booknonce:
-                    curbook = book[count]
-                    if curbook == 0: // "Shifting records of empty book index # %s by %d" % (count, booknonce - count)
-                        shiftby = booknonce - count
-                        if shiftby > 0:
-                            countshift = 0
-                            while shiftby > 0:
-                                book[count + countshift] = book[count + countshift + 1]
-                                shiftby = shiftby - 1
-                                countshift = countshift + 1
-                            book[0] = book[0] - 1
-                            book[-1] = 0
-                            contract.storage[hk] = book
-                        else:
-                            count = count + 1
-                    elif countedall == booklength: // "No more trades to check"
+                    curbook = book[count] // "In book @ %s #%d: %s" % (hk, count, curbook)
+                    if curbook == 0:
+                        count = count + 1
+                        countedall = countedall + 1
+                    elif countedall > booklength:
                         count = booknonce
                     else:
                         if curbook[4] == mk:
@@ -122,18 +149,29 @@ if status == 1:
                                     book[count] = bookadd
                                     book[1] = booklength - 1
                                     curbook = 0
-                                book[count] = curbook // "Amount left to process: %d" % amount
-                                if amount == 0: // "Trade processed, executing"
+                                book[count] = curbook // "Amount left to process: %d in %s" % (amount, book)
+                                if amount == 0: // "Trade processed, executing - TODO"
                                     book[1] = book[1] - 1
                                     book[booknonce] = 0
                                     count = booknonce
-                                lowerindex = 1
+                                lowerindex = 1 // "Last index: %s" % index
                                 if curbook == 0 and amount == 0:
                                     lowerindex = 2
-                                priceindex = index[ik] // "Updating index %s from key %d" % (priceindex, ik)
-                                priceindex[0] = priceindex[0] - lowerindex
-                                index[ik] = priceindex // "to %s" % priceindex
-                                indexes[mk] = index
+                                if ik <= index[0]:
+                                    priceindex = index[ik]
+                                    priceindex[0] = priceindex[0] - lowerindex
+                                    if priceindex[0] == 0:
+                                        index[ik] = 0
+                                    else:
+                                        index[ik] = priceindex
+                                if ir > 1:
+                                    priceindex = index[ir] // "and %s" % priceindex
+                                    priceindex[0] = priceindex[0] - 1
+                                    if priceindex[0] == 0:
+                                        index[ir] = 0
+                                    else:
+                                        index[ir] = priceindex
+                                indexes[mk] = index // "Updating index key %d with %s" % (tk, index)
                                 contract.storage[5003] = indexes
                                 contract.storage[hk] = book
                             elif tx.data[0] == 2 and curbook[0] == 1:
@@ -141,6 +179,7 @@ if status == 1:
                                     amount = amount - curbook[2]
                                     bookadd[2] = amount
                                     book[count] = bookadd
+                                    book[1] = booklength - 1
                                     curbook = 0
                                 elif amount <= curbook[2]: // "Selling balance of %d to %s" % (amount, curbook[3])
                                     curbook[2] = curbook[2] - amount
@@ -157,14 +196,47 @@ if status == 1:
                                 lowerindex = 1
                                 if curbook == 0 and amount == 0:
                                     lowerindex = 2
-                                priceindex = index[ik] // "Updating index %s from key %d" % (priceindex, ik)
-                                priceindex[0] = priceindex[0] - lowerindex
-                                index[ik] = priceindex // "to %s" % priceindex
+                                if ik <= index[0]:
+                                    priceindex = index[ik] // "Updating index %s from key %d by minus %d" % (priceindex, ik, lowerindex)
+                                    priceindex[0] = priceindex[0] - lowerindex
+                                    if priceindex[0] == 0:
+                                        index[ik] = 0
+                                    else:
+                                        index[ik] = priceindex
+                                if ir > 1:
+                                    priceindex = index[ir] // "and %s" % priceindex
+                                    priceindex[0] = priceindex[0] - 1
+                                    if priceindex[0] == 0:
+                                        index[ir] = 0
+                                    else:
+                                        index[ir] = priceindex
                                 indexes[mk] = index
                                 contract.storage[5003] = indexes
                                 contract.storage[hk] = book
                         count = count + 1
                         countedall = countedall + 1
+                    tradeat[0] = tradeat[0] - 1
+                count = 3
+                countedall = 0
+                while count <= booknonce:
+                    curbook = book[count]
+                    if curbook == 0 and count < booknonce:
+                        left = booknonce - count
+                        if left > 0:
+                            countshift = count + 1
+                            while left > 0 and book[countshift] == 0:
+                                left = left - 1
+                                countshift = countshift + 1
+                            totalshift = countshift - count + 1
+                            book[totalshift] = book[countshift] // "Shifting records of empty book index # %s with %d left by %d" % (count, booknonce - count, totalshift)
+                            book[count + 1] = 0
+                            book[0] = book[0] - totalshift
+                            contract.storage[hk] = book
+                    elif countedall > booklength:
+                        count = booknonce
+                    count = count + 1
+                    countedall = countedall + 1
+            tradeat[0] = tradeat[0] - 1
     elif tx.data[0] == 3: // "DEPOSIT"
         stop // "Not implemented yet"
     elif tx.data[0] == 4: // "WITHDRAW"
