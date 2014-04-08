@@ -52,6 +52,7 @@ funtable = [
     ['sha3bytes', 1, 1, ['SHA3'] ],
     ['sload', 1, 1, ['<0>','SLOAD'] ],
     ['sstore', 2, 0, ['<1>','<0>','SSTORE'] ],
+    ['suicide', 1, 1, ['<0>', 'SUICIDE']],
     ['calldataload', 1, 0, ['<0>','CALLDATALOAD'] ],
     ['id', 1, 1, ['<0>'] ],
     # 0 MSIZE (SWAP) MSIZE 0 (MSIZE) MSIZE 0 MSIZE (MSTORE) MSIZE (32 SWAP) 32 MSIZE

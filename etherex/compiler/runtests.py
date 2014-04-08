@@ -1,5 +1,5 @@
 import compiler
-t = open('tests.txt').readlines()
+t = open('compiler/tests.txt').readlines()
 i = 0
 while 1:
     o = []

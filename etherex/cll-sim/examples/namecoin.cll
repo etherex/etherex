@@ -1,5 +1,2 @@
-if tx.value < block.basefee * 200:
-    stop
-if contract.storage[tx.data[0]] or tx.data[0] < 100:
-    stop
-contract.storage[tx.data[0]] = tx.data[1]
+if msg.sender >= 1000:
+    contract.storage[msg.sender] = msg.data[0]
