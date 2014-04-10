@@ -22,6 +22,12 @@ body {
   text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.33);
 }
 
+div.status, span.status,
+div.error, span.error,
+div.warning, span.warning:not(.tabledrag-changed) {
+  background-position: 12px 15px;
+}
+
 /*
 
 h4 {
