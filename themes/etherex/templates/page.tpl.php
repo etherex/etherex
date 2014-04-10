@@ -42,7 +42,7 @@
     <?php endif; ?>
     </nav> <!-- /#nav -->
 
-    <div id="container"<?php print poissonblanc_container_class($left, $right); ?> class="clearfix">
+    <div id="container"<?php print poissonblanc_container_class($left, $right); ?>>
 
       <?php if ($left): ?>
         <aside id="sidebar-left" class="sidebar">
