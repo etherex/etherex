@@ -69,10 +69,20 @@ class EtherExRun(Simulation):
         self.run(tx, self.contract)
         assert self.stopped == "Invalid market ID"
 
-    def test_out_of_range(self):
-        tx = Tx(sender='eoar', value=0, data=[1, 1000 * 10 ** 21, 256**256+1, 1])
+    def test_too_many_arguments(self):
+        tx = Tx(sender='eoar', value=0, data=[1, 1000 * 10 ** 21, 1 * 10 ** 8, 1, 1])
         self.run(tx, self.contract)
-        assert self.stopped.endswith("out of range")
+        assert self.stopped.startswith("Too many arguments")
+
+    def test_amount_out_of_range(self):
+        tx = Tx(sender='eoar', value=0, data=[1, 2**256+1, 1 * 10 ** 8, 1])
+        self.run(tx, self.contract)
+        assert self.stopped.startswith("Amount out of range")
+
+    def test_price_out_of_range(self):
+        tx = Tx(sender='eoar', value=0, data=[1, 1 * 10 ** 8, 256**256+1, 1])
+        self.run(tx, self.contract)
+        assert self.stopped.startswith("Price out of range")
 
     def test_insufficient_btc_trade(self):
         tx = Tx(sender='caktux', value=0, data=[1, 1 * 10 ** 6, 1000 * 10 ** 8, 1])
@@ -128,7 +138,7 @@ class EtherExRun(Simulation):
         tx = Tx(sender='fabrezio', value=5000 * 10 ** 18, data=[1, 4500 * 10 ** 18, 1100 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
-    def test_sell_lower_cross_index(self):
+    def test_sell_lower_cross_index_check(self):
         tx = Tx(sender='eoar', value=20000 * 10 ** 18, data=[2, 20000 * 10 ** 18, 900 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
@@ -154,5 +164,6 @@ class EtherExRun(Simulation):
     #     tx = Tx(sender='caktux', value=5000 * 10 ** 18, data=[2, 5000 * 10 ** 18, 1100 * 10 ** 8, 1])
     #     self.run(tx, self.contract)
 
-    def test_storage_result(self):
+    def test_results(self):
+        self.log(self.contract.balance)
         self.log(self.contract.storage)

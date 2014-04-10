@@ -40,10 +40,11 @@ def array(n):
     return [None] * n
 
 def suicide(address):
-    self = _infer_self()
-    balance = self.contract.balance[self.contract.address]
-    logging.info("Suicide balance of %s to %s" % (balance, address))
+    self = _infer_self(inspect.stack())
+    balance = self.balance[self.address]
+    logging.info("Suicide balance of %s from %s to %s" % (balance, self.address, address))
     self.txs.append((address, balance, 0, 0))
+    self.balance[self.address] = 0
 
 log = logging.info
 
@@ -227,6 +228,7 @@ class Simulation(object):
 
         fees = Fees()
         totalfees = fees.calculate_fees(contract)
+        logging.debug("Fees: %d" % totalfees['total'])
         endowment = contract.balance[contract.address]
         addendowment = tx.value - totalfees['total']
         if addendowment > 0:
@@ -236,11 +238,12 @@ class Simulation(object):
             logging.info("New endowment: %d" % endowment)
         else:
             logging.info("Current endowment: %d" % endowment)
+        # contract.balance[tx.sender] -= endowment
 
         logging.info('-' * 20)
-        logging.info(self.contract.storage)
+        logging.info(contract.storage)
         logging.info('-' * 20)
-        logging.info(self.contract.balance)
+        logging.info(contract.balance)
         logging.info('=' * 20)
 
 
@@ -271,6 +274,9 @@ class Tx(object):
         self.fee = fee
         self.gasprice = gasprice if gasprice else MINGASPRICE
         self.gas = gas if gas else self.fee / self.gasprice
+        gasfee = self.gas * self.gasprice
+        if gasfee > self.fee:
+            self.fee = gasfee
         self.data = data
         self.datan = len(data)
 
@@ -300,20 +306,23 @@ class Msg(object):
 class Balance(object):
 
     def __init__(self):
-        self._balances = defaultdict(int)
+        self._balance = defaultdict(int)
 
     def __getitem__(self, address):
-        balance = self._balances[address]
+        balance = self._balance[address]
         if _is_called_by_contract():
             logging.debug("Accessing balance '%s' of '%s'" % (balance, address))
         return balance
 
     def __setitem__(self, address, value):
-        if _is_called_by_contract():
-            logging.debug("Cannot set balance of '%s' to '%s'" % (address, value))
-        else:
-            self._balances[address] = value
+        # if _is_called_by_contract():
+        #     logging.debug("Cannot set balance of '%s' to '%s'" % (address, value))
+        # else:
+        logging.debug("Setting balance of '%s' to '%s'" % (address, value))
+        self._balance[address] = value
 
+    def __repr__(self):
+        return "<balance %s>" % repr(self._balance)
 
 class Fees(object):
 
@@ -353,6 +362,7 @@ class Fees(object):
         # step fees
         # comp_steps = [e for e in self.results['es']['code'] if isinstance(e,str)]
         # fees['step'] = len(comp_steps[16:])
+
 
         # storage fees
         code_lines = contract.closure.split('\n')
