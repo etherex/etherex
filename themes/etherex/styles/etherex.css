@@ -3,9 +3,8 @@ html {
 }
 
 body {
-  font-family: "Open Sans", sans-serif;
+  font-family: "Palatino", serif;
   font-size: 1.4667em;
-  -webkit-font-weight: 600;
 }
 
 #center,
@@ -14,7 +13,7 @@ body {
 }
 
 .front h2 {
-  font-family: "Open Sans", sans-serif;
+  font-family: "Palatino", serif;
 }
 
 #logo_title a:link,
