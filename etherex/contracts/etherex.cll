@@ -70,17 +70,16 @@ if status == 1:
             indexcount = index[0]
             priceindexed = 0
             replaceindex = 0
-            indexkey = 0
+            indexkey = 1
             tradeat = array(2)
             tradeat[0] = 1
             thistrade = array(2)
-            thistrade[0] = 1
+            thistrade[0] = index[0]
             thistrade[1] = price
             tradeat[1] = thistrade
             bestprice = price
             bestindex = 0
             while indexcount > 0:
-                indexkey = indexcount
                 priceindex = index[indexcount] // "Checking index: %s" % priceindex
                 if priceindex == 0:
                     indexcount = indexcount
@@ -97,26 +96,25 @@ if status == 1:
                         contract.storage[5003] = indexes
                         indexkey = indexcount
                         priceindexed = 1
-                        indexcount = 0
-                    elif msg.data[0] == 1 and currentprice < price: // "Price index of %s below buy price, checking..." % priceindex[1]
+                    if msg.data[0] == 1 and currentprice < price and currentprice > 0: // "Price index of %s below buy price, checking..." % priceindex[1]
                         add = array(1)
                         addindex = array(2)
                         addindex[0] = indexcount
                         addindex[1] = currentprice
-                        add = addindex
+                        add[0] = addindex
                         tradeat[0] = tradeat[0] + 1
-                        tradeat[1] = tradeat[1] + add
+                        tradeat = tradeat + add
                         if currentprice < bestprice:
                             bestprice = currentprice
                             bestindex = indexcount
-                    elif msg.data[0] == 2 and priceindex[1] > price: // "Price index of %s above sell price, checking..." % priceindex[1]
+                    elif msg.data[0] == 2 and currentprice > price and currentprice > 0: // "Price index of %s above sell price, checking..." % priceindex[1]
                         add = array(1)
                         addindex = array(2)
                         addindex[0] = indexcount
                         addindex[1] = currentprice
-                        add = addindex
+                        add[0] = addindex
                         tradeat[0] = tradeat[0] + 1
-                        tradeat[1] = tradeat[1] + add
+                        tradeat = tradeat + add
                         if currentprice > bestprice:
                             bestprice = currentprice
                             bestindex = indexcount
@@ -130,15 +128,16 @@ if status == 1:
                     indexes[marketkey] = index
                     indexkey = replaceindex
                 else: // "Adding price index %s to %s" % (newindex, indexes)
-                    index[0] = index[0] + 1
+                    indexkey = index[0] + 1
+                    index[0] = indexkey
                     newaindex = array(1)
                     newaindex[0] = newindex
-                    indexes[marketkey] = index + newaindex
-                    indexkey = index[0]
+                    index = index + newaindex
+                    indexes[marketkey] = index
                 contract.storage[5003] = indexes
-            while tradeat[0] > 0: // "Trading at price indexes: %s" % tradeat
+            while tradeat[0] > 0 and amount > 0: // "Trading at price indexes: %s" % tradeat
                 tradekey = tradeat[0]
-                tradeindex = tradeat[1]
+                tradeindex = tradeat[tradekey]
                 currentkey = tradeindex[0]
                 currentprice = tradeindex[1] // "Trading at: %s" % currentprice
                 pricekey = currentprice
@@ -151,6 +150,8 @@ if status == 1:
                 countedall = 0
                 while count <= booknonce:
                     curbook = book[count] // "In book @ %s #%d: %s" % (pricekey, count, curbook)
+                    if currentprice < price or currentprice > price:
+                        crosskey = count
                     if curbook == 0:
                         count = count + 1
                         countedall = countedall + 1
@@ -173,7 +174,7 @@ if status == 1:
                                     book[1] = book[1] - 1
                                     book[booknonce] = 0
                                     count = booknonce
-                                lowerindex = 1 // "Updating indexes %s and %s" % (tradekey, indexkey)
+                                lowerindex = 1 // "Updating indexes %s and %s" % (currentkey, indexkey)
                                 if curbook == 0 and amount == 0:
                                     lowerindex = 2
                                 if curbook == 0 or amount == 0:
@@ -186,30 +187,24 @@ if status == 1:
                                             index[currentkey] = 0
                                         else:
                                             index[currentkey] = priceindex
-                                if currentprice < price or currentprice > price: // "Updating cross index and book"
+                                if currentprice < price or currentprice > price: // "Updating cross index and book at index %d in %s" % (indexkey, index)
                                     priceindex = index[indexkey]
-                                    if priceindex == 0:
+                                    priceindex[0] = priceindex[0] - 1
+                                    if priceindex[0] == 0:
                                         index[indexkey] = 0
                                     else:
-                                        priceindex[0] = priceindex[0] - lowerindex
+                                        priceindex[0] = priceindex[0] - 1
                                         if priceindex[0] == 0:
                                             index[indexkey] = 0
                                         else:
                                             index[indexkey] = priceindex
-                                    crossbook = book[priceindex]
+                                    crosspricekey = priceindex[1]
+                                    crosstrades = contract.storage[crosspricekey]
+                                    crossbook = crosstrades[crosskey] // "New balance of %d for %s" % (amount, crossbook[3])
                                     crossbooklength = crossbook[1]
-                                    if amount >= crossbook[2]: // "Bought balance of %d to %s" % (amount, crossbook[3])
-                                        amount = amount - crossbook[2]
-                                        crossbook[2] = amount
-                                        crossbook[1] = crossbooklength - 1
-                                        curbook = 0
-                                    elif amount < crossbook[2]: // "Bought %d from balance of %d to %s" % (crossbook[2], amount, crossbook[3])
-                                        crossbook[2] = crossbook[2] - amount
-                                        crossbook[1] = crossbooklength - 1
-                                        amount = 0
-                                        if crossbook[2] == 0:
-                                            crossbook = 0
-                                            crossbook[1] = crossbooklength - 1
+                                    book[1] = booklength - 1
+                                    crosstrades[crosskey] = crossbook
+                                    contract.storage[crosspricekey] = crosstrades
                                 indexes[marketkey] = index
                                 contract.storage[5003] = indexes
                                 contract.storage[pricekey] = book
@@ -232,7 +227,7 @@ if status == 1:
                                     book[1] = book[1] - 1
                                     book[booknonce] = 0
                                     count = booknonce
-                                lowerindex = 1 // "Updating indexes %s and %s" % (tradekey, indexkey)
+                                lowerindex = 1 // "Updating indexes %s and %s" % (currentkey, indexkey)
                                 if curbook == 0 and amount == 0:
                                     lowerindex = 2
                                 if curbook == 0 or amount == 0:
@@ -245,31 +240,24 @@ if status == 1:
                                             index[currentkey] = 0
                                         else:
                                             index[currentkey] = priceindex
-                                if currentprice < price or currentprice > price: // "Updating cross index and book"
+                                if currentprice < price or currentprice > price: // "Updating cross index and book at index %d in %s" % (indexkey, index)
                                     priceindex = index[indexkey]
                                     priceindex[0] = priceindex[0] - 1
-                                    if priceindex == 0:
+                                    if priceindex[0] == 0:
                                         index[indexkey] = 0
                                     else:
-                                        priceindex[0] = priceindex[0] - lowerindex
+                                        priceindex[0] = priceindex[0] - 1
                                         if priceindex[0] == 0:
                                             index[indexkey] = 0
                                         else:
                                             index[indexkey] = priceindex
-                                    crossbook = book[priceindex]
+                                    crosspricekey = priceindex[1]
+                                    crosstrades = contract.storage[crosspricekey]
+                                    crossbook = crosstrades[crosskey] // "New balance of %d for %s" % (amount, crossbook[3])
                                     crossbooklength = crossbook[1]
-                                    if amount > crossbook[2]: // "Sold %d from balance of %d to %s" % (crossbook[2], amount, crossbook[3])
-                                        amount = amount - crossbook[2]
-                                        crossbook[2] = amount
-                                        crossbook[1] = crossbooklength - 1
-                                        curbook = 0
-                                    elif amount <= crossbook[2]: // "Sold balance of %d to %s" % (amount, crossbook[3])
-                                        crossbook[2] = crossbook[2] - amount
-                                        crossbook[1] = crossbooklength - 1
-                                        amount = 0
-                                        if crossbook[2] == 0:
-                                            crossbook = 0
-                                            crossbook[1] = crossbooklength - 1
+                                    book[1] = booklength - 1
+                                    crosstrades[crosskey] = crossbook
+                                    contract.storage[crosspricekey] = crosstrades
                                 indexes[marketkey] = index
                                 contract.storage[5003] = indexes
                                 contract.storage[pricekey] = book
