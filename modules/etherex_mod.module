@@ -1,6 +1,6 @@
 <?php
 
-function etherex_form_simplenews_block_form_1_alter(&$form, &$form_state) {
+function etherex_mod_form_simplenews_block_form_1_alter(&$form, &$form_state) {
   global $user;
   $submit_text = t('Stay tuned');
   if ($user->uid) {
