@@ -22,7 +22,7 @@ body {
 
 #logo_title a:link,
 #logo_title a:visited {
-  text-shadow: 0px 0px 2px #000;
+  text-shadow: 0px 0px .33em #000;
 }
 
 div.status, span.status,
