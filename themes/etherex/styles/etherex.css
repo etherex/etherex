@@ -5,6 +5,11 @@ html {
 body {
   font-family: "Palatino", serif;
   font-size: 1.4667em;
+  text-shadow: 0 0 2px #000;
+}
+
+#wrapper {
+  background: rgba(255, 255, 255, 0.75);
 }
 
 #center,
@@ -18,7 +23,7 @@ body {
 
 #logo_title a:link,
 #logo_title a:visited {
-  text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.33);
+  text-shadow: 0px 0px 2px #000;
 }
 
 div.status, span.status,

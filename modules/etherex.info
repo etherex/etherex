@@ -1,0 +1,4 @@
+name = "etherex"
+description = "EtherEx"
+package = "EtherEx"
+core = 6.x

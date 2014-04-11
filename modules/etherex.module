@@ -1,0 +1,12 @@
+<?php
+
+function etherex_form_simplenews_block_form_1_alter(&$form, &$form_state) {
+  global $user;
+  $submit_text = t('Stay tuned');
+  if ($user->uid) {
+    if (simplenews_user_is_subscribed($user->mail, 1)) { // 1 -> $tid
+      $submit_text = t('Unsubscribe');
+    }
+  }
+  $form['submit']['#value'] = $submit_text;
+}
