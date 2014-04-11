@@ -35,6 +35,10 @@ article {
   text-shadow: 0 0 2px #000;
 }
 
+input.form-text, textarea, select {
+  border-radius: 10px;
+}
+
 /*
 
 h4 {
