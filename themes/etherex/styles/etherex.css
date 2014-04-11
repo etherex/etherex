@@ -5,7 +5,6 @@ html {
 body {
   font-family: "Palatino", serif;
   font-size: 1.4667em;
-  text-shadow: 0 0 2px #000;
 }
 
 #wrapper {
@@ -30,6 +29,10 @@ div.status, span.status,
 div.error, span.error,
 div.warning, span.warning:not(.tabledrag-changed) {
   background-position: 12px 15px;
+}
+
+article {
+  text-shadow: 0 0 2px #000;
 }
 
 /*
