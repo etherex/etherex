@@ -5,7 +5,7 @@ class EtherEx(Contract):
     """EtherEx contract"""
 
     def run(self, tx, contract, block):
-        hll = "contracts/etherex.cll"
+        hll = "contracts/etherex.ser"
         Contract.load(self, hll, tx, contract, block)
 
 
