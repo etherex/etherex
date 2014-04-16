@@ -56,19 +56,26 @@ API
 <operation> <id>
 ```
 
+### Adding a market
+```
+<operation> <name> <minimum trade>
+```
+
 ### Operations
 Allowed values:
 ```
-1 = BUY
-2 = SELL
-3 = DEPOSIT
-4 = WITHDRAW
-5 = CANCEL
+1 = Buy
+2 = Sell
+3 = Deposit
+4 = Withdraw
+5 = Cancel
+6 = Add market (subcurrency)
 ```
 
 ### Amounts
 * Amount in wei for ETH or XETH
 * Amount in satoshi for BTC
+* Smallest denomination for other amounts (see future shared protocol)
 
 ### Prices
 * Price in ETH/BTC * 10 ^ 8, as integer
@@ -79,6 +86,7 @@ Allowed values
 ```
 1 = ETH/BTC
 2 = ETH/XETH
+...
 ```
 
 ### Currencies
@@ -86,7 +94,14 @@ Allowed values
 1 = ETH
 2 = BTC
 3 = XETH
+...
 ```
+
+### Market names
+Follow the "ETH/<name>" convention for the market name, like "ETH/BOB" for BobCoin.
+
+### Minimum trade amounts
+When adding a subcurrency, make the minimum trade amount high enough to make economic sense.
 
 ### Examples
 Buy 1000 ETH at 1200 ETH/BTC (for 1.2 BTC)
@@ -112,6 +127,11 @@ Withdraw 1 ETH
 Cancel operation
 ```
 5 12345678901234567890
+```
+
+Add your subcurrency
+```
+6 "ETH/BOB" 100000000
 ```
 
 

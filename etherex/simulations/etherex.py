@@ -19,14 +19,14 @@ class EtherExRun(Simulation):
         tx = Tx(sender='caktux', value=0, fee=0, data=[0])
         self.run(tx, self.contract)
         assert self.stopped == 'Insufficient fee'
-        assert self.contract.storage[5000] == 0
+        assert self.contract.storage[1] == 0
 
     def test_creation(self):
         tx = Tx(sender='caktux', value=3000 * 10 ** 21, data=[0])
         self.run(tx, self.contract)
         # assert len(self.contract.txs) == 0
-        assert self.contract.storage[5000] == 1
-        assert self.contract.storage[5001] == ['caktux', 'eoar', 'fabrezio']
+        assert self.contract.storage[1] == 1
+        assert self.contract.storage[2] == ['caktux', 'eoar', 'fabrezio']
         assert self.stopped == 'EtherEx initialized'
 
     def test_no_data(self):
@@ -88,19 +88,19 @@ class EtherExRun(Simulation):
         tx = Tx(sender='caktux', value=0, data=[1, 1 * 10 ** 6, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
         assert self.stopped.startswith("Minimum BTC trade amount not met")
-        assert self.contract.storage[5000] == 1
+        assert self.contract.storage[1] == 1
 
     def test_insufficient_eth_trade(self):
         tx = Tx(sender='caktux', value=0, data=[2, 1 * 10 ** 18, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
         assert self.stopped.startswith("Minimum ETH trade amount not met")
-        assert self.contract.storage[5000] == 1
+        assert self.contract.storage[1] == 1
 
     def test_insufficient_eth(self):
         tx = Tx(sender='caktux', value=1 * 10 ** 18, data=[2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
         assert self.stopped.startswith("Minimum ETH value not met")
-        assert self.contract.storage[5000] == 1
+        assert self.contract.storage[1] == 1
 
     def test_first_sell(self):
         tx = Tx(sender="caktux", value=1 * 10 ** 21, data=[2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
@@ -157,6 +157,14 @@ class EtherExRun(Simulation):
 
     def test_other_amount_again(self):
         tx = Tx(sender='caktux', value=2500 * 10 ** 18, data=[1, 2500 * 10 ** 18, 1100 * 10 ** 8, 1])
+        self.run(tx, self.contract)
+
+    def test_whale_sell(self):
+        tx = Tx(sender='eoar', value=5 * 10 ** 28, data=[2, 5 * 10 ** 28, 800 * 10 ** 8, 1])
+        self.run(tx, self.contract)
+
+    def test_whale_buy(self):
+        tx = Tx(sender='eoar', value=0, data=[1, 10 * 10 ** 28, 1500 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
 
