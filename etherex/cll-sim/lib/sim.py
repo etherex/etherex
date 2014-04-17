@@ -25,7 +25,15 @@ def mktx(recipient, amount, datan, data):
     logging.info("Sending tx to %s of %s" % (recipient, amount))
     self.txs.append((recipient, amount, datan, data))
 
-msg = lambda *args, **kwargs: mktx('static', *args, **kwargs)
+def send(recipient, amount, gas):
+    self = _infer_self()
+    logging.info("Sending tx to %s of %s" % (recipient, amount))
+    self.txs.append((recipient, amount, datan, data))
+
+def mkmsg(recipient, amount, gas, data, datan):
+    self = _infer_self()
+    logging.info("Sending tx to %s of %s with data %s" % (recipient, amount, data))
+    self.txs.append((recipient, amount, datan, data))
 
 def stop(reason):
     raise Stop(reason)
@@ -108,7 +116,7 @@ class Contract(object):
             log("Loading %s" % script)
 
             closure = """
-from sim import Block, Contract, Simulation, Tx, Msg, log, msg, stop, stopret, suicide, array
+from sim import Block, Contract, Simulation, Tx, Msg, log, stop, suicide, array, stopret, mkmsg, send
 class HLL(Contract):
     def run(self, tx, msg, contract, block):
 """
@@ -168,6 +176,9 @@ class HLL(Contract):
             # Return
             closure = closure.replace("return(", "stopret(")
 
+            # msg
+            closure = closure.replace("msg(", "mkmsg(")
+
             # Comments
             closure = closure.replace("//", "#")
 
@@ -226,11 +237,11 @@ class Simulation(object):
                 logging.info("Stopped")
                 self.stopped = True
 
-        fees = Fees()
-        totalfees = fees.calculate_fees(contract)
-        logging.debug("Fees: %d" % totalfees['total'])
+        gas = Gas()
+        totalgas = gas.calculate_gas(contract)
+        logging.debug("Fees: %d" % totalgas['total'])
         endowment = contract.balance[contract.address]
-        addendowment = tx.value - totalfees['total']
+        addendowment = tx.value - totalgas['total']
         if addendowment > 0:
             logging.info("Adding %d to endowment" % addendowment)
             endowment += addendowment
@@ -280,10 +291,11 @@ class Tx(object):
         self.data = data
         self.datan = len(data)
 
-        if _is_called_by_contract():
-            fees = Fees()
-            totalfees = fees.calculate_fees(self.contract)
-            freeload = value + totalfees
+        contract = _is_called_by_contract()
+        if contract:
+            gas = Gas()
+            totalgas = gas.calculate_gas(contract)
+            freeload = value + totalgas
             self.contract.balance[self.contract.address] += freeload
             logging.debug("Freeloading %s with %d" % (sender, freeload))
 
@@ -324,10 +336,10 @@ class Balance(object):
     def __repr__(self):
         return "<balance %s>" % repr(self._balance)
 
-class Fees(object):
+class Gas(object):
 
     def __init__(self):
-        self._fees = 0
+        self._gas = 0
         self.gas = 100
         self.gasprice = MINGASPRICE
         self.pricestep = 1 # opcode count
@@ -352,14 +364,14 @@ class Fees(object):
         # u256 const eth::c_txDataGas = 5;
 
 
-    def calculate_fees(self, contract):
+    def calculate_gas(self, contract):
 
         # if 'traceback' in self.results['es']:
         #     return
 
-        fees = { 'tx': self.gasprice * self.pricetx, 'step': 0, 'storage': 0 }
+        gas = { 'tx': self.gasprice * self.pricetx, 'step': 0, 'storage': 0 }
 
-        # step fees
+        # step gas
         # comp_steps = [e for e in self.results['es']['code'] if isinstance(e,str)]
         # fees['step'] = len(comp_steps[16:])
 
@@ -370,7 +382,7 @@ class Fees(object):
             if line.startswith('contract.storage['): # TODO: use regex?
                 fees['storage'] += self.pricestorage
 
-        # add up fees for total
-        fees['total'] = sum(fees.values())
+        # add up gas for total
+        gas['total'] = sum(gas.values())
 
-        return fees
+        return gas

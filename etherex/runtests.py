@@ -1,5 +1,33 @@
 #! /usr/bin/env python
+# import serpent
 import subprocess
+import sys
+sys.path.insert(0, './serpent')
+from serpent import compiler
+
+def compile(f):
+  t = open(f).readlines()
+  i = 0
+  while 1:
+      o = []
+      while i < len(t) and (not len(t[i]) or t[i][0] != '='):
+          o.append(t[i])
+          i += 1
+      i += 1
+      print '================='
+      text = '\n'.join(o).replace('\n\n','\n')
+      # print text
+      ast = compiler.parse(text)
+      print "AST:",ast
+      print ""
+      aevm = compiler.compile_to_assembly(text)
+      print "AEVM:", aevm # ' '.join([str(x) for x in aevm])
+      print ""
+      # s = open(f).read()
+      # code = compiler.compile(text)
+      print "Output:",' '.join([str(x) for x in aevm])
+      if i >= len(t):
+          break
 
 print '\n'
 print '==================='
@@ -18,32 +46,22 @@ print '==================='
 print 'EtherEx LVM'
 print '==================='
 # subprocess.call(["serpent", "compile", "contracts/etherex.ser"])
-# import serpent
-from serpent import compiler
-t = open('contracts/etherex.ser').readlines()
-i = 0
-while 1:
-    o = []
-    while i < len(t) and (not len(t[i]) or t[i][0] != '='):
-        o.append(t[i])
-        i += 1
-    i += 1
-    print '================='
-    text = '\n'.join(o).replace('\n\n','\n')
-    # print text
-    ast = compiler.parse(text)
-    print "AST:",ast
-    print ""
-    aevm = compiler.compile('\n'.join(t))
-    print "AEVM:", aevm # ' '.join([str(x) for x in aevm])
-    print ""
-    code = compiler.compile_to_assembly(compiler.parse(aevm))
-    print "Output:",' '.join([str(x) for x in code])
-    if i >= len(t):
-        break
 
-
+print 'XETH'
+f = 'contracts/xeth.ser'
+compile(f)
 print '\n'
+
+print 'Balances'
+f = 'contracts/balances.ser'
+compile(f)
+print '\n'
+
+print 'EtherEx'
+f = 'contracts/etherex.ser'
+compile(f)
+print '\n'
+
 print '==================='
 print 'WARNING: Experimental code, use at your own risks.'
 print '==================='

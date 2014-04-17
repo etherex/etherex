@@ -284,7 +284,7 @@ if status == 1:
         addmarket[0] = newmarket
         markets = markets + addmarket
         contract.storage[3] = markets // "Market added"
-        res = msg(0xba1a42ce5, msg.value - gas, gas, cmd, 3) // define 0xba1a42ce5=BALANCES
+        res = msg(0xba1a42ce5, msg.value - gas, gas, cmd, 3)
         if res == "OK":
             return("Balances updated")
         else:
@@ -323,8 +323,14 @@ else:
     contract.storage[2] = owners
     contract.storage[3] = markets
     contract.storage[4] = indexes
-    contract.storage[5] = msg.value / 3 // "ETH base funds: %d ETH" % ((msg.value / 3) / 10 ** 21)
-    contract.storage[6] = msg.value / 3 // "ETH running funds: %d ETH" % ((msg.value / 3) / 10 ** 21)
-    contract.storage[7] = msg.value / 3 // "XETH running funds: %d XETH" % ((msg.value / 3) / 10 ** 21)
+    value = msg.value / 3
+    contract.storage[5] = value // "ETH base funds: %d ETH" % ((msg.value / 3) / 10 ** 21)
+    contract.storage[6] = value // "ETH running funds: %d ETH" % ((msg.value / 3) / 10 ** 21)
+    contract.storage[7] = value // "XETH running funds: %d XETH" % ((msg.value / 3) / 10 ** 21)
     contract.storage[1] = 1
+    gas = 1 * 10 ^ 17
+    balance = array(2)
+    balance[0] = contract.address
+    balance[1] = value
+    msg(0xba1a42ce5, value, gas, balance, 2) // define 0xba1a42ce5=BALANCES
     stop // "EtherEx initialized"

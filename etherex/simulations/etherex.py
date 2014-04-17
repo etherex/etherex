@@ -11,7 +11,7 @@ class EtherEx(Contract):
 
 class EtherExRun(Simulation):
 
-    contract = EtherEx(CAK="caktux", EOAR="eoar", FAB="fabrezio")
+    contract = EtherEx(CAK="caktux", EOAR="eoar", FAB="fabrezio", BALANCES="BalancesContract")
     # ts = time.time()
 
     def test_insufficient_fee(self):
@@ -24,7 +24,7 @@ class EtherExRun(Simulation):
     def test_creation(self):
         tx = Tx(sender='caktux', value=3000 * 10 ** 21, data=[0])
         self.run(tx, self.contract)
-        # assert len(self.contract.txs) == 0
+        # assert len(self.contract.txs) == 1
         assert self.contract.storage[1] == 1
         assert self.contract.storage[2] == ['caktux', 'eoar', 'fabrezio']
         assert self.stopped == 'EtherEx initialized'

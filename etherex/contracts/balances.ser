@@ -1,0 +1,17 @@
+status = contract.storage[1]
+if status == 1:
+  if msg.sender == contract.storage[2]:
+    addr = msg.data[0]
+    if addr < 2:
+      stop
+    balance = msg.data[1]
+    if balance < 1 or balance > 2^256-1:
+      stop
+    contract.storage[addr] = balance
+    a = "OK"
+    return(a)
+  else:
+    stop
+else:
+  contract.storage[2] = msg.sender
+  contract.storage[1] = 1

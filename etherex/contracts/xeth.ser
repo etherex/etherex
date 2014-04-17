@@ -1,0 +1,17 @@
+if tx.gasprice * tx.gas < block.gaslimit / 10:
+    stop // Insufficient fee
+elif contract.storage[1]: // Running contract...
+    frm = msg.sender
+    to = msg.data[0]
+    value = msg.data[1]
+    if to <= 1:
+        stop // "tx.data[0] out of bounds: %s" % msg.data[0]
+    bal = contract.storage[frm] // "Balance of %s: %d" % (frm, bal)
+    if bal < value:
+        stop // "Insufficient funds, %s has %d needs %d" % (frm, bal, value)
+    else: // "Adjusting values by %d" % value
+        contract.storage[frm] = contract.storage[frm] - value
+        contract.storage[to] = contract.storage[to] + value
+else:
+    contract.storage[msg.sender] = 10^18 // #define msg.sender=MYCREATOR
+    contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.sender

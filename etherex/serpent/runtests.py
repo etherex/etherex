@@ -13,10 +13,10 @@ while 1:
     ast = compiler.parse(text)
     print "AST:",ast
     print ""
-    aevm = compiler.compile('\n'.join(t))
+    aevm = compiler.compile_to_assembly(text)
     print "AEVM:",aevm # ' '.join([str(x) for x in aevm])
     print ""
-    code = compiler.compile_to_assembly(compiler.parse(aevm))
-    print "Output:",' '.join([str(x) for x in code])
+    # code = compiler.compile(text)
+    print "Output:",' '.join([str(x) for x in aevm])
     if i >= len(t):
         break
