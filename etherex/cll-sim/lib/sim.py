@@ -21,17 +21,17 @@ def _is_called_by_contract():
     return Contract in caller_class.__bases__
 
 def mktx(recipient, amount, datan, data):
-    self = _infer_self()
+    self = _infer_self(inspect.stack())
     logging.info("Sending tx to %s of %s" % (recipient, amount))
     self.txs.append((recipient, amount, datan, data))
 
 def send(recipient, amount, gas):
-    self = _infer_self()
+    self = _infer_self(inspect.stack())
     logging.info("Sending tx to %s of %s" % (recipient, amount))
     self.txs.append((recipient, amount, datan, data))
 
 def mkmsg(recipient, amount, gas, data, datan):
-    self = _infer_self()
+    self = _infer_self(inspect.stack())
     logging.info("Sending tx to %s of %s with data %s" % (recipient, amount, data))
     self.txs.append((recipient, amount, datan, data))
 
