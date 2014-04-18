@@ -3,15 +3,18 @@ if status == 1:
   if msg.sender == contract.storage[2]:
     addr = msg.data[0]
     if addr < 2:
-      stop
+      ret = "Invalid address"
+      return(ret)
     balance = msg.data[1]
     if balance < 1 or balance > 2^256-1:
-      stop
+      ret = "Invalid balance"
+      return(ret)
     contract.storage[addr] = balance
-    a = "OK"
-    return(a)
+    ret = "OK"
+    return(ret)
   else:
-    stop
+    ret = "Unauthorized access"
+    return(ret)
 else:
-  contract.storage[2] = msg.sender
-  contract.storage[1] = 1
+  contract.storage[2] = msg.sender // #define msg.sender=CREATOR
+  contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.sender

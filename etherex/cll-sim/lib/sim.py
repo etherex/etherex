@@ -64,12 +64,13 @@ class Block(object):
         self.number = number
         self.parenthash = parenthash
         self._storages = defaultdict(Storage)
+        self.gaslimit = 1 * 10 ^ 42
 
     @property
     def basefee(self):
         return 1
 
-    # def contract_storage(self, key):
+    # def contract_storage(self, key): # :(
     #     if _is_called_by_contract():
     #         logging.debug("Accessing contract_storage '%s'" % key)
     #     return self._storages[key]
@@ -216,12 +217,14 @@ class Simulation(object):
         for name, method, linenr in sorted(test_methods, key=itemgetter(2)):
             method()
 
-    def run(self, tx, contract, block=None):
+    def run(self, tx, contract, block=None, method_name=None):
         self.stopped = False
         if block is None:
             block = Block()
 
-        method_name = inspect.stack()[1][3]
+        if method_name is None:
+            method_name = inspect.stack()[1][3]
+
         logging.info("RUN %s: %s" % (method_name.replace('_', ' ').capitalize(), tx))
 
         msg = Msg(tx)

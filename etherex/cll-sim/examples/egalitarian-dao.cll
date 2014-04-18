@@ -17,14 +17,14 @@ else if tx.data[0] == 1:
     contract.storage[k] = 1
     contract.storage[k+1] = tx.datan
 else if tx.data[0] == 2:
-    if contract.storage[k] >= contract.storage[2 ^ 255] * 2 / 3:
-        if tx.value <= tx.datan * block.basefee * 200:
+    if contract.storage[k] >= contract.storage[2 ^ 255 + 1] * 2 / 3:
+        L = contract.storage[k+1]
+        if tx.value <= L * block.basefee * 200:
             stop
         i = 3
-        L = contract.storage[k+1]
         loc = contract.storage[k+2]
         while i < L:
-            contract.storage[loc+i-3] = tx.data[i]
+            contract.storage[loc+i-3] = contract.storage[k+i]
             i = i + 1
 if contract.storage[2 ^ 255 + 1] == 0:
     contract.storage[2 ^ 255 + 1] = 1

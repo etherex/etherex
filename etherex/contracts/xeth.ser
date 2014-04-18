@@ -4,7 +4,7 @@ elif contract.storage[1]: // Running contract...
     frm = msg.sender
     to = msg.data[0]
     value = msg.data[1]
-    if to <= 1:
+    if to <= 1 or to > 2^256-1:
         stop // "tx.data[0] out of bounds: %s" % msg.data[0]
     bal = contract.storage[frm] // "Balance of %s: %d" % (frm, bal)
     if bal < value:
@@ -13,5 +13,5 @@ elif contract.storage[1]: // Running contract...
         contract.storage[frm] = contract.storage[frm] - value
         contract.storage[to] = contract.storage[to] + value
 else:
-    contract.storage[msg.sender] = 10^18 // #define msg.sender=MYCREATOR
+    contract.storage[msg.sender] = 10^18 // #define msg.sender=CREATOR
     contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.sender

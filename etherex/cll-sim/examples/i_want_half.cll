@@ -51,7 +51,7 @@ if state == S_PROPOSED:
 else if state == S_MARRIED and tx.sender == partner_1 or tx.sender == partner_2:
     if tx.data[0] == TX_WITHDRAW:
         creator = contract.storage[I_WITHDRAW_CREATOR]
-        if creator != 0 and contract.storage[I_WITHDRAW_TO] == tx.data[1] and contract.I_WITHDRAW_AMOUNT] == tx.data[2] and creator != tx.sender:
+        if creator != 0 and contract.storage[I_WITHDRAW_TO] == tx.data[1] and contract.storage[I_WITHDRAW_AMOUNT] == tx.data[2] and creator != tx.sender:
             mktx(tx.data[1], tx.data[2], 0, 0)
             contract.storage[I_WITHDRAW_TO] = 0
             contract.storage[I_WITHDRAW_AMOUNT] = 0

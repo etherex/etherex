@@ -8,11 +8,34 @@ class EtherEx(Contract):
         hll = "contracts/etherex.ser"
         Contract.load(self, hll, tx, contract, block)
 
+class Balances(Contract):
+    """Balances contract"""
+
+    def run(self, tx, contract, block):
+        hll = "contracts/balances.ser"
+        Contract.load(self, hll, tx, contract, block)
+
+class Xeth(Contract):
+    """Xeth contract"""
+
+    def run(self, tx, contract, block):
+        hll = "contracts/xeth.ser"
+        Contract.load(self, hll, tx, contract, block)
 
 class EtherExRun(Simulation):
 
+    balances = Balances(CREATOR="EtherEx")
+    xeth = Xeth(CREATOR="EtherEx")
     contract = EtherEx(CAK="caktux", EOAR="eoar", FAB="fabrezio", BALANCES="BalancesContract")
     # ts = time.time()
+
+    def test_balances_creation(self):
+        tx = Tx(sender='caktux', value=1 * 10 ** 18, data=[0])
+        self.run(tx, self.balances)
+
+    def test_xeth_creation(self):
+        tx = Tx(sender='caktux', value=1 * 10 ** 18, data=[0])
+        self.run(tx, self.xeth)
 
     def test_insufficient_fee(self):
         # block = Block(timestamp=self.ts + 15 * 86400 + 1)
