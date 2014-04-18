@@ -21,19 +21,28 @@ def _is_called_by_contract():
     return Contract in caller_class.__bases__
 
 def mktx(recipient, amount, datan, data):
-    self = _infer_self(inspect.stack())
+    self = _infer_self()
     logging.info("Sending tx to %s of %s" % (recipient, amount))
     self.txs.append((recipient, amount, datan, data))
 
 def send(recipient, amount, gas):
     self = _infer_self(inspect.stack())
-    logging.info("Sending tx to %s of %s" % (recipient, amount))
-    self.txs.append((recipient, amount, datan, data))
+    balance = self.balance[self.address]
+    if balance < amount:
+        raise Stop("Insufficient funds")
+    else:
+        self.balance[self.address] = balance - amount
+        logging.info("Sending tx to %s of %s" % (recipient, amount))
+        self.txs.append((recipient, amount, gas, 0, 0))
 
 def mkmsg(recipient, amount, gas, data, datan):
     self = _infer_self(inspect.stack())
-    logging.info("Sending tx to %s of %s with data %s" % (recipient, amount, data))
-    self.txs.append((recipient, amount, datan, data))
+    balance = self.balance[self.address]
+    if balance < amount:
+        raise Stop("Insufficient funds")
+    else:
+        logging.info("Sending tx to %s of %s with data %s" % (recipient, amount, data))
+        self.txs.append((recipient, amount, gas, datan, data))
 
 def stop(reason):
     raise Stop(reason)
@@ -167,6 +176,9 @@ class HLL(Contract):
 
                     # Indent
                     closure += baseindent + line
+
+            # !
+            closure = closure.replace("!", "not ")
 
             # Exponents
             closure = closure.replace("^", "**")

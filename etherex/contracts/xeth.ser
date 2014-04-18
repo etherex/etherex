@@ -14,6 +14,10 @@ if contract.storage[1]: // "Running contract..."
     elif value > 0 and to > 1: // "Adjusting values by %d" % value
         contract.storage[frm] = bal - value
         contract.storage[to] = contract.storage[to] + value
+    if msg.datasize < 3:
+        arr = array(1)
+        arr[0] = 0
+        msg.data = msg.data + arr
     if msg.data[2] == 1 and to > 1:
         ret = contract.storage[to] // "Balance of %s: %s" % (to, ret)
         return(ret)

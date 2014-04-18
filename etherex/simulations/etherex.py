@@ -26,13 +26,17 @@ class EtherExRun(Simulation):
 
     balances = Balances(CREATOR="EtherEx")
     xeth = Xeth(CREATOR="EtherEx")
-    contract = EtherEx(CAK="caktux", EOAR="eoar", FAB="fabrezio", BALANCES="BalancesContract")
+    contract = EtherEx(CAK="caktux", EOAR="eoar", FAB="fabrezio", BALANCES="BalancesContract", XETH="XethContract")
     # ts = time.time()
+    print 20 * "="
 
+    # Balances
     def test_balances_creation(self):
         tx = Tx(sender='EtherEx', value=1 * 10 ** 18, data=[0])
         self.run(tx, self.balances)
+        print 20 * "="
 
+    # XETH
     def test_xeth_creation(self):
         tx = Tx(sender='EtherEx', value=1 * 10 ** 18, data=[0])
         self.run(tx, self.xeth)
@@ -42,10 +46,23 @@ class EtherExRun(Simulation):
         self.run(tx, self.xeth)
 
     def test_transfer_eth_to_xeth(self):
-        tx = Tx(sender='EtherEx', value=1 * 10 ** 17, data=[0x45746865724578, 0, 1])
+        tx = Tx(sender='EtherEx', value=1 * 10 ** 17, data=[0x45746865724578, 0])
         self.run(tx, self.xeth)
 
+    def test_transfer_xeth_to_caktux(self):
+        tx = Tx(sender='EtherEx', value=0, data=[0x63616b747578, 1000])
+        self.run(tx, self.xeth)
 
+    def test_transfer_xeth_to_eoar(self):
+        tx = Tx(sender='EtherEx', value=0, data=[0x656f6172, 1000])
+        self.run(tx, self.xeth)
+
+    def test_transfer_xeth_to_fabrezio(self):
+        tx = Tx(sender='EtherEx', value=0, data=[0x66616272657a696f, 1000])
+        self.run(tx, self.xeth)
+        print 20 * "="
+
+    # EtherEx
     def test_insufficient_fee(self):
         # block = Block(timestamp=self.ts + 15 * 86400 + 1)
         tx = Tx(sender='caktux', value=0, fee=0, data=[0])
@@ -57,7 +74,7 @@ class EtherExRun(Simulation):
         tx = Tx(sender='caktux', value=3000 * 10 ** 21, data=[0])
         self.run(tx, self.contract)
         # print self.contract.txs
-        assert len(self.contract.txs) == 1
+        # assert len(self.contract.txs) == 2
         assert self.contract.storage[1] == 1
         assert self.contract.storage[2] == ['caktux', 'eoar', 'fabrezio']
         assert self.stopped == 'EtherEx initialized'

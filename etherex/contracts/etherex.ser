@@ -38,6 +38,8 @@ if status == 1:
             if msg.data[0] == 2 and amount < market[2]:
                 stop // "Minimum ETH trade amount not met, minimum is %s, got %d" % (market[2], msg.value)
             if msg.data[0] == 2 and msg.value < market[2]:
+                gas = tx.gasprice * tx.gas
+                send(msg.sender, msg.value - gas, gas)
                 stop // "Minimum ETH value not met, minimum is %s, got %d" % (market[2], msg.value)
             pricekey = price // "Trade amounts and balances OK for %s" % market[0]
             book = contract.storage[pricekey] // "Current price orderbook: %s" % book
@@ -332,5 +334,5 @@ else:
     balance = array(2)
     balance[0] = contract.address
     balance[1] = value
-    msg(0xba1a42ce5, value, gas, balance, 2) // define 0xba1a42ce5=BALANCES
+    msg("balances", 0, gas, balance, 2) // define balances=BALANCES
     stop // "EtherEx initialized"
