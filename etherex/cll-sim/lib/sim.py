@@ -267,11 +267,15 @@ class Storage(object):
         self._storage = defaultdict(int)
 
     def __getitem__(self, key):
+        if isinstance(key,(str,unicode)):
+            key = int(key.encode('hex'), 16)
         if _is_called_by_contract():
             logging.debug("Accessing storage '%s'" % key)
         return self._storage[key]
 
     def __setitem__(self, key, value):
+        if isinstance(key,(str,unicode)):
+            key = int(key.encode('hex'), 16)
         if _is_called_by_contract():
             logging.debug("Setting storage '%s' to '%s'" % (key, value))
         self._storage[key] = value

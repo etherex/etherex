@@ -1,17 +1,31 @@
-if tx.gasprice * tx.gas < block.gaslimit / 10:
-    stop // Insufficient fee
-elif contract.storage[1]: // Running contract...
+if contract.storage[1]: // "Running contract..."
     frm = msg.sender
     to = msg.data[0]
     value = msg.data[1]
-    if to <= 1 or to > 2^256-1:
-        stop // "tx.data[0] out of bounds: %s" % msg.data[0]
+    if to < 1 or to > 2^256-1:
+        stop // "msg.data[0] out of bounds: %s" % msg.data[0]
+    if value < 0 or value > 2^256-1:
+        stop // "msg.data[1] out of bounds: %s" % msg.data[0]
+    if msg.value > 0: // "Transfering value to XETH: %s" % msg.value
+        contract.storage[frm] = contract.storage[frm] + msg.value
     bal = contract.storage[frm] // "Balance of %s: %d" % (frm, bal)
     if bal < value:
         stop // "Insufficient funds, %s has %d needs %d" % (frm, bal, value)
-    else: // "Adjusting values by %d" % value
-        contract.storage[frm] = contract.storage[frm] - value
+    elif value > 0 and to > 1: // "Adjusting values by %d" % value
+        contract.storage[frm] = bal - value
         contract.storage[to] = contract.storage[to] + value
+    if msg.data[2] == 1 and to > 1:
+        ret = contract.storage[to] // "Balance of %s: %s" % (to, ret)
+        return(ret)
+    elif msg.data[2] == 2 and to == 1: // "Withdraw"
+        if bal < value:
+            stop // "Insufficient funds, %s has %d needs %d" % (frm, bal, value)
+        contract.storage[frm] = bal - value
+        gas = tx.gas * tx.gasprice
+        ret = "OK"
+        ret = msg(msg.sender, value, gas, ret, 2)
+        return(ret)
 else:
-    contract.storage[msg.sender] = 10^18 // #define msg.sender=CREATOR
+    gas = tx.gasprice * tx.gas
+    contract.storage[msg.sender] = tx.value - gas // #define msg.sender=CREATOR
     contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.sender

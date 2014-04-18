@@ -30,12 +30,21 @@ class EtherExRun(Simulation):
     # ts = time.time()
 
     def test_balances_creation(self):
-        tx = Tx(sender='caktux', value=1 * 10 ** 18, data=[0])
+        tx = Tx(sender='EtherEx', value=1 * 10 ** 18, data=[0])
         self.run(tx, self.balances)
 
     def test_xeth_creation(self):
-        tx = Tx(sender='caktux', value=1 * 10 ** 18, data=[0])
+        tx = Tx(sender='EtherEx', value=1 * 10 ** 18, data=[0])
         self.run(tx, self.xeth)
+
+    def test_check_xeth_balance(self):
+        tx = Tx(sender='EtherEx', value=0, data=[0x45746865724578, 0, 1])
+        self.run(tx, self.xeth)
+
+    def test_transfer_eth_to_xeth(self):
+        tx = Tx(sender='EtherEx', value=1 * 10 ** 17, data=[0x45746865724578, 0, 1])
+        self.run(tx, self.xeth)
+
 
     def test_insufficient_fee(self):
         # block = Block(timestamp=self.ts + 15 * 86400 + 1)
