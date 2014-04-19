@@ -18,18 +18,30 @@ def compile(f):
       text = '\n'.join(o).replace('\n\n','\n')
       # print text
       ast = compiler.parse(text)
-      print "AST:",ast
+      print "AST:"
+      print ast
       print ""
       aevm = compiler.compile_to_assembly(text)
-      print "AEVM:", ' '.join([str(x) for x in aevm])
+      print "AEVM:"
+      print ' '.join([str(x) for x in aevm])
       print ""
       s = open(f).read()
       code = compiler.compile(text)
       # code = compiler.decode_datalist(compiler.encode_datalist(ast))
-      print "Output (hex):"
-      print code.encode('hex') #' '.join([str(x) for x in aevm])
+      print "Output:"
+      print "0x" + code.encode('hex') #' '.join([str(x) for x in aevm])
+      print ""
       print "Int:"
-      print int(code.encode('hex'), 16)
+      asint = int(code.encode('hex'), 16)
+      print asint
+      print ""
+      aslist = compiler.decode_datalist("0x" + code.encode('hex'))
+      print "Datalist of size %d:" % len(aslist)
+      print aslist
+      print ""
+      print "Hex:"
+      ascode = compiler.encode_datalist(aslist)
+      print ascode
       if i >= len(t):
           break
 
@@ -64,7 +76,6 @@ print '\n'
 print 'EtherEx'
 f = 'contracts/etherex.ser'
 compile(f)
-print '\n'
 
 print '==================='
 print 'WARNING: Experimental code, use at your own risks.'
