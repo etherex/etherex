@@ -1,0 +1,55 @@
+================
+x = 3 + 5
+================
+x = array(3)
+x[0] = 4
+x[1] = 6
+x[2] = 8
+================
+x = msg.datasize
+y = msg.data[0]
+z = msg.sender
+msg(z,10^18,0,0,y,x)
+================
+if msg.value <= 25 * 10^18:
+    stop
+elif contract.storage[msg.data[0]] or msg.data[0] < 1000:
+    stop
+contract.storage[msg.data[0]] = msg.data[1]
+================
+while i < 997:
+    i = i + 1
+================
+i = 0
+a = 1
+while i < 997:
+    a = (a * 3) % 997
+    i = i + 1
+contract.storage[-1] = a
+================
+if msg.data[0] == 0:
+    if msg.data[1] > 1000 and !contract.storage[msg.data[1]]:
+        contract.storage[msg.data[1]] = msg.data[2]
+else:
+    k = sha3(msg.data[2])
+    a = array(1)
+    msg(contract.storage[msg.data[1]],msg.value,msg.data[3:],msg.datasize-96,a,1)
+    contract.storage[k] = a
+    return(a,1)
+================
+a = array(3)
+b = string(3)
+setch(a,2,"c")
+byte(a,1)
+c = getch(a,2)
+d = c
+return(d)
+================
+x = msg(0xf345747062de4d05d897d62c4696febbedcb36b8, 10^18, tx.gas - 100, [10,20,30], 3)
+a = array(3)
+a[0] = 10
+a[1] = 20
+a[2] = 30
+y = array(1)
+y[0] = msg(0xf345747062de4d05d897d62c4696febbedcb36b8, 10^18, tx.gas - 100, a, 3, 1)
+x = y[0]
