@@ -1,5 +1,5 @@
 from collections import defaultdict
-import os, sys, imp
+import os, sys, imp, binascii
 import inspect
 import logging
 from operator import itemgetter
@@ -27,22 +27,21 @@ def mktx(recipient, amount, datan, data):
 
 def send(recipient, amount, gas):
     self = _infer_self(inspect.stack())
-    balance = self.balance[self.address]
-    if balance < amount:
-        raise Stop("Insufficient funds")
-    else:
-        self.balance[self.address] = balance - amount
-        logging.info("Sending tx to %s of %s" % (recipient, amount))
-        self.txs.append((recipient, amount, gas, 0, 0))
+    logging.info("Sending tx to %s of %s" % (recipient, amount))
+    self.txs.append((recipient, amount, 0, 0))
 
 def mkmsg(recipient, amount, gas, data, datan):
     self = _infer_self(inspect.stack())
-    balance = self.balance[self.address]
-    if balance < amount:
-        raise Stop("Insufficient funds")
-    else:
-        logging.info("Sending tx to %s of %s with data %s" % (recipient, amount, data))
-        self.txs.append((recipient, amount, gas, datan, data))
+    logging.info("Sending tx to %s of %s with data %s" % (recipient, amount, data))
+    self.txs.append((recipient, amount, datan, data))
+    return 1 # let's just return 1
+
+def create(endowment, gas, data, datan):
+    self = _infer_self(inspect.stack())
+    cid = "0x" + binascii.b2a_hex(os.urandom(20))
+    logging.info("Creating %s, endowment: %s, data: %s" % (cid, endowment, data))
+    self.txs.append((cid, endowment, datan, data))
+    return cid
 
 def stop(reason):
     raise Stop(reason)
@@ -126,7 +125,7 @@ class Contract(object):
             log("Loading %s" % script)
 
             closure = """
-from sim import Block, Contract, Simulation, Tx, Msg, log, stop, suicide, array, stopret, mkmsg, send
+from sim import Block, Contract, Simulation, Tx, Msg, log, stop, suicide, array, stopret, mkmsg, send, create
 class HLL(Contract):
     def run(self, tx, msg, contract, block):
 """
@@ -176,9 +175,6 @@ class HLL(Contract):
 
                     # Indent
                     closure += baseindent + line
-
-            # !
-            closure = closure.replace("!", "not ")
 
             # Exponents
             closure = closure.replace("^", "**")
@@ -254,9 +250,9 @@ class Simulation(object):
 
         gas = Gas()
         totalgas = gas.calculate_gas(contract)
-        logging.debug("Fees: %d" % totalgas['total'])
+        logging.debug("Gas used: %d" % totalgas['total'])
         endowment = contract.balance[contract.address]
-        addendowment = tx.value - totalgas['total']
+        addendowment = tx.value # - totalgas['total']
         if addendowment > 0:
             logging.info("Adding %d to endowment" % addendowment)
             endowment += addendowment

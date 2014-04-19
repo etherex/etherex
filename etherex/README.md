@@ -58,7 +58,7 @@ API
 
 ### Adding a market
 ```
-<operation> <name> <minimum trade>
+<operation> <name> <minimum trade> <owner[s]>
 ```
 
 ### Operations

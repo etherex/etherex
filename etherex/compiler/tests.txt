@@ -31,9 +31,11 @@ if msg.data[0] == 0:
     if msg.data[1] > 1000 and !contract.storage[msg.data[1]]:
         contract.storage[msg.data[1]] = msg.data[2]
 else:
-    a = sha3(msg.data[2])
-    msg(contract.storage[msg.data[1]],msg.value,msg.data[3:],msg.datasize-96,a,msg.data[2])
-    return(a,msg.data[2])
+    k = sha3(msg.data[2])
+    a = array(1)
+    msg(contract.storage[msg.data[1]],msg.value,msg.data[3:],msg.datasize-96,a,1)
+    contract.storage[k] = a
+    return(a,1)
 ================
 a = array(3)
 b = string(3)
@@ -42,3 +44,12 @@ byte(a,1)
 c = getch(a,2)
 d = c
 return(d)
+================
+x = msg(0xf345747062de4d05d897d62c4696febbedcb36b8, 10^18, tx.gas - 100, [10,20,30], 3)
+a = array(3)
+a[0] = 10
+a[1] = 20
+a[2] = 30
+y = array(1)
+y[0] = msg(0xf345747062de4d05d897d62c4696febbedcb36b8, 10^18, tx.gas - 100, a, 3, 1)
+x = y[0]

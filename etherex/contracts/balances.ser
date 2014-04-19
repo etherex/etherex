@@ -10,11 +10,9 @@ if status == 1:
       ret = "Invalid balance"
       return(ret)
     contract.storage[addr] = balance
-    ret = "OK"
-    return(ret)
+    return(1)
   else:
-    ret = "Unauthorized access"
-    return(ret)
+    return(0)
 else:
-  contract.storage[2] = msg.sender // #define msg.sender=CREATOR
-  contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.sender
+  contract.storage[2] = msg.data[0] // #define msg.data[0]=EX
+  contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.data[0]

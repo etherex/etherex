@@ -1,13 +1,17 @@
 if contract.storage[1]: // "Running contract..."
     frm = msg.sender
     to = msg.data[0]
+    if msg.value > 0: // "Transfering value to XETH: %s" % msg.value
+        contract.storage[frm] = contract.storage[frm] + msg.value
+    if msg.datasize < 2:
+        arr = array(1)
+        arr[0] = 0
+        msg.data = msg.data + arr
     value = msg.data[1]
-    if to < 1 or to > 2^256-1:
+    if to < 100 or to > 2^256-1:
         stop // "msg.data[0] out of bounds: %s" % msg.data[0]
     if value < 0 or value > 2^256-1:
         stop // "msg.data[1] out of bounds: %s" % msg.data[0]
-    if msg.value > 0: // "Transfering value to XETH: %s" % msg.value
-        contract.storage[frm] = contract.storage[frm] + msg.value
     bal = contract.storage[frm] // "Balance of %s: %d" % (frm, bal)
     if bal < value:
         stop // "Insufficient funds, %s has %d needs %d" % (frm, bal, value)
@@ -25,11 +29,33 @@ if contract.storage[1]: // "Running contract..."
         if bal < value:
             stop // "Insufficient funds, %s has %d needs %d" % (frm, bal, value)
         contract.storage[frm] = bal - value
-        gas = tx.gas * tx.gasprice
-        ret = "OK"
+        gas = tx.gas - 100
+        ret = 1
         ret = msg(msg.sender, value, gas, ret, 2)
         return(ret)
+    elif msg.data[2] == 3 and to > 1: // "Checking ownership"
+        owners = contract.storage[2]
+        isowner = 0
+        i = 0
+        while i < 3: // "Checking %s against %s" % (to, owners[i])
+            if to == owners[i]:
+                isowner = owners[i]
+            i = i + 1
+        return(isowner)
+    elif msg.data[2] == 4 and msg.sender == 0x45746865724578: // #define 0x45746865724578=EX
+        if value < 1 or value > 1 * 10 ^ 21:
+            return(0)
+        contract.storage[to] = contract.storage[to] + value
 else:
-    gas = tx.gasprice * tx.gas
-    contract.storage[msg.sender] = tx.value - gas // #define msg.sender=CREATOR
-    contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.sender
+    n = 3
+    owners = array(n)
+    owners[0] = 0x63616b747578 // #define 0x63616b747578=CAK
+    owners[1] = 0x656f6172 // #define 0x656f6172=EOAR
+    owners[2] = 0x66616272657a696f // #define 0x66616272657a696f=FAB
+    i = 0
+    while i < n:
+        k = owners[i]
+        contract.storage[k] = msg.value / n
+        i = i + 1
+    contract.storage[2] = owners
+    contract.storage[1] = 1 // "Initializing storage for creators %s" % owners

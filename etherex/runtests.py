@@ -21,11 +21,15 @@ def compile(f):
       print "AST:",ast
       print ""
       aevm = compiler.compile_to_assembly(text)
-      print "AEVM:", aevm # ' '.join([str(x) for x in aevm])
+      print "AEVM:", ' '.join([str(x) for x in aevm])
       print ""
-      # s = open(f).read()
-      # code = compiler.compile(text)
-      print "Output:",' '.join([str(x) for x in aevm])
+      s = open(f).read()
+      code = compiler.compile(text)
+      # code = compiler.decode_datalist(compiler.encode_datalist(ast))
+      print "Output (hex):"
+      print code.encode('hex') #' '.join([str(x) for x in aevm])
+      print "Int:"
+      print int(code.encode('hex'), 16)
       if i >= len(t):
           break
 

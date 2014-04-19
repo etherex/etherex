@@ -24,50 +24,25 @@ class Xeth(Contract):
 
 class EtherExRun(Simulation):
 
-    balances = Balances(CREATOR="EtherEx")
-    xeth = Xeth(CREATOR="EtherEx")
-    contract = EtherEx(CAK="caktux", EOAR="eoar", FAB="fabrezio", BALANCES="BalancesContract", XETH="XethContract")
+    xeth = Xeth(CAK="caktux", EOAR="eoar", FAB="fabrezio")
+    contract = EtherEx(CAK="caktux", EOAR="eoar", FAB="fabrezio", XETH=xeth.address)
+    balances = Balances(EX=contract.address)
+    etherex = int(contract.address, 16)
     # ts = time.time()
     print 20 * "="
 
-    # Balances
-    def test_balances_creation(self):
-        tx = Tx(sender='EtherEx', value=1 * 10 ** 18, data=[0])
-        self.run(tx, self.balances)
-        print 20 * "="
-
     # XETH
     def test_xeth_creation(self):
-        tx = Tx(sender='EtherEx', value=1 * 10 ** 18, data=[0])
-        self.run(tx, self.xeth)
-
-    def test_check_xeth_balance(self):
-        tx = Tx(sender='EtherEx', value=0, data=[0x45746865724578, 0, 1])
-        self.run(tx, self.xeth)
-
-    def test_transfer_eth_to_xeth(self):
-        tx = Tx(sender='EtherEx', value=1 * 10 ** 17, data=[0x45746865724578, 0])
-        self.run(tx, self.xeth)
-
-    def test_transfer_xeth_to_caktux(self):
-        tx = Tx(sender='EtherEx', value=0, data=[0x63616b747578, 1000])
-        self.run(tx, self.xeth)
-
-    def test_transfer_xeth_to_eoar(self):
-        tx = Tx(sender='EtherEx', value=0, data=[0x656f6172, 1000])
-        self.run(tx, self.xeth)
-
-    def test_transfer_xeth_to_fabrezio(self):
-        tx = Tx(sender='EtherEx', value=0, data=[0x66616272657a696f, 1000])
+        tx = Tx(sender='caktux', value=1 * 10 ** 18, data=[0])
         self.run(tx, self.xeth)
         print 20 * "="
 
     # EtherEx
-    def test_insufficient_fee(self):
+    def test_insufficient_gas(self):
         # block = Block(timestamp=self.ts + 15 * 86400 + 1)
-        tx = Tx(sender='caktux', value=0, fee=0, data=[0])
+        tx = Tx(sender='caktux', value=0, gas=10, data=[0])
         self.run(tx, self.contract)
-        assert self.stopped == 'Insufficient fee'
+        assert self.stopped == 'Insufficient gas'
         assert self.contract.storage[1] == 0
 
     def test_creation(self):
@@ -76,9 +51,44 @@ class EtherExRun(Simulation):
         # print self.contract.txs
         # assert len(self.contract.txs) == 2
         assert self.contract.storage[1] == 1
-        assert self.contract.storage[2] == ['caktux', 'eoar', 'fabrezio']
-        assert self.stopped == 'EtherEx initialized'
+        # assert self.contract.storage[2] == ['EtherEx']
+        assert self.stopped.startswith('EtherEx initialized')
+        print 20 * "="
 
+    # - Balances
+    def test_balances_creation(self):
+        tx = Tx(sender=self.etherex, value=1 * 10 ** 18, data=[self.etherex])
+        self.run(tx, self.balances)
+        print 20 * "="
+
+    # - XETH
+    def test_check_xeth_balance(self):
+        tx = Tx(sender=self.etherex, value=0, data=[self.etherex, 0, 1])
+        self.run(tx, self.xeth)
+
+    def test_transfer_eth_to_xeth(self):
+        tx = Tx(sender=self.etherex, value=1 * 10 ** 17, data=[self.etherex, 0])
+        self.run(tx, self.xeth)
+
+    def test_transfer_xeth_to_caktux(self):
+        tx = Tx(sender=self.etherex, value=0, data=[0x63616b747578, 1000])
+        self.run(tx, self.xeth)
+
+    def test_transfer_xeth_to_eoar(self):
+        tx = Tx(sender=self.etherex, value=0, data=[0x656f6172, 1000])
+        self.run(tx, self.xeth)
+
+    def test_transfer_xeth_to_fabrezio(self):
+        tx = Tx(sender=self.etherex, value=0, data=[0x66616272657a696f, 1000])
+        self.run(tx, self.xeth)
+        print 20 * "="
+
+    def test_xeth_ownership(self):
+        tx = Tx(sender=self.etherex, value=0, data=[0x656f6172, 0, 3])
+        self.run(tx, self.xeth)
+        print 20 * "="
+
+    # EtherEx
     def test_no_data(self):
         tx = Tx(sender='eoar', value=0)
         self.run(tx, self.contract)
@@ -225,3 +235,7 @@ class EtherExRun(Simulation):
     def test_results(self):
         self.log(self.contract.balance)
         self.log(self.contract.storage)
+        self.log(self.xeth.balance)
+        self.log(self.xeth.storage)
+        self.log(self.balances.balance)
+        self.log(self.balances.storage)

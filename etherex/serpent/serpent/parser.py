@@ -74,7 +74,7 @@ def parse_lines(lns):
 
 # Tokens contain one or more chars of the same type, with a few exceptions
 def chartype(c):
-    if c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._':
+    if c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.':
         return 'alphanum'
     elif c in '\t ': return 'space'
     elif c in '()[]': return 'brack'
@@ -167,8 +167,7 @@ def toktype(token):
     elif token in ['!']: return 'unary_operation' 
     elif not isinstance(token,str): return 'compound'
     elif token in precedence: return 'binary_operation'
-    elif re.match('^[0-9a-z\-\.]*$_',token): return 'alphanum'
-    elif isinstance(token, str): return 'alphanum'
+    elif re.match('^[0-9a-zA-Z\-\.]*$',token): return 'alphanum'
     elif token[0] in ['"',"'"] and token[0] == token[-1]: return 'alphanum'
     else: raise Exception("Invalid token: "+token)
 

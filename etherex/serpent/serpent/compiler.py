@@ -35,9 +35,9 @@ funtable = [
     ['>=', 2, 1, ['<1>', '<0>', 'LT', 'NOT']],
     ['!', 1, 1, ['<0>', 'NOT']],
     ['or', 2, 1, ['<1>', '<0>', 'DUP', 4, 'PC',
-                  'ADD', 'JMPI', 'POP', 'SWAP', 'POP']],
+                  'ADD', 'JUMPI', 'POP', 'SWAP', 'POP']],
     ['||', 2, 1, ['<1>', '<0>', 'DUP', 4, 'PC',
-                  'ADD', 'JMPI', 'POP', 'SWAP', 'POP']],
+                  'ADD', 'JUMPI', 'POP', 'SWAP', 'POP']],
     ['and', 2, 1, ['<1>', '<0>', 'NOT', 'NOT', 'MUL']],
     ['&&', 2, 1, ['<1>', '<0>', 'NOT', 'NOT', 'MUL']],
     ['xor', 2, 1, ['<1>', '<0>', 'XOR']],
@@ -119,7 +119,7 @@ def fromhex(b):
 
 def is_numberlike(b):
     if isinstance(b, (str, unicode)):
-        if re.match('^[0-9\-]*$', b) or b[:2] == '0x':
+        if re.match('^[0-9\-]*$', b):
             return True
         if b[0] in ["'", '"'] and b[-1] in ["'", '"'] and b[0] == b[-1]:
             return True
@@ -427,7 +427,11 @@ def encode_datalist(vals):
             return 1
         elif n is False or n is None:
             return 0
-    return ''.join(map(enc, vals))
+    if isinstance(vals, (tuple, list)):
+        return ''.join(map(enc, vals))
+    else:
+        # Assume you're getting in numbers or 0x...
+        return ''.join(map(enc, map(numberize, vals.split(' '))))
 
 
 def decode_datalist(arr):

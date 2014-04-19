@@ -14,9 +14,11 @@ while 1:
     print "AST:",ast
     print ""
     aevm = compiler.compile_to_assembly(text)
-    print "AEVM:",aevm # ' '.join([str(x) for x in aevm])
+    print "AEVM:",' '.join([str(x) for x in aevm])
     print ""
-    # code = compiler.compile(text)
-    print "Output:",' '.join([str(x) for x in aevm])
+    # txt = open('compiler/tests.txt').read()
+    # code = compiler.decode_datalist(compiler.encode_datalist(ast))
+    code = compiler.compile(text)
+    print "Output:",code.encode('hex') # ' '.join([str(x) for x in aevm])
     if i >= len(t):
         break
