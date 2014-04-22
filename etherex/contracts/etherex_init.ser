@@ -1,0 +1,4 @@
+contract.storage[2] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31 // #define msg.sender=CAK
+contract.storage[3] = 0x98445cfc0722a38f3324a4ce929b53b7b0e48b00 // "BalancesContract"
+contract.storage[4] = 0x98445cfc0722a38f3324a4ce929b53b7b0e48b00 // "TradesContract"
+contract.storage[5] = msg.value

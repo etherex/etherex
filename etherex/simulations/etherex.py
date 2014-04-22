@@ -53,6 +53,10 @@ class EtherExRun(Simulation):
         assert self.contract.storage[1] == 1
         # assert self.contract.storage[2] == ['EtherEx']
         assert self.stopped.startswith('EtherEx initialized')
+
+    def test_change_ownership(self):
+        tx = Tx(sender='caktux', value=0, data=[9, 0xf9e57456f18d90886263fedd9cc30b27cd959137])
+        self.run(tx, self.contract)
         print 20 * "="
 
     # - Balances

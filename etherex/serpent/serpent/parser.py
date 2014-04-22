@@ -235,7 +235,7 @@ def shunting_yard(tokens):
         elif typ == 'left_paren':
             # Handle cases like 3 * (2 + 5) by using 'id' as a default function
             # name
-            if toktype(prev) != 'alphanum' and toktype(prev) != 'rparen':
+            if toktype(prev) != 'alphanum' and toktype(prev) != 'right_paren':
                 oq.append('id')
             # Say the statement is "... f(45...". At the start, we would have f
             # as the last item on the oq. So we move it onto the stack, put the

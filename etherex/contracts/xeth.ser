@@ -1,61 +1,53 @@
-if contract.storage[1]: // "Running contract..."
-    frm = msg.sender
-    to = msg.data[0]
+status = contract.storage[1]
+if status == 1: // "Running contract..."
+    balance = contract.storage[msg.sender] // "Balance of %s: %d" % (msg.sender, balance)
     if msg.value > 0: // "Transfering value to XETH: %s" % msg.value
-        contract.storage[frm] = contract.storage[frm] + msg.value
-    if msg.datasize < 2:
-        arr = array(1)
-        arr[0] = 0
-        msg.data = msg.data + arr
+        balance = balance + msg.value
+        contract.storage[msg.sender] = balance
+    to = msg.data[0]
     value = msg.data[1]
-    if to < 100 or to > 2^256-1:
-        stop // "msg.data[0] out of bounds: %s" % msg.data[0]
-    if value < 0 or value > 2^256-1:
-        stop // "msg.data[1] out of bounds: %s" % msg.data[0]
-    bal = contract.storage[frm] // "Balance of %s: %d" % (frm, bal)
-    if bal < value:
-        stop // "Insufficient funds, %s has %d needs %d" % (frm, bal, value)
-    elif value > 0 and to > 1: // "Adjusting values by %d" % value
-        contract.storage[frm] = bal - value
+    if to < 100:
+        stop // "msg.data[0] out of bounds: %s" % to
+    if value < 0:
+        stop // "msg.data[1] out of bounds: %s" % value
+    if balance < value:
+        stop // "Insufficient funds, %s has %d needs %d" % (msg.sender, balance, value)
+    else: // "Adjusting values by %d" % value
+        balance = contract.storage[msg.sender] - value
+        contract.storage[msg.sender] = balance
         contract.storage[to] = contract.storage[to] + value
-    if msg.datasize < 3:
-        arr = array(1)
-        arr[0] = 0
-        msg.data = msg.data + arr
-    if msg.data[2] == 1 and to > 1:
-        ret = contract.storage[to] // "Balance of %s: %s" % (to, ret)
-        return(ret)
-    elif msg.data[2] == 2 and to == 1: // "Withdraw"
-        if bal < value:
-            stop // "Insufficient funds, %s has %d needs %d" % (frm, bal, value)
-        contract.storage[frm] = bal - value
-        gas = tx.gas - 100
-        ret = 1
-        ret = msg(msg.sender, value, gas, ret, 2)
-        return(ret)
-    elif msg.data[2] == 3 and to > 1: // "Checking ownership"
-        owners = contract.storage[2]
-        isowner = 0
-        i = 0
-        while i < 3: // "Checking %s against %s" % (to, owners[i])
-            if to == owners[i]:
-                isowner = owners[i]
-            i = i + 1
-        return(isowner)
-    elif msg.data[2] == 4 and msg.sender == 0x45746865724578: // #define 0x45746865724578=EX
-        if value < 1 or value > 1 * 10 ^ 21:
-            return(0)
-        contract.storage[to] = contract.storage[to] + value
-else:
+    if msg.datasize == 3:
+        if msg.data[2] == 1:
+            ret = contract.storage[to] // "Balance of %s: %s" % (to, ret)
+            return(ret)
+        elif msg.data[2] == 2: // "Withdraw"
+            if contract.storage[msg.sender] < value:
+                stop // "Insufficient funds, %s has %d needs %d" % (msg.sender, balance, value)
+            contract.storage[msg.sender] = contract.storage[msg.sender] - value
+            send(msg.data[0], value, tx.gas - 1000)
+            return(1)
+        elif msg.data[2] == 3: // "Checking ownership"
+            owner = contract.storage[2]
+            isowner = 0
+            if to == owner: // "Checking %s against %s" % (to, owner)
+                isowner = owner
+            return(isowner)
+        elif msg.data[2] == 4 and msg.sender == contract.storage[2]: // #define 0x45746865724578=EX
+            if value < 1 or value > 1 * 10 ^ 21:
+                return(0)
+            contract.storage[to] = contract.storage[to] + value // "Minting %d" % value
+        elif msg.data[2] == 5 and msg.sender == contract.storage[2]:
+            contract.storage[2] = msg.data[1]
+            stop // "Set owner to %s" % msg.data[1]
+elif msg.sender == contract.storage[2]:
     n = 3
     owners = array(n)
-    owners[0] = 0x63616b747578 // #define 0x63616b747578=CAK
-    owners[1] = 0x656f6172 // #define 0x656f6172=EOAR
-    owners[2] = 0x66616272657a696f // #define 0x66616272657a696f=FAB
+    owners[0] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31 // #define 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31=CAK
+    owners[1] = 0xe559de5527492bcb42ec68d07df0742a98ec3f1e // #define 0xe559de5527492bcb42ec68d07df0742a98ec3f1e=EOAR
+    owners[2] = 0xf9e57456f18d90886263fedd9cc30b27cd959137 // #define 0xf9e57456f18d90886263fedd9cc30b27cd959137=FAB
     i = 0
     while i < n:
-        k = owners[i]
-        contract.storage[k] = msg.value / n
+        contract.storage[owners[i]] = msg.value / 3
         i = i + 1
-    contract.storage[2] = owners
+    contract.storage[2] = msg.data[0]
     contract.storage[1] = 1 // "Initializing storage for creators %s" % owners

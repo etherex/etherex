@@ -49,6 +49,8 @@ funtable = [
     ['access', 2, 1, ['<0>', '<1>', 32, 'MUL', 'ADD', 'MLOAD']],
     # arr, ind, val
     ['arrset', 3, 0, ['<2>', '<0>', '<1>', 32, 'MUL', 'ADD', 'MSTORE']],
+    # val, pointer -> pointer+32
+    ['set_and_inc', 2, 1, ['<1>', 'DUP', '<0>', 'SWAP', 'MSTORE', 32, 'ADD']],
     # len (32 MUL) len*32 (MSIZE) len*32 MSIZE (SWAP) MSIZE len*32 (MSIZE ADD)
     # MSIZE MSIZE+len*32 (1) MSIZE MSIZE+len*32 1 (SWAP SUB) MSIZE
     # MSIZE+len*32-1 (0 SWAP MSTORE8) MSIZE
@@ -153,11 +155,10 @@ def rewrite(ast):
         elif ast[1] == 'contract.storage':
             return ['sload', rewrite(ast[2])]
     elif ast[0] == 'array_lit':
-        tempvar = mklabel('_temp')
-        o1 = ['set', tempvar, ['array', str(len(ast[1:]))]]
-        of = map(
-            lambda i: ['arrset', tempvar, str(i), rewrite(ast[i + 1])], range(0, len(ast[1:])))
-        return ['seq'] + [o1] + of + [tempvar]
+        o = ['array', str(len(ast[1:]))]
+        for a in ast[1:]:
+            o = ['set_and_inc', rewrite(a), o]
+        return ['-', o, str(len(ast[1:])*32)]
     elif ast[0] == 'return':
         if len(ast) == 2 and ast[1][0] == 'array_lit':
             return ['return', rewrite(ast[1]), str(len(ast[1][1:]))]
@@ -429,6 +430,8 @@ def encode_datalist(vals):
             return 0
     if isinstance(vals, (tuple, list)):
         return ''.join(map(enc, vals))
+    elif vals == '':
+        return ''
     else:
         # Assume you're getting in numbers or 0x...
         return ''.join(map(enc, map(numberize, vals.split(' '))))

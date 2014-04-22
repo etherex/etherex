@@ -74,6 +74,13 @@ class Block(object):
         self._storages = defaultdict(Storage)
         self.gaslimit = 1 * 10 ^ 42
 
+        # 'block.prevhash': ['PREVHASH'],
+        # 'block.coinbase': ['COINBASE'],
+        # 'block.timestamp': ['TIMESTAMP'],
+        # 'block.number': ['NUMBER'],
+        # 'block.difficulty': ['DIFFICULTY'],
+        # 'block.gaslimit': ['GASLIMIT'],
+
     @property
     def basefee(self):
         return 1
@@ -179,8 +186,14 @@ class HLL(Contract):
             # Exponents
             closure = closure.replace("^", "**")
 
-            # Hex
-            closure = closure.replace("hex(", "str(")
+            # not
+            closure = closure.replace("!", "not ")
+
+            # and
+            closure = closure.replace("&&", "and")
+
+            # or
+            closure = closure.replace("||", "or")
 
             # Return
             closure = closure.replace("return(", "stopret(")
@@ -294,8 +307,9 @@ class Storage(object):
 
 class Tx(object):
 
-    def __init__(self, sender=None, value=0, fee=1 * 10 ** 15, gas=0, gasprice=0, data=[]):
+    def __init__(self, sender=None, value=0, fee=1 * 10 ** 15, gas=0, gasprice=0, data=[], origin=None):
         self.sender = sender
+        self.origin = origin
         self.value = value
         self.fee = fee
         self.gasprice = gasprice if gasprice else MINGASPRICE
@@ -306,13 +320,15 @@ class Tx(object):
         self.data = data
         self.datan = len(data)
 
-        contract = _is_called_by_contract()
-        if contract:
-            gas = Gas()
-            totalgas = gas.calculate_gas(contract)
-            freeload = value + totalgas
-            self.contract.balance[self.contract.address] += freeload
-            logging.debug("Freeloading %s with %d" % (sender, freeload))
+        self = _infer_self(inspect.stack())
+        if self.contract and sender == self.contract.address:
+            self.origin = self.contract.address
+
+        # gas = Gas()
+        # totalgas = gas.calculate_gas(self.contract)
+        # freeload = value + totalgas
+        # self.contract.balance[self.contract.address] += freeload
+        # logging.debug("Freeloading %s with %d" % (sender, freeload))
 
     def __repr__(self):
         return '<tx sender=%s value=%d fee=%d gas=%d gasprice=%d data=%s datan=%d>' % (self.sender, self.value, self.fee, self.gas, self.gasprice, self.data, self.datan)
