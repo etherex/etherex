@@ -36,6 +36,12 @@ def mkmsg(recipient, amount, gas, data, datan):
     self.txs.append((recipient, amount, datan, data))
     return 1 # let's just return 1
 
+def mkmsg(recipient, amount, gas, data, datan, var):
+    self = _infer_self(inspect.stack())
+    logging.info("Sending tx to %s of %s with data %s" % (recipient, amount, data))
+    self.txs.append((recipient, amount, datan, data))
+    return 1 # let's just return 1
+
 def create(endowment, gas, data, datan):
     self = _infer_self(inspect.stack())
     cid = "0x" + binascii.b2a_hex(os.urandom(20))

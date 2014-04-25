@@ -27,6 +27,6 @@ if status == 1:
         return(1)
     else:
         return(0)
-elif msg.sender == contract.storage[2]:
+else: // # if msg.sender == contract.storage[2]:
     contract.storage[2] = msg.data[0] // #define msg.data[0]=EX
     contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.data[0]

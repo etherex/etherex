@@ -15,6 +15,20 @@ class Balances(Contract):
         hll = "contracts/balances.ser"
         Contract.load(self, hll, tx, contract, block)
 
+class Indexes(Contract):
+    """Indexes contract"""
+
+    def run(self, tx, contract, block):
+        hll = "contracts/indexes.ser"
+        Contract.load(self, hll, tx, contract, block)
+
+class Trades(Contract):
+    """Trades contract"""
+
+    def run(self, tx, contract, block):
+        hll = "contracts/trades.ser"
+        Contract.load(self, hll, tx, contract, block)
+
 class Xeth(Contract):
     """Xeth contract"""
 
@@ -27,13 +41,16 @@ class EtherExRun(Simulation):
     xeth = Xeth(CAK="caktux", EOAR="eoar", FAB="fabrezio")
     contract = EtherEx(CAK="caktux", EOAR="eoar", FAB="fabrezio", XETH=xeth.address)
     balances = Balances(EX=contract.address)
+    indexes = Indexes(EX=contract.address)
+    trades = Trades(EX=contract.address)
     etherex = int(contract.address, 16)
+
     # ts = time.time()
     print 20 * "="
 
     # XETH
     def test_xeth_creation(self):
-        tx = Tx(sender='caktux', value=1 * 10 ** 18, data=[0])
+        tx = Tx(sender='caktux', value=1 * 10 ** 18, data=[self.etherex])
         self.run(tx, self.xeth)
         print 20 * "="
 
@@ -46,7 +63,7 @@ class EtherExRun(Simulation):
         assert self.contract.storage[1] == 0
 
     def test_creation(self):
-        tx = Tx(sender='caktux', value=3000 * 10 ** 21, data=[0])
+        tx = Tx(sender='caktux', value=3000 * 10 ** 21, gas=100000, data=[int(self.balances.address, 16), int(self.indexes.address, 16), int(self.trades.address, 16), int(self.xeth.address, 16)])
         self.run(tx, self.contract)
         # print self.contract.txs
         # assert len(self.contract.txs) == 2
@@ -55,7 +72,7 @@ class EtherExRun(Simulation):
         assert self.stopped.startswith('EtherEx initialized')
 
     def test_change_ownership(self):
-        tx = Tx(sender='caktux', value=0, data=[9, 0xf9e57456f18d90886263fedd9cc30b27cd959137])
+        tx = Tx(sender='caktux', value=0, data=[8, 0xf9e57456f18d90886263fedd9cc30b27cd959137, 0])
         self.run(tx, self.contract)
         print 20 * "="
 
@@ -96,78 +113,81 @@ class EtherExRun(Simulation):
     def test_no_data(self):
         tx = Tx(sender='eoar', value=0)
         self.run(tx, self.contract)
-        assert self.stopped.startswith("No data")
+        assert self.stopped == 1 # .startswith("No data")
 
     def test_invalid_operation(self):
         tx = Tx(sender='eoar', value=0, data=[0, 0])
         self.run(tx, self.contract)
-        assert self.stopped == "Invalid operation"
+        assert self.stopped == 2 # "Invalid operation"
 
     def test_missing_amount(self):
         tx = Tx(sender='eoar', value=0, data=[1])
         self.run(tx, self.contract)
-        assert self.stopped == "Missing amount"
+        assert self.stopped == 3 # "Missing amount"
 
     def test_invalid_amount(self):
         tx = Tx(sender='eoar', value=0, data=[1, 0])
         self.run(tx, self.contract)
-        assert self.stopped == "Invalid amount"
+        assert self.stopped == 4 # "Invalid amount"
 
     def test_missing_price(self):
         tx = Tx(sender='eoar', value=0, data=[1, 1])
         self.run(tx, self.contract)
-        assert self.stopped == "Missing price"
+        assert self.stopped == 5 # "Missing price"
 
     def test_invalid_price(self):
         tx = Tx(sender='eoar', value=0, data=[1, 1, 0])
         self.run(tx, self.contract)
-        assert self.stopped == "Invalid price"
+        assert self.stopped == 6 # "Invalid price"
 
     def test_missing_market_id(self):
-        tx = Tx(sender='eoar', value=0, data=[1, 1, 1])
+        tx = Tx(sender='eoar', value=0, data=[1, 1, 1 * 10 ** 8])
         self.run(tx, self.contract)
-        assert self.stopped == "Missing market ID"
+        assert self.stopped == 7 # "Missing market ID"
 
-    def test_missing_market_id(self):
+    def test_invalid_market_id(self):
         tx = Tx(sender='eoar', value=0, data=[1, 1, 1 * 10 ** 8, 2])
         self.run(tx, self.contract)
-        assert self.stopped == "Invalid market ID"
+        assert self.stopped == 8 # "Invalid market ID"
 
     def test_too_many_arguments(self):
         tx = Tx(sender='eoar', value=0, data=[1, 1000 * 10 ** 21, 1 * 10 ** 8, 1, 1])
         self.run(tx, self.contract)
-        assert self.stopped.startswith("Too many arguments")
+        assert self.stopped == 9 # .startswith("Too many arguments")
 
     def test_amount_out_of_range(self):
         tx = Tx(sender='eoar', value=0, data=[1, 2**256+1, 1 * 10 ** 8, 1])
         self.run(tx, self.contract)
-        assert self.stopped.startswith("Amount out of range")
+        assert self.stopped == 10 # .startswith("Amount out of range")
 
     def test_price_out_of_range(self):
         tx = Tx(sender='eoar', value=0, data=[1, 1 * 10 ** 8, 256**256+1, 1])
         self.run(tx, self.contract)
-        assert self.stopped.startswith("Price out of range")
+        assert self.stopped == 11 #.startswith("Price out of range")
 
     def test_insufficient_btc_trade(self):
         tx = Tx(sender='caktux', value=0, data=[1, 1 * 10 ** 6, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
-        assert self.stopped.startswith("Minimum BTC trade amount not met")
+        assert self.stopped == 12 #.startswith("Minimum BTC trade amount not met")
         assert self.contract.storage[1] == 1
 
     def test_insufficient_eth_trade(self):
         tx = Tx(sender='caktux', value=0, data=[2, 1 * 10 ** 18, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
-        assert self.stopped.startswith("Minimum ETH trade amount not met")
+        assert self.stopped == 13 #.startswith("Minimum ETH trade amount not met")
         assert self.contract.storage[1] == 1
 
     def test_insufficient_eth(self):
         tx = Tx(sender='caktux', value=1 * 10 ** 18, data=[2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
-        assert self.stopped.startswith("Minimum ETH value not met")
+        assert self.stopped == 14 #.startswith("Minimum ETH value not met")
         assert self.contract.storage[1] == 1
 
     def test_first_sell(self):
         tx = Tx(sender="caktux", value=1 * 10 ** 21, data=[2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+        self.contract.storage[2] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31 # define msg.sender=CAK
+        self.contract.storage[3] = 0x98445cfc0722a38f3324a4ce929b53b7b0e48b00 # BalancesContract
+        self.contract.storage[4] = 0x98445cfc0722a38f3324a4ce929b53b7b0e48b00 # TradesContract
         self.run(tx, self.contract)
 
     def test_second_sell(self):

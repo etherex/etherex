@@ -77,17 +77,6 @@ print 'EtherEx LVM'
 print '==================='
 # subprocess.call(["serpent", "compile", "contracts/etherex.ser"])
 
-print 'XETH'
-print '\n'
-print 'init:'
-f = 'contracts/xeth_init.ser'
-compile(f)
-print '=' * 20
-print 'code:'
-f = 'contracts/xeth.ser'
-compile(f)
-print '\n'
-
 print 'Balances'
 print '\n'
 print 'init:'
@@ -99,6 +88,17 @@ f = 'contracts/balances.ser'
 compile(f)
 print '\n'
 
+print 'Indexes'
+print '\n'
+print 'init:'
+# f = 'contracts/indexes_init.ser'
+# compile(f)
+print '=' * 20
+print 'code'
+f = 'contracts/indexes.ser'
+compile(f)
+print '=' * 20
+
 print 'Trades'
 print '\n'
 print 'init:'
@@ -109,6 +109,17 @@ print 'code'
 f = 'contracts/trades.ser'
 compile(f)
 print '=' * 20
+
+print 'XETH'
+print '\n'
+print 'init:'
+f = 'contracts/xeth_init.ser'
+compile(f)
+print '=' * 20
+print 'code:'
+f = 'contracts/xeth.ser'
+compile(f)
+print '\n'
 
 print 'EtherEx'
 print '\n'

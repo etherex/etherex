@@ -1,44 +1,147 @@
 if tx.gas < 100:
     stop // "Insufficient gas"
+
+# EtherEx
+
+# yeah, you can comment after that...
+
+# API
+# ---
+# * The API is the format of the data field for the Ethereum transactions.
+# * You only need an Ethereum client to use the API.
+
+# ### Trades (buy / sell)
+# ```
+# <operation> <amount> <price> <marketid>
+# ```
+
+# ### Deposits / Withdrawals
+# ```
+# <operation> <amount> <currency>
+# ```
+
+# ### Cancellations
+# ```
+# <operation> <id>
+# ```
+
+# ### Adding a market
+# ```
+# <operation> <name> <minimum trade> <owner[s]>
+# ```
+
+# ### Operations
+# Allowed values:
+# ```
+# 1 = Buy
+# 2 = Sell
+# 3 = Deposit
+# 4 = Withdraw
+# 5 = Cancel
+# 6 = Add market (subcurrency)
+# ```
+
+# ### Amounts
+# * Amount in wei for ETH or XETH
+# * Amount in satoshi for BTC
+# * Smallest denomination for other amounts (see future shared protocol)
+
+# ### Prices
+# * Price in ETH/BTC * 10 ^ 8, as integer
+# * Price in ETH/XETH * 10 ^ 8, as integer
+
+# ### Market IDs
+# Allowed values
+# ```
+# 1 = ETH/BTC
+# 2 = ETH/XETH
+# ...
+# ```
+
+# ### Currencies
+# ```
+# 1 = ETH
+# 2 = BTC
+# 3 = XETH
+# ...
+# ```
+
+# ### Market names
+# Follow the "ETH/<name>" convention for the market name, like "ETH/BOB" for BobCoin.
+
+# ### Minimum trade amounts
+# When adding a subcurrency, make the minimum trade amount high enough to make economic sense.
+
+# ### Examples
+# Buy 1000 ETH at 1200 ETH/BTC (for 1.2 BTC)
+# ```
+# 1 1000000000000000000000 120000000000 1
+# ```
+
+# Sell 1000 ETH at 1200 ETH/BTC (for 1.2 BTC)
+# ```
+# 2 1000000000000000000000 120000000000 1
+# ```
+
+# Deposit 1 BTC
+# ```
+# 3 100000000 2
+# ```
+
+# Withdraw 1 ETH
+# ```
+# 4 1000000000000000000 1
+# ```
+
+# Cancel operation
+# ```
+# 5 12345678901234567890
+# ```
+
+# Add your subcurrency
+# ```
+# 6 "ETH/BOB" 100000000
+# ```
+
 status = contract.storage[1]
 if status == 1:
     if msg.datasize < 1:
         if msg.value > 0: // "Refunding"
-            send(msg.sender, msg.value, tx.gas - 1000)
-        stop // "No data to process"
-    if msg.data[0] < 1 or msg.data[0] > 5:
+            send(msg.sender, msg.value, tx.gas / 10)
+        return(1) // "No data to process"
+    if msg.data[0] < 1: // # or msg.data[0] > 5:
         if msg.value > 0: // "Refunding"
-            send(msg.sender, msg.value, tx.gas - 1000)
-        stop // "Invalid operation"
+            send(msg.sender, msg.value, tx.gas / 10)
+        return(2) // "Invalid operation"
     if msg.data[0] < 3:
         if msg.datasize < 2:
             if msg.value > 0: // "Refunding"
-                send(msg.sender, msg.value, tx.gas - 1000)
-            stop // "Missing amount"
+                send(msg.sender, msg.value, tx.gas / 10)
+            return(3) // "Missing amount"
         elif msg.data[1] < 1:
             if msg.value > 0: // "Refunding"
-                send(msg.sender, msg.value, tx.gas - 1000)
-            stop // "Invalid amount"
+                send(msg.sender, msg.value, tx.gas / 10)
+            return(4) // "Invalid amount"
         elif msg.datasize < 3:
             if msg.value > 0: // "Refunding"
-                send(msg.sender, msg.value, tx.gas - 1000)
-            stop // "Missing price"
+                send(msg.sender, msg.value, tx.gas / 10)
+            return(5) // "Missing price"
         elif msg.data[2] < 1 * 10 ^ 8:
             if msg.value > 0: // "Refunding"
-                send(msg.sender, msg.value, tx.gas - 1000)
-            stop // "Invalid price"
+                send(msg.sender, msg.value, tx.gas / 10)
+            return(6) // "Invalid price"
         elif msg.datasize < 4:
             if msg.value > 0: // "Refunding"
-                send(msg.sender, msg.value, tx.gas - 1000)
-            stop // "Missing market ID"
-        elif msg.data[3] < 1 or msg.data[3] > 1:
+                send(msg.sender, msg.value, tx.gas / 10)
+            return(7) // "Missing market ID"
+        elif msg.data[3] > 1: // # or msg.data[3] < 1:
             if msg.value > 0: // "Refunding"
-                send(msg.sender, msg.value, tx.gas - 1000)
-            stop // "Invalid market ID"
+                send(msg.sender, msg.value, tx.gas / 10)
+            return(8) // "Invalid market ID"
     if msg.datasize > 4:
         if msg.value > 0: // "Refunding"
-            send(msg.sender, msg.value, tx.gas - 1000)
-        stop // "Too many arguments"
+            send(msg.sender, msg.value, tx.gas / 10)
+        return(9) // "Too many arguments"
     markets = array(3)
     marketa = array(4)
     marketb = array(4)
@@ -49,40 +152,50 @@ if status == 1:
     marketb[0] = "ETH/XETH"
     marketb[1] = 1 * 10 ^ 19 // "Minimum XETH trade: %d" % (marketb[1] / (10 ** 18))
     marketb[2] = 1 * 10 ^ 19
-    marketb[3] = 0x5d1e0748f1277a966e2e6db4c695a13bfaa3b212
+    marketb[3] = contract.storage[6]
     markets[0] = 2
     markets[1] = marketa
     markets[2] = marketb
-    balances = contract.storage[3]
     amount = msg.data[1] // "Trade amount: %d" % amount
     price = msg.data[2] // "Trade price: %d" % price
-    if amount > 2^256 - 1 or amount < 1:
+    if amount > 2^255: // # or amount < 1:
         if msg.value > 0: // "Refunding"
-            send(msg.sender, msg.value, tx.gas - 1000)
-        stop // "Amount out of range"
-    if price > 2^256 - 1 or price < 1 * 10 ^ 8 + 1:
+            send(msg.sender, msg.value, tx.gas / 10)
+        return(10) // "Amount out of range"
+    if price > 2^255: // # or price < 1 * 10 ^ 8 + 1:
         if msg.value > 0: // "Refunding"
-            send(msg.sender, msg.value, tx.gas - 1000)
-        stop // "Price out of range"
-    if msg.data[0] > 0 and msg.data[0] < 3:
+            send(msg.sender, msg.value, tx.gas / 10)
+        return(11) // "Price out of range"
+    if msg.data[0] < 3: // # and msg.data[0] < 0:
         marketkey = msg.data[3]
-        market = markets[marketkey]
         if marketkey == 1: // "Checking trade amounts and balances"
-            if msg.data[0] == 1 and amount < market[1]: // "TODO - Check BTC balances"
-                if msg.value > 0: // "Refunding"
-                    send(msg.sender, msg.value, tx.gas - 1000)
-                stop // "Minimum BTC trade amount not met, minimum is %s, got %d" % (market[1], amount)
-            if msg.data[0] == 2 and amount < market[2]:
-                if msg.value > 0: // "Refunding"
-                    send(msg.sender, msg.value, tx.gas - 1000)
-                stop // "Minimum ETH trade amount not met, minimum is %s, got %d" % (market[2], msg.value)
-            if msg.data[0] == 2 and msg.value < market[2]:
-                if msg.value > 0: // "Refunding"
-                    send(msg.sender, msg.value, tx.gas - 1000)
-                stop // "Minimum ETH value not met, minimum is %s, got %d" % (market[2], msg.value)
+            market = marketa // # [marketkey]
+            if msg.data[0] == 1:
+                if amount < market[1]: // "TODO - Check BTC balances"
+                    if msg.value > 0: // "Refunding"
+                        send(msg.sender, msg.value, tx.gas / 10)
+                    return(12) // "Minimum BTC trade amount not met, minimum is %s, got %d" % (market[1], amount)
+            if msg.data[0] == 2:
+                if amount < market[2]:
+                    if msg.value > 0: // "Refunding"
+                        send(msg.sender, msg.value, tx.gas / 10)
+                    return(13) // "Minimum ETH trade amount not met, minimum is %s, got %d" % (market[2], msg.value)
+                if msg.value < market[2]:
+                    if msg.value > 0: // "Refunding"
+                        send(msg.sender, msg.value, tx.gas / 10)
+                    return(14) // "Minimum ETH value not met, minimum is %s, got %d" % (market[2], msg.value)
             pricekey = price // "Trade amounts and balances OK for %s" % market[0]
-            book = contract.storage[pricekey] // "Current price orderbook: %s" % book
-            if book == 0:
+            balances = contract.storage[3]
+            indexes = contract.storage[4]
+            trades = contract.storage[5]
+            bookcount = contract.storage[price] // "Getting last orderbook count: %s" % bookcount
+            data = array(2)
+            data[0] = bookcount
+            data[1] = price
+            book = array(bookcount + 2)
+            msg(trades, 0, tx.gas / 10, data, 2, book) // "Current price orderbook:"
+            contract.storage[10] = book[3]
+            if !book:
                 book = array(2)
                 book[0] = 2
                 book[1] = 1
@@ -106,9 +219,22 @@ if status == 1:
             else:
                 book = book + ba
             crosskey = booknonce
-            contract.storage[pricekey] = book // "Trade added, checking price indexes"
-            indexes = contract.storage[4]
-            index = indexes[marketkey] // "Indexed prices: %s" % index
+            sendbookadd = array(6)
+            sendbookadd[0] = 1
+            sendbookadd[1] = bookadd[0]
+            sendbookadd[2] = bookadd[1]
+            sendbookadd[3] = bookadd[2]
+            sendbookadd[4] = bookadd[3]
+            sendbookadd[5] = bookadd[4]
+            bookcount = msg(trades, 0, tx.gas / 10, sendbookadd, 6) // "contract.storage[pricekey] = book Trade added, checking price indexes"
+            contract.storage[pricekey] = bookcount
+            # indexes = array(2) // "TODO - GET INDEXES - contract.storage[4]..."
+            # indexes[0] = [0]
+            # indexes[1] = [0]
+            # index = indexes[marketkey] // "Indexed prices: %s" % index
+            lastindexcount = contract.storage[10+marketkey]
+            index = array(lastindexcount)
+            index = msg(indexes, 0, tx.gas / 10, [lastcount], 1)
             indexcount = index[0]
             priceindexed = 0
             replaceindex = 0
@@ -133,9 +259,9 @@ if status == 1:
                         indexcount = indexcount - 1
                     elif currentprice == price: // "Price already indexed @ %d %s at index %d" % (currentprice / (1 * 10 ** 8), market[0], indexcount)
                         priceindex[0] = indexedprices + 1
-                        index[indexcount] = priceindex
-                        indexes[marketkey] = index
-                        contract.storage[4] = indexes
+                        index[indexcount] = priceindex // "TODO - SAVE INDEXES - indexes[marketkey] = index, contract.storage[4] = indexes... Done?"
+                        msg(indexes, 0, tx.gas / 10, index, index[0])
+                        contract.storage[10+marketkey] = index[0]
                         indexkey = indexcount
                         priceindexed = 1
                     if msg.data[0] == 1 and currentprice < price and currentprice > 0: // "Price index of %s below buy price, checking..." % priceindex[1]
@@ -166,24 +292,23 @@ if status == 1:
                 newindex[0] = 1
                 newindex[1] = price
                 if replaceindex > 0: // "Replacing price index %d from %s with %s" % (replaceindex, indexes, newindex)
-                    index[replaceindex] = newindex
-                    indexes[marketkey] = index
+                    index[replaceindex] = newindex // "indexes[marketkey] = index..."
                     indexkey = replaceindex
                 else: // "Adding price index %s to %s" % (newindex, indexes)
                     indexkey = index[0] + 1
                     index[0] = indexkey
                     newaindex = array(1)
                     newaindex[0] = newindex
-                    index = index + newaindex
-                    indexes[marketkey] = index
-                contract.storage[4] = indexes
+                    index = index + newaindex // "TODO - SAVE INDEXES - indexes[marketkey] = index, contract.storage[4] = indexes... Done?"
+                msg(indexes, 0, tx.gas / 10, index, index[0])
+            counttradeat = 0
             while tradeat[0] > 0 and amount > 0: // "Trading at price indexes: %s" % tradeat
                 tradekey = tradeat[0]
                 tradeindex = tradeat[tradekey]
                 currentkey = tradeindex[0]
                 currentprice = tradeindex[1] // "Trading at: %s" % currentprice
                 pricekey = currentprice
-                if pricekey > 0:
+                if pricekey > 0 and counttradeat > 0:
                     book = contract.storage[pricekey]
                 if book > 0:
                     booknonce = book[0]
@@ -244,10 +369,9 @@ if status == 1:
                                         if priceindex[0] == 0:
                                             index[currentkey] = 0
                                         else:
-                                            index[currentkey] = priceindex
-                                indexes[marketkey] = index
-                                contract.storage[4] = indexes
-                                contract.storage[pricekey] = book
+                                            index[currentkey] = priceindex // "TODO - SAVE INDEXES - indexes[marketkey] = index, contract.storage[4] = indexes... Done?"
+                                msg(indexes, 0, tx.gas / 10, index, index[0])
+                                contract.storage[pricekey] = book // "TODO - SAVE BOOK!!!"
                                 if currentprice < price or currentprice > price: // "Updating cross index and book at index %d in %s" % (indexkey, index)
                                     priceindex = index[indexkey]
                                     if priceindex == 0:
@@ -275,6 +399,7 @@ if status == 1:
                         count = count + 1
                         countedall = countedall + 1
                 tradeat[0] = tradeat[0] - 1
+                counttradeat = counttradeat + 1
             count = 2
             countedall = 0
             while count <= booknonce:
@@ -299,17 +424,13 @@ if status == 1:
                 count = count + 1
                 countedall = countedall + 1
         elif msg.value > 0: // "Refunding"
-            send(msg.sender, msg.value, tx.gas - 1000)
+            send(msg.sender, msg.value, tx.gas / 10)
     elif msg.data[0] == 3: // "DEPOSIT"
         data = array(2)
         data[0] = msg.sender
         data[1] = msg.value
-        res = msg(balances, msg.value, tx.gas - 1000, data, 2) // "Updating BalancesContract"
-        if res == "OK":
-            return("BalancesContract updated")
-        else:
-            return("Error updating BalancesContract")
-        stop // "Not implemented yet"
+        res = msg(balances, msg.value, tx.gas / 10, data, 2) // "Updating BalancesContract"
+        return(res)
     elif msg.data[0] == 4: // "WITHDRAW"
         coin = msg.data[2]
         if coin == 1: // "ETH"
@@ -332,7 +453,9 @@ if status == 1:
         stop // "Not implemented yet"
     elif msg.data[0] == 6: // "ADDMARKET"
         if msg.value < 1 * 10 ^ 21:
-            stop // "Insufficient deposit to add market"
+            if msg.value > 0: // "Refunding"
+                send(msg.sender, msg.value, tx.gas / 10)
+            return(0) // "Insufficient deposit to add market"
         markets = contract.storage[3] // "TODO... obsolete"
         newmarket = array(4) // "TODO - Check data..."
         newmarket[0] = amount
@@ -346,21 +469,29 @@ if status == 1:
         data = array(2)
         data[0] = msg.data[3]
         data[1] = 0
-        res = msg(balances, msg.value, tx.gas - 1000, data, 2) // "Updating BalancesContract"
+        res = msg(balances, msg.value, tx.gas / 10, data, 2) // "Updating BalancesContract"
         if res == "OK":
             return("BalancesContract updated")
         else:
             return("Error updating BalancesContract")
     elif msg.data[0] == 7:
-        stop // "Not implemented yet"
+        return(0) // "Not implemented yet"
     elif msg.data[0] == 8 and msg.sender == contract.storage[2]:
-        contract.storage[2] = msg.data[1]
-        stop // "Set owner to %s" % msg.data[1]
+        contract.storage[2] = msg.data[1] // "Set owner to %s" % msg.data[1]
+        return(msg.data[1])
     elif msg.data[0] == 9 and msg.sender == contract.storage[2]:
-        contract.storage[2] = msg.data[1]
-        stop // "Set Balances owner to %s" % msg.data[1]
+        contract.storage[2] = msg.data[1] // "Set Balances owner to %s" % msg.data[1]
+        return(msg.data[1])
+    elif msg.data[0] > 9: // "Input out of range"
+        if msg.value > 0: // "Refunding"
+            send(msg.sender, msg.value, tx.gas / 10)
+        return(0) // "Protect the citizens"
+        # suicide(msg.sender) // "Protect the citizens"
     else:
-        suicide(msg.sender) // "Protect the citizens"
+        if msg.value > 0: // "Refunding"
+            send(msg.sender, msg.value, tx.gas - 100)
+        return(0) // "Protect the citizens"
+        # suicide(msg.sender) // "Protect the citizens"
     if msg.value > 0:
         reward = ((amount * price) / (1 * 10 ^ 21)) / 100 // "Sending reward of %s to %s" % (reward, msg.sender)
         data = array(2)
@@ -368,33 +499,21 @@ if status == 1:
         data[1] = reward
         xeth = markets[1]
         xethaddr = xeth[3]
-        msg(xethaddr, reward, tx.gas - 1000, data, 2) // #define xethaddr=XETH
+        msg(xethaddr, reward, tx.gas / 10, data, 2) // #define xethaddr=XETH
     if amount == 0:
-        owner = contract.storage[2]
-        suicide(owner) // "TODO - Execute trades"
+        if msg.value > 0: // "Refunding"
+            send(msg.sender, msg.value, tx.gas / 10)
+        return(0) // "Protect the citizens"
+        # owner = contract.storage[2]
+        # suicide(owner) // "TODO - Execute trades"
     else:
-        stop // "Order placed"
-else:
-    indexes = array(3)
-    ia = array(1)
-    ia[0] = 0
-    ib = array(1)
-    ib[0] = 0
-    indexes[0] = 2
-    indexes[1] = ia
-    indexes[2] = ib
-    balances = contract.storage[3] // "BalancesContract"
-    contract.storage[5] = msg.value // "ETH base funds: %d ETH" % (msg.value / 10 ** 18)
+        return(20) // "Order placed"
+elif msg.data[0]:
+    contract.storage[3] = msg.data[0] // "BalancesContract"
+    contract.storage[4] = msg.data[1] // "IndexesContract"
+    contract.storage[5] = msg.data[2] // "TradesContract"
+    contract.storage[6] = msg.data[3] // "XETHContract"
     contract.storage[2] = msg.sender // #define msg.sender=CAK
-    contract.storage[1] = 1
-    balance = array(2) // "Setting own balance for %s to %s" % (contract.address, msg.value)
-    balance[0] = tx.origin
-    balance[1] = msg.value
-    gas = tx.gas / 2
-    ret = msg(balances, 0, gas, balance, 2)
-    contract.storage[4] = indexes // "TODO - embed Balances contract code? balances = create(value, tx.gas - 1000, code, 15)"
-    if ret:
-        ret = "EtherEx initialized"
-        return(ret)
-    else:
-        return(ret)
+    contract.storage[1] = 1 // "TODO - SET INDEXES - contract.storage[4] = indexes - TODO - embed Balances contract code? balances = create(value, tx.gas / 10, code, 15)..."
+    ret = "EtherEx initialized"
+    return(ret)
