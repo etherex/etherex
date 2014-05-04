@@ -6,6 +6,7 @@ databases = {}
 class DB(object):
 
     def __init__(self, dbfile):
+        self.dbfile = dbfile
         if dbfile not in databases:
             databases[dbfile] = leveldb.LevelDB(dbfile)
         self.db = databases[dbfile]
@@ -27,3 +28,13 @@ class DB(object):
 
     def delete(self, key):
         return self.db.Delete(key)
+
+    def has_key(self, key):
+        try:
+            self.get(key)
+            return True
+        except KeyError:
+            return False
+
+    def __contains__(self, key):
+        return self.has_key(key)

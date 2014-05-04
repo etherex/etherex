@@ -1,32 +1,63 @@
-frm = msg.sender
-status = contract.storage[1]
-balance = contract.storage[frm]
-if msg.value > 0: // "Transfering value to balances: %s" % msg.value
-    balance = balance + msg.value
-    contract.storage[frm] = balance
-if status == 1:
-    addr = msg.data[0]
-    if addr < 2:
-        ret = "Invalid address"
-        return(ret)
-    balance = contract.storage[addr]
-    if msg.datasize == 1:
-        return(balance)
-    elif msg.sender == contract.storage[2]:
+#
+# Balances (XETH)
+#
+init:
+    contract.storage[2] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31
+code:
+    status = contract.storage[1]
+    if status == 1: // "Running contract..."
+        balance = contract.storage[msg.sender] // "Balance of %s: %d" % (msg.sender, balance)
+        if msg.value > 0: // "Transfering value to XETH: %s" % msg.value
+            balance = balance + msg.value
+            contract.storage[msg.sender] = balance
+        to = msg.data[0]
         value = msg.data[1]
-        if value < 1 or value > 2^256-1:
-            ret = "Invalid value"
-            return(ret)
+        if to < 100:
+            return(0) // "msg.data[0] out of bounds: %s" % to
+        if value < 0:
+            return(0) // "msg.data[1] out of bounds: %s" % value
+        if balance < value:
+            return(0) // "Insufficient funds, %s has %d needs %d" % (msg.sender, balance, value)
+        else: // "Adjusting values by %d" % value
+            balance = contract.storage[msg.sender] - value
+            contract.storage[msg.sender] = balance
+            contract.storage[to] = contract.storage[to] + value
         if msg.datasize == 3:
             if msg.data[2] == 1:
-                contract.storage[addr] = balance + value
-            elif msg.data[2] == 0:
-                contract.storage[addr] = balance - value
-        else:
-            contract.storage[addr] = value
-        return(1)
-    else:
-        return(0)
-else: // # if msg.sender == contract.storage[2]:
-    contract.storage[2] = msg.data[0] // #define msg.data[0]=EX
-    contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.data[0]
+                ret = contract.storage[to] // "Balance of %s: %s" % (to, ret)
+                return(ret)
+            elif msg.data[2] == 2: // "Withdraw"
+                if msg.sender == contract.storage[2]:
+                    balance = contract.storage[msg.data[0]]
+                    if balance < value:
+                        return(0) // "Insufficient funds, %s had %d, needed %d" % (msg.data[0], balance, value)
+                elif balance < value:
+                    return(0) // "Insufficient funds, %s has %d needs %d" % (msg.sender, balance, value)
+                contract.storage[msg.sender] = contract.storage[msg.sender] - value
+                send(msg.data[0], value, tx.gas / 2)
+                return(1)
+            elif msg.data[2] == 3: // "Checking ownership"
+                owner = contract.storage[2]
+                isowner = 0
+                if to == owner: // "Checking %s against %s" % (to, owner)
+                    isowner = owner
+                return(isowner)
+            elif msg.data[2] == 4 and msg.sender == contract.storage[2]: // #define 0x45746865724578=EX
+                if value < 1 or value > 1 * 10 ^ 21:
+                    return(0)
+                contract.storage[to] = contract.storage[to] + value // "Minting %d" % value
+            elif msg.data[2] == 5 and msg.sender == contract.storage[2]:
+                contract.storage[2] = msg.data[1]
+                return(0) // "Set owner to %s" % msg.data[1]
+    else: // # if msg.sender == contract.storage[2]:
+        n = 3
+        owners = array(n)
+        owners[0] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31 // #define 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31=CAK
+        owners[1] = 0xe559de5527492bcb42ec68d07df0742a98ec3f1e // #define 0xe559de5527492bcb42ec68d07df0742a98ec3f1e=EOAR
+        owners[2] = 0xf9e57456f18d90886263fedd9cc30b27cd959137 // #define 0xf9e57456f18d90886263fedd9cc30b27cd959137=FAB
+        i = 0
+        while i < n:
+            contract.storage[owners[i]] = msg.value / 3
+            i = i + 1
+        contract.storage[2] = msg.data[0]
+        contract.storage[1] = 1 // "Initializing storage for creators %s" % owners

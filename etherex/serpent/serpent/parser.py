@@ -19,6 +19,7 @@ def strip_line(ln):
     else:
         return ln2
 
+
 # Parse the statement-level structure, including if and while statements
 def parse_lines(lns):
     o = []
@@ -26,53 +27,65 @@ def parse_lines(lns):
     while i < len(lns):
         main = lns[i]
         # Skip empty lines
-        if len(main.strip()) == 0:
+        if len(main.strip()) == 0 or main.strip()[:2] == '//' or main.strip()[:1] == '#':
             i += 1
             continue
         if spaces(main) > 0:
             raise Exception("Line "+str(i)+" indented too much!")
         main = strip_line(main)
         # Grab the child block of an if statement
-        start_child_block = i+1
         indent = 99999999
         i += 1
         child_lns = []
         while i < len(lns):
             if len(strip_line(lns[i])) > 0:
                 sp = spaces(lns[i])
-                if sp == 0: break
-                indent = min(sp,indent)
+                if sp == 0:
+                    break
+                indent = min(sp, indent)
                 child_lns.append(lns[i])
             i += 1
-        child_block = map(lambda x:x[indent:],child_lns)
+        child_block = map(lambda x: x[indent:], child_lns)
         # Calls parse_line to parse the individual line
         out = parse_line(main)
         # Include the child block into the parsed expression
-        if out[0] in ['if', 'else', 'while', 'else if']:
+        if out[0] in ['if', 'else', 'while', 'else if', 'init', 'code']:
             if len(child_block) == 0:
-                raise Exception("If/else/while statement must have sub-clause! (%d)" % i)
+                raise Exception("If/else/while statement must have\
+                                 sub-clause! (%d)" % i)
             else:
                 out.append(parse_lines(child_block))
         else:
             if len(child_block) > 0:
-                raise Exception("Not an if/else/while statement, can't have sub-clause! (%d)" % i)
+                raise Exception("Not an if/else/while statement,\
+                                 can't have sub-clause! (%d)" % i)
         # This is somewhat complicated. Essentially, it converts something like
-        # "if c1 then s1 elif c2 then s2 elif c3 then s3 else s4" (with appropriate
-        # indenting) to [ if c1 s1 [ if c2 s2 [ if c3 s3 s4 ] ] ]
+        # "if c1 then s1 elif c2 then s2 elif c3 then s3 else s4" (with
+        # appropriate indenting) to [ if c1 s1 [ if c2 s2 [ if c3 s3 s4 ] ] ]
         if out[0] == 'else if':
-            if len(o) == 0: raise Exception("Cannot start with else if! (%d)" % i)
+            if len(o) == 0:
+                raise Exception("Cannot start with else if! (%d)" % i)
             u = o[-1]
-            while len(u) == 4: u = u[-1]
+            while len(u) == 4:
+                u = u[-1]
             u.append(['if'] + out[1:])
         elif out[0] == 'else':
-            if len(o) == 0: raise Exception("Cannot start with else! (%d)" % i)
+            if len(o) == 0:
+                raise Exception("Cannot start with else! (%d)" % i)
             u = o[-1]
-            while len(u) == 4: u = u[-1]
+            while len(u) == 4:
+                u = u[-1]
             u.append(out[1])
+        elif out[0] == 'code':
+            if len(o) > 0 and o[-1][0] == 'init':
+                o[-1].append(out[1])
+            else:
+                o.append(['init', ['seq'], out[1]])
         else:
             # Normal case: just add the parsed line to the output
             o.append(out)
     return o[0] if len(o) == 1 else ['seq'] + o
+
 
 # Tokens contain one or more chars of the same type, with a few exceptions
 def chartype(c):
@@ -84,6 +97,7 @@ def chartype(c):
     elif c == "'": return 'squote'
     else: return 'symb'
 
+
 # Converts something like "b[4] = x+2 > y*-3" to
 # [ 'b', '[', '4', ']', '=', 'x', '+', '2', '>', 'y', '*', '-', '3' ]
 def tokenize(ln):
@@ -93,10 +107,11 @@ def tokenize(ln):
     global cur
     cur = ''
     # Finish a token and start a new one
+
     def nxt():
         global cur
         if len(cur) >= 2 and cur[-1] == '-':
-            o.extend([cur[:-1],'-'])
+            o.extend([cur[:-1], '-'])
         elif len(cur.strip()) >= 1:
             o.append(cur)
         cur = ''
@@ -134,8 +149,8 @@ def tokenize(ln):
             tp = c
             i += 1
     nxt()
-    if o[-1] in [':',':\n','\n']: o.pop()
-    if tp in ['squote','dquote']: raise Exception("Unclosed string: "+ln)
+    if o[-1] in [':', ':\n', '\n']: o.pop()
+    if tp in ['squote', 'dquote']: raise Exception("Unclosed string: "+ln)
     return o
 
 # This is the part where we turn a token list into an abstract syntax tree
@@ -170,8 +185,9 @@ def toktype(token):
     elif not isinstance(token,str): return 'compound'
     elif token in precedence: return 'binary_operation'
     elif re.match('^[0-9a-zA-Z\-\.#]*$',token): return 'alphanum'
-    elif token[0] in ['"',"'"] and token[0] == token[-1]: return 'alphanum'
+    elif token[0] in ['"', "'"] and token[0] == token[-1]: return 'alphanum'
     else: raise Exception("Invalid token: "+token)
+
 
 # https://en.wikipedia.org/wiki/Shunting-yard_algorithm
 #
@@ -199,25 +215,26 @@ def shunting_yard(tokens):
     iq = [x for x in tokens]
     oq = []
     stack = []
-    prev,tok = None,None
+    prev, tok = None, None
+
     # The normal Shunting-Yard algorithm simply converts expressions into
     # reverse polish notation. Here, we try to be slightly more ambitious
     # and build up the AST directly on the output queue
     # eg. say oq = [ 2, 5, 3 ] and we add "+" then "*"
     # we get first [ 2, [ +, 5, 3 ] ] then [ [ *, 2, [ +, 5, 3 ] ] ]
-    def popstack(stack,oq):
+    def popstack(stack, oq):
         tok = stack.pop()
         typ = toktype(tok)
         if typ == 'binary_operation':
-            a,b = oq.pop(), oq.pop()
-            oq.append([ tok, b, a])
+            a, b = oq.pop(), oq.pop()
+            oq.append([tok, b, a])
         elif typ == 'unary_operation':
             a = oq.pop()
-            oq.append([ tok, a ])
+            oq.append([tok, a])
         elif typ == 'right_paren':
             args = []
             while toktype(oq[-1]) != 'left_paren':
-                args.insert(0,oq.pop())
+                args.insert(0, oq.pop())
             oq.pop()
             if tok == ']' and args[0] != 'id':
                 oq.append(['access'] + args)
@@ -254,11 +271,11 @@ def shunting_yard(tokens):
             # to coalesce all of the function arguments sitting on the
             # oq into a single list
             while len(stack) and toktype(stack[-1]) != 'left_paren':
-                popstack(stack,oq)
+                popstack(stack, oq)
             if len(stack):
                 stack.pop()
             stack.append(tok)
-            popstack(stack,oq)
+            popstack(stack, oq)
         elif typ == 'unary_operation' or typ == 'binary_operation':
             # -5 -> 0 - 5
             if tok == '-' and toktype(prev) not in ['alphanum', 'right_paren']:
@@ -266,36 +283,37 @@ def shunting_yard(tokens):
             # Handle BEDMAS operator precedence
             prec = precedence[tok]
             while len(stack) and toktype(stack[-1]) == 'binary_operation' and precedence[stack[-1]] < prec:
-                popstack(stack,oq)
+                popstack(stack, oq)
             stack.append(tok)
         elif typ == 'comma':
             # Finish evaluating all arithmetic before the comma
             while len(stack) and toktype(stack[-1]) != 'left_paren':
-                popstack(stack,oq)
+                popstack(stack, oq)
         elif typ == 'colon':
             # Colon is like a comma except it stays in the argument list
             while len(stack) and toktype(stack[-1]) != 'right_paren':
-                popstack(stack,oq)
+                popstack(stack, oq)
             oq.append(tok)
     while len(stack):
-        popstack(stack,oq)
+        popstack(stack, oq)
     if len(oq) == 1:
         return oq[0]
     else:
         raise Exception("Wrong number of items left on stack: "+str(oq))
 
+
 def parse_line(ln):
     tokens = tokenize(ln.strip())
-    if tokens[0] == 'if' or tokens[0] == 'while':
-        return [ tokens[0], shunting_yard(tokens[1:]) ]
+    if tokens[0] in ['if', 'while']:
+        return [tokens[0], shunting_yard(tokens[1:])]
     elif len(tokens) >= 2 and tokens[0] == 'else' and tokens[1] == 'if':
-        return [ 'else if', shunting_yard(tokens[2:]) ]
+        return ['else if', shunting_yard(tokens[2:])]
     elif len(tokens) >= 1 and tokens[0] == 'elif':
-        return [ 'else if', shunting_yard(tokens[1:]) ]
-    elif len(tokens) == 1 and tokens[0] == 'else':
-        return [ 'else' ]
+        return ['else if', shunting_yard(tokens[1:])]
+    elif len(tokens) == 1 and tokens[0] in ['else', 'init', 'code']:
+        return [tokens[0]]
     elif '=' in tokens:
         eqplace = tokens.index('=')
-        return [ 'set', shunting_yard(tokens[:eqplace]), shunting_yard(tokens[eqplace+1:]) ]
+        return ['set', shunting_yard(tokens[:eqplace]), shunting_yard(tokens[eqplace+1:])]
     else:
         return shunting_yard(tokens)

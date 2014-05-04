@@ -7,14 +7,14 @@ x[1] = 6
 x[2] = 8
 ================
 x = msg.datasize
-y = msg.data[0]
+y = msg.data
 z = msg.sender
-msg(z,10^18,0,0,y,x)
+o = msg(z,10^18,0,y,x)
 ================
 if msg.value <= 25 * 10^18:
-    stop
+    return(0)
 elif contract.storage[msg.data[0]] or msg.data[0] < 1000:
-    stop
+    return(1)
 contract.storage[msg.data[0]] = msg.data[1]
 ================
 while i < 997:

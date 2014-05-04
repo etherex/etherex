@@ -1,3 +1,5 @@
+import logging
+import logging.config
 from sha3 import sha3_256
 from bitcoin import privtopub
 import struct
@@ -5,6 +7,10 @@ import os
 import sys
 import errno
 import rlp
+from rlp import big_endian_to_int, int_to_big_endian
+
+
+logger = logging.getLogger(__name__)
 
 
 def sha3(seed):
@@ -57,28 +63,9 @@ def coerce_to_bytes(x):
         return x
 
 
-def int_to_big_endian(integer):
-    '''convert a integer to big endian binary string'''
-    # 0 is a special case, treated same as ''
-    if integer == 0:
-        return ''
-    s = '%x' % integer
-    if len(s) & 1:
-        s = '0' + s
-    return s.decode('hex')
-
-
 def int_to_big_endian4(integer):
     ''' 4 bytes big endian integer'''
     return struct.pack('>I', integer)
-
-
-def big_endian_to_int(string):
-    '''convert a big endian binary string to integer'''
-    # '' is a special case, treated same as 0
-    string = string or '\x00'
-    s = string.encode('hex')
-    return long(s, 16)
 
 
 def recursive_int_to_big_endian(item):
@@ -148,7 +135,7 @@ def encode_addr(v):
 
 def encode_int(v):
     '''encodes an integer into serialization'''
-    if not isinstance(v, (int, long)) or v < 0 or v >= 2**256:
+    if not isinstance(v, (int, long)) or v < 0 or v >= 2 ** 256:
         raise Exception("Integer invalid or out of range")
     return int_to_big_endian(v)
 
@@ -210,31 +197,95 @@ def print_func_call(ignore_first_arg=False, max_call_number=100):
     return inner
 
 
-def mkdir_p(path):
-    try:
-        os.makedirs(path)
-    except OSError as e:
-        if e.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:
-            raise
+class DataDir(object):
 
-
-def ensure_get_eth_dir():
     ethdirs = {
         "linux2": "~/.pyethereum",
         "darwin": "~/Library/Application Support/Pyethereum/",
         "win32": "~/AppData/Roaming/Pyethereum",
         "win64": "~/AppData/Roaming/Pyethereum",
     }
-    eth_dir = ethdirs.get(sys.platform, '~/.pyethereum')
-    eth_dir = os.path.expanduser(os.path.normpath(eth_dir))
-    mkdir_p(eth_dir)
-    return eth_dir
 
+    def __init__(self):
+        self._path = None
 
-STATEDB_DIR = os.path.join(ensure_get_eth_dir(), 'statedb')
+    def set(self, path):
+        path = os.path.abspath(path)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        assert os.path.isdir(path)
+        self._path = path
+
+    def _set_default(self):
+        p = self.ethdirs.get(sys.platform, self.ethdirs['linux2'])
+        self.set(os.path.expanduser(os.path.normpath(p)))
+
+    @property
+    def path(self):
+        if not self._path:
+            self._set_default()
+        return self._path
+
+data_dir = DataDir()
 
 
 def get_db_path():
-    return STATEDB_DIR
+    return os.path.join(data_dir.path, 'statedb')
+
+
+def configure_logging(loggerlevels=':DEBUG', verbosity=1):
+    logconfig = dict(
+        version=1,
+        disable_existing_loggers=False,
+        formatters=dict(
+            debug=dict(
+                format='[%(asctime)s] %(name)s %(levelname)s %(threadName)s:'
+                ' %(message)s'
+            ),
+            minimal=dict(
+                format='%(message)s'
+            ),
+        ),
+        handlers=dict(
+            default={
+                'level': 'INFO',
+                'class': 'logging.StreamHandler',
+                'formatter': 'minimal'
+            },
+            verbose={
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+                'formatter': 'debug'
+            },
+        ),
+        loggers=dict()
+    )
+
+    for loggerlevel in filter(lambda _: ':' in _, loggerlevels.split(',')):
+        name, level = loggerlevel.split(':')
+        logconfig['loggers'][name] = dict(
+            handlers=['verbose'], level=level, propagate=False)
+
+    if len(logconfig['loggers']) == 0:
+        logconfig['loggers'][''] = dict(
+            handlers=['default'],
+            level={0: 'ERROR', 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}.get(
+                verbosity),
+            propagate=True)
+
+    logging.config.dictConfig(logconfig)
+    # logging.debug("logging set up like that: %r", logconfig)
+
+
+class Denoms():
+    def __init__(self):
+        self.wei = 1
+        self.babbage = 10**3
+        self.lovelace = 10**6
+        self.shannon = 10**9
+        self.szabo = 10**12
+        self.finney = 10**15
+        self.ether = 10**18
+        self.turing = 2**256
+
+denoms = Denoms()

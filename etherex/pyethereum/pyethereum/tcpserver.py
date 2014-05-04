@@ -34,7 +34,6 @@ class TcpServer(StoppableLoopThread):
         sock.listen(5)
         self.sock = sock
         self.ip, self.port = sock.getsockname()
-        signals.local_address_set.send(self, ip=self.ip, port=self.port)
         logger.info("TCP server started {0}:{1}".format(self.ip, self.port))
         super(TcpServer, self).pre_loop()
 
@@ -46,10 +45,10 @@ class TcpServer(StoppableLoopThread):
             traceback.print_exc(file=sys.stdout)
             time.sleep(0.1)
             return
-        signals.connection_accepted.send(sender=self,
-                                         connection=connection,
-                                         ip=ip,
-                                         port=port)
+        signals.peer_connection_accepted.send(sender=self,
+                                              connection=connection,
+                                              ip=ip,
+                                              port=port)
 
 tcp_server = TcpServer()
 

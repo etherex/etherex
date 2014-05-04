@@ -1,38 +1,52 @@
-status = contract.storage[1]
-exchange = contract.storage[2]
-last = contract.storage[10]
-# if msg.value: // "Refunding excess value: %s" % msg.value
-#     ret = send(msg.sender, msg.value, tx.gas / 2)
-#     return(ret)
-if status == 1:
-    if msg.datasize == 1: // "Getting index"
-        if last > 10:
-            total = (last - 10) / 2
-        else:
-            total = 0
-        indexes = array(last - 9)
-        indexes[0] = 0
-        i = 1
-        while i < last - 10:
-            indexes[i] = contract.storage[10 + i]
-            i = i + 1
-        return(indexes, last + 1)
-    elif msg.datasize > 1:
-        if msg.data[0] == 1:
-            if msg.sender == exchange: // "Adding indexes"
-                i = 1
-                while i < msg.datasize:
-                    contract.storage[10 + i] = msg.data[i]
-                    i = i + 1
-                last = msg.datasize - 1
-                contract.storage[10] = last
-                return(last)
-        elif msg.data[0] == 0:
-            if msg.sender == exchange: // "Removing index"
-                # contract.storage[10] = contract.storage[10] - 1
-                contract.storage[msg.data[1]] = 0
-                return(0)
-else: // # if msg.sender == contract.storage[2]:
-    contract.storage[10] = 10
-    contract.storage[2] = msg.data[0] // #define msg.data[0]=EX
-    contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.data[0]
+#
+# Indexes
+#
+init:
+    contract.storage[2] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31
+code:
+    status = contract.storage[1]
+    exchange = contract.storage[2]
+    last = contract.storage[10]
+    # if msg.value > 0: # "Refunding excess value: %s" % msg.value
+    #     ret = send(msg.sender, msg.value, tx.gas / 2)
+    #     return(ret)
+    if status == 1:
+        slots = 2
+        if msg.datasize == 1: // "Getting indexes"
+            if last > 10:
+                total = (last - 10) / slots
+            else:
+                total = 0
+            indexes = array(total * slots + 1)
+            indexes[0] = 0
+            i = 1
+            while i < last - 10:
+                indexes[i] = contract.storage[100 + i]
+                i = i + 1
+            return(indexes, last + 1)
+        elif msg.datasize > 1:
+            if msg.data[0] == 1:
+                if msg.sender == exchange: // "Adding index"
+                    i = 0
+                    while i < slots:
+                        contract.storage[last + 100 + i] = msg.data[i + 1]
+                        i = i + 1
+                    contract.storage[10] = last + slots
+                    return(last)
+            if msg.data[0] == 2:
+                if msg.sender == exchange: // "Replacing index"
+                    if msg.datasize < 4:
+                        return(0)
+                    contract.storage[msg.data[2] * slots + 100] = msg.data[1]
+                    contract.storage[10] = last + slots
+                    return(last)
+            elif msg.data[0] == 0:
+                if msg.sender == exchange: // "Removing index # %d" % msg.data[1]
+                    contract.storage[msg.data[1] * slots + 100] = 0
+                    contract.storage[msg.data[1] * slots + 101] = 0
+                    # contract.storage[10] = contract.storage[10] - 1
+                    return(1)
+    else: // # if msg.sender == contract.storage[2]:
+        contract.storage[10] = 10
+        contract.storage[2] = msg.data[0] // #define msg.data[0]=EX
+        contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.data[0]

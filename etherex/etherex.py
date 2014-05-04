@@ -1,4 +1,5 @@
 import sys
+sys.path.insert(0, './serpent')
 import serpent
 sys.path.insert(0, './pyethereum')
 from pyethereum import transactions, blocks, processblock, utils
@@ -37,11 +38,10 @@ def write_owner(root_hash, filename):
 def init_system(genesis, key):
     code = serpent.compile(open('contracts/etherex.ser').read())
     # print code.encode('hex')
-    tx_make_root = transactions.contract(0,0,10**12, 10000, code).sign(key)
-    root_contract = processblock.apply_tx(genesis, tx_make_root)[1]
+    tx_make_root = transactions.contract(0,0,10**12, 100000, code).sign(key)
+    root_contract = processblock.apply_tx(genesis, tx_make_root)
 
-    root_hash = hex(int(root_contract.encode('hex'), 16))
-    print "Contract address: " + root_hash
+    print "Contract address: " + root_contract[1]
 
     # f = lambda x: write_owner(root_hash, x)
     # map(f, ['contracts/balances_init.ser', 'contracts/trades_init.ser', 'contracts/indexes_init.ser', 'contracts/xeth_init.ser'])
@@ -52,48 +52,49 @@ def init_system(genesis, key):
     tx_make_indexes = transactions.contract(2,0,10**12, 10000, code).sign(key)
     code = serpent.compile(open('contracts/trades.ser').read())
     tx_make_trades = transactions.contract(3,0,10**12, 10000, code).sign(key)
-    code = serpent.compile(open('contracts/xeth.ser').read())
+    code = serpent.compile(open('contracts/currencies.ser').read())
     tx_make_currency = transactions.contract(4,0,10**12, 10000, code).sign(key)
 
     balances_contract = processblock.apply_tx(genesis, tx_make_balances)
-    print "Balances address: " + balances_contract[1]
+    print "Balances (XETH) address: " + balances_contract[1]
     indexes_contract = processblock.apply_tx(genesis, tx_make_indexes)
     print "Indexes address: " + indexes_contract[1]
     trades_contract = processblock.apply_tx(genesis, tx_make_trades)
     print "Trades address: " + trades_contract[1]
-    currency_contract = processblock.apply_tx(genesis, tx_make_currency)
-    print "Currency address: " + currency_contract[1]
+    currencies_contract = processblock.apply_tx(genesis, tx_make_currency)
+    print "Currencies address: " + currencies_contract[1]
 
+    r_contract = root_contract[1]
     b_contract = balances_contract[1]
     i_contract = indexes_contract[1]
     t_contract = trades_contract[1]
-    c_contract = currency_contract[1]
+    c_contract = currencies_contract[1]
 
     # init EtherEx
     data = serpent.encode_datalist([b_contract, i_contract, t_contract, c_contract])
-    tx_init_root = transactions.Transaction(5, 10**12, 10000, root_contract, 10 * 10 ** 18, data).sign(key)
+    tx_init_root = transactions.Transaction(5, 10**12, 10000, r_contract, 0, data).sign(key)
     ret = processblock.apply_tx(genesis, tx_init_root)
     print "Result: %s" % serpent.decode_datalist(ret[1])
     # init Balances
-    tx_init_root = transactions.Transaction(6, 10**12, 10000, b_contract, 0, serpent.encode_datalist([root_contract])).sign(key)
+    tx_init_root = transactions.Transaction(6, 10**12, 10000, b_contract, 1 * 10 ** 18, serpent.encode_datalist([r_contract])).sign(key)
     ret = processblock.apply_tx(genesis, tx_init_root)
     print "Result: %s" % serpent.decode_datalist(ret[1])
     # init Indexes
-    tx_init_root = transactions.Transaction(7, 10**12, 10000, i_contract, 0, serpent.encode_datalist([root_contract])).sign(key)
+    tx_init_root = transactions.Transaction(7, 10**12, 10000, i_contract, 0, serpent.encode_datalist([r_contract])).sign(key)
     ret = processblock.apply_tx(genesis, tx_init_root)
     print "Result: %s" % serpent.decode_datalist(ret[1])
     # init Trades
-    tx_init_root = transactions.Transaction(8, 10**12, 10000, t_contract, 0, serpent.encode_datalist([root_contract,b_contract])).sign(key)
+    tx_init_root = transactions.Transaction(8, 10**12, 10000, t_contract, 0, serpent.encode_datalist([r_contract])).sign(key)
     ret = processblock.apply_tx(genesis, tx_init_root)
     print "Result: %s" % serpent.decode_datalist(ret[1])
-    # init Currency
-    tx_init_root = transactions.Transaction(9, 10**12, 10000, c_contract, 10 * 10 ** 18, serpent.encode_datalist([root_contract])).sign(key)
+    # init Currencies
+    tx_init_root = transactions.Transaction(9, 10**12, 10000, c_contract, 0, serpent.encode_datalist([r_contract])).sign(key)
     ret = processblock.apply_tx(genesis, tx_init_root)
     print "Result: %s" % serpent.decode_datalist(ret[1])
 
     # Run tests
-    data = serpent.encode_datalist([2, 10 * 10 ** 19, 1500 * 10 ** 8, 1])
-    tx_init_root = transactions.Transaction(10, 10**12, 100000, root_contract, 10 * 10 ** 19, data).sign(key)
+    data = serpent.encode_datalist([1, 10 * 10 ** 19, 1500 * 10 ** 8, 1])
+    tx_init_root = transactions.Transaction(10, 10**12, 100000, r_contract, 0, data).sign(key)
     ret = processblock.apply_tx(genesis, tx_init_root)
     print "Result: %s" % serpent.decode_datalist(ret[1])
 
@@ -102,7 +103,7 @@ def init_system(genesis, key):
     # ret = processblock.apply_tx(genesis, tx_init_root)
     # print "Result: %s" % serpent.decode_datalist(ret)
 
-    addresses = {root_hash:'etherex', b_contract:'balances', i_contract:'indexes', t_contract:'trades', c_contract:'currency', utils.privtoaddr(key):'me'}
+    addresses = {r_contract:'etherex', b_contract:'balances', i_contract:'indexes', t_contract:'trades', c_contract:'currency', utils.privtoaddr(key):'me'}
 
     print addresses
     return addresses

@@ -6,7 +6,8 @@ import logging
 import signals
 from stoppable import StoppableLoopThread
 from packeter import packeter
-from utils import big_endian_to_int as idec, recursive_int_to_big_endian
+from utils import big_endian_to_int as idec
+from utils import recursive_int_to_big_endian
 import rlp
 
 
@@ -155,6 +156,8 @@ class Peer(StoppableLoopThread):
         if not self.hello_sent:
             self.send_Hello()
 
+        signals.peer_handshake_success.send(sender=self)
+
     def send_Ping(self):
         self.send_packet(packeter.dump_Ping())
         self.last_pinged = time.time()
@@ -166,7 +169,7 @@ class Peer(StoppableLoopThread):
         self.send_packet(packeter.dump_Pong())
 
     def _recv_Pong(self, data):
-        self.send_GetTransactions()  # FIXME
+        pass
 
     def send_Disconnect(self, reason=None):
         logger.info('disconnecting {0}, reason: {1}'.format(
@@ -174,19 +177,20 @@ class Peer(StoppableLoopThread):
         self.send_packet(packeter.dump_Disconnect())
         # end connection
         time.sleep(2)
-        signals.disconnect_requested.send(self)
+        signals.peer_disconnect_requested.send(self)
 
     def _recv_Disconnect(self, data):
         if len(data):
             reason = packeter.disconnect_reasons_map_by_id[idec(data[0])]
             logger.info('{0} sent disconnect, {1} '.format(repr(self), reason))
-        signals.disconnect_requested.send(sender=self)
+        signals.peer_disconnect_requested.send(sender=self)
 
     def send_GetPeers(self):
         self.send_packet(packeter.dump_GetPeers())
 
     def _recv_GetPeers(self, data):
-        signals.request_data_async('peers', self.send_Peers, data)
+        signals.request_data_async(
+            'known_peer_addresses', data, self.send_Peers)
 
     def send_Peers(self, peers):
         packet = packeter.dump_Peers(peers)
@@ -199,7 +203,8 @@ class Peer(StoppableLoopThread):
             ip = '.'.join(str(ord(b or '\x00')) for b in ip)
             port = idec(port)
             logger.debug('received peer address: {0}:{1}'.format(ip, port))
-            signals.new_peer_received.send(sender=self, peer=[ip, port, pid])
+            signals.peer_address_received.send(
+                sender=self, peer=[ip, port, pid])
 
     def send_GetTransactions(self):
         logger.info('asking for transactions')
@@ -207,26 +212,41 @@ class Peer(StoppableLoopThread):
 
     def _recv_GetTransactions(self, data):
         logger.info('asking for transactions')
-        signals.request_data_async('transactions', self.send_Transactions)
+        signals.request_data_async('local_transactions', data,
+                                   self.send_Transactions)
 
     def send_Transactions(self, transactions):
         self.send_packet(packeter.dump_Transactions(transactions))
 
     def _recv_Transactions(self, data):
-        logger.info('received transactions', len(data), self)
-        signals.new_transactions_received.send(sender=self, transactions=data)
+        logger.info('received transactions #%d', len(data))
+        signals.remote_transactions_received.send(
+            sender=self, transactions=data)
 
     def send_Blocks(self, blocks):
         self.send_packet(packeter.dump_Blocks(blocks))
 
     def _recv_Blocks(self, data):
-        signals.new_blocks_received.send(sender=self, blocks=data)
+        signals.remote_blocks_received.send(sender=self, block_lst=data)
 
     def send_GetChain(self, parents=[], count=1):
         self.send_packet(packeter.dump_GetChain(parents, count))
 
     def _recv_GetChain(self, data):
-        signals.request_data_async('blocks', self.send_Blocks, data)
+        """
+        [0x14, Parent1, Parent2, ..., ParentN, Count]
+        Request the peer to send Count (to be interpreted as an integer) blocks 
+        in the current canonical block chain that are children of Parent1 
+        (to be interpreted as a SHA3 block hash). If Parent1 is not present in
+        the block chain, it should instead act as if the request were for Parent2 &c. 
+        through to ParentN. If the designated parent is the present block chain head,
+        an empty reply should be sent. If none of the parents are in the current 
+        canonical block chain, then NotInChain should be sent along with ParentN 
+        (i.e. the last Parent in the parents list). If no parents are passed, then 
+        reply need not be made.
+        """
+        signals.local_chain_requested.send(
+            sender=self, blocks=data[:-1], count=idec(data[-1]))
 
     def send_NotInChain(self, block_hash):
         self.send_packet(packeter.dump_NotInChain(block_hash))
@@ -235,8 +255,12 @@ class Peer(StoppableLoopThread):
         pass
 
     def loop_body(self):
-        send_size = self._process_send()
-        recv_size = self._process_recv()
+        try:
+            send_size = self._process_send()
+            recv_size = self._process_recv()
+        except IOError:
+            self.stop()
+            return 
         # pause
         if not (send_size or recv_size):
             time.sleep(0.1)

@@ -1,13 +1,13 @@
 diff --git a/pyethereum/packeter.py b/pyethereum/packeter.py
-index 2b790c1..0663e28 100644
+index 09267ab..a32633a 100644
 --- a/pyethereum/packeter.py
 +++ b/pyethereum/packeter.py
 @@ -65,7 +65,7 @@ class Packeter(object):
+         dict((v, k) for k, v in disconnect_reasons_map.items())
  
-     # as sent by Ethereum(++)/v0.3.11/brew/Darwin/unknown
      SYNCHRONIZATION_TOKEN = 0x22400891
--    PROTOCOL_VERSION = 11
-+    PROTOCOL_VERSION = 424235
+-    PROTOCOL_VERSION = 0x0c
++    PROTOCOL_VERSION = 0x6792b
+     # is the node s Unique Identifier and is the 512-bit hash that serves to
+     # identify the node.
      NETWORK_ID = 0
-     CLIENT_ID = 'Ethereum(py)/0.0.1'
-     CAPABILITIES = 0x01 + 0x02 + 0x04  # node discovery + transaction relaying

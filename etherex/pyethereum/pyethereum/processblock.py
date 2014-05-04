@@ -1,9 +1,6 @@
 import rlp
 from opcodes import opcodes
 
-from utils import big_endian_to_int as decode_int
-from utils import int_to_big_endian as encode_int
-from utils import sha3
 import utils
 import time
 import blocks
@@ -29,41 +26,32 @@ GTXCOST = 500
 OUT_OF_GAS = -1
 
 
-def process(block, txs):
-    for tx in txs:
-        apply_tx(block, tx)
-    finalize(block)
-
-
-def finalize(block):
-    block.delta_balance(block.coinbase, block.reward)
-
-
 def verify(block, parent):
     assert block.timestamp >= parent.timestamp
     assert block.timestamp <= time.time() + 900
-    block2 = blocks.init_from_parent(parent,
-                                     block.coinbase,
-                                     block.extra_data,
-                                     block.timestamp)
+    block2 = blocks.Block.init_from_parent(parent,
+                                           block.coinbase,
+                                           block.extra_data,
+                                           block.timestamp)
     assert block2.difficulty == block.difficulty
     assert block2.gas_limit == block.gas_limit
+    block2.finalize()  # this is the first potential state change
     for i in range(block.transaction_count):
         tx, s, g = block.transactions.get(utils.encode_int(i))
         tx = transactions.Transaction.deserialize(tx)
         assert tx.startgas + block2.gas_used <= block.gas_limit
-        block2.apply_tx(tx)
+        apply_tx(block2, tx)
         assert s == block2.state.root
         assert g == utils.encode_int(block2.gas_used)
-    finalize(block2)
     assert block2.state.root == block.state.root
-    assert block2.gas_consumed == block.gas_consumed
+    assert block2.gas_used == block.gas_used
     return True
 
 
 class Message(object):
 
     def __init__(self, sender, to, value, gas, data):
+        assert gas >= 0
         self.sender = sender
         self.to = to
         self.value = value
@@ -76,7 +64,7 @@ def apply_tx(block, tx):
         raise Exception("Trying to apply unsigned transaction!")
     acctnonce = block.get_nonce(tx.sender)
     if acctnonce != tx.nonce:
-        raise Exception("Invalid nonce! Sender %s tx %s" %
+        raise Exception("Invalid nonce! sender_acct:%s tx:%s" %
                         (acctnonce, tx.nonce))
     o = block.delta_balance(tx.sender, -tx.gasprice * tx.startgas)
     if not o:
@@ -88,7 +76,9 @@ def apply_tx(block, tx):
     if tx.to:
         result, gas, data = apply_msg(block, tx, message)
     else:
-        result, gas = create_contract(block, tx, message)
+        result, gas, data = create_contract(block, tx, message)
+    if debug:
+        print('applied tx, result', result, 'gas', gas, 'data/code', ''.join(map(chr,data)).encode('hex'))
     if not result:  # 0 = OOG failure in both cases
         block.revert(snapshot)
         block.gas_used += tx.startgas
@@ -99,8 +89,7 @@ def apply_tx(block, tx):
         block.delta_balance(block.coinbase, tx.gasprice * (tx.startgas - gas))
         block.gas_used += tx.startgas - gas
         output = ''.join(map(chr, data)) if tx.to else result.encode('hex')
-    tx_data = [tx.serialize(), block.state.root, encode_int(block.gas_used)]
-    block.add_transaction_to_list(tx_data)
+    block.add_transaction_to_list(tx)
     success = output is not OUT_OF_GAS
     return success, output if success else ''
 
@@ -121,7 +110,7 @@ def decode_datalist(arr):
         arr = ''.join(map(chr, arr))
     o = []
     for i in range(0, len(arr), 32):
-        o.append(decode_int(arr[i:i + 32]))
+        o.append(utils.big_endian_to_int(arr[i:i + 32]))
     return o
 
 
@@ -158,14 +147,13 @@ def apply_msg(block, tx, msg):
 def create_contract(block, tx, msg):
     snapshot = block.snapshot()
     sender = msg.sender.decode('hex') if len(msg.sender) == 40 else msg.sender
-    nonce = encode_int(block.get_nonce(msg.sender))
-    recvaddr = sha3(rlp.encode([sender, nonce]))[12:]
+    nonce = utils.encode_int(block.get_nonce(msg.sender))
+    recvaddr = utils.sha3(rlp.encode([sender, nonce]))[12:]
     # Transfer value, instaquit if not enough
     block.delta_balance(recvaddr, msg.value)
     o = block.delta_balance(msg.sender, msg.value)
     if not o:
         return 0, msg.gas
-    block.set_code(recvaddr, msg.data)
     compustate = Compustate(gas=msg.gas)
     # Main loop
     while 1:
@@ -173,15 +161,15 @@ def create_contract(block, tx, msg):
         if o is not None:
             if o == OUT_OF_GAS:
                 block.revert(snapshot)
-                return 0, 0
+                return 0, 0, []
             else:
                 block.set_code(recvaddr, ''.join(map(chr, o)))
-                return recvaddr, compustate.gas
+                return recvaddr, compustate.gas, o
 
 
 def get_op_data(code, index):
     opcode = ord(code[index]) if index < len(code) else 0
-    if opcode < 96 or (opcode > 240 and opcode <= 255):
+    if opcode < 96 or (opcode >= 240 and opcode <= 255):
         if opcode in opcodes:
             return opcodes[opcode]
         else:
@@ -250,7 +238,7 @@ def apply_op(block, tx, msg, code, compustate):
         import serpent
         if op[:4] == 'PUSH':
             start, n = compustate.pc + 1, int(op[4:])
-            print(op, decode_int(code[start:start + n]))
+            print(op, utils.big_endian_to_int(code[start:start + n]))
         else:
             print(op, ' '.join(map(str, stackargs)),
                   serpent.decode_datalist(compustate.memory))
@@ -320,7 +308,7 @@ def apply_op(block, tx, msg, code, compustate):
         if len(mem) < stackargs[0] + stackargs[1]:
             mem.extend([0] * (stackargs[0] + stackargs[1] - len(mem)))
         data = ''.join(map(chr, mem[stackargs[0]:stackargs[0] + stackargs[1]]))
-        stk.append(rlp.decode(sha3(data), 256))
+        stk.append(rlp.decode(utils.sha3(data), 256))
     elif op == 'ADDRESS':
         stk.append(msg.to)
     elif op == 'BALANCE':
@@ -336,12 +324,12 @@ def apply_op(block, tx, msg, code, compustate):
             stk.append(0)
         else:
             dat = msg.data[stackargs[0]:stackargs[0] + 32]
-            stk.append(decode_int(dat + '\x00' * (32 - len(dat))))
+            stk.append(utils.big_endian_to_int(dat + '\x00' * (32 - len(dat))))
     elif op == 'CALLDATASIZE':
         stk.append(len(msg.data))
     elif op == 'CALLDATACOPY':
-        if len(mem) < stackargs[0] + stackargs[2]:
-            mem.extend([0] * (stackargs[0] + stackargs[2] - len(mem)))
+        if len(mem) < stackargs[1] + stackargs[2]:
+            mem.extend([0] * (stackargs[1] + stackargs[2] - len(mem)))
         for i in range(stackargs[2]):
             if stackargs[0] + i < len(msg.data):
                 mem[stackargs[1] + i] = ord(msg.data[stackargs[0] + i])
@@ -349,10 +337,18 @@ def apply_op(block, tx, msg, code, compustate):
                 mem[stackargs[1] + i] = 0
     elif op == 'GASPRICE':
         stk.append(tx.gasprice)
+    elif op == 'CODECOPY':
+        if len(mem) < stackargs[1] + stackargs[2]:
+            mem.extend([0] * (stackargs[1] + stackargs[2] - len(mem)))
+        for i in range(stackargs[2]):
+            if stackargs[0] + i < len(code):
+                mem[stackargs[1] + i] = ord(code[stackargs[0] + i])
+            else:
+                mem[stackargs[1] + i] = 0
     elif op == 'PREVHASH':
-        stk.append(decode_int(block.prevhash))
+        stk.append(utils.big_endian_to_int(block.prevhash))
     elif op == 'COINBASE':
-        stk.append(decode_int(block.coinbase.decode('hex')))
+        stk.append(utils.big_endian_to_int(block.coinbase.decode('hex')))
     elif op == 'TIMESTAMP':
         stk.append(block.timestamp)
     elif op == 'NUMBER':
@@ -373,7 +369,7 @@ def apply_op(block, tx, msg, code, compustate):
         if len(mem) < stackargs[0] + 32:
             mem.extend([0] * (stackargs[0] + 32 - len(mem)))
         data = ''.join(map(chr, mem[stackargs[0]:stackargs[0] + 32]))
-        stk.append(decode_int(data))
+        stk.append(utils.big_endian_to_int(data))
     elif op == 'MSTORE':
         if len(mem) < stackargs[0] + 32:
             mem.extend([0] * (stackargs[0] + 32 - len(mem)))
@@ -404,7 +400,7 @@ def apply_op(block, tx, msg, code, compustate):
         pushnum = int(op[4:])
         compustate.pc = oldpc + 1 + pushnum
         dat = code[oldpc + 1: oldpc + 1 + pushnum]
-        stk.append(decode_int(dat))
+        stk.append(utils.big_endian_to_int(dat))
     elif op == 'CREATE':
         if len(mem) < stackargs[2] + stackargs[3]:
             mem.extend([0] * (stackargs[2] + stackargs[3] - len(mem)))
@@ -413,14 +409,21 @@ def apply_op(block, tx, msg, code, compustate):
         data = ''.join(map(chr, mem[stackargs[2]:stackargs[2] + stackargs[3]]))
         if debug:
             print("Sub-contract:", msg.to, value, gas, data)
-        create_contract(block, tx, Message(msg.to, '', value, gas, data))
+        addr, gas, code = create_contract(
+            block, tx, Message(msg.to, '', value, gas, data))
+        if debug:
+            print("Output of contract creation:", addr, code)
+        if addr:
+            stk.append(utils.coerce_to_int(addr))
+        else:
+            stk.append(0)
     elif op == 'CALL':
         if len(mem) < stackargs[3] + stackargs[4]:
             mem.extend([0] * (stackargs[3] + stackargs[4] - len(mem)))
         if len(mem) < stackargs[5] + stackargs[6]:
             mem.extend([0] * (stackargs[5] + stackargs[6] - len(mem)))
         gas = stackargs[0]
-        to = encode_int(stackargs[1])
+        to = utils.encode_int(stackargs[1])
         to = (('\x00' * (32 - len(to))) + to)[12:]
         value = stackargs[2]
         data = ''.join(map(chr, mem[stackargs[3]:stackargs[3] + stackargs[4]]))
@@ -446,7 +449,7 @@ def apply_op(block, tx, msg, code, compustate):
             mem.extend([0] * (stackargs[0] + stackargs[1] - len(mem)))
         return mem[stackargs[0]:stackargs[0] + stackargs[1]]
     elif op == 'SUICIDE':
-        to = encode_int(stackargs[0])
+        to = utils.encode_int(stackargs[0])
         to = (('\x00' * (32 - len(to))) + to)[12:]
         block.delta_balance(to, block.get_balance(msg.to))
         block.state.update(msg.to, '')

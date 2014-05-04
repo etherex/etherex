@@ -77,21 +77,21 @@
   }
 </style>
 <script>
-  var etherExAddr = key.addressOf("4b1920c2cebf77afe3c63b3c6d89509313ffbcfa");
-  var tradesAddr = key.addressOf("e140cc3986acda5945313ab89db877fcd94484c7");
-  var xethAddr = key.addressOf("c5a6539111c31fbb85b851c49a59e0eb9207097d");
-  var gavAddr = key.addressOf("929b11b8eeea00966e873a241d4b67f7540d1f38");
+  var etherExAddr = "0xf3968d1b368afb437dd0a912893237c4f31482fc";
+  var tradesAddr = "0x6b385354b319a439b36bbeb74f8b8c0517b359ad";
+  var xethAddr = "0x5d07190100b7e73def243e52eb9e575b939e20ef";
+  var gavAddr = "0x929b11b8eeea00966e873a241d4b67f7540d1f38";
   sendGav = function() {
+    var data = "0x" + document.getElementById("to").value).pad(32);
+    data += bin(document.getElementById("value").value).pad(32);
     eth.transact(
       key.secret(eth.key()),
       0,
       gavAddr,
-      bytes.concat(
-        u256.bytesOf(u256.fromAddress(key.addressOf(document.getElementById("to").value))),
-        u256.bytesOf(u256.value(document.getElementById("value").value))
-      ),
-      u256.value(10000),
-      eth.gasPrice()
+      data,
+      '10000',
+      eth.gasPrice(),
+      'updateBalances'
     );
   };
   // var ba = u256.bytesOf(u256.value(1));
@@ -101,11 +101,11 @@
   // var bs = b1+b2+b3+b4;
   // var b = bytes.fromString(bs,4);
   check = function () {
-    var init = document.getElementById("price").value;
-    var val = u256.toValue(u256.value(init));
-    var check = bytes.toString(bytes.fromString(init,32));
-    var test = u256.toValue(bytes.u256of(u256.bytesOf(u256.value(init))));
-    document.getElementById("check").innerText = init + " wut " + val + " or " + test + " then " + check;
+    // var init = document.getElementById("price").value * Math.pow(10,8);
+    // var val = u256.stringOf(u256.mul(u256.value(document.getElementById("price").value), u256.value(Math.pow(10,2))));
+    // var check = bytes.toString(bytes.fromString(init,32));
+    // var test = u256.toValue(bytes.u256of(u256.bytesOf(u256.value(init))));
+    document.getElementById("check").innerText = unbin(bin(document.getElementById("price").value * Math.pow(10,8))); // + " wut " + val + " or " + test + " then " + check;
     // = bytes.toString(bytes.concat(
     //   [
     //     u256.bytesOf(u256.value(2)),
@@ -126,43 +126,39 @@
     // };
     // data = bytes.concat(u256.bytesOf(u256.value(1)), u256.bytesOf(u256.value(document.getElementById("amount").value)));
     // datb = bytes.concat(u256.bytesOf(u256.value(document.getElementById("price").value)), u256.bytesOf(u256.value(1)));
+    var data = bin(1).pad(32);
+    data += bin(document.getElementById("amount").value * Math.pow(10,18)).pad(32);
+    data += bin(document.getElementById("price").value * Math.pow(10,8)).pad(32);
+    data += bin(1).pad(32);
     eth.transact(
       key.secret(eth.key()),
       0,
       etherExAddr,
-      bytes.concat(
-        [
-          u256.bytesOf(u256.value(1)),
-          u256.bytesOf(u256.value(document.getElementById("amount").value)),
-          u256.bytesOf(u256.value(document.getElementById("price").value)),
-          u256.bytesOf(u256.value(1))
-        ]
-      ),
-      u256.value(100000),
-      eth.gasPrice()
+      data,
+      "100000",
+      eth.gasPrice(),
+      updateBalances
     );
   };
   sell = function() {
+    var data = bin(2).pad(32);
+    data += bin(document.getElementById("amount").value * Math.pow(10,18)).pad(32);
+    data += bin(document.getElementById("price").value * Math.pow(10,8)).pad(32);
+    data += bin(1).pad(32);
     eth.transact(
       key.secret(eth.key()),
-      u256.value(document.getElementById("amount").value),
+      document.getElementById("amount").value * Math.pow(10,18),
       etherExAddr,
-      bytes.concat(
-        [
-          u256.bytesOf(u256.value(2)),
-          u256.bytesOf(u256.value(document.getElementById("amount").value)),
-          u256.bytesOf(u256.value(document.getElementById("price").value)),
-          u256.bytesOf(u256.value(1))
-        ]
-      ),
-      u256.value(100000),
-      eth.gasPrice()
+      data,
+      "100000",
+      eth.gasPrice(),
+      updateBalances
     );
   };
   getOrderbook = function() {
     var table = "<table><tr><th class='book'>Buy</th><th class='book'>Sell</th></tr>";
     var startkey = 100;
-    var lastkey = u256.toValue(eth.storageAt(tradesAddr, u256.value(10)));
+    var lastkey = eth.storageAt(tradesAddr, 10)).bin();
     document.getElementById("last").innerText = lastkey;
     // var trades = u256.toValue(eth.storageAt(tradesAddr, u256.value(startkey)));
     // var prices = eth.keys();
@@ -171,20 +167,21 @@
     for (var i = startkey; i < startkey + lastkey; i = i + 5) {
       // myaddr = u256.toValue(u256.fromAddress(key.address(indexes[i])));
       // price = indexes[i][1];
-      if (!u256.isNull(eth.storageAt(tradesAddr, u256.value(i)))) {
-        var type = u256.toValue(eth.storageAt(tradesAddr, u256.value(i)));
-        var price = u256.toValue(eth.storageAt(tradesAddr, u256.value(i+1))) / Math.pow(10, 8);
+      var value = eth.storageAt(tradesAddr, i).bin();
+      if (value) {
+        var type = eth.storageAt(tradesAddr, i).bin();
+        var price = eth.storageAt(tradesAddr, i+1).bin() / Math.pow(10, 8);
         var strprice = price + " ETH/BTC";
-        var amount = u256.toValue(eth.storageAt(tradesAddr, u256.value(i+2)));
-        var stramount = "<br />of " + u256.ethOf(eth.storageAt(tradesAddr, u256.value(i+2)));
+        var amount = eth.storageAt(tradesAddr, i+2).bin() / Math.pow(10, 18);
+        var stramount = "<br />of " + u256.stringOf(eth.storageAt(tradesAddr, i+2));
         document.getElementById("lastprice").innerText = price;
-        var owner = "<br />by " + key.toAbridged(u256.toAddress(eth.storageAt(tradesAddr, u256.value(i+3))));
+        var owner = "<br />by " + key.toAbridged(eth.storageAt(tradesAddr, i+3).substr(2);
         if (price) {
           table += "<tr>\
                 <td class='book'>" + ((type == 1) ? strprice + stramount + owner : '') + "</td>\
                 <td class='book'>" + ((type == 2) ? strprice + stramount + owner : '') + "</td>\
             </tr>";
-          document.getElementById("price").value = price * Math.pow(10, 8);
+          document.getElementById("price").value = price;
         };
         if (amount) {
           document.getElementById("amount").value = amount;
@@ -196,18 +193,18 @@
   };
   updateBalances = function() {
     getOrderbook();
-    document.getElementById("eth").innerText = u256.ethOf(eth.balanceAt(key.address(eth.key())));
-    document.getElementById("xeth").innerText = u256.ethOf(eth.balanceAt(xethAddr));
-  	document.getElementById("gav").innerText = u256.stringOf(eth.storageAt(gavAddr, u256.fromAddress(eth.account())));
-    document.getElementById("tot").innerText = u256.ethOf(eth.balanceAt(etherExAddr));
+    document.getElementById("eth").innerText = eth.balanceAt("0x" + eth.coinbase);
+    document.getElementById("xeth").innerText = eth.balanceAt(xethAddr);
+  	document.getElementById("gav").innerText = eth.storageAt(gavAddr, "0x" + eth.coinbase);
+    document.getElementById("tot").innerText = eth.balanceAt(etherExAddr);
   };
-  eth.changed.connect(updateBalances);
+  eth.newBlock(updateBalances);
 </script>
 </head>
 <body>
 <h1>EtherEx</h1>
 <h2><span id="eth">0 ETH</span></h2>
-<h4><span id="xeth">0</span> XETH</h4>
+<h4><span id="xeth">0</span> in XETH</h4>
 <h4><span id="gav">0</span> GAV</h4>
 <h4>Exchange total: <span id="tot">0</span></h4>
 <div>Price: <span id="lastprice">0</span></div>

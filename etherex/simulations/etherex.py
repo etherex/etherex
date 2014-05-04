@@ -9,7 +9,7 @@ class EtherEx(Contract):
         Contract.load(self, hll, tx, contract, block)
 
 class Balances(Contract):
-    """Balances contract"""
+    """Balances contract (XETH)"""
 
     def run(self, tx, contract, block):
         hll = "contracts/balances.ser"
@@ -29,47 +29,42 @@ class Trades(Contract):
         hll = "contracts/trades.ser"
         Contract.load(self, hll, tx, contract, block)
 
-class Xeth(Contract):
-    """Xeth contract"""
+class Currencies(Contract):
+    """Currencies contract (markets)"""
 
     def run(self, tx, contract, block):
-        hll = "contracts/xeth.ser"
+        hll = "contracts/currencies.ser"
         Contract.load(self, hll, tx, contract, block)
 
 class EtherExRun(Simulation):
 
-    xeth = Xeth(CAK="caktux", EOAR="eoar", FAB="fabrezio")
-    contract = EtherEx(CAK="caktux", EOAR="eoar", FAB="fabrezio", XETH=xeth.address)
-    balances = Balances(EX=contract.address)
+    balances = Balances(CAK="caktux", EOAR="eoar", FAB="fabrezio")
+    contract = EtherEx(CAK="caktux", EOAR="eoar", FAB="fabrezio", XETH=balances.address)
     indexes = Indexes(EX=contract.address)
     trades = Trades(EX=contract.address)
+    currencies = Currencies(EX=contract.address)
     etherex = int(contract.address, 16)
 
     # ts = time.time()
     print 20 * "="
-
-    # XETH
-    def test_xeth_creation(self):
-        tx = Tx(sender='caktux', value=1 * 10 ** 18, data=[self.etherex])
-        self.run(tx, self.xeth)
-        print 20 * "="
 
     # EtherEx
     def test_insufficient_gas(self):
         # block = Block(timestamp=self.ts + 15 * 86400 + 1)
         tx = Tx(sender='caktux', value=0, gas=10, data=[0])
         self.run(tx, self.contract)
-        assert self.stopped == 'Insufficient gas'
+        assert self.stopped == 1 # 'Insufficient gas'
         assert self.contract.storage[1] == 0
 
     def test_creation(self):
-        tx = Tx(sender='caktux', value=3000 * 10 ** 21, gas=100000, data=[int(self.balances.address, 16), int(self.indexes.address, 16), int(self.trades.address, 16), int(self.xeth.address, 16)])
+        tx = Tx(sender='caktux', value=3000 * 10 ** 21, gas=100000, data=[int(self.balances.address, 16), int(self.indexes.address, 16), int(self.trades.address, 16), int(self.currencies.address, 16)])
         self.run(tx, self.contract)
+        self.contract.ret = [3,1,2,150000000000,10000000000000000000,'caktux',1]
         # print self.contract.txs
         # assert len(self.contract.txs) == 2
         assert self.contract.storage[1] == 1
         # assert self.contract.storage[2] == ['EtherEx']
-        assert self.stopped.startswith('EtherEx initialized')
+        assert self.stopped == 1 # .startswith('EtherEx initialized')
 
     def test_change_ownership(self):
         tx = Tx(sender='caktux', value=0, data=[8, 0xf9e57456f18d90886263fedd9cc30b27cd959137, 0])
@@ -82,31 +77,43 @@ class EtherExRun(Simulation):
         self.run(tx, self.balances)
         print 20 * "="
 
-    # - XETH
+    # - Indexes
+    def test_indexes_creation(self):
+        tx = Tx(sender=self.etherex, value=0, data=[self.etherex])
+        self.run(tx, self.indexes)
+        print 20 * "="
+
+    # - Trades
+    def test_trades_creation(self):
+        tx = Tx(sender=self.etherex, value=0, data=[self.etherex])
+        self.run(tx, self.trades)
+        print 20 * "="
+
+    # - XETH (Balances)
     def test_check_xeth_balance(self):
         tx = Tx(sender=self.etherex, value=0, data=[self.etherex, 0, 1])
-        self.run(tx, self.xeth)
+        self.run(tx, self.balances)
 
     def test_transfer_eth_to_xeth(self):
         tx = Tx(sender=self.etherex, value=1 * 10 ** 17, data=[self.etherex, 0])
-        self.run(tx, self.xeth)
+        self.run(tx, self.balances)
 
     def test_transfer_xeth_to_caktux(self):
         tx = Tx(sender=self.etherex, value=0, data=[0x63616b747578, 1000])
-        self.run(tx, self.xeth)
+        self.run(tx, self.balances)
 
     def test_transfer_xeth_to_eoar(self):
         tx = Tx(sender=self.etherex, value=0, data=[0x656f6172, 1000])
-        self.run(tx, self.xeth)
+        self.run(tx, self.balances)
 
     def test_transfer_xeth_to_fabrezio(self):
         tx = Tx(sender=self.etherex, value=0, data=[0x66616272657a696f, 1000])
-        self.run(tx, self.xeth)
+        self.run(tx, self.balances)
         print 20 * "="
 
     def test_xeth_ownership(self):
         tx = Tx(sender=self.etherex, value=0, data=[0x656f6172, 0, 3])
-        self.run(tx, self.xeth)
+        self.run(tx, self.balances)
         print 20 * "="
 
     # EtherEx
@@ -259,7 +266,7 @@ class EtherExRun(Simulation):
     def test_results(self):
         self.log(self.contract.balance)
         self.log(self.contract.storage)
-        self.log(self.xeth.balance)
-        self.log(self.xeth.storage)
+        self.log(self.balances.balance)
+        self.log(self.balances.storage)
         self.log(self.balances.balance)
         self.log(self.balances.storage)

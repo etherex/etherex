@@ -3,9 +3,9 @@ import socket
 import logging
 
 from dispatch import receiver
-import netifaces
 
 from stoppable import StoppableLoopThread
+import rlp
 import signals
 from peer import Peer
 
@@ -22,10 +22,11 @@ class PeerManager(StoppableLoopThread):
         super(PeerManager, self).__init__()
         self.connected_peers = set()
         self._known_peers = set()  # (ip, port, node_id)
-        self.local_addresses = []  # [(ip, port)]
+        self.local_node_id = ''
 
     def configure(self, config):
         self.config = config
+        self.local_node_id = config.get('network', 'node_id')
 
     def stop(self):
         with self.lock:
@@ -71,8 +72,7 @@ class PeerManager(StoppableLoopThread):
         try:
             sock.connect((host, port))
         except Exception as e:
-            logger.debug(
-                'Conencting {0}:{1} failed, {2}'.format(host, port, str(e)))
+            logger.debug('Connecting %s:%d failed, %s', host, port, e)
             return None
         ip, port = sock.getpeername()
         logger.debug('connected {0}:{1}'.format(ip, port))
@@ -86,7 +86,7 @@ class PeerManager(StoppableLoopThread):
         candidates = self.get_known_peer_addresses().difference(
             self.get_connected_peer_addresses())
         candidates = [
-            ipn for ipn in candidates if ipn[:2] not in self.local_addresses]
+            ipn for ipn in candidates if ipn[2] != self.local_node_id]
         return candidates
 
     def _check_alive(self, peer):
@@ -162,62 +162,40 @@ def config_peermanager(sender, **kwargs):
     peer_manager.configure(sender)
 
 
-@receiver(signals.local_address_set)
-def local_address_set_handler(sender, ip, port, **kwargs):
-    local_addresses = []
-    if ip == '0.0.0.0':
-        for interface in netifaces.interfaces():
-            ifaddresses = netifaces.ifaddresses(interface)
-            if netifaces.AF_INET in ifaddresses:
-                inets = ifaddresses[netifaces.AF_INET]
-                for inet in inets:
-                    local_addresses.append((inet['addr'], port))
-    else:
-        local_addresses = [(ip, port)]
-
-    with peer_manager.lock:
-        peer_manager.local_addresses.extend(local_addresses)
-
-
-@receiver(signals.connection_accepted)
+@receiver(signals.peer_connection_accepted)
 def connection_accepted_handler(sender, connection, ip, port, **kwargs):
     peer_manager.add_peer(connection, ip, port)
 
 
-@receiver(signals.peers_requested)
-def peers_requested_handler(sender, req, **kwargs):
-    peers = peer_manager.get_known_peer_addresses()
-    signals.peers_ready.send(None, data=peers)
-
-
-@receiver(signals.live_peers_requested)
-def live_peers_requested_handler(sender, req, **kwargs):
-    with peer_manager.lock:
-        peers = peer_manager.get_connected_peer_addresses()
-    signals.live_peers_ready.send(None, data=peers)
-
-
-@receiver(signals.known_peers_requested)
-def known_peers_requested_handler(sender, req, **kwargs):
-    with peer_manager.lock:
-        peers = peer_manager.get_known_peer_addresses()
-    signals.known_peers_ready.send(None, data=peers)
-
-
-@receiver(signals.disconnect_requested)
+@receiver(signals.peer_disconnect_requested)
 def disconnect_requested_handler(sender, **kwargs):
     peer = sender
     peer_manager.remove_peer(peer)
 
 
-@receiver(signals.new_peer_received)
-def new_peer_received_handler(sender, peer, **kwargs):
+@receiver(signals.peer_address_received)
+def peer_address_received_handler(sender, peer, **kwargs):
     ''' peer should be (ip, port, node_id)
     '''
     peer_manager.add_known_peer_address(*peer)
 
 
-@receiver(signals.remote_chain_requested)
-def remote_chain_requested_handler(sender, parents=[], count=1, **kwargs):
+@receiver(signals.send_local_blocks)
+def send_blocks(sender, blocks=[], **kwargs):
+    blocks = [rlp.decode(b.serialize()) for b in blocks] # FIXME
     for peer in peer_manager.connected_peers:
-        peer.send_GetChain(parents, count)
+        peer.send_Blocks(blocks)
+
+
+@receiver(signals.known_peer_addresses_requested)
+def known_peers_requested_handler(sender, req, **kwargs):
+    with peer_manager.lock:
+        peers = peer_manager.get_known_peer_addresses()
+    signals.known_peer_addresses_ready.send(None, data=peers)
+
+
+@receiver(signals.send_local_transactions)
+def send_transactions(sender, transactions=[], **kwargs):
+    transactions = [rlp.decode(t.serialize()) for t in transactions]
+    for peer in peer_manager.connected_peers:
+        peer.send_Transactions(transactions)

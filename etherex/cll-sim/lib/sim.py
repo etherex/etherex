@@ -29,18 +29,20 @@ def send(recipient, amount, gas):
     self = _infer_self(inspect.stack())
     logging.info("Sending tx to %s of %s" % (recipient, amount))
     self.txs.append((recipient, amount, 0, 0))
+    return 0
 
-def mkmsg(recipient, amount, gas, data, datan):
+def mkmsg(recipient, amount, gas, data, datan, var=""):
     self = _infer_self(inspect.stack())
+    try:
+        ret = self.contract.ret
+    except:
+        ret = 1
     logging.info("Sending tx to %s of %s with data %s" % (recipient, amount, data))
     self.txs.append((recipient, amount, datan, data))
-    return 1 # let's just return 1
-
-def mkmsg(recipient, amount, gas, data, datan, var):
-    self = _infer_self(inspect.stack())
-    logging.info("Sending tx to %s of %s with data %s" % (recipient, amount, data))
-    self.txs.append((recipient, amount, datan, data))
-    return 1 # let's just return 1
+    if var:
+        return ret
+    else:
+        return 0
 
 def create(endowment, gas, data, datan):
     self = _infer_self(inspect.stack())
@@ -144,10 +146,25 @@ class HLL(Contract):
 """
             baseindent = "        "
 
+            initcode = closure
+            codeline = 0
+            gotinit = False
+
             with open(script) as fp:
                 for i, line in enumerate(fp):
-                    # Use comments for stop and log messages
                     l = line.strip()
+                    if l[:5] == 'init:':
+                        codeline = 1
+                        line = ""
+                    elif l[:5] == 'code:':
+                        codeline = i - 1
+                        gotinit = True
+                        line = ""
+                    elif codeline > 0 and not gotinit:
+                        initcode += baseindent + l
+                        codeline = i
+                        line = ""
+                    # Use comments for stop and log messages
                     if l.startswith("stop"):
                         # Line number as default stop message
                         s = "line " + str(i)
@@ -187,7 +204,8 @@ class HLL(Contract):
                         line += baseindent + indent + s
 
                     # Indent
-                    closure += baseindent + line
+                    if len(line) > 0:
+                        closure += baseindent + line
 
             # Exponents
             closure = closure.replace("^", "**")
@@ -216,6 +234,19 @@ class HLL(Contract):
             # Pass txs and constants
             for i, c in self.__dict__.items():
                 closure_module.__dict__[i] = c
+
+            # Run init code
+            init_module = imp.new_module('init_contract')
+            for i, c in self.__dict__.items():
+                init_module.__dict__[i] = c
+            if codeline > 0 and gotinit:
+                if codeline == 1:
+                    raise NotImplementedError("Missing code: statement.")
+                else:
+                    exec(initcode, init_module.__dict__)
+                    ic = init_module.HLL()
+                    msg = Msg(tx)
+                    ic.run(tx, msg, contract, block)
 
             # Set self.closure_module for reuse and self.closure for export
             self.closure = closure

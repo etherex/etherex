@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import time
+sys.path.insert(0, './serpent')
 import serpent
 sys.path.insert(0, './pyethereum')
 from pyethereum import eth, transactions, blocks, processblock, utils
@@ -69,30 +70,36 @@ def init_network():
 
             if chain_manager.head != None:
                 print chain_manager.head
-            if init == False and chain_manager.blockchain and chain_manager.head is not None:
+            if init == False and chain_manager.head is not None:
                 # block = genesis_block(addrs)
-                block = chain_manager.blockchain.get('head')
-                print block
-                display_block_chain(block, users)
-                contracts = init_system(block, master_key)
+                # block = blocks.get_block(chain_manager.blockchain.get('HEAD'))
+                block = chain_manager.head
+                if block.number > 10:
+                    # block = chain_manager.blockchain.get("ab6b9a5613970faa771b12d449b2e9bb925ab7a369f0a4b86b286e9d540099cf".decode('hex'))
+                    print block
+                    # display_block_chain(block, users)
+                    contracts = init_system(block, master_key)
 
-                root_contract = [i for i,j in zip(contracts.keys(), contracts.values()) if j=='etherex'][0]
-                balances_contract = [i for i,j in zip(contracts.keys(), contracts.values()) if j=='balances'][0]
-                indexes_contract = [i for i,j in zip(contracts.keys(), contracts.values()) if j=='indexes'][0]
-                trades_contract = [i for i,j in zip(contracts.keys(), contracts.values()) if j=='trades'][0]
-                xeth_contract = [i for i,j in zip(contracts.keys(), contracts.values()) if j=='currency'][0]
+                    root_contract = [i for i,j in zip(contracts.keys(), contracts.values()) if j=='etherex'][0]
+                    balances_contract = [i for i,j in zip(contracts.keys(), contracts.values()) if j=='balances'][0]
+                    indexes_contract = [i for i,j in zip(contracts.keys(), contracts.values()) if j=='indexes'][0]
+                    trades_contract = [i for i,j in zip(contracts.keys(), contracts.values()) if j=='trades'][0]
+                    xeth_contract = [i for i,j in zip(contracts.keys(), contracts.values()) if j=='currency'][0]
 
-                init = True
-                # DEBUG
-                # bdict = block.to_dict()
-                # print bdict
-                display_block_chain(block, users)
+                    init = True
+                    # DEBUG
+                    # bdict = block.to_dict()
+                    # print bdict
+                    print block
+                    # display_block_chain(block, users)
 
     logger.info('exiting')
 
     peer_manager.join()
 
     logger.debug('main thread finished')
+
+
 init_network()
 
 
@@ -112,4 +119,6 @@ init = True
 # DEBUG
 # bdict = block.to_dict()
 # print bdict
-display_block_chain(block, users)
+print block
+print block.to_dict()
+# display_block_chain(block, users)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import time
+import uuid
 import signal
 import ConfigParser
 from optparse import OptionParser
@@ -10,11 +11,15 @@ import logging.config
 from common import make_pyethereum_avail
 make_pyethereum_avail()
 
+from pyethereum.utils import configure_logging
+from pyethereum.utils import data_dir
+from pyethereum.utils import sha3
 from pyethereum.signals import config_ready
 from pyethereum.tcpserver import tcp_server
 from pyethereum.peermanager import peer_manager
-from pyethereum.chainmanager import chain_manager
 from pyethereum.apiserver import api_server
+from pyethereum.packeter import Packeter
+
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +34,8 @@ def create_config():
     config.set('network', 'num_peers', '5')
     config.set('network', 'remote_port', '30303')
     config.set('network', 'remote_host', '')
-    config.set('network', 'client_id', 'Ethereum(py)/0.0.1')
+    config.set('network', 'client_id', Packeter.CLIENT_ID)
+    config.set('network', 'node_id', sha3(str(uuid.uuid1())).encode('hex'))
 
     config.add_section('api')
     config.set('api', 'listen_host', '127.0.0.1')
@@ -39,23 +45,31 @@ def create_config():
     config.set('misc', 'verbosity', '1')
     config.set('misc', 'config_file', None)
     config.set('misc', 'logging', None)
+    config.set('misc', 'data_dir', data_dir.path)
+    config.set('misc', 'mining', '10')
 
     config.add_section('wallet')
-
-    # NODE_ID == pubkey, needed in order to work with Ethereum(++)
-    config.set('wallet', 'pub_key',
-               'J\x02U\xfaFs\xfa\xa3\x0f\xc5\xab\xfd<U\x0b\xfd\xbc\r<\x97=5'
-               '\xf7&F:\xf8\x1cT\xa02\x81\xcf\xff"\xc5\xf5\x96[8\xacc\x01R'
-               '\x98wW\xa3\x17\x82G\x85I\xc3o|\x84\xcbD6\xbay\xd6\xd9')
+    config.set('wallet', 'coinbase', '0' * 40)
 
     usage = "usage: %prog [options]"
-    parser = OptionParser(usage=usage,  version="%prog 0.1a")
+    parser = OptionParser(usage=usage,  version=Packeter.CLIENT_ID)
     parser.add_option(
         "-l", "--listen",
         dest="listen_port",
         default=config.get('network', 'listen_port'),
         help="<port>  Listen on the given port for incoming"
         " connected (default: 30303).")
+    parser.add_option(
+        "-a", "--address",
+        dest="coinbase",
+        help="Set the coinbase (mining payout) address",
+        default=config.get('wallet', 'coinbase'))
+    parser.add_option(
+        "-d", "--data_dir",
+        dest="data_dir",
+        help="<path>  Load database from path (default: %s)" % config.get(
+            'misc', 'data_dir'),
+        default=config.get('misc', 'data_dir'))
     parser.add_option(
         "-r", "--remote",
         dest="remote_host",
@@ -72,6 +86,11 @@ def create_config():
         dest="verbosity",
         default=config.get('misc', 'verbosity'),
         help="<0 - 3>  Set the log verbosity from 0 to 3 (default: 1)")
+    parser.add_option(
+        "-m", "--mining",
+        dest="mining",
+        default=config.get('misc', 'mining'),
+        help="<0 - 100> Percent CPU used for mining 0==off (default: 10)")
     parser.add_option(
         "-L", "--logging",
         dest="logging",
@@ -96,9 +115,14 @@ def create_config():
         config.set('network', attr, getattr(
             options, attr) or config.get('network', attr))
     # set misc options
-    for attr in ('verbosity', 'config_file'):
+    for attr in ('verbosity', 'config_file', 'logging', 'data_dir', 'mining'):
         config.set(
             'misc', attr, getattr(options, attr) or config.get('misc', attr))
+
+    # set wallet options
+    for attr in ('coinbase',):
+        config.set(
+            'wallet', attr, getattr(options, attr) or config.get('wallet', attr))
 
     if len(args) != 0:
         parser.error("wrong number of arguments")
@@ -107,61 +131,24 @@ def create_config():
     if config.get('misc', 'config_file'):
         config.read(config.get('misc', 'config_file'))
 
+    # set datadir
+    if config.get('misc', 'data_dir'):
+        data_dir.set(config.get('misc', 'data_dir'))
+
     # configure logging
-    loggerlevels = getattr(options, 'logging') or ''
     configure_logging(
-        loggerlevels, verbosity=config.getint('misc', 'verbosity'))
+        config.get('misc', 'logging') or '',
+        verbosity=config.getint('misc', 'verbosity'))
 
     return config
-
-
-def configure_logging(loggerlevels, verbosity=1):
-    logconfig = dict(
-        version=1,
-        disable_existing_loggers=False,
-        formatters=dict(
-            debug=dict(
-                format='[%(asctime)s] %(name)s %(levelname)s %(threadName)s:'
-                ' %(message)s'
-            ),
-            minimal=dict(
-                format='%(message)s'
-            ),
-        ),
-        handlers=dict(
-            default={
-                'level': 'INFO',
-                'class': 'logging.StreamHandler',
-                'formatter': 'minimal'
-            },
-            verbose={
-                'level': 'DEBUG',
-                'class': 'logging.StreamHandler',
-                'formatter': 'debug'
-            },
-        ),
-        loggers=dict()
-    )
-
-    for loggerlevel in filter(lambda _: ':' in _, loggerlevels.split(',')):
-        name, level = loggerlevel.split(':')
-        logconfig['loggers'][name] = dict(
-            handlers=['verbose'], level=level, propagate=False)
-
-    if len(logconfig['loggers']) == 0:
-        logconfig['loggers'][''] = dict(
-            handlers=['default'],
-            level={0: 'ERROR', 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}.get(
-                verbosity),
-            propagate=True)
-
-    logging.config.dictConfig(logconfig)
-    logging.debug("logging set up like that: {0}".format(logconfig))
 
 
 def main():
     config = create_config()
     config_ready.send(sender=config)
+
+    # import after logger config is ready
+    from pyethereum.chainmanager import chain_manager
 
     try:
         tcp_server.start()

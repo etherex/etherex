@@ -1,23 +1,45 @@
 #!/usr/bin/python
 import re
-import sys
-import os
 from parser import parse
 from opcodes import opcodes, reverse_opcodes
-import json
 
 label_counter = [0]
 
 
-def mklabel(prefix):
+def mksymbol():
     label_counter[0] += 1
-    return prefix + str(label_counter[0] - 1)
+    return '_' + str(label_counter[0] - 1)
+
+is_numeric = lambda x: isinstance(x, (int, long))
+is_string = lambda x: isinstance(x, (str, unicode))
 
 # All functions go here
 #
-# Entries go in a format:
+# Format specification (hey guys, I herd you like DSLs so I made a DSL
+# to help you write a compiler for your DSL into your other DSL so you
+# can debug your code while you debug your code...)
 #
-# [ val, inputcount, outputcount, code ]
+# [ val, inputspec, outputcount, code ]
+#
+# inputspec = either number of arity-1 args or [ a1, a2 ... an ] where
+# ak is the arity of arg k
+#
+# outputspec = arity of output
+#
+# code = [ arg1, arg2 ... argn ] where each arg is either an op, or
+# <k> to input the compilation of arg k, or <Ck> to input the compilation
+# of arg k as code in a new context, or ~blah for a label with name blah
+# or $blah for the reference to ~blah or $foo.bar for the distance
+# between ~foo and ~bar
+#
+# Example:
+#
+# ['if', [1, 0], 0, ['<0>', 'NOT', '$endif', 'JUMPI', '<1>', '~endif']],
+#
+# Takes argument of arity 1 (the condition) and of arity 0 (the stmt),
+# returns arity 0, works by jumping over <1> only if the result of <0>
+# passed through a NOT is true (ie. if <0> is false it does not do <1>,
+# so it does <1> only if <0> is true (yay triple negative))
 
 funtable = [
     ['+', 2, 1, ['<1>', '<0>', 'ADD']],
@@ -44,51 +66,87 @@ funtable = [
     ['&', 2, 1, ['<1>', '<0>', 'AND']],
     ['|', 2, 1, ['<1>', '<0>', 'OR']],
     ['byte', 2, 1, ['<0>', '<1>', 'BYTE']],
+    ['pop', 1, 0, ['<0>', 'POP']],
     # Word array methods
     # arr, ind -> val
-    ['access', 2, 1, ['<0>', '<1>', 32, 'MUL', 'ADD', 'MLOAD']],
+    ['access', 2, 1,
+        ['<0>', '<1>', 32, 'MUL', 'ADD', 'MLOAD']],
     # arr, ind, val
-    ['arrset', 3, 0, ['<2>', '<0>', '<1>', 32, 'MUL', 'ADD', 'MSTORE']],
+    ['arrset', 3, 0,
+        ['<2>', '<0>', '<1>', 32, 'MUL', 'ADD', 'MSTORE']],
     # val, pointer -> pointer+32
-    ['set_and_inc', 2, 1, ['<1>', 'DUP', '<0>', 'SWAP', 'MSTORE', 32, 'ADD']],
-    # len (32 MUL) len*32 (MSIZE) len*32 MSIZE (SWAP) MSIZE len*32 (MSIZE ADD)
-    # MSIZE MSIZE+len*32 (1) MSIZE MSIZE+len*32 1 (SWAP SUB) MSIZE
-    # MSIZE+len*32-1 (0 SWAP MSTORE8) MSIZE
-    ['array', 1, 1, ['<0>', 32, 'MUL', 'MSIZE', 'SWAP', 'MSIZE',
-                     'ADD', 1, 'SWAP', 'SUB', 0, 'SWAP', 'MSTORE8']],  # len -> arr
+    ['set_and_inc', 2, 1,
+        ['<1>', 'DUP', '<0>', 'SWAP', 'MSTORE', 32, 'ADD']],
+    # len -> array
+    ['array', 1, 1,
+        ['<0>', 32, 'MUL', 'MSIZE', 'SWAP', 'MSIZE',  # msize len*32 msize
+         'ADD', 1, 'SWAP', 'SUB', 0, 'SWAP', 'MSTORE8']],  # -> oldmemsize
     # String array methods
     # arr, ind -> val
-    ['getch', 2, 1, ['<1>', '<0>', 'ADD', 'MLOAD', 255, 'AND']],
-    ['setch', 3, 0, ['<2>', '<1>', '<0>', 'ADD', 'MSTORE']],  # arr, ind, val
+    ['getch', 2, 1,
+        ['<1>', '<0>', 'ADD', 'MLOAD', 255, 'AND']],
+    ['setch', 3, 0,
+        ['<2>', '<1>', '<0>', 'ADD', 'MSTORE']],  # arr, ind, val
     # len MSIZE (SWAP) MSIZE len (MSIZE ADD) MSIZE MSIZE+len (1) MSIZE
     # MSIZE+len 1 (SWAP SUB) MSIZE MSIZE+len-1 (0 SWAP MSTORE8) MSIZE
-    ['string', 1, 1, ['<0>', 'MSIZE', 'SWAP', 'MSIZE', 'ADD',
-                      1, 'SWAP', 'SUB', 0, 'SWAP', 'MSTORE8']],  # len -> arr
-    # ['send', 2, 1, [0,0,0,0,0,'<1>','<0>','CALL'] ], # to, value, 0, [] -> /dev/null
+    ['string', 1, 1,
+        ['<0>', 'MSIZE', 'SWAP', 'MSIZE',  # msize len msize
+         'ADD', 1, 'SWAP', 'SUB', 0, 'SWAP', 'MSTORE8']],  # -> oldmemsize
+    # to, value, 0, [] -> /dev/null
+    ['send', 2, 1,
+        [0, 0, 0, 0, '<1>', '<0>', 25, 'GAS', 'SUB', 'CALL']],
     # to, value, gas, [] -> /dev/null
-    ['send', 3, 1, [0, 0, 0, 0, '<2>', '<1>', '<0>', 'CALL']],
-    # MSIZE 0 MSIZE (MSTORE) MSIZE (DUP) MSIZE MSIZE (...) MSIZE MSIZE 32 <4>
-    # <3> <2> <1> <0> (CALL) MSIZE FLAG (POP) MSIZE (MLOAD) RESULT
-    ['msg', 5, 1, ['MSIZE', 0, 'MSIZE', 'MSTORE', 'DUP', 32, 'SWAP', '<4>', 32, 'MUL', '<3>',
-                   '<2>', '<1>', '<0>', 'CALL', 'POP', 'MLOAD']],  # to, value, gas, data, datasize -> out32
-    # <5>*32 (MSIZE SWAP MSIZE SWAP) MSIZE MSIZE <5>*32 (DUP MSIZE ADD) MSIZE MSIZE <5>*32 MEND+1 (1 SWAP SUB) MSIZE MSIZE <5>*32 MEND (0 SWAP MSTORE8) MSIZE MSIZE <5>*32 (SWAP) MSIZE <5>*32 MSIZE
-    ['msg', 6, 1, ['<5>', 32, 'MUL', 'MSIZE', 'SWAP', 'MSIZE', 'SWAP', 'DUP', 'MSIZE', 'ADD', 1, 'SWAP', 'SUB', 0, 'SWAP', 'MSTORE8', 'SWAP',
-                   '<4>', 32, 'MUL', '<3>', '<2>', '<1>', '<0>', 'CALL', 'POP']],  # to, value, gas, data, datasize, outsize -> out
+    ['send', 3, 1,
+        [0, 0, 0, 0, '<1>', '<0>', '<2>', 'CALL']],
+    # to, value, gas, data, datasize -> out32
+    ['msg', 5, 1,
+        ['MSIZE', 0, 'MSIZE', 'MSTORE', 'DUP', 32, 'SWAP',  # oldmsz 32 oldmsz
+         '<4>', 32, 'MUL', '<3>', '<1>', '<0>', '<2>',  # oldmsz <call args>
+         'CALL', 'POP', 'MLOAD']],  # -> oldmsz
+    # to, value, gas, data, datasize, outsize -> out
+    ['msg', 6, 1,
+        ['<5>', 32, 'MUL', 'MSIZE', 'SWAP', 'MSIZE',  # msize len*32 msize
+         'SWAP', 'DUP', 'MSIZE',  # msize msize len*32 len*32 msize
+         'ADD', 1, 'SWAP', 'SUB', 0, 'SWAP', 'MSTORE8',  # msize msize len*32
+         'SWAP',  # msize len*32 msize
+         '<4>', 32, 'MUL', '<3>', '<1>', '<0>', '<2>',  # oldmsz <call args>
+         'CALL', 'POP']],
     # value, gas, data, datasize
     ['create', 4, 1, ['<3>', '<2>', '<1>', '<0>', 'CREATE']],
+    # value, gas, dataobject
+    ['create', [1, 1, 2], 1, ['<2>', '<1>', '<0>', 'CREATE']],
     ['sha3', 1, 1, [32, 'MSIZE', '<0>', 'MSIZE', 'MSTORE', 'SHA3']],
     ['sha3bytes', 1, 1, ['SHA3']],
     ['sload', 1, 1, ['<0>', 'SLOAD']],
     ['sstore', 2, 0, ['<1>', '<0>', 'SSTORE']],
     ['calldataload', 1, 1, ['<0>', 32, 'MUL', 'CALLDATALOAD']],
     ['id', 1, 1, ['<0>']],
-    # 0 MSIZE (SWAP) MSIZE 0 (MSIZE) MSIZE 0 MSIZE (MSTORE) MSIZE (32 SWAP) 32
-    # MSIZE
-    # returns single value
+    # returns single val32
     ['return', 1, 0, [
         '<0>', 'MSIZE', 'SWAP', 'MSIZE', 'MSTORE', 32, 'SWAP', 'RETURN']],
+    # returns array
     ['return', 2, 0, ['<1>', 32, 'MUL', '<0>', 'RETURN']],
     ['suicide', 1, 0, ['<0>', 'SUICIDE']],
+    # if cond then
+    ['if', [1, 0], 0, ['<0>', 'NOT', '$endif', 'JUMPI', '<1>', '~endif']],
+    # if cond then else
+    ['ifelse', [1, 0, 0], 0,
+        ['<0>', 'NOT', '$else', 'JUMPI', '<1>',
+         '$endif', 'JUMP', '~else', '<2>', '~endif']],
+    # while cond code
+    ['while', [1, 0], 0,
+        ['~beginwhile', '<0>', 'NOT', '$endwhile', 'JUMPI',
+         '<1>', '$beginwhile', 'JUMP', '~endwhile']],
+    # Inits with code <0> and returns code <1>
+    ['init', [0, 0], 0,
+        ['<0>', '$begincode.endcode', 'DUP', 'MSIZE', 'SWAP',  # len memsz len
+         'MSIZE', '$begincode', 'CALLDATACOPY', 'RETURN',  # cdc and return
+         '~begincode', '<C1>', '~endcode']],
+    # Returns len, pointer double representing code string
+    ['code', [0], 2,
+        ['$begincode.endcode', 'DUP', 'MSIZE', 'SWAP',  # len memsize len
+         'MSIZE', '$begincode', 'CODECOPY', '$endcode', 'JUMP',  # len memsize
+         '~begincode', '<C0>', '~endcode']],
 ]
 
 # Pseudo-variables representing opcodes
@@ -100,6 +158,7 @@ pseudovars = {
     'tx.origin': ['ORIGIN'],
     'tx.gas': ['GAS'],
     'contract.balance': ['BALANCE'],
+    'contract.address': ['ADDRESS'],
     'block.prevhash': ['PREVHASH'],
     'block.coinbase': ['COINBASE'],
     'block.timestamp': ['TIMESTAMP'],
@@ -116,7 +175,8 @@ def frombytes(b):
 
 
 def fromhex(b):
-    return 0 if len(b) == 0 else '0123456789abcdef'.find(b[-1]) + 16 * fromhex(b[:-1])
+    hexord = lambda x: '0123456789abcdef'.find(x)
+    return 0 if len(b) == 0 else hexord(b[-1]) + 16 * fromhex(b[:-1])
 
 
 def is_numberlike(b):
@@ -140,45 +200,96 @@ def numberize(b):
 
 
 # Apply rewrite rules
-def rewrite(ast):
+def _rewrite(ast):
     if isinstance(ast, (str, unicode)):
         return ast
     elif ast[0] == 'set':
         if ast[1][0] == 'access':
             if ast[1][1] == 'contract.storage':
-                return ['sstore', rewrite(ast[1][2]), rewrite(ast[2])]
+                return ['sstore', _rewrite(ast[1][2]), _rewrite(ast[2])]
             else:
-                return ['arrset', rewrite(ast[1][1]), rewrite(ast[1][2]), rewrite(ast[2])]
+                return ['arrset', _rewrite(ast[1][1]),
+                        _rewrite(ast[1][2]), _rewrite(ast[2])]
+    elif ast[0] == 'if':
+        return ['ifelse' if len(ast) == 4 else 'if'] + map(_rewrite, ast[1:])
     elif ast[0] == 'access':
         if ast[1] == 'msg.data':
-            return ['calldataload', rewrite(ast[2])]
+            return ['calldataload', _rewrite(ast[2])]
         elif ast[1] == 'contract.storage':
-            return ['sload', rewrite(ast[2])]
+            return ['sload', _rewrite(ast[2])]
     elif ast[0] == 'array_lit':
         o = ['array', str(len(ast[1:]))]
         for a in ast[1:]:
-            o = ['set_and_inc', rewrite(a), o]
+            o = ['set_and_inc', _rewrite(a), o]
         return ['-', o, str(len(ast[1:])*32)]
+    elif ast[0] == 'code':
+        return ['code', rewrite(ast[1])]
     elif ast[0] == 'return':
         if len(ast) == 2 and ast[1][0] == 'array_lit':
-            return ['return', rewrite(ast[1]), str(len(ast[1][1:]))]
-    return map(rewrite, ast)
+            return ['return', _rewrite(ast[1]), str(len(ast[1][1:]))]
+    # Import is to be used specifically for creates
+    elif ast[0] == 'import':
+        return ['code', rewrite(parse(open(ast[1]).read()))]
+    # Inset is to be used like a macro in C++
+    elif ast[0] == 'inset':
+        return _rewrite(parse(open(ast[1]).read()))
+    return map(_rewrite, ast)
 
+
+def rewrite(ast):
+    if ast[0] != 'init':
+        return _rewrite(['init', ['seq'], ast])
+    else:
+        return _rewrite(ast)
+
+
+# Determine arity of every argument, do AST checking
+class decorate():
+    def __init__(self, ast):
+        if isinstance(ast, (str, unicode)):
+            self.value, self.fun = ast, None
+            self.arity = 1
+        elif ast[0] == 'set':
+            self.value, self.fun = None, 'set'
+            self.args = map(decorate, ast[1:])
+            assert self.args[0].arity == 1
+            assert self.args[1].arity == 1
+            self.arity = 0
+        elif ast[0] == 'seq':
+            self.value, self.fun = None, 'seq'
+            self.args = map(decorate, ast[1:])
+            self.arity = self.args[-1].arity if len(self.args) else 0
+        elif is_numeric(ast[0]):
+            f = funtable[ast[0]]
+            self.value, self.fun = None, f[0]
+            self.args = map(decorate, ast[1:])
+            self.arity, self.code = f[2], f[3]
+        else:
+            d = map(decorate, ast[1:])
+            for f in funtable:
+                if ast[0] == f[0]:
+                    f[1] = ([1] * f[1]) if is_numeric(f[1]) else f[1]
+                    works = False
+                    if len(d) == len(f[1]):
+                        works = True
+                        for i in range(len(f[1])):
+                            if d[i].arity != f[1][i]:
+                                works = False
+                    if works:
+                        self.value, self.fun = None, f[0]
+                        self.args = d
+                        self.arity = f[2]
+                        self.code = f[3]
+                        return
+            raise Exception("no matching function found", ast)
+
+    def __str__(self):
+        if self.value is not None:
+            return str(self.value)
+        else:
+            return str([self.fun] + map(str, self.args))
 
 # Main compiler code
-def arity(ast):
-    if isinstance(ast, (str, unicode)):
-        return 1
-    elif ast[0] == 'set':
-        return 0
-    elif ast[0] == 'if':
-        return 0
-    elif ast[0] == 'seq':
-        return 1 if len(ast[1:]) and arity(ast[-1]) == 1 else 0
-    else:
-        for f in funtable:
-            if ast[0] == f[0]:
-                return f[2]
 
 
 # Debugging
@@ -192,79 +303,71 @@ def print_wrapper(f):
 
 
 # Right-hand-side expressions (ie. the normal kind)
-#@print_wrapper
-def compile_expr(ast, varhash, lc=[0]):
-    # Stop keyword
-    if ast == 'stop':
-        return ['STOP']
+# @print_wrapper
+def compile_expr(ast, varhash):
     # Literals
-    elif isinstance(ast, (str, unicode)):
-        if is_numberlike(ast):
-            return [numberize(ast)]
-        elif ast in pseudovars:
-            return pseudovars[ast]
+    if ast.value is not None:
+        if ast.value == 'stop':
+            return ['STOP']
+        if is_numberlike(ast.value):
+            return [numberize(ast.value)]
+        elif ast.value in pseudovars:
+            return pseudovars[ast.value]
         else:
-            if ast not in varhash:
-                varhash[ast] = len(varhash) * 32
-            return [varhash[ast], 'MLOAD']
+            if ast.value not in varhash:
+                varhash[ast.value] = len(varhash) * 32
+            return [varhash[ast.value], 'MLOAD']
     # Set (specifically, variables)
-    elif ast[0] == 'set':
-        if not isinstance(ast[1], (str, unicode)):
-            raise Exception("Cannot set the value of " + str(ast[1]))
-        elif ast[1] in pseudovars:
+    elif ast.fun == 'set':
+        if ast.args[0].value is None:
+            raise Exception("Cannot set value of " + str(ast.args[0].value))
+        elif ast.args[0].value in pseudovars:
             raise Exception("Cannot set a pseudovariable!")
         else:
-            if ast[1] not in varhash:
-                varhash[ast[1]] = len(varhash) * 32
-            return compile_expr(ast[2], varhash, lc) + [varhash[ast[1]], 'MSTORE']
-    # If and if/else statements
-    elif ast[0] == 'if':
-        f = compile_expr(ast[1], varhash, lc)
-        g = compile_expr(ast[2], varhash, lc)
-        h = compile_expr(ast[3], varhash, lc) if len(ast) > 3 else None
-        label, ref = 'LABEL_' + str(lc[0]), 'REF_' + str(lc[0])
-        lc[0] += 1
-        label2, ref2 = 'LABEL_' + str(lc[0]), 'REF_' + str(lc[0])
-        lc[0] += 1
-        if h:
-            return f + ['NOT', ref2, 'JUMPI'] + g + [ref, 'JUMP', label2] + h + [label]
-        else:
-            return f + ['NOT', ref, 'JUMPI'] + g + [label]
-    # While loops
-    elif ast[0] == 'while':
-        f = compile_expr(ast[1], varhash, lc)
-        g = compile_expr(ast[2], varhash, lc)
-        beglab, begref = 'LABEL_' + str(lc[0]), 'REF_' + str(lc[0])
-        endlab, endref = 'LABEL_' + str(lc[0] + 1), 'REF_' + str(lc[0] + 1)
-        lc[0] += 2
-        return [beglab] + f + ['NOT', endref, 'JUMPI'] + g + [begref, 'JUMP', endlab]
+            if ast.args[0].value not in varhash:
+                varhash[ast.args[0].value] = len(varhash) * 32
+            return (compile_expr(ast.args[1], varhash) +
+                    [varhash[ast.args[0].value], 'MSTORE'])
     # Seq
-    elif ast[0] == 'seq':
+    elif ast.fun == 'seq':
         o = []
-        for arg in ast[1:]:
-            o.extend(compile_expr(arg, varhash, lc))
-            if arity(arg) == 1 and arg != ast[-1]:
+        for arg in ast.args:
+            o.extend(compile_expr(arg, varhash))
+            for i in range(arg.arity):
                 o.append('POP')
         return o
     # Functions and operations
-    for f in funtable:
-        if ast[0] == f[0] and len(ast[1:]) == f[1]:
-            # If arity of all args is 1
-            if reduce(lambda x, y: x * arity(y), ast[1:], 1):
-                iq = f[3][:]
-                oq = []
-                while len(iq):
-                    tok = iq.pop(0)
-                    if isinstance(tok, (str, unicode)) and tok[0] == '<' and tok[-1] == '>':
-                        oq.extend(
-                            compile_expr(ast[1 + int(tok[1:-1])], varhash, lc))
-                    else:
-                        oq.append(tok)
-                return oq
+    else:
+        symb = mksymbol()
+        iq = ast.code[:]
+        oq = []
+        while len(iq):
+            tok = iq.pop(0)
+            if not is_string(tok):
+                oq.append(tok)
+            elif tok[0] == '<' and tok[-1] == '>':
+                # <C3> = fragment 3, compiled as independent code
+                if tok[1] == 'C':
+                    sub_vh = {}
+                    subcode = compile_expr(ast.args[int(tok[2:-1])], sub_vh)
+                    inner = add_wrappers(subcode, sub_vh)
+                    oq.extend(['#CODE_BEGIN'] + inner + ['#CODE_END'])
+                # <3> = fragment 3
+                else:
+                    inner = compile_expr(ast.args[int(tok[1:-1])],
+                                         varhash)
+                    oq.extend(inner)
+            elif tok[0] == '~':
+                oq.append(tok+symb)
+            elif tok[0] == '$':
+                vals = tok[1:].split('.')
+                if len(vals) == 1:
+                    oq.append(tok+symb)
+                else:
+                    oq.append('$' + vals[0] + symb + '.' + vals[1] + symb)
             else:
-                raise Exception(
-                    "Arity of argument mismatches for %s: %s" % (f[0], ast))
-    raise Exception("invalid op: " + ast[0])
+                oq.append(tok)
+        return oq
 
 
 # Stuff to add once to each program
@@ -301,32 +404,36 @@ def optimize(c):
     while len(iq):
         oq.append(iq.pop(0))
         if oq[-1] in ops and len(oq) >= 3:
-            if isinstance(oq[-2], (int, long)) and isinstance(oq[-3], (int, long)):
+            if is_numeric(oq[-2]) and is_numeric(oq[-3]):
                 ntok = ops[oq[-1]](oq[-2], oq[-3])
                 multipop(oq, 3).append(ntok)
         if oq[-1] == 'NOT' and len(oq) >= 2 and oq[-2] == 'NOT':
             multipop(oq, 2)
-        if oq[-1] == 'ADD' and len(oq) >= 3 and oq[-2] == 0 and is_numberlike(oq[-3]):
+        if oq[-1] == 'ADD' and len(oq) >= 3 and oq[-2] == 0 \
+                and is_numberlike(oq[-3]):
             multipop(oq, 2)
-        if oq[-1] in ['SUB', 'ADD'] and len(oq) >= 3 and oq[-3] == 0 and is_numberlike(oq[-2]):
+        if oq[-1] in ['SUB', 'ADD'] and len(oq) >= 3 and oq[-3] == 0 \
+                and is_numberlike(oq[-2]):
             ntok = oq[-2]
             multipop(oq, 3).append(ntok)
     return oq
 
 
 def compile_to_assembly(source, optimize_flag=1):
-    if isinstance(source, (str, unicode)):
+    if is_string(source):
         source = parse(source)
-    varhash = {}
     c1 = rewrite(source)
-    c2 = compile_expr(c1, varhash, [0])
-    c3 = add_wrappers(c2, varhash)
-    c4 = optimize(c3) if optimize_flag else c3
-    return c4
+    c2 = decorate(c1)
+    label_counter[0] = 0
+    varhash = {}
+    c3 = compile_expr(c2, varhash)
+    c4 = add_wrappers(c3, varhash)
+    c5 = optimize(c4) if optimize_flag else c4
+    return c5
 
 
 def get_vars(source):
-    if isinstance(source, (str, unicode)):
+    if is_string(source):
         source = parse(source)
     varhash = {}
     c1 = rewrite(source)
@@ -345,31 +452,43 @@ def tobytearr(n, L):
 
 # Dereference labels
 def dereference(c):
+    label_length = log256(len(c)*4)
     iq = [x for x in c]
     mq = []
     pos = 0
     labelmap = {}
+    beginning_stack = [0]
     while len(iq):
         front = iq.pop(0)
-        if isinstance(front, str) and front[:6] == 'LABEL_':
-            labelmap[front[6:]] = pos
+        if not is_numeric(front) and front[0] == '~':
+            labelmap[front[1:]] = pos - beginning_stack[-1]
+        elif front == '#CODE_BEGIN':
+            beginning_stack.append(pos)
+        elif front == '#CODE_END':
+            beginning_stack.pop()
         else:
             mq.append(front)
-            if isinstance(front, str) and front[:4] == 'REF_':
-                pos += 5
-            elif isinstance(front, (int, long)):
+            if is_numeric(front):
                 pos += 1 + max(1, log256(front))
+            elif front[:1] == '$':
+                pos += label_length + 1
             else:
                 pos += 1
     oq = []
     for m in mq:
-        if isinstance(m, str) and m[:4] == 'REF_':
-            oq.append('PUSH4')
-            oq.extend(tobytearr(labelmap[m[4:]], 4))
-        elif isinstance(m, (int, long)):
+        if is_numeric(m):
             L = max(1, log256(m))
             oq.append('PUSH' + str(L))
             oq.extend(tobytearr(m, L))
+        elif m[:1] == '$':
+            vals = m[1:].split('.')
+            if len(vals) == 1:
+                oq.append('PUSH'+str(label_length))
+                oq.extend(tobytearr(labelmap[vals[0]], label_length))
+            else:
+                oq.append('PUSH'+str(label_length))
+                value = labelmap[vals[1]] - labelmap[vals[0]]
+                oq.extend(tobytearr(value, label_length))
         else:
             oq.append(m)
     return oq
@@ -377,7 +496,7 @@ def dereference(c):
 
 def serialize(source):
     def numberize(arg):
-        if isinstance(arg, (int, long)):
+        if is_numeric(arg):
             return arg
         elif arg in reverse_opcodes:
             return reverse_opcodes[arg]
@@ -401,7 +520,7 @@ def deserialize(source):
             o.append('PUSH' + str(p - 95))
         else:
             o.append(opcodes[p][0])
-        if p >= 96 and p <= 127:
+        if j < 0 and p >= 96 and p <= 127:
             j = p - 95
         j -= 1
         i += 1
@@ -418,11 +537,11 @@ def compile(source):
 
 def encode_datalist(vals):
     def enc(n):
-        if isinstance(n, (int, long)):
+        if is_numeric(n):
             return ''.join(map(chr, tobytearr(n, 32)))
-        elif isinstance(n, (str, unicode)) and len(n) == 40:
+        elif is_string(n) and len(n) == 40:
             return '\x00' * 12 + n.decode('hex')
-        elif isinstance(n, (str, unicode)):
+        elif is_string(n):
             return '\x00' * (32 - len(n)) + n
         elif n is True:
             return 1
