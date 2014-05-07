@@ -22,6 +22,11 @@
           </a>
         </h1>
         <?php endif; ?>
+        <?php if ($mission && $is_front): ?>
+        <h2 id="mission">
+          <?php print check_plain($mission); ?>
+        </h2>
+        <?php endif; ?>
       </hgroup>
     </header> <!-- /#header -->
     <?php print $header; ?>
@@ -63,7 +68,7 @@
             <?php print $above_content; ?>
           </div>
           <?php endif; ?>
-          <?php if ($mission): print '<div id="mission" class="clearfix">'. $mission .'</div>'; endif; ?>
+          <?php // if ($mission): print '<div id="mission" class="clearfix">'. $mission .'</div>'; endif; ?>
           <?php if ($tabs): print '<div id="tabs-wrapper" class="clearfix clear-block">'; endif; ?>
           <?php if ($title && !$is_front): print '<h1 id="page-title" class="'. ($tabs ? ' with-tabs"' : '"') .'>'. $title .'</h1>'; endif; ?>
           <?php if ($tabs): print '<ul class="tabs primary clearfix">'. $tabs .'</ul></div>'; endif; ?>

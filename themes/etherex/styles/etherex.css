@@ -1,28 +1,116 @@
 html {
-  background-color: #05050F; /* rgb(5,5,15) */
+  background-color: #0786d2;
 }
 
 body {
-  font-family: "Palatino", serif;
+  font-family: Futura, "Trebuchet MS", Arial, sans-serif;
   font-size: 1.4667em;
-}
-
-#wrapper {
-  background: rgba(255, 255, 255, 0.75);
+  font-weight: lighter;
+  text-shadow: 0 0 2px #000000;
 }
 
 #center,
 .sidebar {
-  background: rgba(0, 0, 0, 0.65);
+  background: none;
 }
 
+.messages {
+  text-shadow: none;
+}
+
+#logo-and-title {
+  max-width: 100%;
+  width: 100%;
+}
+
+#logo_title {
+  font-size: 3.5em;
+  text-transform: uppercase;
+  margin-right: 2em;
+  margin-top: 0;
+}
+
+#logo_title,
 .front h2 {
-  font-family: "Palatino", serif;
+  font-family: Futura, "Trebuchet MS", Arial, sans-serif;
 }
 
-#logo_title a:link,
-#logo_title a:visited {
-  text-shadow: 0px 0px .33em #000;
+#logo_title:after {
+  color: #fff;
+  content: "/";
+  font-size: 1.25em;
+  font-weight: 100;
+  position: absolute;
+  right: -1em;
+  top: 0;
+}
+
+.front #header {
+  padding-top: 20%;
+}
+
+.front article {
+  float: left;
+  width: 60%;
+}
+
+.front article .content {
+  float: left;
+  font-size: 1.5em;
+  margin-left: 25%;
+  width: 50%;
+}
+
+.front #center .content {
+  text-align: left;
+}
+
+.front #block-simplenews-1 {
+  float: right;
+  width: 40%;
+}
+/*
+#simplenews-block-form-1 {
+  text-align: left;
+}
+*/
+.front #block-simplenews-1 .content p {
+  font-size: 1.5em;
+}
+
+.compact-form-label {
+  color: #fff;
+}
+
+.form-button, .form-submit[type="submit"], a.button, .unit_availability .bookinglist td:last-child a {
+  background: none;
+  border: 2px solid #fff;
+  border-radius: 0;
+  box-shadow: none;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font-style: normal;
+  line-height: 2em;
+  padding: 0.5em 1em;
+  text-align: center;
+  text-decoration: none;
+  text-indent: 0;
+  text-shadow: 0 0 2px #000000;
+}
+
+.no-touch .form-button:hover,
+.no-touch .form-submit[type=submit]:hover,
+.no-touch .button:hover,
+.no-touch .unit_availability .bookinglist td:last-child a:hover {
+  background-color: none;
+  background: none;
+  color: #fff;
+}
+
+#mission {
+  margin-bottom: 0;
+  margin-top: 2em;
 }
 
 div.status, span.status,
@@ -36,7 +124,12 @@ article {
 }
 
 input.form-text, textarea, select {
-  border-radius: 10px;
+  border: 2px solid #fff;
+  /*border-radius: 10px;*/
+}
+
+input.form-text, textarea, select {
+  background: none;
 }
 
 /*
