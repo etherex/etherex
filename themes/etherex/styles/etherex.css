@@ -113,6 +113,10 @@ body {
 }
 
 @media all and (max-width: 1023px) {
+  div#page {
+    max-width: 98%;
+    width: auto;
+  }
   h1#logo_title {
     margin: 0 2em 0 0;
     width: auto;

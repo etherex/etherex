@@ -22,7 +22,7 @@
           </a>
         </h1>
         <?php endif; ?>
-        <?php if ($mission && $is_front): ?>
+        <?php if ($mission): ?>
         <h2 id="mission">
           <?php print check_plain($mission); ?>
         </h2>
