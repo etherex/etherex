@@ -3,7 +3,7 @@ html {
 }
 
 body {
-  font-family: "Muli", Futura, "Trebuchet MS", Arial, sans-serif;
+  font-family: "Questrial", Futura, "Trebuchet MS", Arial, sans-serif;
   font-size: 1.4667em;
   font-weight: lighter;
   text-shadow: 0 0 2px #000000;
@@ -32,7 +32,7 @@ body {
 
 #logo_title,
 .front h2 {
-  font-family: "Muli", Futura, "Trebuchet MS", Arial, sans-serif;
+  font-family: "Questrial", Futura, "Trebuchet MS", Arial, sans-serif;
 }
 
 #logo_title:after {
