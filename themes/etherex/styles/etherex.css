@@ -3,7 +3,7 @@ html {
 }
 
 body {
-  font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+  font-family: "Muli", Futura, "Trebuchet MS", Arial, sans-serif;
   font-size: 1.4667em;
   font-weight: lighter;
   text-shadow: 0 0 2px #000000;
@@ -32,14 +32,14 @@ body {
 
 #logo_title,
 .front h2 {
-  font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+  font-family: "Muli", Futura, "Trebuchet MS", Arial, sans-serif;
 }
 
 #logo_title:after {
   color: #fff;
   content: "/";
   font-size: 1.25em;
-  font-weight: 100;
+  font-weight: 300;
   position: absolute;
   right: -1em;
   top: 0;
@@ -83,7 +83,7 @@ body {
 
 .front article {
   float: left;
-  width: 60%;
+  width: 61.803398875%;
 }
 
 .front article .content {
@@ -99,7 +99,7 @@ body {
 
 .front #block-simplenews-1 {
   float: right;
-  width: 40%;
+  width: 38.19660112%;
 }
 
 /*
