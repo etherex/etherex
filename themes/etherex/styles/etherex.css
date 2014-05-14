@@ -93,6 +93,11 @@ body {
   width: 50%;
 }
 
+.front .node .content p a:link,
+.front .node .content p a:visited {
+  text-decoration: none;
+}
+
 .front #center .content {
   text-align: left;
 }
