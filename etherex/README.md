@@ -15,7 +15,7 @@ Components
 
 * contracts: CLL contracts running EtherEx
 * simulations: Python simulations for EtherEx
-* compiler: Python compiler by Vitalik Buterin [repo](https://github.com/ethereum/compiler)
+* serpent: Serpent compiler by Vitalik Buterin [repo](https://github.com/ethereum/serpent)
 * cll-sim: CLL simulator by Joris Bontje [repo](https://github.com/jorisbontje/cll-sim)
 * tests: extra tests
 
@@ -27,6 +27,13 @@ Running tests
 ```
 
 Refer to the [compiler](https://github.com/ethereum/compiler) and [simulator](https://github.com/jorisbontje/cll-sim) for their respective usage.
+
+
+Local Blockchain tests
+----------------------
+```
+./etherex_init.py
+```
 
 
 Requirements
