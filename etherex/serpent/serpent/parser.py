@@ -33,6 +33,10 @@ def parse_lines(lns):
         if spaces(main) > 0:
             raise Exception("Line "+str(i)+" indented too much!")
         main = strip_line(main)
+        # If the line was only a comment it's now empty, so skip it
+        if len(main) == 0:
+            i += 1
+            continue
         # Grab the child block of an if statement
         indent = 99999999
         i += 1
@@ -167,6 +171,7 @@ precedence = {
     '<=': 4,
     '>': 4,
     '>=': 4,
+    '&': 5,
     '==': 5,
     'and': 6,
     '&&': 6,

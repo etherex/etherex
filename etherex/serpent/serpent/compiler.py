@@ -248,7 +248,7 @@ class decorate():
     def __init__(self, ast):
         if isinstance(ast, (str, unicode)):
             self.value, self.fun = ast, None
-            self.arity = 1
+            self.arity = 0 if self.value == 'stop' else 1
         elif ast[0] == 'set':
             self.value, self.fun = None, 'set'
             self.args = map(decorate, ast[1:])

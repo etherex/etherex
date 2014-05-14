@@ -15,7 +15,7 @@ import logging.config
 from pyethereum.signals import config_ready
 from pyethereum.tcpserver import tcp_server
 from pyethereum.peermanager import peer_manager
-from pyethereum.chainmanager import chain_manager
+# from pyethereum.chainmanager import chain_manager
 from pyethereum.apiserver import api_server
 
 logger = logging.getLogger(__name__)
@@ -33,8 +33,19 @@ print "Initializing exchange from addr and key: %s, %s" % ("0x" + users[0][1], "
 # Init network and get blockchain, from eth.py main()
 def init_network():
     init = False
+
+
     config = eth.create_config()
-    config_ready.send(sender=config)
+
+    try:
+        import pyethereum.monkeypatch
+        logger.info("Loaded your customizations from monkeypatch.py")
+    except ImportError, e:
+        pass
+
+    config_ready.send(sender=None, config=config)
+    # import after logger config is ready
+    from pyethereum.chainmanager import chain_manager
 
     try:
         tcp_server.start()
@@ -59,13 +70,14 @@ def init_network():
     # connect peer
     if config.get('network', 'remote_host'):
         peer_manager.connect_peer(
-            "127.0.0.1", # config.get('network', 'remote_host'),
+            "127.0.0.1", #config.get('network', 'remote_host'),
             config.getint('network', 'remote_port'))
 
     # loop
     while not peer_manager.stopped():
-        time.sleep(0.5)
-        if len(peer_manager.get_connected_peer_addresses()) > 0:
+        time.sleep(1)
+
+        if len(peer_manager.get_connected_peer_addresses()) >= 1:
             chain_manager.synchronize_blockchain()
 
             if chain_manager.head != None:

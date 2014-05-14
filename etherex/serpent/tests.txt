@@ -1,3 +1,7 @@
+
+================
+// First line comment
+x = 1
 ================
 x = 3 + 5
 ================
@@ -54,21 +58,6 @@ y = array(1)
 y[0] = msg(0xf345747062de4d05d897d62c4696febbedcb36b8, 10^18, tx.gas - 100, a, 3, 1)
 x = y[0]
 ================
-n = 3
-addresses = array(n)
-addresses[0] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31
-addresses[1] = 0xe559de5527492bcb42ec68d07df0742a98ec3f1e
-addresses[2] = 0xf9e57456f18d90886263fedd9cc30b27cd959137
-contract.storage[addresses[0]] = 1
-contract.storage[addresses[1]] = 1
-contract.storage[addresses[2]] = 1
+a = 0x1001 & 1
 ================
-n = 3
-addresses = array(n)
-addresses[0] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31
-addresses[1] = 0xe559de5527492bcb42ec68d07df0742a98ec3f1e
-addresses[2] = 0xf9e57456f18d90886263fedd9cc30b27cd959137
-i = 0
-while i < n:
-    contract.storage[owners[i]] = 1
-    i = i + 1
+// A comment on a line on its own at the start of a file

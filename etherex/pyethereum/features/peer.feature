@@ -82,15 +82,10 @@ Feature: peer
 
   Scenario: receive a GetPeers packet
     Given a GetPeers packet
-    And peers data
-    And a peers data provider
-    '''which handle known_peers_addresses_requested signal
-    and send known_peers_addresses_ready signal
-    '''
-    When peer.send_Peers is instrumented
+    When getpeers_received signal handler is connected
     And the packet is received from peer
     And all data with the peer is processed
-    Then peer.send_Peers should be called once with the peers data
+    Then the getpeers_received signal handler should be called once
 
   Scenario: send Peers to peer
     Given peers data
@@ -101,10 +96,10 @@ Feature: peer
   Scenario: receive a Peers packet
     Given peers data
     And a Peers packet with the peers data
-    When handler for a new_peer_received signal is registered
+    When handler for new_peers_received signal is registered
     And the packet is received from peer
     And all data with the peer is processed
-    Then the new_peer_received handler should be called once for each peer
+    Then the new_peers_received handler should be called once with all peers
 
   Scenario: send GetTransactions to peer
     When peer.send_GetTransactions is called
@@ -113,15 +108,10 @@ Feature: peer
 
   Scenario: receive a GetTransactions packet
     Given a GetTransactions packet
-    And transactions data
-    And a transactions data provider
-    '''which handle transactions_requested signal
-    and send transactions_ready signal
-    '''
-    When peer.send_Transactions is instrumented
+    When gettransactions_received signal handler is connected
     And the packet is received from peer
     And all data with the peer is processed
-    Then peer.send_Transactions should be called once with the transactions data
+    Then the gettransactions_received signal handler should be called once
 
   Scenario: send Transactions to peer
     Given transactions data
@@ -168,7 +158,6 @@ Feature: peer
     When peer.send_Blocks is instrumented
     And the packet is received from peer
     And all data with the peer is processed
-    Then peer.send_Blocks should be called once with the blocks data
 
   Scenario: send NotInChain to peer
     When peer.send_NotInChain is called

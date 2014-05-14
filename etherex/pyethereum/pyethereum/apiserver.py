@@ -1,9 +1,13 @@
 import logging
 import threading
+import json
+
 import bottle
+
 from pyethereum.chainmanager import chain_manager
 from pyethereum.peermanager import peer_manager
 import pyethereum.dispatch as dispatch
+from pyethereum.blocks import block_structure
 import pyethereum.signals as signals
 from pyethereum.transactions import Transaction
 
@@ -37,8 +41,8 @@ api_server = ApiServer()
 
 
 @dispatch.receiver(signals.config_ready)
-def config_api_server(sender, **kwargs):
-    api_server.configure(sender)
+def config_api_server(sender, config, **kwargs):
+    api_server.configure(config)
 
 
 # #######cors##############
@@ -65,16 +69,25 @@ class CorsMiddleware:
                 return start_response(status, headers, exc_info)
             return self.app(environ, my_start_response)
 
-# ####### ##############
+
+# ######### Utilities ########
+def load_json_req():
+    json_body = bottle.request.json
+    if not json_body:
+        json_body = json.load(bottle.request.body)
+    return json_body
 
 
+# ######## Blocks ############
 def make_blocks_response(blocks):
-    objs = [dict(blockhash=x.hex_hash(),
-                 prevhash=x.prevhash.encode('hex'),
-                 uncles_hash=x.uncles_hash.encode('hex'),
-                 nonce=x.nonce.encode('hex'),
-                 tx_list_root=x.tx_list_root.encode('hex')
-                 ) for x in blocks]
+    objs = []
+    for block in blocks:
+        obj = block.to_dict()
+        for item_name, item_type, _ in block_structure:
+            if item_type in ["bin", "trie_root"]:
+                obj[item_name] = obj[item_name].encode('hex')
+        objs.append(obj)
+
     return dict(blocks=objs)
 
 
@@ -106,19 +119,31 @@ def transactions():
     return bottle.redirect(base_url + '/transactions/' + tx.hex_hash())
 
 
-# ######## Peers ###################
+# ######## Accounts ############
+@app.get(base_url + '/accounts/')
+def accounts():
+    logger.debug('accounts')
+    pass
 
+
+@app.get(base_url + '/accounts/<address>')
+def account(address=None):
+    logger.debug('account/%s', address)
+    pass
+
+
+# ######## Peers ###################
 def make_peers_response(peers):
     objs = [dict(ip=ip, port=port, node_id=node_id.encode('hex'))
             for (ip, port, node_id) in peers]
     return dict(peers=objs)
 
 
-@app.get(base_url + '/connected_peers/')
+@app.get(base_url + '/peers/connected')
 def connected_peers():
     return make_peers_response(peer_manager.get_connected_peer_addresses())
 
 
-@app.get(base_url + '/known_peers/')
+@app.get(base_url + '/peers/known')
 def known_peers():
     return make_peers_response(peer_manager.get_known_peer_addresses())

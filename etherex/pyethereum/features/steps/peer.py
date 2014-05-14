@@ -33,11 +33,9 @@ def step_impl(context):
     packet = context.packeter.dump_Hello()
     assert context.sent_packets == [packet]
 
-
 @given(u'a valid Hello packet')  # noqa
 def step_impl(context):
     context.packet = context.packeter.dump_Hello()
-
 
 @given(u'a Hello packet with protocol version incompatible')  # noqa
 def step_impl(context):
@@ -201,27 +199,17 @@ def step_impl(context):
     ]
 
 
-@given(u'a peers data provider')  # noqa
+@when(u'getpeers_received signal handler is connected')  # noqa
 def step_impl(context):
-    from pyethereum.signals import (known_peer_addresses_requested,
-                                    known_peer_addresses_ready)
-
-    def peers_requested_handler(sender, req, **kwargs):
-        known_peer_addresses_ready.send(sender=None, data=context.peers_data)
-
-    context.peers_requested_handler = peers_requested_handler
-    known_peer_addresses_requested.connect(context.peers_requested_handler)
+    from pyethereum.signals import getpeers_received
+    handler = mock.MagicMock()
+    context.getpeers_received_handler = handler
+    getpeers_received.connect(handler)
 
 
-@when(u'peer.send_Peers is instrumented')  # noqa
+@then(u'the getpeers_received signal handler should be called once')  # noqa
 def step_impl(context):
-    context.peer.send_Peers = instrument(context.peer.send_Peers)
-
-
-@then(u'peer.send_Peers should be called once with the peers data')  # noqa
-def step_impl(context):
-    assert context.peer.send_Peers.call_count == 1
-    assert context.peer.send_Peers.call_args[0][0] == context.peers_data
+    assert context.getpeers_received_handler.call_count == 1
 
 
 @when(u'peer.send_Peers is called')  # noqa
@@ -241,22 +229,23 @@ def step_impl(context):
     context.packet = context.packeter.dump_Peers(context.peers_data)
 
 
-@when(u'handler for a new_peer_received signal is registered')  # noqa
+@when(u'handler for new_peers_received signal is registered')  # noqa
 def step_impl(context):
     context.new_peer_received_handler = mock.MagicMock()
-    from pyethereum.signals import peer_address_received
-    peer_address_received.connect(context.new_peer_received_handler)
+    from pyethereum.signals import peer_addresses_received
+    peer_addresses_received.connect(context.new_peer_received_handler)
 
 
-@then(u'the new_peer_received handler should be called once'  # noqa
-' for each peer')
+@then(u'the new_peers_received handler should be called once'  # noqa
+' with all peers')
 def step_impl(context):
-    call_args_list = context.new_peer_received_handler.call_args_list
-    assert len(call_args_list) == len(context.peers_data)
-    pairs = zip(call_args_list, context.peers_data)
+    call_args = context.new_peer_received_handler.call_args_list[0]
+    call_peers = call_args[1]['addresses']
+    assert len(call_peers) == len(context.peers_data)
+    pairs = zip(call_peers, context.peers_data)
     for call, peer in pairs:
-        assert call[1]['peer'] == peer
-
+        assert call == peer
+        #assert call[1]['address'] == peer
 
 @when(u'peer.send_GetTransactions is called')  # noqa
 def step_impl(context):
@@ -284,29 +273,18 @@ def step_impl(context):
     ]
 
 
-@given(u'a transactions data provider')  # noqa
+@when(u'gettransactions_received signal handler is connected')  # noqa
 def step_impl(context):
-    from pyethereum.signals import (local_transactions_requested,
-                                    local_transactions_ready)
-
-    def handler(sender, req, **kwargs):
-        local_transactions_ready.send(sender=None, data=context.transactions_data)
-
-    context.transactions_requested_handler = handler
-    local_transactions_requested.connect(handler)
+    from pyethereum.signals import gettransactions_received
+    handler = mock.MagicMock()
+    context.gettransactions_received_handler = handler
+    gettransactions_received.connect(handler)
 
 
-@when(u'peer.send_Transactions is instrumented')  # noqa
+@then(u'the gettransactions_received signal handler'  # noqa
+      ' should be called once')
 def step_impl(context):
-    context.peer.send_Transactions = instrument(context.peer.send_Transactions)
-
-
-@then(u'peer.send_Transactions should be called once'  # noqa
-' with the transactions data')
-def step_impl(context):
-    assert context.peer.send_Transactions.call_count == 1
-    transactions_args = context.peer.send_Transactions.call_args[0][0]
-    assert transactions_args == context.transactions_data
+    assert context.gettransactions_received_handler.call_count == 1
 
 
 @when(u'peer.send_Transactions is called')  # noqa
@@ -421,12 +399,6 @@ def step_impl(context):
 @when(u'peer.send_Blocks is instrumented')  # noqa
 def step_impl(context):
     context.peer.send_Blocks = instrument(context.peer.send_Blocks)
-
-
-@then(u'peer.send_Blocks should be called once with the blocks data')  # noqa
-def step_impl(context):
-    assert context.peer.send_Blocks.call_count == 1
-    assert context.peer.send_Blocks.call_args[0][0] == context.blocks_data
 
 
 @when(u'peer.send_NotInChain is called')  # noqa

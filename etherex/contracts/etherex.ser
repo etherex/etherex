@@ -51,7 +51,7 @@ code:
         marketa[0] = "ETH/BTC"
         marketa[1] = 1 * 10 ^ 7 // "Minimum mBTC trade: %d" % (marketa[1] / (10 ** 5))
         marketa[2] = 1 * 10 ^ 19 // "Minimum ETH trade: %d" % (marketa[2] / (10 ** 18))
-        marketa[3] = tx.origin
+        marketa[3] = contract.address
         marketb[0] = "ETH/XETH"
         marketb[1] = 1 * 10 ^ 19 // "Minimum XETH trade: %d" % (marketb[1] / (10 ** 18))
         marketb[2] = 1 * 10 ^ 19 // #define marketb[3]=XETH

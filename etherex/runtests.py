@@ -2,8 +2,11 @@
 # import serpent
 import subprocess
 import sys
+import json
 sys.path.insert(0, './serpent')
 from serpent import compiler
+
+def compile_from_assembly(source): return compiler.serialize(compiler.dereference(json.loads(source)))
 
 def compile(f):
   t = open(f).readlines()
@@ -16,32 +19,41 @@ def compile(f):
     i += 1
     print '================='
     text = '\n'.join(o).replace('\n\n','\n')
-    # print text
-    ast = compiler.parse(text)
+
     print "AST:"
+    ast = compiler.parse(text)
     print ast
     print ""
-    aevm = compiler.compile_to_assembly(text)
+
     print "AEVM:"
+    aevm = compiler.compile_to_assembly(text)
     print ' '.join([str(x) for x in aevm])
     print ""
     s = open(f).read()
     code = compiler.compile(text)
     # code = compiler.decode_datalist(compiler.encode_datalist(ast))
+
     print "Output:"
     print "0x" + code.encode('hex') #' '.join([str(x) for x in aevm])
     print ""
+
     print "Int:"
     asint = int(code.encode('hex'), 16)
     print asint
     print ""
     aslist = compiler.decode_datalist("0x" + code.encode('hex'))
+
     print "Datalist of size %d:" % len(aslist)
     hexlist = list()
     for item in aslist:
       hexlist.append(hex(item)[:-1])
     print hexlist
     print ""
+
+    # print "Serialized:"
+    # print compile_from_assembly(json.dumps(ast))
+    # print ""
+
     print "Decoded hex:"
     ashex = list()
     for item in hexlist:

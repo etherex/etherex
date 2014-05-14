@@ -1,2 +1,1 @@
-if msg.data >= 100:
-    contract.storage[msg.data[0]] = msg.data[1]
+contract.storage[msg.sender] = msg.data[0]

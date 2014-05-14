@@ -4,7 +4,6 @@ from utils import big_endian_to_int as idec
 from utils import int_to_big_endian4 as ienc4
 from utils import int_to_big_endian as ienc
 from utils import recursive_int_to_big_endian
-from utils import sha3
 import dispatch
 import sys
 import signals
@@ -66,10 +65,10 @@ class Packeter(object):
 
     SYNCHRONIZATION_TOKEN = 0x22400891
     PROTOCOL_VERSION = 0x6792b
+
     # is the node s Unique Identifier and is the 512-bit hash that serves to
     # identify the node.
     NETWORK_ID = 0
-    # as sent by Ethereum(++)/v0.3.11/brew/Darwin/unknown
     CLIENT_ID = 'Ethereum(py)/0.5.1/%s/Protocol:%d' % (sys.platform,
                                                        PROTOCOL_VERSION)
     CAPABILITIES = 0x01 + 0x02 + 0x04  # node discovery + transaction relaying
@@ -144,6 +143,8 @@ class Packeter(object):
         return packet
 
     def dump_Hello(self):
+        # inconsistency here!
+        # spec says CAPABILITIES, LISTEN_PORT but code reverses
         """
         [0x00, PROTOCOL_VERSION, NETWORK_ID, CLIENT_ID, CAPABILITIES,
         LISTEN_PORT, NODE_ID]
@@ -187,8 +188,6 @@ class Packeter(object):
         return self.dump_packet(data)
 
     def dump_Disconnect(self, reason=None):
-        assert not reason or reason in self.disconnect_reasons_map
-
         data = [self.cmd_map_by_name['Disconnect']]
         if reason:
             data.append(self.disconnect_reasons_map[reason])
@@ -205,7 +204,7 @@ class Packeter(object):
         '''
         data = [self.cmd_map_by_name['Peers']]
         for ip, port, pid in peers:
-            ip = list((ienc(int(x)) for x in ip.split('.')))
+            ip = ''.join(chr(int(x)) for x in ip.split('.'))
             data.append([ip, port, pid])
         return self.dump_packet(data)
 
@@ -216,9 +215,10 @@ class Packeter(object):
     def dump_GetTransactions(self):
         """
         [0x12, [nonce, receiving_address, value, ... ], ... ]
-        Specify (a) transaction(s) that the peer should make sure is included on 
-        its transaction queue. The items in the list (following the first item 0x12) 
-        are transactions in the format described in the main Ethereum specification.
+        Specify (a) transaction(s) that the peer should make sure is included
+        on its transaction queue. The items in the list (following the first
+        item 0x12) are transactions in the format described in the main
+        Ethereum specification.
         """
         data = [self.cmd_map_by_name['GetTransactions']]
         return self.dump_packet(data)
@@ -230,14 +230,14 @@ class Packeter(object):
     def dump_GetChain(self, parents=[], count=1):
         """
         [0x14, Parent1, Parent2, ..., ParentN, Count]
-        Request the peer to send Count (to be interpreted as an integer) blocks 
-        in the current canonical block chain that are children of Parent1 
-        (to be interpreted as a SHA3 block hash). If Parent1 is not present in 
-        the block chain, it should instead act as if the request were for 
-        Parent2 &c. through to ParentN. If the designated parent is the present 
-        block chain head, an empty reply should be sent. If none of the parents 
-        are in the current canonical block chain, then NotInChain should be 
-        sent along with ParentN (i.e. the last Parent in the parents list). 
+        Request the peer to send Count (to be interpreted as an integer) blocks
+        in the current canonical block chain that are children of Parent1
+        (to be interpreted as a SHA3 block hash). If Parent1 is not present in
+        the block chain, it should instead act as if the request were for
+        Parent2 &c. through to ParentN. If the designated parent is the present
+        block chain head, an empty reply should be sent. If none of the parents
+        are in the current canonical block chain, then NotInChain should be
+        sent along with ParentN (i.e. the last Parent in the parents list).
         If no parents are passed, then a reply need not be made.
         """
         data = [self.cmd_map_by_name['GetChain']] + parents + [count]
@@ -252,6 +252,5 @@ packeter = Packeter()
 
 
 @dispatch.receiver(signals.config_ready)
-def config_packeter(sender, **kwargs):
-    config = sender
+def config_packeter(sender, config, **kwargs):
     packeter.configure(config)
