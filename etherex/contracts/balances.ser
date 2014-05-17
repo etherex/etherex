@@ -2,7 +2,7 @@
 # Balances (XETH)
 #
 init:
-    contract.storage[2] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31
+    contract.storage[2] = msg.sender
 code:
     status = contract.storage[1]
     if status == 1: // "Running contract..."
@@ -43,7 +43,7 @@ code:
                     isowner = owner
                 return(isowner)
             elif msg.data[2] == 4 and msg.sender == contract.storage[2]: // #define 0x45746865724578=EX
-                if value < 1 or value > 1 * 10 ^ 21:
+                if value < 1:# or value > 1 * 10 ^ 21:
                     return(0)
                 contract.storage[to] = contract.storage[to] + value // "Minting %d" % value
             elif msg.data[2] == 5 and msg.sender == contract.storage[2]:
@@ -52,12 +52,14 @@ code:
     else: // # if msg.sender == contract.storage[2]:
         n = 3
         owners = array(n)
-        owners[0] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31 // #define 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31=CAK
-        owners[1] = 0xe559de5527492bcb42ec68d07df0742a98ec3f1e // #define 0xe559de5527492bcb42ec68d07df0742a98ec3f1e=EOAR
-        owners[2] = 0xf9e57456f18d90886263fedd9cc30b27cd959137 // #define 0xf9e57456f18d90886263fedd9cc30b27cd959137=FAB
+        owners[0] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31 // #define 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31=ALICE
+        owners[1] = 0xe559de5527492bcb42ec68d07df0742a98ec3f1e // #define 0xe559de5527492bcb42ec68d07df0742a98ec3f1e=BOB
+        owners[2] = 0xf9e57456f18d90886263fedd9cc30b27cd959137 // #define 0xf9e57456f18d90886263fedd9cc30b27cd959137=CHARLIE
         i = 0
         while i < n:
             contract.storage[owners[i]] = msg.value / 3
             i = i + 1
+        contract.storage[msg.sender] = msg.value
         contract.storage[2] = msg.data[0]
         contract.storage[1] = 1 // "Initializing storage for creators %s" % owners
+        return(1)

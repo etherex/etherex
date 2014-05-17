@@ -1,6 +1,6 @@
 #!/usr/bin/python
 from serpent import compiler
-t = open('compiler/tests.txt').readlines()
+t = open('serpent/tests.txt').readlines()
 i = 0
 while 1:
     o = []

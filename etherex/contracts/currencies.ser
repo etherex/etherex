@@ -2,7 +2,7 @@
 # Currencies (Markets)
 #
 init:
-    contract.storage[2] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31
+    contract.storage[2] = msg.sender
 code:
   status = contract.storage[1]
   exchange = contract.storage[2]
@@ -32,15 +32,15 @@ code:
                   price = msg.data[3]
                   owner = msg.data[4]
                   market = msg.value
-                  if trade < 1 or trade > 2:
+                  if trade < 1:# or trade > 2:
                       return(0) // "Invalid market ID"
-                  if price < 1 or price > 2^255:
+                  if price < 1:# or price > 2^255:
                       return(0) // "Invalid price"
-                  if amount < 1 or amount > 2^255:
+                  if amount < 1:# or amount > 2^255:
                       return(0) // "Invalid minimum amount"
-                  if owner < 1 or owner > 2^255:
+                  if owner < 1:# or owner > 2^255:
                       return(0) // "Invalid owner"
-                  if market < 0 or market > 2^255: // "TODO - Get and check market value"
+                  if market < 0:# or market > 2^255: // "TODO - Get and check market value"
                       return(0) // "Invalid market value"
                   i = 0
                   while i < 5:
@@ -76,3 +76,4 @@ code:
   else: // # if msg.sender == contract.storage[2]:
       contract.storage[2] = msg.data[0] // #define msg.data[0]=EX
       contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.data[0]
+      return(1)

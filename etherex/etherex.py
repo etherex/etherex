@@ -98,6 +98,11 @@ def init_system(genesis, key):
     ret = processblock.apply_tx(genesis, tx_init_root)
     print "Result: %s" % serpent.decode_datalist(ret[1])
 
+    data = serpent.encode_datalist([2, 10 * 10 ** 19, 1500 * 10 ** 8, 1])
+    tx_init_root = transactions.Transaction(11, 10**12, 100000, r_contract, 10 * 10 ** 19, data).sign(key)
+    ret = processblock.apply_tx(genesis, tx_init_root)
+    print "Result: %s" % serpent.decode_datalist(ret[1])
+
     # data = serpent.encode_datalist([9, 0xf9e57456f18d90886263fedd9cc30b27cd959137]) #2, 10 * 10 ** 19, 1500 * 10 ** 8, 1])
     # tx_init_root = transactions.Transaction(11, 10 * 10 ** 19, 10**12, 100000, root_contract, data).sign(key)
     # ret = processblock.apply_tx(genesis, tx_init_root)

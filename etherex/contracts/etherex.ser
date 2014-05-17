@@ -2,7 +2,7 @@
 # Etherex
 #
 init:
-    contract.storage[2] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31
+    contract.storage[2] = msg.sender
 code:
     if tx.gas < 100:
         return(0) // "Insufficient gas"
@@ -12,7 +12,7 @@ code:
             if msg.value > 0: // "Refunding"
                 ret = send(msg.sender, msg.value, tx.gas / 2)
             return(1) // "No data to process"
-        if msg.data[0] < 1 or msg.data[0] > 5:
+        if msg.data[0] < 1: # or msg.data[0] > 5:
             if msg.value > 0: // "Refunding"
                 ret = send(msg.sender, msg.value, tx.gas / 2)
             return(2) // "Invalid operation"
@@ -37,7 +37,7 @@ code:
                 if msg.value > 0: // "Refunding"
                     ret = send(msg.sender, msg.value, tx.gas / 2)
                 return(7) // "Missing market ID"
-            elif msg.data[3] > 1 or msg.data[3] < 1:
+            elif msg.data[3] > 1: # or msg.data[3] < 1:
                 if msg.value > 0: // "Refunding"
                     ret = send(msg.sender, msg.value, tx.gas / 2)
                 return(8) // "Invalid market ID"
@@ -51,7 +51,7 @@ code:
         marketa[0] = "ETH/BTC"
         marketa[1] = 1 * 10 ^ 7 // "Minimum mBTC trade: %d" % (marketa[1] / (10 ** 5))
         marketa[2] = 1 * 10 ^ 19 // "Minimum ETH trade: %d" % (marketa[2] / (10 ** 18))
-        marketa[3] = contract.address
+        marketa[3] = msg.sender # contract.address...
         marketb[0] = "ETH/XETH"
         marketb[1] = 1 * 10 ^ 19 // "Minimum XETH trade: %d" % (marketb[1] / (10 ** 18))
         marketb[2] = 1 * 10 ^ 19 // #define marketb[3]=XETH
@@ -61,11 +61,11 @@ code:
         markets[2] = marketb
         amount = msg.data[1] // "Trade amount: %d" % amount
         price = msg.data[2] // "Trade price: %d" % price
-        if amount > 2^256-1 or amount < 1:
+        if amount > 2^255-1: # or amount < 1:
             if msg.value > 0: // "Refunding"
                 ret = send(msg.sender, msg.value, tx.gas / 2)
             return(10) // "Amount out of range"
-        if price > 2^256-1 or price < 1 * 10 ^ 8 + 1:
+        if price > 2^255-1: # or price < 1 * 10 ^ 8 + 1:
             if msg.value > 0: // "Refunding"
                 ret = send(msg.sender, msg.value, tx.gas / 2)
             return(11) // "Price out of range"
@@ -325,7 +325,7 @@ code:
                                     lowerindex = 1 // "Updating indexes %s and %s" % (currentkey, indexkey)
                                     if curbook == 0 and amount == 0 and price == currentprice:
                                         lowerindex = 2
-                                    if curbook == 0 or amount == 0:
+                                    if curbook == 0: # or amount == 0:
                                         priceindex = index[currentkey] // "Updating index %s from key %d by minus %d" % (priceindex, currentkey, lowerindex)
                                         if priceindex == 0:
                                             index[currentkey] = 0
@@ -346,7 +346,7 @@ code:
                                         sendindex[2] = currentkey
                                         ret = msg(indexes, 0, tx.gas / 2, sendindex, 3)
                                     # contract.storage[pricekey] = book # "TODO - SAVE BOOK!!!"
-                                    if currentprice < price or currentprice > price: // "Updating cross index and book at index %d in %s" % (indexkey, index)
+                                    if currentprice < price: # or currentprice > price: // "Updating cross index and book at index %d in %s" % (indexkey, index)
                                         priceindex = index[indexkey]
                                         if priceindex == 0:
                                             index[indexkey] = 0

@@ -2,7 +2,7 @@
 # Indexes
 #
 init:
-    contract.storage[2] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31
+    contract.storage[2] = msg.sender
 code:
     status = contract.storage[1]
     exchange = contract.storage[2]
@@ -50,3 +50,4 @@ code:
         contract.storage[10] = 10
         contract.storage[2] = msg.data[0] // #define msg.data[0]=EX
         contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.data[0]
+        return(1)

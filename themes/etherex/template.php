@@ -17,6 +17,9 @@ function etherex_preprocess_page(&$vars) {
   $vars['head'] = str_replace('<meta name="msapplication-config" content="/sites/zerogox.com/themes/zerogox/browserconfig.xml"/>' . "\n", '', $vars['head']);
   $vars['head'] = str_replace('353535', '0786d2', $vars['head']);
   $vars['head'] = str_replace("\n" . '<link href="//fonts.googleapis.com/css?family=Cinzel:400,700" rel="stylesheet" type="text/css">', '', $vars['head']);
+  if (empty($vars['mission'])) {
+    $vars['mission'] = variable_get('site_mission', '');
+  }
   // $vars['head'] = str_replace('<link href="//fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic&subset=latin" rel="stylesheet" type="text/css" />'. "\n", '', $vars['head']);
   // drupal_set_html_head('<link href="//fonts.googleapis.com/css?family=Open+Sans:300,300italic,600,600italic,700,700italic&subset=latin" rel="stylesheet" type="text/css" />');
 
