@@ -1,0 +1,5 @@
+if !contract.storage[msg.data[0]]:
+    contract.storage[msg.data[0]] = msg.data[1]
+    return(1)
+else:
+    return(0)

@@ -1,0 +1,2 @@
+x = create(tx.gas - 100, 0, import(mul2.se))
+return(msg(x,0,tx.gas-100,[5],1))
