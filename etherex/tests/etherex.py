@@ -44,6 +44,7 @@ class TestEtherEx(object):
         assert self.sim.get_storage_data(self.contract, 5) == int(self.tcontract, 16)
         assert self.sim.get_storage_data(self.contract, 6) == int(self.ccontract, 16)
         assert self.sim.get_storage_data(self.bcontract, "b5b8c62dd5a20793b6c562e002e7e0aa68316d31") == 333333333333333333
+        assert self.sim.get_storage_data(self.bcontract, self.ALICE.address) == 10 ** 18
         assert self.sim.get_storage_data(self.bcontract, 2) == int(self.contract, 16)
         assert self.sim.get_storage_data(self.icontract, 2) == int(self.contract, 16)
         assert self.sim.get_storage_data(self.tcontract, 2) == int(self.contract, 16)
