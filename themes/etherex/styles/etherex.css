@@ -188,8 +188,19 @@ div.warning, span.warning:not(.tabledrag-changed) {
   background-position: 12px 15px;
 }
 
+.type-blog #page-title,
+.type-simplews #page-title {
+  text-align: center;
+}
+
 article {
   text-shadow: 0 0 2px #000;
+}
+
+#center .node {
+  font-size: 1.25em;
+  margin: 0 auto;
+  max-width: 800px;
 }
 
 input.form-text, textarea, select {
