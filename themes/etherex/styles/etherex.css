@@ -193,6 +193,10 @@ div.warning, span.warning:not(.tabledrag-changed) {
   text-align: center;
 }
 
+.section-chain #center {
+  overflow-x: scroll;
+}
+
 article {
   text-shadow: 0 0 2px #000;
 }
