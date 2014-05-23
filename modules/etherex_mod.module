@@ -73,8 +73,8 @@ function etherex_mod_form_simplenews_block_form_1_alter(&$form, &$form_state) {
     }
   }
   $form['donations'] = array(
-    'type' => '#markup',
-    'value' => '<h3>Donations<br/>1MMQbxMhyt3XvmArTiscWRZCsdwpv4nnuu</h3>',
+    '#type' => 'markup',
+    '#value' => '<h3>Donations<br/>1MMQbxMhyt3XvmArTiscWRZCsdwpv4nnuu</h3>'
   );
   $form['submit']['#value'] = $submit_text;
 }
