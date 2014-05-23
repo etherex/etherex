@@ -72,9 +72,9 @@ function etherex_mod_form_simplenews_block_form_1_alter(&$form, &$form_state) {
       $submit_text = t('Unsubscribe');
     }
   }
-  $form['donations'] = array(
-    '#type' => 'markup',
-    '#value' => '<h4>Donations<br/>1MMQbxMhyt3XvmArTiscWRZCsdwpv4nnuu</h4>'
-  );
+  // $form['donations'] = array(
+  //   '#type' => 'markup',
+  //   '#value' => '<h4>Donations<br/>1MMQbxMhyt3XvmArTiscWRZCsdwpv4nnuu</h4>'
+  // );
   $form['submit']['#value'] = $submit_text;
 }
