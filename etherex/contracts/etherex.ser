@@ -454,7 +454,7 @@ code:
             # suicide(msg.sender) // "Protect the citizens"
         else:
             if msg.value > 0: // "Refunding"
-                ret = send(msg.sender, msg.value, tx.gas - 100)
+                ret = send(msg.sender, msg.value, tx.gas / 2)
             return(0) // "Protect the citizens"
             # suicide(msg.sender) // "Protect the citizens"
         if msg.value > 0:

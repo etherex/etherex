@@ -37,7 +37,7 @@ if msg.data[0] == 0:
 else:
     k = sha3(msg.data[2])
     a = array(1)
-    msg(contract.storage[msg.data[1]],msg.value,msg.data[3:],msg.datasize-96,a,1)
+    msg(contract.storage[msg.data[1]],msg.value,0,msg.datasize-3,a,1)
     contract.storage[k] = a
     return(a,1)
 ================
@@ -61,3 +61,8 @@ x = y[0]
 a = 0x1001 & 1
 ================
 // A comment on a line on its own at the start of a file
+================
+init:
+    contract.storage[1] = msg.sender
+code:
+    contract.storage[2] = 1

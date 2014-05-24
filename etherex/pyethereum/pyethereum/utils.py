@@ -5,8 +5,8 @@ from bitcoin import privtopub
 import struct
 import os
 import sys
-import errno
 import rlp
+import db
 import random
 from rlp import big_endian_to_int, int_to_big_endian
 
@@ -94,7 +94,19 @@ def recursive_int_to_big_endian(item):
         return res
     return item
 
+
+def rlp_encode(item):
+    '''
+    item can be nested string/integer/list of string/integer
+    '''
+    return rlp.encode(recursive_int_to_big_endian(item))
+
 # Format encoders/decoders for bin, addr, int
+
+
+def decode_hash(v):
+    '''decodes a bytearray from hash'''
+    return db_get(v)
 
 
 def decode_bin(v):
@@ -130,6 +142,13 @@ def decode_root(root):
     return root
 
 
+def encode_hash(v):
+    '''encodes a bytearray into hash'''
+    k = sha3(v)
+    db_put(k, v)
+    return k
+
+
 def encode_bin(v):
     '''encodes a bytearray into serialization'''
     return v
@@ -154,6 +173,7 @@ def encode_int(v):
     return int_to_big_endian(v)
 
 decoders = {
+    "hash": decode_hash,
     "bin": decode_bin,
     "addr": decode_addr,
     "int": decode_int,
@@ -161,6 +181,7 @@ decoders = {
 }
 
 encoders = {
+    "hash": encode_hash,
     "bin": encode_bin,
     "addr": encode_addr,
     "int": encode_int,
@@ -249,6 +270,18 @@ def get_db_path():
 
 def get_index_path():
     return os.path.join(data_dir.path, 'indexdb')
+
+
+def db_put(key, value):
+    database = db.DB(get_db_path())
+    res = database.put(key, value)
+    database.commit()
+    return res
+
+
+def db_get(key):
+    database = db.DB(get_db_path())
+    return database.get(key)
 
 
 def configure_logging(loggerlevels=':DEBUG', verbosity=1):

@@ -22,6 +22,7 @@ code:
             balance = contract.storage[msg.sender] - value
             contract.storage[msg.sender] = balance
             contract.storage[to] = contract.storage[to] + value
+            return(1)
         if msg.datasize == 3:
             if msg.data[2] == 1:
                 ret = contract.storage[to] // "Balance of %s: %s" % (to, ret)

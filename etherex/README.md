@@ -13,11 +13,12 @@ This repository contains the code that runs the exchange on Ethereum as a set of
 Components
 ----------
 
-* contracts: CLL contracts running EtherEx
-* simulations: Python simulations for EtherEx
+* contracts: Serpent contracts
+* simulations: Python simulations (deprecated soon)
 * serpent: Serpent compiler by Vitalik Buterin [repo](https://github.com/ethereum/serpent)
+* evm-sim: EVM simulator by Joris Bontje [repo](https://github.com/EtherCasts/evm-sim)
 * cll-sim: CLL simulator by Joris Bontje [repo](https://github.com/jorisbontje/cll-sim)
-* tests: extra tests
+* tests: evm-sim tests
 
 
 Running tests
@@ -26,7 +27,7 @@ Running tests
 ./runtests.py
 ```
 
-Refer to the [compiler](https://github.com/ethereum/compiler) and [simulator](https://github.com/jorisbontje/cll-sim) for their respective usage.
+Refer to [Serpent](https://github.com/ethereum/serpent) and the [simulator](https://github.com/EtherCasts/evm-sim) for their respective usage.
 
 
 Local Blockchain tests
@@ -146,7 +147,6 @@ Notes
 -----
 * Your Ethereum address is used as your identity
 * You can only make trades for your address
-* Balances can't be transferred
 
 
 TODO

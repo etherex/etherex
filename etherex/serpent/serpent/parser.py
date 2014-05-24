@@ -1,31 +1,38 @@
 import re
+import utils
+token, astnode = utils.token, utils.astnode
+
 
 # Number of spaces at the beginning of a line
 def spaces(ln):
     spaces = 0
-    while spaces < len(ln) and ln[spaces] == ' ': spaces += 1
+    while spaces < len(ln) and ln[spaces] == ' ':
+        spaces += 1
     return spaces
 
+
 # Main parse function
-def parse(document):
-    return parse_lines(document.split('\n'))
+def parse(document, fil='main'):
+    return parse_lines(document.split('\n'), fil)
+
 
 def strip_line(ln):
     ln2 = ln.strip()
     if '//' in ln2:
-        ln2 = ln2[:ln2.find('//')]
+        ln2 = ln2[:ln2.find('//')].rstrip()
     if '#' in ln2:
-        return ln2[:ln2.find('#')]
+        return ln2[:ln2.find('#')].rstrip()
     else:
         return ln2
 
 
 # Parse the statement-level structure, including if and while statements
-def parse_lines(lns):
+def parse_lines(lns, fil='main', voffset=0, hoffset=0):
     o = []
     i = 0
     while i < len(lns):
         main = lns[i]
+        line_index = i
         # Skip empty lines
         if len(main.strip()) == 0 or main.strip()[:2] == '//' or main.strip()[:1] == '#':
             i += 1
@@ -33,6 +40,7 @@ def parse_lines(lns):
         if spaces(main) > 0:
             raise Exception("Line "+str(i)+" indented too much!")
         main = strip_line(main)
+        hoffset2 = len(main) - len(main.lstrip())
         # If the line was only a comment it's now empty, so skip it
         if len(main) == 0:
             i += 1
@@ -51,60 +59,62 @@ def parse_lines(lns):
             i += 1
         child_block = map(lambda x: x[indent:], child_lns)
         # Calls parse_line to parse the individual line
-        out = parse_line(main)
+        out = parse_line(main, fil, voffset + line_index, hoffset + hoffset2)
         # Include the child block into the parsed expression
-        if out[0] in ['if', 'else', 'while', 'else if', 'init', 'code']:
-            if len(child_block) == 0:
-                raise Exception("If/else/while statement must have\
-                                 sub-clause! (%d)" % i)
-            else:
-                out.append(parse_lines(child_block))
+        if main[-1] == ':':
+            assert len(child_block)
+            params = fil, voffset + line_index + 1, hoffset + indent
+            out.args.append(parse_lines(child_block, *params))
         else:
-            if len(child_block) > 0:
-                raise Exception("Not an if/else/while statement,\
-                                 can't have sub-clause! (%d)" % i)
+            assert not len(child_block)
         # This is somewhat complicated. Essentially, it converts something like
         # "if c1 then s1 elif c2 then s2 elif c3 then s3 else s4" (with
         # appropriate indenting) to [ if c1 s1 [ if c2 s2 [ if c3 s3 s4 ] ] ]
-        if out[0] == 'else if':
+        if out.fun == 'else if':
             if len(o) == 0:
                 raise Exception("Cannot start with else if! (%d)" % i)
             u = o[-1]
-            while len(u) == 4:
-                u = u[-1]
-            u.append(['if'] + out[1:])
-        elif out[0] == 'else':
+            while len(u.args) == 3:
+                u = u.args[-1]
+            u.args.append(astnode('if', out.args, *out.metadata))
+        elif out.fun == 'else':
             if len(o) == 0:
                 raise Exception("Cannot start with else! (%d)" % i)
             u = o[-1]
-            while len(u) == 4:
-                u = u[-1]
-            u.append(out[1])
-        elif out[0] == 'code':
-            if len(o) > 0 and o[-1][0] == 'init':
-                o[-1].append(out[1])
+            while len(u.args) == 3:
+                u = u.args[-1]
+            u.args.append(out.args[-1])
+        elif out.fun == 'code':
+            if len(o) > 0 and o[-1].fun == 'init':
+                o[-1].args.append(astnode('seq', out.args, *out.metadata))
             else:
-                o.append(['init', ['seq'], out[1]])
+                astargs = [astnode('seq', [], *out[0].metadata), out[1]]
+                o.args.append(astnode('init', astargs, *out[0].metadata))
         else:
             # Normal case: just add the parsed line to the output
             o.append(out)
-    return o[0] if len(o) == 1 else ['seq'] + o
+    return o[0] if len(o) == 1 else astnode('seq', o, fil, voffset, hoffset)
 
 
 # Tokens contain one or more chars of the same type, with a few exceptions
 def chartype(c):
-    if c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.':
+    if c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.':
         return 'alphanum'
-    elif c in '\t ': return 'space'
-    elif c in '()[]': return 'brack'
-    elif c == '"': return 'dquote'
-    elif c == "'": return 'squote'
-    else: return 'symb'
+    elif c in '\t ':
+        return 'space'
+    elif c in '()[]{}':
+        return 'brack'
+    elif c == '"':
+        return 'dquote'
+    elif c == "'":
+        return 'squote'
+    else:
+        return 'symb'
 
 
 # Converts something like "b[4] = x+2 > y*-3" to
 # [ 'b', '[', '4', ']', '=', 'x', '+', '2', '>', 'y', '*', '-', '3' ]
-def tokenize(ln):
+def tokenize(ln, fil='main', linenum=0, charnum=0):
     tp = 'space'
     i = 0
     o = []
@@ -115,9 +125,10 @@ def tokenize(ln):
     def nxt():
         global cur
         if len(cur) >= 2 and cur[-1] == '-':
-            o.extend([cur[:-1], '-'])
+            o.append(token(cur[:-1], fil, linenum, charnum + i - len(cur)))
+            o.append(token('-', fil, linenum, charnum + i))
         elif len(cur.strip()) >= 1:
-            o.append(cur)
+            o.append(token(cur, fil, linenum, charnum + i - len(cur)))
         cur = ''
     # Main loop
     while i < len(ln):
@@ -153,12 +164,15 @@ def tokenize(ln):
             tp = c
             i += 1
     nxt()
-    if o[-1] in [':', ':\n', '\n']: o.pop()
-    if tp in ['squote', 'dquote']: raise Exception("Unclosed string: "+ln)
+    if len(o) > 0 and o[-1].val in [':', ':\n', '\n']:
+        o.pop()
+    if tp in ['squote', 'dquote']:
+        raise Exception("Unclosed string: "+ln)
     return o
 
 # This is the part where we turn a token list into an abstract syntax tree
 precedence = {
+    '!': 0,
     '^': 1,
     '*': 2,
     '/': 3,
@@ -177,21 +191,34 @@ precedence = {
     '&&': 6,
     'or': 7,
     '||': 7,
-    '!': 0
+    '=': 10,
 }
 
+
 def toktype(token):
-    if token is None: return None
-    elif token in ['(','[']: return 'left_paren'
-    elif token in [')',']']: return 'right_paren'
-    elif token == ',': return 'comma'
-    elif token == ':': return 'colon'
-    elif token in ['!']: return 'unary_operation' 
-    elif not isinstance(token,str): return 'compound'
-    elif token in precedence: return 'binary_operation'
-    elif re.match('^[0-9a-zA-Z\-\.#]*$',token): return 'alphanum'
-    elif token[0] in ['"', "'"] and token[0] == token[-1]: return 'alphanum'
-    else: raise Exception("Invalid token: "+token)
+    if token is None or isinstance(token, astnode):
+        return None
+    elif token.val in ['(', '[']:
+        return 'left_paren'
+    elif token.val in [')', ']']:
+        return 'right_paren'
+    elif token.val == ',':
+        return 'comma'
+    elif token.val == ':':
+        return 'colon'
+    elif token.val in ['!']:
+        return 'unary_operation'
+    elif not isinstance(token.val, str):
+        return 'compound'
+    elif token.val in precedence:
+        return 'binary_operation'
+    elif re.match('^[0-9a-zA-Z\-\.#]*$', token.val):
+        return 'alphanum'
+    elif token.val[0] in ['"', "'"] and token.val[0] == token.val[-1]:
+        return 'alphanum'
+    else:
+        print token
+        raise Exception("Invalid token: "+token)
 
 
 # https://en.wikipedia.org/wiki/Shunting-yard_algorithm
@@ -232,21 +259,21 @@ def shunting_yard(tokens):
         typ = toktype(tok)
         if typ == 'binary_operation':
             a, b = oq.pop(), oq.pop()
-            oq.append([tok, b, a])
+            oq.append(astnode(tok.val, [b, a], *tok.metadata))
         elif typ == 'unary_operation':
             a = oq.pop()
-            oq.append([tok, a])
+            oq.append(astnode(tok.val, [a], *tok.metadata))
         elif typ == 'right_paren':
             args = []
             while toktype(oq[-1]) != 'left_paren':
                 args.insert(0, oq.pop())
-            oq.pop()
-            if tok == ']' and args[0] != 'id':
-                oq.append(['access'] + args)
-            elif tok == ']':
-                oq.append(['array_lit'] + args[1:])
-            elif tok == ')' and len(args) and args[0] != 'id':
-                oq.append(args)
+            lbrack = oq.pop()
+            if tok.val == ']' and args[0].val != 'id':
+                oq.append(astnode('access', args, *lbrack.metadata))
+            elif tok.val == ']':
+                oq.append(astnode('array_lit', args[1:], *lbrack.metadata))
+            elif tok.val == ')' and len(args) and args[0].val != 'id':
+                oq.append(astnode(args[0].val, args[1:], *args[0].metadata))
             else:
                 oq.append(args[1])
     # The main loop
@@ -260,7 +287,7 @@ def shunting_yard(tokens):
             # Handle cases like 3 * (2 + 5) by using 'id' as a default function
             # name
             if toktype(prev) != 'alphanum' and toktype(prev) != 'right_paren':
-                oq.append('id')
+                oq.append(token('id', *prev.metadata))
             # Say the statement is "... f(45...". At the start, we would have f
             # as the last item on the oq. So we move it onto the stack, put the
             # leftparen on the oq, and move f back to the stack, so we have ( f
@@ -283,11 +310,11 @@ def shunting_yard(tokens):
             popstack(stack, oq)
         elif typ == 'unary_operation' or typ == 'binary_operation':
             # -5 -> 0 - 5
-            if tok == '-' and toktype(prev) not in ['alphanum', 'right_paren']:
-                oq.append('0')
+            if tok.val == '-' and toktype(prev) not in ['alphanum', 'right_paren']:
+                oq.append(token('0', *tok.metadata))
             # Handle BEDMAS operator precedence
-            prec = precedence[tok]
-            while len(stack) and toktype(stack[-1]) == 'binary_operation' and precedence[stack[-1]] < prec:
+            prec = precedence[tok.val]
+            while len(stack) and toktype(stack[-1]) == 'binary_operation' and precedence[stack[-1].val] < prec:
                 popstack(stack, oq)
             stack.append(tok)
         elif typ == 'comma':
@@ -304,21 +331,20 @@ def shunting_yard(tokens):
     if len(oq) == 1:
         return oq[0]
     else:
-        raise Exception("Wrong number of items left on stack: "+str(oq))
+        raise Exception("Wrong number of items on stack!")
 
 
-def parse_line(ln):
-    tokens = tokenize(ln.strip())
-    if tokens[0] in ['if', 'while']:
-        return [tokens[0], shunting_yard(tokens[1:])]
-    elif len(tokens) >= 2 and tokens[0] == 'else' and tokens[1] == 'if':
-        return ['else if', shunting_yard(tokens[2:])]
-    elif len(tokens) >= 1 and tokens[0] == 'elif':
-        return ['else if', shunting_yard(tokens[1:])]
-    elif len(tokens) == 1 and tokens[0] in ['else', 'init', 'code']:
-        return [tokens[0]]
-    elif '=' in tokens:
-        eqplace = tokens.index('=')
-        return ['set', shunting_yard(tokens[:eqplace]), shunting_yard(tokens[eqplace+1:])]
+def parse_line(ln, fil='main', linenum=0, charnum=0):
+    l_offset = len(ln) - len(ln.lstrip())
+    metadata = fil, linenum, charnum + l_offset
+    tok = tokenize(ln.strip(), *metadata)
+    if tok[0].val in ['if', 'while']:
+        return astnode(tok[0], [shunting_yard(tok[1:])], *metadata)
+    elif len(tok) >= 2 and [tok[0].val, tok[1].val] == ['else', 'if']:
+        return astnode('else if', [shunting_yard(tok[2:])], *metadata)
+    elif len(tok) >= 1 and tok[0].val == 'elif':
+        return astnode('else if', [shunting_yard(tok[1:])], *metadata)
+    elif len(tok) == 1 and tok[0].val in ['else', 'init', 'code']:
+        return astnode(tok[0], [], *metadata)
     else:
-        return shunting_yard(tokens)
+        return shunting_yard(tok)

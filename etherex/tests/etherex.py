@@ -50,26 +50,40 @@ class TestEtherEx(object):
         assert self.sim.get_storage_data(self.tcontract, 2) == int(self.contract, 16)
         assert self.sim.get_storage_data(self.ccontract, 2) == int(self.contract, 16)
 
+    # Balances
     def test_alice_to_bob(self):
+        # ans = self.sim.tx(self.ALICE, self.bcontract, 10**18, [self.contract])
+        # assert ans == [1]
+        self.test_initialize()
+
         ans = self.sim.tx(self.ALICE, self.bcontract, 0, [self.BOB.address, 1000])
         assert ans == [1]
-        assert self.sim.get_storage_data(self.bcontract, self.ALICE.address) == 999000
-        assert self.sim.get_storage_data(self.bcontract, self.BOB.address) == 0
+        assert self.sim.get_storage_data(self.bcontract, self.ALICE.address) == 10**18 - 1000
+        assert self.sim.get_storage_data(self.bcontract, self.BOB.address) == 1000
 
     def test_bob_to_charlie_invalid(self):
-        ans = self.sim.tx(self.BOB, self.contract, 0, [self.CHARLIE.address, 1000])
+        # ans = self.sim.tx(self.ALICE, self.bcontract, 10**18, [self.contract])
+        # assert ans == [1]
+        self.test_initialize()
+
+        ans = self.sim.tx(self.BOB, self.bcontract, 0, [self.CHARLIE.address, 2000])
         assert ans == [0]
-        assert self.sim.get_storage_data(self.bcontract, self.ALICE.address) == 999000
+        assert self.sim.get_storage_data(self.bcontract, self.ALICE.address) == 10**18
         assert self.sim.get_storage_data(self.bcontract, self.BOB.address) == 0
         assert self.sim.get_storage_data(self.bcontract, self.CHARLIE.address) == 0
 
     def test_alice_to_bob_to_charlie_valid(self):
+        # ans = self.sim.tx(self.ALICE, self.bcontract, 10**18, [self.contract])
+        # assert ans == [1]
+        self.test_initialize()
+
         ans = self.sim.tx(self.ALICE, self.bcontract, 0, [self.BOB.address, 1000])
         assert ans == [1]
 
         ans = self.sim.tx(self.BOB, self.bcontract, 0, [self.CHARLIE.address, 250])
         assert ans == [1]
 
-        assert self.sim.get_storage_data(self.bcontract, self.ALICE.address) == 999000
+        assert self.sim.get_storage_data(self.bcontract, self.ALICE.address) == 10**18 - 1000
         assert self.sim.get_storage_data(self.bcontract, self.BOB.address) == 750
         assert self.sim.get_storage_data(self.bcontract, self.CHARLIE.address) == 250
+        # assert self.sim.get_storage_dict(self.bcontract) == ''

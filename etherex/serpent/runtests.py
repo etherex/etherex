@@ -1,23 +1,54 @@
 #!/usr/bin/python
-from serpent import compiler
-t = open('serpent/tests.txt').readlines()
+
+import random
+
+
+def bijection_test_lllparser(ast2):
+    text2 = lllparser.serialize_lll(ast2)
+    i = 0
+    n = random.randrange(4)  # No comments yet.
+    while i >= 0 and n > 0:
+        i = text2.find('\n', i)
+        n -= 1
+    if i > 0:
+        text2 = text2[:i] + '\n' + text2[i:]
+    print(text2)
+
+    ast3  = lllparser.parse_lll(text2)
+    if ast3.listfy() != ast2.listfy():
+        print("BUG: Parsing output again gave different result!")
+        print(ast2)
+        print(ast3)
+        print("")
+
+
+from serpent import parser, rewriter, compiler, lllparser
+t = open('tests.txt').readlines()
 i = 0
-while 1:
+while True:
     o = []
     while i < len(t) and (not len(t[i]) or t[i][0] != '='):
         o.append(t[i])
         i += 1
     i += 1
     print '================='
-    text = '\n'.join(o).replace('\n\n','\n')
+    text = '\n'.join(o).replace('\n\n', '\n')
     print text
-    ast = compiler.parse(text)
-    print "AST:",ast
+    ast = parser.parse(text)
+    print "AST:", ast
     print ""
-    aevm = compiler.compile_to_assembly(text)
-    print "AEVM:",' '.join([str(x) for x in aevm])
+    ast2 = rewriter.compile_to_lll(ast)
+    print "LLL:", ast2
     print ""
-    code = compiler.compile(text)
-    print "Output:",code.encode('hex')
+    bijection_test_lllparser(ast2)
+
+    varz = rewriter.analyze(ast)
+    print "Analysis: ", varz
+    print ""
+    aevm = compiler.compile_lll(ast2)
+    print "AEVM:", ' '.join([str(x) for x in aevm])
+    print ""
+    code = compiler.assemble(aevm)
+    print "Output:", code.encode('hex')
     if i >= len(t):
         break

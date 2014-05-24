@@ -5,6 +5,7 @@ import re
 import json
 import serpent
 
+
 def main():
     if len(sys.argv) == 1:
         print "serpent <command> <arg1> <arg2> ..."
@@ -31,9 +32,16 @@ def main():
             args[0] = open(args[0]).read()
         except:
             pass
+        if cmd in ['rewrite', 'preprocess', 'finalize', 'compile_to_lll',
+                   'compile_lll']:
+            args[0] = serpent.utils.nodeify(args[0])
         o = getattr(serpent, cmd)(*args)
-        if isinstance(o, (list, dict)):
+        if isinstance(o, dict):
             print json.dumps(o)
+        elif isinstance(o, list):
+            print json.dumps(map(lambda x: x.listfy(), o))
+        elif isinstance(o, (serpent.utils.token, serpent.utils.astnode)):
+            print json.dumps(o.listfy())
         else:
             print o.encode('hex')
 

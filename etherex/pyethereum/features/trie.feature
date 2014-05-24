@@ -88,7 +88,7 @@ Feature: trie tree manipulate
     When clear trie tree
     And insert pairs
     Then for each pair, get with key will return the correct value
-    And get by the key: <key> will return None
+    And get by the key: <key> will return BLANK
 
     Examples: key not existing
       | key    |
@@ -99,11 +99,14 @@ Feature: trie tree manipulate
   Scenario Outline: delete node
     Given pairs with keys: <keys>
     When clear trie tree
-    And insert pairs
+    And insert pairs except key: <key>
+    And record hash as old hash
+    And insert pair with key: <key>
     And delete by the key: <key>
-    Then for each pair, get with key will return the correct value
-    And get by the key: <key> will return None
-    And tree has no change if key does not exist
+    And record hash as new hash
+    Then for keys except <key>, get with key will return the correct value
+    And old hash is the same with new hash
+    And get by the key: <key> will return BLANK
 
     Examples: basic
       | key  | keys   |
@@ -205,7 +208,6 @@ Feature: trie tree manipulate
       | keys                                 |
       | ["\x03\xe8", "\x03\xe9", "\x03\xe8"] |
 
-
   Scenario Outline: conform to fixture
     Given input dictionary: <in>
     When clear trie tree
@@ -215,6 +217,10 @@ Feature: trie tree manipulate
     Examples: basic
       | in                       | root                                                               |
       | {u'a': u'A', u'b': u'B'} | "300eab197a9d9e437aaeb9b0d7bd77d57e8d4e3eeca0b1e6a3fe28a84e2cd70c" |
+
+    Examples: long value
+      | in                                                            | root                                                               |
+      | {u'A': u'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'} | "d23786fb4a010da3ce639d66d5e904a11dbc02746d1ce25029e53290cabf28ab" |
 
     Examples: basic1
       | in                 | root                                                               |
