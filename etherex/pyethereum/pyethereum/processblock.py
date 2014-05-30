@@ -6,11 +6,10 @@ import time
 import blocks
 import transactions
 import trie
+import logging
+logger = logging.getLogger(__name__)
 
-
-debug = 0
-
-# params
+expensive_debug = False
 
 GSTEP = 1
 GSTOP = 0
@@ -28,8 +27,6 @@ OUT_OF_GAS = -1
 
 
 def verify(block, parent):
-    if block.timestamp < parent.timestamp:
-        print block.timestamp, parent.timestamp
     assert block.timestamp >= parent.timestamp
     assert block.timestamp <= time.time() + 900
     block2 = blocks.Block.init_from_parent(parent,
@@ -41,9 +38,9 @@ def verify(block, parent):
     block2.finalize()  # this is the first potential state change
     for i in range(block.transaction_count):
         tx, s, g = rlp.decode(block.transactions.get(utils.encode_int(i)))
-        tx = transactions.Transaction.deserialize(tx)
+        tx = transactions.Transaction.create(tx)
         assert tx.startgas + block2.gas_used <= block.gas_limit
-        apply_tx(block2, tx)
+        apply_transaction(block2, tx)
         assert s == block2.state.root_hash
         assert g == utils.encode_int(block2.gas_used)
     assert block2.state.root_hash == block.state.root_hash
@@ -54,7 +51,6 @@ def verify(block, parent):
 class Message(object):
 
     def __init__(self, sender, to, value, gas, data):
-        assert gas >= 0
         self.sender = sender
         self.to = to
         self.value = value
@@ -62,37 +58,100 @@ class Message(object):
         self.data = data
 
 
-def apply_tx(block, tx):
+class InvalidTransaction(Exception):
+    pass
+
+
+class UnsignedTransaction(InvalidTransaction):
+    pass
+
+
+class InvalidNonce(InvalidTransaction):
+    pass
+
+
+class InsufficientBalance(InvalidTransaction):
+    pass
+
+
+class InsufficientStartGas(InvalidTransaction):
+    pass
+
+
+class BlockGasLimitReached(InvalidTransaction):
+    pass
+
+
+class GasPriceTooLow(InvalidTransaction):
+    pass
+
+
+def apply_transaction(block, tx):
+
+    def rp(actual, target):
+        return '%r, actual:%r target:%r' % (tx, actual, target)
+
+    # (1) The transaction signature is valid;
     if not tx.sender:
-        raise Exception("Trying to apply unsigned transaction!")
+        raise UnsignedTransaction(tx)
+
+    # (2) the transaction nonce is valid (equivalent to the
+    #     sender account's current nonce);
     acctnonce = block.get_nonce(tx.sender)
     if acctnonce != tx.nonce:
-        raise Exception("Invalid nonce! sender_acct:%s tx:%s" %
-                        (acctnonce, tx.nonce))
-    o = block.delta_balance(tx.sender, -tx.gasprice * tx.startgas)
-    if not o:
-        raise Exception("Insufficient balance to pay fee!")
+        raise InvalidNonce(rp(tx.nonce, acctnonce))
+
+    # (3) the gas limit is no smaller than the intrinsic gas,
+    # g0, used by the transaction;
+    intrinsic_gas_used = GTXDATA * len(tx.data) + GTXCOST
+    if tx.startgas < intrinsic_gas_used:
+        raise InsufficientStartGas(rp(tx.startgas, intrinsic_gas_used))
+
+    # (4) the sender account balance contains at least the
+    # cost, v0, required in up-front payment.
+    total_cost = tx.value + tx.gasprice * tx.startgas
+    if block.get_balance(tx.sender) < total_cost:
+        raise InsufficientBalance(
+            rp(block.get_balance(tx.sender), total_cost))
+
+    # check offered gas price is enough
+    if tx.gasprice < block.min_gas_price:
+        raise GasPriceTooLow(rp(tx.gasprice, block.min_gas_price))
+
+    # check block gas limit
+    if block.gas_used + tx.startgas > block.gas_limit:
+        BlockGasLimitReached(
+            rp(block.gas_used + tx.startgas, block.gas_limit))
+
+    # start transacting #################
     if tx.to:
         block.increment_nonce(tx.sender)
+
+    # buy startgas
+    success = block.transfer_value(tx.sender, block.coinbase,
+                                   tx.gasprice * tx.startgas)
+    assert success
+
     snapshot = block.snapshot()
-    message_gas = tx.startgas - GTXDATA * len(tx.serialize()) - GTXCOST
+    message_gas = tx.startgas - intrinsic_gas_used
     message = Message(tx.sender, tx.to, tx.value, message_gas, tx.data)
     if tx.to:
-        result, gas, data = apply_msg(block, tx, message)
+        result, gas_remained, data = apply_msg(block, tx, message)
     else:
-        result, gas, data = create_contract(block, tx, message)
-    if debug:
-        print('applied tx, result', result, 'gas', gas, 'data/code',
-              ''.join(map(chr, data)).encode('hex'))
+        result, gas_remained, data = create_contract(block, tx, message)
+    assert gas_remained >= 0
+    logger.debug('applied tx, result %s gas remained %s data/code %s', result, gas_remained, 
+          ''.join(map(chr, data)).encode('hex'))
     if not result:  # 0 = OOG failure in both cases
         block.revert(snapshot)
         block.gas_used += tx.startgas
-        block.delta_balance(block.coinbase, tx.gasprice * tx.startgas)
         output = OUT_OF_GAS
     else:
-        block.delta_balance(tx.sender, tx.gasprice * gas)
-        block.delta_balance(block.coinbase, tx.gasprice * (tx.startgas - gas))
-        block.gas_used += tx.startgas - gas
+        gas_used = tx.startgas - gas_remained
+        # sell remaining gas
+        block.transfer_value(
+            block.coinbase, tx.sender, tx.gasprice * gas_remained)
+        block.gas_used += gas_used
         output = ''.join(map(chr, data)) if tx.to else result.encode('hex')
     block.add_transaction_to_list(tx)
     success = output is not OUT_OF_GAS
@@ -130,18 +189,16 @@ def apply_msg(block, tx, msg):
     compustate = Compustate(gas=msg.gas)
     # Main loop
     while 1:
-        if debug:
-            print({
-                "Stack": compustate.stack,
-                "PC": compustate.pc,
-                "Gas": compustate.gas,
-                "Memory": decode_datalist(compustate.memory),
-                "Storage": block.get_storage(msg.to).to_dict(),
-            })
+        logger.debug({
+            "Stack": compustate.stack,
+            "PC": compustate.pc,
+            "Gas": compustate.gas,
+            "Memory": decode_datalist(compustate.memory),
+            "Storage": block.get_storage(msg.to).to_dict(),
+        })
         o = apply_op(block, tx, msg, code, compustate)
         if o is not None:
-            if debug:
-                print('done', o)
+            logger.debug('done %s', o)
             if o == OUT_OF_GAS:
                 block.revert(snapshot)
                 return 0, 0, []
@@ -157,8 +214,7 @@ def create_contract(block, tx, msg):
     msg.to = recvaddr
     block.increment_nonce(msg.sender)
     # Transfer value, instaquit if not enough
-    block.delta_balance(recvaddr, msg.value)
-    o = block.delta_balance(msg.sender, msg.value)
+    o = block.transfer_value(msg.sender, msg.to, msg.value)
     if not o:
         return 0, msg.gas
     compustate = Compustate(gas=msg.gas)
@@ -239,20 +295,19 @@ def apply_op(block, tx, msg, code, compustate):
     # out of gas error
     fee = calcfee(block, tx, msg, compustate, op)
     if fee > compustate.gas:
-        if debug:
-            print("Out of gas", compustate.gas, "need", fee)
-            print(op, list(reversed(compustate.stack)))
+        logger.debug("Out of gas %s need %s", compustate.gas, fee)
+        logger.debug('%s %s', op, list(reversed(compustate.stack)))
         return OUT_OF_GAS
     stackargs = []
     for i in range(in_args):
         stackargs.append(compustate.stack.pop())
-    if debug:
+    if expensive_debug:
         import serpent
         if op[:4] == 'PUSH':
             start, n = compustate.pc + 1, int(op[4:])
-            print(op, utils.big_endian_to_int(code[start:start + n]))
+            logger.debug('%s %s ', op, utils.big_endian_to_int(code[start:start + n]))
         else:
-            print(op, ' '.join(map(str, stackargs)),
+            logger.debug('%s %s ', op, ' '.join(map(str, stackargs)),
                   serpent.decode_datalist(compustate.memory))
     # Apply operation
     oldgas = compustate.gas
@@ -431,12 +486,10 @@ def apply_op(block, tx, msg, code, compustate):
         gas = stackargs[0]
         value = stackargs[1]
         data = ''.join(map(chr, mem[stackargs[2]:stackargs[2] + stackargs[3]]))
-        if debug:
-            print("Sub-contract:", msg.to, value, gas, data)
+        logger.debug("Sub-contract: %s %s %s %s ", msg.to, value, gas, data)
         addr, gas, code = create_contract(
             block, tx, Message(msg.to, '', value, gas, data))
-        if debug:
-            print("Output of contract creation:", addr, code)
+        logger.debug("Output of contract creation: %s  %s ", addr, code)
         if addr:
             stk.append(utils.coerce_to_int(addr))
         else:
@@ -451,14 +504,12 @@ def apply_op(block, tx, msg, code, compustate):
         to = (('\x00' * (32 - len(to))) + to)[12:]
         value = stackargs[2]
         data = ''.join(map(chr, mem[stackargs[3]:stackargs[3] + stackargs[4]]))
-        if debug:
-            print("Sub-call:", utils.coerce_addr_to_hex(msg.to),
+        logger.debug("Sub-call: %s %s %s %s %s ", utils.coerce_addr_to_hex(msg.to),
                   utils.coerce_addr_to_hex(to), value, gas, data)
         result, gas, data = apply_msg(
             block, tx, Message(msg.to, to, value, gas, data))
-        if debug:
-            print("Output of sub-call:", result, data, "length", len(data),
-                  "expected", stackargs[6])
+        logger.debug("Output of sub-call: %s %s length %s expected %s", result, data,len(data),
+                  stackargs[6])
         for i in range(stackargs[6]):
             mem[stackargs[5] + i] = 0
         if result == 0:

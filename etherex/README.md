@@ -17,7 +17,7 @@ Components
 * simulations: Python simulations (deprecated soon)
 * serpent: Serpent compiler by Vitalik Buterin [repo](https://github.com/ethereum/serpent)
 * evm-sim: EVM simulator by Joris Bontje [repo](https://github.com/EtherCasts/evm-sim)
-* cll-sim: CLL simulator by Joris Bontje [repo](https://github.com/jorisbontje/cll-sim)
+* cll-sim: HLL simulator by Joris Bontje [repo](https://github.com/jorisbontje/cll-sim)
 * tests: evm-sim tests
 
 

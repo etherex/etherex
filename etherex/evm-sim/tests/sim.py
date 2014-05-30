@@ -33,7 +33,7 @@ class Simulator(object):
     def load_contract(self, frm, code, endowment=0, gas=STARTGAS):
         _tx = transactions.contract(nonce=self.nonce[frm], gasprice=self.GASPRICE, startgas=gas,
                                     endowment=endowment, code=code).sign(frm.key)
-        result, contract = processblock.apply_tx(self.genesis, _tx)
+        result, contract = processblock.apply_transaction(self.genesis, _tx)
         assert result
 
         self.nonce[frm] += 1
@@ -42,7 +42,7 @@ class Simulator(object):
     def tx(self, frm, to, value, data):
         _tx = transactions.Transaction(nonce=self.nonce[frm], gasprice=self.GASPRICE, startgas=self.STARTGAS,
                                        to=to, value=value, data=serpent.encode_datalist(data)).sign(frm.key)
-        result, ans = processblock.apply_tx(self.genesis, _tx)
+        result, ans = processblock.apply_transaction(self.genesis, _tx)
         assert result
 
         self.nonce[frm] += 1

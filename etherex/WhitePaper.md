@@ -66,7 +66,7 @@ code:
         buyorsell = msg.data[0]
         availabletobuy = contract.storage[sellindex]
         if buyorsell == 1:
-            if availabletobuy <= msg.value: 
+            if availabletobuy <= msg.value:
                 return(0)
             contract.storage[sellindex] = availabletobuy - msg.value
             ret = send(500, msg.sender, 2 * msg.value)
@@ -144,7 +144,7 @@ Allowed values:
 2 = SELL
 3 = DEPOSIT
 4 = WITHDRAW
-5 = CANCEL 
+5 = CANCEL
 6 = ADDMARKET
 ```
 

@@ -33,28 +33,26 @@ class Miner():
         logger.debug('Difficulty %s', block.difficulty)
 
     def add_transaction(self, transaction):
-        """
-        (1) The transaction signature is valid;
-        (2) the transaction nonce is valid (equivalent to the
-            sender accounts current nonce);
-        (3) the gas limit is no smaller than the intrinsic gas,
-            g0 , used by the transaction;
-        (4) the sender account balance contains at least the cost,
-            v0, required in up-front payment.
-        """
+        block_state = self.block.state_root
         try:
-            success, res = self.block.apply_transaction(transaction)
-            assert transaction in self.block.get_transactions()
-        except Exception, e:
-            logger.debug('rejected transaction %r: %s', transaction, e)
+            success, output = processblock.apply_transaction(
+                self.block, transaction)
+        except processblock.InvalidTransaction as e:
+            # if unsuccessfull the prerequistes were not fullfilled
+            # and the tx isinvalid, state must not have changed
+            logger.debug('Invalid Transaction %r: %r', transaction, e)
+            assert block_state == self.block.state_root
             return False
         if not success:
             logger.debug('transaction %r not applied', transaction)
+            assert block_state == self.block.state_root
         else:
+            assert transaction in self.block.get_transactions()
             logger.debug(
                 'transaction %r applied to %r res: %r',
-                transaction, self.block, res)
-        return success
+                transaction, self.block, output)
+            assert block_state != self.block.state_root
+            return True
 
     def get_transactions(self):
         return self.block.get_transactions()
@@ -195,23 +193,27 @@ class ChainManager(StoppableLoopThread):
         # assuming to receive chain order w/ newest block first
         for t_block in reversed(transient_blocks):
             logger.debug('Trying to deserialize %r', t_block)
+            logger.debug(t_block.rlpdata.encode('hex'))
             try:
                 block = blocks.Block.deserialize(t_block.rlpdata)
+            except processblock.InvalidTransaction as e:
+                logger.debug(
+                    'Malicious %r w/ invalid Transaction %r', t_block, e)
+                continue
             except blocks.UnknownParentException:
-
-                number = t_block.number
                 if t_block.prevhash == blocks.GENESIS_PREVHASH:
-                    logger.debug('Incompatible Genesis %r', t_block)
+                    logger.debug('Received Incompatible Genesis %r', t_block)
                     if disconnect_cb:
                         disconnect_cb(reason='Wrong genesis block')
                 else:
                     logger.debug('%s with unknown parent', t_block)
-                    if number > self.head.number:
+                    if t_block.number > self.head.number:
                         self.synchronize_blockchain()
-                    else:
+                    else: # FIXME: Issue #108
+                        logger.debug(
+                            'UNIMPLEMENTED: Need sidechain with parent of %s', t_block)
                         # FIXME synchronize with side chain
                         # check for largest number
-                        pass
                 break
             if block.hash in self:
                 logger.debug('Known %r', block)
@@ -378,6 +380,13 @@ def handle_local_chain_requested(sender, peer, block_hashes, count, **kwargs):
                 return
 
     if len(block_hashes):
+        # handle genesis special case
+        if block_hashes[-1] in chain_manager:
+            assert chain_manager.get(block_hashes[-1]).is_genesis()
+            block_hashes.pop(-1)
+            if not block_hashes:
+                return
+        assert block_hashes[-1] not in chain_manager
         #  If none of the parents are in the current
         logger.debug(
             "Sending NotInChain: %r", block_hashes[-1].encode('hex')[:4])

@@ -53,8 +53,8 @@ for i, (name, typ, default) in enumerate(block_structure):
     block_structure_rev[name] = [i, typ, default]
 
 acct_structure = [
-    ["balance", "int", 0],
     ["nonce", "int", 0],
+    ["balance", "int", 0],
     ["storage", "trie_root", trie.BLANK_ROOT],
     ["code", "hash", ""],
 ]
@@ -140,10 +140,10 @@ class Block(object):
         if transaction_list:
             # support init with transactions only if state is known
             assert self.state.root_hash_valid()
-            for tx_serialized, state_root, gas_used_encoded \
+            for tx_lst_serialized, state_root, gas_used_encoded \
                     in transaction_list:
                 self._add_transaction_to_list(
-                    tx_serialized, state_root, gas_used_encoded)
+                    tx_lst_serialized, state_root, gas_used_encoded)
 
         # make sure we are all on the same db
         assert self.state.db.db == self.transactions.db.db
@@ -219,11 +219,11 @@ class Block(object):
                                        timestamp=kargs['timestamp'])
         block.finalize()  # this is the first potential state change
         # replay transactions
-        for tx_serialized, _state_root, _gas_used_encoded in transaction_list:
-            tx = transactions.Transaction.deserialize(tx_serialized)
-            processblock.apply_tx(block, tx)
-            assert _state_root == block.state.root_hash
+        for tx_lst_serialized, _state_root, _gas_used_encoded in transaction_list:
+            tx = transactions.Transaction.create(tx_lst_serialized)
+            success, output = processblock.apply_transaction(block, tx)
             assert utils.decode_int(_gas_used_encoded) == block.gas_used
+            assert _state_root == block.state.root_hash
 
         # checks
         assert block.prevhash == self.hash
@@ -299,22 +299,23 @@ class Block(object):
         self._set_acct_item(address, param, value)
         return True
 
-    def _add_transaction_to_list(self, tx_serialized,
+    def _add_transaction_to_list(self, tx_lst_serialized,
                                  state_root, gas_used_encoded):
         # adds encoded data # FIXME: the constructor should get objects
-        data = [tx_serialized, state_root, gas_used_encoded]
+        assert isinstance(tx_lst_serialized, list)
+        data = [tx_lst_serialized, state_root, gas_used_encoded]
         self.transactions.update(
             utils.encode_int(self.transaction_count), rlp.encode(data))
         self.transaction_count += 1
 
     def add_transaction_to_list(self, tx):
-        # used by processblocks apply_tx only. not atomic!
-        self._add_transaction_to_list(tx.serialize(),
+        tx_lst_serialized = rlp.decode(tx.serialize())
+        self._add_transaction_to_list(tx_lst_serialized,
                                       self.state_root,
                                       utils.encode_int(self.gas_used))
 
     def _list_transactions(self):
-        # returns [[tx_serialized, state_root, gas_used_encoded],...]
+        # returns [[tx_lst_serialized, state_root, gas_used_encoded],...]
         txlist = []
         for i in range(self.transaction_count):
             txlist.append(rlp.decode(
@@ -322,11 +323,8 @@ class Block(object):
         return txlist
 
     def get_transactions(self):
-        return [transactions.Transaction.deserialize(tx) for
+        return [transactions.Transaction.create(tx) for
                 tx, s, g in self._list_transactions()]
-
-    def apply_transaction(self, tx):
-        return processblock.apply_tx(self, tx)
 
     def get_nonce(self, address):
         return self._get_acct_item(address, 'nonce')
@@ -342,6 +340,12 @@ class Block(object):
 
     def delta_balance(self, address, value):
         return self._delta_item(address, 'balance', value)
+
+    def transfer_value(self, from_addr, to_addr, value):
+        assert value >= 0
+        if self.delta_balance(from_addr, -value):
+            return self.delta_balance(to_addr, value)
+        return False
 
     def get_code(self, address):
         return self._get_acct_item(address, 'code')
