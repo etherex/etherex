@@ -51,12 +51,13 @@ def step_impl(context, key):
 
 @when(u'insert pairs except key: {key:Py}')  # noqa
 def step_impl(context, key):
-    context.pairs = []
+    pairs = []
     for k, v in context.pairs:
         if k != key:
             v = gen_random_value()
-            context.trie.update(key, v)
-            context.pairs.add((k, v))
+            context.trie.update(k, v)
+            pairs.append((k, v))
+    context.pairs = pairs
 
 
 @when(u'record hash as old hash')  # noqa
@@ -130,6 +131,24 @@ def step_impl(context):
         context.trie.update(key, value)
 
 
-@then(u'the hash of the tree root is {root_hash:Py}')  # noqa
-def step_impl(context, root_hash):
-    assert context.trie.root_hash.encode('hex') == root_hash
+@given(u'trie fixtures file path')  # noqa
+def step_impl(context):
+    context.trie_fixture_path = 'fixtures/trietest.json'
+
+
+@when(u'load the trie fixtures')  # noqa
+def step_impl(context):
+    import json
+    data = json.load(file(context.trie_fixture_path))
+    context.examples = data
+
+
+@then(u'for each example, then the hash of the tree root'  # noqa
+' is the expectation')
+def step_impl(context):
+    for title, example in context.examples.iteritems():
+        context.trie.clear()
+        for pair in example['inputs']:
+            context.trie.update(pair[0], pair[1])
+        hex_hash = context.trie.root_hash.encode('hex')
+        assert hex_hash == example['expectation'], '{} fails'.format(title)

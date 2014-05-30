@@ -5,10 +5,10 @@ x = 1
 ================
 x = 3 + 5
 ================
-x = array(3)
-x[0] = 4
-x[1] = 6
-x[2] = 8
+my_array = array(3)  // Testing underscores.
+my_array[0] = 4
+my_array[1] = 6
+my_array[2] = 8
 ================
 x = msg.datasize
 y = msg.data
@@ -19,6 +19,8 @@ if msg.value <= 25 * 10^18:
     return(0)
 elif contract.storage[msg.data[0]] or msg.data[0] < 1000:
     return(1)
+elif third:
+    return("else")
 contract.storage[msg.data[0]] = msg.data[1]
 ================
 while i < 997:
@@ -59,10 +61,34 @@ y[0] = msg(0xf345747062de4d05d897d62c4696febbedcb36b8, 10^18, tx.gas - 100, a, 3
 x = y[0]
 ================
 a = 0x1001 & 1
+
 ================
 // A comment on a line on its own at the start of a file
+================
+which = 1
+case which:
+of 3:
+    x = 1
+    return(x)
+of 1:
+    return('1')
+default:
+    return("most default")
+================
+init:
+    a = 1
+code:
+    b = 2
 ================
 init:
     contract.storage[1] = msg.sender
 code:
     contract.storage[2] = 1
+================
+init: // comment on block line
+    contract.storage[1] = msg.sender
+code:
+    if tx.gas > 1000: // comment on block line
+        send(msg.sender, msg.value, tx.gas / 2)
+        return(1)
+    return(0)

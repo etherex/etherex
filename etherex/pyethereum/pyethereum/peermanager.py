@@ -13,6 +13,9 @@ from peer import Peer
 
 logger = logging.getLogger(__name__)
 
+def is_valid_ip(ip): # FIXME, IPV6
+    return ip.count('.') == 3
+
 
 class PeerManager(StoppableLoopThread):
 
@@ -24,19 +27,16 @@ class PeerManager(StoppableLoopThread):
         super(PeerManager, self).__init__()
         self.connected_peers = set()
         self._known_peers = set()  # (ip, port, node_id)
-
-        self.local_ip = ''
-        self.local_port = ''
+        self.local_ip = '0.0.0.0'
+        self.local_port = 0
         self.local_node_id = ''
 
     def configure(self, config):
         self.config = config
         self.local_node_id = config.get('network', 'node_id')
-
-    def set_local_address(self, ip, port):
-        with self.lock:
-            self.local_ip = ip
-            self.local_port = port
+        self.local_ip = config.get('network', 'listen_host')
+        assert is_valid_ip(self.local_ip)
+        self.local_port = config.getint('network', 'listen_port')
 
     def stop(self):
         with self.lock:
@@ -48,7 +48,7 @@ class PeerManager(StoppableLoopThread):
     def load_saved_peers(self):
         path = os.path.join(self.config.get('misc', 'data_dir'), 'peers.json')
         if os.path.exists(path):
-            peers = set((i, p, "") for i, p in json.load(open(path)))
+            peers = set((ip, port, "") for ip, port in json.load(open(path)))
             self._known_peers.update(peers)
 
     def save_peers(self):
@@ -56,6 +56,7 @@ class PeerManager(StoppableLoopThread):
         json.dump([[i, p] for i, p, n in self._known_peers], open(path, 'w'))
 
     def add_known_peer_address(self, ip, port, node_id):
+        assert is_valid_ip(ip)
         if not ip or not port or not node_id:
             return
         ipn = (ip, port, node_id)
@@ -197,19 +198,13 @@ def config_peermanager(sender, config, **kwargs):
     peer_manager.configure(config)
 
 
-@receiver(signals.p2p_address_ready)
-def p2p_address_ready_handler(sender, ip, port, **kwargs):
-    peer_manager.set_local_address(ip, port)
-
-
 @receiver(signals.peer_connection_accepted)
 def connection_accepted_handler(sender, connection, ip, port, **kwargs):
     peer_manager.add_peer(connection, ip, port)
 
 
 @receiver(signals.send_local_blocks)
-def send_blocks(sender, blocks=[], **kwargs):
-    blocks = [rlp.decode(b.serialize()) for b in blocks]  # FIXME
+def send_blocks_handler(sender, blocks=[], **kwargs):
     for peer in peer_manager.connected_peers:
         peer.send_Blocks(blocks)
 
@@ -218,6 +213,7 @@ def send_blocks(sender, blocks=[], **kwargs):
 def getaddress_received_handler(sender, peer, **kwargs):
     with peer_manager.lock:
         peers = peer_manager.get_known_peer_addresses()
+        assert is_valid_ip(peer_manager.local_ip)
         peers.add((peer_manager.local_ip,
                   peer_manager.local_port,
                   peer_manager.local_node_id))
@@ -238,8 +234,8 @@ def disconnect_requested_handler(sender, peer, forget=False, **kwargs):
 def peer_addresses_received_handler(sender, addresses, **kwargs):
     ''' addresses should be (ip, port, node_id)
     '''
-    for address in addresses:
-        peer_manager.add_known_peer_address(*address)
+    for ip, port, node_id in addresses:
+        peer_manager.add_known_peer_address(ip, port, node_id)
     peer_manager.save_peers()
 
 

@@ -58,7 +58,7 @@ code:
         owners[2] = 0xf9e57456f18d90886263fedd9cc30b27cd959137 // #define 0xf9e57456f18d90886263fedd9cc30b27cd959137=CHARLIE
         i = 0
         while i < n:
-            contract.storage[owners[i]] = msg.value / 3
+            contract.storage[owners[i]] = msg.value / n
             i = i + 1
         contract.storage[msg.sender] = msg.value
         contract.storage[2] = msg.data[0]

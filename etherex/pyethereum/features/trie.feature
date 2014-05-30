@@ -39,21 +39,21 @@ Feature: trie tree manipulate
       | ["A", "Z"] |
     # ---- end: insert to a key value node---------
 
-    # ---- start: insert to a diverge node---------
-    Examples: insert to a diverge node, with same slot
+    # ---- start: insert to a branch node---------
+    Examples: insert to a branch node, with same slot
       # nibbles of A: [4,1]
       # nibbles of Z: [5,10]
       # nibbles of B: [4,2]
       | keys            |
       | ["A", "Z", "B"] |
 
-    Examples: insert to a diverge node, with different slot
+    Examples: insert to a branch node, with different slot
       # nibbles of A: [4,1]
       # nibbles of Z: [5,10]
       # nibbles of 0: [3,0]
       | keys            |
       | ["A", "Z", "0"] |
-    # ---- end: insert to a diverge node---------
+    # ---- end: insert to a branch node---------
 
     Examples: insert in a more sophisticated case
       | keys                                                                     |
@@ -95,7 +95,6 @@ Feature: trie tree manipulate
       | "ABDCD" |
       | "X"     |
 
-
   Scenario Outline: delete node
     Given pairs with keys: <keys>
     When clear trie tree
@@ -112,9 +111,9 @@ Feature: trie tree manipulate
       | key  | keys   |
       | "AB" | ["AB"] |
 
-    Examples: diverge node
+    Examples: branch node
       | key | keys       |
-      | "A" | ["A", "B"] |
+      | "A" | ["A", "Z"] |
 
     Examples: key value node
       | key  | keys        |
@@ -124,6 +123,11 @@ Feature: trie tree manipulate
     Examples:
       | key  | keys             |
       | "AB" | ["A", "B", "AB"] |
+
+    Examples: delete branch and kv node
+      | key    | keys                                 |
+      | 'dog'  | ['cat', 'ca', 'dog', 'doge', 'test'] |
+      | 'test' | ['cat', 'ca',  'doge', 'test']       |
 
     Examples: sophisticated case
       | key    | keys                                                                    |
@@ -139,6 +143,17 @@ Feature: trie tree manipulate
       | "0"    | ["AB", "AC", "ABCD", "ACD", "A", "B", "CD", "BCD", "Z", "0", "Z0", "0Z"]|
       | "Z0"   | ["AB", "AC", "ABCD", "ACD", "A", "B", "CD", "BCD", "Z", "0", "Z0", "0Z"]|
       | "0Z"   | ["AB", "AC", "ABCD", "ACD", "A", "B", "CD", "BCD", "Z", "0", "Z0", "0Z"]|
+
+  Scenario Outline: delete none exist key
+    Given pairs with keys: <keys>
+    When clear trie tree
+    And insert pairs
+    And record hash as old hash
+    And delete by the key: <key>
+    And record hash as new hash
+    Then for keys except <key>, get with key will return the correct value
+    And old hash is the same with new hash
+    And get by the key: <key> will return BLANK
 
     Examples: key not existing
       | key        | keys                     |
@@ -161,7 +176,7 @@ Feature: trie tree manipulate
       | keys           |
       | ["AB", "ABCD"] |
 
-    Examples: diverge node
+    Examples: branch node
       # nibbles of A: [4,1]
       # nibbles of Z: [5,10]
       # nibbles of B: [4,2]
@@ -190,7 +205,7 @@ Feature: trie tree manipulate
       | keys           |
       | ["AB", "ABCD"] |
 
-    Examples: diverge node
+    Examples: branch node
       # nibbles of A: [4,1]
       # nibbles of Z: [5,10]
       # nibbles of B: [4,2]
@@ -208,41 +223,7 @@ Feature: trie tree manipulate
       | keys                                 |
       | ["\x03\xe8", "\x03\xe9", "\x03\xe8"] |
 
-  Scenario Outline: conform to fixture
-    Given input dictionary: <in>
-    When clear trie tree
-    And build trie tree from the input
-    Then the hash of the tree root is <root>
-
-    Examples: basic
-      | in                       | root                                                               |
-      | {u'a': u'A', u'b': u'B'} | "300eab197a9d9e437aaeb9b0d7bd77d57e8d4e3eeca0b1e6a3fe28a84e2cd70c" |
-
-    Examples: long value
-      | in                                                            | root                                                               |
-      | {u'A': u'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'} | "d23786fb4a010da3ce639d66d5e904a11dbc02746d1ce25029e53290cabf28ab" |
-
-    Examples: basic1
-      | in                 | root                                                               |
-      | {u'test': u'test'} | "85d106d4edff3b7a4889e91251d0a87d7c17a1dda648ebdba8c6060825be23b8" |
-
-    Examples: basic2
-      | in                                  | root                                                               |
-      | {u'test': u'test', u'te': u'testy'} | "8452568af70d8d140f58d941338542f645fcca50094b20f3c3d8c3df49337928" |
-
-    Examples: doprefix
-      | in                                                               | root                                                               |
-      | {u'dogglesworth': u'cat', u'dog': u'puppy', u'doe': u'reindeer'} | "8aad789dff2f538bca5d8ea56e8abe10f4c7ba3a5dea95fea4cd6e7c3a1168d3" |
-
-    Examples: beprefix
-      | in                                            | root                                                               |
-      | {u'be': u'e', u'dog': u'puppy', u'bed': u'd'} | "3f67c7a47520f79faa29255d2d3c084a7a6df0453116ed7232ff10277a8be68b" |
-
-    Examples: multiprefix
-      | in                                                                          | root                                                               |
-      | {u'do': u'verb', u'horse': u'stallion', u'doge': u'coin', u'dog': u'puppy'} | "5991bb8c6514148a29db676a14ac506cd2cd5775ace63c30a4fe457715e9ac84" |
-
-    Examples: replacement
-      | in                                                                          | root                                                               |
-      | [['foo', 'bar'], ['food', 'bat'], ['food', 'bass']]                         | "17beaa1648bafa633cda809c90c04af50fc8aed3cb40d16efbddee6fdf63c4c3" |
-
+  Scenario: conform to fixture
+    Given trie fixtures file path
+    When load the trie fixtures
+    Then for each example, then the hash of the tree root is the expectation

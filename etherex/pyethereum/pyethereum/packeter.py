@@ -204,6 +204,7 @@ class Packeter(object):
         '''
         data = [self.cmd_map_by_name['Peers']]
         for ip, port, pid in peers:
+            assert ip.count('.') == 3
             ip = ''.join(chr(int(x)) for x in ip.split('.'))
             data.append([ip, port, pid])
         return self.dump_packet(data)
@@ -224,10 +225,12 @@ class Packeter(object):
         return self.dump_packet(data)
 
     def dump_Blocks(self, blocks):
-        data = [self.cmd_map_by_name['Blocks']] + blocks
+        blocks_as_lists = [rlp.decode(b.serialize()) for b in blocks]
+        # FIXME, can we have a method to append rlp encoded data
+        data = [self.cmd_map_by_name['Blocks']] + blocks_as_lists
         return self.dump_packet(data)
 
-    def dump_GetChain(self, parents=[], count=1):
+    def dump_GetChain(self, parent_hashes=[], count=1):
         """
         [0x14, Parent1, Parent2, ..., ParentN, Count]
         Request the peer to send Count (to be interpreted as an integer) blocks
@@ -240,7 +243,7 @@ class Packeter(object):
         sent along with ParentN (i.e. the last Parent in the parents list).
         If no parents are passed, then a reply need not be made.
         """
-        data = [self.cmd_map_by_name['GetChain']] + parents + [count]
+        data = [self.cmd_map_by_name['GetChain']] + parent_hashes + [count]
         return self.dump_packet(data)
 
     def dump_NotInChain(self, block_hash):

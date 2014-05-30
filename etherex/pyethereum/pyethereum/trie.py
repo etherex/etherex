@@ -177,12 +177,13 @@ class Trie(object):
         self.root_node = BLANK_NODE
 
     def _delete_child_stroage(self, node):
-        if len(node) == 17:
+        node_type = self._get_node_type(node)
+        if node_type == NODE_TYPE_BRANCH:
             for item in node[:16]:
                 self._delete_child_stroage(self._decode_to_node(item))
-        elif len(node) == 17:
+        elif is_key_value_type(node_type):
             node_type = self._get_node_type(node)
-            if node_type == NODE_TYPE_LEAF:
+            if node_type == NODE_TYPE_EXTENSION:
                 self._delete_child_stroage(self._decode_to_node(node[1]))
 
     def _encode_node(self, node):
@@ -411,7 +412,8 @@ class Trie(object):
                 unpack_to_nibbles(sub_node[0])
             return [pack_nibbles(new_key), sub_node[1]]
         if sub_node_type == NODE_TYPE_BRANCH:
-            return [pack_nibbles([not_blank_index]), sub_node]
+            return [pack_nibbles([not_blank_index]),
+                    self._encode_node(sub_node)]
         assert False
 
     def _delete_and_delete_storage(self, node, key):
@@ -432,13 +434,13 @@ class Trie(object):
                 self._decode_to_node(node[key[0]]), key[1:])
         )
 
-        if node[key[0]] == encoded_new_sub_node:
+        if encoded_new_sub_node == node[key[0]]:
             return node
 
+        node[key[0]] = encoded_new_sub_node
         if encoded_new_sub_node == BLANK_NODE:
             return self._normalize_branch_node(node)
 
-        node[key[0]] = encoded_new_sub_node
         return node
 
     def _delete_kv_node(self, node, key):
@@ -476,7 +478,7 @@ class Trie(object):
             return [pack_nibbles(new_key), new_sub_node[1]]
 
         if new_sub_node_type == NODE_TYPE_BRANCH:
-            return [pack_nibbles(curr_key), new_sub_node[1]]
+            return [pack_nibbles(curr_key), self._encode_node(new_sub_node)]
 
         # should be no more cases
         assert False
@@ -608,6 +610,9 @@ class Trie(object):
 
         if not isinstance(value, (str, unicode)):
             raise Exception("Value must be string")
+
+        if value == '':
+            return self.delete(key)
 
         self.root_node = self._update_and_delete_storage(
             self.root_node,

@@ -14,7 +14,8 @@ GENESIS_NONCE = utils.sha3(chr(42))
 GENESIS_GAS_LIMIT = 10 ** 6
 MIN_GAS_LIMIT = 10 ** 4
 GASLIMIT_EMA_FACTOR = 1024
-BLOCK_REWARD = 10 ** 18
+BLOCK_REWARD = 1500 * utils.denoms.finney
+UNCLE_REWARD = 7 * BLOCK_REWARD / 8
 BLOCK_DIFF_FACTOR = 1024
 GENESIS_MIN_GAS_PRICE = 0
 BLKLIM_FACTOR_NOM = 6
@@ -81,6 +82,27 @@ class UnknownParentException(Exception):
     pass
 
 
+class TransientBlock(object):
+
+    """
+    Read only, non persisted, not validated representation of a block
+    """
+
+    def __init__(self, rlpdata):
+        self.rlpdata = rlpdata
+        self.hash = utils.sha3(rlpdata)
+        header_args, transaction_list, uncles = rlp.decode(rlpdata)
+        self.transaction_list = transaction_list  # rlp encoded transactions
+        self.uncles = uncles
+        for i, (name, typ, default) in enumerate(block_structure):
+            setattr(self, name, utils.decoders[typ](header_args[i]))
+
+    def __repr__(self):
+        return '<TransientBlock(#%d %s %s)>' %\
+            (self.number, self.hash.encode('hex')[
+             :4], self.prevhash.encode('hex')[:4])
+
+
 class Block(object):
 
     def __init__(self,
@@ -137,6 +159,8 @@ class Block(object):
                 "Transactions root not found in database! %r" % self)
         if utils.sha3(rlp.encode(self.uncles)) != self.uncles_hash:
             raise Exception("Uncle root hash does not match!")
+        if len(self.uncles) != len(set(self.uncles)):
+            raise Exception("Uncle hash not uniqe in uncles list")
         if len(self.extra_data) > 1024:
             raise Exception("Extra data cannot exceed 1024 bytes")
         if self.coinbase == '':
@@ -150,8 +174,10 @@ class Block(object):
             self.nonce == GENESIS_NONCE
 
     def check_proof_of_work(self, nonce):
-        prefix = self.serialize_header_without_nonce()
-        h = utils.sha3(utils.sha3(prefix + nonce))
+        assert len(nonce) == 32
+        rlp_Hn = self.serialize_header_without_nonce()
+        # BE(SHA3(SHA3(RLP(Hn)) o n))
+        h = utils.sha3(utils.sha3(rlp_Hn) + nonce)
         l256 = utils.big_endian_to_int(h)
         return l256 < 2 ** 256 / self.difficulty
 
@@ -201,7 +227,6 @@ class Block(object):
 
         # checks
         assert block.prevhash == self.hash
-        assert block.state.root_hash == kargs['state_root']
         assert block.tx_list_root == kargs['tx_list_root']
         assert block.gas_used == kargs['gas_used']
         assert block.gas_limit == kargs['gas_limit']
@@ -210,6 +235,7 @@ class Block(object):
         assert block.number == kargs['number']
         assert block.extra_data == kargs['extra_data']
         assert utils.sha3(rlp.encode(block.uncles)) == kargs['uncles_hash']
+        assert block.state.root_hash == kargs['state_root']
 
         block.uncles_hash = kargs['uncles_hash']
         block.nonce = kargs['nonce']
@@ -221,19 +247,6 @@ class Block(object):
     def hex_deserialize(cls, hexrlpdata):
         return cls.deserialize(hexrlpdata.decode('hex'))
 
-    # _get_acct_item(bin or hex, int) -> bin
-    def _get_acct_item(self, address, param):
-        ''' get account item
-        :param address: account address, can be binary or hex string
-        :param param: parameter to get
-        '''
-        if len(address) == 40:
-            address = address.decode('hex')
-
-        acct = rlp.decode(self.state.get(address)) or self.mk_blank_acct()
-        decoder = utils.decoders[acct_structure_rev[param][1]]
-        return decoder(acct[acct_structure_rev[param][0]])
-
     def mk_blank_acct(self):
         if not hasattr(self, '_blank_acct'):
             codehash = utils.sha3('')
@@ -243,6 +256,21 @@ class Block(object):
                                 trie.BLANK_ROOT,
                                 codehash]
         return self._blank_acct[:]
+
+    def get_acct(self, address):
+        if len(address) == 40:
+            address = address.decode('hex')
+        acct = rlp.decode(self.state.get(address)) or self.mk_blank_acct()
+        return tuple(utils.decoders[t](acct[i])
+                     for i, (n, t, d) in enumerate(acct_structure))
+
+    # _get_acct_item(bin or hex, int) -> bin
+    def _get_acct_item(self, address, param):
+        ''' get account item
+        :param address: account address, can be binary or hex string
+        :param param: parameter to get
+        '''
+        return self.get_acct(address)[acct_structure_rev[param][0]]
 
     # _set_acct_item(bin or hex, int, bin)
     def _set_acct_item(self, address, param, value):
@@ -265,14 +293,10 @@ class Block(object):
         :param param: parameter to increase/decrease
         :param value: can be positive or negative
         '''
-        if len(address) == 40:
-            address = address.decode('hex')
-        acct = rlp.decode(self.state.get(address)) or self.mk_blank_acct()
-        index = acct_structure_rev[param][0]
-        if utils.decode_int(acct[index]) + value < 0:
+        value = self._get_acct_item(address, param) + value
+        if value < 0:
             return False
-        acct[index] = utils.encode_int(utils.decode_int(acct[index]) + value)
-        self.state.update(address, rlp.encode(acct))
+        self._set_acct_item(address, param, value)
         return True
 
     def _add_transaction_to_list(self, tx_serialized,
@@ -342,19 +366,14 @@ class Block(object):
             t.delete(utils.coerce_to_bytes(index))
         self._set_acct_item(address, 'storage', t.root_hash)
 
-    def _account_to_dict(self, acct):
+    def account_to_dict(self, address):
         med_dict = {}
-        for i, (name, typ, default) in enumerate(acct_structure):
-            med_dict[name] = utils.decoders[typ](acct[i])
+        for i, val in enumerate(self.get_acct(address)):
+            med_dict[acct_structure[i][0]] = val
         strie = trie.Trie(utils.get_db_path(), med_dict['storage']).to_dict()
         med_dict['storage'] = {utils.decode_int(k): utils.decode_int(v)
                                for k, v in strie.iteritems()}
         return med_dict
-
-    def account_to_dict(self, address):
-        acct = rlp.decode(self.state.get(address.decode('hex')))\
-            or self.mk_blank_acct()
-        return self._account_to_dict(acct)
 
     # Revert computation
     def snapshot(self):
@@ -372,7 +391,16 @@ class Block(object):
         self.transaction_count = mysnapshot['txcount']
 
     def finalize(self):
+        """
+        Apply rewards
+        We raise the block's coinbase account by Rb, the block reward,
+        and the coinbase of each uncle by 7 of 8 that.
+        Rb = 1500 finney
+        """
         self.delta_balance(self.coinbase, BLOCK_REWARD)
+        for uncle_hash in self.uncles:
+            uncle = get_block(uncle_hash)
+            self.delta_balance(uncle.coinbase, UNCLE_REWARD)
 
     def serialize_header_without_nonce(self):
         return rlp.encode(self.list_header(exclude=['nonce']))
@@ -408,10 +436,9 @@ class Block(object):
         b = {}
         for name, typ, default in block_structure:
             b[name] = getattr(self, name)
-        state = self.state.to_dict()
         b["state"] = {}
-        for k, v in state.iteritems():
-            b["state"][k.encode('hex')] = self._account_to_dict(v)
+        for address, v in self.state.to_dict().iteritems():
+            b["state"][address.encode('hex')] = self.account_to_dict(address)
         # txlist = []
         # for i in range(self.transaction_count):
         #     txlist.append(self.transactions.get(utils.encode_int(i)))

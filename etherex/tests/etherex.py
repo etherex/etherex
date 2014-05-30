@@ -1,6 +1,8 @@
 import sys
 sys.path.insert(0, './evm-sim/tests')
 from sim import Key, Simulator, load_serpent
+from pyethereum import processblock
+processblock.debug = True
 
 class TestEtherEx(object):
 
