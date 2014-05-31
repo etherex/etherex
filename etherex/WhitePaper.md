@@ -1,16 +1,31 @@
-EtherEx: A decentralized exchange built on Ethereum
+A decentralized exchange built on Ethereum
 ===================================================
 
 Abstract
 --------
 
-At the end of January 2014, an organisation called Ethereum announced their existence to the world and took the minds of developers and cryptocurrency enthusiasts all over the world. With such an innovative, versatile and secure platform to build upon, we now have the means to create the solution to the Achille's heel of cryptocurrencies, and that solution is a decentralized exchange.
+At the end of January 2014, an organisation called Ethereum announced their existence to the world and took the minds of developers and crypto enthusiasts all over the world. With such an innovative, versatile and secure platform to build upon, we now have the means to create the solution to the Achille's heel of cryptocurrencies, and that solution is a decentralized exchange.
 
-This document will go further into the details of this implementation of a decentralized exchange built on Ethereum, the concepts, potential problems and solutions, requirements and innovations.
+This document will go further into the details of this implementation of a decentralized exchange built on Ethereum, the concepts, requirements, potential problems and solutions, and innovations.
 
+-----
 
 [TOC]
 
+-----
+
+Concept
+-------
+
+The concept of a decentralized exchange can take many shapes and can be implemented in many different ways. A few projects have already emerged, including some that are already operational, namely Counterparty and Mastercoin's metaDEx. Both implement the concept in a peer-to-peer fashion and are built on top of the Bitcoin network. Unfortunately, these exchanges are limited by the very nature of Bitcoin's blockchain technology. We won't go further into the details of those limitations in this paper since Vitalik Buterin already covered them in the [Ethereum white paper][1][^1], but we need to describe how such limitations affect the implementation of a decentralized exchange built on that technology.
+
+Bitcoin's strength lies in it's simplicity, at least in terms of what it aims to achieve. There is no denying it's complexity, the efforts required to understand it's inner workings or how difficult it can be to grasp the concept at first. But what it does is still ultimately very simple operations, which are those of a currency; if I send you `x` BTC, I now have `x` BTC less and you have `x` more BTC. The Bitcoin blockchain only keeps track of those transactions as a distributed public ledger, and this is where those limitations start to emerge.
+
+Building a decentralized exchange on a ledger that was designed to keep track of simple transactions (unspent outputs in Bitcoin's jargon) would be like trying to run Wall Street using side-notes in every accountant's single-lined book and matching traders by phone, however close to reality that can actually be (or was).
+
+It is for those reasons and those mentioned in Vitalik's white paper that make Ethereum a much better platform for such an exchange.
+
+[describe the concept!]
 
 
 Requirements
@@ -37,13 +52,13 @@ Managing the integration of other cryptocurrencies is a challenging part of a de
 
 Outside of the Ethereum network, EtherEx will need secure wallets and their related APIs to communicate information back into the trading engine. We could host a plethora of cryptocurrency clients with an API wrapper, find a provider like Blockchain.info for each currency, or a mix of both solutions per currency or even within the same currency. The first implementation for ETH/BTC will most likely use Blockchain.info for the low costs, security, track record and immediate availability of their API. Decisions will need to be taken regarding other trading pairs, and easier and more direct implementations into the Ethereum network will offer alternatives that will also have to be considered when they arise.
 
-...
+[blockchain.info thing is kind of obsolete... + elaborate]
 
 
 Implementation of a decentralized exchange on Ethereum
 ------------------------------------------------------
 
-EtherEx is made of set of contracts running on the Ethereum blockchain. We've been running tests and simulations since their first proof-of-concept (poc) was made available and already made a number of contributions to the codebase of Ethereum itself. Although very basic at the moment, those were exactly what we needed to confirm the feasibility of this project, a sort of poc-within-a-poc. Below is an even more simplistic example outlining some of the basic ideas of a exchange contract :
+EtherEx is made of a set of contracts running on the Ethereum blockchain. We've been running tests and simulations since their first proof-of-concept (poc) was made available and already made a number of contributions to the codebase of Ethereum itself. Although very basic at the moment, those were exactly what we needed to confirm the feasibility of this project, a sort of poc-within-a-poc. Below is an even more simplistic example outlining some of the basic ideas of a exchange contract :
 
 ```python
 init:
@@ -89,12 +104,13 @@ The `msg.data[0]` field is then checked to indicate a buy (passing 1 as first va
 
 This outlines how this example works only, and the real implementation will be much more complex and useful. Other contracts will be receiving transactions from EtherEx only, acting as secure data feeds thus allowing to update balances inside the exchange's contracts in a secure fashion.
 
-! ... [fig. 1. Deposit and trade](http://etherex.org/sites/etherex.org/files/emm.png)  
+![fig. 1. Deposit and trade](http://etherex.org/sites/etherex.org/files/emm.png)
 fig. 1. Deposit and trade
 
 Deposit : User ---> EtherEx multisig BTC wallet --> EtherEx to Ethereum TX (deposit confirmed) --> EtherEx updates from blockchain
 Trade : User to Ethereum TX (trade) --> EtherEx & User update from blockchain
 
+[ replace this ugly fig... ]
 
 
 A New Approach
@@ -226,9 +242,17 @@ Interface
 
 EtherEx will provide an open source interface on the Ethereum platform both as a standalone web app that connects to your node and as a client-browser interface.
 
+[ needs more details? ]
 
 
 Conclusion
 ==========
 
 Using blockchain technology allows to solve many problems by having the users and the exchange access the same data as easily. New challenges are introduced at many levels, and allocation of resources have to be carefully managed to allow a good user experience and provide useful decentralized services.
+
+[ needs work... ]
+
+
+### References
+[1]: https://github.com/ethereum/wiki/wiki/%5BEnglish%5D-White-Paper#scripting
+[^1]: https://github.com/ethereum/wiki/wiki/%5BEnglish%5D-White-Paper#scripting
