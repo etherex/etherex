@@ -17,7 +17,7 @@ This document will go further into the details of this implementation of a decen
 Concept
 -------
 
-The concept of a decentralized exchange can take many shapes and can be implemented in many different ways. A few projects have already emerged, including some that are already operational, namely Counterparty and Mastercoin's metaDEx. Both implement the concept in a peer-to-peer fashion and are built on top of the Bitcoin network. Unfortunately, these exchanges are limited by the very nature of Bitcoin's blockchain technology. We won't go further into the details of those limitations in this paper since Vitalik Buterin already covered them in the [Ethereum white paper][1][^1], but we need to describe how such limitations affect the implementation of a decentralized exchange built on that technology.
+The concept of a decentralized exchange can take many shapes and can be implemented in many different ways. A few projects have already emerged, including some that are already operational, namely Counterparty and Mastercoin's metaDEx. Both implement the concept in a peer-to-peer fashion and are built on top of the Bitcoin network. Unfortunately, these exchanges are limited by the very nature of Bitcoin's blockchain technology. We won't go further into the details of those limitations in this paper since Vitalik Buterin already covered them in the [Ethereum white paper][1], but we need to describe how such limitations affect the implementation of a decentralized exchange built on that technology.
 
 Bitcoin's strength lies in it's simplicity, at least in terms of what it aims to achieve. There is no denying it's complexity, the efforts required to understand it's inner workings or how difficult it can be to grasp the concept at first. But what it does is still ultimately very simple operations, which are those of a currency; if I send you `x` BTC, I now have `x` BTC less and you have `x` more BTC. The Bitcoin blockchain only keeps track of those transactions as a distributed public ledger, and this is where those limitations start to emerge.
 
@@ -25,7 +25,16 @@ Building a decentralized exchange on a ledger that was designed to keep track of
 
 It is for those reasons and those mentioned in Vitalik's white paper that make Ethereum a much better platform for such an exchange.
 
-[describe the concept!]
+
+### The decentralized, centralized order book
+
+We will now have the platform to build something that was previously either impossible, very difficult to achieve and/or needed countless hacks in order to provide even the most basic functionality transparently, which is the safe transfer of funds.
+
+Having great cryptographic tools at our disposal is interesting, but it's never really that useful unless it allows us to connect more easily. Bitcoin has allowed that in incredible ways. And since it's just the first experiment, we know much more is still possible. I also like to compare Bitcoin to git. They're great decentralized tools, but we still need to gather somewhere and have some level of centralization; we now have GitHub. Maybe it could be decentralized too, distribute the load of hosting in the process and speed it up a notch. I'd like some GitHubCoins, I use it a lot. The point to this is probably the transparency, however funny jumping from a coin to that sounds at first.
+
+Ethereum now provides the perfect platform for transparency. We can now centralize the order-book, the trading engine, and every rule we need to make an exchange work, only **fully transparent, fully open-source and with the security of blockchain technology**.
+
+[ some more describing the concept still ]
 
 
 Requirements
@@ -104,7 +113,7 @@ The `msg.data[0]` field is then checked to indicate a buy (passing 1 as first va
 
 This outlines how this example works only, and the real implementation will be much more complex and useful. Other contracts will be receiving transactions from EtherEx only, acting as secure data feeds thus allowing to update balances inside the exchange's contracts in a secure fashion.
 
-![fig. 1. Deposit and trade](http://etherex.org/sites/etherex.org/files/emm.png)
+!-[fig. 1. Deposit and trade](http://etherex.org/sites/etherex.org/files/emm.png)
 fig. 1. Deposit and trade
 
 Deposit : User ---> EtherEx multisig BTC wallet --> EtherEx to Ethereum TX (deposit confirmed) --> EtherEx updates from blockchain
@@ -228,21 +237,19 @@ Notes
 
 
 
-JSON API
-========
-
-A complete JSON-RPC API will be provided to retrieve information about the exchange, however providing your own nodes will be highly encouraged. All of the exchange's data will be available to you from the interface within the Ethereum client.
-
-There will be no JSON or other type of trading API since the exchange is using Ethereum. Trading is done by sending transactions directly to the contract(s) running the exchange.
-
-
-
 Interface
 =========
 
 EtherEx will provide an open source interface on the Ethereum platform both as a standalone web app that connects to your node and as a client-browser interface.
 
 [ needs more details? ]
+
+
+###JSON API
+
+A complete JSON-RPC API will be provided to retrieve information about the exchange, however providing your own nodes will be highly encouraged. All of the exchange's data will be available to you from the interface within the Ethereum client.
+
+There will be no JSON or other type of trading API since the exchange is using Ethereum. Trading is done by sending transactions directly to the contract(s) running the exchange.
 
 
 Conclusion
@@ -255,4 +262,4 @@ Using blockchain technology allows to solve many problems by having the users an
 
 ### References
 [1]: https://github.com/ethereum/wiki/wiki/%5BEnglish%5D-White-Paper#scripting
-[^1]: https://github.com/ethereum/wiki/wiki/%5BEnglish%5D-White-Paper#scripting
+1: https://github.com/ethereum/wiki/wiki/%5BEnglish%5D-White-Paper#scripting
