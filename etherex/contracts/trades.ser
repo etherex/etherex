@@ -8,9 +8,9 @@ code:
     exchange = contract.storage[2]
     last = contract.storage[10]
     contract.storage[20] = msg.datasize
-    # if msg.value > 0: # "Refunding excess value: %s" % msg.value
-    #     ret = send(msg.sender, msg.value, tx.gas / 2)
-    #     return(ret)
+    if msg.value > 0: // "Refunding excess value: %s" % msg.value
+        ret = send(tx.gas / 2, msg.sender, msg.value)
+        return(ret)
     if status == 1:
         if msg.datasize == 2: // "Getting trades"
             i = 0
@@ -37,22 +37,22 @@ code:
                     amount = msg.data[3]
                     owner = msg.data[4]
                     market = msg.data[5]
-                    if trade < 1:# or trade > 2:
+                    if trade < 1 or trade > 2:
                         return(0) // "Invalid trade type"
-                    if price < 1:# or price > 2^256-1:
+                    if price < 1 or price > 2^254:
                         return(0) // "Invalid price"
-                    if amount < 1:# or amount > 2^256-1:
+                    if amount < 1 or amount > 2^254:
                         return(0) // "Invalid amount"
-                    if owner < 1:# or owner > 2^256-1:
+                    if owner < 1 or owner > 2^254:
                         return(0) // "Invalid owner"
-                    if market < 0:# or market > 2^256-1: // "TODO - Get and check market count"
+                    if market < 1 or market > 2^254: // "TODO - Get and check market count"
                         return(0) // "Invalid market"
                     i = 0
                     while i < 5:
                         contract.storage[last + 100 + i] = msg.data[i + 1]
                         i = i + 1
                     contract.storage[10] = last + 5
-                    return(last)
+                    return(last + 100)
             elif msg.data[0] == 0: // "Removing trade"
                 if msg.sender == exchange:
                     total = (last - 100) / 5
@@ -77,7 +77,7 @@ code:
                         i = i + 1
                     return(ret)
         return(0)
-    else: // # if msg.sender == contract.storage[2]:
+    elif msg.sender == exchange:
         contract.storage[2] = msg.data[0] // #define msg.data[0]=EX
         contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.data[0]
         return(1)

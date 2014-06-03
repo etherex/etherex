@@ -172,22 +172,22 @@ class EtherExRun(Simulation):
         self.run(tx, self.contract)
         assert self.stopped == 11 #.startswith("Price out of range")
 
-    def test_insufficient_btc_trade(self):
-        tx = Tx(sender='alice', value=0, data=[1, 1 * 10 ** 6, 1000 * 10 ** 8, 1])
-        self.run(tx, self.contract)
-        assert self.stopped == 12 #.startswith("Minimum BTC trade amount not met")
-        assert self.contract.storage[1] == 1
+    # def test_insufficient_btc_trade(self):
+    #     tx = Tx(sender='alice', value=0, data=[1, 1 * 10 ** 6, 1000 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
+    #     assert self.stopped == 12 #.startswith("Minimum BTC trade amount not met")
+    #     assert self.contract.storage[1] == 1
 
     def test_insufficient_eth_trade(self):
         tx = Tx(sender='alice', value=0, data=[2, 1 * 10 ** 18, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
-        assert self.stopped == 13 #.startswith("Minimum ETH trade amount not met")
+        assert self.stopped == 12 #.startswith("Minimum ETH trade amount not met")
         assert self.contract.storage[1] == 1
 
     def test_insufficient_eth(self):
         tx = Tx(sender='alice', value=1 * 10 ** 18, data=[2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
-        assert self.stopped == 14 #.startswith("Minimum ETH value not met")
+        assert self.stopped == 13 #.startswith("Minimum ETH value not met")
         assert self.contract.storage[1] == 1
 
     def test_first_sell(self):

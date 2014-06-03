@@ -178,28 +178,6 @@ def test_genesis_db():
     assert blk != blk3
 
 
-def test_trie_state_root_nodep(genesis_fixture):
-    def int_to_big_endian(integer):
-        if integer == 0:
-            return ''
-        s = '%x' % integer
-        if len(s) & 1:
-            s = '0' + s
-        return s.decode('hex')
-    EMPTYSHA3 = utils.sha3('')
-    assert EMPTYSHA3.encode('hex') == \
-        'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'
-    ZERO_ENC = int_to_big_endian(0)
-    assert ZERO_ENC == ''
-    state = trie.Trie(tempfile.mktemp())
-    for address, value in genesis_fixture['initial_alloc'].items():
-        acct = [
-            int_to_big_endian(int(value)), ZERO_ENC, trie.BLANK_ROOT, EMPTYSHA3]
-        state.update(address.decode('hex'), rlp.encode(acct))
-    assert state.root_hash.encode(
-        'hex') == genesis_fixture['genesis_state_root']
-
-
 def test_genesis_state_root(genesis_fixture):
     # https://ethereum.etherpad.mozilla.org/12
     set_db()
@@ -530,39 +508,6 @@ def test_reward_unlces():
     assert cm.head.get_balance(local_coinbase) == 2 * blocks.BLOCK_REWARD
     assert cm.head.get_balance(uncle_coinbase) == blocks.UNCLE_REWARD
     assert 7 * blocks.BLOCK_REWARD / 8 == blocks.UNCLE_REWARD
-
-
-# blocks 1-3 genereated with Ethereum (++) 0.5.9
-# chain order w/ newest block first
-cpp_rlp_blocks = ["f8b5f8b1a0cea7b6f4379812715562aaf0f44accf61ece5a2d80fe780d7e173fbbb1b146eaa01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347941315bd599b73fd7b159e23dc75ddef80e7708feaa007e693fe94ea4772ab4c875af6bee3d58c0cab33981a0a336f4ae6cf514c1ee680833feffc038609184e72a000830f36d080845381ae3e80a00000000000000000000000000000000000000000000000000950e155eb5ed4cac0c0",
-                  "f8b5f8b1a00c892995c469f57a34447217fc6cebbaf604c9d82d621a6505c7493ac1333e68a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347941315bd599b73fd7b159e23dc75ddef80e7708feaa0e785df309fbf0289aa9d1c09096c039aa69b880b6c001eb95ec838fb2dcebe5180833fe004028609184e72a000830f3a9f80845381ae3e80a0000000000000000000000000000000000000000000000000b985b7d378a23d84c0c0",
-                  "f8b5f8b1a0c305511e7cb9b33767e50f5e94ecd7b1c51359a04f45183860ec6808d80b0d3fa01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347941315bd599b73fd7b159e23dc75ddef80e7708feaa04b6da9af1b96757921ba3a0de69c615fea5482570e37a4d74d051e1e19f996c880833ff000018609184e72a000830f3e6f80845381adf680a00000000000000000000000000000000000000000000000003dfac8aa6e0214b4c0c0"]
-
-
-def test_receive_cpp_block_1():
-    set_db()
-    cm = get_chainmanager()
-    blk1 = blocks.TransientBlock(cpp_rlp_blocks[-1].decode('hex'))
-    assert not blk1.transaction_list
-    assert not blk1.uncles
-    assert blk1.number == 1
-    genesis = cm.head
-    assert blk1.prevhash.encode('hex') == genesis.hex_hash()
-    local_blk1 = genesis.deserialize_child(blk1.rlpdata)
-    assert local_blk1.check_proof_of_work(local_blk1.nonce) == True
-
-
-def test_receive_cpp_chain():
-    set_db()
-    cm = get_chainmanager()
-    local_blk = cm.head  # genesis
-    for i, rlp_block in enumerate(reversed(cpp_rlp_blocks)):
-        blk = blocks.TransientBlock(rlp_block.decode('hex'))
-        assert not blk.transaction_list
-        assert not blk.uncles
-        assert blk.number == i + 1
-        local_blk = local_blk.deserialize_child(blk.rlpdata)
-        assert local_blk.check_proof_of_work(local_blk.nonce) == True
 
 
 

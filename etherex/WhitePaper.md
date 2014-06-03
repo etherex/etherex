@@ -41,8 +41,8 @@ Requirements
 ------------
 
 * Fully operational Ethereum network
-* EtherEx website for external services
-* A wallet and API per cryptocurrency
+* EtherEx website for external services (optional)
+* A wallet and API per off-chain cryptocurrency
 
 
 

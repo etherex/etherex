@@ -31,11 +31,12 @@ def verify(block, parent):
     assert block.timestamp <= time.time() + 900
     block2 = blocks.Block.init_from_parent(parent,
                                            block.coinbase,
-                                           block.extra_data,
-                                           block.timestamp)
+                                           extra_data=block.extra_data,
+                                           timestamp=block.timestamp,
+                                           uncles=block.uncles)
     assert block2.difficulty == block.difficulty
     assert block2.gas_limit == block.gas_limit
-    block2.finalize()  # this is the first potential state change
+    block2.finalize()
     for i in range(block.transaction_count):
         tx, s, g = rlp.decode(block.transactions.get(utils.encode_int(i)))
         tx = transactions.Transaction.create(tx)
@@ -135,13 +136,15 @@ def apply_transaction(block, tx):
     snapshot = block.snapshot()
     message_gas = tx.startgas - intrinsic_gas_used
     message = Message(tx.sender, tx.to, tx.value, message_gas, tx.data)
-    if tx.to:
+    # MESSAGE
+    if tx.to and tx.to != '0000000000000000000000000000000000000000':
         result, gas_remained, data = apply_msg(block, tx, message)
-    else:
+    else:  # CREATE
         result, gas_remained, data = create_contract(block, tx, message)
     assert gas_remained >= 0
-    logger.debug('applied tx, result %s gas remained %s data/code %s', result, gas_remained, 
-          ''.join(map(chr, data)).encode('hex'))
+    logger.debug(
+        'applied tx, result %s gas remained %s data/code %s', result,
+        gas_remained, ''.join(map(chr, data)).encode('hex'))
     if not result:  # 0 = OOG failure in both cases
         block.revert(snapshot)
         block.gas_used += tx.startgas
@@ -182,8 +185,7 @@ def apply_msg(block, tx, msg):
     snapshot = block.snapshot()
     code = block.get_code(msg.to)
     # Transfer value, instaquit if not enough
-    block.delta_balance(msg.to, msg.value)
-    o = block.delta_balance(msg.sender, -msg.value)
+    o = block.transfer_value(msg.sender, msg.to, msg.value)
     if not o:
         return 0, msg.gas, []
     compustate = Compustate(gas=msg.gas)
@@ -208,9 +210,11 @@ def apply_msg(block, tx, msg):
 
 def create_contract(block, tx, msg):
     snapshot = block.snapshot()
+
     sender = msg.sender.decode('hex') if len(msg.sender) == 40 else msg.sender
     nonce = utils.encode_int(block.get_nonce(msg.sender))
     recvaddr = utils.sha3(rlp.encode([sender, nonce]))[12:]
+    assert not block.get_code(recvaddr)
     msg.to = recvaddr
     block.increment_nonce(msg.sender)
     # Transfer value, instaquit if not enough
@@ -253,9 +257,14 @@ def calcfee(block, tx, msg, compustate, op):
         m_extend = max(0, ceil32(stk[-1] + stk[-2]) - len(mem))
         return GSHA3 + m_extend / 32 * GMEMORY
     elif op == 'SLOAD':
-        return GSLOAD
+        return GSTEP + GSLOAD
     elif op == 'SSTORE':
-        return GSSTORE
+        if not block.get_storage_data(msg.to, stk[-1]) and stk[-2]:
+            return 2 * GSSTORE
+        elif block.get_storage_data(msg.to, stk[-1]) and not stk[-2]:
+            return 0
+        else:
+            return GSSTORE
     elif op == 'MLOAD':
         m_extend = max(0, ceil32(stk[-1] + 32) - len(mem))
         return GSTEP + m_extend / 32 * GMEMORY
@@ -271,15 +280,20 @@ def calcfee(block, tx, msg, compustate, op):
                        ceil32(stk[-6] + stk[-7]) - len(mem))
         return GCALL + stk[-1] + m_extend / 32 * GMEMORY
     elif op == 'CREATE':
-        m_extend = max(0, ceil32(stk[-3] + stk[-4]) - len(mem))
-        return GCREATE + stk[-2] + m_extend / 32 * GMEMORY
+        m_extend = max(0, ceil32(stk[-2] + stk[-3]) - len(mem))
+        return GSTEP + GCREATE + m_extend / 32 * GMEMORY
     elif op == 'RETURN':
         m_extend = max(0, ceil32(stk[-1] + stk[-2]) - len(mem))
         return GSTEP + m_extend / 32 * GMEMORY
     elif op == 'CALLDATACOPY':
         m_extend = max(0, ceil32(stk[-1] + stk[-3]) - len(mem))
         return GSTEP + m_extend / 32 * GMEMORY
-    elif op == 'STOP' or op == 'INVALID':
+    elif op == 'CODECOPY':
+        m_extend = max(0, ceil32(stk[-1] + stk[-3]) - len(mem))
+        return GSTEP + m_extend / 32 * GMEMORY
+    elif op == 'BALANCE':
+        return GBALANCE
+    elif op == 'STOP' or op == 'INVALID' or op == 'SUICIDE':
         return GSTOP
     else:
         return GSTEP
@@ -305,10 +319,11 @@ def apply_op(block, tx, msg, code, compustate):
         import serpent
         if op[:4] == 'PUSH':
             start, n = compustate.pc + 1, int(op[4:])
-            logger.debug('%s %s ', op, utils.big_endian_to_int(code[start:start + n]))
+            logger.debug('%s %s ', op,
+                         utils.big_endian_to_int(code[start:start + n]))
         else:
-            logger.debug('%s %s ', op, ' '.join(map(str, stackargs)),
-                  serpent.decode_datalist(compustate.memory))
+            logger.debug('%s %s %s', op, ' '.join(map(str, stackargs)),
+                         serpent.decode_datalist(compustate.memory))
     # Apply operation
     oldgas = compustate.gas
     oldpc = compustate.pc
@@ -504,12 +519,14 @@ def apply_op(block, tx, msg, code, compustate):
         to = (('\x00' * (32 - len(to))) + to)[12:]
         value = stackargs[2]
         data = ''.join(map(chr, mem[stackargs[3]:stackargs[3] + stackargs[4]]))
-        logger.debug("Sub-call: %s %s %s %s %s ", utils.coerce_addr_to_hex(msg.to),
-                  utils.coerce_addr_to_hex(to), value, gas, data)
+        logger.debug(
+            "Sub-call: %s %s %s %s %s ", utils.coerce_addr_to_hex(msg.to),
+            utils.coerce_addr_to_hex(to), value, gas, data)
         result, gas, data = apply_msg(
             block, tx, Message(msg.to, to, value, gas, data))
-        logger.debug("Output of sub-call: %s %s length %s expected %s", result, data,len(data),
-                  stackargs[6])
+        logger.debug(
+            "Output of sub-call: %s %s length %s expected %s", result, data, len(data),
+            stackargs[6])
         for i in range(stackargs[6]):
             mem[stackargs[5] + i] = 0
         if result == 0:

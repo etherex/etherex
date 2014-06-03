@@ -39,8 +39,8 @@ class Simulator(object):
         self.nonce[frm] += 1
         return contract
 
-    def tx(self, frm, to, value, data):
-        _tx = transactions.Transaction(nonce=self.nonce[frm], gasprice=self.GASPRICE, startgas=self.STARTGAS,
+    def tx(self, frm, to, value, data, gas=STARTGAS):
+        _tx = transactions.Transaction(nonce=self.nonce[frm], gasprice=self.GASPRICE, startgas=gas,
                                        to=to, value=value, data=serpent.encode_datalist(data)).sign(frm.key)
         result, ans = processblock.apply_transaction(self.genesis, _tx)
         assert result

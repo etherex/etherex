@@ -90,7 +90,7 @@ print '==================='
 print 'EtherEx simulations'
 print '==================='
 subprocess.call(["cll-sim/run.py", "simulations/etherex.py"]) # , "contracts/etherex.cll"])
-subprocess.call(["py.test", "tests/etherex.py", "-v"]) # , "contracts/etherex.cll"])
+subprocess.call(["py.test", "tests/etherex.py", "-v", "-x"]) # , "contracts/etherex.cll"])
 
 print '\n'
 print '==================='

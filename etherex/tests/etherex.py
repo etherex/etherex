@@ -2,7 +2,7 @@ import sys
 sys.path.insert(0, './evm-sim/tests')
 from sim import Key, Simulator, load_serpent
 from pyethereum import processblock
-processblock.debug = True
+processblock.expensive_debug = True
 
 class TestEtherEx(object):
 
@@ -18,7 +18,8 @@ class TestEtherEx(object):
         cls.tcode = load_serpent('contracts/trades.ser')
         cls.ccode = load_serpent('contracts/currencies.ser')
         cls.sim = Simulator({cls.ALICE.address: 10**24,
-                             cls.BOB.address: 10**24})
+                             cls.BOB.address: 10**24,
+                             cls.CHARLIE.address: 10**24})
 
     def setup_method(self, method):
         self.sim.reset()
@@ -89,3 +90,221 @@ class TestEtherEx(object):
         assert self.sim.get_storage_data(self.bcontract, self.BOB.address) == 750
         assert self.sim.get_storage_data(self.bcontract, self.CHARLIE.address) == 250
         # assert self.sim.get_storage_dict(self.bcontract) == ''
+
+
+    def test_change_ownership(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.ALICE, self.contract, 0, [8, 0xf9e57456f18d90886263fedd9cc30b27cd959137])
+        assert ans == [0xf9e57456f18d90886263fedd9cc30b27cd959137]
+        # self.run(tx, self.contract)
+        # print 20 * "="
+
+    # - XETH (Balances)
+    def test_check_xeth_balance(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.ALICE, self.bcontract, 0, [self.ALICE.address, 0, 1])
+        assert ans == [1000000000000000000]
+
+    def test_transfer_eth_to_xeth(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 17, [3, 1 * 10 ** 17, 0])
+        assert ans == [1]
+        assert self.sim.get_storage_data(self.bcontract, self.ALICE.address) == 10**18 + 10 ** 17
+
+    def test_check_xeth_ownership(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.ALICE, self.bcontract, 0, [int(self.contract, 16), 0, 3])
+        assert ans == [int(self.contract, 16)]
+
+
+    # EtherEx
+    def test_no_data(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.BOB, self.contract, 0, [])
+
+        assert ans == [1] # .startswith("No data")
+
+    def test_invalid_operation(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.BOB, self.contract, 0, [0, 0])
+
+        assert ans == [2] # "Invalid operation"
+
+    def test_missing_amount(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.BOB, self.contract, 0, [1])
+
+        assert ans == [3] # "Missing amount"
+
+    def test_invalid_amount(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.BOB, self.contract, 0, [1, 0])
+
+        assert ans == [4] # "Invalid amount"
+
+    def test_missing_price(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.BOB, self.contract, 0, [1, 1])
+
+        assert ans == [5] # "Missing price"
+
+    def test_invalid_price(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.BOB, self.contract, 0, [1, 1, 0])
+
+        assert ans == [6] # "Invalid price"
+
+    def test_missing_market_id(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.BOB, self.contract, 0, [1, 1, 1 * 10 ** 8])
+
+        assert ans == [7] # "Missing market ID"
+
+    def test_invalid_market_id(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.BOB, self.contract, 0, [1, 1, 1 * 10 ** 8, 2])
+
+        assert ans == [8] # "Invalid market ID"
+
+    def test_too_many_arguments(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.BOB, self.contract, 0, [1, 1000 * 10 ** 21, 1 * 10 ** 8, 1, 1])
+
+        assert ans == [9] # .startswith("Too many arguments")
+
+    def test_amount_out_of_range(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.BOB, self.contract, 0, [1, 2**254 + 1, 1 * 10 ** 8 + 1, 1])
+
+        assert ans == [10] # .startswith("Amount out of range")
+
+    def test_price_out_of_range(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.BOB, self.contract, 0, [1, 1 * 10 ** 8, 2**254 + 1, 1])
+
+        assert ans == [11] #.startswith("Price out of range")
+
+    def test_insufficient_eth_trade(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.ALICE, self.contract, 0, [2, 1 * 10 ** 18, 1000 * 10 ** 8, 1])
+
+        assert ans == [12] #.startswith("Minimum ETH trade amount not met")
+
+    def test_insufficient_eth(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 18, [2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+        assert ans == [13] #.startswith("Minimum ETH value not met")
+
+    # # def test_insufficient_btc_trade(self):
+    # #     tx = Tx(sender='alice', value=0, data=[1, 1 * 10 ** 6, 1000 * 10 ** 8, 1])
+    # #     self.run(tx, self.contract)
+    # #     assert self.stopped == 12 #.startswith("Minimum BTC trade amount not met")
+    # #     assert self.contract.storage[1] == 1
+
+    def test_first_sell(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 21, [2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+
+        print self.sim.get_storage_dict(self.contract)
+        print self.sim.get_storage_dict(self.icontract)
+        print self.sim.get_storage_dict(self.tcontract)
+        assert ans == [100]
+        assert self.sim.get_storage_data(self.tcontract, 100) == 2
+        assert self.sim.get_storage_data(self.tcontract, 101) == 1000 * 10 ** 8
+        assert self.sim.get_storage_data(self.tcontract, 102) == 1 * 10 ** 21
+        assert self.sim.get_storage_data(self.tcontract, 103) == int(self.ALICE.address, 16)
+        assert self.sim.get_storage_data(self.tcontract, 104) == 1
+
+    def test_second_sell(self):
+        self.test_first_sell()
+
+        ans = self.sim.tx(self.BOB, self.contract, 1 * 10 ** 21, [2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+
+        assert ans == [105]
+        assert self.sim.get_storage_data(self.tcontract, 105) == 2
+        assert self.sim.get_storage_data(self.tcontract, 106) == 1000 * 10 ** 8
+        assert self.sim.get_storage_data(self.tcontract, 107) == 1 * 10 ** 21
+        assert self.sim.get_storage_data(self.tcontract, 108) == int(self.BOB.address, 16)
+        assert self.sim.get_storage_data(self.tcontract, 109) == 1
+
+    def test_first_buy(self):
+        self.test_second_sell()
+
+        ans = self.sim.tx(self.CHARLIE, self.contract, 0, [1, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+
+        assert ans == [110]
+        assert self.sim.get_storage_data(self.tcontract, 110) == 1 # TODO status
+        assert self.sim.get_storage_data(self.tcontract, 111) == 1000 * 10 ** 8
+        assert self.sim.get_storage_data(self.tcontract, 112) == 1 * 10 ** 21
+        assert self.sim.get_storage_data(self.tcontract, 113) == int(self.CHARLIE.address, 16)
+        assert self.sim.get_storage_data(self.tcontract, 114) == 1
+
+    # def test_second_buy_with_leftover(self):
+    #     tx = Tx(sender='alice', value=0, data=[1, 1500 * 10 ** 18, 1000 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
+
+    # def test_bigger_sell(self):
+    #     tx = Tx(sender='bob', value=1500 * 10 ** 18, data=[2, 1500 * 10 ** 18, 1200 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
+
+    # def test_bigger_buy_but_less(self):
+    #     tx = Tx(sender='alice', value=1200 * 10 ** 18, data=[1, 1200 * 10 ** 18, 1200 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
+
+    # def test_buy_other_amount(self):
+    #     tx = Tx(sender='charlie', value=4200 * 10 ** 18, data=[1, 4000 * 10 ** 18, 1100 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
+
+    # def test_sell_twice_that_amount(self):
+    #     tx = Tx(sender='bob', value=8000 * 10 ** 21, data=[2, 8000 * 10 ** 18, 1100 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
+
+    # def test_another_buy_at_that_price(self):
+    #     tx = Tx(sender='charlie', value=5000 * 10 ** 18, data=[1, 4500 * 10 ** 18, 1100 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
+
+    # def test_sell_lower_cross_index_check(self):
+    #     tx = Tx(sender='bob', value=20000 * 10 ** 18, data=[2, 20000 * 10 ** 18, 900 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
+
+    # def test_buy_lower_cross_index_fail(self):
+    #     tx = Tx(sender='charlie', value=2500 * 10 ** 18, data=[1, 2500 * 10 ** 18, 900 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
+
+    # def test_sell_back_at_first_price(self):
+    #     tx = Tx(sender='bob', value=2500 * 10 ** 18, data=[2, 500 * 10 ** 18, 1000 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
+
+    # def test_index_replacing(self):
+    #     tx = Tx(sender='charlie', value=2500 * 10 ** 18, data=[2, 2500 * 10 ** 18, 950 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
+
+    # def test_other_amount_again(self):
+    #     tx = Tx(sender='alice', value=2500 * 10 ** 18, data=[1, 2500 * 10 ** 18, 1100 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
+
+    # def test_whale_sell(self):
+    #     tx = Tx(sender='bob', value=5 * 10 ** 28, data=[2, 5 * 10 ** 28, 800 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
+
+    # def test_whale_buy(self):
+    #     tx = Tx(sender='bob', value=0, data=[1, 10 * 10 ** 28, 1500 * 10 ** 8, 1])
+    #     self.run(tx, self.contract)
