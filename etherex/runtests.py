@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 # import serpent
 import subprocess
+import os
 import sys
 import json
 sys.path.insert(0, './serpent')
@@ -83,7 +84,10 @@ print '\n'
 print '==================='
 print 'Compiler tests'
 print '==================='
-subprocess.call(["python", "serpent/runtests.py"])
+origwd = os.getcwd() # remember our original working directory
+os.chdir('serpent') # os.path.join(os.path.abspath(sys.path[0]), './serpent'))
+subprocess.call(["python", "runtests.py"])
+os.chdir(origwd)
 
 print '\n'
 print '==================='

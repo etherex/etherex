@@ -114,7 +114,7 @@ code:
                 if !bookcount:
                     bookcount = 0
                 data = array(2)
-                data[0] = bookcount // "bookcount: %s" % bookcount
+                data[0] = bookcount
                 data[1] = price
 
                 # Set our book's array

@@ -1,46 +1,46 @@
 #!/usr/bin/python
-
 import random
+from serpent import parser, rewriter, compiler, lllparser
 
-
-def bijection_test_lllparser(ast2):
-    text2 = repr(ast2)
+def bijection_test_lllparser(lll):
+    text = repr(lll)
     i = 0
-    n = random.randrange(4)  # No comments yet.
+    n = random.randrange(4)
     while i >= 0 and n > 0:
-        i = text2.find('\n', i)
+        i = text.find('\n', i)
         n -= 1
     if i > 0:
-        text2 = text2[:i] + ';blablabla\n' + text2[i+1:]
-    print(text2)
+        text = text[:i] + ';-\n' + text[i+1:]
 
-    ast3  = lllparser.parse_lll(text2)
-    if ast3.listfy() != ast2.listfy():
+    ast = lllparser.parse_lll(text)
+    if ast.listfy() != lll.listfy():
         print("BUG: Parsing output again gave different result!")
-        print(ast2)
-        print(ast3)
+        print(lll)
+        print(ast)
         print("")
-
-
-from serpent import parser, rewriter, compiler, lllparser
 
 
 def test_on_text(text):
     print text
+
     ast = parser.parse(text)
     print "AST:", ast
     print ""
-    ast2 = rewriter.compile_to_lll(ast)
-    print "LLL:", ast2
+
+    lll = rewriter.compile_to_lll(ast)
+    print "LLL:", lll
     print ""
-    bijection_test_lllparser(ast2)
+
+    bijection_test_lllparser(lll)
 
     varz = rewriter.analyze(ast)
     print "Analysis: ", varz
     print ""
-    aevm = compiler.compile_lll(ast2)
+
+    aevm = compiler.compile_lll(lll)
     print "AEVM:", ' '.join([str(x) for x in aevm])
     print ""
+
     code = compiler.assemble(aevm)
     print "Output:", code.encode('hex')
 
@@ -59,7 +59,6 @@ def test_on_file(file):
         test_on_text(text)
         if i >= len(t):
             break
-
 
 for f in ['tests.txt',
           'examples/mul2.se', 'examples/namecoin.se',
