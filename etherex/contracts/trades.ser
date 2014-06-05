@@ -1,20 +1,37 @@
 #
 # Trades
 #
+
 init:
     contract.storage[2] = msg.sender
+
 code:
+    # Basic gas check
+    if tx.gas < 1000:
+        return(0) // "Insufficient gas"
+
+    # Set our status
     status = contract.storage[1]
+
+    # Set reference to exchange
     exchange = contract.storage[2]
+
+    # Get our last recorded pointer
     last = contract.storage[10]
-    contract.storage[20] = msg.datasize
+
+    ret = 0
     if msg.value > 0: // "Refunding excess value: %s" % msg.value
-        ret = send(tx.gas / 2, msg.sender, msg.value)
-        return(ret)
+        ret = send(tx.gas / 2, tx.origin, msg.value)
+
+    # Logging
+    contract.storage[20] = msg.datasize
+    contract.storage[21] = tx.gas
+    contract.storage[22] = ret
+
     if status == 1:
         if msg.datasize == 2: // "Getting trades"
             i = 0
-            trades = array(msg.data[0] + 2)
+            trades = array(msg.data[0] * 5 + 2)
             trades[0] = 0
             trades[1] = 0
             while i < msg.data[0]:
@@ -25,10 +42,10 @@ code:
                     trades[trades[0] * 5 + 4] = contract.storage[i * 5 + 102] // "Amount"
                     trades[trades[0] * 5 + 5] = contract.storage[i * 5 + 103] // "Owner"
                     trades[trades[0] * 5 + 6] = contract.storage[i * 5 + 104] // "Market"
-                    trades[1] = trades[0] + 1
+                    trades[1] = trades[1] + 1
                     trades[0] = trades[0] + 1
                 i = i + 1
-            return(trades, trades[0] * 5 + 2)
+            return(trades, msg.data[0] * 5 + 2)
         elif msg.datasize == 6:
             if msg.data[0] == 1:
                 if msg.sender == exchange: // "Adding trade"

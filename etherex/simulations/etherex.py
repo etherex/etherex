@@ -118,57 +118,57 @@ class EtherExRun(Simulation):
 
     # EtherEx
     def test_no_data(self):
-        tx = Tx(sender='bob', value=0)
+        tx = Tx(sender='bob', value=0, gas=10000)
         self.run(tx, self.contract)
         assert self.stopped == 1 # .startswith("No data")
 
     def test_invalid_operation(self):
-        tx = Tx(sender='bob', value=0, data=[0, 0])
+        tx = Tx(sender='bob', value=0, gas=10000, data=[0, 0])
         self.run(tx, self.contract)
         assert self.stopped == 2 # "Invalid operation"
 
     def test_missing_amount(self):
-        tx = Tx(sender='bob', value=0, data=[1])
+        tx = Tx(sender='bob', value=0, gas=10000, data=[1])
         self.run(tx, self.contract)
         assert self.stopped == 3 # "Missing amount"
 
     def test_invalid_amount(self):
-        tx = Tx(sender='bob', value=0, data=[1, 0])
+        tx = Tx(sender='bob', value=0, gas=10000, data=[1, 0])
         self.run(tx, self.contract)
         assert self.stopped == 4 # "Invalid amount"
 
     def test_missing_price(self):
-        tx = Tx(sender='bob', value=0, data=[1, 1])
+        tx = Tx(sender='bob', value=0, gas=10000, data=[1, 1])
         self.run(tx, self.contract)
         assert self.stopped == 5 # "Missing price"
 
     def test_invalid_price(self):
-        tx = Tx(sender='bob', value=0, data=[1, 1, 0])
+        tx = Tx(sender='bob', value=0, gas=10000, data=[1, 1, 0])
         self.run(tx, self.contract)
         assert self.stopped == 6 # "Invalid price"
 
     def test_missing_market_id(self):
-        tx = Tx(sender='bob', value=0, data=[1, 1, 1 * 10 ** 8])
+        tx = Tx(sender='bob', value=0, gas=10000, data=[1, 1, 1 * 10 ** 8])
         self.run(tx, self.contract)
         assert self.stopped == 7 # "Missing market ID"
 
     def test_invalid_market_id(self):
-        tx = Tx(sender='bob', value=0, data=[1, 1, 1 * 10 ** 8, 2])
+        tx = Tx(sender='bob', value=0, gas=10000, data=[1, 1, 1 * 10 ** 8, 2])
         self.run(tx, self.contract)
         assert self.stopped == 8 # "Invalid market ID"
 
     def test_too_many_arguments(self):
-        tx = Tx(sender='bob', value=0, data=[1, 1000 * 10 ** 21, 1 * 10 ** 8, 1, 1])
+        tx = Tx(sender='bob', value=0, gas=10000, data=[1, 1000 * 10 ** 21, 1 * 10 ** 8, 1, 1])
         self.run(tx, self.contract)
         assert self.stopped == 9 # .startswith("Too many arguments")
 
     def test_amount_out_of_range(self):
-        tx = Tx(sender='bob', value=0, data=[1, 2**256+1, 1 * 10 ** 8, 1])
+        tx = Tx(sender='bob', value=0, gas=10000, data=[1, 2**256+1, 1 * 10 ** 8, 1])
         self.run(tx, self.contract)
         assert self.stopped == 10 # .startswith("Amount out of range")
 
     def test_price_out_of_range(self):
-        tx = Tx(sender='bob', value=0, data=[1, 1 * 10 ** 8, 256**256+1, 1])
+        tx = Tx(sender='bob', value=0, gas=10000, data=[1, 1 * 10 ** 8, 256**256+1, 1])
         self.run(tx, self.contract)
         assert self.stopped == 11 #.startswith("Price out of range")
 
@@ -179,82 +179,82 @@ class EtherExRun(Simulation):
     #     assert self.contract.storage[1] == 1
 
     def test_insufficient_eth_trade(self):
-        tx = Tx(sender='alice', value=0, data=[2, 1 * 10 ** 18, 1000 * 10 ** 8, 1])
+        tx = Tx(sender='alice', value=0, gas=10000, data=[2, 1 * 10 ** 18, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
         assert self.stopped == 12 #.startswith("Minimum ETH trade amount not met")
         assert self.contract.storage[1] == 1
 
     def test_insufficient_eth(self):
-        tx = Tx(sender='alice', value=1 * 10 ** 18, data=[2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+        tx = Tx(sender='alice', value=1 * 10 ** 18, gas=10000, data=[2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
         assert self.stopped == 13 #.startswith("Minimum ETH value not met")
         assert self.contract.storage[1] == 1
 
     def test_first_sell(self):
-        tx = Tx(sender="alice", value=1 * 10 ** 21, data=[2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+        tx = Tx(sender="alice", value=1 * 10 ** 21, gas=10000, data=[2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
         self.contract.storage[2] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31 # Alice
         self.contract.storage[3] = 0x98445cfc0722a38f3324a4ce929b53b7b0e48b00 # BalancesContract
         self.contract.storage[4] = 0x98445cfc0722a38f3324a4ce929b53b7b0e48b00 # TradesContract
         self.run(tx, self.contract)
 
     def test_second_sell(self):
-        tx = Tx(sender="bob", value=1 * 10 ** 21, data=[2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+        tx = Tx(sender="bob", value=1 * 10 ** 21, gas=10000, data=[2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_first_buy(self):
-        tx = Tx(sender="charlie", value=0, data=[1, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+        tx = Tx(sender="charlie", value=0, gas=10000, data=[1, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_second_buy_with_leftover(self):
-        tx = Tx(sender='alice', value=0, data=[1, 1500 * 10 ** 18, 1000 * 10 ** 8, 1])
+        tx = Tx(sender='alice', value=0, gas=10000, data=[1, 1500 * 10 ** 18, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_bigger_sell(self):
-        tx = Tx(sender='bob', value=1500 * 10 ** 18, data=[2, 1500 * 10 ** 18, 1200 * 10 ** 8, 1])
+        tx = Tx(sender='bob', value=1500 * 10 ** 18, gas=10000, data=[2, 1500 * 10 ** 18, 1200 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_bigger_buy_but_less(self):
-        tx = Tx(sender='alice', value=1200 * 10 ** 18, data=[1, 1200 * 10 ** 18, 1200 * 10 ** 8, 1])
+        tx = Tx(sender='alice', value=1200 * 10 ** 18, gas=10000, data=[1, 1200 * 10 ** 18, 1200 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_buy_other_amount(self):
-        tx = Tx(sender='charlie', value=4200 * 10 ** 18, data=[1, 4000 * 10 ** 18, 1100 * 10 ** 8, 1])
+        tx = Tx(sender='charlie', value=4200 * 10 ** 18, gas=10000, data=[1, 4000 * 10 ** 18, 1100 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_sell_twice_that_amount(self):
-        tx = Tx(sender='bob', value=8000 * 10 ** 21, data=[2, 8000 * 10 ** 18, 1100 * 10 ** 8, 1])
+        tx = Tx(sender='bob', value=8000 * 10 ** 21, gas=10000, data=[2, 8000 * 10 ** 18, 1100 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_another_buy_at_that_price(self):
-        tx = Tx(sender='charlie', value=5000 * 10 ** 18, data=[1, 4500 * 10 ** 18, 1100 * 10 ** 8, 1])
+        tx = Tx(sender='charlie', value=5000 * 10 ** 18, gas=10000, data=[1, 4500 * 10 ** 18, 1100 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_sell_lower_cross_index_check(self):
-        tx = Tx(sender='bob', value=20000 * 10 ** 18, data=[2, 20000 * 10 ** 18, 900 * 10 ** 8, 1])
+        tx = Tx(sender='bob', value=20000 * 10 ** 18, gas=10000, data=[2, 20000 * 10 ** 18, 900 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_buy_lower_cross_index_fail(self):
-        tx = Tx(sender='charlie', value=2500 * 10 ** 18, data=[1, 2500 * 10 ** 18, 900 * 10 ** 8, 1])
+        tx = Tx(sender='charlie', value=2500 * 10 ** 18, gas=10000, data=[1, 2500 * 10 ** 18, 900 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_sell_back_at_first_price(self):
-        tx = Tx(sender='bob', value=2500 * 10 ** 18, data=[2, 500 * 10 ** 18, 1000 * 10 ** 8, 1])
+        tx = Tx(sender='bob', value=2500 * 10 ** 18, gas=10000, data=[2, 500 * 10 ** 18, 1000 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_index_replacing(self):
-        tx = Tx(sender='charlie', value=2500 * 10 ** 18, data=[2, 2500 * 10 ** 18, 950 * 10 ** 8, 1])
+        tx = Tx(sender='charlie', value=2500 * 10 ** 18, gas=10000, data=[2, 2500 * 10 ** 18, 950 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_other_amount_again(self):
-        tx = Tx(sender='alice', value=2500 * 10 ** 18, data=[1, 2500 * 10 ** 18, 1100 * 10 ** 8, 1])
+        tx = Tx(sender='alice', value=2500 * 10 ** 18, gas=10000, data=[1, 2500 * 10 ** 18, 1100 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_whale_sell(self):
-        tx = Tx(sender='bob', value=5 * 10 ** 28, data=[2, 5 * 10 ** 28, 800 * 10 ** 8, 1])
+        tx = Tx(sender='bob', value=5 * 10 ** 28, gas=10000, data=[2, 5 * 10 ** 28, 800 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_whale_buy(self):
-        tx = Tx(sender='bob', value=0, data=[1, 10 * 10 ** 28, 1500 * 10 ** 8, 1])
+        tx = Tx(sender='bob', value=0, gas=10000, data=[1, 10 * 10 ** 28, 1500 * 10 ** 8, 1])
         self.run(tx, self.contract)
 
     def test_results(self):

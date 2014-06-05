@@ -39,7 +39,7 @@ def main():
         o = getattr(serpent, cmd)(*args)
         if isinstance(o, dict):
             print json.dumps(o)
-        elif isinstance(o, list):
+        elif isinstance(o, (list, tuple)):
             print ' '.join(map(str, o))
         elif isinstance(o, (serpent.utils.token, serpent.utils.astnode)):
             print repr(o)

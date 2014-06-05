@@ -42,6 +42,7 @@ class TestEtherEx(object):
         ans = self.sim.tx(self.ALICE, self.icontract, 0, [self.contract])
         ans = self.sim.tx(self.ALICE, self.tcontract, 0, [self.contract])
         ans = self.sim.tx(self.ALICE, self.ccontract, 0, [self.contract])
+        assert ans == [1]
         assert self.sim.get_storage_data(self.contract, 3) == int(self.bcontract, 16)
         assert self.sim.get_storage_data(self.contract, 4) == int(self.icontract, 16)
         assert self.sim.get_storage_data(self.contract, 5) == int(self.tcontract, 16)
@@ -60,6 +61,7 @@ class TestEtherEx(object):
         self.test_initialize()
 
         ans = self.sim.tx(self.ALICE, self.bcontract, 0, [self.BOB.address, 1000])
+
         assert ans == [1]
         assert self.sim.get_storage_data(self.bcontract, self.ALICE.address) == 10**18 - 1000
         assert self.sim.get_storage_data(self.bcontract, self.BOB.address) == 1000
@@ -70,6 +72,7 @@ class TestEtherEx(object):
         self.test_initialize()
 
         ans = self.sim.tx(self.BOB, self.bcontract, 0, [self.CHARLIE.address, 2000])
+
         assert ans == [0]
         assert self.sim.get_storage_data(self.bcontract, self.ALICE.address) == 10**18
         assert self.sim.get_storage_data(self.bcontract, self.BOB.address) == 0
@@ -218,44 +221,69 @@ class TestEtherEx(object):
     # #     assert self.stopped == 12 #.startswith("Minimum BTC trade amount not met")
     # #     assert self.contract.storage[1] == 1
 
+    def test_add_bob_coin(self):
+        self.test_initialize()
+
+        ans = self.sim.tx(self.BOB, self.contract, 10 * 10 ** 18, [6, 1 * 10 ** 18, 1 * 10 ** 8, "ETH/BOB", self.BOB.address])
+
+        print self.sim.get_storage_dict(self.ccontract)
+        assert self.sim.get_storage_data(self.ccontract, 2) == int(self.contract, 16)
+        assert ans == [42]
+        assert self.sim.get_storage_data(self.ccontract, 100) == int("ETH/BOB".encode('hex'), 16)
+        assert self.sim.get_storage_data(self.ccontract, 101) == 1 * 10 ** 18
+        assert self.sim.get_storage_data(self.ccontract, 102) == 1 * 10 ** 8
+        assert self.sim.get_storage_data(self.ccontract, 103) == int(self.BOB.address, 16)
+        assert self.sim.get_storage_data(self.ccontract, 104) == 2
+
     def test_first_sell(self):
         self.test_initialize()
 
         ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 21, [2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
 
-        print self.sim.get_storage_dict(self.contract)
-        print self.sim.get_storage_dict(self.icontract)
-        print self.sim.get_storage_dict(self.tcontract)
-        assert ans == [100]
         assert self.sim.get_storage_data(self.tcontract, 100) == 2
         assert self.sim.get_storage_data(self.tcontract, 101) == 1000 * 10 ** 8
         assert self.sim.get_storage_data(self.tcontract, 102) == 1 * 10 ** 21
         assert self.sim.get_storage_data(self.tcontract, 103) == int(self.ALICE.address, 16)
         assert self.sim.get_storage_data(self.tcontract, 104) == 1
+        assert ans == [1]
 
     def test_second_sell(self):
         self.test_first_sell()
 
-        ans = self.sim.tx(self.BOB, self.contract, 1 * 10 ** 21, [2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+        ans = self.sim.tx(self.BOB, self.contract, 1 * 10 ** 21, [2, 1 * 10 ** 21, 1000 * 10 ** 8, 1], 100000)
 
-        assert ans == [105]
+        print self.sim.get_storage_dict(self.contract)
+        print "=" * 20
+        print self.sim.get_storage_dict(self.bcontract)
+        print "=" * 20
+        print self.sim.get_storage_dict(self.icontract)
+        print "=" * 20
+        print self.sim.get_storage_dict(self.tcontract)
         assert self.sim.get_storage_data(self.tcontract, 105) == 2
         assert self.sim.get_storage_data(self.tcontract, 106) == 1000 * 10 ** 8
         assert self.sim.get_storage_data(self.tcontract, 107) == 1 * 10 ** 21
         assert self.sim.get_storage_data(self.tcontract, 108) == int(self.BOB.address, 16)
         assert self.sim.get_storage_data(self.tcontract, 109) == 1
+        assert ans == [1] # Should be 1 or 2...
 
     def test_first_buy(self):
         self.test_second_sell()
 
-        ans = self.sim.tx(self.CHARLIE, self.contract, 0, [1, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+        ans = self.sim.tx(self.CHARLIE, self.contract, 0, [1, 1 * 10 ** 21, 1000 * 10 ** 8, 1], 100000)
 
-        assert ans == [110]
+        print self.sim.get_storage_dict(self.contract)
+        print "=" * 20
+        print self.sim.get_storage_dict(self.bcontract)
+        print "=" * 20
+        print self.sim.get_storage_dict(self.icontract)
+        print "=" * 20
+        print self.sim.get_storage_dict(self.tcontract)
         assert self.sim.get_storage_data(self.tcontract, 110) == 1 # TODO status
         assert self.sim.get_storage_data(self.tcontract, 111) == 1000 * 10 ** 8
         assert self.sim.get_storage_data(self.tcontract, 112) == 1 * 10 ** 21
         assert self.sim.get_storage_data(self.tcontract, 113) == int(self.CHARLIE.address, 16)
         assert self.sim.get_storage_data(self.tcontract, 114) == 1
+        assert ans == [2] # Should be 2 or 3...
 
     # def test_second_buy_with_leftover(self):
     #     tx = Tx(sender='alice', value=0, data=[1, 1500 * 10 ** 18, 1000 * 10 ** 8, 1])

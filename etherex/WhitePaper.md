@@ -32,18 +32,17 @@ We will now have the platform to build something that was previously either impo
 
 Having great cryptographic tools at our disposal is interesting, but it's never really that useful unless it allows us to connect more easily. Bitcoin has allowed that in incredible ways. And since it's just the first experiment, we know much more is still possible. I also like to compare Bitcoin to git. They're great decentralized tools, but we still need to gather somewhere and have some level of centralization; we now have GitHub. Maybe it could be decentralized too, distribute the load of hosting in the process and speed it up a notch. I'd like some GitHubCoins, I use it a lot. The point to this is probably the transparency, however funny jumping from a coin to that sounds at first.
 
-Ethereum now provides the perfect platform for transparency. We can now centralize the order-book, the trading engine, and every rule we need to make an exchange work, only **fully transparent, fully open-source and with the security of blockchain technology**.
+Ethereum now provides the perfect platform for transparency. We can now centralize the order book, the trading engine, and every rule we need to make an exchange work, only now **fully transparently, totally open-source and with the security of blockchain technology**.
 
-[ some more describing the concept still ]
+[ some more describing the concept still ? ]
 
 
 Requirements
 ------------
 
 * Fully operational Ethereum network
-* EtherEx website for external services (optional)
-* A wallet and API per off-chain cryptocurrency
-
+* Standard balance check API
+* Off-chain interaction with other cryptocurrencies
 
 
 Problems and solutions
@@ -57,17 +56,19 @@ Centralized exchanges suffer from a serious trust problem. A decentralized excha
 * Fiat integration
 
 
-Managing the integration of other cryptocurrencies is a challenging part of a decentralized exchange, and probably the main reason why none has emerged so far. Ethereum now provides a solution to the security and decentralization, but also brings the necessary building blocks for other cryptocurrencies to start interacting. EtherEx aims to be the first to take advantage of those possibilities.
+Managing the integration of other cryptocurrencies is a challenging part of a decentralized exchange, and probably the main reason why none has emerged so far. Ethereum now provides a solution to the security and decentralization, but also brings the necessary building blocks for other cryptocurrencies to start interacting. A decentralized exchange will be the first application of this kind to take advantage of those possibilities.
 
-Outside of the Ethereum network, EtherEx will need secure wallets and their related APIs to communicate information back into the trading engine. We could host a plethora of cryptocurrency clients with an API wrapper, find a provider like Blockchain.info for each currency, or a mix of both solutions per currency or even within the same currency. The first implementation for ETH/BTC will most likely use Blockchain.info for the low costs, security, track record and immediate availability of their API. Decisions will need to be taken regarding other trading pairs, and easier and more direct implementations into the Ethereum network will offer alternatives that will also have to be considered when they arise.
+Outside of the Ethereum network, a decentralized exchange will need secure wallets and their related APIs to communicate information back into the trading engine. The first implementations for ETH/BTC might require a more centralized approach, but . Decisions will need to be taken regarding other trading pairs, and easier and more direct implementations into the Ethereum network will offer alternatives that will also have to be considered when they arise.
 
 [blockchain.info thing is kind of obsolete... + elaborate]
+
+
 
 
 Implementation of a decentralized exchange on Ethereum
 ------------------------------------------------------
 
-EtherEx is made of a set of contracts running on the Ethereum blockchain. We've been running tests and simulations since their first proof-of-concept (poc) was made available and already made a number of contributions to the codebase of Ethereum itself. Although very basic at the moment, those were exactly what we needed to confirm the feasibility of this project, a sort of poc-within-a-poc. Below is an even more simplistic example outlining some of the basic ideas of a exchange contract :
+The decentralized exchange is made of a set of contracts running on the Ethereum blockchain. We've been running tests and simulations since their first proof-of-concept (poc) was made available and already made a number of contributions to the codebase of Ethereum itself. Although very basic at the moment, those were exactly what we needed to confirm the feasibility of this project, a sort of poc-within-a-poc. Below is an even more simplistic example outlining some of the basic ideas of a exchange contract :
 
 ```python
 init:
@@ -111,13 +112,13 @@ Once the contract is initialized, after the else statement, fees are calculated,
 
 The `msg.data[0]` field is then checked to indicate a buy (passing 1 as first value) or a sell (passing 2 as first value) and the current balance available to buy. In our example, a seller would actually be giving away instead of selling. If the sender is buying and the balance allows it, we proceed to subtract the amount minus the fees from the balance in storage, send twice the value less the fees to the buyer, and send the exchange's owner part of the fees. If the sender is selling, as mentioned before, the transaction's value minus the fees is added to the balance in storage and the sender can now feel very generous. Exchange fees are also sent to the owner in that case.
 
-This outlines how this example works only, and the real implementation will be much more complex and useful. Other contracts will be receiving transactions from EtherEx only, acting as secure data feeds thus allowing to update balances inside the exchange's contracts in a secure fashion.
+This outlines how this example works only, and the real implementation will be much more complex and useful. Other contracts will be receiving transactions from the exchange only, acting as secure data feeds thus allowing to update balances inside the exchange's contracts in a secure fashion.
 
 !-[fig. 1. Deposit and trade](http://etherex.org/sites/etherex.org/files/emm.png)
 fig. 1. Deposit and trade
 
-Deposit : User ---> EtherEx multisig BTC wallet --> EtherEx to Ethereum TX (deposit confirmed) --> EtherEx updates from blockchain
-Trade : User to Ethereum TX (trade) --> EtherEx & User update from blockchain
+Deposit : User ---> Exchange multisig BTC wallet --> Exchange to Ethereum TX (deposit confirmed) --> Exchange updates from blockchain
+Trade : User to Ethereum TX (trade) --> Exchange & User update from blockchain
 
 [ replace this ugly fig... ]
 
@@ -125,7 +126,12 @@ Trade : User to Ethereum TX (trade) --> EtherEx & User update from blockchain
 A New Approach
 --------------
 
-Ethereum now allows us to build an exchange with a decentralized but shared order book, and where every asset denominated in ether can be handled in a trust system.
+Ethereum now allows us to build an exchange with a decentralized but shared order book, and where every asset denominated in ether can be handled in a trustless, automated, decentralized trading engine.
+
+The main contract handles most of the interactions with the users, dispatching commands or simply refunding the user in case of an invalid request. Once the interface is stable enough, most or all of these errors should be caught before becoming transactions and actual trades or operation requests. The main contract will handle most of the exchange's logic, including trade verifications, but will only hold a few meta-data objects and the nonces of price indexes. A separate, possibly self-replicating contract will store those price indexes, which themselves at least include prices and the total of trades per price. Another contract will handle a subcurrency as the base asset of the exchange. It's actual use is still being discussed since there is still a preference towards simply using Ether for all transactions if possible. However, a balance within the exchange still needs to be recorded and such a subcurrency currently serves that purpose with that contract. A fourth contract, also self-replicating, will hold the actual trades and data. And, at the very least, a fifth contract is needed to hold the different markets being added.
+
+Other contracts will eventually get added for Contracts for Differences (CFDs) and any new features. It will also be up to the community to provide some of those contracts, something that should be made easy by copying a current set of contracts and related interface.
+
 
 [ More info about interactions between contracts and other feeds, backend servers, the website, other interfaces, limitations, etc. ]
 
@@ -161,6 +167,12 @@ A full description of the final contract storage data structure will be provided
 ```
 
 
+### Adding a market
+```
+<operation> <minimum trade> <minimum price> <owner[s]> <name>
+```
+
+
 ### Operations
 
 Allowed values:
@@ -178,6 +190,7 @@ Allowed values:
 
 * Amount in wei for ETH or XETH
 * Amount in satoshi for BTC
+* Lowest denomination of each subcurrency
 
 
 ### Prices
@@ -200,6 +213,13 @@ New market IDs will be created as DAO creators add their subcurrency to the exch
 3 = BTC
 ```
 New currency IDs will also be created as markets get added.
+
+
+### Market names
+Follow the "ETH/<name>" convention for the market name, like "ETH/BOB" for BobCoin.
+
+### Minimum trade amounts
+When adding a subcurrency, make the minimum trade amount high enough to make economic sense.
 
 
 ### Examples
@@ -229,6 +249,11 @@ Cancel operation
 5 0x3039
 ```
 
+Add your subcurrency
+```
+6 1000000000000000000000 100000000 "ETH/BOB"
+```
+
 
 Notes
 -----
@@ -240,7 +265,7 @@ Notes
 Interface
 =========
 
-EtherEx will provide an open source interface on the Ethereum platform both as a standalone web app that connects to your node and as a client-browser interface.
+The decentralized exchange will provide an open source interface on the Ethereum platform both as a standalone web app that connects to a node and as a client-browser interface.
 
 [ needs more details? ]
 
@@ -255,7 +280,7 @@ There will be no JSON or other type of trading API since the exchange is using E
 Conclusion
 ==========
 
-Using blockchain technology allows to solve many problems by having the users and the exchange access the same data as easily. New challenges are introduced at many levels, and allocation of resources have to be carefully managed to allow a good user experience and provide useful decentralized services.
+Using blockchain technology allows to solve many problems by having the users and the exchange access the same data as easily. New challenges are introduced at many levels, and allocation of resources have to be carefully managed to allow a good user experience and provide useful decentralized services. However, the possibilities combined with the inherent security of the network will allow for better, safer and simpler trading tools operating in total transparency.
 
 [ needs work... ]
 

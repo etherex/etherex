@@ -1,15 +1,33 @@
 #
 # Indexes
 #
+
 init:
     contract.storage[2] = msg.sender
+
 code:
+    # Basic gas check
+    if tx.gas < 1000:
+        return(0) // "Insufficient gas"
+
+    # Set our status
     status = contract.storage[1]
+
+    # Set reference to exchange
     exchange = contract.storage[2]
+
+    # Get our last recorded pointer
     last = contract.storage[10]
+
+    ret = 0
     if msg.value > 0: // "Refunding excess value: %s" % msg.value
-        ret = send(tx.gas / 2, msg.sender, msg.value)
-        return(ret)
+        ret = send(tx.gas / 2, tx.origin, msg.value)
+
+    # Logging
+    contract.storage[20] = msg.datasize
+    contract.storage[21] = tx.gas
+    contract.storage[22] = ret
+
     if status == 1:
         slots = 2
         if msg.datasize == 1: // "Getting indexes"
@@ -34,15 +52,14 @@ code:
                     while i < slots:
                         contract.storage[last + 100 + i] = msg.data[i + 1]
                         i = i + 1
-                    contract.storage[11] = last + slots
+                    contract.storage[10] = last + slots
                     return(last)
             if msg.data[0] == 2:
                 if msg.sender == exchange: // "Replacing index"
                     if msg.datasize < 4:
                         return(0)
                     contract.storage[msg.data[2] * slots + 100] = msg.data[1]
-                    contract.storage[12] = last + slots
-                    return(last)
+                    return(msg.data[2])
             elif msg.data[0] == 0:
                 if msg.sender == exchange: // "Removing index # %d" % msg.data[1]
                     contract.storage[msg.data[1] * slots + 100] = 0

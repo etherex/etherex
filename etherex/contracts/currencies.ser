@@ -1,63 +1,83 @@
 #
 # Currencies (Markets)
 #
+
 init:
     contract.storage[2] = msg.sender
+
 code:
+    # Basic gas check
+    if tx.gas < 1000:
+        return(0) // "Insufficient gas"
+
+    # Set our status
     status = contract.storage[1]
+
+    # Set reference to exchange
     exchange = contract.storage[2]
+
+    # Get our last recorded pointer
     last = contract.storage[10]
-    contract.storage[20] = msg.datasize
+
+    ret = 0
     if msg.value > 0: // "Refunding excess value: %s" % msg.value
-        ret = send(tx.gas / 2, msg.sender, msg.value)
-        return(ret)
+        ret = send(tx.gas / 2, tx.origin, msg.value)
+
+    # Logging
+    contract.storage[20] = msg.datasize
+    contract.storage[21] = tx.gas
+    contract.storage[22] = ret
+
     if status == 1:
         if msg.datasize == 2: // "Getting markets"
             i = 0
-            trades = array(msg.data[0] + 2)
-            trades[0] = 0
-            trades[1] = 0
+            markets = array(msg.data[0] + 2)
+            markets[0] = 0
+            markets[1] = 0
             while i < msg.data[0]:
-                trades[trades[0] * 5 + 2] = contract.storage[i * 5 + 100] // "Name"
-                trades[trades[0] * 5 + 3] = contract.storage[i * 5 + 101] // "Minimum amount"
-                trades[trades[0] * 5 + 4] = contract.storage[i * 5 + 102] // "Price"
-                trades[trades[0] * 5 + 5] = contract.storage[i * 5 + 103] // "Owner"
-                trades[trades[0] * 5 + 6] = contract.storage[i * 5 + 104] // "Market value"
-                trades[1] = trades[0] + 1
-                trades[0] = trades[0] + 1
+                markets[markets[0] * 5 + 2] = contract.storage[i * 5 + 100] // "Name"
+                markets[markets[0] * 5 + 3] = contract.storage[i * 5 + 101] // "Minimum amount"
+                markets[markets[0] * 5 + 4] = contract.storage[i * 5 + 102] // "Price"
+                markets[markets[0] * 5 + 5] = contract.storage[i * 5 + 103] // "Owner"
+                markets[markets[0] * 5 + 6] = contract.storage[i * 5 + 104] // "Market ID"
+                markets[1] = markets[0] + 1
+                markets[0] = markets[0] + 1
                 i = i + 1
-            return(trades, trades[0] * 5 + 2)
+            return(markets, markets[0] * 5 + 2)
         elif msg.datasize == 5:
             if msg.data[0] == 1:
                 if msg.sender == exchange: // "Adding market"
+                    contract.storage[8] = msg.data[0]
                     name = msg.data[1]
                     amount = msg.data[2]
                     price = msg.data[3]
                     owner = msg.data[4]
-                    market = msg.value
-                    if trade < 1 or trade > 1:
-                        return(0) // "Invalid market ID" # testnet on 1 market id
-                    if price < 1 or price > 2^255:
-                        return(0) // "Invalid price"
-                    if amount < 1 or amount > 2^255:
+                    market = (last / 5) + 2
+                    contract.storage[9] = market
+                    if amount < 1 or amount > 2^254:
                         return(0) // "Invalid minimum amount"
-                    if owner < 1 or owner > 2^255:
+                    if price < 1 or price > 2^254:
+                        return(0) // "Invalid price"
+                    if owner < 1 or owner > 2^254:
                         return(0) // "Invalid owner"
-                    if market < 1 or market > 2^255: // "TODO - Get and check market value"
-                        return(0) // "Invalid market value"
+                    if market < 1 or market > 2^254:
+                        return(0) // "Invalid market ID"
                     i = 0
                     while i < 5:
-                        contract.storage[last + 100 + i] = msg.data[i + 1]
+                        if i < 4:
+                            contract.storage[last + 100 + i] = msg.data[i + 1]
+                        else:
+                            contract.storage[last + 100 + i] = market
                         i = i + 1
                     last = last + 5
                     contract.storage[10] = last
-                    return(last - 5)
+                    return(market)
             elif msg.data[0] == 0: // "Removing market"
                 if msg.sender == exchange:
                     total = (last - 100) / 5
                     i = 0
-                    trades = array(1)
-                    trades[0] = 0
+                    markets = array(1)
+                    markets[0] = 0
                     ret = 0
                     while i < total:
                         owner = contract.storage[i * 5 + 103] // "Check by owner"
@@ -71,10 +91,11 @@ code:
                                 while c < 5:
                                     contract.storage[i * 5 + 100 + c] = 0
                                     c = c + 1
-                                trades[0] = trades[0] - 1
+                                markets[0] = markets[0] - 1
                                 ret = 1
                         i = i + 1
                     return(ret)
+                return(0)
         return(0)
     elif msg.sender == exchange:
         contract.storage[2] = msg.data[0] // #define msg.data[0]=EX

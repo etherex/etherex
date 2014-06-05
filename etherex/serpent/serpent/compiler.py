@@ -141,7 +141,7 @@ def deserialize(source):
             j = p - 95
         j -= 1
         i += 1
-    return map(utils.tokenify,o)
+    return map(utils.tokenify, o)
 
 
 def assemble(source):
@@ -150,6 +150,11 @@ def assemble(source):
 
 def compile(source):
     return assemble(compile_lll(compile_to_lll(parse(source))))
+
+
+def biject(source, byte):
+    c = dereference(compile_lll(compile_to_lll(parse(source))))
+    return c[int(byte)].metadata
 
 
 def encode_datalist(vals):
