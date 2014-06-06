@@ -5,6 +5,7 @@
   EtherEx.coinbase = "0x995db8d9f8f4dcc2b35da87a3768bd10eb8ee2da";
 
   EtherEx.addresses = {};
+  EtherEx.addresses.namereg = "0x2d0aceee7e5ab874e22ccf8d1a649f59106d74e8";
   EtherEx.addresses.trades = "0x6b385354b319a439b36bbeb74f8b8c0517b359ad";
   EtherEx.addresses.xeth = "0x5620133321fcac7f15a5c570016f6cb6dc263f9d";
   EtherEx.addresses.markets = "0x5620133321fcac7f15a5c570016f6cb6dc263f9d";
@@ -24,6 +25,14 @@
       }
     };
     // console.log(EtherEx.markets);
+  };
+
+  EtherEx.getAddress = function(_a) {
+    return eth.storageAt(EtherEx.addresses.namereg, _a).substr(2);
+  };
+
+  EtherEx.getName = function(_a) {
+    return eth.storageAt(EtherEx.addresses.namereg, "0x" + _a).bin().unpad();
   };
 
   EtherEx.sendXETH = function() {
@@ -122,21 +131,31 @@
   };
 
   EtherEx.updateBalances = function() {
-    document.getElementById("eth").innerHTML = Ethereum.BigInteger(eth.balanceAt(eth.coinbase).dec()).divide(Ethereum.BigInteger("10").pow(18));
+    var err = $('<a class="error" href="#"><i class="icon-cancel" title="Error - try reloading"></i></a>');
 
-    document.getElementById("xeth").innerHTML = eth.storageAt(EtherEx.addresses.xeth, eth.coinbase).dec();
-    document.getElementById("tot").innerHTML = eth.balanceAt(EtherEx.coinbase).dec();
+    try {
+      $(".error").remove();
 
-    $("#addressbook").html(eth.secretToAddress(eth.key));
+      document.getElementById("eth").innerHTML = Ethereum.BigInteger(eth.balanceAt(eth.coinbase).dec()).divide(Ethereum.BigInteger("10").pow(18));
 
-    EtherEx.loadMarkets();
-    EtherEx.getOrderbook();
+      document.getElementById("xeth").innerHTML = eth.storageAt(EtherEx.addresses.xeth, eth.coinbase).dec();
+      document.getElementById("tot").innerHTML = eth.balanceAt(EtherEx.coinbase).dec();
+
+      $("#addressbook").html(eth.secretToAddress(eth.key));
+
+      EtherEx.loadMarkets();
+      EtherEx.getOrderbook();
+    }
+    catch (e) {
+      err.on('click', function() {
+        location.reload(true);
+      })
+      $("#page h2").eq(0).append(err);
+    }
   };
 
   $(document).ready(function() {
-    $( "#tabs" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
-
-    EtherEx.updateBalances();
+    $("#tabs").tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
 
     $("#check").on('click', function() {
       EtherEx.check();
@@ -154,6 +173,20 @@
       }
     });
 
+    $("#to").on('keyup', function(e) {
+      this.addr = EtherEx.getAddress($(this).val());
+      if (this.addr.length == 40)
+        $(this).val(this.addr);
+    });
+
+    $("#addr").on('keyup', function(e) {
+      this.namereg = EtherEx.getName($(this).val());
+      if (this.namereg.length > 0)
+        $("#addrResult").html(this.namereg);
+      else
+        $("#addrResult").html("");
+    });
+
     $("#sendxeth").on('click', function() {
       if ($("#to").val() == "") {
         alert("Please provide a recipient address.");
@@ -169,6 +202,7 @@
       EtherEx.updateBalances();
     });
 
+    EtherEx.updateBalances();
     eth.watch(EtherEx.addresses.xeth, eth.coinbase, EtherEx.updateBalances);
   });
 

@@ -69,7 +69,7 @@ if (typeof(window.jQuery) === "undefined") {
 
         <div id="send">
           <ul>
-            <li><label for="To">To: </label><input id="to" type="text" value=""/></li>
+            <li><label for="to">To: </label><input id="to" type="text" value="" /></li>
             <li><label for="value">Value: </label><input id="value" type="number" value="100"/></li>
             <li><button id="sendxeth">Send XETH</button><button id="refresh">Refresh</button></li>
           </ul>
@@ -77,6 +77,11 @@ if (typeof(window.jQuery) === "undefined") {
 
         <div id="contacts">
           <div id="addressbook"></div>
+          <h3>Lookup</h3>
+          <ul>
+            <li><label for="addr">Address: </label><input id="addr" type="text" value="" /></li>
+          </ul>
+          <div>Result: <span id="addrResult"></span></div>
         </div>
 
         <div id="wallets">

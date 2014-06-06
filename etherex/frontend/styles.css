@@ -9,11 +9,14 @@ body {
   font-family: Futura, "Trebuchet MS", Arial, sans-serif;
   text-align: center;
 }
+h1 { 
+  font-size: 2em;
+}
 h1, h2 {
   font-family: Futura, "Trebuchet MS", Arial, sans-serif;
 }
-h1 { 
-  font-size: 2em;
+h3 {
+  text-decoration: underline;
 }
 ul {
   list-style-type: none;
@@ -35,24 +38,30 @@ pre {
 }
 label {
   display: inline-block;
+  font-size: 1.25em;
   float: left;
-  padding-top: .75em;
-  margin-right: 5%;
+  margin: 0 5% .5em 0;
+  padding: .333em 0 0 0;
   text-align: right;
   width: 20%;
 }
 input {
   border: 0;
+  border-radius: 5px;
+  font-size: 1.25em;
   float: left;
-  margin-right: 25%;
+  margin: 0 5% .5em 0;
   padding: .5em .5em .4em;
-  width: 50%;
+  width: 70%;
 }
 button {
-  background: #333;
+  background: rgba(0,0,0,.25);
   border: 0;
-  box-shadow: 1px 1px 5px #000;
+  border-radius: 5px;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
   color: #fff;
+  font-size: 1em;
+  margin: .5em .5em 0 0;
   padding: .5em 1em;
 }
 table {
@@ -88,20 +97,20 @@ a:visited {
   padding: 1em;
 }
 
-.book {
-  width: 50%;
-}
-
 #nav {
   float: left;
   font-size: 3em;
-  max-width: 3em;
-  /*width: 10%;*/
+  max-width: 15%;
 }
 
 #main {
   float: right;
+  max-width: 85%;
   width: 85%;
+}
+
+.book {
+  width: 50%;
 }
 
 footer {
@@ -121,7 +130,7 @@ a:focus, li:focus { outline: none; }
 .ui-tabs .ui-tabs-nav li.ui-tabs-selected { margin-bottom: 0; padding-bottom: 1px; }
 .ui-tabs .ui-tabs-nav li.ui-tabs-selected a, .ui-tabs .ui-tabs-nav li.ui-state-disabled a, .ui-tabs .ui-tabs-nav li.ui-state-processing a { cursor: text; }
 .ui-tabs .ui-tabs-nav li a, .ui-tabs.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-selected a { cursor: pointer; }
-.ui-tabs .ui-tabs-panel { display: block; border-width: 0; padding: 1em 1.4em; background: none; }
+.ui-tabs .ui-tabs-panel { display: block; border-width: 0; padding: 2em 0 0; background: none; }
 .ui-tabs .ui-tabs-hide { display: none !important; }
 
 /* Icons */
