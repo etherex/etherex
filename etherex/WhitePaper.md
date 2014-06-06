@@ -8,11 +8,39 @@ At the end of January 2014, an organisation called Ethereum announced their exis
 
 This document will go further into the details of this implementation of a decentralized exchange built on Ethereum, the concepts, requirements, potential problems and solutions, and innovations.
 
------
 
-[TOC]
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
 
------
+  - [Concept](#concept)
+    - [The decentralized, centralized order book](#the-decentralized-centralized-order-book)
+  - [Requirements](#requirements)
+  - [Problems and solutions](#problems-and-solutions)
+  - [Implementation of a decentralized exchange on Ethereum](#implementation-of-a-decentralized-exchange-on-ethereum)
+  - [A New Approach](#a-new-approach)
+  - [Data structure and API](#data-structure-and-api)
+    - [API](#api)
+    - [Trades (buy / sell)](#trades-buy--sell)
+    - [Deposits / Withdrawals](#deposits--withdrawals)
+    - [Cancellations](#cancellations)
+    - [Adding a market](#adding-a-market)
+    - [Operations](#operations)
+    - [Amounts](#amounts)
+    - [Prices](#prices)
+    - [Market IDs](#market-ids)
+    - [Currencies](#currencies)
+    - [Market names](#market-names)
+    - [Minimum trade amounts](#minimum-trade-amounts)
+    - [Examples](#examples)
+  - [Notes](#notes)
+- [Interface](#interface)
+    - [JSON API](#json-api)
+- [Conclusion](#conclusion)
+    - [References](#references)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 Concept
 -------
@@ -114,7 +142,7 @@ The `msg.data[0]` field is then checked to indicate a buy (passing 1 as first va
 
 This outlines how this example works only, and the real implementation will be much more complex and useful. Other contracts will be receiving transactions from the exchange only, acting as secure data feeds thus allowing to update balances inside the exchange's contracts in a secure fashion.
 
-!-[fig. 1. Deposit and trade](http://etherex.org/sites/etherex.org/files/emm.png)
+![fig. 1. Deposit and trade](http://etherex.org/sites/etherex.org/files/emm.png)
 fig. 1. Deposit and trade
 
 Deposit : User ---> Exchange multisig BTC wallet --> Exchange to Ethereum TX (deposit confirmed) --> Exchange updates from blockchain
@@ -169,7 +197,7 @@ A full description of the final contract storage data structure will be provided
 
 ### Adding a market
 ```
-<operation> <minimum trade> <minimum price> <owner[s]> <name>
+<operation> <minimum trade> <minimum price> <currency> <contract>
 ```
 
 
