@@ -4,11 +4,12 @@
 
   EtherEx.coinbase = "0x995db8d9f8f4dcc2b35da87a3768bd10eb8ee2da";
 
-  EtherEx.addresses = {};
-  EtherEx.addresses.namereg = "0x2d0aceee7e5ab874e22ccf8d1a649f59106d74e8";
-  EtherEx.addresses.trades = "0x6b385354b319a439b36bbeb74f8b8c0517b359ad";
-  EtherEx.addresses.xeth = "0x5620133321fcac7f15a5c570016f6cb6dc263f9d";
-  EtherEx.addresses.markets = "0x5620133321fcac7f15a5c570016f6cb6dc263f9d";
+  EtherEx.addresses = {
+    namereg: "0x2d0aceee7e5ab874e22ccf8d1a649f59106d74e8",
+    trades: "0x6b385354b319a439b36bbeb74f8b8c0517b359ad",
+    xeth: "0x5620133321fcac7f15a5c570016f6cb6dc263f9d",
+    markets: "0x5620133321fcac7f15a5c570016f6cb6dc263f9d"
+  };
 
   EtherEx.markets = {};
 
@@ -141,8 +142,14 @@
       document.getElementById("xeth").innerHTML = eth.storageAt(EtherEx.addresses.xeth, eth.coinbase).dec();
       document.getElementById("tot").innerHTML = eth.balanceAt(EtherEx.coinbase).dec();
 
-      $("#addressbook").html(eth.secretToAddress(eth.key));
+      var keys = eth.keys;
+      for (var i = keys.length - 1; i >= 0; i--) {
+        var key = eth.secretToAddress(keys[i]);
+        var bal = Ethereum.BigInteger(eth.balanceAt(key).dec()).divide(Ethereum.BigInteger("10").pow(18));
+        var entry = $("<tr><td><div>" + key.substr(2) + "</div></td><td>" + bal + " ETH</td></tr>");
 
+        $("#addressbook > table > tbody").append(entry);
+      };
       EtherEx.loadMarkets();
       EtherEx.getOrderbook();
     }

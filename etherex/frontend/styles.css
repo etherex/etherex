@@ -71,17 +71,21 @@ table {
   margin: 1em 5%;
   width: 90%;
 }
-tr:first-child {
+tr th,
+tr:nth-child(even) td {
+  background: rgba(0,0,0,0.25);
+  border-radius: 10px;
+}
+/*
+tr:first-child td {
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
 }
-tr:last-child {
+tr:last-child td {
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
 }
-tr:nth-child(odd) {
-  background: rgba(0,0,0,0.25);
-}
+*/
 td, th {
   padding: .5em 1em;
 }
@@ -107,6 +111,18 @@ a:visited {
   float: right;
   max-width: 85%;
   width: 85%;
+}
+
+#addressbook {
+  max-width: 100%;
+}
+
+#addressbook td > div {
+  height: 1.5em;
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .book {

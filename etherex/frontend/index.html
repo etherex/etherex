@@ -60,8 +60,8 @@ if (typeof(window.jQuery) === "undefined") {
       <section id="main">
         <div id="user">
           <ul>
-            <li><label for="amount">Amount: </label><input id="amount" type="number" value="10"/></li>
-            <li><label for="price">Price: </label><input id="price" type="number" value="1500"/></li>
+            <li><label for="amount">Amount: </label><input id="amount" type="number" value="10" min="1" /></li>
+            <li><label for="price">Price: </label><input id="price" type="number" value="1500" min="1" /></li>
             <li><button id="buy">Buy</button><button id="sell">Sell</button><button id="check">Check</button><button id="clear">Clear</button></li>
           </ul>
           <div id="book"></div>
@@ -69,17 +69,25 @@ if (typeof(window.jQuery) === "undefined") {
 
         <div id="send">
           <ul>
-            <li><label for="to">To: </label><input id="to" type="text" value="" /></li>
-            <li><label for="value">Value: </label><input id="value" type="number" value="100"/></li>
+            <li><label for="to">To: </label><input id="to" type="text" value="" placeholder="Address or name" /></li>
+            <li><label for="value">Value: </label><input id="value" type="number" value="100" min="1" /></li>
             <li><button id="sendxeth">Send XETH</button><button id="refresh">Refresh</button></li>
           </ul>
         </div>
 
         <div id="contacts">
-          <div id="addressbook"></div>
+          <div id="addressbook">
+            <table>
+              <thead>
+                <th>Address</th>
+                <th>Balance</th>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
           <h3>Lookup</h3>
           <ul>
-            <li><label for="addr">Address: </label><input id="addr" type="text" value="" /></li>
+            <li><label for="addr">Address: </label><input id="addr" type="text" value="" placeholder="Address" /></li>
           </ul>
           <div>Result: <span id="addrResult"></span></div>
         </div>
