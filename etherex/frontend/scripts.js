@@ -23,7 +23,7 @@
         'minprice': eth.storageAt(EtherEx.addresses.markets, String(i+2)).dec(),
       }
     };
-    console.log(EtherEx.markets);
+    // console.log(EtherEx.markets);
   };
 
   EtherEx.sendXETH = function() {
@@ -123,14 +123,18 @@
 
   EtherEx.updateBalances = function() {
     document.getElementById("eth").innerHTML = Ethereum.BigInteger(eth.balanceAt(eth.coinbase).dec()).divide(Ethereum.BigInteger("10").pow(18));
+
     document.getElementById("xeth").innerHTML = eth.storageAt(EtherEx.addresses.xeth, eth.coinbase).dec();
     document.getElementById("tot").innerHTML = eth.balanceAt(EtherEx.coinbase).dec();
+
+    $("#addressbook").html(eth.secretToAddress(eth.key));
 
     EtherEx.loadMarkets();
     EtherEx.getOrderbook();
   };
 
   $(document).ready(function() {
+    $( "#tabs" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
 
     EtherEx.updateBalances();
 
