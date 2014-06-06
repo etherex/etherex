@@ -94,7 +94,6 @@ print '==================='
 print 'EtherEx simulations'
 print '==================='
 subprocess.call(["cll-sim/run.py", "simulations/etherex.py"]) # , "contracts/etherex.cll"])
-subprocess.call(["py.test", "tests/etherex.py", "-v", "-x"]) # , "contracts/etherex.cll"])
 
 print '\n'
 print '==================='
@@ -163,6 +162,8 @@ compile(f)
 # print 'TMP'
 # f = 'contracts/tmp.ser'
 # compile(f)
+
+subprocess.call(["py.test", "tests/etherex.py", "-v", "-x"]) # , "contracts/etherex.cll"])
 
 print '==================='
 print 'WARNING: Experimental code, use at your own risks.'
