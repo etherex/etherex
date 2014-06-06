@@ -4,7 +4,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
 <script>
 if (typeof(window.eth) === "undefined")
-  document.write('<script src="eth.js"></scrip' + 't>');
+  document.write('<script src="eth.js"><\/script>');
 if (typeof(window.jQuery) === "undefined") {
   document.write('<script src="jquery.min.js"><\/script>');
 }
@@ -14,31 +14,39 @@ if (typeof(window.jQuery) === "undefined") {
 <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-</head>
-<body>
-<div id="page">
-<h1>EtherEx</h1>
-<h2><span id="eth">0 ETH</span></h2>
-<h4><span id="xeth">0</span> in XETH</h4>
-<h4><span id="gav">0</span> GAV</h4>
-<h4>Exchange total: <span id="tot">0</span></h4>
-<div>Price: <span id="lastprice">0</span></div>
-<div>Last check: <span id="check">0</span></div>
-<div id="book"></div>
-<ul>
-<li><label for="amount">Amount: </label><input id="amount" type="number" value=""/></li>
-<li><label for="price">Price: </label><input id="price" type="number" value=""/></li>
-<li><button onClick="buy()">Buy</button><button onClick="sell()">Sell</button><button onClick="check()">Check</button></li>
-</ul>
-<ul>
-<li><label for="To">To: </label><input id="to" type="text" value=""/></li>
-<li><label for="value">Value: </label><input id="value" type="number" value="1"/></li>
-<li><button onClick="sendGav()">Send GAV</button><button onClick="updateBalances()">Refresh</button></li>
-</ul>
-<div>
-  <div>Last ID count: <span id="last">0</span></div>
-  Log: <div id="log"></div>
-</div>
-</div>
+  <div id="page">
+    <h1>EtherEx</h1>
+
+    <h2><span id="eth">0</span> ETH</h2>
+
+    <h4><span id="xeth">0</span> XETH</h4>
+
+    <div>Price: <span id="lastprice">0</span></div>
+    <div>Check:
+      <pre id="checkval"></pre>
+    </div>
+
+    <h4>Market depth: <span id="tot">0</span></h4>
+
+    <div id="book"></div>
+
+    <ul>
+      <li><label for="amount">Amount: </label><input id="amount" type="number" value="10"/></li>
+      <li><label for="price">Price: </label><input id="price" type="number" value="1500"/></li>
+      <li><button id="buy">Buy</button><button id="sell">Sell</button><button id="check">Check</button></li>
+    </ul>
+
+    <ul>
+      <li><label for="To">To: </label><input id="to" type="text" value=""/></li>
+      <li><label for="value">Value: </label><input id="value" type="number" value="1"/></li>
+      <li><button id="sendxeth">Send XETH</button><button id="refresh">Refresh</button></li>
+    </ul>
+
+    <div>
+      <div>Last ID count: <span id="last">0</span></div>
+      Log:
+      <div id="log"></div>
+    </div>
+  </div>
 </body>
 </html>

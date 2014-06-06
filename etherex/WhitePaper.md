@@ -86,9 +86,9 @@ Centralized exchanges suffer from a serious trust problem. A decentralized excha
 
 Managing the integration of other cryptocurrencies is a challenging part of a decentralized exchange, and probably the main reason why none has emerged so far. Ethereum now provides a solution to the security and decentralization, but also brings the necessary building blocks for other cryptocurrencies to start interacting. A decentralized exchange will be the first application of this kind to take advantage of those possibilities.
 
-Outside of the Ethereum network, a decentralized exchange will need secure wallets and their related APIs to communicate information back into the trading engine. The first implementations for ETH/BTC might require a more centralized approach, but . Decisions will need to be taken regarding other trading pairs, and easier and more direct implementations into the Ethereum network will offer alternatives that will also have to be considered when they arise.
+Outside of the Ethereum network, a decentralized exchange will need secure wallets and their related APIs to communicate information back into the trading engine. The first implementations for ETH/BTC might require a more centralized approach depending on the tools available to secure off-chain coins. Decisions will need to be taken regarding other trading pairs, and easier and more direct implementations into the Ethereum network will offer alternatives that will also have to be considered when they arise.
 
-[blockchain.info thing is kind of obsolete... + elaborate]
+It has to be understood that the decentralized exchange itself will not be providing the off-chain services but act as a hub for other DAOs and DACs to provide such services. In the same way that Ethereum provides a feature-less platform, the exchange initially provides a blank slate for new markets. Many pairs of the same currency can also compete in security, features, speed, privacy and so on, across different levels of decentralization.
 
 
 
@@ -279,7 +279,7 @@ Cancel operation
 
 Add your subcurrency
 ```
-6 1000000000000000000000 100000000 "ETH/BOB"
+6 1000000000000000000000 100000000 "ETH/BOB" 0xe559de5527492bcb42ec68d07df0742a98ec3f1e
 ```
 
 

@@ -438,8 +438,10 @@ code:
                         count = booknonce
                     count = count + 1
                     countedall = countedall + 1
+
             elif msg.value > 0: // "Refunding"
                 ret = send(tx.gas / 2, msg.sender, msg.value)
+
         #
         # Deposit
         #
