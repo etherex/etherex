@@ -59,7 +59,7 @@
 
     eth.transact(
       eth.key,
-      0,
+      "0",
       EtherEx.coinbase,
       data,
       "100000",
@@ -73,7 +73,7 @@
 
     eth.transact(
       eth.key,
-      Ethereum.BigInteger(document.getElementById("amount").value).multiply(Ethereum.BigInteger("10").pow(18)),
+      String(Ethereum.BigInteger(document.getElementById("amount").value).multiply(Ethereum.BigInteger("10").pow(18))),
       EtherEx.coinbase,
       data,
       "100000",
@@ -122,7 +122,7 @@
   };
 
   EtherEx.updateBalances = function() {
-    document.getElementById("eth").innerHTML = eth.balanceAt(eth.coinbase).dec();
+    document.getElementById("eth").innerHTML = Ethereum.BigInteger(eth.balanceAt(eth.coinbase).dec()).divide(Ethereum.BigInteger("10").pow(18));
     document.getElementById("xeth").innerHTML = eth.storageAt(EtherEx.addresses.xeth, eth.coinbase).dec();
     document.getElementById("tot").innerHTML = eth.balanceAt(EtherEx.coinbase).dec();
 
@@ -134,19 +134,33 @@
 
     EtherEx.updateBalances();
 
-    $("#buy").on('click', function() {
-      EtherEx.buy();
-    });
-    $("#sell").on('click', function() {
-      EtherEx.sell();
-    });
     $("#check").on('click', function() {
       EtherEx.check();
     });
-    $("#sendxeth").on('click', function() {
-      EtherEx.sendXETH();
+
+    $("#buy").on('click', function() {
+      if (window.confirm("Buy " + $("#amount").val() + " ETH at " + $("#price").val() + " ETH/XETH ?")) {
+        EtherEx.buy();
+      }
     });
-    $("#refresh").on('click', function() {
+
+    $("#sell").on('click', function() {
+      if (window.confirm("Sell " + $("#amount").val() + " ETH at " + $("#price").val() + " ETH/XETH ?")) {
+        EtherEx.sell();
+      }
+    });
+
+    $("#sendxeth").on('click', function() {
+      if ($("#to").val() == "") {
+        alert("Please provide a recipient address.");
+        return;
+      }
+      if (window.confirm("Send " + $("#value").val() + " XETH to " + $("#to").val() + " ?")) {
+        EtherEx.sendXETH();
+      }
+    });
+
+    $("#refresh, #clear").on('click', function() {
       EtherEx.clear();
       EtherEx.updateBalances();
     });
