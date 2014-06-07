@@ -17,6 +17,9 @@ This document will go further into the details of this implementation of a decen
     - [The decentralized, centralized order book](#the-decentralized-centralized-order-book)
   - [Requirements](#requirements)
   - [Problems and solutions](#problems-and-solutions)
+    - [Blockchain bloat](#blockchain-bloat)
+    - [Off-chain coins and fiat integration](#off-chain-coins-and-fiat-integration)
+    - [Adoption and ecosystem](#adoption-and-ecosystem)
   - [Implementation of a decentralized exchange on Ethereum](#implementation-of-a-decentralized-exchange-on-ethereum)
   - [A New Approach](#a-new-approach)
   - [Data structure and API](#data-structure-and-api)
@@ -58,7 +61,7 @@ It is for those reasons and those mentioned in Vitalik's white paper that make E
 
 We will now have the platform to build something that was previously either impossible, very difficult to achieve and/or needed countless hacks in order to provide even the most basic functionality transparently, which is the safe transfer of funds.
 
-Having great cryptographic tools at our disposal is interesting, but it's never really that useful unless it allows us to connect more easily. Bitcoin has allowed that in incredible ways. And since it's just the first experiment, we know much more is still possible. I also like to compare Bitcoin to git. They're great decentralized tools, but we still need to gather somewhere and have some level of centralization; we now have GitHub. Maybe it could be decentralized too, distribute the load of hosting in the process and speed it up a notch. I'd like some GitHubCoins, I use it a lot. The point to this is probably the transparency, however funny jumping from a coin to that sounds at first.
+Having great cryptographic tools at our disposal is interesting, but it's never really that useful unless it allows us to connect more easily. Bitcoin has allowed that in incredible ways. And since it's just the first experiment, we know much more is still possible. I also like to compare Bitcoin to git. They're great decentralized tools, but we still need to gather somewhere and have some level of centralization; we now have GitHub. And it could be decentralized too, distribute the load of hosting in the process and increase its responsiveness. But the point to this is the transparency and the inherent security it provides. It is now possible to build decentralized, centralized tools.
 
 Ethereum now provides the perfect platform for transparency. We can now centralize the order book, the trading engine, and every rule we need to make an exchange work, only now **fully transparently, totally open-source and with the security of blockchain technology**.
 
@@ -79,17 +82,31 @@ Problems and solutions
 Centralized exchanges suffer from a serious trust problem. A decentralized exchange solves most of these problems, but also has challenges of its own. We'll take a look at those in this section.
 
 
-* Handling other cryptocurrencies (wallets, APIs, security)
 * Possible blockchain bloat
-* Fiat integration
+* Off-chain coins and fiat integration
+* Adoption and ecosystem
 
 
 Managing the integration of other cryptocurrencies is a challenging part of a decentralized exchange, and probably the main reason why none has emerged so far. Ethereum now provides a solution to the security and decentralization, but also brings the necessary building blocks for other cryptocurrencies to start interacting. A decentralized exchange will be the first application of this kind to take advantage of those possibilities.
 
 Outside of the Ethereum network, a decentralized exchange will need secure wallets and their related APIs to communicate information back into the trading engine. The first implementations for ETH/BTC might require a more centralized approach depending on the tools available to secure off-chain coins. Decisions will need to be taken regarding other trading pairs, and easier and more direct implementations into the Ethereum network will offer alternatives that will also have to be considered when they arise.
 
+
+### Blockchain bloat
+
+Trading data will need to be regularly optimized to maintain an acceptable footprint on the Ethereum network. More research and tests will be needed, but it is already clear that the operating costs will not be suited for HFT trading and for very small trades. It will be the project's responsibility to be properly optimized both in its execution and storage use. However, other scaling issues would have to be resolved with the Ethereum platform itself, to which the exchange would contribute with any development or direct code contribution.
+
+
+### Off-chain coins and fiat integration
+
 It has to be understood that the decentralized exchange itself will not be providing the off-chain services but act as a hub for other DAOs and DACs to provide such services. In the same way that Ethereum provides a feature-less platform, the exchange initially provides a blank slate for new markets. Many pairs of the same currency can also compete in security, features, speed, privacy and so on, across different levels of decentralization.
 
+[ more about markets and currency pairs ]
+
+
+### Adoption and ecosystem
+
+A decentralized exchange will require no sign-up of any kind from users to allow for its normal operations. However, users would be required to hold an initial balance of Ether to interact with the network in the first place. The exchange will hold an important role within the ecosystem as described as the DAOex in the (draft) paper [The DAOist protocol][2] by Vlad Zamfir, and some work has already been done in that paper to provide a solution to easier adoption. Other elements of that protocol will need to be implemented both in the exchange and DAOs and will be covered when a complete API is available. At the very least, a standard API for getting balances and transferring amounts for subcurrencies will need to be established.
 
 
 
@@ -142,13 +159,6 @@ The `msg.data[0]` field is then checked to indicate a buy (passing 1 as first va
 
 This outlines how this example works only, and the real implementation will be much more complex and useful. Other contracts will be receiving transactions from the exchange only, acting as secure data feeds thus allowing to update balances inside the exchange's contracts in a secure fashion.
 
-![fig. 1. Deposit and trade](http://etherex.org/sites/etherex.org/files/emm.png)
-fig. 1. Deposit and trade
-
-Deposit : User ---> Exchange multisig BTC wallet --> Exchange to Ethereum TX (deposit confirmed) --> Exchange updates from blockchain
-Trade : User to Ethereum TX (trade) --> Exchange & User update from blockchain
-
-[ replace this ugly fig... ]
 
 
 A New Approach
@@ -223,8 +233,8 @@ Allowed values:
 
 ### Prices
 
-* Price in ETH/BTC * 10 ^ 8, as long integer
 * Price in ETH/XETH * 10 ^ 8, as long integer
+* Price in ETH/BTC * 10 ^ 8, as long integer
 
 
 ### Market IDs
@@ -286,7 +296,6 @@ Add your subcurrency
 Notes
 -----
 * Your Ethereum address is used as your identity
-* You can only make trades for your address
 
 
 
@@ -310,9 +319,11 @@ Conclusion
 
 Using blockchain technology allows to solve many problems by having the users and the exchange access the same data as easily. New challenges are introduced at many levels, and allocation of resources have to be carefully managed to allow a good user experience and provide useful decentralized services. However, the possibilities combined with the inherent security of the network will allow for better, safer and simpler trading tools operating in total transparency.
 
-[ needs work... ]
 
 
 ### References
 [1]: https://github.com/ethereum/wiki/wiki/%5BEnglish%5D-White-Paper#scripting
 1: https://github.com/ethereum/wiki/wiki/%5BEnglish%5D-White-Paper#scripting
+
+[2]: https://docs.google.com/a/coinculture.info/document/d/1h9WY8XbT3cuIVN5mFmlkRJ8tHj5pJSnEpQ4__fslxXI/edit
+2: https://docs.google.com/a/coinculture.info/document/d/1h9WY8XbT3cuIVN5mFmlkRJ8tHj5pJSnEpQ4__fslxXI/edit

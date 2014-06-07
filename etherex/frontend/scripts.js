@@ -10,6 +10,25 @@
     markets: "0x5620133321fcac7f15a5c570016f6cb6dc263f9d"
   };
 
+  EtherEx.init = [
+    "0xac873234d24964d3ef3ded0aa77493b40e5e5cf5",
+    "0x1e2130bab79f92547f446969328a8c95721a2e2c",
+    "0x8b01a7e2317fbb6d8096bb667d0604ce898aeaf8",
+    "0xffabe02d3ef93ee947dd534e032812a41a109555"
+  ];
+
+  EtherEx.transact = function(to, gas, value, data) {
+    // console.log(data);
+    eth.transact(
+      eth.key,
+      String(value),
+      "0x" + to,
+      data,
+      "10000",
+      eth.gasPrice
+    );
+  };
+
   EtherEx.markets = [
     {},
     {
@@ -222,7 +241,7 @@
       }
     });
 
-    $("#to").on('keyup', function(e) {
+    $("#to,#tto").on('keyup', function(e) {
       this.addr = EtherEx.getAddress($(this).val());
       if (this.addr.length == 40)
         $(this).val(this.addr);
@@ -230,16 +249,16 @@
       this.namereg = EtherEx.getName($(this).val());
       if (this.namereg.length > 0) {
         $(this).css('color', 'rgba(0,0,0,.15)');
-        $("#toname").html(this.namereg);
+        $(this).next('span').html(this.namereg);
       }
       else {
         $(this).css('color', 'rgba(0,0,0)');
-        $("#toname").html("");
+        $(this).next('span').html("");
       }
     });
-    $("#to").on('focus', function() {
+    $("#to,#tto").on('focus', function() {
       $(this).css('color', 'rgba(0,0,0)');
-      $("#toname").html("");
+      $(this).next('span').html("");
     });
 
     $("#toname").on('click', function() {
@@ -282,6 +301,17 @@
       if (window.confirm("Create contract with " + $("#gas").val() + " gas?")) {
         EtherEx.create();
       }
+    });
+
+    $("#transact").on('click', function() {
+      EtherEx.transact(
+        $("#tto").val(),
+        $("#tgas").val(),
+        $('#tval').val(),
+        $('#data').val()
+        // EtherEx.coinbase.pad(32)
+        // EtherEx.init[0].pad(32) + EtherEx.init[1].pad(32) + EtherEx.init[2].pad(32) + EtherEx.init[3].pad(32)
+      );
     });
 
     $("#refresh, #clear").on('click', function() {
