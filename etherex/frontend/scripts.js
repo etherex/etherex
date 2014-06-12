@@ -17,18 +17,6 @@
     "0xffabe02d3ef93ee947dd534e032812a41a109555"
   ];
 
-  EtherEx.transact = function(to, gas, value, data) {
-    // console.log(data);
-    eth.transact(
-      eth.key,
-      String(value),
-      "0x" + to,
-      data,
-      "10000",
-      eth.gasPrice
-    );
-  };
-
   EtherEx.markets = [
     {},
     {
@@ -61,6 +49,36 @@
     return eth.storageAt(EtherEx.addresses.namereg, "0x" + _a).bin().unpad();
   };
 
+  EtherEx.create = function() {
+    eth.create(
+      eth.key,
+      $("#endowment").val(),
+      $("#code").val(),
+      $("#gas").val(),
+      eth.gasPrice
+    );
+  };
+
+  EtherEx.transact = function(to, gas, value, data) {
+    // console.log(data);
+    eth.transact(
+      eth.key,
+      String(value),
+      "0x" + to,
+      data,
+      String(gas),
+      eth.gasPrice
+    );
+  };
+
+  EtherEx.txdata = function() {
+    var data = String(1).pad(32);
+    data += String(Ethereum.BigInteger(document.getElementById("amount").value).multiply(Ethereum.BigInteger("10").pow(18))).pad(32);
+    data += String(Ethereum.BigInteger(document.getElementById("price").value).multiply(Ethereum.BigInteger("10").pow(8))).pad(32);
+    data += String(1).pad(32);
+    return data;
+  };
+
   EtherEx.sendETH = function() {
     eth.transact(
       eth.key,
@@ -81,24 +99,6 @@
       "1000",
       eth.gasPrice
     );
-  };
-
-  EtherEx.create = function() {
-    eth.create(
-      eth.key,
-      $("#endowment").val(),
-      $("#code").val(),
-      $("#gas").val(),
-      eth.gasPrice
-    );
-  };
-
-  EtherEx.txdata = function() {
-    var data = String(1).pad(32);
-    data += String(Ethereum.BigInteger(document.getElementById("amount").value).multiply(Ethereum.BigInteger("10").pow(18))).pad(32);
-    data += String(Ethereum.BigInteger(document.getElementById("price").value).multiply(Ethereum.BigInteger("10").pow(8))).pad(32);
-    data += String(1).pad(32);
-    return data;
   };
 
   EtherEx.check = function () {
@@ -156,7 +156,7 @@
       if (value) {
         var type = eth.storageAt(EtherEx.addresses.trades, String(i)).dec();
         var price = Ethereum.BigInteger(eth.storageAt(EtherEx.addresses.trades, String(i+1)).dec()) / Math.pow(10, 8);
-        var strprice = price + " ETH/BTC";
+        var strprice = price + " ETH/XETH";
         var amount = eth.storageAt(EtherEx.addresses.trades, String(i+2)).dec() / Math.pow(10, 18);
         var stramount = "<br />of " + eth.storageAt(EtherEx.addresses.trades, String(i+2)).dec();
         document.getElementById("lastprice").innerHTML = price;
@@ -204,7 +204,8 @@
         try {
           for (var m = EtherEx.markets.length - 1; m >= 1; m--) {
             var subbal = eth.storageAt(EtherEx.markets[m].address, key).dec();
-            var subentry = $('<tr><td class="sub">+ ' + EtherEx.markets[m].name + '</td><td>' + subbal + " </td></tr>");
+            var length = EtherEx.markets[m].name.length - 4;
+            var subentry = $('<tr><td class="sub">+ ' + '</td><td>' + subbal + " " + EtherEx.markets[m].name.substr(0, length) + " </td></tr>");
 
             $("#addressbook > table > tbody").append(subentry);
           };
