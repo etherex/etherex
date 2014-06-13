@@ -1,5 +1,11 @@
 #! /usr/bin/env python
-# import serpent
+# runtests.py -- EtherEx tests launcher
+#
+# Copyright (c) 2014 EtherEx
+#
+# This software may be modified and distributed under the terms
+# of the MIT license.  See the LICENSE file for details.
+
 import subprocess
 import os
 import sys
@@ -85,7 +91,7 @@ print '==================='
 print 'Compiler tests'
 print '==================='
 origwd = os.getcwd() # remember our original working directory
-os.chdir('serpent') # os.path.join(os.path.abspath(sys.path[0]), './serpent'))
+os.chdir('serpent')
 subprocess.call(["python", "runtests.py"])
 os.chdir(origwd)
 
@@ -93,7 +99,7 @@ print '\n'
 print '==================='
 print 'EtherEx simulations'
 print '==================='
-subprocess.call(["cll-sim/run.py", "simulations/etherex.py"]) # , "contracts/etherex.cll"])
+subprocess.call(["cll-sim/run.py", "simulations/etherex.py"])
 
 print '\n'
 print '==================='
@@ -103,11 +109,6 @@ print '==================='
 
 print 'Balances (XETH)'
 print '\n'
-# print 'init:'
-# f = 'contracts/balances_init.ser'
-# compile(f)
-# print '=' * 20
-# print 'code:'
 f = 'contracts/balances.ser'
 compile(f)
 print '=' * 20
@@ -115,11 +116,6 @@ print '\n'
 
 print 'Indexes'
 print '\n'
-# print 'init:'
-# f = 'contracts/indexes_init.ser'
-# compile(f)
-# print '=' * 20
-# print 'code'
 f = 'contracts/indexes.ser'
 compile(f)
 print '=' * 20
@@ -127,11 +123,6 @@ print '\n'
 
 print 'Trades'
 print '\n'
-# print 'init:'
-# f = 'contracts/trades_init.ser'
-# compile(f)
-# print '=' * 20
-# print 'code'
 f = 'contracts/trades.ser'
 compile(f)
 print '=' * 20
@@ -139,11 +130,6 @@ print '\n'
 
 print 'Currencies (Markets)'
 print '\n'
-# print 'init:'
-# f = 'contracts/currencies_init.ser'
-# compile(f)
-# print '=' * 20
-# print 'code:'
 f = 'contracts/currencies.ser'
 compile(f)
 print '=' * 20
@@ -151,19 +137,10 @@ print '\n'
 
 print 'EtherEx'
 print '\n'
-# print 'init:'
-# f = 'contracts/etherex_init.ser'
-# compile(f)
-# print '=' * 20
-# print 'code'
 f = 'contracts/etherex.ser'
 compile(f)
-# print '=' * 20
-# print 'TMP'
-# f = 'contracts/tmp.ser'
-# compile(f)
 
-subprocess.call(["py.test", "tests/etherex.py", "-v", "-x"]) # , "contracts/etherex.cll"])
+subprocess.call(["py.test", "tests/etherex.py", "-v", "-x"])
 
 print '==================='
 print 'WARNING: Experimental code, use at your own risks.'

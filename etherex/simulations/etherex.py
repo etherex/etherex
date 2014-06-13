@@ -1,3 +1,10 @@
+# etherex.py -- EtherEx simulations
+#
+# Copyright (c) 2014 EtherEx
+#
+# This software may be modified and distributed under the terms
+# of the MIT license.  See the LICENSE file for details.
+
 from sim import Block, Contract, Simulation, Tx
 # import time
 
