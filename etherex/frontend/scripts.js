@@ -1,3 +1,11 @@
+/* etherex.js -- EtherEx frontend
+ *
+ * Copyright (c) 2014 EtherEx
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
 (function($) {
 
   EtherEx = {};
@@ -108,6 +116,7 @@
 
   EtherEx.clear = function () {
     document.getElementById("checkval").innerHTML = "";
+    document.getElementById("log").innerHTML = "";
   };
 
   EtherEx.buy = function() {
@@ -177,8 +186,16 @@
     document.getElementById('book').innerHTML = table;
   };
 
-  EtherEx.updateBalances = function() {
+  EtherEx.showError = function(e) {
     var err = $('<a class="error" href="#"><i class="icon-cancel" title="Error - try reloading"></i></a>');
+    err.on('click', function() {
+      location.reload(true);
+    })
+    $("#page h2").eq(0).append(err);
+    $('#log').append(String(e) + "<br />");
+  };
+
+  EtherEx.updateBalances = function() {
 
     try {
       // Cleanup
@@ -210,16 +227,15 @@
             $("#addressbook > table > tbody").append(subentry);
           };
         }
-        catch (er) {}
+        catch (e) {
+          EtherEx.showError(e);
+        }
       };
 
       EtherEx.getOrderbook();
     }
     catch (e) {
-      err.on('click', function() {
-        location.reload(true);
-      })
-      $("#page h2").eq(0).append(err);
+      EtherEx.showError(e);
     }
   };
 

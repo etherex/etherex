@@ -1,3 +1,10 @@
+/* styles.css -- EtherEx frontend
+ *
+ * Copyright (c) 2014 EtherEx
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
 html, body {
   margin: 0;
   padding: 0;
@@ -49,6 +56,7 @@ input,
 textarea {
   border: 0;
   border-radius: 5px;
+  box-sizing: border-box;
   font-size: 1.25em;
   float: left;
   margin: 0 5% .5em 0;

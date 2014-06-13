@@ -1,3 +1,13 @@
+<!-- index.html - EtherEx frontend
+ *
+ * Copyright (c) 2014 EtherEx
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ *
+ * https://github.com/etherex-crypto/etherex
+-->
+<!DOCTYPE html>
 <html>
 <head>
 <title>EtherEx</title>
@@ -102,8 +112,8 @@ if (typeof(window.jQuery) === "undefined") {
         </div>
 
         <div id="settings">
+          <h3>Contract</h3>
           <p id="addcontract">
-            <h3>Contract</h3>
             <ul>
               <li><label for="endowment">End.: </label><input id="endowment" type="number" placeholder="Endowment" value="0" min="0" /></li>
               <li><label for="gas">Gas: </label><input id="gas" type="number" placeholder="Gas" value="10000" min="1000" /></li>
@@ -111,8 +121,8 @@ if (typeof(window.jQuery) === "undefined") {
               <li><button id="create">Send</button></li>
             </ul>
           </p>
+          <h3>Transact</h3>
           <p id="addtx">
-            <h3>Transact</h3>
             <ul>
               <li><label for="tto">To: </label><input id="tto" type="text" value="" placeholder="Address or name" /><span id="ttoname"></span></li>
               <li><label for="tval">Val.: </label><input id="tval" type="number" placeholder="Value" value="0" min="0" /></li>
@@ -127,8 +137,7 @@ if (typeof(window.jQuery) === "undefined") {
 
     <footer>
       <div>Last ID count: <span id="last">0</span></div>
-      Log:
-      <div id="log"></div>
+      Log: <span id="log"></span>
     </footer>
   </div>
 </body>

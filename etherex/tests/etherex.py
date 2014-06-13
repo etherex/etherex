@@ -73,7 +73,7 @@ class TestEtherEx(object):
 
         ans = self.sim.tx(self.BOB, self.bcontract, 0, [self.CHARLIE.address, 2000])
 
-        assert ans == [0]
+        assert ans == [4]
         assert self.sim.get_storage_data(self.bcontract, self.ALICE.address) == 10**18
         assert self.sim.get_storage_data(self.bcontract, self.BOB.address) == 0
         assert self.sim.get_storage_data(self.bcontract, self.CHARLIE.address) == 0

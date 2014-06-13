@@ -1,5 +1,12 @@
+# etherex.se -- Ethereum contract
 #
-# Etherex
+# Copyright (c) 2014 EtherEx
+#
+# This software may be modified and distributed under the terms
+# of the MIT license.  See the LICENSE file for details.
+
+#
+# EtherEx
 #
 
 init:
@@ -486,14 +493,17 @@ code:
                 if msg.value > 0: // "Refunding"
                     ret = send(tx.gas / 2, msg.sender, msg.value)
                 return(0) // "Insufficient deposit to add market"
-            markets = contract.storage[6] // "TODO - CurrenciesContract (Markets)"
-            newmarket = array(5) // "TODO - Check data..."
-            newmarket[0] = 1
-            newmarket[1] = msg.data[3]
-            newmarket[2] = amount
-            newmarket[3] = price
-            newmarket[4] = msg.data[4]
-            res = msg(tx.gas / 2, markets, 0, newmarket, 5) // "Updating CurrenciesContract"
+
+            markets = contract.storage[6]
+            market = array(5) // "TODO - Check data..."
+            market[0] = 1
+            market[1] = msg.data[3]
+            market[2] = amount
+            market[3] = price
+            market[4] = msg.data[4]
+            res = msg(tx.gas / 2, markets, 0, market, 5) // "Updating CurrenciesContract"
+
+            # Store last count
             contract.storage[7] = res
 
             # Issue XETH to market creator

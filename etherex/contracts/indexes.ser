@@ -1,3 +1,10 @@
+# indexes.se -- Ethereum contract
+#
+# Copyright (c) 2014 EtherEx
+#
+# This software may be modified and distributed under the terms
+# of the MIT license.  See the LICENSE file for details.
+
 #
 # Indexes
 #
@@ -65,8 +72,13 @@ code:
                     contract.storage[msg.data[1] * slots + 100] = 0
                     contract.storage[msg.data[1] * slots + 101] = 0
                     return(1)
+
     elif msg.sender == exchange:
-        contract.storage[10] = 10
+
+        # Set contract owner
         contract.storage[2] = msg.data[0] // #define msg.data[0]=EX
+
+        # Set contract as active
         contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.data[0]
+
         return(1)
