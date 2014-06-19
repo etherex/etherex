@@ -43,7 +43,7 @@ def write_owner(root_hash, filename):
         f.close()
 
 def init_system(genesis, key):
-    code = serpent.compile(open('contracts/etherex.ser').read())
+    code = serpent.compile(open('contracts/etherex.se').read())
     # print code.encode('hex')
     tx_make_root = transactions.contract(0,0,10**12, 100000, code).sign(key)
     root_contract = processblock.apply_transaction(genesis, tx_make_root)
@@ -51,15 +51,15 @@ def init_system(genesis, key):
     print "Contract address: " + root_contract[1]
 
     # f = lambda x: write_owner(root_hash, x)
-    # map(f, ['contracts/balances_init.ser', 'contracts/trades_init.ser', 'contracts/indexes_init.ser', 'contracts/xeth_init.ser'])
+    # map(f, ['contracts/balances_init.se', 'contracts/trades_init.se', 'contracts/indexes_init.se', 'contracts/xeth_init.se'])
 
-    code = serpent.compile(open('contracts/balances.ser').read())
+    code = serpent.compile(open('contracts/balances.se').read())
     tx_make_balances = transactions.contract(1,0,10**12, 10000, code).sign(key)
-    code = serpent.compile(open('contracts/indexes.ser').read())
+    code = serpent.compile(open('contracts/indexes.se').read())
     tx_make_indexes = transactions.contract(2,0,10**12, 10000, code).sign(key)
-    code = serpent.compile(open('contracts/trades.ser').read())
+    code = serpent.compile(open('contracts/trades.se').read())
     tx_make_trades = transactions.contract(3,0,10**12, 10000, code).sign(key)
-    code = serpent.compile(open('contracts/currencies.ser').read())
+    code = serpent.compile(open('contracts/currencies.se').read())
     tx_make_currency = transactions.contract(4,0,10**12, 10000, code).sign(key)
 
     balances_contract = processblock.apply_transaction(genesis, tx_make_balances)

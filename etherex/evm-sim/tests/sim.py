@@ -2,11 +2,13 @@ from collections import Counter
 
 from pyethereum import transactions, blocks, processblock, utils
 import serpent
+import subprocess
 
 # processblock.debug = 1
 
 
 def load_serpent(filename):
+    # return subprocess.call(["/Users/caktux/ethereum/serpent/serpent", "compile", open(filename).read()])
     return serpent.compile(open(filename).read())
 
 

@@ -10,21 +10,25 @@
 #
 
 init:
-    contract.storage[2] = msg.sender
+    # c3D definitions
+    contract.storage[10] = 0x88554646AB
+    contract.storage[15] = msg.sender
+    contract.storage[16] = msg.sender
+    contract.storage[17] = block.timestamp
 
 code:
     # Basic gas check
     if tx.gas < 1000:
         return(0) // "Insufficient gas"
 
-    # Set our status
+    # Get our status
     status = contract.storage[1]
 
-    # Set reference to exchange
-    exchange = contract.storage[2]
+    # Get reference to exchange
+    exchange = contract.storage[15]
 
     # Get our last recorded pointer
-    last = contract.storage[10]
+    last = contract.storage[18]
 
     ret = 0
     if msg.value > 0: // "Refunding excess value: %s" % msg.value
@@ -75,7 +79,7 @@ code:
                     while i < 5:
                         contract.storage[last + 100 + i] = msg.data[i + 1]
                         i = i + 1
-                    contract.storage[10] = last + 5
+                    contract.storage[18] = last + 5
                     return(last + 100)
             elif msg.data[0] == 0: // "Removing trade"
                 if msg.sender == exchange:
@@ -100,14 +104,18 @@ code:
                                 ret = 1
                         i = i + 1
                     return(ret)
-        return(0)
+        return(ret)
 
     elif msg.sender == exchange:
 
-        # Set contract owner
-        contract.storage[2] = msg.data[0] // #define msg.data[0]=EX
+        # NameReg
+        msg(tx.gas - 1000, msg.data[1], 0, ["EtherEx - Trades"], 1)
+
+        # Set contract parent and owner
+        contract.storage[14] = msg.data[0] # Set c3D parent
+        contract.storage[15] = msg.data[0] // #define msg.data[0]=EX
 
         # Set contract as active
-        contract.storage[1] = 1 // "Initializing storage for creator %s" % msg.data[0]
+        contract.storage[1] = 1 // "Initializing storage for sender %s" % msg.data[0]
 
         return(1)

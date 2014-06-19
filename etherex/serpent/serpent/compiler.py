@@ -92,6 +92,8 @@ def dereference(c):
     oq = []
     for m in mq:
         oqplus = []
+        if utils.is_numberlike(m.val):
+            m.val = utils.numberize(m.val)
         if utils.is_numeric(m.val):
             L = max(1, utils.log256(m.val))
             oqplus.append('PUSH' + str(L))

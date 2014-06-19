@@ -1,0 +1,622 @@
+# etherex.se -- Ethereum contract
+#
+# Copyright (c) 2014 EtherEx
+#
+# This software may be modified and distributed under the terms
+# of the MIT license.  See the LICENSE file for details.
+
+#
+# EtherEx
+#
+
+init:
+    # c3D definitions
+    contract.storage[10] = 0x88554646BB
+    contract.storage[15] = msg.sender
+    contract.storage[16] = msg.sender
+    contract.storage[17] = block.timestamp
+
+code:
+    # Basic gas check
+    if tx.gas < 1000:
+        return(0) // "Insufficient gas"
+
+    # Get our status
+    status = contract.storage[1]
+
+    # Get reference to owner / DOUG
+    owner = contract.storage[15]
+
+    # Get markets count
+    cmarket = contract.storage[7]
+
+    # Logging
+    contract.storage[20] = msg.datasize
+    contract.storage[21] = tx.gas
+
+    # Operate only if initialized
+    if status == 1:
+
+        #
+        # Basic checks
+        #
+        if msg.datasize < 1: // "No data to process"
+            if msg.value > 0: // "Refunding"
+                ret = send(tx.gas / 2, msg.sender, msg.value)
+            return(0)
+
+        if msg.data[0] < 1 or msg.data[0] > 9: // "Invalid operation"
+            if msg.value > 0: // "Refunding"
+                ret = send(tx.gas / 2, msg.sender, msg.value)
+            return(2)
+
+        # Add Buy / Sell trade checks
+        if msg.data[0] < 3: // "Missing amount"
+            if msg.datasize < 2:
+                if msg.value > 0: // "Refunding"
+                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                return(3)
+
+            elif msg.data[1] < 1: // "Invalid amount"
+                if msg.value > 0: // "Refunding"
+                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                return(4)
+
+            elif msg.datasize < 3: // "Missing price"
+                if msg.value > 0: // "Refunding"
+                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                return(5)
+
+            elif msg.data[2] < 1 * 10 ^ 8: // "Invalid price"
+                if msg.value > 0: // "Refunding"
+                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                return(6)
+
+            elif msg.datasize < 4: // "Missing market ID"
+                if msg.value > 0: // "Refunding"
+                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                return(7)
+
+            elif msg.data[3] > cmarket or msg.data[3] < 1: // "Invalid market ID"
+                if msg.value > 0: // "Refunding"
+                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                return(8)
+
+            if msg.datasize > 4: // "Too many arguments"
+                if msg.value > 0: // "Refunding"
+                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                return(9)
+
+        #
+        # Initialize markets
+        #
+        markets = contract.storage[6]
+
+        marketa = array(4)
+        marketa[0] = "ETH/XETH" // #define marketa[3]=XETH
+        marketa[1] = 1 * 10 ^ 19 // "Minimum XETH trade: %d" % (marketa[1] / (10 ** 18))
+        marketa[2] = 1 * 10 ^ 8 // "Initial price * 10 ^ 8"
+        marketa[3] = contract.storage[3]
+
+        # Get our request amount and price
+        amount = msg.data[1] // "Trade amount: %d" % amount
+        price = msg.data[2] // "Trade price: %d" % price
+
+        # Basic amount and price checks
+        if msg.data[0] < 3 and amount > 2^254: # or amount < 1:
+            if msg.value > 0: // "Refunding"
+                ret = send(tx.gas / 2, msg.sender, msg.value)
+            return(10) // "Amount out of range"
+
+        if msg.data[0] < 3 and price > 2^254: # or price < 1 * 10 ^ 8 + 1:
+            if msg.value > 0: // "Refunding"
+                ret = send(tx.gas / 2, msg.sender, msg.value)
+            return(11) // "Price out of range"
+
+        # Buy / Sell actions
+        if msg.data[0] < 3:
+            market = array(4)
+            marketid = msg.data[3]
+            # if marketid == 1: # Careful now...
+            # Get market
+            if marketid > 1:
+                marketb = array(4)
+                marketb[0] = msg(tx.gas / 2, markets, 0, [marketid], 1, 4)
+                marketb[1] = 10 ^ 19
+                marketb[1] = 10 ^ 8
+                marketb[2] = contract.storage[3] # TODO - bad...
+                market = marketb
+            else:
+                market = marketa
+
+            # Checking trade amounts and balances
+            if amount < market[1]: # Check Buy amount
+                if msg.value > 0: // "Refunding"
+                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                return(12) // "Minimum %s trade amount not met, minimum is %s, got %d" % (market[0], market[2], msg.value)
+
+            if msg.value < market[1] and msg.data[0] == 2: # Check Sell amount
+                if msg.value > 0: // "Refunding"
+                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                return(13) // "Minimum %s value not met, minimum is %s, got %d" % (market[0], market[2], msg.value)
+
+            # "Trade amounts OK for %s" % market[0]
+            pricekey = price
+            balances = marketa[3] // "TODO - Check %s balances" % market[0]
+            indexes = contract.storage[4]
+            trades = contract.storage[5]
+
+            # "Getting last orderbook count: %s" % bookcount
+            bookcount = contract.storage[pricekey]
+            if !bookcount:
+                bookcount = 0
+            data = array(2)
+            data[0] = bookcount
+            data[1] = price
+
+            # Set our book array
+            book = array(bookcount * 5 + 2)
+
+            # TODO - Get proper orderbook or not...
+            if bookcount > 0:
+                book = msg(tx.gas / 2, trades, 0, data, 2, bookcount * 5 + 2) // "Current price orderbook: %s" % book
+            if !book:
+                book = array(2)
+                book[0] = 1
+                book[1] = 0
+
+            # if bookcount > 1:
+            #     contract.storage[10] = book[5]
+            # s = 0
+            # abook = array(book[0] + 1)
+            # abook[0] = book[0] + 1
+            # abook[1] = book[1]
+            # abook[book[0]] = 0
+            # if bookcount > 0:
+            #     abook[2] = 0
+            # while s < book[1] * 5: # "Processing book... %d of %d: %s" % (s, book[1] * 5, abook)
+            #     if book[s + 2]: # "%s" % s
+            #         m = s % 5
+            #         if m == 0:
+            #             tbook = array(5)
+            #         tbook[m] = book[s + 2]
+            #         if m == 4:
+            #             abook[s / 5 + 2] = tbook # "%s" % tbook
+            #     else:
+            #         abook[s / 5 + 2] = 0
+            #     s = s + 1
+            # book = abook # "Processed orderbook: %s" % abook
+
+            # New book entry
+            bookadd = array(5)
+            bookadd[0] = msg.data[0]
+            bookadd[1] = price
+            bookadd[2] = amount
+            bookadd[3] = msg.sender
+            bookadd[4] = marketid
+
+            # ba = array(1)
+            # ba[0] = bookadd
+
+            if !book[0]:
+                book[0] = 1
+            if !book[1]:
+                book[1] = 0
+            booknonce = book[0]
+            booklength = book[1]
+
+            # if book[booknonce - 1] and book[booknonce - 1] == 0: # "Last trade filled, replacing empty data"
+            #     booknonce = booknonce - 1
+            #     book[0] = book[0] - 1
+            #     # b = 0
+            #     # while b < 5:
+            #     #     book[book[0] - 4 + b] = bookadd[b]
+            #     #     b = b + 1
+            #     book[booknonce] = bookadd
+            # else:
+            #     book[booknonce] = bookadd
+
+            crosskey = booknonce
+
+            sendbookadd = array(6)
+            sendbookadd[0] = 1
+            sendbookadd[1] = bookadd[0]
+            sendbookadd[2] = bookadd[1]
+            sendbookadd[3] = bookadd[2]
+            sendbookadd[4] = bookadd[3]
+            sendbookadd[5] = bookadd[4]
+            tradeid = msg(tx.gas / 2, trades, 0, sendbookadd, 6) // "Trade added, checking price indexes"
+            contract.storage[9] = tradeid # "Was contract.storage[pricekey] = book ..."
+            booklength = (tradeid - 100) / 5 + 1
+            contract.storage[pricekey] = booklength
+            contract.storage[10 + marketid] = booklength
+            # indexcount = contract.storage[10 + marketid]
+            # indexcount = booklength
+
+            # Debug from here
+            return(market[0])
+            # return(booklength + 1)
+
+            if indexcount > 0: // "Getting indexes with count %d" % indexcount
+                index = array(indexcount * 2 + 1)
+                index = msg(tx.gas / 2, indexes, 0, indexcount, 1, indexcount * 2 + 1)
+            else:
+                index = array(3)
+                index[0] = 1
+                index[1] = 0
+                index[2] = 0
+            indexcount = index[0] // "Index: %s" % index
+            s = 0
+            aindex = array(index[0] + 1)
+            aindex[0] = index[0]
+            if indexcount < 2:
+                aindex[1] = index[1]
+            while s < indexcount * 2: // "Processing indexes... %d of %d: %s" % (s, index[0] * 2, aindex)
+                if index[s + 1]: // "%s" % s
+                    m = s % 2
+                    if m == 0:
+                        tindex = array(2)
+                    tindex[m] = index[s + 1]
+                    if m == 1:
+                        aindex[s / 2 + 1] = tindex // "%s" % tindex
+                else:
+                    aindex[s / 2 + 1] = 0
+                s = s + 1
+            index = aindex // "Indexes: %s" % index
+            priceindexed = 0
+            replaceindex = 0
+            indexkey = 1
+            tradeat = array(2)
+            tradeat[0] = 1
+            thistrade = array(2)
+            thistrade[0] = index[0]
+            thistrade[1] = price
+            tradeat[1] = thistrade
+            bestprice = price
+            bestindex = 0
+            while indexcount > 0:
+                priceindex = index[indexcount] // "Checking index: %s" % priceindex
+                if priceindex == 0:
+                    indexcount = indexcount
+                    replaceindex = indexcount
+                else:
+                    indexedprices = priceindex[0]
+                    currentprice = priceindex[1]
+                    if currentprice == 0:
+                        indexcount = indexcount - 1
+                    elif currentprice == price: // "Price already indexed @ %d %s at index %d" % (currentprice / (1 * 10 ** 8), market[0], indexcount)
+                        priceindex[0] = indexedprices + 1
+                        index[indexcount] = priceindex // "TODO - SAVE INDEXES - indexes[marketid] = index, contract.storage[4] = indexes... Done?"
+                        sendindex = array(4)
+                        sendindex[0] = 2
+                        sendindex[1] = priceindex[0]
+                        sendindex[2] = priceindex[1]
+                        sendindex[3] = indexcount
+                        msg(tx.gas / 2, indexes, 0, sendindex, 4)
+                        contract.storage[10+marketid] = index[0]
+                        indexkey = indexcount
+                        priceindexed = 1
+                    if msg.data[0] == 1 and currentprice < price and currentprice > 0: // "Price index of %s below buy price, checking..." % priceindex[1]
+                        add = array(1)
+                        addindex = array(2)
+                        addindex[0] = indexcount
+                        addindex[1] = currentprice
+                        add[0] = addindex
+                        tradeat[0] = tradeat[0] + 1
+                        tradeat = tradeat + add
+                        if currentprice < bestprice:
+                            bestprice = currentprice
+                            bestindex = indexcount
+                    elif msg.data[0] == 2 and currentprice > price and currentprice > 0: // "Price index of %s above sell price, checking..." % priceindex[1]
+                        add = array(1)
+                        addindex = array(2)
+                        addindex[0] = indexcount
+                        addindex[1] = currentprice
+                        add[0] = addindex
+                        tradeat[0] = tradeat[0] + 1
+                        tradeat = tradeat + add
+                        if currentprice > bestprice:
+                            bestprice = currentprice
+                            bestindex = indexcount
+                indexcount = indexcount - 1
+            if priceindexed == 0: // "Indexing price"
+                newindex = array(2)
+                newindex[0] = 1
+                newindex[1] = price
+                if replaceindex > 0: // "Replacing price index %d from %s with %s" % (replaceindex, indexes, newindex)
+                    index[replaceindex] = newindex // "indexes[marketid] = index..."
+                    indexkey = replaceindex
+                    sendindex = array(4)
+                    sendindex[0] = 2
+                    sendindex[1] = newindex[0]
+                    sendindex[2] = newindex[1]
+                    sendindex[3] = replaceindex
+                    ret = msg(tx.gas / 2, indexes, 0, sendindex, 4)
+                else: // "Adding price index %s to %s" % (newindex, indexes)
+                    indexkey = index[0] + 1
+                    index[0] = indexkey
+                    newaindex = array(1)
+                    newaindex[0] = newindex
+                    index = index + newaindex // "TODO - SAVE INDEXES - indexes[marketid] = index, contract.storage[4] = indexes... Done?"
+                    sendindex = array(3)
+                    sendindex[0] = 1
+                    sendindex[1] = newindex[0]
+                    sendindex[2] = newindex[1]
+                    ret = msg(tx.gas / 2, indexes, 0, sendindex, 3)
+            counttradeat = 0
+            while tradeat[0] > 0 and amount > 0: // "Trading at price indexes: %s" % tradeat
+                tradekey = tradeat[0]
+                tradeindex = tradeat[tradekey]
+                currentkey = tradeindex[0]
+                currentprice = tradeindex[1] // "Trading at: %s" % currentprice
+                pricekey = currentprice
+                if pricekey > 0 and counttradeat > 0:
+                    book = contract.storage[pricekey]
+                if book > 0:
+                    booknonce = book[0]
+                    booklength = book[1]
+                count = 2
+                countedall = 0
+                while count <= booknonce:
+                    curbook = book[count] // "In book @ %s #%d: %s" % (pricekey, count, curbook)
+                    if curbook == 0:
+                        count = count + 1
+                        countedall = countedall + 1
+                    elif countedall > booklength:
+                        count = booknonce + 1
+                    else:
+                        if curbook[4] == marketid:
+                            boughtorsold = 0
+                            if msg.data[0] == 1 and curbook[0] == 2:
+                                if amount < curbook[2]: // "Buying %d from balance of %d from %s" % (amount, curbook[2], curbook[3])
+                                    curbook[2] = curbook[2] - amount
+                                    amount = 0
+                                elif amount >= curbook[2]: // "Buying balance of %d from %s" % (curbook[2], curbook[3])
+                                    amount = amount - curbook[2]
+                                    bookadd[2] = amount
+                                    book[count] = bookadd
+                                    book[1] = booklength - 1
+                                    curbook = 0
+                                boughtorsold = 1
+                            elif msg.data[0] == 2 and curbook[0] == 1:
+                                if amount > curbook[2]: // "Selling %d from balance of %d to %s" % (curbook[2], amount, curbook[3])
+                                    amount = amount - curbook[2]
+                                    bookadd[2] = amount
+                                    book[count] = bookadd
+                                    book[1] = booklength - 1
+                                    curbook = 0
+                                elif amount <= curbook[2]: // "Selling balance of %d to %s" % (amount, curbook[3])
+                                    curbook[2] = curbook[2] - amount
+                                    book[1] = booklength - 1
+                                    amount = 0
+                                    if curbook[2] == 0:
+                                        curbook = 0
+                                        book[1] = booklength - 1
+                                boughtorsold = 1
+                            if boughtorsold == 1:
+                                book[count] = curbook // "Amount left to process: %d in %s" % (amount, book)
+                                if amount == 0: // "Trade processed, executing... - TODO"
+                                    book[1] = book[1] - 1
+                                    book[booknonce] = 0
+                                    count = booknonce
+                                lowerindex = 1 // "Updating indexes %s and %s" % (currentkey, indexkey)
+                                if curbook == 0 and amount == 0 and price == currentprice:
+                                    lowerindex = 2
+                                if curbook == 0 or amount == 0:
+                                    priceindex = index[currentkey] // "Updating index %s from key %d by minus %d" % (priceindex, currentkey, lowerindex)
+                                    if priceindex == 0:
+                                        index[currentkey] = 0
+                                    else:
+                                        priceindex[0] = priceindex[0] - lowerindex
+                                        if priceindex[0] == 0:
+                                            index[currentkey] = 0
+                                        else:
+                                            index[currentkey] = priceindex // "TODO - SAVE INDEXES - indexes[marketid] = index, contract.storage[4] = indexes... Done?"
+                                if priceindex[0] == 0:
+                                    sendindex = array(2)
+                                    sendindex[0] = 0
+                                    sendindex[1] = currentkey
+                                    ret = msg(tx.gas / 2, indexes, 0, sendindex, 2)
+                                else:
+                                    sendindex[0] = 2
+                                    sendindex[1] = priceindex[0]
+                                    sendindex[2] = currentkey
+                                    ret = msg(tx.gas / 2, indexes, 0, sendindex, 3)
+                                # contract.storage[pricekey] = book # "TODO - SAVE BOOK!!!"
+                                if currentprice < price or currentprice > price: // "Updating cross index and book at index %d in %s" % (indexkey, index)
+                                    priceindex = index[indexkey]
+                                    if priceindex == 0:
+                                        index[indexkey] = 0
+                                        crosspricekey = currentprice
+                                    else:
+                                        priceindex[0] = priceindex[0] - 1
+                                        if priceindex[0] == 0:
+                                            index[indexkey] = 0
+                                        else:
+                                            index[indexkey] = priceindex
+                                        crosspricekey = priceindex[1]
+                                    crosstrades = contract.storage[crosspricekey] // "%s, %s" % (crosskey, crosstrades)
+                                    crossbook = crosstrades[crosskey]
+                                    if crossbook == 0: // "Balance of %s set to 0" % crossbook
+                                        crossbooklength = 0
+                                    else:
+                                        crossbooklength = crossbook[1] // "New balance of %d for %s" % (amount, crossbook[3])
+                                        if amount == 0:
+                                            crossbook = 0
+                                        book[1] = booklength - 1
+                                    crosstrades[crosskey] = crossbook
+                                    # contract.storage[crosspricekey] = crosstrades # TODO SAVE CROSSBOOK
+                                boughtorsold = 0
+                        count = count + 1
+                        countedall = countedall + 1
+                tradeat[0] = tradeat[0] - 1
+                counttradeat = counttradeat + 1
+
+            # Record optimizations - TODO - move to maintenance contract
+            count = 2
+            countedall = 0
+            while count <= booknonce:
+                curbook = book[count]
+                if curbook == 0:
+                    left = booknonce - count
+                    if left > 0:
+                        countshift = count + 1
+                        while left > 0 and book[countshift] == 0:
+                            left = left - 1
+                            countshift = countshift + 1
+                        totalshift = countshift - count + 1
+                        book[totalshift] = book[countshift] // "Shifting records of empty book index # %s with %d left to index # %d" % (countshift, booknonce - count, totalshift)
+                        book[countshift] = 0
+                        if countshift > totalshift + left:
+                            book[0] = book[0] - 1
+                        # contract.storage[pricekey] = book // "TODO - SAVE BOOK"
+                        count = count + totalshift - 1
+                    countedall = countedall + 1
+                if countedall > booklength:
+                    count = booknonce
+                count = count + 1
+                countedall = countedall + 1
+
+        #
+        # Deposit
+        #
+        elif msg.data[0] == 3: // "DEPOSIT"
+            data = array(2)
+            data[0] = msg.sender
+            data[1] = msg.value
+            ret = msg(tx.gas / 2, marketa[3], msg.value, data, 2) // "Updating BalancesContract (XETH)"
+            return(1)
+
+        #
+        # Withdrawal
+        #
+        elif msg.data[0] == 4: // "WITHDRAW"
+            coin = msg.data[2]
+            if coin == 1: // "ETH"
+                ret = 0
+                return(ret)
+            elif coin == 2: // "BTC"
+                return(0) // "Not implemented yet"
+            elif coin == 3: // "XETH"
+                data = array(3)
+                data[0] = msg.sender
+                data[1] = value
+                data[2] = 1
+                ret = msg(tx.gas / 2, marketa[3], value, data, 3)
+                return(ret)
+
+        #
+        # Cancelation
+        #
+        elif msg.data[0] == 5: // "CANCEL"
+            # owner = contract.storage[2]
+            # suicide(msg.sender)
+            return(0) // "Not implemented yet"
+
+        #
+        # Add market
+        #
+        elif msg.data[0] == 6: // "ADDMARKET"
+            if msg.value < 10 * 10 ^ 18:
+                if msg.value > 0: // "Refunding"
+                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                return(0) // "Insufficient deposit to add market"
+
+            markets = contract.storage[6]
+            market = array(5) // "TODO - Check data..."
+            market[0] = 1
+            market[1] = msg.data[3]
+            market[2] = amount
+            market[3] = price
+            market[4] = msg.data[4]
+            res = msg(tx.gas / 2, markets, 0, market, 5) // "Updating CurrenciesContract"
+
+            # Store last count
+            contract.storage[7] = res
+
+            # Issue XETH to market creator
+            data = array(2)
+            data[0] = msg.sender
+            data[1] = msg.value
+            ret = msg(tx.gas / 2, marketa[3], msg.value, data, 2)
+
+            if res:
+                return(42) // "Market added"
+            else:
+                return(41) // "Error adding market"
+
+        #
+        # Edit market
+        #
+        elif msg.data[0] == 7:
+            return(0) // "Not implemented yet"
+
+        #
+        # Change ownership
+        #
+        elif msg.data[0] == 8 and msg.sender == owner:
+            contract.storage[15] = msg.data[1] // "Set owner to %s" % msg.data[1]
+            return(msg.data[1])
+        #
+        # Change XETH ownership
+        #
+        elif msg.data[0] == 9 and msg.sender == owner:
+            contract.storage[3] = msg.data[1] // "Set Balances owner to %s" % msg.data[1]
+            return(msg.data[1])
+        elif msg.data[0] > 9: // "Input out of range"
+            if msg.value > 0: // "Refunding"
+                ret = send(tx.gas / 2, msg.sender, msg.value)
+            return(9) // "Protect the citizens"
+            # suicide(msg.sender) // "Protect the citizens"
+
+        #
+        # Uncaught operation
+        #
+        else:
+            if msg.value > 0: // "Refunding"
+                ret = send(tx.gas / 2, msg.sender, msg.value)
+            return(0) // "Protect the citizens"
+            # suicide(msg.sender)
+
+        #
+        # XETH issuance
+        #
+        if msg.value > 0:
+            reward = ((amount * price) / (1 * 10 ^ 21)) / 100 // "Sending reward of %s to %s" % (reward, msg.sender)
+            data = array(2)
+            data[0] = msg.sender
+            data[1] = reward
+            ret = msg(tx.gas / 2, marketa[3], reward, data, 2) // #define xethaddr=XETH
+            return(ret)
+
+        #
+        # Return
+        #
+        if amount == 0:
+            if msg.value > 0: // "Refunding"
+                ret = send(tx.gas / 2, msg.sender, msg.value)
+            return(20) // "Protect the citizens"
+            # suicide(owner)
+        else:
+            if !ret:
+                ret = 20
+            return(ret) // "Order placed"
+
+    #
+    # Post-creation init
+    #
+    elif msg.sender == owner:
+
+        contract.storage[3] = msg.data[0] // "BalancesContract (XETH)"
+        contract.storage[4] = msg.data[1] // "IndexesContract"
+        contract.storage[5] = msg.data[2] // "TradesContract"
+        contract.storage[6] = msg.data[3] // "CurrenciesContract (markets), storage # 7 for count"
+        contract.storage[7] = 1
+
+        # NameReg
+        msg(tx.gas - 1000, msg.data[4], 0, ["EtherEx"], 1)
+
+        # Set contract as active
+        contract.storage[1] = 1
+
+        return(1) // "EtherEx initialized"

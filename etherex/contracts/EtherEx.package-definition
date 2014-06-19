@@ -1,0 +1,70 @@
+# Package Name:       EtherEx
+# Package Author:     caktux
+# Package Email:      caktux@etherex.org
+# Package Repository: https://github.com/etherex-crypto/etherex
+
+# Precursor, set some variables.
+#set:
+#  {{swarum_blob_id}} => 0xb5e0478618d5e91682efc0e2a95b3d32cdae546c03f6014dc8df659c2f0f94c3
+
+# First We Deploy DOUG
+#modify-deploy:
+#  doug/doug-v7.lll => {{DOUG}}
+#  (def 'DOUGDATAMODEL 0x0) =>
+#  (def 'DOUGUIPOINTER 0x0) =>
+
+# Deploy contracts
+deploy:
+  namereg.se => {{NameReg}}
+deploy:
+  etherex.se => {{EtherEx}}
+deploy:
+  balances.se => {{Balances}}
+deploy:
+  indexes.se => {{Indexes}}
+deploy:
+  trades.se => {{Trades}}
+deploy:
+  currencies.se => {{Currencies}}
+
+# Register with DOUG
+#transact:
+#  {{DOUG}} => register etherex {{EtherEx}}
+#transact:
+#  {{DOUG}} => register balances {{Balances}}
+#transact:
+#  {{DOUG}} => register indexes {{Indexes}}
+#transact:
+#  {{DOUG}} => register trades {{Trades}}
+#transact:
+#  {{DOUG}} => register currencies {{Currencies}}
+
+# Initialize
+transact:
+  {{EtherEx}} => {{Balances}} {{Indexes}} {{Trades}} {{Currencies}} {{NameReg}}
+transact:
+  {{Balances}} => {{EtherEx}} {{NameReg}}
+transact:
+  {{Indexes}} => {{EtherEx}} {{NameReg}}
+transact:
+  {{Trades}} => {{EtherEx}} {{NameReg}}
+transact:
+  {{Currencies}} => {{EtherEx}} {{NameReg}}
+
+# Log those deploys.
+#log:
+#  Doug => {{DOUG}}
+log:
+  NameReg => {{NameReg}}
+log:
+  EtherEx => {{EtherEx}}
+log:
+  Balances => {{Balances}}
+log:
+  Indexes => {{Indexes}}
+log:
+  Trades => {{Trades}}
+log:
+  Currencies => {{Currencies}}
+log:
+  All => Done

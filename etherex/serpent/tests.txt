@@ -43,6 +43,12 @@ else:
     contract.storage[k] = a
     return(a,1)
 ================
+a = array(2)
+a[0] = msg.data[0]
+a[1] = msg.data[1]
+b = sha3(a, 2)
+return(b)
+================
 a = array(3)
 b = string(3)
 setch(a,2,"c")

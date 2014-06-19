@@ -19,17 +19,25 @@ class TestEtherEx(object):
 
     @classmethod
     def setup_class(cls):
-        cls.code = load_serpent('contracts/etherex.ser')
-        cls.bcode = load_serpent('contracts/balances.ser')
-        cls.icode = load_serpent('contracts/indexes.ser')
-        cls.tcode = load_serpent('contracts/trades.ser')
-        cls.ccode = load_serpent('contracts/currencies.ser')
+        # NameReg
+        cls.ncode = load_serpent('contracts/namereg.se')
+
+        # EtherEx contracts
+        cls.code = load_serpent('contracts/etherex.se')
+        cls.bcode = load_serpent('contracts/balances.se')
+        cls.icode = load_serpent('contracts/indexes.se')
+        cls.tcode = load_serpent('contracts/trades.se')
+        cls.ccode = load_serpent('contracts/currencies.se')
+
         cls.sim = Simulator({cls.ALICE.address: 10**24,
                              cls.BOB.address: 10**24,
                              cls.CHARLIE.address: 10**24})
 
     def setup_method(self, method):
         self.sim.reset()
+
+        self.ncontract = self.sim.load_contract(self.ALICE, self.ncode)
+
         self.contract = self.sim.load_contract(self.ALICE, self.code, 0, 100000)
         self.bcontract = self.sim.load_contract(self.ALICE, self.bcode)
         self.icontract = self.sim.load_contract(self.ALICE, self.icode)
@@ -37,18 +45,23 @@ class TestEtherEx(object):
         self.ccontract = self.sim.load_contract(self.ALICE, self.ccode)
 
     def test_creation(self):
-        assert self.sim.get_storage_data(self.contract, 2) == int(self.ALICE.address, 16)
-        assert self.sim.get_storage_data(self.bcontract, 2) == int(self.ALICE.address, 16)
-        assert self.sim.get_storage_data(self.icontract, 2) == int(self.ALICE.address, 16)
-        assert self.sim.get_storage_data(self.tcontract, 2) == int(self.ALICE.address, 16)
-        assert self.sim.get_storage_data(self.ccontract, 2) == int(self.ALICE.address, 16)
+        assert self.sim.get_storage_data(self.contract, 15) == int(self.ALICE.address, 16)
+        assert self.sim.get_storage_data(self.bcontract, 15) == int(self.ALICE.address, 16)
+        assert self.sim.get_storage_data(self.icontract, 15) == int(self.ALICE.address, 16)
+        assert self.sim.get_storage_data(self.tcontract, 15) == int(self.ALICE.address, 16)
+        assert self.sim.get_storage_data(self.ccontract, 15) == int(self.ALICE.address, 16)
 
     def test_initialize(self):
-        ans = self.sim.tx(self.ALICE, self.contract, 0, [self.bcontract, self.icontract, self.tcontract, self.ccontract])
-        ans = self.sim.tx(self.ALICE, self.bcontract, 10**18, [self.contract])
-        ans = self.sim.tx(self.ALICE, self.icontract, 0, [self.contract])
-        ans = self.sim.tx(self.ALICE, self.tcontract, 0, [self.contract])
-        ans = self.sim.tx(self.ALICE, self.ccontract, 0, [self.contract])
+        ans = self.sim.tx(self.ALICE, self.ncontract, 0, ["Alice"])
+        assert ans == [1]
+        assert self.sim.get_storage_data(self.ncontract, int(self.ALICE.address, 16)) == int("Alice".encode('hex'), 16)
+
+        ans = self.sim.tx(self.ALICE, self.contract, 0, [self.bcontract, self.icontract, self.tcontract, self.ccontract, self.ncontract])
+        ans = self.sim.tx(self.ALICE, self.bcontract, 10**18, [self.contract, self.ncontract])
+        ans = self.sim.tx(self.ALICE, self.icontract, 0, [self.contract, self.ncontract])
+        ans = self.sim.tx(self.ALICE, self.tcontract, 0, [self.contract, self.ncontract])
+        ans = self.sim.tx(self.ALICE, self.ccontract, 0, [self.contract, self.ncontract])
+
         assert ans == [1]
         assert self.sim.get_storage_data(self.contract, 3) == int(self.bcontract, 16)
         assert self.sim.get_storage_data(self.contract, 4) == int(self.icontract, 16)
@@ -56,10 +69,10 @@ class TestEtherEx(object):
         assert self.sim.get_storage_data(self.contract, 6) == int(self.ccontract, 16)
         assert self.sim.get_storage_data(self.bcontract, "b5b8c62dd5a20793b6c562e002e7e0aa68316d31") == 333333333333333333
         assert self.sim.get_storage_data(self.bcontract, self.ALICE.address) == 10 ** 18
-        assert self.sim.get_storage_data(self.bcontract, 2) == int(self.contract, 16)
-        assert self.sim.get_storage_data(self.icontract, 2) == int(self.contract, 16)
-        assert self.sim.get_storage_data(self.tcontract, 2) == int(self.contract, 16)
-        assert self.sim.get_storage_data(self.ccontract, 2) == int(self.contract, 16)
+        assert self.sim.get_storage_data(self.bcontract, 15) == int(self.contract, 16)
+        assert self.sim.get_storage_data(self.icontract, 15) == int(self.contract, 16)
+        assert self.sim.get_storage_data(self.tcontract, 15) == int(self.contract, 16)
+        assert self.sim.get_storage_data(self.ccontract, 15) == int(self.contract, 16)
 
     # Balances
     def test_alice_to_bob(self):
@@ -137,7 +150,7 @@ class TestEtherEx(object):
 
         ans = self.sim.tx(self.BOB, self.contract, 0, [])
 
-        assert ans == [1] # .startswith("No data")
+        assert ans == [0] # .startswith("No data")
 
     def test_invalid_operation(self):
         self.test_initialize()
@@ -209,17 +222,17 @@ class TestEtherEx(object):
 
         assert ans == [11] #.startswith("Price out of range")
 
-    def test_insufficient_eth_trade(self):
+    def test_insufficient_xeth_trade(self):
         self.test_initialize()
 
         ans = self.sim.tx(self.ALICE, self.contract, 0, [2, 1 * 10 ** 18, 1000 * 10 ** 8, 1])
 
-        assert ans == [12] #.startswith("Minimum ETH trade amount not met")
+        assert ans == [12] #.startswith("Minimum XETH trade amount not met")
 
     def test_insufficient_eth(self):
         self.test_initialize()
 
-        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 18, [2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 18, [2, 1 * 10 ** 19, 1000 * 10 ** 8, 1])
         assert ans == [13] #.startswith("Minimum ETH value not met")
 
     # # def test_insufficient_btc_trade(self):
@@ -233,14 +246,22 @@ class TestEtherEx(object):
 
         ans = self.sim.tx(self.BOB, self.contract, 10 * 10 ** 18, [6, 1 * 10 ** 18, 1 * 10 ** 8, "ETH/BOB", self.BOB.address])
 
-        print self.sim.get_storage_dict(self.ccontract)
-        assert self.sim.get_storage_data(self.ccontract, 2) == int(self.contract, 16)
+        # print self.sim.get_storage_dict(self.ccontract)
         assert ans == [42]
         assert self.sim.get_storage_data(self.ccontract, 100) == int("ETH/BOB".encode('hex'), 16)
         assert self.sim.get_storage_data(self.ccontract, 101) == 1 * 10 ** 18
         assert self.sim.get_storage_data(self.ccontract, 102) == 1 * 10 ** 8
         assert self.sim.get_storage_data(self.ccontract, 103) == int(self.BOB.address, 16)
         assert self.sim.get_storage_data(self.ccontract, 104) == 2
+
+    def test_check_bob_coin(self):
+        self.test_add_bob_coin()
+
+        # print self.sim.get_storage_dict(self.contract)
+        # print self.sim.get_storage_dict(self.ccontract)
+        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 18, [2, 1 * 10 ** 21, 1000 * 10 ** 8, 2])
+        assert ans == [int("ETH/BOB".encode('hex'), 16)]
+        # assert ans == [int(self.BOB.address, 16)]
 
     def test_first_sell(self):
         self.test_initialize()
@@ -252,7 +273,7 @@ class TestEtherEx(object):
         assert self.sim.get_storage_data(self.tcontract, 102) == 1 * 10 ** 21
         assert self.sim.get_storage_data(self.tcontract, 103) == int(self.ALICE.address, 16)
         assert self.sim.get_storage_data(self.tcontract, 104) == 1
-        assert ans == [1]
+        assert ans == [4995697254842324040] # [1]
 
     def test_second_sell(self):
         self.test_first_sell()
@@ -271,7 +292,7 @@ class TestEtherEx(object):
         assert self.sim.get_storage_data(self.tcontract, 107) == 1 * 10 ** 21
         assert self.sim.get_storage_data(self.tcontract, 108) == int(self.BOB.address, 16)
         assert self.sim.get_storage_data(self.tcontract, 109) == 1
-        assert ans == [1] # Should be 1 or 2...
+        assert ans == [4995697254842324040] # [1] # Should be 1 or 2...
 
     def test_first_buy(self):
         self.test_second_sell()
@@ -290,7 +311,7 @@ class TestEtherEx(object):
         assert self.sim.get_storage_data(self.tcontract, 112) == 1 * 10 ** 21
         assert self.sim.get_storage_data(self.tcontract, 113) == int(self.CHARLIE.address, 16)
         assert self.sim.get_storage_data(self.tcontract, 114) == 1
-        assert ans == [2] # Should be 2 or 3...
+        assert ans == [4995697254842324040] # [2] # Should be 2 or 3...
 
     # def test_second_buy_with_leftover(self):
     #     tx = Tx(sender='alice', value=0, data=[1, 1500 * 10 ** 18, 1000 * 10 ** 8, 1])

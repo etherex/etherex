@@ -1,0 +1,15 @@
+# namereg.se -- Ethereum contract
+#
+# Copyright (c) 2014 EtherEx
+#
+# This software may be modified and distributed under the terms
+# of the MIT license.  See the LICENSE file for details.
+
+# NameReg
+
+if !contract.storage[msg.data[0]] or contract.storage[msg.data[0]] == msg.sender:
+    contract.storage[msg.sender] = msg.data[0]
+    contract.storage[msg.data[0]] = msg.sender
+    return(1)
+else:
+    return(0)

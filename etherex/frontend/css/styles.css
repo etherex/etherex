@@ -152,6 +152,40 @@ a:visited {
   width: 70%;
 }
 
+#chart {
+  display: inline-block;
+  margin: 3em 5% 1em;
+  height: 300px;
+  width: 90%;
+}
+
+#legend {
+  background: rgba(255,255,255,0.25);
+  display: inline-block;
+  position: absolute;
+  right: 0;
+  top: 5em;
+}
+
+#chart svg {
+  margin: 0 auto;
+}
+
+#slider {
+  margin: 0 auto 3em;
+  width: 90%;
+}
+
+#slider svg {
+  left: 0;
+}
+
+.column { display: inline-block }
+#legend .line { color: #333 }
+.rickshaw_graph .detail .x_label {
+  color: #333;
+}
+
 .book {
   width: 50%;
 }

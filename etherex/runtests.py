@@ -105,39 +105,39 @@ print '\n'
 print '==================='
 print 'EtherEx LVM'
 print '==================='
-# subprocess.call(["serpent", "compile", "contracts/etherex.ser"])
+# subprocess.call(["serpent", "compile", "contracts/etherex.se"])
 
 print 'Balances (XETH)'
 print '\n'
-f = 'contracts/balances.ser'
+f = 'contracts/balances.se'
 compile(f)
 print '=' * 20
 print '\n'
 
 print 'Indexes'
 print '\n'
-f = 'contracts/indexes.ser'
+f = 'contracts/indexes.se'
 compile(f)
 print '=' * 20
 print '\n'
 
 print 'Trades'
 print '\n'
-f = 'contracts/trades.ser'
+f = 'contracts/trades.se'
 compile(f)
 print '=' * 20
 print '\n'
 
 print 'Currencies (Markets)'
 print '\n'
-f = 'contracts/currencies.ser'
+f = 'contracts/currencies.se'
 compile(f)
 print '=' * 20
 print '\n'
 
 print 'EtherEx'
 print '\n'
-f = 'contracts/etherex.ser'
+f = 'contracts/etherex.se'
 compile(f)
 
 subprocess.call(["py.test", "tests/etherex.py", "-v", "-x"])

@@ -12,35 +12,42 @@ class EtherEx(Contract):
     """EtherEx contract"""
 
     def run(self, tx, contract, block):
-        hll = "contracts/etherex.ser"
+        hll = "contracts/etherex.se"
         Contract.load(self, hll, tx, contract, block)
 
 class Balances(Contract):
     """Balances contract (XETH)"""
 
     def run(self, tx, contract, block):
-        hll = "contracts/balances.ser"
+        hll = "contracts/balances.se"
         Contract.load(self, hll, tx, contract, block)
 
 class Indexes(Contract):
     """Indexes contract"""
 
     def run(self, tx, contract, block):
-        hll = "contracts/indexes.ser"
+        hll = "contracts/indexes.se"
         Contract.load(self, hll, tx, contract, block)
 
 class Trades(Contract):
     """Trades contract"""
 
     def run(self, tx, contract, block):
-        hll = "contracts/trades.ser"
+        hll = "contracts/trades.se"
         Contract.load(self, hll, tx, contract, block)
 
 class Currencies(Contract):
     """Currencies contract (markets)"""
 
     def run(self, tx, contract, block):
-        hll = "contracts/currencies.ser"
+        hll = "contracts/currencies.se"
+        Contract.load(self, hll, tx, contract, block)
+
+class NameReg(Contract):
+    """NameReg contract"""
+
+    def run(self, tx, contract, block):
+        hll = "contracts/namereg.se"
         Contract.load(self, hll, tx, contract, block)
 
 class EtherExRun(Simulation):
@@ -50,6 +57,7 @@ class EtherExRun(Simulation):
     indexes = Indexes(EX=contract.address)
     trades = Trades(EX=contract.address)
     currencies = Currencies(EX=contract.address)
+    namereg = NameReg()
     etherex = int(contract.address, 16)
 
     # ts = time.time()
@@ -64,7 +72,7 @@ class EtherExRun(Simulation):
         assert self.contract.storage[1] == 0
 
     def test_creation(self):
-        tx = Tx(sender='alice', value=3000 * 10 ** 21, gas=100000, data=[int(self.balances.address, 16), int(self.indexes.address, 16), int(self.trades.address, 16), int(self.currencies.address, 16)])
+        tx = Tx(sender='alice', value=3000 * 10 ** 21, gas=100000, data=[int(self.balances.address, 16), int(self.indexes.address, 16), int(self.trades.address, 16), int(self.currencies.address, 16), int(self.namereg.address, 16)])
         self.run(tx, self.contract)
         self.contract.ret = [3,1,2,150000000000,10000000000000000000,'alice',1]
         # print self.contract.txs
@@ -80,19 +88,19 @@ class EtherExRun(Simulation):
 
     # - Balances
     def test_balances_creation(self):
-        tx = Tx(sender=self.etherex, value=1 * 10 ** 18, data=[self.etherex])
+        tx = Tx(sender=self.etherex, value=1 * 10 ** 18, data=[self.etherex, int(self.namereg.address, 16)])
         self.run(tx, self.balances)
         print 20 * "="
 
     # - Indexes
     def test_indexes_creation(self):
-        tx = Tx(sender=self.etherex, value=0, data=[self.etherex])
+        tx = Tx(sender=self.etherex, value=0, data=[self.etherex, int(self.namereg.address, 16)])
         self.run(tx, self.indexes)
         print 20 * "="
 
     # - Trades
     def test_trades_creation(self):
-        tx = Tx(sender=self.etherex, value=0, data=[self.etherex])
+        tx = Tx(sender=self.etherex, value=0, data=[self.etherex, int(self.namereg.address, 16)])
         self.run(tx, self.trades)
         print 20 * "="
 

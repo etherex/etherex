@@ -11,18 +11,22 @@
 <html>
 <head>
 <title>EtherEx</title>
+<link rel="stylesheet" type="text/css" href="css/styles.css">
+<link rel="stylesheet" type="text/css" href="css/rickshaw.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 <script>
 if (typeof(window.eth) === "undefined")
-  document.write('<script src="eth.js"><\/script>');
+  document.write('<script src="js/eth.js"><\/script>');
 if (typeof(window.jQuery) === "undefined") {
-  document.write('<script src="jquery.min.js"><\/script>');
+  document.write('<script src="js/jquery.min.js"><\/script>');
 }
 </script>
-<script type="text/javascript" src="ethereum-min.js"></script>
-<script type="text/javascript" src="scripts.js"></script>
-<link rel="stylesheet" type="text/css" href="styles.css">
+<script type="text/javascript" src="js/ethereum-min.js"></script>
+<script type="text/javascript" src="js/scripts.js"></script>
+<script type="text/javascript" src="js/d3.min.js"></script>
+<script type="text/javascript" src="js/scripts.js"></script>
+<script type="text/javascript" src="js/rickshaw.min.js"></script>
 </head>
 <body>
   <div id="page">
@@ -109,6 +113,11 @@ if (typeof(window.jQuery) === "undefined") {
         <div id="trades">
           <h2>Price: <span id="lastprice">0</span></h2>
           <div>Market depth: <span id="tot">0</span></div>
+          <div class="column">
+            <div id="chart"></div>
+            <div id="legend"></div>
+            <div id="slider"></div>
+          </div>
         </div>
 
         <div id="settings">
@@ -140,5 +149,6 @@ if (typeof(window.jQuery) === "undefined") {
       Log: <span id="log"></span>
     </footer>
   </div>
+  <script type="text/javascript" src="js/charts.js"></script>
 </body>
 </html>

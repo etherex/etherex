@@ -13,8 +13,8 @@
   EtherEx.coinbase = "0x995db8d9f8f4dcc2b35da87a3768bd10eb8ee2da";
 
   EtherEx.addresses = {
-    namereg: "0x2d0aceee7e5ab874e22ccf8d1a649f59106d74e8", // "8b01a7e2317fbb6d8096bb667d0604ce898aeaf8"
-    trades: "0x6b385354b319a439b36bbeb74f8b8c0517b359ad",
+    namereg: "0x9bdb1a48ecfea81a2a752c05870d38f6e59c90ad", // "8b01a7e2317fbb6d8096bb667d0604ce898aeaf8"
+    trades: "0xffabe02d3ef93ee947dd534e032812a41a109555",
     markets: "0x5620133321fcac7f15a5c570016f6cb6dc263f9d"
   };
 
@@ -69,11 +69,15 @@
 
   EtherEx.transact = function(to, gas, value, data) {
     // console.log(data);
+    var adata = data.split(" ");
+    var pdata = "";
+    for (var i in adata)
+      pdata += String(adata[i]).pad(32)
     eth.transact(
       eth.key,
       String(value),
       "0x" + to,
-      data,
+      pdata,
       String(gas),
       eth.gasPrice
     );
@@ -111,7 +115,13 @@
 
   EtherEx.check = function () {
     var data = EtherEx.txdata();
-    document.getElementById("checkval").innerHTML = data.unbin().substr(2);
+    document.getElementById("checkval").innerHTML = "<p>" + data.unbin().substr(2) + "</p>";
+
+    var pdata = "";
+    var adata = $("#data").val().split(" ");
+    for (var d in adata)
+      pdata += String(adata[d]).pad(32)
+    document.getElementById("checkval").innerHTML += "<p>" + pdata.unbin().substr(2) + "</p>";
   };
 
   EtherEx.clear = function () {
@@ -240,6 +250,25 @@
   };
 
   $(document).ready(function() {
+    // var graph = new Rickshaw.Graph( {
+    //   element: document.querySelector("#chart"),
+    //   series: [{
+    //     color: 'lightblue',
+    //     data: [
+    //       { x: 0, y: 40 },
+    //       { x: 1, y: 49 },
+    //       { x: 2, y: 38 },
+    //       { x: 3, y: 30 },
+    //       { x: 4, y: 32 } ]
+    //   }]
+    // });
+    
+    // graph.setRenderer('line');
+
+    // var axes = new Rickshaw.Graph.Axis.Time( { graph: graph } );
+
+    // graph.render();
+
     $("#tabs").tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
 
     $("#check").on('click', function() {

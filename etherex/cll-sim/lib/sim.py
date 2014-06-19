@@ -1,7 +1,8 @@
 from collections import defaultdict
-import os, sys, imp, binascii
+import imp, binascii
 import inspect
 import logging
+import serpent
 from operator import itemgetter
 MINGASPRICE = 10000000000000
 
@@ -59,6 +60,11 @@ def stopret(value, index=None):
         raise Stop(value[index])
     else:
         raise Stop(value)
+
+def inset(filename):
+    if filename[0] == '"':
+        filename = filename[1:-1]
+    return serpent.parse(open(filename).read(), filename)
 
 def array(n):
     return [None] * n
@@ -140,7 +146,7 @@ class Contract(object):
             log("Loading %s" % script)
 
             closure = """
-from sim import Block, Contract, Simulation, Tx, Msg, log, stop, suicide, array, stopret, mkmsg, send, create
+from sim import Block, Contract, Simulation, Tx, Msg, log, stop, suicide, array, stopret, mkmsg, send, create, inset
 class HLL(Contract):
     def run(self, tx, msg, contract, block):
 """
@@ -161,7 +167,7 @@ class HLL(Contract):
                         gotinit = True
                         line = ""
                     elif codeline > 0 and not gotinit:
-                        initcode += baseindent + l
+                        initcode += baseindent + l + "\n"
                         codeline = i
                         line = ""
                     # Use comments for stop and log messages
