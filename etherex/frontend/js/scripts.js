@@ -35,6 +35,39 @@
     }
   ];
 
+  EtherEx.units = {
+    "Uether": Ethereum.BigInteger("1000000000000000000000000000000000000000000000000000000"),
+    "Vether": Ethereum.BigInteger("1000000000000000000000000000000000000000000000000000"),
+    "Dether": Ethereum.BigInteger("1000000000000000000000000000000000000000000000000"),
+    "Nether": Ethereum.BigInteger("1000000000000000000000000000000000000000000000"),
+    "Yether": Ethereum.BigInteger("1000000000000000000000000000000000000000000"),
+    "Zether": Ethereum.BigInteger("1000000000000000000000000000000000000000"),
+    "Eether": Ethereum.BigInteger("1000000000000000000000000000000000000"),
+    "Pether": Ethereum.BigInteger("1000000000000000000000000000000000"),
+    "Tether": Ethereum.BigInteger("1000000000000000000000000000000"),
+    "Gether": Ethereum.BigInteger("1000000000000000000000000000"),
+    "Mether": Ethereum.BigInteger("1000000000000000000000000"),
+    "Kether": Ethereum.BigInteger("1000000000000000000000"),
+    "ether" : Ethereum.BigInteger("1000000000000000000"),
+    "finney": Ethereum.BigInteger("1000000000000000"),
+    "szabo" : Ethereum.BigInteger("1000000000000"),
+    "Gwei"  : Ethereum.BigInteger("1000000000"),
+    "Mwei"  : Ethereum.BigInteger("1000000"),
+    "Kwei"  : Ethereum.BigInteger("1000"),
+    "wei"   : Ethereum.BigInteger("1")
+  };
+
+  EtherEx.formatBalance = function(_b) {
+    if (_b > EtherEx.units[0] * 10000)
+      return (_b / EtherEx.units[0]).toFixed(5) + " " + Object.keys(EtherEx.units)[0];
+    for (i in EtherEx.units) {
+      if (EtherEx.units[i] != 1 && _b >= EtherEx.units[i] * 100) {
+        return ((_b / (EtherEx.units[i] / 1000)) / 1000).toFixed(5) + " " + i
+      }
+    }
+    return _b.toFixed(5) + " wei";
+  };
+
   EtherEx.loadMarkets = function() {
     var last = eth.storageAt(EtherEx.addresses.markets, String(2));
     for (var i = 100; i < 100 + parseInt(last) / 10000000; i = i + 5) {
@@ -214,7 +247,7 @@
 
       EtherEx.loadMarkets();
 
-      document.getElementById("eth").innerHTML = Ethereum.BigInteger(eth.balanceAt(eth.coinbase).dec()).divide(Ethereum.BigInteger("10").pow(18));
+      document.getElementById("eth").innerHTML = EtherEx.formatBalance(eth.balanceAt(eth.coinbase).dec()); // Ethereum.BigInteger(eth.balanceAt(eth.coinbase).dec()).divide(Ethereum.BigInteger("10").pow(18));
 
       document.getElementById("xeth").innerHTML = eth.storageAt(EtherEx.markets[1].address, eth.coinbase).dec();
       document.getElementById("tot").innerHTML = eth.balanceAt(EtherEx.coinbase).dec();
