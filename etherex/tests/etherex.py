@@ -133,7 +133,7 @@ class TestEtherEx(object):
     def test_transfer_eth_to_xeth(self):
         self.test_initialize()
 
-        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 17, [3, 1 * 10 ** 17, 0])
+        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 17, [4, 1 * 10 ** 17, 0])
         assert ans == [1]
         assert self.sim.get_storage_data(self.bcontract, self.ALICE.address) == 10**18 + 10 ** 17
 
@@ -244,7 +244,7 @@ class TestEtherEx(object):
     def test_add_bob_coin(self):
         self.test_initialize()
 
-        ans = self.sim.tx(self.BOB, self.contract, 10 * 10 ** 18, [6, 1 * 10 ** 18, 1 * 10 ** 8, "ETH/BOB", self.BOB.address])
+        ans = self.sim.tx(self.BOB, self.contract, 10 * 10 ** 18, [7, 1 * 10 ** 18, 1 * 10 ** 8, "ETH/BOB", self.BOB.address])
 
         # print self.sim.get_storage_dict(self.ccontract)
         assert ans == [42]

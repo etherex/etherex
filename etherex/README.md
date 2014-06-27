@@ -16,9 +16,38 @@ Components
 * contracts: Serpent contracts
 * simulations: Python simulations (deprecated soon)
 * serpent: Serpent compiler by Vitalik Buterin [repo](https://github.com/ethereum/serpent)
+* pyethereum: Python Ethereum client [repo](https://github.com/ethereum/pyethereum)
 * evm-sim: EVM simulator by Joris Bontje [repo](https://github.com/EtherCasts/evm-sim)
-* cll-sim: HLL simulator by Joris Bontje [repo](https://github.com/jorisbontje/cll-sim)
-* tests: evm-sim tests
+* ~~cll-sim: CLL simulator by Joris Bontje [repo](https://github.com/jorisbontje/cll-sim)~~
+* tests: EtherEx evm-sim tests
+
+
+Requirements
+------------
+* Python
+* [EPM](https://github.com/project-douglas/epm) for deployment
+
+
+Installation
+------------
+```
+git clone https://github.com/etherex-crypto/etherex.git
+cd etherex && pip install --upgrade -r requirements.txt
+```
+
+Then follow your platform specific instructions.
+
+### Linux
+```
+cd serpent && make
+sudo make install
+```
+
+### OS X
+```
+brew tap caktux/ethereum
+brew install serpent
+```
 
 
 Running tests
@@ -37,21 +66,19 @@ Local Blockchain tests
 ```
 
 
-Requirements
-------------
-```
-pip install -r requirements.txt
-```
-
-
 API
 ---
 * The API is the format of the data field for the Ethereum transactions.
 * You only need an Ethereum client to use the API.
 
-### Trades (buy / sell)
+### Add buy / sell trade
 ```
 <operation> <amount> <price> <marketid>
+```
+
+### Trade
+```
+<operation> <tradeid[s]>
 ```
 
 ### Deposits / Withdrawals
@@ -74,10 +101,11 @@ Allowed values:
 ```
 1 = Buy
 2 = Sell
-3 = Deposit
-4 = Withdraw
-5 = Cancel
-6 = Add market (subcurrency)
+3 = Trade
+4 = Deposit
+5 = Withdraw
+6 = Cancel
+7 = Add market
 ```
 
 ### Amounts
@@ -122,24 +150,29 @@ Sell 1000 ETH at 1200 ETH/BTC (for 1.2 BTC)
 2 1000000000000000000000 120000000000 1
 ```
 
+Fulfill trade
+```
+3 0x3039
+```
+
 Deposit 1 BTC
 ```
-3 100000000 2
+4 100000000 2
 ```
 
 Withdraw 1 ETH
 ```
-4 1000000000000000000 1
+5 1000000000000000000 1
 ```
 
 Cancel operation
 ```
-5 12345678901234567890
+6 0x3039
 ```
 
 Add your subcurrency
 ```
-6 "ETH/BOB" 100000000
+7 1000000000000000000000 100000000 "ETH/BOB" 0xe559de5527492bcb42ec68d07df0742a98ec3f1e
 ```
 
 

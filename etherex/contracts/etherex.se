@@ -228,8 +228,18 @@ code:
             # contract.storage[pricekey] = booklength
             contract.storage[100 + marketid] = booklength
 
-            # Debug from here
             return(tradeid)
+
+        #
+        # Trade
+        #
+        elif msg.data[0] == 3: // "TRADE"
+            t = 0
+            tc = msg.datasize - 1
+            while t < tc:
+                t = t + 1
+                trades[t] = msg.data[t]
+            return(1)
 
             # if indexcount > 0: // "Getting indexes with count %d" % indexcount
             #     index = array(indexcount * 2 + 1)
@@ -472,20 +482,11 @@ code:
             #     countedall = countedall + 1
 
 
-        #
-        # Trade
-        #
-        elif msg.data[0] == 10: // "TRADE"
-            t = 0
-            trades = array(msg.datasize - 1)
-            while t < msg.datasize - 1:
-                t = t + 1
-                trades[t] = msg.data[t]
 
         #
         # Deposit
         #
-        elif msg.data[0] == 3: // "DEPOSIT"
+        elif msg.data[0] == 4: // "DEPOSIT"
             data = array(2)
             data[0] = msg.sender
             data[1] = msg.value
@@ -495,7 +496,7 @@ code:
         #
         # Withdrawal
         #
-        elif msg.data[0] == 4: // "WITHDRAW"
+        elif msg.data[0] == 5: // "WITHDRAW"
             coin = msg.data[2]
             if coin == 1: // "ETH"
                 ret = 0
@@ -513,7 +514,7 @@ code:
         #
         # Cancelation
         #
-        elif msg.data[0] == 5: // "CANCEL"
+        elif msg.data[0] == 6: // "CANCEL"
             # owner = contract.storage[2]
             # suicide(msg.sender)
             return(0) // "Not implemented yet"
@@ -521,7 +522,7 @@ code:
         #
         # Add market
         #
-        elif msg.data[0] == 6: // "ADDMARKET"
+        elif msg.data[0] == 7: // "ADDMARKET"
             if msg.value < 10 * 10 ^ 18:
                 if msg.value > 0: // "Refunding"
                     ret = send(tx.gas / 2, msg.sender, msg.value)
@@ -551,12 +552,6 @@ code:
                 return(41) // "Error adding market"
 
         #
-        # Edit market
-        #
-        elif msg.data[0] == 7:
-            return(0) // "Not implemented yet"
-
-        #
         # Change ownership
         #
         elif msg.data[0] == 8 and msg.sender == owner:
@@ -568,7 +563,17 @@ code:
         elif msg.data[0] == 9 and msg.sender == owner:
             contract.storage[3] = msg.data[1] // "Set Balances owner to %s" % msg.data[1]
             return(msg.data[1])
-        elif msg.data[0] > 10: // "Input out of range"
+
+        #
+        # Edit market
+        #
+        elif msg.data[0] == 10:
+            return(0) // "Not implemented yet"
+
+        #
+        # "Input out of range"
+        #
+        elif msg.data[0] > 10:
             if msg.value > 0: // "Refunding"
                 ret = send(tx.gas / 2, msg.sender, msg.value)
             return(9) // "Protect the citizens"
