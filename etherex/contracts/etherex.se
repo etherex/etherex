@@ -45,7 +45,7 @@ code:
                 ret = send(tx.gas / 2, msg.sender, msg.value)
             return(0)
 
-        if msg.data[0] < 1 or msg.data[0] > 9: // "Invalid operation"
+        if msg.data[0] < 1 or msg.data[0] > 10: // "Invalid operation"
             if msg.value > 0: // "Refunding"
                 ret = send(tx.gas / 2, msg.sender, msg.value)
             return(2)
@@ -121,10 +121,7 @@ code:
             # Get market
             if marketid > 1:
                 marketb = array(4)
-                marketb[0] = msg(tx.gas / 2, markets, 0, [marketid], 1, 4)
-                marketb[1] = 10 ^ 19
-                marketb[1] = 10 ^ 8
-                marketb[2] = contract.storage[3] # TODO - bad...
+                marketb = msg(tx.gas / 2, markets, 0, [marketid], 1, 4)
                 market = marketb
             else:
                 market = marketa
@@ -146,48 +143,48 @@ code:
             indexes = contract.storage[4]
             trades = contract.storage[5]
 
-            # "Getting last orderbook count: %s" % bookcount
-            bookcount = contract.storage[pricekey]
-            if !bookcount:
-                bookcount = 0
-            data = array(2)
-            data[0] = bookcount
-            data[1] = price
+            # # "Getting last orderbook count: %s" % bookcount
+            # bookcount = contract.storage[pricekey]
+            # if !bookcount:
+            #     bookcount = 0
+            # data = array(2)
+            # data[0] = bookcount
+            # data[1] = price
 
-            # Set our book array
-            book = array(bookcount * 5 + 2)
+            # # Set our book array
+            # book = array(bookcount * 5 + 2)
 
-            # TODO - Get proper orderbook or not...
-            if bookcount > 0:
-                book = msg(tx.gas / 2, trades, 0, data, 2, bookcount * 5 + 2) // "Current price orderbook: %s" % book
-            if !book:
-                book = array(2)
-                book[0] = 1
-                book[1] = 0
-
-            # if bookcount > 1:
-            #     contract.storage[10] = book[5]
-            # s = 0
-            # abook = array(book[0] + 1)
-            # abook[0] = book[0] + 1
-            # abook[1] = book[1]
-            # abook[book[0]] = 0
+            # # TODO - Get proper orderbook or not...
             # if bookcount > 0:
-            #     abook[2] = 0
-            # while s < book[1] * 5: # "Processing book... %d of %d: %s" % (s, book[1] * 5, abook)
-            #     if book[s + 2]: # "%s" % s
-            #         m = s % 5
-            #         if m == 0:
-            #             tbook = array(5)
-            #         tbook[m] = book[s + 2]
-            #         if m == 4:
-            #             abook[s / 5 + 2] = tbook # "%s" % tbook
-            #     else:
-            #         abook[s / 5 + 2] = 0
-            #     s = s + 1
-            # book = abook # "Processed orderbook: %s" % abook
+            #     book = msg(tx.gas / 2, trades, 0, data, 2, bookcount * 5 + 2) // "Current price orderbook: %s" % book
+            # if !book:
+            #     book = array(2)
+            #     book[0] = 1
+            #     book[1] = 0
 
-            # New book entry
+            # # if bookcount > 1:
+            # #     contract.storage[10] = book[5]
+            # # s = 0
+            # # abook = array(book[0] + 1)
+            # # abook[0] = book[0] + 1
+            # # abook[1] = book[1]
+            # # abook[book[0]] = 0
+            # # if bookcount > 0:
+            # #     abook[2] = 0
+            # # while s < book[1] * 5: # "Processing book... %d of %d: %s" % (s, book[1] * 5, abook)
+            # #     if book[s + 2]: # "%s" % s
+            # #         m = s % 5
+            # #         if m == 0:
+            # #             tbook = array(5)
+            # #         tbook[m] = book[s + 2]
+            # #         if m == 4:
+            # #             abook[s / 5 + 2] = tbook # "%s" % tbook
+            # #     else:
+            # #         abook[s / 5 + 2] = 0
+            # #     s = s + 1
+            # # book = abook # "Processed orderbook: %s" % abook
+
+            # # New book entry
             bookadd = array(5)
             bookadd[0] = msg.data[0]
             bookadd[1] = price
@@ -195,26 +192,26 @@ code:
             bookadd[3] = msg.sender
             bookadd[4] = marketid
 
-            # ba = array(1)
-            # ba[0] = bookadd
+            # # ba = array(1)
+            # # ba[0] = bookadd
 
-            if !book[0]:
-                book[0] = 1
-            if !book[1]:
-                book[1] = 0
-            booknonce = book[0]
-            booklength = book[1]
+            # if !book[0]:
+            #     book[0] = 1
+            # if !book[1]:
+            #     book[1] = 0
+            # booknonce = book[0]
+            # booklength = book[1]
 
-            # if book[booknonce - 1] and book[booknonce - 1] == 0: # "Last trade filled, replacing empty data"
-            #     booknonce = booknonce - 1
-            #     book[0] = book[0] - 1
-            #     # b = 0
-            #     # while b < 5:
-            #     #     book[book[0] - 4 + b] = bookadd[b]
-            #     #     b = b + 1
-            #     book[booknonce] = bookadd
-            # else:
-            #     book[booknonce] = bookadd
+            # # if book[booknonce - 1] and book[booknonce - 1] == 0: # "Last trade filled, replacing empty data"
+            # #     booknonce = booknonce - 1
+            # #     book[0] = book[0] - 1
+            # #     # b = 0
+            # #     # while b < 5:
+            # #     #     book[book[0] - 4 + b] = bookadd[b]
+            # #     #     b = b + 1
+            # #     book[booknonce] = bookadd
+            # # else:
+            # #     book[booknonce] = bookadd
 
             crosskey = booknonce
 
@@ -225,257 +222,265 @@ code:
             sendbookadd[3] = bookadd[2]
             sendbookadd[4] = bookadd[3]
             sendbookadd[5] = bookadd[4]
-            tradeid = msg(tx.gas / 2, trades, 0, sendbookadd, 6) // "Trade added, checking price indexes"
-            contract.storage[9] = tradeid # "Was contract.storage[pricekey] = book ..."
+            tradeid = msg(tx.gas / 2, trades, 0, sendbookadd, 6) # Trade added
+            contract.storage[9] = tradeid
             booklength = (tradeid - 100) / 5 + 1
-            contract.storage[pricekey] = booklength
-            contract.storage[10 + marketid] = booklength
-            # indexcount = contract.storage[10 + marketid]
-            # indexcount = booklength
+            # contract.storage[pricekey] = booklength
+            contract.storage[100 + marketid] = booklength
 
             # Debug from here
-            return(market[0])
-            # return(booklength + 1)
+            return(tradeid)
 
-            if indexcount > 0: // "Getting indexes with count %d" % indexcount
-                index = array(indexcount * 2 + 1)
-                index = msg(tx.gas / 2, indexes, 0, indexcount, 1, indexcount * 2 + 1)
-            else:
-                index = array(3)
-                index[0] = 1
-                index[1] = 0
-                index[2] = 0
-            indexcount = index[0] // "Index: %s" % index
-            s = 0
-            aindex = array(index[0] + 1)
-            aindex[0] = index[0]
-            if indexcount < 2:
-                aindex[1] = index[1]
-            while s < indexcount * 2: // "Processing indexes... %d of %d: %s" % (s, index[0] * 2, aindex)
-                if index[s + 1]: // "%s" % s
-                    m = s % 2
-                    if m == 0:
-                        tindex = array(2)
-                    tindex[m] = index[s + 1]
-                    if m == 1:
-                        aindex[s / 2 + 1] = tindex // "%s" % tindex
-                else:
-                    aindex[s / 2 + 1] = 0
-                s = s + 1
-            index = aindex // "Indexes: %s" % index
-            priceindexed = 0
-            replaceindex = 0
-            indexkey = 1
-            tradeat = array(2)
-            tradeat[0] = 1
-            thistrade = array(2)
-            thistrade[0] = index[0]
-            thistrade[1] = price
-            tradeat[1] = thistrade
-            bestprice = price
-            bestindex = 0
-            while indexcount > 0:
-                priceindex = index[indexcount] // "Checking index: %s" % priceindex
-                if priceindex == 0:
-                    indexcount = indexcount
-                    replaceindex = indexcount
-                else:
-                    indexedprices = priceindex[0]
-                    currentprice = priceindex[1]
-                    if currentprice == 0:
-                        indexcount = indexcount - 1
-                    elif currentprice == price: // "Price already indexed @ %d %s at index %d" % (currentprice / (1 * 10 ** 8), market[0], indexcount)
-                        priceindex[0] = indexedprices + 1
-                        index[indexcount] = priceindex // "TODO - SAVE INDEXES - indexes[marketid] = index, contract.storage[4] = indexes... Done?"
-                        sendindex = array(4)
-                        sendindex[0] = 2
-                        sendindex[1] = priceindex[0]
-                        sendindex[2] = priceindex[1]
-                        sendindex[3] = indexcount
-                        msg(tx.gas / 2, indexes, 0, sendindex, 4)
-                        contract.storage[10+marketid] = index[0]
-                        indexkey = indexcount
-                        priceindexed = 1
-                    if msg.data[0] == 1 and currentprice < price and currentprice > 0: // "Price index of %s below buy price, checking..." % priceindex[1]
-                        add = array(1)
-                        addindex = array(2)
-                        addindex[0] = indexcount
-                        addindex[1] = currentprice
-                        add[0] = addindex
-                        tradeat[0] = tradeat[0] + 1
-                        tradeat = tradeat + add
-                        if currentprice < bestprice:
-                            bestprice = currentprice
-                            bestindex = indexcount
-                    elif msg.data[0] == 2 and currentprice > price and currentprice > 0: // "Price index of %s above sell price, checking..." % priceindex[1]
-                        add = array(1)
-                        addindex = array(2)
-                        addindex[0] = indexcount
-                        addindex[1] = currentprice
-                        add[0] = addindex
-                        tradeat[0] = tradeat[0] + 1
-                        tradeat = tradeat + add
-                        if currentprice > bestprice:
-                            bestprice = currentprice
-                            bestindex = indexcount
-                indexcount = indexcount - 1
-            if priceindexed == 0: // "Indexing price"
-                newindex = array(2)
-                newindex[0] = 1
-                newindex[1] = price
-                if replaceindex > 0: // "Replacing price index %d from %s with %s" % (replaceindex, indexes, newindex)
-                    index[replaceindex] = newindex // "indexes[marketid] = index..."
-                    indexkey = replaceindex
-                    sendindex = array(4)
-                    sendindex[0] = 2
-                    sendindex[1] = newindex[0]
-                    sendindex[2] = newindex[1]
-                    sendindex[3] = replaceindex
-                    ret = msg(tx.gas / 2, indexes, 0, sendindex, 4)
-                else: // "Adding price index %s to %s" % (newindex, indexes)
-                    indexkey = index[0] + 1
-                    index[0] = indexkey
-                    newaindex = array(1)
-                    newaindex[0] = newindex
-                    index = index + newaindex // "TODO - SAVE INDEXES - indexes[marketid] = index, contract.storage[4] = indexes... Done?"
-                    sendindex = array(3)
-                    sendindex[0] = 1
-                    sendindex[1] = newindex[0]
-                    sendindex[2] = newindex[1]
-                    ret = msg(tx.gas / 2, indexes, 0, sendindex, 3)
-            counttradeat = 0
-            while tradeat[0] > 0 and amount > 0: // "Trading at price indexes: %s" % tradeat
-                tradekey = tradeat[0]
-                tradeindex = tradeat[tradekey]
-                currentkey = tradeindex[0]
-                currentprice = tradeindex[1] // "Trading at: %s" % currentprice
-                pricekey = currentprice
-                if pricekey > 0 and counttradeat > 0:
-                    book = contract.storage[pricekey]
-                if book > 0:
-                    booknonce = book[0]
-                    booklength = book[1]
-                count = 2
-                countedall = 0
-                while count <= booknonce:
-                    curbook = book[count] // "In book @ %s #%d: %s" % (pricekey, count, curbook)
-                    if curbook == 0:
-                        count = count + 1
-                        countedall = countedall + 1
-                    elif countedall > booklength:
-                        count = booknonce + 1
-                    else:
-                        if curbook[4] == marketid:
-                            boughtorsold = 0
-                            if msg.data[0] == 1 and curbook[0] == 2:
-                                if amount < curbook[2]: // "Buying %d from balance of %d from %s" % (amount, curbook[2], curbook[3])
-                                    curbook[2] = curbook[2] - amount
-                                    amount = 0
-                                elif amount >= curbook[2]: // "Buying balance of %d from %s" % (curbook[2], curbook[3])
-                                    amount = amount - curbook[2]
-                                    bookadd[2] = amount
-                                    book[count] = bookadd
-                                    book[1] = booklength - 1
-                                    curbook = 0
-                                boughtorsold = 1
-                            elif msg.data[0] == 2 and curbook[0] == 1:
-                                if amount > curbook[2]: // "Selling %d from balance of %d to %s" % (curbook[2], amount, curbook[3])
-                                    amount = amount - curbook[2]
-                                    bookadd[2] = amount
-                                    book[count] = bookadd
-                                    book[1] = booklength - 1
-                                    curbook = 0
-                                elif amount <= curbook[2]: // "Selling balance of %d to %s" % (amount, curbook[3])
-                                    curbook[2] = curbook[2] - amount
-                                    book[1] = booklength - 1
-                                    amount = 0
-                                    if curbook[2] == 0:
-                                        curbook = 0
-                                        book[1] = booklength - 1
-                                boughtorsold = 1
-                            if boughtorsold == 1:
-                                book[count] = curbook // "Amount left to process: %d in %s" % (amount, book)
-                                if amount == 0: // "Trade processed, executing... - TODO"
-                                    book[1] = book[1] - 1
-                                    book[booknonce] = 0
-                                    count = booknonce
-                                lowerindex = 1 // "Updating indexes %s and %s" % (currentkey, indexkey)
-                                if curbook == 0 and amount == 0 and price == currentprice:
-                                    lowerindex = 2
-                                if curbook == 0 or amount == 0:
-                                    priceindex = index[currentkey] // "Updating index %s from key %d by minus %d" % (priceindex, currentkey, lowerindex)
-                                    if priceindex == 0:
-                                        index[currentkey] = 0
-                                    else:
-                                        priceindex[0] = priceindex[0] - lowerindex
-                                        if priceindex[0] == 0:
-                                            index[currentkey] = 0
-                                        else:
-                                            index[currentkey] = priceindex // "TODO - SAVE INDEXES - indexes[marketid] = index, contract.storage[4] = indexes... Done?"
-                                if priceindex[0] == 0:
-                                    sendindex = array(2)
-                                    sendindex[0] = 0
-                                    sendindex[1] = currentkey
-                                    ret = msg(tx.gas / 2, indexes, 0, sendindex, 2)
-                                else:
-                                    sendindex[0] = 2
-                                    sendindex[1] = priceindex[0]
-                                    sendindex[2] = currentkey
-                                    ret = msg(tx.gas / 2, indexes, 0, sendindex, 3)
-                                # contract.storage[pricekey] = book # "TODO - SAVE BOOK!!!"
-                                if currentprice < price or currentprice > price: // "Updating cross index and book at index %d in %s" % (indexkey, index)
-                                    priceindex = index[indexkey]
-                                    if priceindex == 0:
-                                        index[indexkey] = 0
-                                        crosspricekey = currentprice
-                                    else:
-                                        priceindex[0] = priceindex[0] - 1
-                                        if priceindex[0] == 0:
-                                            index[indexkey] = 0
-                                        else:
-                                            index[indexkey] = priceindex
-                                        crosspricekey = priceindex[1]
-                                    crosstrades = contract.storage[crosspricekey] // "%s, %s" % (crosskey, crosstrades)
-                                    crossbook = crosstrades[crosskey]
-                                    if crossbook == 0: // "Balance of %s set to 0" % crossbook
-                                        crossbooklength = 0
-                                    else:
-                                        crossbooklength = crossbook[1] // "New balance of %d for %s" % (amount, crossbook[3])
-                                        if amount == 0:
-                                            crossbook = 0
-                                        book[1] = booklength - 1
-                                    crosstrades[crosskey] = crossbook
-                                    # contract.storage[crosspricekey] = crosstrades # TODO SAVE CROSSBOOK
-                                boughtorsold = 0
-                        count = count + 1
-                        countedall = countedall + 1
-                tradeat[0] = tradeat[0] - 1
-                counttradeat = counttradeat + 1
+            # if indexcount > 0: // "Getting indexes with count %d" % indexcount
+            #     index = array(indexcount * 2 + 1)
+            #     index = msg(tx.gas / 2, indexes, 0, indexcount, 1, indexcount * 2 + 1)
+            # else:
+            #     index = array(3)
+            #     index[0] = 1
+            #     index[1] = 0
+            #     index[2] = 0
+            # indexcount = index[0] // "Index: %s" % index
+            # s = 0
+            # aindex = array(index[0] + 1)
+            # aindex[0] = index[0]
+            # if indexcount < 2:
+            #     aindex[1] = index[1]
+            # while s < indexcount * 2: // "Processing indexes... %d of %d: %s" % (s, index[0] * 2, aindex)
+            #     if index[s + 1]: // "%s" % s
+            #         m = s % 2
+            #         if m == 0:
+            #             tindex = array(2)
+            #         tindex[m] = index[s + 1]
+            #         if m == 1:
+            #             aindex[s / 2 + 1] = tindex // "%s" % tindex
+            #     else:
+            #         aindex[s / 2 + 1] = 0
+            #     s = s + 1
+            # index = aindex // "Indexes: %s" % index
+            # priceindexed = 0
+            # replaceindex = 0
+            # indexkey = 1
+            # tradeat = array(2)
+            # tradeat[0] = 1
+            # thistrade = array(2)
+            # thistrade[0] = index[0]
+            # thistrade[1] = price
+            # tradeat[1] = thistrade
+            # bestprice = price
+            # bestindex = 0
+            # while indexcount > 0:
+            #     priceindex = index[indexcount] // "Checking index: %s" % priceindex
+            #     if priceindex == 0:
+            #         indexcount = indexcount
+            #         replaceindex = indexcount
+            #     else:
+            #         indexedprices = priceindex[0]
+            #         currentprice = priceindex[1]
+            #         if currentprice == 0:
+            #             indexcount = indexcount - 1
+            #         elif currentprice == price: // "Price already indexed @ %d %s at index %d" % (currentprice / (1 * 10 ** 8), market[0], indexcount)
+            #             priceindex[0] = indexedprices + 1
+            #             index[indexcount] = priceindex // "TODO - SAVE INDEXES - indexes[marketid] = index, contract.storage[4] = indexes... Done?"
+            #             sendindex = array(4)
+            #             sendindex[0] = 2
+            #             sendindex[1] = priceindex[0]
+            #             sendindex[2] = priceindex[1]
+            #             sendindex[3] = indexcount
+            #             msg(tx.gas / 2, indexes, 0, sendindex, 4)
+            #             contract.storage[10+marketid] = index[0]
+            #             indexkey = indexcount
+            #             priceindexed = 1
+            #         if msg.data[0] == 1 and currentprice < price and currentprice > 0: // "Price index of %s below buy price, checking..." % priceindex[1]
+            #             add = array(1)
+            #             addindex = array(2)
+            #             addindex[0] = indexcount
+            #             addindex[1] = currentprice
+            #             add[0] = addindex
+            #             tradeat[0] = tradeat[0] + 1
+            #             tradeat = tradeat + add
+            #             if currentprice < bestprice:
+            #                 bestprice = currentprice
+            #                 bestindex = indexcount
+            #         elif msg.data[0] == 2 and currentprice > price and currentprice > 0: // "Price index of %s above sell price, checking..." % priceindex[1]
+            #             add = array(1)
+            #             addindex = array(2)
+            #             addindex[0] = indexcount
+            #             addindex[1] = currentprice
+            #             add[0] = addindex
+            #             tradeat[0] = tradeat[0] + 1
+            #             tradeat = tradeat + add
+            #             if currentprice > bestprice:
+            #                 bestprice = currentprice
+            #                 bestindex = indexcount
+            #     indexcount = indexcount - 1
+            # if priceindexed == 0: // "Indexing price"
+            #     newindex = array(2)
+            #     newindex[0] = 1
+            #     newindex[1] = price
+            #     if replaceindex > 0: // "Replacing price index %d from %s with %s" % (replaceindex, indexes, newindex)
+            #         index[replaceindex] = newindex // "indexes[marketid] = index..."
+            #         indexkey = replaceindex
+            #         sendindex = array(4)
+            #         sendindex[0] = 2
+            #         sendindex[1] = newindex[0]
+            #         sendindex[2] = newindex[1]
+            #         sendindex[3] = replaceindex
+            #         ret = msg(tx.gas / 2, indexes, 0, sendindex, 4)
+            #     else: // "Adding price index %s to %s" % (newindex, indexes)
+            #         indexkey = index[0] + 1
+            #         index[0] = indexkey
+            #         newaindex = array(1)
+            #         newaindex[0] = newindex
+            #         index = index + newaindex // "TODO - SAVE INDEXES - indexes[marketid] = index, contract.storage[4] = indexes... Done?"
+            #         sendindex = array(3)
+            #         sendindex[0] = 1
+            #         sendindex[1] = newindex[0]
+            #         sendindex[2] = newindex[1]
+            #         ret = msg(tx.gas / 2, indexes, 0, sendindex, 3)
+            # counttradeat = 0
+            # while tradeat[0] > 0 and amount > 0: // "Trading at price indexes: %s" % tradeat
+            #     tradekey = tradeat[0]
+            #     tradeindex = tradeat[tradekey]
+            #     currentkey = tradeindex[0]
+            #     currentprice = tradeindex[1] // "Trading at: %s" % currentprice
+            #     pricekey = currentprice
+            #     if pricekey > 0 and counttradeat > 0:
+            #         book = contract.storage[pricekey]
+            #     if book > 0:
+            #         booknonce = book[0]
+            #         booklength = book[1]
+            #     count = 2
+            #     countedall = 0
+            #     while count <= booknonce:
+            #         curbook = book[count] // "In book @ %s #%d: %s" % (pricekey, count, curbook)
+            #         if curbook == 0:
+            #             count = count + 1
+            #             countedall = countedall + 1
+            #         elif countedall > booklength:
+            #             count = booknonce + 1
+            #         else:
+            #             if curbook[4] == marketid:
+            #                 boughtorsold = 0
+            #                 if msg.data[0] == 1 and curbook[0] == 2:
+            #                     if amount < curbook[2]: // "Buying %d from balance of %d from %s" % (amount, curbook[2], curbook[3])
+            #                         curbook[2] = curbook[2] - amount
+            #                         amount = 0
+            #                     elif amount >= curbook[2]: // "Buying balance of %d from %s" % (curbook[2], curbook[3])
+            #                         amount = amount - curbook[2]
+            #                         bookadd[2] = amount
+            #                         book[count] = bookadd
+            #                         book[1] = booklength - 1
+            #                         curbook = 0
+            #                     boughtorsold = 1
+            #                 elif msg.data[0] == 2 and curbook[0] == 1:
+            #                     if amount > curbook[2]: // "Selling %d from balance of %d to %s" % (curbook[2], amount, curbook[3])
+            #                         amount = amount - curbook[2]
+            #                         bookadd[2] = amount
+            #                         book[count] = bookadd
+            #                         book[1] = booklength - 1
+            #                         curbook = 0
+            #                     elif amount <= curbook[2]: // "Selling balance of %d to %s" % (amount, curbook[3])
+            #                         curbook[2] = curbook[2] - amount
+            #                         book[1] = booklength - 1
+            #                         amount = 0
+            #                         if curbook[2] == 0:
+            #                             curbook = 0
+            #                             book[1] = booklength - 1
+            #                     boughtorsold = 1
+            #                 if boughtorsold == 1:
+            #                     book[count] = curbook // "Amount left to process: %d in %s" % (amount, book)
+            #                     if amount == 0: // "Trade processed, executing... - TODO"
+            #                         book[1] = book[1] - 1
+            #                         book[booknonce] = 0
+            #                         count = booknonce
+            #                     lowerindex = 1 // "Updating indexes %s and %s" % (currentkey, indexkey)
+            #                     if curbook == 0 and amount == 0 and price == currentprice:
+            #                         lowerindex = 2
+            #                     if curbook == 0 or amount == 0:
+            #                         priceindex = index[currentkey] // "Updating index %s from key %d by minus %d" % (priceindex, currentkey, lowerindex)
+            #                         if priceindex == 0:
+            #                             index[currentkey] = 0
+            #                         else:
+            #                             priceindex[0] = priceindex[0] - lowerindex
+            #                             if priceindex[0] == 0:
+            #                                 index[currentkey] = 0
+            #                             else:
+            #                                 index[currentkey] = priceindex // "TODO - SAVE INDEXES - indexes[marketid] = index, contract.storage[4] = indexes... Done?"
+            #                     if priceindex[0] == 0:
+            #                         sendindex = array(2)
+            #                         sendindex[0] = 0
+            #                         sendindex[1] = currentkey
+            #                         ret = msg(tx.gas / 2, indexes, 0, sendindex, 2)
+            #                     else:
+            #                         sendindex[0] = 2
+            #                         sendindex[1] = priceindex[0]
+            #                         sendindex[2] = currentkey
+            #                         ret = msg(tx.gas / 2, indexes, 0, sendindex, 3)
+            #                     # contract.storage[pricekey] = book # "TODO - SAVE BOOK!!!"
+            #                     if currentprice < price or currentprice > price: // "Updating cross index and book at index %d in %s" % (indexkey, index)
+            #                         priceindex = index[indexkey]
+            #                         if priceindex == 0:
+            #                             index[indexkey] = 0
+            #                             crosspricekey = currentprice
+            #                         else:
+            #                             priceindex[0] = priceindex[0] - 1
+            #                             if priceindex[0] == 0:
+            #                                 index[indexkey] = 0
+            #                             else:
+            #                                 index[indexkey] = priceindex
+            #                             crosspricekey = priceindex[1]
+            #                         crosstrades = contract.storage[crosspricekey] // "%s, %s" % (crosskey, crosstrades)
+            #                         crossbook = crosstrades[crosskey]
+            #                         if crossbook == 0: // "Balance of %s set to 0" % crossbook
+            #                             crossbooklength = 0
+            #                         else:
+            #                             crossbooklength = crossbook[1] // "New balance of %d for %s" % (amount, crossbook[3])
+            #                             if amount == 0:
+            #                                 crossbook = 0
+            #                             book[1] = booklength - 1
+            #                         crosstrades[crosskey] = crossbook
+            #                         # contract.storage[crosspricekey] = crosstrades # TODO SAVE CROSSBOOK
+            #                     boughtorsold = 0
+            #             count = count + 1
+            #             countedall = countedall + 1
+            #     tradeat[0] = tradeat[0] - 1
+            #     counttradeat = counttradeat + 1
 
-            # Record optimizations - TODO - move to maintenance contract
-            count = 2
-            countedall = 0
-            while count <= booknonce:
-                curbook = book[count]
-                if curbook == 0:
-                    left = booknonce - count
-                    if left > 0:
-                        countshift = count + 1
-                        while left > 0 and book[countshift] == 0:
-                            left = left - 1
-                            countshift = countshift + 1
-                        totalshift = countshift - count + 1
-                        book[totalshift] = book[countshift] // "Shifting records of empty book index # %s with %d left to index # %d" % (countshift, booknonce - count, totalshift)
-                        book[countshift] = 0
-                        if countshift > totalshift + left:
-                            book[0] = book[0] - 1
-                        # contract.storage[pricekey] = book // "TODO - SAVE BOOK"
-                        count = count + totalshift - 1
-                    countedall = countedall + 1
-                if countedall > booklength:
-                    count = booknonce
-                count = count + 1
-                countedall = countedall + 1
+            # # Record optimizations - TODO - move to maintenance contract
+            # count = 2
+            # countedall = 0
+            # while count <= booknonce:
+            #     curbook = book[count]
+            #     if curbook == 0:
+            #         left = booknonce - count
+            #         if left > 0:
+            #             countshift = count + 1
+            #             while left > 0 and book[countshift] == 0:
+            #                 left = left - 1
+            #                 countshift = countshift + 1
+            #             totalshift = countshift - count + 1
+            #             book[totalshift] = book[countshift] // "Shifting records of empty book index # %s with %d left to index # %d" % (countshift, booknonce - count, totalshift)
+            #             book[countshift] = 0
+            #             if countshift > totalshift + left:
+            #                 book[0] = book[0] - 1
+            #             # contract.storage[pricekey] = book // "TODO - SAVE BOOK"
+            #             count = count + totalshift - 1
+            #         countedall = countedall + 1
+            #     if countedall > booklength:
+            #         count = booknonce
+            #     count = count + 1
+            #     countedall = countedall + 1
+
+
+        #
+        # Trade
+        #
+        elif msg.data[0] == 10: // "TRADE"
+            t = 0
+            trades = array(msg.datasize - 1)
+            while t < msg.datasize - 1:
+                t = t + 1
+                trades[t] = msg.data[t]
 
         #
         # Deposit
@@ -563,7 +568,7 @@ code:
         elif msg.data[0] == 9 and msg.sender == owner:
             contract.storage[3] = msg.data[1] // "Set Balances owner to %s" % msg.data[1]
             return(msg.data[1])
-        elif msg.data[0] > 9: // "Input out of range"
+        elif msg.data[0] > 10: // "Input out of range"
             if msg.value > 0: // "Refunding"
                 ret = send(tx.gas / 2, msg.sender, msg.value)
             return(9) // "Protect the citizens"

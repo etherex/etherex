@@ -66,15 +66,15 @@ code:
                     owner = msg.data[4]
                     market = msg.data[5]
                     if trade < 1 or trade > 2:
-                        return(0) // "Invalid trade type"
+                        return(2) // "Invalid trade type"
                     if price < 1 or price > 2^254:
-                        return(0) // "Invalid price"
+                        return(3) // "Invalid price"
                     if amount < 1 or amount > 2^254:
-                        return(0) // "Invalid amount"
+                        return(4) // "Invalid amount"
                     if owner < 1 or owner > 2^254:
-                        return(0) // "Invalid owner"
+                        return(5) // "Invalid owner"
                     if market < 1 or market > 2^254: // "TODO - Get and check market count"
-                        return(0) // "Invalid market"
+                        return(6) // "Invalid market"
                     i = 0
                     while i < 5:
                         contract.storage[last + 100 + i] = msg.data[i + 1]

@@ -1,5 +1,5 @@
 -e pyethereum
--e serpent
+# -e serpent
 flake8
 pytest
 pytest-xdist

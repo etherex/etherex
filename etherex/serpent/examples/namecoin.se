@@ -5,4 +5,5 @@ if !contract.storage[msg.data[0]]: # Is the key not yet taken?
     contract.storage[msg.data[0]] = msg.data[1]
     return(1)
 else:
+
     return(0) // Otherwise do nothing

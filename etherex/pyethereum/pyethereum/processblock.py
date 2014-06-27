@@ -9,7 +9,23 @@ import trie
 import logging
 logger = logging.getLogger(__name__)
 
-expensive_debug = False
+print_debug = 0
+
+
+def enable_debug():
+    global print_debug
+    print_debug = 1
+
+
+def disable_debug():
+    global print_debug
+    print_debug = 0
+
+
+def logger_debug(*args):
+    logger.debug(*args)
+    if print_debug:
+        print(args[0] % tuple(args[1:]))
 
 GSTEP = 1
 GSTOP = 0
@@ -158,6 +174,9 @@ def apply_transaction(block, tx):
             block.coinbase, tx.sender, tx.gasprice * gas_remained)
         block.gas_used += gas_used
         output = ''.join(map(chr, data)) if tx.to else result.encode('hex')
+    for s in block.suicides:
+        block.state.delete(s)
+        block.suicides = []
     block.add_transaction_to_list(tx)
     success = output is not OUT_OF_GAS
     return success, output if success else ''
@@ -318,15 +337,12 @@ def apply_op(block, tx, msg, code, compustate):
     stackargs = []
     for i in range(in_args):
         stackargs.append(compustate.stack.pop())
-    if expensive_debug:
-        import serpent
-        if op[:4] == 'PUSH':
-            start, n = compustate.pc + 1, int(op[4:])
-            logger.debug('%s %s ', op,
-                         utils.big_endian_to_int(code[start:start + n]))
-        else:
-            logger.debug('%s %s %s', op, ' '.join(map(str, stackargs)),
-                         serpent.decode_datalist(compustate.memory))
+    if op[:4] == 'PUSH':
+        ind = compustate.pc + 1
+        v = utils.big_endian_to_int(code[ind: ind + int(op[4:])])
+        logger_debug('%s %s %s', compustate.pc, op, v)
+    else:
+        logger_debug('%s %s %s', compustate.pc, op, stackargs)
     # Apply operation
     oldgas = compustate.gas
     oldpc = compustate.pc
@@ -407,7 +423,7 @@ def apply_op(block, tx, msg, code, compustate):
         data = ''.join(map(chr, mem[stackargs[0]:stackargs[0] + stackargs[1]]))
         stk.append(utils.big_endian_to_int(utils.sha3(data)))
     elif op == 'ADDRESS':
-        stk.append(msg.to)
+        stk.append(utils.coerce_to_int(msg.to))
     elif op == 'BALANCE':
         stk.append(block.get_balance(msg.to))
     elif op == 'ORIGIN':
@@ -457,8 +473,18 @@ def apply_op(block, tx, msg, code, compustate):
     elif op == 'POP':
         pass
     elif op == 'DUP':
-        stk.append(stackargs[0])
-        stk.append(stackargs[0])
+        # DUP POP POP Debug hint
+        if get_op_data(code, oldpc + 1)[0] == 'POP' and \
+           get_op_data(code, oldpc + 2)[0] == 'POP':
+            o = print_debug
+            enable_debug()
+            logger_debug("Debug: %s", stackargs[0])
+            if not o:
+                disable_debug()
+            compustate.pc = oldpc + 3
+        else:
+            stk.append(stackargs[0])
+            stk.append(stackargs[0])
     elif op == 'SWAP':
         stk.append(stackargs[0])
         stk.append(stackargs[1])
@@ -499,19 +525,20 @@ def apply_op(block, tx, msg, code, compustate):
         dat = code[oldpc + 1: oldpc + 1 + pushnum]
         stk.append(utils.big_endian_to_int(dat))
     elif op == 'CREATE':
-        if len(mem) < ceil32(stackargs[2] + stackargs[3]):
-            mem.extend([0] * (ceil32(stackargs[2] + stackargs[3]) - len(mem)))
-        gas = stackargs[0]
-        value = stackargs[1]
-        data = ''.join(map(chr, mem[stackargs[2]:stackargs[2] + stackargs[3]]))
-        logger.debug("Sub-contract: %s %s %s %s ", msg.to, value, gas, data)
+        if len(mem) < ceil32(stackargs[1] + stackargs[2]):
+            mem.extend([0] * (ceil32(stackargs[1] + stackargs[2]) - len(mem)))
+        value = stackargs[0]
+        data = ''.join(map(chr, mem[stackargs[1]:stackargs[1] + stackargs[2]]))
+        logger_debug("Sub-contract: %s %s %s ", msg.to, value, data)
         addr, gas, code = create_contract(
-            block, tx, Message(msg.to, '', value, gas, data))
-        logger.debug("Output of contract creation: %s  %s ", addr, code)
+            block, tx, Message(msg.to, '', value, compustate.gas, data))
+        logger_debug("Output of contract creation: %s  %s ", addr, code)
         if addr:
             stk.append(utils.coerce_to_int(addr))
+            compustate.gas = gas
         else:
             stk.append(0)
+            compustate.gas = 0
     elif op == 'CALL':
         if len(mem) < ceil32(stackargs[3] + stackargs[4]):
             mem.extend([0] * (ceil32(stackargs[3] + stackargs[4]) - len(mem)))
@@ -522,12 +549,12 @@ def apply_op(block, tx, msg, code, compustate):
         to = (('\x00' * (32 - len(to))) + to)[12:]
         value = stackargs[2]
         data = ''.join(map(chr, mem[stackargs[3]:stackargs[3] + stackargs[4]]))
-        logger.debug(
+        logger_debug(
             "Sub-call: %s %s %s %s %s ", utils.coerce_addr_to_hex(msg.to),
-            utils.coerce_addr_to_hex(to), value, gas, data)
+            utils.coerce_addr_to_hex(to), value, gas, data.encode('hex'))
         result, gas, data = apply_msg(
             block, tx, Message(msg.to, to, value, gas, data))
-        logger.debug(
+        logger_debug(
             "Output of sub-call: %s %s length %s expected %s", result, data, len(data),
             stackargs[6])
         for i in range(stackargs[6]):
@@ -546,6 +573,6 @@ def apply_op(block, tx, msg, code, compustate):
     elif op == 'SUICIDE':
         to = utils.encode_int(stackargs[0])
         to = (('\x00' * (32 - len(to))) + to)[12:]
-        block.delta_balance(to, block.get_balance(msg.to))
-        block.state.delete(msg.to)
+        block.transfer_value(msg.to, to, block.get_balance(msg.to))
+        block.suicides.append(msg.to)
         return []

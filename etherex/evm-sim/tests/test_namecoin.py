@@ -1,4 +1,4 @@
-from sim import Key, Simulator, load_serpent
+from sim import Key, Simulator, compile_serpent
 
 
 class TestNamecoin(object):
@@ -7,7 +7,7 @@ class TestNamecoin(object):
 
     @classmethod
     def setup_class(cls):
-        cls.code = load_serpent('examples/namecoin.se')
+        cls.code = compile_serpent('examples/namecoin.se')
         cls.sim = Simulator({cls.ALICE.address: 10**18})
 
     def setup_method(self, method):

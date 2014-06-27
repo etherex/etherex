@@ -1,15 +1,45 @@
 from collections import Counter
+import re
+import subprocess
 
 from pyethereum import transactions, blocks, processblock, utils
-import serpent
-import subprocess
+
+from utils import encode_datalist, decode_datalist
 
 # processblock.debug = 1
 
 
-def load_serpent(filename):
-    # return subprocess.call(["/Users/caktux/ethereum/serpent/serpent", "compile", open(filename).read()])
-    return serpent.compile(open(filename).read())
+def compile_serpent(filename):
+    try:
+        output = subprocess.check_output(["serpent", "compile", filename], stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        raise CompilationException(e.output)
+
+    return output.strip().decode('hex')
+
+def compile_lll(filename):
+    try:
+        output = subprocess.check_output(["lllc", filename], stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        raise CompilationException(e.output)
+
+    return output.strip().decode('hex')
+
+def compile_mutan(filename):
+    try:
+        output = subprocess.check_output(["mutan", filename], stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        raise CompilationException(e.output)
+
+    match = re.search("hex: 0x([0-9a-f]+)", output)
+    if not match:
+        raise CompilationException(output)
+
+    return match.group(1).decode('hex')
+
+
+class CompilationException(Exception):
+    pass
 
 
 class Key(object):
@@ -43,12 +73,12 @@ class Simulator(object):
 
     def tx(self, frm, to, value, data, gas=STARTGAS):
         _tx = transactions.Transaction(nonce=self.nonce[frm], gasprice=self.GASPRICE, startgas=gas,
-                                       to=to, value=value, data=serpent.encode_datalist(data)).sign(frm.key)
+                                       to=to, value=value, data=encode_datalist(data)).sign(frm.key)
         result, ans = processblock.apply_transaction(self.genesis, _tx)
         assert result
 
         self.nonce[frm] += 1
-        return serpent.decode_datalist(ans)
+        return decode_datalist(ans)
 
     def get_storage_data(self, contract, index):
         return self.genesis.get_storage_data(contract, index)

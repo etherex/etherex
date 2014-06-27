@@ -7,7 +7,7 @@
 
 # NameReg
 
-if !contract.storage[msg.data[0]] or contract.storage[msg.data[0]] == msg.sender:
+if not contract.storage[msg.data[0]]: # or contract.storage[msg.data[0]] == msg.sender:
     contract.storage[msg.sender] = msg.data[0]
     contract.storage[msg.data[0]] = msg.sender
     return(1)

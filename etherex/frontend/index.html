@@ -25,7 +25,6 @@ if (typeof(window.jQuery) === "undefined") {
 <script type="text/javascript" src="js/ethereum-min.js"></script>
 <script type="text/javascript" src="js/scripts.js"></script>
 <script type="text/javascript" src="js/d3.min.js"></script>
-<script type="text/javascript" src="js/scripts.js"></script>
 <script type="text/javascript" src="js/rickshaw.min.js"></script>
 </head>
 <body>
@@ -135,7 +134,7 @@ if (typeof(window.jQuery) === "undefined") {
             <ul>
               <li><label for="tto">To: </label><input id="tto" type="text" value="" placeholder="Address or name" /><span id="ttoname"></span></li>
               <li><label for="tval">Val.: </label><input id="tval" type="number" placeholder="Value" value="0" min="0" /></li>
-              <li><label for="tgas">Gas: </label><input id="gas" type="number" placeholder="Gas" value="10000" min="1000" /></li>
+              <li><label for="tgas">Gas: </label><input id="tgas" type="number" placeholder="Gas" value="10000" min="1000" /></li>
               <li><label for="data">Code: </label><textarea id="data" placeholder="0x"></textarea></li>
               <li><button id="transact">Send</button></li>
             </ul>

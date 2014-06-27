@@ -1,9 +1,12 @@
 init:
+    # Initial: premine 1000000 units to creator
     contract.storage[msg.sender] = 1000000
 code:
+    # If a message with one item is sent, that's a balance query
     if msg.datasize == 1:
         addr = msg.data[0]
         return(contract.storage[addr])
+    # If a message with two items [to, value] are sent, that's a transfer request
     else:
         from = msg.sender
         fromvalue = contract.storage[from]

@@ -1,5 +1,4 @@
 -e git://github.com/ethereum/pyethereum.git#egg=pyethereum
--e git://github.com/ethereum/serpent.git#egg=ethereum-serpent
 flake8==2.1.0
 pytest==2.5.2
 pytest-xdist==1.10

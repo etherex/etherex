@@ -350,14 +350,16 @@
     });
 
     $("#transact").on('click', function() {
-      EtherEx.transact(
-        $("#tto").val(),
-        $("#tgas").val(),
-        $('#tval').val(),
-        $('#data').val()
-        // EtherEx.coinbase.pad(32)
-        // EtherEx.init[0].pad(32) + EtherEx.init[1].pad(32) + EtherEx.init[2].pad(32) + EtherEx.init[3].pad(32)
-      );
+      if (window.confirm("Make transaction with " + $("#tgas").val() + " gas?")) {
+        EtherEx.transact(
+          $("#tto").val(),
+          $("#tgas").val(),
+          $('#tval').val(),
+          $('#data').val()
+          // EtherEx.coinbase.pad(32)
+          // EtherEx.init[0].pad(32) + EtherEx.init[1].pad(32) + EtherEx.init[2].pad(32) + EtherEx.init[3].pad(32)
+        );
+      }
     });
 
     $("#refresh, #clear").on('click', function() {
