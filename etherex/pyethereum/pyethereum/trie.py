@@ -40,6 +40,13 @@ def nibbles_to_bin(nibbles):
 
 
 NIBBLE_TERMINATOR = 16
+RECORDING = 1
+NONE = 0
+VERIFYING = -1
+
+
+class InvalidSPVProof(Exception):
+    pass
 
 
 def with_terminator(nibbles):
@@ -130,6 +137,7 @@ BLANK_ROOT = ''
 
 
 class Trie(object):
+    proof_mode = 0
 
     def __init__(self, dbfile, root_hash=BLANK_ROOT):
         '''it also present a dictionary like interface
@@ -137,9 +145,24 @@ class Trie(object):
         :param dbfile: key value database
         :root: blank or trie node in form of [key, value] or [v0,v1..v15,v]
         '''
-        dbfile = os.path.abspath(dbfile)
-        self.db = DB(dbfile)
+        if isinstance(dbfile, str):
+            dbfile = os.path.abspath(dbfile)
+            self.db = DB(dbfile)
+        else:
+            self.db = dbfile  # Pass in a database object directly
         self.set_root_hash(root_hash)
+        self.proof_mode = 0
+        self.proof_nodes = []
+
+    # For SPV proof production/verification purposes
+    def spv_check(self, node):
+        if not self.proof_mode:
+            pass
+        elif self.proof_mode == RECORDING:
+            self.proof_nodes.append(node)
+        elif self.proof_nodes == VERIFYING:
+            if node not in self.proof_nodes:
+                raise InvalidSPVProof("Proof invalid!")
 
     @property
     def root_hash(self):
@@ -154,6 +177,7 @@ class Trie(object):
         val = rlp.encode(self.root_node)
         key = utils.sha3(val)
         self.db.put(key, val)
+        self.spv_check(self.root_node)
         return key
 
     @root_hash.setter
@@ -196,6 +220,7 @@ class Trie(object):
 
         hashkey = utils.sha3(rlpnode)
         self.db.put(hashkey, rlpnode)
+        self.spv_check(node)
         return hashkey
 
     def _decode_to_node(self, encoded):
@@ -203,7 +228,9 @@ class Trie(object):
             return BLANK_NODE
         if isinstance(encoded, list):
             return encoded
-        return rlp.decode(self.db.get(encoded))
+        o = rlp.decode(self.db.get(encoded))
+        self.spv_check(o)
+        return o
 
     def _get_node_type(self, node):
         ''' get node type and content
@@ -267,7 +294,6 @@ class Trie(object):
         responsibility to *store* the new node storage, and delete the old
         node storage
         """
-        assert value != BLANK_NODE
         node_type = self._get_node_type(node)
 
         if node_type == NODE_TYPE_BLANK:
@@ -350,6 +376,86 @@ class Trie(object):
                     self._encode_node(new_node)]
         else:
             return new_node
+
+    def _getany(self, node, reverse=False, path=[]):
+        node_type = self._get_node_type(node)
+        if node_type == NODE_TYPE_BLANK:
+            return None
+        if node_type == NODE_TYPE_BRANCH:
+            if node[16]:
+                return [16]
+            scan_range = range(16)
+            if reverse:
+                scan_range.reverse()
+            for i in scan_range:
+                o = self._getany(self._decode_to_node(node[i]), path=path+[i])
+                if o:
+                    return [i] + o
+            return None
+        curr_key = without_terminator(unpack_to_nibbles(node[0]))
+        if node_type == NODE_TYPE_LEAF:
+            return curr_key
+
+        if node_type == NODE_TYPE_EXTENSION:
+            curr_key = without_terminator(unpack_to_nibbles(node[0]))
+            sub_node = self._decode_to_node(node[1])
+            return self._getany(sub_node, path=path+curr_key)
+
+    def _iter(self, node, key, reverse=False, path=[]):
+        node_type = self._get_node_type(node)
+
+        if node_type == NODE_TYPE_BLANK:
+            return None
+
+        elif node_type == NODE_TYPE_BRANCH:
+            if len(key):
+                sub_node = self._decode_to_node(node[key[0]])
+                o = self._iter(sub_node, key[1:], reverse, path+[key[0]])
+                if o:
+                    return [key[0]] + o
+            if reverse:
+                scan_range = range(key[0] if len(key) else 0)
+            else:
+                scan_range = range(key[0]+1 if len(key) else 0, 16)
+            for i in scan_range:
+                sub_node = self._decode_to_node(node[i])
+                o = self._getany(sub_node, reverse, path+[i])
+                if o:
+                    return [i] + o
+            if reverse and node[16]:
+                return [16]
+            return None
+
+        descend_key = without_terminator(unpack_to_nibbles(node[0]))
+        if node_type == NODE_TYPE_LEAF:
+            if reverse:
+                return descend_key if descend_key < key else None
+            else:
+                return descend_key if descend_key > key else None
+
+        if node_type == NODE_TYPE_EXTENSION:
+            # traverse child nodes
+            sub_node = self._decode_to_node(node[1])
+            sub_key = key[len(descend_key):]
+            if starts_with(key, descend_key):
+                o = self._iter(sub_node, sub_key, reverse, path + descend_key)
+            elif descend_key > key[:len(descend_key)] and not reverse:
+                o = self._getany(sub_node, sub_key, False, path + descend_key)
+            elif descend_key < key[:len(descend_key)] and reverse:
+                o = self._getany(sub_node, sub_key, True, path + descend_key)
+            else:
+                o = None
+            return descend_key + o if o else None
+
+    def next(self, key):
+        key = bin_to_nibbles(key)
+        o = self._iter(self.root_node, key)
+        return nibbles_to_bin(o) if o else None
+
+    def prev(self, key):
+        key = bin_to_nibbles(key)
+        o = self._iter(self.root_node, key, reverse=True)
+        return nibbles_to_bin(o) if o else None
 
     def _delete_node_storage(self, node):
         '''delete storage
@@ -599,20 +705,20 @@ class Trie(object):
 
     def update(self, key, value):
         '''
-        :param key: a string with length of [0, 32]
+        :param key: a string
         :value: a string
         '''
         if not isinstance(key, (str, unicode)):
             raise Exception("Key must be string")
 
-        if len(key) > 32:
-            raise Exception("Max key length is 32")
+        # if len(key) > 32:
+        #     raise Exception("Max key length is 32")
 
         if not isinstance(value, (str, unicode)):
             raise Exception("Value must be string")
 
-        if value == '':
-            return self.delete(key)
+        # if value == '':
+        #     return self.delete(key)
 
         self.root_node = self._update_and_delete_storage(
             self.root_node,
@@ -625,6 +731,33 @@ class Trie(object):
         if self.root_hash == BLANK_ROOT:
             return True
         return self.root_hash in self.db
+
+    def produce_spv_proof(self, key):
+        self.proof_mode = RECORDING
+        self.proof_nodes = [self.root_node]
+        self.get(key)
+        self.proof_mode = NONE
+        o = self.proof_nodes
+        self.proof_nodes = []
+        return o
+
+
+def verify_spv_proof(root, key, proof):
+    t = Trie(db.EphemDB())
+    t.proof_mode = VERIFYING
+    t.proof_nodes = proof
+    for i, node in enumerate(proof):
+        R = rlp.encode(node)
+        H = utils.sha3(R)
+        t.db.put(H, R)
+    try:
+        t.root_hash = root
+        t.get(key)
+        return True
+    except Exception, e:
+        print e
+        return False
+
 
 if __name__ == "__main__":
     import sys

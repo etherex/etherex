@@ -1,207 +1,186 @@
-# contract.storage[1] contains the lowest stored epoch
-# contract.storage[2] contains the highest stored epoch
-# contract.storage[3] contains the starting block
-# contract.storage[4] contains the contract's global ETH exposure
-# contract.storage[5] contains the contract's global USD exposure
-# contract.storage[EPOCHSTORE+2k+0] contains the USD price in wei in epoch k
-# contract.storage[EPOCHSTORE+2k+1] contains the per-epoch interest rate at that epoch, times 10^9
-# contract.storage[2^160 - 1] contains the number of hashed votes
-# contract.storage[2^160...] is the array of hash votes
-# contract.storage[2^180...] is the array of 
-# contract.storage[ACCOUNTS+addr] contains the ether amount
-# contract.storage[ACCOUNTS+addr+1] contains the USD amount
-# contract.storage[ACCOUNTS+addr+2] contains the last accessed epoch
+# Hedged zero-supply dollar implementation
+# Uses SchellingCoin as price-determining backend
+#
+# Stored variables:
+#
+# 0: Schelling coin contract
+# 1: Last epoch
+# 2: Genesis block of contract
+# 3: USD exposure
+# 4: ETH exposure
+# 5: Cached price
+# 6: Last interest rate
+# 2^160 + k: interest rate accumulator at k epochs
+# 2^161 + ADDR * 3: eth-balance of a particular address
+# 2^161 + ADDR * 3 + 1: usd-balance of a particular address
+# 2^161 + ADDR * 3 + 1: last accessed epoch of a particular address
+#
+# Transaction types:
+#
+# [1, to, val]: send ETH
+# [2, to, val]: send USD
+# [3, wei_amount]: convert ETH to USD
+# [4, usd_amount]: converts USD to ETH
+# [5]: deposit
+# [6, amount]: withdraw
+# [7]: my balance query
+# [7, acct]: balance query for any acct
+# [8]: global state query
+# [9]: liquidation test any account
+#
+# The purpose of the contract is to serve as a sort of cryptographic
+# bank account where users can store both ETH and USD. ETH must be
+# stored in zero or positive quantities, but USD balances can be
+# positive or negative. If the USD balance is negative, the invariant
+# usdbal * 10 >= ethbal * 9 must be satisfied; if any account falls
+# below this value, then that account's balances are zeroed. Note
+# that there is a 2% bounty to ping the app if an account does go
+# below zero; one weakness is that if no one does ping then it is
+# quite possible for accounts to go negative-net-worth, then zero
+# themselves out, draining the reserves of the "bank" and potentially
+# bankrupting it. A 0.1% fee on ETH <-> USD trade is charged to
+# minimize this risk. Additionally, the bank itself will inevitably
+# end up with positive or negative USD exposure; to mitigate this,
+# it automatically updates interest rates on USD to keep exposure
+# near zero.
 
 shared:
-    NUM_HASHED_VOTES = 2^160 - 1
-    HASHED_VOTES = 2^160
-    TOTAL_DEPOSIT = 2^170 - 1    
-    DEPOSITS = 2^170
-    REVEALED_VOTES = 2^180
+    SCHELLING_COIN = contract.storage[0]
     LAST_EPOCH = 1
     STARTING_BLOCK = 2
     USD_EXPOSURE = 3
     ETH_EXPOSURE = 4
-    EPOCHSTORE = 5
+    PRICE = 5
+    LAST_INTEREST_RATE = 6
+    EPOCHSTORE = 2^160
     ACCOUNTS = 2^161
-    MERGESORT = contract.storage[0]
 init:
-    contract.storage[0] = create('quicksort.se')
-    contract.storage[LAST_EPOCH] = 0
-    contract.storage[STARTING_BLOCK] = block.number
+    contract.storage[0] = create('schellingcoin.se')
+    contract.storage[PRICE] = call(contract.storage[0], 4)
+    contract.storage[EPOCHSTORE] = 10^18
 
 code:
     sender = msg.sender
-    epoch = (block.number - contract.storage[STARTING_BLOCK]) / 1000
-    subindex = (block.number - contract.storage[STARTING_BLOCK]) % 1000
+    epoch = (block.number - contract.storage[STARTING_BLOCK]) / 100
     last_epoch = contract.storage[LAST_EPOCH]
+    usdval = contract.storage[PRICE] or call(SCHELLING_COIN, 4)
 
     # Update contract epochs
-    while epoch > last_epoch:
+    if epoch > last_epoch:
+        delta = epoch - last_epoch
+        last_interest_rate = contract.storage[LAST_INTEREST_RATE]
 
-        num_hashed_votes = contract.storage[NUM_HASHED_VOTES]
-        # Gather legitimate revealed votes
-        o = array(num_hashed_votes)
-        i = 0
-        j = 0
-        total_deposit = contract.storage[TOTAL_DEPOSIT]
-        total_reward
-        while i < num_hashed_votes:
-            v = contract.storage[REVEALED_VOTES + i]
-            if v > 0: # No need to do check, check was already made in (8)
-                # Original form is val * 2^160 + address, we convert to
-                # val * 2^160 + index
-                o[j] = v & (-2^160) + i
-                j = j + 1
-            else:
-                dep = contract.storage[DEPOSITS + i]
-                total_deposit -= dep
-                contract.storage[ACCOUNTS + (v % 2^160)] += dep
-                total_reward += dep
-            i = i + 1
-        o2 = call(MERGESORT, o, j, j)
-
-
-        # If contract is short USD, we want fewer people long USD, so charge rent on it
-        # Otherwise, do the reverse
-        pointer = EPOCHSTORE + last_epoch * 2
         if contract.storage[USD_EXPOSURE] < 0:
-            contract.storage[pointer + 3] = contract.storage[pointer + 1] - 10000
-        else:
-            contract.storage[pointer + 3] = contract.storage[pointer + 1] + 10000
-    
-        i = 0
-        td = 0
-        new_value = contract.storage[pointer]
-        new_value_chosen = 0
+            contract.storage[LAST_INTEREST_RATE] = last_interest_rate - 10000 * delta
+        elif contract.storage[USD_EXPOSURE] > 0:
+            contract.storage[LAST_INTEREST_RATE] = last_interest_rate + 10000 * delta
+        
+        last_accum = contract.storage[EPOCHSTORE + last_accum]
+        contract.storage[EPOCHSTORE + epoch] = last_accum + last_accum * last_interest_rate * delta / 10^9
 
-        while i < j:
-            index = o2[i] % 2^160
-            dep = contract.storage[DEPOSITS + i]
-            account = contract.storage[REVEALED_VOTES + index] % 2^160
-            # Reward accounts who are close to the medium
-            if td + dep > total_deposit / 4 or td < total_deposit * 3 / 4:
-                my_reward = dep * 2002 / 2000
-            else:
-                my_reward = dep * 1999 / 2000
-            contract.storage[ACCOUNTS + account] += my_reward
-            total_reward += my_reward
-            # Set the price to the new median value
-            if td + bal >= total_deposit / 2 and !new_value_chosen:
-                new_value = o2[i] / 2^160
-                new_value_chosen = 1
-            td += bal
-            i += 1
-        contract.storage[ETH_EXPOSURE] = contract.storage[ETH_EXPOSURE] + total_reward
-        contract.storage[pointer + 2] = new_value
-
-        last_epoch = last_epoch + 1
-        contract.storage[NUM_HASHED_VOTES] = 0
-
-    contract.storage[LAST_EPOCH] = last_epoch
+        # Proceeds go to support the SchellingCoin feeding it price data, ultimately providing the depositors
+        # of the SchellingCoin an interest rate
+        bal = (contract.balance - contract.storage[ETH_EXPOSURE]) / 10000
+        if bal < 0:
+            bal = 0
+        usdval = msg(tx.gas - 100, SCHELLING_COIN, bal, 4)
+        contract.storage[PRICE] = usdval
+        contract.storage[LAST_EPOCH] = epoch
 
     # Now, the API begins
 
-    # Update account
-    if msg.data[0] == 0:
-        acct = msg.data[1]
-    else:
-        acct = sender
+    # Useful variables
+    my_acct = ACCOUNTS + msg.sender * 3
+    recv_acct = ACCOUNTS + msg.data[1] * 3
+    ethbal = contract.storage[my_acct]
+    usdbal = contract.storage[my_acct + 1]
 
-    # Safeguard against targeting accounts incorrectly
-    if contract.storage[ACCOUNTS + acct - 1] or contract.storage[ACCOUNTS + acct + 3]:
-        return(0)
-    account_last_epoch = contract.storage[ACCOUNTS + sender + 2]
-    while account_last_epoch < last_epoch:
-        usdbal = contract.storage[ACCOUNTS + sender + 1]
-        interest = contract.storage[EPOCHSTORE + account_last_epoch * 2 + 1]
-        usdbal = usdbal + usdbal * interest / 10^9
-        contract.storage[ACCOUNTS + sender + 1] = usdbal
-        account_last_epoch = account_last_epoch + 1
-    contract.storage[ACCOUNTS + sender + 2] = last_epoch
-    # Force liquidation
-    ethbal = contract.storage[ACCOUNTS + sender]
-    usdval = contract.storage[EPOCHSTORE + last_epoch * 2]
-    if usdbal * 50 + usdval * ethbal * 45 < 0:
-        contract.storage[ETH_EXPOSURE] = contract.storage[ETH_EXPOSURE] - ethbal
-        contract.storage[USD_EXPOSURE] = contract.storage[USD_EXPOSURE] + usdbal
-        contract.stotage[ACCOUNTS + sender] = 0
-        contract.stotage[ACCOUNTS + sender + 1] = 0
+    # Apply interest rates to sender and liquidation-test self
+    if msg.data[0] != 9:
+        call(contract.address, [9, msg.sender], 2)
     
     # Send ETH (to, value)
     if msg.data[0] == 1:
-        if msg.data[2] > 0 and msg.data[2] < ethbal and usdbal * 50 + (ethbal - msg.data[2]) * usdval * 45 >= 0:
-            contract.storage[ACCOUNTS + sender] = ethbal - msg.data[2]
-            call(contract.address,[0, msg.data[1]], 2)
-            contract.storage[ACCOUNTS + msg.data[1]] = contract.storage[ACCOUNTS + msg.data[1]] + msg.data[2]
+        if msg.data[2] > 0 and msg.data[2] <= ethbal and usdbal * usdval * 10 + (ethbal - msg.data[2]) * 9 >= 0:
+            contract.storage[my_acct] = ethbal - msg.data[2]
+            call(contract.address, [9, msg.data[1]], 2)
+            contract.storage[recv_acct] += msg.data[2]
             return(1)
     # Send USD (to, value)
     elif msg.data[0] == 2:
-        if msg.data[2] > 0 and msg.data[2] < usdbal and (usdbal - msg.data[2]) * 50 + ethbal * usdval * 45 >= 0:
-            contract.storage[ACCOUNTS + sender + 1] = usdbal - msg.data[2]
-            call(contract.address,[0, msg.data[1]], 2)
-            contract.storage[ACCOUNTS + msg.data[1] + 1] = contract.storage[ACCOUNTS + msg.data[1] + 1] + msg.data[2]
+        if msg.data[2] > 0 and (usdbal - msg.data[2]) * usdval * 10 + ethbal * 9 >= 0:
+            contract.storage[my_acct + 1] = usdbal - msg.data[2]
+            call(contract.address, [9, msg.data[1]], 2)
+            contract.storage[recv_acct + 1] += msg.data[2]
             return(1)
     # Convert USD to ETH (usdvalue)
     elif msg.data[0] == 3:
-        if msg.data[1] > 0 and msg.data[1] < usdbal:
+        if msg.data[1] > 0:
             usdminus = msg.data[1]
             ethplus = usdminus * usdval * 999 / 1000
-            if (usdbal - usdminus) * 50 + (ethbal + ethplus) * usdval * 45 >= 0:
-                contract.storage[ACCOUNTS + sender] = ethbal + ethplus
-                contract.storage[ACCOUNTS + sender + 1] = usdbal + usdminus
-                contract.storage[ETH_EXPOSURE] = contract.storage[ETH_EXPOSURE] + ethplus
-                contract.storage[USD_EXPOSURE] = contract.storage[USD_EXPOSURE] - usdminus
-            return([ethbal + ethplus, usdbal - usdminus], 2)
+            if (usdbal - usdminus) * usdval * 10 + (ethbal + ethplus) * 9 >= 0:
+                contract.storage[my_acct] = ethbal + ethplus
+                contract.storage[my_acct + 1] = usdbal - usdminus
+                contract.storage[ETH_EXPOSURE] += ethplus
+                contract.storage[USD_EXPOSURE] -= usdminus
+                return([ethbal + ethplus, usdbal - usdminus], 2)
+            return([ethbal, usdbal], 2)
     # Convert ETH to USD (ethvalue)
     elif msg.data[0] == 4:
         if msg.data[1] >= 0 and msg.data[1] < ethbal:
             usdplus = msg.data[1] / usdval * 999 / 1000
             ethminus = msg.data[1]
-            if (usdbal + usdplus) * 50 + (ethbal - ethminus) * usdval * 45 >= 0:
-                contract.storage[ACCOUNTS + sender] = ethbal - ethminus
-                contract.storage[ACCOUNTS + sender + 1] = usdbal + usdplus
+            if (usdbal + usdplus) * 10 + (ethbal - ethminus) * usdval * 9 >= 0:
+                contract.storage[my_acct] = ethbal - ethminus
+                contract.storage[my_acct + 1] = usdbal + usdplus
                 contract.storage[ETH_EXPOSURE] -= ethminus
                 contract.storage[USD_EXPOSURE] += usdplus
-            return([ethbal - ethminus, usdbal + usdplus], 2)
+                return([ethbal - ethminus, usdbal + usdplus], 2)
+            return([ethbal, usdbal], 2)
     # Deposit
     elif msg.data[0] == 5:
-        contract.storage[ACCOUNTS + sender] = ethbal + msg.value
-        contract.storage[ETH_EXPOSURE] = contract.storage[ETH_EXPOSURE] + msg.value
+        contract.storage[my_acct] = ethbal + msg.value
+        contract.storage[ETH_EXPOSURE] += msg.value
         return(ethbal + msg.value)
     # Withdraw (ethvalue)
     elif msg.data[0] == 6:
-        if msg.data[1] >= 0 and msg.data[1] <= ethbal:
-            contract.storage[ACCOUNTS + sender] = ethbal - msg.data[1]
-            contract.storage[ETH_EXPOSURE] += msg.data[1]
+        if msg.data[1] > 0 and msg.data[1] < ethbal and usdbal * usdval * 10 + (ethbal - msg.data[1]) * 9 >= 0:
+            contract.storage[myacct] = ethbal - msg.data[1]
+            contract.storage[ETH_EXPOSURE] -= msg.data[1]
             send(msg.sender, msg.data[1])
             return(ethbal - msg.data[1])
-    # Submit hash (hash, deposit)
-    # Hash is sha3(value * 2^160 + sender address)
+    # Balance query (acct)
     elif msg.data[0] == 7:
-        if subindex < 500 and msg.data[2] <= ethbal:
-            contract.storage[ACCOUNTS + sender] = ethbal - msg.data[2]
-            contract.storage[ETH_EXPOSURE] -= msg.data[2]
-            num_hashed_votes = contract.storage[NUM_HASHED_VOTES]
-            contract.storage[HASHED_VOTES + num_hashed_votes] = msg.data[1]
-            contract.storage[DEPOSITS + num_hashed_votes] += msg.data[2]
-            contract.storage[NUM_HASHED_VOTES] = num_hashed_votes + 1
-            contract.storage[TOTAL_DEPOSIT] += msg.data[2]
-            return(num_hashed_votes)
-    # Submit result (index, val)
-    # Be sure to submit the actual USD value, not the address/value combination that you hashed 
-    elif msg.data[0] == 8:
-        if subindex >= 500:
-            v = msg.sender * 2^160 + msg.data[2]
-            if sha3(v) == contract.storage[HASHED_VOTES + msg.data[1]]:
-                contract.storage[REVEALED_VOTES + msg.data[i]] = v
-                return(1)
-            return(0)
-    # Balance query
-    elif msg.data[0] == 9:
-        return([ethbal, usdbal], 2)
+        if msg.datasize > 1:
+            call(contract.address, [9, msg.data[1]], 2)
+            return([contract.storage[recv_acct], contract.storage[recv_acct + 1]], 2)
+        else:
+            return([ethbal, usdbal], 2)
     # Global state query
-    elif msg.data[0] == 10:
-        price = contract.storage[EPOCHSTORE + last_epoch * 2]
-        interest = contract.storage[EPOCHSTORE + last_epoch * 2 + 1]
-        return([last_epoch, price, interest], 3)
+    elif msg.data[0] == 8:
+        interest = contract.storage[LAST_INTEREST_RATE]
+        usd_exposure = contract.storage[USD_EXPOSURE]
+        eth_exposure = contract.storage[ETH_EXPOSURE]
+        eth_balance = contract.balance
+        return([epoch, usdval, interest, usd_exposure, eth_exposure, eth_balance], 6)
+    # Update and liquidation test any account, with bounty for success
+    elif msg.data[0] == 9:
+        account_last_epoch = contract.storage[recv_acct + 2] or 0
+        if account_last_epoch != epoch:
+            cur_balance = contract.storage[recv_acct + 1]
+            new_balance = cur_balance * contract.storage[EPOCHSTORE + epoch] / contract.storage[EPOCHSTORE + account_last_epoch]
+            contract.storage[recv_acct + 1] = new_balance
+            contract.storage[recv_acct + 2] = last_epoch
+            contract.storage[USD_EXPOSURE] += new_balance - cur_balance
+        
+        ethbal = contract.storage[recv_acct]
+        usdbal = contract.storage[recv_acct + 1]
+
+        if usdbal * usdval * 10 + ethbal * 9 < 0:
+            contract.storage[ETH_EXPOSURE] = contract.storage[ETH_EXPOSURE] - ethbal + ethbal / 50
+            contract.storage[USD_EXPOSURE] = contract.storage[USD_EXPOSURE] + usdbal
+            contract.storage[my_acct] += ethbal / 50
+            contract.storage[recv_acct] = 0
+            contract.storage[recv_acct + 1] = 0
+            return(1)
+        return(0)

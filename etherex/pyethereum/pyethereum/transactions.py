@@ -107,7 +107,7 @@ class Transaction(object):
     def to_dict(self):
         h = {}
         for name, typ, default in tx_structure:
-            h[name] = getattr(self, name)
+            h[name] = utils.printers[typ](getattr(self, name))
         h['sender'] = self.sender
         return h
 

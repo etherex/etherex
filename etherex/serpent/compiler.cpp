@@ -86,15 +86,14 @@ programData opcodeify(Node node, programAux aux=Aux()) {
         Node code = astnode("____CODE", o, m);
         Node nodelist[] = {
             token("$begincode"+symb+".endcode"+symb, m), token("DUP", m),
-            sub.code,
-            token("$begincode"+symb, m), token("CODECOPY", m),
+            token("$begincode"+symb, m), sub.code, token("CODECOPY", m),
             token("$endcode"+symb, m), token("JUMP", m),
             token("~begincode"+symb, m), code, token("~endcode"+symb, m)
         };
         return pd(sub.aux, multiToken(nodelist, 10, m));
     }
     std::vector<Node> subs;
-    for (int i = 0; i < node.args.size(); i++) {
+	for (unsigned i = 0; i < node.args.size(); i++) {
         programData sub = opcodeify(node.args[i], aux);
         aux = sub.aux;
         subs.push_back(sub.code);
@@ -169,7 +168,7 @@ programData opcodeify(Node node, programAux aux=Aux()) {
         nodes.push_back(token(intToDecimal(subs.size() * 32 - 1), m));
         nodes.push_back(token("ADD", m));
         nodes.push_back(token("MSTORE8", m));
-        for (int i = 0; i < subs.size(); i++) {
+		for (unsigned i = 0; i < subs.size(); i++) {
             nodes.push_back(token("DUP", m));
             nodes.push_back(subs[i]);
             nodes.push_back(token("SWAP", m));
@@ -246,7 +245,7 @@ programAux buildDict(Node program, programAux aux, int labelLength) {
     // A sub-program (ie. LLL)
     else if (program.val == "____CODE") {
         programAux auks = Aux();
-        for (int i = 0; i < program.args.size(); i++) {
+		for (unsigned i = 0; i < program.args.size(); i++) {
             auks = buildDict(program.args[i], auks, labelLength);
         }
         for (std::map<std::string,std::string>::iterator it=auks.vars.begin();
@@ -258,7 +257,7 @@ programAux buildDict(Node program, programAux aux, int labelLength) {
     }
     // Normal sub-block
     else {
-        for (int i = 0; i < program.args.size(); i++) {
+		for (unsigned i = 0; i < program.args.size(); i++) {
             aux = buildDict(program.args[i], aux, labelLength);
         }
     }
@@ -296,7 +295,7 @@ Node substDict(Node program, programAux aux, int labelLength) {
         else return program;
     }
     else {
-        for (int i = 0; i < program.args.size(); i++) {
+		for (unsigned i = 0; i < program.args.size(); i++) {
             Node n = substDict(program.args[i], aux, labelLength);
             if (n.type == TOKEN || n.args.size()) out.push_back(n);
         }
@@ -320,9 +319,9 @@ std::vector<Node> flatten(Node derefed) {
         o.push_back(derefed);
     }
     else {
-        for (int i = 0; i < derefed.args.size(); i++) {
+		for (unsigned i = 0; i < derefed.args.size(); i++) {
             std::vector<Node> oprime = flatten(derefed.args[i]);
-            for (int j = 0; j < oprime.size(); j++) o.push_back(oprime[j]);
+			for (unsigned j = 0; j < oprime.size(); j++) o.push_back(oprime[j]);
         }
     }
     return o;
@@ -331,7 +330,7 @@ std::vector<Node> flatten(Node derefed) {
 // Opcodes -> bin
 std::string serialize(std::vector<Node> codons) {
     std::string o;
-    for (int i = 0; i < codons.size(); i++) {
+	for (unsigned i = 0; i < codons.size(); i++) {
         int v;
         if (isNumberLike(codons[i])) {
             v = decimalToInt(codons[i].val);
@@ -351,7 +350,7 @@ std::string serialize(std::vector<Node> codons) {
 std::vector<Node> deserialize(std::string ser) {
     std::vector<Node> o;
     int backCount = 0;
-    for (int i = 0; i < ser.length(); i++) {
+	for (unsigned i = 0; i < ser.length(); i++) {
         unsigned char v = (unsigned char)ser[i];
         std::string oper = op((int)v);
         if (oper != "" && backCount <= 0) o.push_back(token(oper));
@@ -390,9 +389,9 @@ std::vector<Node> prettyCompileLLL(Node program) {
 // Converts a list of integer values to binary transaction data
 std::string encodeDatalist(std::vector<std::string> vals) {
     std::string o;
-    for (int i = 0; i < vals.size(); i++) {
+	for (unsigned i = 0; i < vals.size(); i++) {
         std::vector<Node> n = toByteArr(strToNumeric(vals[i]), Metadata(), 32);
-        for (int j = 0; j < n.size(); j++) {
+		for (unsigned j = 0; j < n.size(); j++) {
             int v = decimalToInt(n[j].val);
             o += (char)v;
         }
@@ -403,9 +402,9 @@ std::string encodeDatalist(std::vector<std::string> vals) {
 // Converts binary transaction data into a list of integer values
 std::vector<std::string> decodeDatalist(std::string ser) {
     std::vector<std::string> out;
-    for (int i = 0; i < ser.length(); i+= 32) {
+	for (unsigned i = 0; i < ser.length(); i+= 32) {
         std::string o = "0";
-        for (int j = i; j < i + 32; j++) {
+		for (unsigned j = i; j < i + 32; j++) {
             int vj = (int)(unsigned char)ser[j];
             o = decimalAdd(decimalMul(o, "256"), intToDecimal(vj));
         }

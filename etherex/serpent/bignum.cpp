@@ -38,10 +38,10 @@ std::string decimalDigitMul(std::string a, int dig) {
 //Multiply two strings representing decimal values
 std::string decimalMul(std::string a, std::string b) {
     std::string o = "0";
-    for (int i = 0; i < b.length(); i++) {
+	for (unsigned i = 0; i < b.length(); i++) {
         std::string n = decimalDigitMul(a, b[i] - '0');
         if (n != "0") {
-            for (int j = i + 1; j < b.length(); j++) n += "0";
+			for (unsigned j = i + 1; j < b.length(); j++) n += "0";
         }
         o = decimalAdd(o, n);
     }
@@ -60,7 +60,7 @@ std::string decimalSub(std::string a, std::string b) {
     if (b == a) return "0";
     while (b.length() < a.length()) b = "0" + b;
     std::string c = b;
-    for (int i = 0; i < c.length(); i++) c[i] = '0' + ('9' - c[i]);
+	for (unsigned i = 0; i < c.length(); i++) c[i] = '0' + ('9' - c[i]);
     std::string o = decimalAdd(decimalAdd(a, c).substr(1), "1");
     while (o.size() > 1 && o[0] == '0') o = o.substr(1);
     return o;

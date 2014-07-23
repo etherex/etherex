@@ -1,41 +1,44 @@
-#!/usr/bin/env python
+from setuptools import setup, Extension
 
 import os
-from setuptools import setup
-from setuptools.command.install import install
-from distutils.command.build import build
-from subprocess import call
+from distutils.sysconfig import get_config_vars
 
-
-class build_serpent(build):
-    def run(self):
-        # run original build code
-        build.run(self)
-        call('make')
-
-
-class install_serpent(install):
-    def run(self):
-        # run original install code
-        install.run(self)
-        call(['make', 'install'])
-
-
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
-
+(opt,) = get_config_vars('OPT')
+os.environ['OPT'] = " ".join(
+    flag for flag in opt.split() if flag != '-Wstrict-prototypes'
+)
 
 setup(
-    name='ethereum-serpent',
-    version='1.3.8',
+    # Name of this package
+    name="ethereum-serpent",
+
+    # Package version
+    version='1.5.4',
+
     description='Serpent compiler',
     maintainer='Vitalik Buterin',
     maintainer_email='v@buterin.com',
     license='WTFPL',
     url='http://www.ethereum.org/',
-    long_description=read('README.md'),
-    cmdclass={
-        'build': build_serpent,
-        'install': install_serpent,
+
+    # Describes how to build the actual extension module from C source files.
+    ext_modules=[
+         Extension(
+             'pyext',         # Python name of the module
+             ['bignum.cpp', 'util.cpp', 'tokenize.cpp',
+              'lllparser.cpp', 'parser.cpp', 'rewriter.cpp',
+              'compiler.cpp', 'funcs.cpp', 'pyserpent.cpp']
+         )],
+    py_modules=[
+        'serpent',
+        'pyserpent'
+    ],
+    scripts=[
+        'serpent.py'
+    ],
+    entry_points={
+        'console_scripts': [
+            'serpent = serpent:main',
+        ],
     }
-)
+    ),

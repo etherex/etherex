@@ -45,6 +45,7 @@ class TestEtherEx(object):
         self.ccontract = self.sim.load_contract(self.ALICE, self.ccode)
 
     def test_creation(self):
+        assert self.sim.get_storage_data(self.contract, 10) == 0x88554646BB
         assert self.sim.get_storage_data(self.contract, 15) == int(self.ALICE.address, 16)
         assert self.sim.get_storage_data(self.bcontract, 15) == int(self.ALICE.address, 16)
         assert self.sim.get_storage_data(self.icontract, 15) == int(self.ALICE.address, 16)

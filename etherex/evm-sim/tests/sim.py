@@ -1,41 +1,33 @@
 from collections import Counter
-import re
 import subprocess
 
 from pyethereum import transactions, blocks, processblock, utils
-
-from utils import encode_datalist, decode_datalist
+from serpent import encode_datalist, decode_datalist
 
 # processblock.debug = 1
 
 
-def compile_serpent(filename):
+def compile_cli(cmd, args, filename):
     try:
-        output = subprocess.check_output(["serpent", "compile", filename], stderr=subprocess.STDOUT)
+        output = subprocess.check_output([cmd] + args + [filename], stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
         raise CompilationException(e.output)
 
     return output.strip().decode('hex')
+
+
+def compile_serpent(filename):
+    # with open(filename) as f:
+    #     return compile(f.read())
+    return compile_cli("serpent", ["compile"], filename)
+
 
 def compile_lll(filename):
-    try:
-        output = subprocess.check_output(["lllc", filename], stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        raise CompilationException(e.output)
+    return compile_cli("lllc", [], filename)
 
-    return output.strip().decode('hex')
 
 def compile_mutan(filename):
-    try:
-        output = subprocess.check_output(["mutan", filename], stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        raise CompilationException(e.output)
-
-    match = re.search("hex: 0x([0-9a-f]+)", output)
-    if not match:
-        raise CompilationException(output)
-
-    return match.group(1).decode('hex')
+    return compile_cli("mutan", [], filename)
 
 
 class CompilationException(Exception):
@@ -60,6 +52,7 @@ class Simulator(object):
 
     def reset(self):
         self.genesis = blocks.genesis(self.founders)
+        self.genesis.timestamp = 1388534400  # 2014-01-01
         self.nonce = Counter()
 
     def load_contract(self, frm, code, endowment=0, gas=STARTGAS):

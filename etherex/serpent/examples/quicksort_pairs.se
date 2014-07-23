@@ -1,0 +1,42 @@
+# Quicksort pairs
+# eg. input of the form [ 30, 1, 90, 2, 70, 3, 50, 4]
+# outputs [ 30, 1, 50, 4, 70, 3, 90, 2 ]
+#
+# Note: this can be used as a generalized sorting algorithm:
+# map every object to [ key, ref ] where `ref` is the index
+# in memory to all of the properties and `key` is the key to
+# sort by
+
+
+if msg.datasize <= 2:
+    return(msg.data, msg.datasize)
+else:
+    low = array(msg.datasize)
+    lsz = 0
+    high = array(msg.datasize)
+    hsz = 0
+    i = 2
+    while i < msg.datasize:
+        if msg.data[i] < msg.data[0]:
+            low[lsz] = msg.data[i]
+            low[lsz + 1] = msg.data[i + 1]
+            lsz += 2
+        else:
+            high[hsz] = msg.data[i]
+            high[hsz + 1] = msg.data[i + 1]
+            hsz += 2
+        i = i + 2
+    low = call(contract.address, low, lsz, lsz)
+    high = call(contract.address, high, hsz, hsz)
+    o = array(msg.datasize)
+    i = 0
+    while i < lsz:
+        o[i] = low[i]
+        i += 1
+    o[lsz] = msg.data[0]
+    o[lsz + 1] = msg.data[1]
+    j = 0
+    while j < hsz:
+        o[lsz + 2 + j] = high[j]
+        j += 1
+    return(o, msg.datasize)

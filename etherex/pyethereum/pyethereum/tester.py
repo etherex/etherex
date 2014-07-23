@@ -1,6 +1,6 @@
 import pyethereum
-import pyserpent
 import time
+serpent = None
 
 u = pyethereum.utils
 t = pyethereum.transactions
@@ -19,16 +19,20 @@ a0, a1, a2, a3, a4, a5, a6, a7, a8, a9 = accounts[:10]
 
 
 class state():
-    def __init__(self):
+    def __init__(self, num_accounts=len(keys)):
+        global serpent
+        if not serpent:
+            serpent = __import__('serpent')
         o = {}
-        for i in range(len(keys)):
+        for i in range(num_accounts):
             o[accounts[i]] = 10**18
         self.block = b.genesis(o)
+        self.block.coinbase = a0
         self.mine(1)
 
     def contract(self, code, sender=k0, endowment=0):
         sendnonce = self.block.get_nonce(u.privtoaddr(sender))
-        evm = pyserpent.compile(code)
+        evm = serpent.compile(code)
         tx = t.contract(sendnonce, 1, 100000, endowment, evm)
         tx.sign(sender)
         (s, a) = pb.apply_transaction(self.block, tx)
@@ -38,23 +42,14 @@ class state():
 
     def send(self, sender, to, value, data=[]):
         sendnonce = self.block.get_nonce(u.privtoaddr(sender))
-        data2 = []
-        for d in data:
-            if isinstance(d, (int, long)):
-                data2.append(str(d))
-            elif len(d) == 0:
-                data2.append('0')
-            elif len(d) == 40:
-                data2.append('0x'+d)
-            else:
-                data2.append('0x'+d.encode('hex'))
-        evmdata = pyserpent.encode_datalist(data2)
+        evmdata = serpent.encode_datalist(data)
         tx = t.Transaction(sendnonce, 1, 100000, to, value, evmdata)
         tx.sign(sender)
         (s, r) = pb.apply_transaction(self.block, tx)
         if not s:
             raise Exception("Transaction failed")
-        return pyserpent.decode_datalist(r)
+        o = serpent.decode_datalist(r)
+        return map(lambda x: x-2**256 if x > 2**255 else x, o)
 
     def mine(self, n=1, coinbase=a0):
         for i in range(n):

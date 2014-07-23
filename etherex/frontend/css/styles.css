@@ -78,7 +78,6 @@ table {
   border: 0;
   border-radius: 10px;
   margin: 1em 5%;
-  width: 90%;
 }
 tr th,
 tr:nth-child(even) td {
@@ -97,9 +96,31 @@ tr:last-child td {
 */
 td, th {
   padding: .5em 1em;
+  max-width: 14em;
+  width: 50%;
 }
 td.sub {
   text-align: right;
+}
+td:nth-child(1) {
+  text-align: left;
+  white-space: nowrap;
+}
+td:nth-child(2) {
+  text-align: right;
+  white-space: nowrap;
+}
+td:nth-child(2) span {
+  max-width: 70%;
+  vertical-align: bottom;
+}
+
+.address {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }
 
 a:link,
@@ -109,7 +130,7 @@ a:visited {
 
 #page {
   margin: 0 auto;
-  max-width: 32em;
+  max-width: 40em;
   padding: 1em;
 }
 
@@ -209,6 +230,95 @@ a:focus, li:focus { outline: none; }
 .ui-tabs .ui-tabs-nav li a, .ui-tabs.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-selected a { cursor: pointer; }
 .ui-tabs .ui-tabs-panel { display: block; border-width: 0; padding: 2em 0 0; background: none; }
 .ui-tabs .ui-tabs-hide { display: none !important; }
+
+
+/* Transactions */
+
+ul#latest {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  border: 1em rgba(0,0,0, 0.05) solid;
+}
+ul#latest li {
+  padding: 4pt 0pt;
+}
+ul#latest li:nth-child(odd) {
+  background-color: rgba(0,0,0, 0.05);
+}
+span.timestamp {
+  width: 12em;
+  display: inline-block;
+  color: #333;
+}
+span#gav {
+  font-weight: bold;
+}
+span#eth {
+  font-weight: bold;
+}
+div#balance {
+  margin-top: 30pt;
+  float: left;
+}
+div#addr {
+  margin-top: 30pt;
+  float: right;
+}
+span.xfer {
+  color: #333;
+}
+span.out {
+  color: #800;
+}
+span.in {
+  color: #008;
+}
+span.ind {
+  font-weight: bold;
+  margin: 0 4pt;
+}
+span.to, span.from {
+  font-weight: normal;
+  display: inline-block;
+  /*width: 32em;*/
+}
+span.value {
+  font-weight: bold;
+  width: 8em;
+  display: inline-block;
+  text-align: right;
+}
+span.name {
+  font-weight: bold;
+  font-size: small;
+  padding: 0 3pt;
+  width: 3em;
+  display: inline-block;
+  text-align: center;
+}
+span.xfer span.name {
+  font-weight: normal;
+}
+span.units {
+  font-size: small;
+  padding: 0 4pt;
+}
+span.confirms, span.unconfirmed {
+  background: #8d9;
+  color: #000;
+  font-size: small;
+  margin: -1pt 4pt 4pt 4pt;
+  padding: 1pt 3pt 1pt 3pt;
+  border: #474 1pt solid;
+  border-radius: 4pt;
+  float: right;
+}
+span.unconfirmed {
+  background: #f88;
+  border-color: #844;
+}
+
 
 /* Icons */
 

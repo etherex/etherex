@@ -1,0 +1,9 @@
+code:
+    if msg.data[0] == "hash":
+        proposal_id = sha3(msg.data[1])
+        return(proposal_id)
+    else:
+        return(0)
+
+
+

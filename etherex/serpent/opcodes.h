@@ -10,7 +10,7 @@ std::map<std::string, int> opcodes;
 std::map<int, std::string> reverseOpcodes;
 
 // Fetches everything EXCEPT PUSH1..32
-std::pair<std::string, int> _opcode(std::string ops, int opi, bool bk=false) {
+std::pair<std::string, int> _opcode(std::string ops, int opi) {
     if (!opcodes.size()) {
         opcodes["STOP"] = 0x00;
         opcodes["ADD"] = 0x01;
@@ -81,11 +81,11 @@ std::pair<std::string, int> _opcode(std::string ops, int opi, bool bk=false) {
 }
 
 int opcode(std::string op) {
-    return _opcode(op, 0, false).second;
+	return _opcode(op, 0).second;
 }
 
 std::string op(int opcode) {
-    return _opcode("", opcode, true).first;
+	return _opcode("", opcode).first;
 }
 
 #endif

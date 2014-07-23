@@ -11,13 +11,14 @@ int precedence(Node tok) {
     std::string v = tok.val;
     if (v == "!" || v == "not") return 0;
     else if (v=="^" || v == "**") return 1;
-    else if (v=="*" || v=="/" || v=="@/" || v=="%" | v=="@%") return 2;
+	else if (v=="*" || v=="/" || v=="@/" || v=="%" || v=="@%") return 2;
     else if (v=="+" || v=="-") return 3;
     else if (v=="<" || v==">" || v=="<=" || v==">=") return 4;
     else if (v=="@<" || v=="@>" || v=="@<=" || v=="@>=") return 4;
-    else if (v=="&" || v=="|" || v=="xor" || v=="==") return 5;
+    else if (v=="&" || v=="|" || v=="xor" || v=="==" || v == "!=") return 5;
     else if (v=="&&" || v=="and") return 6;    
     else if (v=="||" || v=="or") return 7;
+    else if (v==":") return 8;
     else if (v=="=") return 10;
     else if (v=="+=" || v=="-=" || v=="*=" || v=="/=" || v=="%=") return 10;
     else if (v=="@/=" || v=="@%=") return 10;
@@ -28,15 +29,13 @@ int precedence(Node tok) {
 int toktype(Node tok) {
     if (tok.type == ASTNODE) return COMPOUND;
     std::string v = tok.val;
-    if (v == "(" || v == "[") return LPAREN;
-    else if (v == ")" || v == "]") return RPAREN;
+    if (v == "(" || v == "[" || v == "{") return LPAREN;
+    else if (v == ")" || v == "]" || v == "}") return RPAREN;
     else if (v == ",") return COMMA;
-    else if (v == ":") return COLON;
     else if (v == "!" || v == "not") return UNARY_OP;
     else if (precedence(tok) >= 0) return BINARY_OP;
-    bool isSymbolic = true;
     if (tok.val[0] != '"' && tok.val[0] != '\'') {
-        for (int i = 0; i < tok.val.length(); i++) {
+		for (unsigned i = 0; i < tok.val.length(); i++) {
             if (chartype(tok.val[i]) == SYMB) {
                 err("Invalid symbol: "+tok.val, tok.metadata);
             }
@@ -55,7 +54,7 @@ std::vector<Node> shuntingYard(std::vector<Node> tokens) {
     std::vector<Node> oq;
     std::vector<Node> stack;
     Node prev, tok;
-    int prevtyp, toktyp;
+    int prevtyp = 0, toktyp = 0;
     
     while (iq.size()) {
         prev = tok;
@@ -72,11 +71,8 @@ std::vector<Node> shuntingYard(std::vector<Node> tokens) {
             if (prevtyp != ALPHANUM && prevtyp != RPAREN) {
                 oq.push_back(token("id", tok.metadata));
             }
-            Node fun = oq.back();
-            oq.pop_back();
-            oq.push_back(tok);
-            oq.push_back(fun);
             stack.push_back(tok);
+            oq.push_back(tok);
         }
         // If rparen, keep moving from stack to output queue until lparen
         else if (toktyp == RPAREN) {
@@ -84,7 +80,9 @@ std::vector<Node> shuntingYard(std::vector<Node> tokens) {
                 oq.push_back(stack.back());
                 stack.pop_back();
             }
-            if (stack.size()) stack.pop_back();
+            if (stack.size()) {
+                stack.pop_back();
+            }
             oq.push_back(tok);
         }
         // If binary op, keep popping from stack while higher bedmas precedence
@@ -94,20 +92,20 @@ std::vector<Node> shuntingYard(std::vector<Node> tokens) {
             }
             int prec = precedence(tok);
             while (stack.size() 
-                  && toktype(stack.back()) == BINARY_OP 
+                  && (toktype(stack.back()) == BINARY_OP 
+                      || toktype(stack.back()) == UNARY_OP)
                   && precedence(stack.back()) <= prec) {
                 oq.push_back(stack.back());
                 stack.pop_back();
             }
             stack.push_back(tok);
         }
-        // Comma and colon mean finish evaluating the argument
-        else if (toktyp == COMMA || toktyp == COLON) {
+        // Comma means finish evaluating the argument
+        else if (toktyp == COMMA) {
             while (stack.size() && toktype(stack.back()) != LPAREN) {
                 oq.push_back(stack.back());
                 stack.pop_back();
             }
-            if (toktyp == COLON) oq.push_back(tok);
         }
     }
     while (stack.size()) {
@@ -149,17 +147,22 @@ Node treefy(std::vector<Node> stream) {
             oq.push_back(astnode(tok.val, args2, tok.metadata));
         }
         // If rparen, keep grabbing until we get to an lparen
-        else if (toktype(tok) == RPAREN) {
+        else if (typ == RPAREN) {
             std::vector<Node> args;
             while (1) {
+                if (toktype(oq.back()) == LPAREN) break;
                 args.push_back(oq.back());
                 oq.pop_back();
                 if (!oq.size()) err("Bracket without matching", tok.metadata);
-                if (toktype(oq.back()) == LPAREN) break;
             }
             oq.pop_back();
+            args.push_back(oq.back());
+            oq.pop_back();
             // We represent a[b] as (access a b)
-            if (tok.val == "]") args.push_back(token("access", tok.metadata));
+            if (tok.val == "]")
+                 args.push_back(token("access", tok.metadata));
+            if (args.back().type == ASTNODE)
+                 args.push_back(token("fun", tok.metadata));
             std::string fun = args.back().val;
             args.pop_back();
             // We represent [1,2,3] as (array_lit 1 2 3)
@@ -176,7 +179,7 @@ Node treefy(std::vector<Node> stream) {
             // into 2 ( id 3 5 * ) +, effectively putting "id" as a dummy
             // function where the algo was expecting a function to call the
             // thing inside the brackets. This reverses that step
-			if (fun == "id" && args2.size()) {
+			if (fun == "id" && args2.size() == 1) {
                 oq.push_back(args2[0]);
             }
             else {
@@ -202,11 +205,11 @@ Node treefy(std::vector<Node> stream) {
             oq.back().args.pop_back();
             oq.back().args.push_back(parseSerpent(root + filename));
         }
-        // Useful for debugging
-        // for (int i = 0; i < oq.size(); i++) {
-        //     std::cerr << printSimple(oq[i]) << " ";
-        // }
-        // std::cerr << "\n";
+        //Useful for debugging
+        //for (int i = 0; i < oq.size(); i++) {
+        //    std::cerr << printSimple(oq[i]) << " ";
+        //}
+        //std::cerr << " <-\n";
     }
     // Output must have one argument
     if (oq.size() == 0) {
@@ -215,7 +218,8 @@ Node treefy(std::vector<Node> stream) {
     else if (oq.size() > 1) {
         err("Multiple expressions or unclosed bracket", oq[1].metadata);
     }
-    else return oq[0];
+
+	return oq[0];
 }
 
 
@@ -227,8 +231,9 @@ Node parseSerpentTokenStream(std::vector<Node> s) {
 
 // Count spaces at beginning of line
 int spaceCount(std::string s) {
-    int pos = 0;
-    while (pos < s.length() && (s[pos] == ' ' || s[pos] == '\t')) pos += 1;
+	unsigned pos = 0;
+	while (pos < s.length() && (s[pos] == ' ' || s[pos] == '\t'))
+		pos++;
     return pos;
 }
 
@@ -241,7 +246,7 @@ bool bodied(std::string tok) {
 bool childBlocked(std::string tok) {
     return tok == "if" || tok == "elif" || tok == "else"
         || tok == "code" || tok == "shared" || tok == "init"
-        || tok == "while";
+        || tok == "while" || tok == "repeat" || tok == "for";
 }
 
 // Are the two commands meant to continue each other? 
@@ -267,7 +272,7 @@ bool isLineEmpty(std::string line) {
 Node parseLines(std::vector<std::string> lines, Metadata metadata, int sp) {
     std::vector<Node> o;
     int origLine = metadata.ln;
-    int i = 0;
+	unsigned i = 0;
     while (i < lines.size()) {
         metadata.ln = origLine + i; 
         std::string main = lines[i];
@@ -279,12 +284,11 @@ Node parseLines(std::vector<std::string> lines, Metadata metadata, int sp) {
         if (spaces != sp) {
             err("Indent mismatch", metadata);
         }
-        int lineIndex = i;
         // Tokenize current line
         std::vector<Node> tokens = tokenize(main.substr(sp), metadata);
         // Remove extraneous tokens, including if / elif
         std::vector<Node> tokens2;
-        for (int j = 0; j < tokens.size(); j++) {
+		for (unsigned j = 0; j < tokens.size(); j++) {
             if (tokens[j].val == "#" || tokens[j].val == "//") break;
             if (j >= 1 || !bodied(tokens[j].val)) {
                 tokens2.push_back(tokens[j]);
@@ -298,8 +302,9 @@ Node parseLines(std::vector<std::string> lines, Metadata metadata, int sp) {
         int childIndent = 999999;
         std::vector<std::string> childBlock;
         while (1) {
-            i += 1;
-            if (i >= lines.size()) break;
+			i++;
+			if (i >= lines.size())
+				break;
             bool ile = isLineEmpty(lines[i]);
             if (!ile) {
                 int spaces = spaceCount(lines[i]);
@@ -311,7 +316,7 @@ Node parseLines(std::vector<std::string> lines, Metadata metadata, int sp) {
         }
         // Child block empty?
         bool cbe = true;
-        for (int i = 0; i < childBlock.size(); i++) {
+		for (unsigned i = 0; i < childBlock.size(); i++) {
             if (childBlock[i].length() > 0) { cbe = false; break; }
         }
         // Bring back if / elif into AST

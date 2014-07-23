@@ -11,7 +11,7 @@
 
 init:
     # c3D definitions
-    contract.storage[10] = 0x88554646AB
+    contract.storage[10] = 585546221227 # 0x88554646AB
     contract.storage[15] = msg.sender
     contract.storage[16] = msg.sender
     contract.storage[17] = block.timestamp
@@ -26,6 +26,10 @@ code:
 
     # Get reference to exchange
     exchange = contract.storage[15]
+
+    # Logging
+    contract.storage[20] = msg.datasize
+    contract.storage[21] = tx.gas
 
     # Get our last recorded pointer
     last = contract.storage[18]
@@ -109,7 +113,7 @@ code:
     elif msg.sender == exchange:
 
         # NameReg
-        msg(tx.gas - 1000, msg.data[1], 0, ["EtherEx - Trades"], 1)
+        msg(tx.gas - 1000, msg.data[1], 0, ["Trades"], 1)
 
         # Set contract parent and owner
         contract.storage[14] = msg.data[0] # Set c3D parent

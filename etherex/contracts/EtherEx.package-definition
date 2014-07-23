@@ -8,10 +8,10 @@
 #  {{swarum_blob_id}} => 0xb5e0478618d5e91682efc0e2a95b3d32cdae546c03f6014dc8df659c2f0f94c3
 
 # First We Deploy DOUG
-#modify-deploy:
-#  doug/doug-v7.lll => {{DOUG}}
-#  (def 'DOUGDATAMODEL 0x0) =>
-#  (def 'DOUGUIPOINTER 0x0) =>
+# deploy:
+#   doug/doug-v7.lll => {{DOUG}}
+#   (def 'DOUGDATAMODEL 0x0) =>
+#   (def 'DOUGUIPOINTER 0x0) =>
 
 # Deploy contracts
 deploy:
@@ -28,16 +28,16 @@ deploy:
   currencies.se => {{Currencies}}
 
 # Register with DOUG
-#transact:
-#  {{DOUG}} => register etherex {{EtherEx}}
-#transact:
-#  {{DOUG}} => register balances {{Balances}}
-#transact:
-#  {{DOUG}} => register indexes {{Indexes}}
-#transact:
-#  {{DOUG}} => register trades {{Trades}}
-#transact:
-#  {{DOUG}} => register currencies {{Currencies}}
+# transact:
+#   {{DOUG}} => register etherex {{EtherEx}}
+# transact:
+#   {{DOUG}} => register balances {{Balances}}
+# transact:
+#   {{DOUG}} => register indexes {{Indexes}}
+# transact:
+#   {{DOUG}} => register trades {{Trades}}
+# transact:
+#   {{DOUG}} => register currencies {{Currencies}}
 
 # Initialize
 transact:

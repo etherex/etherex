@@ -6,7 +6,10 @@ import time
 import blocks
 import transactions
 import trie
+import sys
 import logging
+import json
+import time
 logger = logging.getLogger(__name__)
 
 print_debug = 0
@@ -25,7 +28,7 @@ def disable_debug():
 def logger_debug(*args):
     logger.debug(*args)
     if print_debug:
-        print(args[0] % tuple(args[1:]))
+        sys.stderr.write(args[0] % tuple(args[1:]) + '\n')
 
 GSTEP = 1
 GSTOP = 0
@@ -54,14 +57,15 @@ def verify(block, parent):
                                            uncles=block.uncles)
     assert block2.difficulty == block.difficulty
     assert block2.gas_limit == block.gas_limit
-    block2.finalize()
     for i in range(block.transaction_count):
-        tx, s, g = rlp.decode(block.transactions.get(utils.encode_int(i)))
+        tx, s, g = rlp.decode(
+            block.transactions.get(rlp.encode(utils.encode_int(i))))
         tx = transactions.Transaction.create(tx)
         assert tx.startgas + block2.gas_used <= block.gas_limit
         apply_transaction(block2, tx)
         assert s == block2.state.root_hash
         assert g == utils.encode_int(block2.gas_used)
+    block2.finalize()
     assert block2.state.root_hash == block.state.root_hash
     assert block2.gas_used == block.gas_used
     return True
@@ -143,7 +147,7 @@ def apply_transaction(block, tx):
             rp(block.gas_used + tx.startgas, block.gas_limit))
 
     # start transacting #################
-    if tx.to:
+    if tx.to and tx.to != CREATE_CONTRACT_ADDRESS:
         block.increment_nonce(tx.sender)
 
     # buy startgas
@@ -156,13 +160,15 @@ def apply_transaction(block, tx):
     message = Message(tx.sender, tx.to, tx.value, message_gas, tx.data)
     # MESSAGE
     if tx.to and tx.to != CREATE_CONTRACT_ADDRESS:
-        result, gas_remained, data = apply_msg(block, tx, message)
+        result, gas_remained, data = apply_msg_send(block, tx, message)
     else:  # CREATE
         result, gas_remained, data = create_contract(block, tx, message)
+        result = utils.coerce_addr_to_hex(result)
     assert gas_remained >= 0
     logger.debug(
-        'applied tx, result %s gas remained %s data/code %s', result,
+        'applied tx, result %r gas remained %r data/code %r', result,
         gas_remained, ''.join(map(chr, data)).encode('hex'))
+    #logger.debug(json.dumps(block.to_dict(), indent=2))
     if not result:  # 0 = OOG failure in both cases
         block.revert(snapshot)
         block.gas_used += tx.startgas
@@ -173,10 +179,14 @@ def apply_transaction(block, tx):
         block.transfer_value(
             block.coinbase, tx.sender, tx.gasprice * gas_remained)
         block.gas_used += gas_used
-        output = ''.join(map(chr, data)) if tx.to else result.encode('hex')
-    for s in block.suicides:
-        block.state.delete(s)
-        block.suicides = []
+        if tx.to:
+            output = ''.join(map(chr, data))
+        else:
+            output = result
+    suicides = block.suicides
+    block.suicides = []
+    for s in suicides:
+        block.del_account(s)
     block.add_transaction_to_list(tx)
     success = output is not OUT_OF_GAS
     return success, output if success else ''
@@ -202,26 +212,21 @@ def decode_datalist(arr):
     return o
 
 
-def apply_msg(block, tx, msg):
-    logger.debug("apply_msg:%r %r", tx, msg)
+def apply_msg(block, tx, msg, code):
+    logger.debug("apply_msg:%r %r gas:%r", tx, msg, msg.gas)
     snapshot = block.snapshot()
-    code = block.get_code(msg.to)
     # Transfer value, instaquit if not enough
     o = block.transfer_value(msg.sender, msg.to, msg.value)
     if not o:
         return 0, msg.gas, []
     compustate = Compustate(gas=msg.gas)
+    t, ops = time.time(), 0
     # Main loop
     while 1:
-        logger.debug({
-            "Stack": compustate.stack,
-            "PC": compustate.pc,
-            "Gas": compustate.gas,
-            "Memory": decode_datalist(compustate.memory),
-            "Storage": block.get_storage(msg.to).to_dict(),
-        })
         o = apply_op(block, tx, msg, code, compustate)
+        ops += 1
         if o is not None:
+            logger_debug("Time per op: %s", str((time.time() - t) * 1.0 / ops))
             logger.debug('done %s', o)
             if o == OUT_OF_GAS:
                 block.revert(snapshot)
@@ -230,30 +235,25 @@ def apply_msg(block, tx, msg):
                 return 1, compustate.gas, o
 
 
-def create_contract(block, tx, msg):
-    snapshot = block.snapshot()
+def apply_msg_send(block, tx, msg):
+    return apply_msg(block, tx, msg, block.get_code(msg.to))
 
+
+def create_contract(block, tx, msg):
     sender = msg.sender.decode('hex') if len(msg.sender) == 40 else msg.sender
     nonce = utils.encode_int(block.get_nonce(msg.sender))
-    recvaddr = utils.sha3(rlp.encode([sender, nonce]))[12:]
-    assert not block.get_code(recvaddr)
-    msg.to = recvaddr
-    block.increment_nonce(msg.sender)
-    # Transfer value, instaquit if not enough
-    o = block.transfer_value(msg.sender, msg.to, msg.value)
-    if not o:
-        return 0, msg.gas
-    compustate = Compustate(gas=msg.gas)
-    # Main loop
-    while 1:
-        o = apply_op(block, tx, msg, msg.data, compustate)
-        if o is not None:
-            if o == OUT_OF_GAS:
-                block.revert(snapshot)
-                return 0, 0, []
-            else:
-                block.set_code(recvaddr, ''.join(map(chr, o)))
-                return recvaddr, compustate.gas, o
+    msg.to = utils.sha3(rlp.encode([sender, nonce]))[12:].encode('hex')
+    assert not block.get_code(msg.to)
+    res, gas, dat = apply_msg(block, tx, msg, msg.data)
+    if res and len(dat):
+        block.increment_nonce(msg.sender)
+        block.set_code(msg.to, ''.join(map(chr, dat)))
+        return utils.coerce_to_int(msg.to), gas, dat
+    elif res:
+        block.state.delete(msg.to.decode('hex'))
+        return utils.coerce_to_int(msg.to), gas, dat
+    else:
+        return res, gas, dat
 
 
 def get_op_data(code, index):
@@ -279,7 +279,7 @@ def calcfee(block, tx, msg, compustate, op):
         m_extend = max(0, ceil32(stk[-1] + stk[-2]) - len(mem))
         return GSHA3 + m_extend / 32 * GMEMORY
     elif op == 'SLOAD':
-        return GSTEP + GSLOAD
+        return GSLOAD
     elif op == 'SSTORE':
         if not block.get_storage_data(msg.to, stk[-1]) and stk[-2]:
             return 2 * GSSTORE
@@ -303,7 +303,7 @@ def calcfee(block, tx, msg, compustate, op):
         return GCALL + stk[-1] + m_extend / 32 * GMEMORY
     elif op == 'CREATE':
         m_extend = max(0, ceil32(stk[-2] + stk[-3]) - len(mem))
-        return GSTEP + GCREATE + m_extend / 32 * GMEMORY
+        return GCREATE + m_extend / 32 * GMEMORY
     elif op == 'RETURN':
         m_extend = max(0, ceil32(stk[-1] + stk[-2]) - len(mem))
         return GSTEP + m_extend / 32 * GMEMORY
@@ -331,8 +331,8 @@ def apply_op(block, tx, msg, code, compustate):
     # out of gas error
     fee = calcfee(block, tx, msg, compustate, op)
     if fee > compustate.gas:
-        logger.debug("Out of gas %s need %s", compustate.gas, fee)
-        logger.debug('%s %s', op, list(reversed(compustate.stack)))
+        logger_debug("Out of gas %s need %s", compustate.gas, fee)
+        logger_debug('Op: %s %s', op, list(reversed(compustate.stack)))
         return OUT_OF_GAS
     stackargs = []
     for i in range(in_args):
@@ -340,17 +340,17 @@ def apply_op(block, tx, msg, code, compustate):
     if op[:4] == 'PUSH':
         ind = compustate.pc + 1
         v = utils.big_endian_to_int(code[ind: ind + int(op[4:])])
-        logger_debug('%s %s %s', compustate.pc, op, v)
+        logger_debug('%s %s %s %s', compustate.pc, op, v, compustate.gas - fee)
     else:
-        logger_debug('%s %s %s', compustate.pc, op, stackargs)
+        logger_debug('%s %s %s %s', compustate.pc, op, stackargs,
+                     compustate.gas - fee)
     # Apply operation
-    oldgas = compustate.gas
     oldpc = compustate.pc
     compustate.gas -= fee
     compustate.pc += 1
     stk = compustate.stack
     mem = compustate.memory
-    if op == 'STOP':
+    if op == 'STOP' or op == 'INVALID':
         return []
     elif op == 'ADD':
         stk.append((stackargs[0] + stackargs[1]) % 2 ** 256)
@@ -425,9 +425,9 @@ def apply_op(block, tx, msg, code, compustate):
     elif op == 'ADDRESS':
         stk.append(utils.coerce_to_int(msg.to))
     elif op == 'BALANCE':
-        stk.append(block.get_balance(msg.to))
+        stk.append(block.get_balance(utils.coerce_addr_to_hex(stackargs[0])))
     elif op == 'ORIGIN':
-        stk.append(tx.sender)
+        stk.append(utils.coerce_to_int(tx.sender))
     elif op == 'CALLER':
         stk.append(utils.coerce_to_int(msg.sender))
     elif op == 'CALLVALUE':
@@ -451,13 +451,13 @@ def apply_op(block, tx, msg, code, compustate):
     elif op == 'GASPRICE':
         stk.append(tx.gasprice)
     elif op == 'CODECOPY':
-        if len(mem) < ceil32(stackargs[1] + stackargs[2]):
-            mem.extend([0] * (ceil32(stackargs[1] + stackargs[2]) - len(mem)))
+        if len(mem) < ceil32(stackargs[0] + stackargs[2]):
+            mem.extend([0] * (ceil32(stackargs[0] + stackargs[2]) - len(mem)))
         for i in range(stackargs[2]):
-            if stackargs[0] + i < len(code):
-                mem[stackargs[1] + i] = ord(code[stackargs[0] + i])
+            if stackargs[1] + i < len(code):
+                mem[stackargs[0] + i] = ord(code[stackargs[1] + i])
             else:
-                mem[stackargs[1] + i] = 0
+                mem[stackargs[0] + i] = 0
     elif op == 'PREVHASH':
         stk.append(utils.big_endian_to_int(block.prevhash))
     elif op == 'COINBASE':
@@ -469,7 +469,7 @@ def apply_op(block, tx, msg, code, compustate):
     elif op == 'DIFFICULTY':
         stk.append(block.difficulty)
     elif op == 'GASLIMIT':
-        stk.append(block.gaslimit)
+        stk.append(block.gas_limit)
     elif op == 'POP':
         pass
     elif op == 'DUP':
@@ -478,7 +478,8 @@ def apply_op(block, tx, msg, code, compustate):
            get_op_data(code, oldpc + 2)[0] == 'POP':
             o = print_debug
             enable_debug()
-            logger_debug("Debug: %s", stackargs[0])
+            v = stackargs[0]
+            logger_debug("Debug: %s", v if v < 2**255 else v - 2**256)
             if not o:
                 disable_debug()
             compustate.pc = oldpc + 3
@@ -518,7 +519,7 @@ def apply_op(block, tx, msg, code, compustate):
     elif op == 'MSIZE':
         stk.append(len(mem))
     elif op == 'GAS':
-        stk.append(oldgas)
+        stk.append(compustate.gas)  # AFTER subtracting cost 1
     elif op[:4] == 'PUSH':
         pushnum = int(op[4:])
         compustate.pc = oldpc + 1 + pushnum
@@ -534,7 +535,7 @@ def apply_op(block, tx, msg, code, compustate):
             block, tx, Message(msg.to, '', value, compustate.gas, data))
         logger_debug("Output of contract creation: %s  %s ", addr, code)
         if addr:
-            stk.append(utils.coerce_to_int(addr))
+            stk.append(addr)
             compustate.gas = gas
         else:
             stk.append(0)
@@ -546,13 +547,13 @@ def apply_op(block, tx, msg, code, compustate):
             mem.extend([0] * (ceil32(stackargs[5] + stackargs[6]) - len(mem)))
         gas = stackargs[0]
         to = utils.encode_int(stackargs[1])
-        to = (('\x00' * (32 - len(to))) + to)[12:]
+        to = (('\x00' * (32 - len(to))) + to)[12:].encode('hex')
         value = stackargs[2]
         data = ''.join(map(chr, mem[stackargs[3]:stackargs[3] + stackargs[4]]))
         logger_debug(
             "Sub-call: %s %s %s %s %s ", utils.coerce_addr_to_hex(msg.to),
             utils.coerce_addr_to_hex(to), value, gas, data.encode('hex'))
-        result, gas, data = apply_msg(
+        result, gas, data = apply_msg_send(
             block, tx, Message(msg.to, to, value, gas, data))
         logger_debug(
             "Output of sub-call: %s %s length %s expected %s", result, data, len(data),
@@ -576,3 +577,5 @@ def apply_op(block, tx, msg, code, compustate):
         block.transfer_value(msg.to, to, block.get_balance(msg.to))
         block.suicides.append(msg.to)
         return []
+    for a in stk:
+        assert isinstance(a, (int, long))

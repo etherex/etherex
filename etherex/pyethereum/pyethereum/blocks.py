@@ -5,7 +5,9 @@ import db
 import utils
 import processblock
 import transactions
-
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger()
 
 INITIAL_DIFFICULTY = 2 ** 22
 GENESIS_PREVHASH = '\00' * 32
@@ -22,9 +24,9 @@ BLKLIM_FACTOR_NOM = 6
 BLKLIM_FACTOR_DEN = 5
 
 GENESIS_INITIAL_ALLOC = \
-    {"8a40bfaa73256b60764c1bf40675a99083efb075": 2 ** 200,  # (G)
+    {"51ba59315b3a95761d0863b05ccc7a7f54703d99": 2 ** 200,  # (G)
      "e6716f9544a56c530d868e4bfbacb172315bdead": 2 ** 200,  # (J)
-     "1e12515ce3e0f817a4ddef9ca55788a1d66bd2df": 2 ** 200,  # (V)
+     "b9c015918bdaba24b4ff057a92a3873d6eb201be": 2 ** 200,  # (V)
      "1a26338f0d905e295fccb71fa9ea849ffa12aaf4": 2 ** 200,  # (A)
      "2ef47100e0787b915105fd5e3f4ff6752079d5cb": 2 ** 200,  # (M)
      "cd2a3d9f938e13cd947ec05abc7fe734df8dd826": 2 ** 200,  # (R)
@@ -188,13 +190,22 @@ class Block(object):
         return l256 < 2 ** 256 / self.difficulty
 
     @classmethod
-    def deserialize(cls, rlpdata):
-        header_args, transaction_list, uncles = rlp.decode(rlpdata)
-        assert len(header_args) == len(block_structure)
-        kargs = dict(transaction_list=transaction_list, uncles=uncles)
+    def deserialize_header(cls, header_data):
+        if isinstance(header_data, (str, unicode)):
+            header_data = rlp.decode(header_data)
+        assert len(header_data) == len(block_structure)
+        kargs = {}
         # Deserialize all properties
         for i, (name, typ, default) in enumerate(block_structure):
-            kargs[name] = utils.decoders[typ](header_args[i])
+            kargs[name] = utils.decoders[typ](header_data[i])
+        return kargs
+
+    @classmethod
+    def deserialize(cls, rlpdata):
+        header_args, transaction_list, uncles = rlp.decode(rlpdata)
+        kargs = cls.deserialize_header(header_args)
+        kargs['transaction_list'] = transaction_list
+        kargs['uncles'] = uncles
 
         # if we don't have the state we need to replay transactions
         _db = db.DB(utils.get_db_path())
@@ -225,13 +236,16 @@ class Block(object):
                                        timestamp=kargs['timestamp'])
 
         # replay transactions
-        for tx_lst_serialized, _state_root, _gas_used_encoded in transaction_list:
+        for tx_lst_serialized, _state_root, _gas_used_encoded in \
+                transaction_list:
             tx = transactions.Transaction.create(tx_lst_serialized)
+#            logger.debug('state:\n%s', utils.dump_state(block.state))
+#            logger.debug('applying %r', tx)
             success, output = processblock.apply_transaction(block, tx)
-            block.add_transaction_to_list(tx)
+            #block.add_transaction_to_list(tx) # < this is done by processblock
+#            logger.debug('state:\n%s', utils.dump_state(block.state))
             assert utils.decode_int(_gas_used_encoded) == block.gas_used
             assert _state_root == block.state.root_hash
-
         block.finalize()
 
         block.uncles_hash = kargs['uncles_hash']
@@ -253,7 +267,6 @@ class Block(object):
         assert block.state.root_hash == kargs['state_root']
 
         return block
-
 
     @classmethod
     def hex_deserialize(cls, hexrlpdata):
@@ -291,6 +304,7 @@ class Block(object):
         :param param: parameter to set
         :param value: new value
         '''
+#        logger.debug('set acct %r %r %d', address, param, value)
         if len(address) == 40:
             address = address.decode('hex')
         acct = rlp.decode(self.state.get(address)) or self.mk_blank_acct()
@@ -317,7 +331,8 @@ class Block(object):
         assert isinstance(tx_lst_serialized, list)
         data = [tx_lst_serialized, state_root, gas_used_encoded]
         self.transactions.update(
-            utils.encode_int(self.transaction_count), rlp.encode(data))
+            rlp.encode(utils.encode_int(self.transaction_count)),
+            rlp.encode(data))
         self.transaction_count += 1
 
     def add_transaction_to_list(self, tx):
@@ -331,7 +346,7 @@ class Block(object):
         txlist = []
         for i in range(self.transaction_count):
             txlist.append(rlp.decode(
-                self.transactions.get(utils.encode_int(i))))
+                self.transactions.get(rlp.encode(utils.encode_int(i)))))
         return txlist
 
     def get_transactions(self):
@@ -340,6 +355,9 @@ class Block(object):
 
     def get_nonce(self, address):
         return self._get_acct_item(address, 'nonce')
+
+    def set_nonce(self, address, value):
+        return self._set_acct_item(address, 'nonce', value)
 
     def increment_nonce(self, address):
         return self._delta_item(address, 'nonce', 1)
@@ -371,27 +389,34 @@ class Block(object):
 
     def get_storage_data(self, address, index):
         t = self.get_storage(address)
-        val = t.get(utils.coerce_to_bytes(index))
-        return utils.decode_int(val) if val else 0
+        key = utils.zpad(utils.coerce_to_bytes(index), 32)
+        val = rlp.decode(t.get(key))
+        return utils.big_endian_to_int(val) if val else 0
 
     def set_storage_data(self, address, index, val):
         t = self.get_storage(address)
+        key = utils.zpad(utils.coerce_to_bytes(index), 32)
         if val:
-            t.update(utils.coerce_to_bytes(index), utils.encode_int(val))
+            t.update(key, rlp.encode(utils.encode_int(val)))
         else:
-            t.delete(utils.coerce_to_bytes(index))
+            t.delete(key)
         self._set_acct_item(address, 'storage', t.root_hash)
+
+    def del_account(self, address):
+        if len(address) == 40:
+            address = address.decode('hex')
+        self.state.delete(address)
 
     def account_to_dict(self, address):
         med_dict = {}
         for i, val in enumerate(self.get_acct(address)):
-            med_dict[acct_structure[i][0]] = val
-        med_dict['code_hash'] = utils.sha3(med_dict['code']).encode('hex')
-        med_dict['code'] = med_dict['code'].encode('hex')
-        strie = trie.Trie(utils.get_db_path(), med_dict['storage'])
-        med_dict['storage'] = {k.encode('hex'): v.encode('hex')
+            name, typ, default = acct_structure[i]
+            med_dict[acct_structure[i][0]] = utils.printers[typ](val)
+            if name == 'storage':
+                strie = trie.Trie(utils.get_db_path(), val)
+        med_dict['storage'] = {'0x'+k.encode('hex'):
+                               '0x'+rlp.decode(v).encode('hex')
                                for k, v in strie.to_dict().iteritems()}
-        med_dict['storage_root'] = strie.root_hash.encode('hex')
         return med_dict
 
     # Revert computation
@@ -424,13 +449,18 @@ class Block(object):
     def serialize_header_without_nonce(self):
         return rlp.encode(self.list_header(exclude=['nonce']))
 
-    @property
-    def state_root(self):
+    def get_state_root(self):
         return self.state.root_hash
 
-    @property
-    def tx_list_root(self):
+    def set_state_root(self, state_root_hash):
+        self.state = trie.Trie(utils.get_db_path(), state_root_hash)
+
+    state_root = property(get_state_root, set_state_root)
+
+    def get_tx_list_root(self):
         return self.transactions.root_hash
+
+    tx_list_root = property(get_tx_list_root)
 
     def list_header(self, exclude=[]):
         self.uncles_hash = utils.sha3(rlp.encode(self.uncles))
@@ -454,21 +484,21 @@ class Block(object):
     def to_dict(self):
         b = {}
         for name, typ, default in block_structure:
-            b[name] = getattr(self, name)
-        for key in ["nonce", "state_root", "uncles_hash", "prevhash"]:
-            b[key] = b[key].encode("hex")
+            b[name] = utils.printers[typ](getattr(self, name))
         b["state"] = {}
         for address, v in self.state.to_dict().iteritems():
             b["state"][address.encode('hex')] = self.account_to_dict(address)
         txlist = []
         for i in range(self.transaction_count):
-            td = self.transactions.get(utils.encode_int(i))
-            tx, msr, gas = map(lambda i: rlp.descend(td, i), range(3))
+            td = self.transactions.get(rlp.encode(utils.encode_int(i)))
+            tx = rlp.descend(td, 0)
+            msr = rlp.descend_to_val(td, 1)
+            gas = rlp.descend_to_val(td, 2)
             txjson = transactions.Transaction.deserialize(tx).to_dict()
             txlist.append({
                 "tx": txjson,
-                "medstate": msr,
-                "gas": utils.decode_int(gas)
+                "medstate": msr.encode('hex'),
+                "gas": str(utils.decode_int(gas))
             })
         b["transactions"] = txlist
         return b
@@ -553,13 +583,13 @@ def has_block(blockhash):
     return blockhash in db.DB(utils.get_db_path())
 
 
-def genesis(initial_alloc=GENESIS_INITIAL_ALLOC, difficulty=INITIAL_DIFFICULTY):
+def genesis(start_alloc=GENESIS_INITIAL_ALLOC, difficulty=INITIAL_DIFFICULTY):
     # https://ethereum.etherpad.mozilla.org/11
     block = Block(prevhash=GENESIS_PREVHASH, coinbase=GENESIS_COINBASE,
                   tx_list_root=trie.BLANK_ROOT,
                   difficulty=difficulty, nonce=GENESIS_NONCE,
                   gas_limit=GENESIS_GAS_LIMIT)
-    for addr, balance in initial_alloc.iteritems():
+    for addr, balance in start_alloc.iteritems():
         block.set_balance(addr, balance)
     block.state.db.commit()
     return block

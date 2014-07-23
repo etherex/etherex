@@ -1,5 +1,5 @@
 from collections import defaultdict
-import imp, binascii
+import os, imp, binascii
 import inspect
 import logging
 import serpent
@@ -452,6 +452,7 @@ class Gas(object):
 
         # storage fees
         code_lines = contract.closure.split('\n')
+        fees = []
         for i, line in enumerate(code_lines):
             if line.startswith('contract.storage['): # TODO: use regex?
                 fees['storage'] += self.pricestorage

@@ -20,13 +20,13 @@ Test Net. It currently support the Serpent, LLL and Mutan languages.
 
 Install the required Python libraries with `pip`, it is suggested to do this within a [virtualenv](http://virtualenv.readthedocs.org/).
 
-` pip install -r requirements.txt`
+`pip install -r requirements.txt`
 
-To use Serpent, the `serpent` compiler binary needs to be installed and available on the PATH; install it from https://github.com/ethereum/serpent/
+Serpent support is available by default.
 
 To use LLL, the `lllc` compiler binary needs to be installed and available on the PATH; install it from https://github.com/ethereum/cpp-ethereum/
 
-To use Mutan, the `mutan` compiler binary needs to be installed and available on the PATH; install it from https://github.com/obscuren/mutan
+To use Mutan, the `mutan` compiler binary needs to be installed and available on the PATH; install it from https://github.com/obscuren/mutan/
 
 ## Usage
 

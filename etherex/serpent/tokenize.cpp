@@ -13,18 +13,18 @@ int chartype(char c) {
     if (c >= '0' && c <= '9') return ALPHANUM;
     else if (c >= 'a' && c <= 'z') return ALPHANUM;
     else if (c >= 'A' && c <= 'Z') return ALPHANUM;
-    else if (std::string("~._$").find(c) != -1) return ALPHANUM;
+	else if (std::string("~._$").find(c) != std::string::npos) return ALPHANUM;
     else if (c == '\t' || c == ' ' || c == '\n') return SPACE;
-    else if (std::string("()[]{}").find(c) != -1) return BRACK;
+	else if (std::string("()[]{}").find(c) != std::string::npos) return BRACK;
     else if (c == '"') return DQUOTE;
     else if (c == '\'') return SQUOTE;
     else return SYMB;
 }
 
 // "y = f(45,124)/3" -> [ "y", "f", "(", "45", ",", "124", ")", "/", "3"]
-std::vector<Node> tokenize(std::string inp, Metadata metadata) {
+std::vector<Node> tokenize(std::string inp, Metadata metadata, bool lispMode) {
     int curtype = SPACE;
-    int pos = 0;
+	unsigned pos = 0;
     int lastNewline = 0;
     metadata.ch = 0;
     std::string cur;
@@ -33,6 +33,9 @@ std::vector<Node> tokenize(std::string inp, Metadata metadata) {
     inp += " ";
     while (pos < inp.length()) {
         int headtype = chartype(inp[pos]);
+        if (lispMode) {
+            if (inp[pos] == '\'') headtype = ALPHANUM;
+        }
         // Are we inside a quote?
         if (curtype == SQUOTE || curtype == DQUOTE) {
             // Close quote

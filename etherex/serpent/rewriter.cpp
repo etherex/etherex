@@ -24,7 +24,6 @@ std::string valid[][3] = {
     { "sha3", "1", "2" },
     { "return", "1", "2" },
     { "inset", "1", "1" },
-    { "import", "1", "1" },
     { "array_lit", "0", tt256 },
     { "seq", "0", tt256 },
     { "---END---", "", "" } //Keep this line at the end of the list
@@ -62,6 +61,10 @@ std::string macros[][2] = {
     {
         "(@%= $a $b)",
         "(set $a (@% $a $b))"
+    },
+    {
+        "(!= $a $b)",
+        "(not (eq $a $b))"
     },
     {
         "(if $cond $do (else $else))",
@@ -129,7 +132,11 @@ std::string macros[][2] = {
     },
     {
         "(sha3 $x)",
-        "(seq (set $1 $x) (sha3 (ref $1) 32))"
+        "(seq (set $1 $x) (~sha3 (ref $1) 32))"
+    },
+    {
+        "(sha3 $mstart $msize)",
+        "(~sha3 $mstart (mul 32 $msize))"
     },
     {
         "(id $0)",
@@ -220,14 +227,6 @@ std::string macros[][2] = {
         "$x"
     },
     {
-        "(create $val (import $code))",
-        "(seq (set $1 (msize)) (create $val (get $1) (lll $code (get $1))))"
-    },
-    {
-        "(create (import $x))",
-        "(seq (set $1 (msize)) (create $val (get $1) (lll $code (get $1))))"
-    },
-    {
         "(create $x)",
         "(seq (set $1 (msize)) (create $val (get $1) (lll $code (get $1))))"
     },
@@ -237,7 +236,7 @@ std::string macros[][2] = {
     { "tx.gasprice", "(gasprice)" },
     { "tx.origin", "(origin)" },
     { "tx.gas", "(gas)" },
-    { "contract.balance", "(balance)" },
+    { "contract.balance", "(balance (address))" },
     { "contract.address", "(address)" },
     { "block.prevhash", "(prevhash)" },
     { "block.coinbase", "(coinbase)" },
@@ -252,9 +251,7 @@ std::string macros[][2] = {
 std::vector<std::vector<Node> > nodeMacros;
 
 std::string synonyms[][2] = {
-    { "|", "or" },
     { "or", "||" },
-    { "&", "and" },
     { "and", "&&" },
     { "elif", "if" },
     { "!", "not" },
@@ -274,6 +271,7 @@ std::string synonyms[][2] = {
     { ">", "sgt" },
     { "=", "set" },
     { "==", "eq" },
+    { ":", "kv" },
     { "---END---", "" } //Keep this line at the end of the list
 };
 
@@ -289,7 +287,7 @@ matchResult match(Node p, Node n) {
     matchResult o;
     o.success = false;
     if (p.type == TOKEN) {
-        if (p.val == n.val) o.success = true;
+        if (p.val == n.val && n.type == TOKEN) o.success = true;
         else if (p.val[0] == '$') {
             o.success = true;
             o.map[p.val.substr(1)] = n;
@@ -298,7 +296,7 @@ matchResult match(Node p, Node n) {
     else if (n.type==TOKEN || p.val!=n.val || p.args.size()!=n.args.size()) {
     }
     else {
-        for (int i = 0; i < p.args.size(); i++) {
+		for (unsigned i = 0; i < p.args.size(); i++) {
             matchResult oPrime = match(p.args[i], n.args[i]);
             if (!oPrime.success) {
                 o.success = false;
@@ -335,11 +333,40 @@ Node subst(Node pattern,
     }
     else {
         std::vector<Node> args;
-        for (int i = 0; i < pattern.args.size(); i++) {
+		for (unsigned i = 0; i < pattern.args.size(); i++) {
             args.push_back(subst(pattern.args[i], dict, varflag, metadata));
         }
         return astnode(pattern.val, args, metadata);
     }
+}
+
+// array_lit transform
+
+Node array_lit_transform(Node node) {
+    std::vector<Node> o1;
+    o1.push_back(token(intToDecimal(node.args.size() * 32), node.metadata));
+    std::vector<Node> o2;
+    std::string symb = "_temp"+mkUniqueToken()+"_0";
+    o2.push_back(token(symb, node.metadata));
+    o2.push_back(astnode("alloc", o1, node.metadata));
+    std::vector<Node> o3;
+    o3.push_back(astnode("set", o2, node.metadata));
+    for (unsigned i = 0; i < node.args.size(); i++) {
+        // (mstore (add (get symb) i*32) v)
+        std::vector<Node> o5;
+        o5.push_back(token(symb, node.metadata));
+        std::vector<Node> o6;
+        o6.push_back(astnode("get", o5, node.metadata));
+        o6.push_back(token(intToDecimal(i * 32), node.metadata));
+        std::vector<Node> o7;
+        o7.push_back(astnode("add", o6));
+        o7.push_back(node.args[i]);
+        o3.push_back(astnode("mstore", o7, node.metadata));
+    }
+    std::vector<Node> o8;
+    o8.push_back(token(symb, node.metadata));
+    o3.push_back(astnode("get", o8));
+    return astnode("seq", o3, node.metadata);
 }
 
 // Recursively applies rewrite rules
@@ -355,7 +382,7 @@ Node apply_rules(Node node) {
         }
     }
     // Main code
-    int pos = 0;
+	unsigned pos = 0;
     std::string prefix = "_temp"+mkUniqueToken()+"_";
     while(1) {
         if (synonyms[pos][0] == "---END---") {
@@ -372,16 +399,24 @@ Node apply_rules(Node node) {
         if (mr.success) {
             Node pattern2 = nodeMacros[pos][1];
             node = subst(pattern2, mr.map, prefix, node.metadata);
+            pos = 0;
         }
     }
-    if (node.type == ASTNODE && node.val != "ref" && node.val != "get") {
-        int i = 0;
-        if (node.val == "set") i = 1;
+    // Array_lit special instruction
+    if (node.val == "array_lit")
+        node = array_lit_transform(node);
+    if (node.type == ASTNODE) {
+		unsigned i = 0;
+        if (node.val == "set" || node.val == "ref" || node.val == "get") {
+            node.args[0].val = "'" + node.args[0].val;
+            i = 1;
+        }
         for (i = i; i < node.args.size(); i++) {
             node.args[i] = apply_rules(node.args[i]);
         }
     }
     else if (node.type == TOKEN && !isNumberLike(node)) {
+        node.val = "'" + node.val;
         std::vector<Node> args;
         args.push_back(node);
         node = astnode("get", args, node.metadata);
@@ -396,7 +431,7 @@ Node apply_rules(Node node) {
 
 Node optimize(Node inp) {
     if (inp.type == TOKEN) return tryNumberize(inp);
-    for (int i = 0; i < inp.args.size(); i++) {
+	for (unsigned i = 0; i < inp.args.size(); i++) {
         inp.args[i] = optimize(inp.args[i]);
     }
     if (inp.args.size() == 2 
@@ -449,7 +484,7 @@ Node validate(Node inp) {
             i++;
         }
     }
-    for (int i = 0; i < inp.args.size(); i++) validate(inp.args[i]);
+	for (unsigned i = 0; i < inp.args.size(); i++) validate(inp.args[i]);
     return inp;
 }
 

@@ -9,9 +9,7 @@ COMMON_OBJS = bignum.o util.o tokenize.o lllparser.o parser.o rewriter.o compile
 HEADERS = bignum.h util.h tokenize.h lllparser.h parser.h rewriter.h compiler.h funcs.h
 PYTHON_VERSION = 2.7
 
-all: serpent $(TARGET).so
-
-serpent : serpentc lib 
+serpent : serpentc lib
 
 lib:
 	ar rvs libserpent.a $(COMMON_OBJS) 
@@ -39,14 +37,10 @@ funcs.o : funcs.cpp funcs.h
 
 cmdline.o: cmdline.cpp
 
-clean:
-	rm -f serpent *\.o $(TARGET).so libserpent.a
+pyext.o: pyext.cpp
 
-$(TARGET).so: $(TARGET).o
-	g++ $(CXXFLAGS) -shared $(PLATFORM_OPTS) $(TARGET).o -L$(BOOST_LIB) -lboost_python -L/usr/lib/python$(PYTHON_VERSION)/config -lpython$(PYTHON_VERSION) $(COMMON_OBJS) -o $(TARGET).so
- 
-$(TARGET).o: $(TARGET).cpp $(COMMON_OBJS)
-	g++ $(CXXFLAGS) -I$(PYTHON) -I$(BOOST_INC) -c $(TARGET).cpp
+clean:
+	rm -f serpent *\.o libserpent.a libserpent.so
 
 install:
 	cp serpent /usr/local/bin
@@ -55,4 +49,3 @@ install:
 	rm -rf /usr/local/include/libserpent
 	mkdir -p /usr/local/include/libserpent
 	cp $(HEADERS) /usr/local/include/libserpent
-	cp pyserpent.so /usr/lib/python2.7/lib-dynload/

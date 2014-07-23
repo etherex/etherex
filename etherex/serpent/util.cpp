@@ -29,7 +29,7 @@ Node astnode(std::string val, std::vector<Node> args, Metadata met) {
 // Print token list
 std::string printTokens(std::vector<Node> tokens) {
     std::string s = "";
-    for (int i = 0; i < tokens.size(); i++) {
+	for (unsigned i = 0; i < tokens.size(); i++) {
         s += tokens[i].val + " ";
     }
     return s;
@@ -40,7 +40,7 @@ std::string printSimple(Node ast) {
     if (ast.type == TOKEN) return ast.val;
     std::string o = "(" + ast.val;
     std::vector<std::string> subs;
-    for (int i = 0; i < ast.args.size(); i++) {
+	for (unsigned i = 0; i < ast.args.size(); i++) {
         o += " " + printSimple(ast.args[i]);
     }
     return o + ")";
@@ -50,7 +50,7 @@ std::string printSimple(Node ast) {
 int treeSize(Node prog) {
     if (prog.type == TOKEN) return 1;
     int o = 0;
-    for (int i = 0; i < prog.args.size(); i++) o += treeSize(prog.args[i]);
+	for (unsigned i = 0; i < prog.args.size(); i++) o += treeSize(prog.args[i]);
     return o;
 }
 
@@ -65,15 +65,15 @@ std::string printAST(Node ast, bool printMetadata) {
     }
     o += ast.val;
     std::vector<std::string> subs;
-    for (int i = 0; i < ast.args.size(); i++) {
+	for (unsigned i = 0; i < ast.args.size(); i++) {
         subs.push_back(printAST(ast.args[i], printMetadata));
     }
-    int k = 0;
+	unsigned k = 0;
     std::string out = " ";
     // As many arguments as possible go on the same line as the function,
     // except when seq is used
     while (k < subs.size() && o != "(seq") {
-        if (subs[k].find("\n") != -1 || (out + subs[k]).length() >= 80) break;
+		if (subs[k].find("\n") != std::string::npos || (out + subs[k]).length() >= 80) break;
         out += subs[k] + " ";
         k += 1;
     }
@@ -81,7 +81,7 @@ std::string printAST(Node ast, bool printMetadata) {
     if (k < subs.size()) {
         o += out + "\n";
         std::vector<std::string> subsSliceK;
-        for (int i = k; i < subs.size(); i++) subsSliceK.push_back(subs[i]);
+		for (unsigned i = k; i < subs.size(); i++) subsSliceK.push_back(subs[i]);
         o += indentLines(joinLines(subsSliceK));
         o += "\n)";
     }
@@ -93,7 +93,7 @@ std::string printAST(Node ast, bool printMetadata) {
 
 // Splits text by line
 std::vector<std::string> splitLines(std::string s) {
-    int pos = 0;
+	unsigned pos = 0;
     int lastNewline = 0;
     std::vector<std::string> o;
     while (pos < s.length()) {
@@ -110,7 +110,7 @@ std::vector<std::string> splitLines(std::string s) {
 // Inverse of splitLines
 std::string joinLines(std::vector<std::string> lines) {
     std::string o = "\n";
-    for (int i = 0; i < lines.size(); i++) {
+	for (unsigned i = 0; i < lines.size(); i++) {
         o += lines[i] + "\n";
     }
     return o.substr(1, o.length() - 2);
@@ -119,7 +119,7 @@ std::string joinLines(std::vector<std::string> lines) {
 // Indent all lines by 4 spaces
 std::string indentLines(std::string inp) {
     std::vector<std::string> lines = splitLines(inp);
-    for (int i = 0; i < lines.size(); i++) lines[i] = "    "+lines[i];
+	for (unsigned i = 0; i < lines.size(); i++) lines[i] = "    "+lines[i];
     return joinLines(lines);
 }
 
@@ -131,12 +131,12 @@ std::string strToNumeric(std::string inp) {
     }
     else if ((inp[0] == '"' && inp[inp.length()-1] == '"')
             || (inp[0] == '\'' && inp[inp.length()-1] == '\'')) {
-        for (int i = 1; i < inp.length() - 1; i++) {
+		for (unsigned i = 1; i < inp.length() - 1; i++) {
             o = decimalAdd(decimalMul(o,"256"), intToDecimal(inp[i]));
         }
     }
     else if (inp.substr(0,2) == "0x") {
-        for (int i = 2; i < inp.length(); i++) {
+		for (unsigned i = 2; i < inp.length(); i++) {
             int dig = std::string("0123456789abcdef").find(inp[i]);
             if (dig < 0) return "";
             o = decimalAdd(decimalMul(o,"16"), intToDecimal(dig));
@@ -144,7 +144,7 @@ std::string strToNumeric(std::string inp) {
     }
     else {
         bool isPureNum = true;
-        for (int i = 0; i < inp.length(); i++) {
+		for (unsigned i = 0; i < inp.length(); i++) {
             isPureNum = isPureNum && inp[i] >= '0' && inp[i] <= '9';
         }
         o = isPureNum ? inp : "";
@@ -226,7 +226,7 @@ void err(std::string errtext, Metadata met) {
 //Bin to hex
 std::string binToHex(std::string inp) {
     std::string o = "";
-    for (int i = 0; i < inp.length(); i++) {
+	for (unsigned i = 0; i < inp.length(); i++) {
         unsigned char v = inp[i];
         o += std::string("0123456789abcdef").substr(v/16, 1)
            + std::string("0123456789abcdef").substr(v%16, 1);
@@ -237,7 +237,7 @@ std::string binToHex(std::string inp) {
 //Hex to bin
 std::string hexToBin(std::string inp) {
     std::string o = "";
-    for (int i = 0; i+1 < inp.length(); i+=2) {
+	for (unsigned i = 0; i+1 < inp.length(); i+=2) {
         char v = (char)(std::string("0123456789abcdef").find(inp[i]) * 16 +
                 std::string("0123456789abcdef").find(inp[i+1]));
         o += v;
@@ -248,7 +248,7 @@ std::string hexToBin(std::string inp) {
 //Lower to upper
 std::string upperCase(std::string inp) {
     std::string o = "";
-    for (int i = 0; i < inp.length(); i++) {
+	for (unsigned i = 0; i < inp.length(); i++) {
         if (inp[i] >= 97 && inp[i] <= 122) o += inp[i] - 32;
         else o += inp[i];
     }

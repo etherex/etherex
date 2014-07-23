@@ -1,0 +1,2 @@
+if not contract.storage[msg.data[0]]:
+    contract.storage[msg.data[0]] = msg.data[1]

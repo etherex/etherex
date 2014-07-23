@@ -11,6 +11,7 @@ import blocks
 import processblock
 from transactions import Transaction
 import indexdb
+import chainlogger
 
 logger = logging.getLogger(__name__)
 
@@ -20,22 +21,31 @@ NUM_BLOCKS_PER_REQUEST = 32
 
 
 class Miner():
-
     """
     Mines on the current head
     Stores received transactions
+
+    The process of finalising a block involves four stages:
+    1) Validate (or, if mining, determine) uncles;
+    2) validate (or, if mining, determine) transactions;
+    3) apply rewards;
+    4) verify (or, if mining, compute a valid) state and nonce.
     """
 
     def __init__(self, parent, uncles, coinbase):
         self.nonce = 0
-        block = self.block = blocks.Block.init_from_parent(
+        self.block = blocks.Block.init_from_parent(
             parent, coinbase, uncles=[u.hash for u in uncles])
-        block.finalize()
-        logger.debug('Mining #%d %s', block.number, block.hex_hash())
-        logger.debug('Difficulty %s', block.difficulty)
+        self.pre_finalize_state_root = self.block.state_root
+        self.block.finalize()
+        logger.debug('Mining #%d %s', self.block.number, self.block.hex_hash())
+        logger.debug('Difficulty %s', self.block.difficulty)
+
 
     def add_transaction(self, transaction):
-        block_state = self.block.state_root
+        old_state_root = self.block.state_root
+        # revert finalization
+        self.block.state_root = self.pre_finalize_state_root
         try:
             success, output = processblock.apply_transaction(
                 self.block, transaction)
@@ -43,18 +53,25 @@ class Miner():
             # if unsuccessfull the prerequistes were not fullfilled
             # and the tx isinvalid, state must not have changed
             logger.debug('Invalid Transaction %r: %r', transaction, e)
-            assert block_state == self.block.state_root
-            return False
+            success = False
+
+        # finalize
+        self.pre_finalize_state_root = self.block.state_root
+        self.block.finalize()
+
         if not success:
             logger.debug('transaction %r not applied', transaction)
-            assert block_state == self.block.state_root
+            assert old_state_root == self.block.state_root
+            return False
         else:
             assert transaction in self.block.get_transactions()
             logger.debug(
                 'transaction %r applied to %r res: %r',
                 transaction, self.block, output)
-            assert block_state != self.block.state_root
+            assert old_state_root != self.block.state_root
             return True
+
+
 
     def get_transactions(self):
         return self.block.get_transactions()
@@ -115,7 +132,7 @@ class ChainManager(StoppableLoopThread):
         if genesis:
             self._initialize_blockchain(genesis)
         logger.debug('Chain @ #%d %s', self.head.number, self.head.hex_hash())
-        self.log_chain()
+        #self.log_chain()
         self.new_miner()
 
     @property
@@ -220,6 +237,9 @@ class ChainManager(StoppableLoopThread):
                 try:
                     block = blocks.Block.deserialize(t_block.rlpdata)
                 except processblock.InvalidTransaction as e:
+                    # FIXME there might be another exception in
+                    # blocks.deserializeChild when replaying transactions
+                    # if this fails, we need torewind state
                     logger.debug(
                         'Malicious %r w/ invalid Transaction %r', t_block, e)
                     continue
@@ -285,6 +305,9 @@ class ChainManager(StoppableLoopThread):
         if block.chain_difficulty() > self.head.chain_difficulty():
             logger.debug('New Head %r', block)
             self._update_head(block)
+
+        # log the block
+        chainlogger.log_block(block)
         return True
 
     def get_children(self, block):
@@ -357,6 +380,7 @@ class ChainManager(StoppableLoopThread):
     def log_chain(self):
         num = self.head.number + 1
         for b in reversed(self.get_chain(count=num)):
+            chainlogger.log_block(b)
             logger.debug(b)
             for tx in b.get_transactions():
                 logger.debug('\t%r', tx)

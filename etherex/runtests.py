@@ -11,9 +11,9 @@ import os
 import sys
 import json
 sys.path.insert(0, './serpent')
-from serpent import parser, rewriter, compiler
+import serpent
 
-def compile_from_assembly(source): return compiler.serialize(compiler.dereference(json.loads(source)))
+def compile_from_assembly(source): return serpent.serialize(serpent.dereference(json.loads(source)))
 
 def compile(f):
   t = open(f).readlines()
@@ -26,28 +26,33 @@ def compile(f):
     i += 1
     print '================='
     text = '\n'.join(o).replace('\n\n', '\n')
+    # print text
 
-    ast = parser.parse(text)
-    print "AST:", ast
+    # ast = serpent.parse(text)
+    # print "AST:", ast
+    # print ""
+
+    lll = serpent.compile_to_lll(text)
+    print "LLL:", lll
     print ""
 
-    ast2 = rewriter.compile_to_lll(ast)
-    print "LLL:", ast2
+    aevm = serpent.pretty_compile_lll(lll)
+    print "AEVM:", aevm # .encode('hex') # ' '.join([str(x) for x in aevm])
     print ""
+
     # print ' '.join([str(x) for x in aevm])
     # s = open(f).read()
-    # code = compiler.compile(text)
+    code = serpent.compile(text)
+    print "HEX:", code.encode('hex')
+    print ""
     # code = compiler.decode_datalist(compiler.encode_datalist(ast))
 
-    ops = rewriter.analyze(ast)
-    print "Analysis:", ops
-    print ""
+    # ops = serpent.analyze(ast)
+    # print "Analysis:", ops
+    # print ""
 
-    aevm = compiler.compile_lll(ast2)
-    print "AEVM:", ' '.join([str(x) for x in aevm])
-    print ""
-    code = compiler.assemble(aevm)
-    print "Output:", code.encode('hex')
+    # code = serpent.assemble(aevm)
+    # print "Output:", aevm
     # print "0x" + code.encode('hex') #' '.join([str(x) for x in aevm])
 
     # print "Int:"
