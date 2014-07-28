@@ -1,5 +1,7 @@
 from sim import Key, Simulator, compile_serpent
 
+from pyethereum import utils
+
 
 class TestDatafeed(object):
 
@@ -19,12 +21,12 @@ class TestDatafeed(object):
         ans = self.sim.tx(self.ALICE, self.contract, 0, data)
         assert ans == [1]
         storage = self.sim.get_storage_dict(self.contract)
-        assert storage.get('key') == 'value'
+        assert storage.get(utils.zpad('key', 32)) == 'value'
 
     def test_store_multiple(self):
         data = ['key1', 'value1', 'key2', 'value2']
         ans = self.sim.tx(self.ALICE, self.contract, 0, data)
         assert ans == [1]
         storage = self.sim.get_storage_dict(self.contract)
-        assert storage.get('key1') == 'value1'
-        assert storage.get('key2') == 'value2'
+        assert storage.get(utils.zpad('key1', 32)) == 'value1'
+        assert storage.get(utils.zpad('key2', 32)) == 'value2'

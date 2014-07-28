@@ -77,4 +77,5 @@ class Simulator(object):
         return self.genesis.get_storage_data(contract, index)
 
     def get_storage_dict(self, contract):
-        return self.genesis.get_storage(contract).to_dict()
+        return {k[2:].decode('hex'): v[2:].decode('hex')
+                for (k, v) in self.genesis.account_to_dict(contract).get('storage').iteritems()}

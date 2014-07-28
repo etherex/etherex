@@ -41,10 +41,7 @@ code:
 
     if status == 1:
         if msg.datasize == 1: // "Getting market"
-            if marketid > 2:
-                marketid = msg.data[0] - 2 # TODO - fix this...
-            else:
-                marketid = 0
+            marketid = msg.data[0] - 1
             market = array(4)
             market[0] = contract.storage[marketid * 5 + 100] // "Name"
             market[1] = contract.storage[marketid * 5 + 101] // "Minimum amount"
@@ -60,7 +57,7 @@ code:
                     amount = msg.data[2]
                     price = msg.data[3]
                     owner = msg.data[4]
-                    market = (last / 5) + 2
+                    market = (last / 5) + 1
                     contract.storage[9] = market
                     if amount < 1 or amount > 2^254:
                         return(0) // "Invalid minimum amount"
@@ -110,7 +107,7 @@ code:
     elif msg.sender == exchange:
 
         # NameReg
-        msg(tx.gas - 1000, msg.data[1], 0, ["Markets"], 1)
+        msg(tx.gas - 1000, msg.data[1], 0, ["EtherEx - Markets"], 1)
 
         # Set contract parent and owner
         contract.storage[14] = msg.data[0] # Set c3D parent

@@ -50,17 +50,17 @@ code:
             if value < 1:
                 return(3) // "msg.data[1] out of bounds: %s" % value
 
-        # Check for sufficient funds and adjust balances
-        if balance < value:
-            return(4) // "Insufficient funds, %s has %d needs %d" % (msg.sender, balance, value)
+            # Check for sufficient funds and adjust balances
+            if balance < value:
+                return(4) // "Insufficient funds, %s has %d needs %d" % (msg.sender, balance, value)
 
-        elif value > 0: // "Adjusting values by %d" % value
-            balance = contract.storage[msg.sender] - value
-            contract.storage[msg.sender] = balance
-            contract.storage[to] = contract.storage[to] + value
+            elif value > 0: // "Adjusting values by %d" % value
+                balance = contract.storage[msg.sender] - value
+                contract.storage[msg.sender] = balance
+                contract.storage[to] = contract.storage[to] + value
 
         # Operations
-        if msg.datasize == 3:
+        else:
 
             # Check balance
             if msg.data[2] == 1:
@@ -70,12 +70,15 @@ code:
             # Withdraw
             elif msg.data[2] == 2: // "Withdraw"
                 if msg.sender == exchange:
-                    balance = contract.storage[msg.data[0]]
+                    sender = msg.data[0]
+                    balance = contract.storage[sender]
                     if balance < value:
                         return(0) // "Insufficient funds, %s had %d, needed %d" % (msg.data[0], balance, value)
-                elif balance < value:
-                    return(0) // "Insufficient funds, %s has %d needs %d" % (msg.sender, balance, value)
-                contract.storage[msg.sender] = contract.storage[msg.sender] - value
+                else:
+                    sender = msg.sender
+                    if balance < value:
+                        return(0) // "Insufficient funds, %s has %d needs %d" % (msg.sender, balance, value)
+                contract.storage[sender] = contract.storage[sender] - value
                 send(tx.gas / 2, msg.data[0], value)
                 return(1)
 
@@ -112,10 +115,10 @@ code:
             contract.storage[owners[i]] = msg.value / n # DEBUG
             i = i + 1
 
-        contract.storage[msg.sender] = msg.value # DEBUG - Sets full value to sender
+        # contract.storage[msg.sender] = msg.value # DEBUG - Sets full value to sender
 
         # NameReg
-        msg(tx.gas - 1000, msg.data[1], 0, ["Balances"], 1)
+        msg(tx.gas - 1000, msg.data[1], 0, ["EtherEx - Balances"], 1)
 
         # Set contract parent and owner
         contract.storage[14] = msg.data[0] # Set c3D parent

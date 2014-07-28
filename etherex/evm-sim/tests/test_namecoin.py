@@ -1,5 +1,7 @@
 from sim import Key, Simulator, compile_serpent
 
+from pyethereum import utils
+
 
 class TestNamecoin(object):
 
@@ -19,7 +21,7 @@ class TestNamecoin(object):
         ans = self.sim.tx(self.ALICE, self.contract, 0, data)
 
         assert ans == [1]
-        assert self.sim.get_storage_dict(self.contract) == {'ethereum.bit': '54.200.236.204'}
+        assert self.sim.get_storage_dict(self.contract) == {utils.zpad('ethereum.bit', 32): '54.200.236.204'}
 
     def test_double_reservation(self):
         data = ['ethereum.bit', '127.0.0.1']
@@ -29,4 +31,4 @@ class TestNamecoin(object):
         data = ['ethereum.bit', '127.0.0.2']
         ans = self.sim.tx(self.ALICE, self.contract, 0, data)
         assert ans == [0]
-        assert self.sim.get_storage_dict(self.contract) == {'ethereum.bit': '127.0.0.1'}
+        assert self.sim.get_storage_dict(self.contract) == {utils.zpad('ethereum.bit', 32): '127.0.0.1'}

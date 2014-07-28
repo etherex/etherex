@@ -130,7 +130,7 @@ code:
         value = msg.data[2]
         # check if sender has an account and has tax credits
         if value < contract.storage[ACCOUNT_MAP_OFFSET + from + 2]:
-            return([0, "sender doesn't have enough tax credits"], 2)
+            return([0, "not enough tax credits"], 2)
 
         # check if proposal exist
         if contract.storage[PROPOSAL_MAP_OFFSET + proposal_id] == 0:

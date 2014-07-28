@@ -6,6 +6,8 @@
 # Precursor, set some variables.
 #set:
 #  {{swarum_blob_id}} => 0xb5e0478618d5e91682efc0e2a95b3d32cdae546c03f6014dc8df659c2f0f94c3
+# set:
+#   {{NameReg}} => 0x50441127ea5b9dfd835a9aba4e1dc9c1257b58ca
 
 # First We Deploy DOUG
 # deploy:
@@ -50,6 +52,8 @@ transact:
   {{Trades}} => {{EtherEx}} {{NameReg}}
 transact:
   {{Currencies}} => {{EtherEx}} {{NameReg}}
+transact:
+  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 XETH {{Balances}}
 
 # Log those deploys.
 #log:
