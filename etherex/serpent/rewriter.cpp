@@ -411,7 +411,7 @@ Node apply_rules(Node node) {
             node.args[0].val = "'" + node.args[0].val;
             i = 1;
         }
-        for (i = i; i < node.args.size(); i++) {
+        for (; i < node.args.size(); i++) {
             node.args[i] = apply_rules(node.args[i]);
         }
     }
@@ -430,7 +430,12 @@ Node apply_rules(Node node) {
 }
 
 Node optimize(Node inp) {
-    if (inp.type == TOKEN) return tryNumberize(inp);
+    if (inp.type == TOKEN) {
+        Node o = tryNumberize(inp);
+        if (decimalGt(o.val, tt256, true))
+            err("Value too large (exceeds 32 bytes or 2^256)", inp.metadata);
+        return o;
+    }
 	for (unsigned i = 0; i < inp.args.size(); i++) {
         inp.args[i] = optimize(inp.args[i]);
     }

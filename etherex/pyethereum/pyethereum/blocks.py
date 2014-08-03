@@ -6,7 +6,7 @@ import utils
 import processblock
 import transactions
 import logging
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
 INITIAL_DIFFICULTY = 2 ** 22
@@ -14,10 +14,11 @@ GENESIS_PREVHASH = '\00' * 32
 GENESIS_COINBASE = "0" * 40
 GENESIS_NONCE = utils.sha3(chr(42))
 GENESIS_GAS_LIMIT = 10 ** 6
-MIN_GAS_LIMIT = 10 ** 4
+MIN_GAS_LIMIT = 125000
 GASLIMIT_EMA_FACTOR = 1024
 BLOCK_REWARD = 1500 * utils.denoms.finney
-UNCLE_REWARD = 7 * BLOCK_REWARD / 8
+UNCLE_REWARD = 3 * BLOCK_REWARD / 4
+NEPHEW_REWARD = BLOCK_REWARD / 8
 BLOCK_DIFF_FACTOR = 1024
 GENESIS_MIN_GAS_PRICE = 0
 BLKLIM_FACTOR_NOM = 6
@@ -66,7 +67,8 @@ acct_structure_rev = {}
 for i, (name, typ, default) in enumerate(acct_structure):
     acct_structure_rev[name] = [i, typ, default]
 
-
+import sys
+sys.setrecursionlimit(10000) # FIXME: persist difficulty of known blocks
 def calc_difficulty(parent, timestamp):
     offset = parent.difficulty / BLOCK_DIFF_FACTOR
     sign = 1 if timestamp - parent.timestamp < 42 else -1
@@ -167,7 +169,7 @@ class Block(object):
                 "Transactions root not found in database! %r" % self)
         if utils.sha3(rlp.encode(self.uncles)) != self.uncles_hash:
             raise Exception("Uncle root hash does not match!")
-        if len(self.uncles) != len(set(self.uncles)):
+        if len(self.uncles) != len(set(map(str, self.uncles))):
             raise Exception("Uncle hash not uniqe in uncles list")
         if len(self.extra_data) > 1024:
             raise Exception("Extra data cannot exceed 1024 bytes")
@@ -233,7 +235,8 @@ class Block(object):
 
         block = Block.init_from_parent(self, kargs['coinbase'],
                                        extra_data=kargs['extra_data'],
-                                       timestamp=kargs['timestamp'])
+                                       timestamp=kargs['timestamp'],
+                                       uncles=uncles)
 
         # replay transactions
         for tx_lst_serialized, _state_root, _gas_used_encoded in \
@@ -244,8 +247,10 @@ class Block(object):
             success, output = processblock.apply_transaction(block, tx)
             #block.add_transaction_to_list(tx) # < this is done by processblock
 #            logger.debug('state:\n%s', utils.dump_state(block.state))
+            logger.debug('d %s %s', utils.decode_int(_gas_used_encoded), block.gas_used)
             assert utils.decode_int(_gas_used_encoded) == block.gas_used
             assert _state_root == block.state.root_hash
+
         block.finalize()
 
         block.uncles_hash = kargs['uncles_hash']
@@ -362,6 +367,9 @@ class Block(object):
     def increment_nonce(self, address):
         return self._delta_item(address, 'nonce', 1)
 
+    def decrement_nonce(self, address):
+        return self._delta_item(address, 'nonce', -1)
+
     def get_balance(self, address):
         return self._get_acct_item(address, 'balance')
 
@@ -441,10 +449,11 @@ class Block(object):
         and the coinbase of each uncle by 7 of 8 that.
         Rb = 1500 finney
         """
-        self.delta_balance(self.coinbase, BLOCK_REWARD)
-        for uncle_hash in self.uncles:
-            uncle = get_block(uncle_hash)
-            self.delta_balance(uncle.coinbase, UNCLE_REWARD)
+        self.delta_balance(self.coinbase,
+                           BLOCK_REWARD + NEPHEW_REWARD * len(self.uncles))
+        for uncle_rlp in self.uncles:
+            uncle_data = Block.deserialize_header(uncle_rlp)
+            self.delta_balance(uncle_data['coinbase'], UNCLE_REWARD)
 
     def serialize_header_without_nonce(self):
         return rlp.encode(self.list_header(exclude=['nonce']))
@@ -531,8 +540,14 @@ class Block(object):
             # calculate the summarized_difficulty (on the fly for now)
         if self.is_genesis():
             return self.difficulty
+        elif 'difficulty:'+self.hex_hash() in self.state.db:
+            return utils.decode_int(
+                self.state.db.get('difficulty:'+self.hex_hash()))
         else:
-            return self.difficulty + self.get_parent().chain_difficulty()
+            o = self.difficulty + self.get_parent().chain_difficulty()
+            self.state.db.put('difficulty:'+self.hex_hash(),
+                              utils.encode_int(o))
+            return o
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and self.hash == other.hash

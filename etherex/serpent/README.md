@@ -1,4 +1,3 @@
 Installation:
 
-make
-sudo make install
+```make && sudo make install```

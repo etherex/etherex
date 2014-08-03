@@ -33,7 +33,7 @@
   EtherEx.markets = [
     {},
     {
-      name: "XETH/ETH",
+      name: "XETH",
       address: "0xcd91d7a2eeb6e23b30ec6e501e3ffd5688c3104e",
       minamount: Ethereum.BigInteger("10").pow(18),
       minprice: Ethereum.BigInteger("10").pow(8),
@@ -74,25 +74,25 @@
   };
 
   EtherEx.loadMarkets = function() {
-    var last = eth.storageAt(EtherEx.addresses.markets, String(18)).dec();
+    var last = eth.stateAt(EtherEx.addresses.markets, String(18)).dec();
     for (var i = 100; i <= 100 + parseInt(last); i = i + 5) {
-      var id = eth.storageAt(EtherEx.addresses.markets, String(i+4)).dec();
+      var id = eth.stateAt(EtherEx.addresses.markets, String(i+4)).dec();
       EtherEx.markets[id] = {
-        name: eth.storageAt(EtherEx.addresses.markets, String(i)),
-        address: eth.storageAt(EtherEx.addresses.markets, String(i+3)),
-        minamount: eth.storageAt(EtherEx.addresses.markets, String(i+1)).dec(),
-        minprice: eth.storageAt(EtherEx.addresses.markets, String(i+2)).dec(),
+        name: ethBrowser ? eth.stateAt(EtherEx.addresses.markets, String(i)).bin() : eth.stateAt(EtherEx.addresses.markets, String(i)),
+        address: eth.stateAt(EtherEx.addresses.markets, String(i+3)),
+        minamount: eth.stateAt(EtherEx.addresses.markets, String(i+1)).dec(),
+        minprice: eth.stateAt(EtherEx.addresses.markets, String(i+2)).dec(),
       }
     };
     // console.log(EtherEx.markets);
   };
 
   EtherEx.getAddress = function(_a) {
-    return eth.storageAt(EtherEx.addresses.namereg, _a).substr(2);
+    return eth.stateAt(EtherEx.addresses.namereg, _a).substr(2);
   };
 
   EtherEx.getName = function(_a) {
-    return eth.storageAt(EtherEx.addresses.namereg, "0x" + _a).bin().unpad();
+    return eth.stateAt(EtherEx.addresses.namereg, "0x" + _a).bin().unpad();
   };
 
   EtherEx.create = function() {
@@ -152,7 +152,7 @@
   };
 
   EtherEx.check = function () {
-    var data = EtherEx.txdata();
+    var data = EtherEx.txdata(1, 1);
     document.getElementById("checkval").innerHTML = "<p>" + data.unbin().substr(2) + "</p>";
 
     var pdata = "";
@@ -197,26 +197,28 @@
 
   EtherEx.getOrderbook = function() {
     var startkey = 100;
-    var lastkey = eth.storageAt(EtherEx.addresses.trades, "18").dec();
+    var lastkey = eth.stateAt(EtherEx.addresses.trades, String(18)).dec();
 
     var table = "<table><tr><th class='book'>Buy</th><th class='book'>Sell</th></tr>";
 
     document.getElementById("last").innerHTML = lastkey;
+    // console.log(lastkey);
 
     var check = 0;
     var booklength = lastkey / 5;
     var length = startkey + parseInt(lastkey);
 
     for (var i = startkey; i < length; i = i + 5) {
-      var value = eth.storageAt(EtherEx.addresses.trades, String(i).bin()).dec();
+      var value = eth.stateAt(EtherEx.addresses.trades, String(i)).dec();
 
       if (value) {
-        var type = eth.storageAt(EtherEx.addresses.trades, String(i)).dec();
-        var price = Ethereum.BigInteger(eth.storageAt(EtherEx.addresses.trades, String(i+1)).dec()) / Math.pow(10, 8);
-        var strprice = price + " ETH/XETH"; // TODO - markets
-        var amount = eth.storageAt(EtherEx.addresses.trades, String(i+2)).dec() / Math.pow(10, 18);
-        var stramount = EtherEx.formatBalance(eth.storageAt(EtherEx.addresses.trades, String(i+2)).dec()) + "<br />@ ";
-        var owner = '<br />by <span class="address">' + eth.storageAt(EtherEx.addresses.trades, String(i+3)).substr(2) + '</span>';
+        var type = eth.stateAt(EtherEx.addresses.trades, String(i)).dec();
+        var price = Ethereum.BigInteger(eth.stateAt(EtherEx.addresses.trades, String(i+1)).dec()) / Math.pow(10, 8);
+        var market = eth.stateAt(EtherEx.addresses.trades, String(i+4)).dec();
+        var strprice = price + " ETH/" + EtherEx.markets[market].name;
+        var amount = eth.stateAt(EtherEx.addresses.trades, String(i+2)).dec();
+        var stramount = EtherEx.formatBalance(amount) + "<br />@ ";
+        var owner = '<br />by <span class="address">' + eth.stateAt(EtherEx.addresses.trades, String(i+3)).substr(2) + '</span>';
         if (price) {
           table += "<tr>\
                 <td class='book'>" + ((type == 1) ? stramount + strprice + owner : '') + "</td>\
@@ -225,9 +227,9 @@
           document.getElementById("lastprice").innerHTML = price;
           // document.getElementById("price").value = price;
         };
-        if (amount) {
-          // document.getElementById("amount").value = amount;
-        };
+        // if (amount) {
+        //   document.getElementById("amount").value = amount;
+        // };
       };
     };
     table += "</table>";
@@ -244,17 +246,23 @@
   };
 
   EtherEx.btcBalances = function(keys) {
+    // document.getElementById("log").innerHTML = keys.length;
+    $("#addressbook > table > tbody tr.btc").remove();
+
     for (var i = keys.length - 1; i >= 0; i--) {
       var key = keys[i];
-      console.log(key);
+      // console.log(key);
+      $("#log").append(i + "...");
       $.get("https://api.blockcypher.com/v1/btc/main/addrs/" + key.address, function (info) {
-        console.log(info);
-        var entry = $('<tr><td><div><span class="address">' + key.address + "</span></div></td><td>" + info.final_balance / 100000000  + " BTC</td></tr>");
-        $("#addressbook > table > tbody").append(entry);
-      }).fail( function() {
-        var entry = $('<tr><td><div><span class="address">' + key.address + "</span></div></td><td>0 BTC</td></tr>");
+        $("#log").append(i + ";");
+        // console.log(info);
+        var entry = $('<tr class="btc"><td><div><span class="address">' + key.address + "</span></div></td><td>" + info.final_balance / 100000000  + " BTC</td></tr>");
         $("#addressbook > table > tbody").append(entry);
       });
+      // .fail( function() {
+      //   var entry = $('<tr><td><div><span class="address">' + key.address + "</span></div></td><td>0 BTC</td></tr>");
+      //   $("#addressbook > table > tbody").append(entry);
+      // });
     };
   }
 
@@ -270,7 +278,7 @@
 
     document.getElementById('eth').innerHTML = (unconfirmed > confirmed ? EtherEx.formatBalance(confirmed) + "<br /><sup>(" + EtherEx.formatBalance(unconfirmed - confirmed) + " unconfirmed)</sup>" : EtherEx.formatBalance(unconfirmed));
 
-    var latest = eth.transactions({latest: true});
+    var latest = eth.messages({latest: -1});
 
     var lh = $("#latest").html("");
     var s = latest.length - 1;
@@ -278,11 +286,13 @@
     for (i in latest)
     {
       var l = latest[s - i];
-      if (l.to != "".pad(20).unbin())
+      var ours = (addrs.indexOf(l.from) != -1 || addrs.indexOf(l.to) != -1)
+      if (l.to != "".pad(20).unbin() && ours)
       {
-        var dest = l.data.bin().substr(12, 20).unbin();
-        var wesent = addrs.indexOf(l.from) != -1;
+        var dest = wesent ? l.to : l.input.bin().substr(12, 20).unbin();
+        // $("#log").append("<br />" + dest);
         var wegot = addrs.indexOf(dest) != -1;
+        var wesent = addrs.indexOf(l.from) != -1;
 
         var sub = false;
         $(EtherEx.markets).each( function(i, market) {
@@ -295,7 +305,7 @@
         lh.append('<li>' +
           '<span class="timestamp" title="' + new Date(l.timestamp * 1000).toLocaleString() + '">' + new Date(l.timestamp * 1000).toLocaleTimeString() + "</span>" +
           (wesent ? wegot ? '<span class="xfer"><span class="name">XFER' : '<span class="out"><span class="name">OUT' : '<span class="in"><span class="name">IN') + '</span>' +
-          '<span class="value">' + (sub ? l.data.bin().substr(32, 32).unbin().dec() + ' ' + sub : (l.value ? EtherEx.formatBalance(l.value.dec()) : '')) + '</span>' +
+          '<span class="value">' + (sub ? l.input.bin().substr(32, 32).dec() + ' ' + sub : (l.value ? EtherEx.formatBalance(l.value.dec()) : '')) + '</span>' +
           '' + (!wesent ? '<span class="from address"><span class="ind">&lt;</span>' + l.from + '</span>' : !wegot ? '<span class="to address"><span class="ind">&gt;</span>' + (sub ? dest : l.to) + '</span>' : "") + '</span>' +
           (l.age ? l.age < 6 ?
             '<span class="confirms">' + l.age + ' CONFIRMATIONS</span>' : "" :
@@ -319,7 +329,7 @@
 
       var addrs = eth.keys.map(function (k) { return eth.secretToAddress(k); });
 
-      document.getElementById("xeth").innerHTML = eth.storageAt(EtherEx.markets[1].address, addrs[0]).dec();
+      document.getElementById("xeth").innerHTML = eth.stateAt(EtherEx.markets[1].address, addrs[0]).dec();
 
       document.getElementById("tot").innerHTML = eth.balanceAt(EtherEx.coinbase).dec();
 
@@ -332,7 +342,7 @@
 
         try {
           for (var m = EtherEx.markets.length - 1; m >= 1; m--) {
-            var subbal = eth.storageAt(EtherEx.markets[m].address, addr).dec();
+            var subbal = eth.stateAt(EtherEx.markets[m].address, addr).dec();
             var length = EtherEx.markets[m].name.length - 4;
             var subentry = $('<tr><td class="sub">+ ' + '</td><td><span class="address">' + subbal + "</span> " + EtherEx.markets[m].name.substr(0, length) + "</td></tr>");
 
@@ -373,7 +383,27 @@
     }
   };
 
+
   $(document).ready(function() {
+
+    if (!ethBrowser) {
+      window.eth.stateAt = window.eth.storageAt;
+      window.eth.messages = function() { return {}; };
+      eth.watch(eth.coinbase, EtherEx.markets[1].address, EtherEx.updateBalances);
+    }
+    else {
+      var addrs = [];
+      for (var i = eth.keys.length - 1; i >= 0; i--) {
+        addrs.push(eth.secretToAddress(eth.keys[i]));
+        // eth.watch({altered: addr}).changed(EtherEx.updateBalances);
+      }
+      addrs.push(eth.coinbase);
+      addrs.push(EtherEx.markets[1].address);
+      // eth.watch({altered: eth.coinbase}).changed(EtherEx.updateBalances);
+      // eth.watch({altered: EtherEx.markets[1].address}).changed(EtherEx.updateBalances);
+      eth.watch({altered: addrs}).changed(EtherEx.updateBalances);
+    }
+
     // var graph = new Rickshaw.Graph( {
     //   element: document.querySelector("#chart"),
     //   series: [{
@@ -491,9 +521,8 @@
       EtherEx.updateBalances();
     });
 
-    EtherEx.updateBalances();
+    // EtherEx.updateBalances();
     $("#to").trigger('keyup');
-    eth.watch(EtherEx.markets[1].address, eth.coinbase, EtherEx.updateBalances);
   });
 
 })(jQuery);

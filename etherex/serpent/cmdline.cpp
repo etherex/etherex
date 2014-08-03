@@ -64,7 +64,7 @@ int main(int argv, char** argc) {
         std::cout << assemble(parseLLL(input, true)) << "\n";
     }
     else if (command == "serialize") {
-        std::cout << binToHex(serialize(tokenize(input))) << "\n";
+        std::cout << binToHex(serialize(tokenize(input, Metadata(), false))) << "\n";
     }
     else if (command == "flatten") {
         std::cout << printTokens(flatten(parseLLL(input, true))) << "\n";

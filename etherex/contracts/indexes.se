@@ -84,7 +84,7 @@ code:
     elif msg.sender == exchange:
 
         # NameReg
-        msg(tx.gas - 1000, msg.data[1], 0, ["EtherEx - Indexes"], 1)
+        call(msg.data[1], 0x45746865724578202d20496e6465786573000000000000000000000000000000) # "EtherEx - Indexes"
 
         # Set contract parent and owner
         contract.storage[14] = msg.data[0] # Set c3D parent

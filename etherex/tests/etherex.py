@@ -59,6 +59,8 @@ class TestEtherEx(object):
 
         ans = self.sim.tx(self.ALICE, self.contract, 0, [self.bcontract, self.icontract, self.tcontract, self.ccontract, self.ncontract])
         assert ans == [1]
+        assert self.sim.get_storage_data(self.ncontract, int(self.contract, 16)) == 0x4574686572457800000000000000000000000000000000000000000000000000 # int("EtherEx".encode('hex'), 16)
+        assert self.sim.get_storage_data(self.contract, 10) == 0x88554646BB
 
         ans = self.sim.tx(self.ALICE, self.bcontract, 10**18, [self.contract, self.ncontract])
         assert ans == [1]
@@ -257,20 +259,20 @@ class TestEtherEx(object):
     def test_insufficient_buy_trade(self):
         self.test_initialize()
 
-        ans = self.sim.tx(self.ALICE, self.contract, 0, [1, 1 * 10 ** 17, 1000 * 10 ** 8, 1])
+        ans = self.sim.tx(self.ALICE, self.contract, 0, [1, 1 * 10 ** 17, 1000 * 10 ** 8, 1], 100000)
 
         assert ans == [12] #.startswith("Minimum XETH trade amount not met")
 
     def test_insufficient_sell_trade(self):
         self.test_initialize()
 
-        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 17, [2, 1 * 10 ** 17, 1000 * 10 ** 8, 1])
+        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 17, [2, 1 * 10 ** 17, 1000 * 10 ** 8, 1], 100000)
         assert ans == [13] #.startswith("Minimum ETH value not met")
 
     def test_insufficient_mismatch_sell_trade(self):
         self.test_initialize()
 
-        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 18, [2, 1 * 10 ** 19, 1000 * 10 ** 8, 1])
+        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 18, [2, 1 * 10 ** 19, 1000 * 10 ** 8, 1], 100000)
         assert ans == [14] #.startswith("Minimum ETH value not met")
 
     def test_add_bob_coin(self):
@@ -298,7 +300,7 @@ class TestEtherEx(object):
     def test_first_sell(self):
         self.test_initialize()
 
-        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 21, [2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+        ans = self.sim.tx(self.ALICE, self.contract, 1 * 10 ** 21, [2, 1 * 10 ** 21, 1000 * 10 ** 8, 1], 100000)
 
         assert self.sim.get_storage_data(self.tcontract, 100) == 2
         assert self.sim.get_storage_data(self.tcontract, 101) == 1000 * 10 ** 8

@@ -6,10 +6,13 @@
 # of the MIT license.  See the LICENSE file for details.
 
 # NameReg
-
-if not contract.storage[msg.data[0]]: # or contract.storage[msg.data[0]] == msg.sender:
-    contract.storage[msg.sender] = msg.data[0]
-    contract.storage[msg.data[0]] = msg.sender
-    return(1)
-else:
-    return(0)
+init:
+    contract.storage[contract.address] = 0x45746865724578202d204e616d65526567000000000000000000000000000000 # "EtherEx - NameReg"
+    contract.storage[0x45746865724578202d204e616d65526567000000000000000000000000000000] = contract.address
+code:
+    if not contract.storage[msg.data[0]]: # or contract.storage[msg.data[0]] == msg.sender:
+        contract.storage[msg.sender] = msg.data[0]
+        contract.storage[msg.data[0]] = msg.sender
+        return(1)
+    else:
+        return(0)

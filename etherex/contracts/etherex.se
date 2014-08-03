@@ -42,49 +42,49 @@ code:
         #
         if msg.datasize < 1: // "No data to process"
             if msg.value > 0: // "Refunding"
-                ret = send(tx.gas / 2, msg.sender, msg.value)
+                ret = send(msg.sender, msg.value)
             return(0)
 
         if msg.data[0] < 1 or msg.data[0] > 10: // "Invalid operation"
             if msg.value > 0: // "Refunding"
-                ret = send(tx.gas / 2, msg.sender, msg.value)
+                ret = send(msg.sender, msg.value)
             return(2)
 
         # Add Buy / Sell trade checks
         if msg.data[0] < 3: // "Missing amount"
             if msg.datasize < 2:
                 if msg.value > 0: // "Refunding"
-                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                    ret = send(msg.sender, msg.value)
                 return(3)
 
             elif msg.data[1] < 1: // "Invalid amount"
                 if msg.value > 0: // "Refunding"
-                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                    ret = send(msg.sender, msg.value)
                 return(4)
 
             elif msg.datasize < 3: // "Missing price"
                 if msg.value > 0: // "Refunding"
-                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                    ret = send(msg.sender, msg.value)
                 return(5)
 
             elif msg.data[2] < 1 * 10 ^ 8: // "Invalid price"
                 if msg.value > 0: // "Refunding"
-                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                    ret = send(msg.sender, msg.value)
                 return(6)
 
             elif msg.datasize < 4: // "Missing market ID"
                 if msg.value > 0: // "Refunding"
-                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                    ret = send(msg.sender, msg.value)
                 return(7)
 
             elif msg.data[3] > cmarket or msg.data[3] < 1: // "Invalid market ID"
                 if msg.value > 0: // "Refunding"
-                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                    ret = send(msg.sender, msg.value)
                 return(8)
 
             if msg.datasize > 4: // "Too many arguments"
                 if msg.value > 0: // "Refunding"
-                    ret = send(tx.gas / 2, msg.sender, msg.value)
+                    ret = send(msg.sender, msg.value)
                 return(9)
 
         #
@@ -99,12 +99,12 @@ code:
         # Basic amount and price checks
         if msg.data[0] < 3 and amount > 2^254: # or amount < 1:
             if msg.value > 0: // "Refunding"
-                ret = send(tx.gas / 2, msg.sender, msg.value)
+                ret = send(msg.sender, msg.value)
             return(10) // "Amount out of range"
 
         if msg.data[0] < 3 and price > 2^254: # or price < 1 * 10 ^ 8 + 1:
             if msg.value > 0: // "Refunding"
-                ret = send(tx.gas / 2, msg.sender, msg.value)
+                ret = send(msg.sender, msg.value)
             return(11) // "Price out of range"
 
         # Buy / Sell actions
@@ -113,13 +113,13 @@ code:
             marketid = msg.data[3]
 
             # Get market
-            market = msg(tx.gas / 2, markets, 0, [marketid], 1, 4)
+            market = call(markets, [marketid], 1, 4)
 
             # Checking trade amounts and balances
             if msg.data[0] == 1: # Check buy amount
                 if amount < market[1]:
                     if msg.value > 0: // "Refunding"
-                        ret = send(tx.gas / 2, msg.sender, msg.value)
+                        ret = send(msg.sender, msg.value)
                     return(12) // "Minimum %s trade amount not met, minimum is %s, got %d" % (market[0], market[2], msg.value)
             else: # Check sell amount
                 if msg.value < market[1]:
@@ -128,12 +128,12 @@ code:
                 # Check msg.value and amount match
                 if msg.value < amount:
                     if msg.value > 0: // "Refunding"
-                        ret = send(tx.gas / 2, msg.sender, msg.value)
+                        ret = send(msg.sender, msg.value)
                     return(14) // "Trade amount mismatch"
 
                 # Refund excess value
                 if msg.value > amount:
-                    ret = send(tx.gas / 2, msg.sender, msg.value - amount)
+                    ret = send(msg.sender, msg.value - amount)
 
 
             # "Trade amounts OK for %s" % market[0]
@@ -151,11 +151,25 @@ code:
             trade[4] = msg.sender
             trade[5] = marketid
 
-            tradeid = msg(tx.gas / 2, trades, 0, trade, 6) # Trade added
+            tradeid = call(trades, trade, 6) # Trade added
             contract.storage[9] = tradeid
             booklength = (tradeid - 100) / 5 + 1
             # contract.storage[pricekey] = booklength
             contract.storage[100 + marketid] = booklength
+
+            #
+            # XETH issuance
+            #
+            xeth = array(4)
+
+            # Get market
+            xeth = call(markets, [1], 1, 4)
+
+            reward = ((amount * price) / (1 * 10 ^ 21)) / 100 // "Sending reward of %s to %s" % (reward, msg.sender)
+            data = array(2)
+            data[0] = msg.sender
+            data[1] = reward
+            ret = msg(tx.gas - 25, xeth[3], reward, data, 2) // #define xethaddr=XETH
 
             return(tradeid)
 
@@ -178,12 +192,12 @@ code:
             marketid = msg.data[1]
 
             # Get market
-            market = msg(tx.gas / 2, markets, 0, [marketid], 1, 4)
+            market = call(markets, [marketid], 1, 4)
 
             data = array(2)
             data[0] = msg.sender
             data[1] = msg.value
-            ret = msg(tx.gas / 2, market[3], msg.value, data, 2) # "Updating BalancesContract (XETH)"
+            ret = msg(tx.gas - 25, market[3], msg.value, data, 2) # "Updating BalancesContract (XETH)"
             # return(market[3])
             return(1)
 
@@ -195,13 +209,13 @@ code:
             marketid = msg.data[2]
 
             # Get market
-            market = msg(tx.gas / 2, markets, 0, [marketid], 1, 4)
+            market = call(markets, [marketid], 1, 4)
 
             data = array(3)
             data[0] = msg.sender
             data[1] = msg.data[1]
             data[2] = 2
-            ret = msg(tx.gas / 2, market[3], 0, data, 3)
+            ret = call(market[3], data, 3)
             return(ret)
 
         #
@@ -218,7 +232,7 @@ code:
         elif msg.data[0] == 7: // "ADDMARKET"
             # if msg.value < 10 ^ 18:
             #     if msg.value > 0: # "Refunding"
-            #         ret = send(tx.gas / 2, msg.sender, msg.value)
+            #         ret = send(msg.sender, msg.value)
             #     return(0) # "Insufficient deposit to add market"
 
             markets = contract.storage[6]
@@ -228,7 +242,7 @@ code:
             market[2] = amount
             market[3] = price
             market[4] = msg.data[4]
-            res = msg(tx.gas / 2, markets, 0, market, 5) // "Updating CurrenciesContract"
+            res = call(markets, market, 5) // "Updating CurrenciesContract"
 
             # Store last count
             contract.storage[7] = res
@@ -237,7 +251,7 @@ code:
             # data = array(2)
             # data[0] = msg.sender
             # data[1] = msg.value
-            # ret = msg(tx.gas / 2, contract.storage[3], msg.value, data, 2)
+            # ret = call(contract.storage[3], msg.value, data, 2)
 
             if res:
                 return(42) // "Market added"
@@ -250,6 +264,7 @@ code:
         elif msg.data[0] == 8 and msg.sender == owner:
             contract.storage[15] = msg.data[1] // "Set owner to %s" % msg.data[1]
             return(msg.data[1])
+
         #
         # Change XETH ownership
         #
@@ -268,7 +283,7 @@ code:
         #
         elif msg.data[0] > 10:
             if msg.value > 0: // "Refunding"
-                ret = send(tx.gas / 2, msg.sender, msg.value)
+                ret = send(msg.sender, msg.value)
             return(9) // "Protect the citizens"
             # suicide(msg.sender) // "Protect the citizens"
 
@@ -277,34 +292,16 @@ code:
         #
         else:
             if msg.value > 0: // "Refunding"
-                ret = send(tx.gas / 2, msg.sender, msg.value)
+                ret = send(msg.sender, msg.value)
             return(0) // "Protect the citizens"
-            # suicide(msg.sender)
-
-        #
-        # XETH issuance
-        #
-        # if msg.value > 0:
-        #     market = array(4)
-
-        #     # Get market
-        #     market = msg(tx.gas / 2, markets, 0, [1], 1, 4)
-
-        #     reward = ((amount * price) / (1 * 10 ^ 21)) / 100 // "Sending reward of %s to %s" % (reward, msg.sender)
-        #     data = array(2)
-        #     data[0] = msg.sender
-        #     data[1] = reward
-        #     ret = msg(tx.gas / 2, market[3], reward, data, 2) // #define xethaddr=XETH
-        #     return(ret)
 
         #
         # Return
         #
         if amount == 0:
             if msg.value > 0: // "Refunding"
-                ret = send(tx.gas / 2, msg.sender, msg.value)
-            return(20) // "Protect the citizens"
-            # suicide(owner)
+                ret = send(msg.sender, msg.value)
+            return(20)
         else:
             if !ret:
                 ret = 20
@@ -321,7 +318,7 @@ code:
         contract.storage[6] = msg.data[3] // "CurrenciesContract (markets), storage # 7 for count"
 
         # NameReg
-        msg(tx.gas - 1000, msg.data[4], 0, ["EtherEx"], 1)
+        call(msg.data[4], 0x4574686572457800000000000000000000000000000000000000000000000000) # EtherEx
 
         # Set contract as active
         contract.storage[1] = 1

@@ -103,6 +103,9 @@ code:
         return(1)
 
     elif msg.sender == exchange:
+
+        contract.storage[msg.sender] = msg.value # DEBUG - Sets full value to sender
+
         n = 3
         owners = array(n)
         owners[0] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31 // #define 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31=ALICE
@@ -112,13 +115,11 @@ code:
         # Split endowment between owners
         i = 0
         while i < n:
-            contract.storage[owners[i]] = msg.value / n # DEBUG
+            contract.storage[owners[i]] = 10 ^ 18 / n # DEBUG
             i = i + 1
 
-        # contract.storage[msg.sender] = msg.value # DEBUG - Sets full value to sender
-
         # NameReg
-        msg(tx.gas - 1000, msg.data[1], 0, ["EtherEx - Balances"], 1)
+        call(msg.data[1], 0x45746865724578202d2042616c616e6365730000000000000000000000000000) # "EtherEx - Balances"
 
         # Set contract parent and owner
         contract.storage[14] = msg.data[0] # Set c3D parent

@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 rlp_hash_hex = lambda data: utils.sha3(rlp.encode(data)).encode('hex')
 
-NUM_BLOCKS_PER_REQUEST = 32
+NUM_BLOCKS_PER_REQUEST = 32 # FIXME timeouts occure if validating received blocks takes too long.
+# small numbers don't fetch the old blocks ...
 
 
 class Miner():
@@ -35,7 +36,7 @@ class Miner():
     def __init__(self, parent, uncles, coinbase):
         self.nonce = 0
         self.block = blocks.Block.init_from_parent(
-            parent, coinbase, uncles=[u.hash for u in uncles])
+            parent, coinbase, uncles=[u.list_header() for u in uncles])
         self.pre_finalize_state_root = self.block.state_root
         self.block.finalize()
         logger.debug('Mining #%d %s', self.block.number, self.block.hex_hash())
@@ -277,10 +278,10 @@ class ChainManager(StoppableLoopThread):
             return False
 
         # make sure we know the uncles
-        for uncle_hash in block.uncles:
-            if not uncle_hash in self:
-                logger.debug('Missing uncle for block %r', block)
-                return False
+        # for uncle_hash in block.uncles:
+        #     if not uncle_hash in self:
+        #         logger.debug('Missing uncle for block %r', block)
+        #        return False
 
         # check PoW
         if not len(block.nonce) == 32:
@@ -307,7 +308,7 @@ class ChainManager(StoppableLoopThread):
             self._update_head(block)
 
         # log the block
-        chainlogger.log_block(block)
+        #chainlogger.log_block(block)
         return True
 
     def get_children(self, block):
@@ -380,7 +381,7 @@ class ChainManager(StoppableLoopThread):
     def log_chain(self):
         num = self.head.number + 1
         for b in reversed(self.get_chain(count=num)):
-            chainlogger.log_block(b)
+            #chainlogger.log_block(b)
             logger.debug(b)
             for tx in b.get_transactions():
                 logger.debug('\t%r', tx)
@@ -426,12 +427,13 @@ def handle_local_chain_requested(sender, peer, block_hashes, count, **kwargs):
 
     if len(block_hashes):
         # handle genesis special case
-        if block_hashes[-1] in chain_manager:
-            assert chain_manager.get(block_hashes[-1]).is_genesis()
-            block_hashes.pop(-1)
-            if not block_hashes:
-                return
-        assert block_hashes[-1] not in chain_manager
+        if False: # FIXME, current logic does not work
+            if block_hashes[-1] in chain_manager:
+                assert chain_manager.get(block_hashes[-1]).is_genesis()
+                block_hashes.pop(-1)
+                if not block_hashes:
+                    return
+            assert block_hashes[-1] not in chain_manager
         #  If none of the parents are in the current
         logger.debug(
             "Sending NotInChain: %r", block_hashes[-1].encode('hex')[:4])
