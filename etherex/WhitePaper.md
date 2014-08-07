@@ -228,10 +228,11 @@ Allowed values:
 ```
 1 = BUY
 2 = SELL
-3 = DEPOSIT
-4 = WITHDRAW
-5 = CANCEL
-6 = ADDMARKET
+3 = TRADE
+4 = DEPOSIT
+5 = WITHDRAW
+6 = CANCEL
+7 = ADDMARKET
 ```
 
 
@@ -257,9 +258,10 @@ New market IDs will be created as DAO creators add their subcurrency to the exch
 
 ### Currencies
 ```
-1 = ETH
-2 = XETH
-3 = BTC
+0 = ETH
+1 = XETH
+2 = XBTC
+...
 ```
 New currency IDs will also be created as markets get added.
 
@@ -291,22 +293,22 @@ Fulfill trade
 
 Deposit 1 BTC
 ```
-3 100000000 2
+4 100000000 2
 ```
 
 Withdraw 1 ETH
 ```
-4 1000000000000000000 1
+5 1000000000000000000 1
 ```
 
 Cancel operation
 ```
-5 0x3039
+6 0x3039
 ```
 
 Add your subcurrency
 ```
-6 1000000000000000000000 100000000 "BOB" 0xe559de5527492bcb42ec68d07df0742a98ec3f1e
+7 1000000000000000000000 100000000 "BOB" 0xe559de5527492bcb42ec68d07df0742a98ec3f1e
 ```
 
 
