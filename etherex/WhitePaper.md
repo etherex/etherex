@@ -47,10 +47,15 @@ This document will go further into the details of this implementation of a decen
 
 Concept
 -------
+The decentralized exchange consists of many contracts running on Ethereum. The contracts interact with each other to allow users to make trades. In order to use the exchange, users put in trade information and send funds to a master contract which then executes the trade. Once the contract receives both sides of the trade, it sends the funds to the respective parties involved. The contracts of the exchange hold the funds so they are always safe from everyone, including the creators of the exchange.
+
+
+Limitations of current implementations
+--------------------------------------
 
 The concept of a decentralized exchange can take many shapes and can be implemented in many different ways. A few projects have already emerged, including some that are already operational, namely Counterparty and Mastercoin's metaDEx. Both implement the concept in a peer-to-peer fashion and are built on top of the Bitcoin network. Unfortunately, these exchanges are limited by the very nature of Bitcoin's blockchain technology. We won't go further into the details of those limitations in this paper since Vitalik Buterin already covered them in the [Ethereum white paper][1], but we need to describe how such limitations affect the implementation of a decentralized exchange built on that technology.
 
-Bitcoin's strength lies in it's simplicity, at least in terms of what it aims to achieve. There is no denying it's complexity, the efforts required to understand it's inner workings or how difficult it can be to grasp the concept at first. But what it does is still ultimately very simple operations, which are those of a currency; if I send you `x` BTC, I now have `x` BTC less and you have `x` more BTC. The Bitcoin blockchain only keeps track of those transactions as a distributed public ledger, and this is where those limitations start to emerge.
+Bitcoin's strength lies in it's simplicity, at least in terms of what it aims to achieve. There is no denying it's complexity, the efforts required to understand it's inner workings or how difficult it can be to grasp the concept at first. But what it does is still ultimately very simple operations, which are those of a currency; if I send you `x` BTC, I now have `x` BTC less and you have `x` more BTC. The Bitcoin blockchain keeps track of those transactions as a distributed public ledger, and this is where those limitations start to emerge.
 
 Building a decentralized exchange on a ledger that was designed to keep track of simple transactions (unspent outputs in Bitcoin's jargon) would be like trying to run Wall Street using side-notes in every accountant's single-lined book and matching traders by phone, however close to reality that can actually be (or was).
 
@@ -65,7 +70,7 @@ Having great cryptographic tools at our disposal is interesting, but it's never 
 
 Ethereum now provides the perfect platform for transparency. We can now centralize the order book, the trading engine, and every rule we need to make an exchange work, only now **fully transparently, totally open-source and with the security of blockchain technology**.
 
-[ some more describing the concept still ? ]
+Traders will no longer have to trust private servers to hold the order book, along with every single one of its input and output. This new order book and the deterministic nature of contracts on Ethereum brings the much needed transparency to cryptocurrency exchanges.
 
 
 Requirements
@@ -101,7 +106,9 @@ Trading data will need to be regularly optimized to maintain an acceptable footp
 
 It has to be understood that the decentralized exchange itself will not be providing the off-chain services but act as a hub for other DAOs and DACs to provide such services. In the same way that Ethereum provides a feature-less platform, the exchange initially provides a blank slate for new markets. Many pairs of the same currency can also compete in security, features, speed, privacy and so on, across different levels of decentralization.
 
-[ more about markets and currency pairs ]
+Ethereum will not be able to interact with off chain assets such as Bitcoin and Litecoin without first having brought those off chain assets onto Ethereum. Since the ability to bring off chain assets onto the Ethereum chain is not a feature built into the core of Ethereum, the exchange will have to implement these off chain assets while staying true to its goal of decentralization. At this point a few different solutions offer themselves. It may be possible to use a combination of multi-signature wallets and oracles to create an environment where no one party has the ability to steal assets or block them from moving. Another solution is to implement side chains as a way to trustlessly handle these off chain assets. Unfortunately the bitcoin technology is not in place to implement side chains from their end so the sidechain option will not be a viable one until the core bitcoin technology is updated. Though once it becomes a possibility, sidechains might be the optimal way to implement off chain assets.
+
+Fiat integration brings its own set of problems as by nature fiat is not decentralized. If fiat existed on a blockchain, implementing it would be no different than adding any other off chain asset. Unfortunately, that is not the case. One possible solution to this conundrum is the use of shelling coins to hold a steady value. While it may not technically be fiat, shelling coins could be pegged to a steady value such as the USD, EUR or even commodities such as oil and gold. Another possible solution for fiat integration is that a third party with the existing infrastructure may decide it is profitable to issue Ethereum USD coins. If an entity takes up the role of taking in fiat and issuing Ethereum coins representing that fiat, it could be implemented or even used directly on the exchange.
 
 
 ### Adoption and ecosystem
@@ -112,6 +119,7 @@ The adoption rate of the exchange will depend heavily on the adoption rate of Et
 
 The ecosystem of subcurrencies and DApps within Ethereum will also have a major influence on the adoption rate of the exchange. Even if the trading of off-chain assets could be enough to make the exchange a "killer app" and provide a high enough adoption, a thriving subcurrency market will be needed to prove the usefulness of both Ethereum and a decentralized exchange.
 
+[ more about the ecosystem ]
 
 Implementation of a decentralized exchange on Ethereum
 ------------------------------------------------------
@@ -311,9 +319,7 @@ Notes
 Interface
 =========
 
-The decentralized exchange will provide an open source interface on the Ethereum platform both as a standalone web app that connects to a node and as a client-browser interface.
-
-[ needs more details? ]
+The decentralized exchange will provide an open source interface on the Ethereum platform both as a standalone web app that connects to a node and as a client-browser interface. It can still be made very similar to what traders are used to with current centralized exchanges.
 
 
 ###JSON API
@@ -321,6 +327,8 @@ The decentralized exchange will provide an open source interface on the Ethereum
 A complete JSON-RPC API will be provided to retrieve information about the exchange, however providing your own nodes will be highly encouraged. All of the exchange's data will be available to you from the interface within the Ethereum client.
 
 There will be no JSON or other type of trading API since the exchange is using Ethereum. Trading is done by sending transactions directly to the contract(s) running the exchange.
+
+The same transaction API used by the interface will be available for anyone to create trading bots, only those will have to make transactions on your behalf instead of normal network requests. They will also be limited by block times, block gas limits and transaction costs which should greatly reduce the impact of trading bots on such a platform. Seasoned traders will still see many benefits in automating most operations.
 
 
 Conclusion
