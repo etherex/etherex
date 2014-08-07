@@ -94,7 +94,7 @@ Outside of the Ethereum network, a decentralized exchange will need secure walle
 
 ### Blockchain bloat
 
-Trading data will need to be regularly optimized to maintain an acceptable footprint on the Ethereum network. More research and tests will be needed, but it is already clear that the operating costs will not be suited for HFT trading and for very small trades. It will be the project's responsibility to be properly optimized both in its execution and storage use. However, other scaling issues would have to be resolved with the Ethereum platform itself, to which the exchange would contribute with any development or direct code contribution.
+Trading data will need to be regularly optimized to maintain an acceptable footprint on the Ethereum network. More research and tests will be needed, but it is already clear that the operating costs will not be suited for HFT trading and for very small trades. It will be the project's responsibility to be properly optimized both in its execution and storage use. However, other scaling issues would have to be resolved within the Ethereum platform itself, to which the exchange would contribute with any development or direct code contribution.
 
 
 ### Off-chain coins and fiat integration
@@ -108,6 +108,9 @@ It has to be understood that the decentralized exchange itself will not be provi
 
 A decentralized exchange will require no sign-up of any kind from users to allow for its normal operations. However, users would be required to hold an initial balance of Ether to interact with the network in the first place. The exchange will hold an important role within the ecosystem as described as the DAOex in the (draft) paper [The DAOist protocol][2] by Vlad Zamfir, and some work has already been done in that paper to provide a solution to easier adoption. Other elements of that protocol will need to be implemented both in the exchange and DAOs and will be covered when a complete API is available. At the very least, a standard API for getting balances and transferring amounts for subcurrencies will need to be established.
 
+The adoption rate of the exchange will depend heavily on the adoption rate of Ethereum itself. Adoption may be sped up once the exchange offers an assortment of off chain assets. If the exchange can become a decentralized version of Cryptsy, potentially many users may switch over in a short amount of time. As the Ethereum infrastructure may take some time to really build up, offering trading between off chain assets will be the catalyst that speeds up the exchange's adoption.
+
+The ecosystem of subcurrencies and DApps within Ethereum will also have a major influence on the adoption rate of the exchange. Even if the trading of off-chain assets could be enough to make the exchange a "killer app" and provide a high enough adoption, a thriving subcurrency market will be needed to prove the usefulness of both Ethereum and a decentralized exchange.
 
 
 Implementation of a decentralized exchange on Ethereum
@@ -254,7 +257,8 @@ New currency IDs will also be created as markets get added.
 
 
 ### Market names
-Follow the "ETH/<name>" convention for the market name, like "ETH/BOB" for BobCoin.
+Market names follow the "ETH/<name>" convention. When registering a new market, submit the currency name as a three or four letter uppercase identifier, ex.: "BOB" for BobCoin.
+
 
 ### Minimum trade amounts
 When adding a subcurrency, make the minimum trade amount high enough to make economic sense.
@@ -262,14 +266,14 @@ When adding a subcurrency, make the minimum trade amount high enough to make eco
 
 ### Examples
 
-Buy 1000 ETH at 1200 ETH/BTC (for 1.2 BTC)
+Buy 1000 ETH at 1200 ETH/XETH
 ```
 1 1000000000000000000000 120000000000 1
 ```
 
-Sell 1000 ETH at 1200 ETH/BTC (for 1.2 BTC)
+Sell 1000 ETH at 1500 ETH/XETH
 ```
-2 1000000000000000000000 120000000000 1
+2 1000000000000000000000 150000000000 1
 ```
 
 Fulfill trade
@@ -294,7 +298,7 @@ Cancel operation
 
 Add your subcurrency
 ```
-6 1000000000000000000000 100000000 "ETH/BOB" 0xe559de5527492bcb42ec68d07df0742a98ec3f1e
+6 1000000000000000000000 100000000 "BOB" 0xe559de5527492bcb42ec68d07df0742a98ec3f1e
 ```
 
 
