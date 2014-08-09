@@ -30,40 +30,29 @@ code:
     # Logging
     contract.storage[20] = msg.datasize
     contract.storage[21] = tx.gas
+    contract.storage[22] = block.timestamp
 
     # Get our last recorded pointer
     last = contract.storage[18]
 
-    ret = 0
-    if msg.value > 0: // "Refunding excess value: %s" % msg.value
-        ret = send(tx.gas / 2, tx.origin, msg.value)
-
-    # Logging
-    contract.storage[20] = msg.datasize
-    contract.storage[21] = tx.gas
-    contract.storage[22] = ret
+    # DEBUG
+    if msg.value > 0: // "Refunding value: %s" % msg.value
+        send(tx.origin, msg.value)
 
     if status == 1:
-        if msg.datasize == 2: // "Getting trades"
-            i = 0
-            trades = array(msg.data[0] * 5 + 2)
-            trades[0] = 0
-            trades[1] = 0
-            while i < msg.data[0]:
-                price = contract.storage[i * 5 + 101]
-                if price == msg.data[1]:
-                    trades[trades[0] * 5 + 2] = contract.storage[i * 5 + 100] // "Buy or sell"
-                    trades[trades[0] * 5 + 3] = price // "Price"
-                    trades[trades[0] * 5 + 4] = contract.storage[i * 5 + 102] // "Amount"
-                    trades[trades[0] * 5 + 5] = contract.storage[i * 5 + 103] // "Owner"
-                    trades[trades[0] * 5 + 6] = contract.storage[i * 5 + 104] // "Market"
-                    trades[1] = trades[1] + 1
-                    trades[0] = trades[0] + 1
-                i = i + 1
-            return(trades, msg.data[0] * 5 + 2)
+        if msg.datasize == 1: // "Getting trade"
+            trade = array(5)
+            trade[0] = contract.storage[msg.data[0]] // "Buy or sell"
+            trade[1] = contract.storage[msg.data[0] + 1] // "Price"
+            trade[2] = contract.storage[msg.data[0] + 2] // "Amount"
+            trade[3] = contract.storage[msg.data[0] + 3] // "Owner"
+            trade[4] = contract.storage[msg.data[0] + 4] // "Market"
+            return(trade, 5)
+
         elif msg.datasize == 6:
-            if msg.data[0] == 1:
-                if msg.sender == exchange: // "Adding trade"
+
+            if msg.data[0] == 1: // "Adding trade"
+                if msg.sender == exchange:
                     trade = msg.data[1]
                     price = msg.data[2]
                     amount = msg.data[3]
@@ -85,35 +74,24 @@ code:
                         i = i + 1
                     contract.storage[18] = last + 5
                     return(last + 100)
-            elif msg.data[0] == 0: // "Removing trade"
+
+        elif msg.datasize == 2:
+
+            if msg.data[0] == 0: // "Removing trade"
                 if msg.sender == exchange:
-                    total = (last - 100) / 5
-                    i = 0
-                    trades = array(1)
-                    trades[0] = 0
-                    ret = 0
-                    while i < total:
-                        owner = contract.storage[i * 5 + 103] // "Check by owner"
-                        if owner == msg.data[4]:
-                            trade = contract.storage[i * 5 + 100]
-                            price = contract.storage[i * 5 + 101]
-                            amount = contract.storage[i * 5 + 102]
-                            market = contract.storage[i * 5 + 104]
-                            if trade == msg.data[1] and price == msg.data[2] and amount == msg.data[3] and market == msg.data[5]:
-                                c = 0
-                                while c < 5:
-                                    contract.storage[i * 5 + 100 + c] = 0
-                                    c = c + 1
-                                trades[0] = trades[0] - 1
-                                ret = 1
-                        i = i + 1
-                    return(ret)
-        return(ret)
+                    # Clear storage
+                    c = 0
+                    while c < 5:
+                        contract.storage[msg.data[1] + c] = 0
+                        c = c + 1
+
+                    return(1)
+        return(0)
 
     elif msg.sender == exchange:
 
         # NameReg
-        call(msg.data[1], 0x45746865724578202d2054726164657300000000000000000000000000000000) # "EtherEx - Trades"
+        call(msg.data[1], msg.data[2])
 
         # Set contract parent and owner
         contract.storage[14] = msg.data[0] # Set c3D parent

@@ -4,8 +4,6 @@ import subprocess
 from pyethereum import transactions, blocks, processblock, utils
 from serpent import encode_datalist, decode_datalist
 
-# processblock.debug = 1
-
 
 def compile_cli(cmd, args, filename):
     try:
@@ -72,6 +70,14 @@ class Simulator(object):
 
         self.nonce[frm] += 1
         return decode_datalist(ans)
+
+    def get_transactions(self):
+        return self.genesis._list_transactions()
+        # return [[tx, s, g]
+        #         for (tx, s, g) in self.genesis._list_transactions()]
+
+    def get_balance(self, address):
+        return self.genesis.get_balance(address)
 
     def get_storage_data(self, contract, index):
         return self.genesis.get_storage_data(contract, index)

@@ -134,6 +134,7 @@ def do_test_vm(name):
         pb.apply_msg(blk, tx, msg, exek['code'][2:].decode('hex'))
     pb.apply_msg = orig_apply_msg
     apply_message_calls.pop(0)
+    blk.commit_state()
 
     assert success
     assert len(callcreates) == len(apply_message_calls)
@@ -151,4 +152,6 @@ def do_test_vm(name):
 
     # check state
     for address, data in post.items():
-        assert data == blk.account_to_dict(address)
+        state = blk.account_to_dict(address)
+        state.pop('storage_root', None)  # attribute not present in vmtest fixtures
+        assert data == state

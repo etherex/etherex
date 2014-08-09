@@ -18,7 +18,7 @@
   EtherEx.coinbase = "0x3f2af2a311132b3730328a7b30db1025cd8579c3";
 
   EtherEx.addresses = {
-    namereg: "0xf298931b974dfb01b13e44eae9e4428afa3ba7f4", // "8b01a7e2317fbb6d8096bb667d0604ce898aeaf8"
+    namereg: ["0xf298931b974dfb01b13e44eae9e4428afa3ba7f4", "0x50441127ea5b9dfd835a9aba4e1dc9c1257b58ca"], // "8b01a7e2317fbb6d8096bb667d0604ce898aeaf8"
     trades: "0x54d1b757675b6f42d59ccc7c6d1c947536447f7d",
     markets: "0xad4665d4ffc60f0ea22a0f99dfc0988ce4b2c968"
   };
@@ -31,13 +31,13 @@
   ];
 
   EtherEx.markets = [
-    {},
-    {
-      name: "XETH",
-      address: "0xcd91d7a2eeb6e23b30ec6e501e3ffd5688c3104e",
-      minamount: Ethereum.BigInteger("10").pow(18),
-      minprice: Ethereum.BigInteger("10").pow(8),
-    }
+    {}, // Reserve markets[0] to ETH
+    // {
+    //   name: "XETH",
+    //   address: "0xdebd115297dbabd326ec3b1615a428b9ae090b9f",
+    //   minamount: Ethereum.BigInteger("10").pow(18),
+    //   minprice: Ethereum.BigInteger("10").pow(8),
+    // }
   ];
 
   EtherEx.units = {
@@ -78,21 +78,33 @@
     for (var i = 100; i <= 100 + parseInt(last); i = i + 5) {
       var id = eth.stateAt(EtherEx.addresses.markets, String(i+4)).dec();
       EtherEx.markets[id] = {
-        name: ethBrowser ? eth.stateAt(EtherEx.addresses.markets, String(i)).bin() : eth.stateAt(EtherEx.addresses.markets, String(i)),
+        name: eth.stateAt(EtherEx.addresses.markets, String(i)).bin(),
         address: eth.stateAt(EtherEx.addresses.markets, String(i+3)),
         minamount: eth.stateAt(EtherEx.addresses.markets, String(i+1)).dec(),
         minprice: eth.stateAt(EtherEx.addresses.markets, String(i+2)).dec(),
-      }
+      };
     };
     // console.log(EtherEx.markets);
   };
 
   EtherEx.getAddress = function(_a) {
-    return eth.stateAt(EtherEx.addresses.namereg, _a).substr(2);
+    ret = "";
+    for (var i in EtherEx.addresses.namereg) {
+      ret = eth.stateAt(EtherEx.addresses.namereg[i], _a).substr(2);
+      if (ret.length == 40)
+        return ret;
+    }
+    return ret;
   };
 
   EtherEx.getName = function(_a) {
-    return eth.stateAt(EtherEx.addresses.namereg, "0x" + _a).bin().unpad();
+    ret = "";
+    for (var i in EtherEx.addresses.namereg) {
+      ret = eth.stateAt(EtherEx.addresses.namereg[i], "0x" + _a).bin().unpad();
+      if (ret.length > 0)
+        return ret;
+    }
+    return ret;
   };
 
   EtherEx.create = function() {
@@ -197,12 +209,12 @@
 
   EtherEx.getOrderbook = function() {
     var startkey = 100;
-    var lastkey = eth.stateAt(EtherEx.addresses.trades, String(18)).dec();
-
-    var table = "<table><tr><th class='book'>Buy</th><th class='book'>Sell</th></tr>";
+    var lastkey = eth.stateAt(EtherEx.addresses.trades, "18").dec();
 
     document.getElementById("last").innerHTML = lastkey;
     // console.log(lastkey);
+
+    var table = "<table><tr><th class='book'>Buy</th><th class='book'>Sell</th></tr>";
 
     var check = 0;
     var booklength = lastkey / 5;
@@ -218,11 +230,15 @@
         var strprice = price + " ETH/" + EtherEx.markets[market].name;
         var amount = eth.stateAt(EtherEx.addresses.trades, String(i+2)).dec();
         var stramount = EtherEx.formatBalance(amount) + "<br />@ ";
-        var owner = '<br />by <span class="address">' + eth.stateAt(EtherEx.addresses.trades, String(i+3)).substr(2) + '</span>';
+        var owner = eth.stateAt(EtherEx.addresses.trades, String(i+3)).substr(2);
+        var strowner = '<br />by <span class="address">' + owner + '</span>';
+        var cancel = (owner == eth.coinbase.substr(2)) ? '<br /><button class="cancel" data-id="' + i + '" id="trade-'+ i +'">cancel</button>' : '';
+        // var buy = 
+
         if (price) {
           table += "<tr>\
-                <td class='book'>" + ((type == 1) ? stramount + strprice + owner : '') + "</td>\
-                <td class='book'>" + ((type == 2) ? stramount + strprice + owner : '') + "</td>\
+                <td class='book'>" + ((type == 1) ? stramount + strprice + strowner + cancel : '') + "</td>\
+                <td class='book'>" + ((type == 2) ? stramount + strprice + strowner + cancel : '') + "</td>\
             </tr>";
           document.getElementById("lastprice").innerHTML = price;
           // document.getElementById("price").value = price;
@@ -234,6 +250,22 @@
     };
     table += "</table>";
     document.getElementById('book').innerHTML = table;
+
+    $(".cancel").on('click', function() {
+      var tradeid = $(this).data('id');
+      // $('#log').append(';'+tradeid+';');
+      if (window.confirm("Cancel trade # " + tradeid + " ?")) {
+        eth.transact(
+          eth.key,
+          "0",
+          EtherEx.coinbase,
+          String(6).pad(32) + String(tradeid).pad(32),
+          "10000",
+          eth.gasPrice,
+          EtherEx.updateBalances
+        );
+      }
+    });
   };
 
   EtherEx.showError = function(e) {
@@ -252,9 +284,9 @@
     for (var i = keys.length - 1; i >= 0; i--) {
       var key = keys[i];
       // console.log(key);
-      $("#log").append(i + "...");
+      // $("#log").append(i + "...");
       $.get("https://api.blockcypher.com/v1/btc/main/addrs/" + key.address, function (info) {
-        $("#log").append(i + ";");
+        // $("#log").append(i + ";");
         // console.log(info);
         var entry = $('<tr class="btc"><td><div><span class="address">' + key.address + "</span></div></td><td>" + info.final_balance / 100000000  + " BTC</td></tr>");
         $("#addressbook > table > tbody").append(entry);
@@ -316,6 +348,8 @@
     }
   };
 
+  EtherEx.addrs = eth.keys.map(function (k) { return eth.secretToAddress(k); });
+
   EtherEx.updateBalances = function() {
 
     try {
@@ -327,14 +361,12 @@
 
       // document.getElementById("eth").innerHTML = EtherEx.formatBalance(eth.balanceAt(eth.coinbase).dec()); // Ethereum.BigInteger(eth.balanceAt(eth.coinbase).dec()).divide(Ethereum.BigInteger("10").pow(18));
 
-      var addrs = eth.keys.map(function (k) { return eth.secretToAddress(k); });
-
-      document.getElementById("xeth").innerHTML = eth.stateAt(EtherEx.markets[1].address, addrs[0]).dec();
+      document.getElementById("xeth").innerHTML = eth.stateAt(EtherEx.markets[1].address, EtherEx.addrs[0]).dec();
 
       document.getElementById("tot").innerHTML = eth.balanceAt(EtherEx.coinbase).dec();
 
-      for (var i = eth.keys.length - 1; i >= 0; i--) {
-        var addr = eth.secretToAddress(eth.keys[i]);
+      for (var i = EtherEx.addrs.length - 1; i >= 0; i--) {
+        var addr = EtherEx.addrs[i]; // eth.secretToAddress(eth.keys[i]);
         var bal = Ethereum.BigInteger(eth.balanceAt(addr).dec()).divide(Ethereum.BigInteger("10").pow(18));
         var entry = $('<tr><td><div><span class="address">' + addr.substr(2) + "</span></div></td><td>" + bal + " ETH</td></tr>");
 
@@ -376,7 +408,7 @@
 
       EtherEx.getOrderbook();
 
-      EtherEx.transactions(addrs);
+      EtherEx.transactions(EtherEx.addrs);
     }
     catch (e) {
       EtherEx.showError(e);
@@ -389,18 +421,26 @@
     if (!ethBrowser) {
       window.eth.stateAt = window.eth.storageAt;
       window.eth.messages = function() { return {}; };
-      eth.watch(eth.coinbase, EtherEx.markets[1].address, EtherEx.updateBalances);
+
+      EtherEx.loadMarkets();
+
+      eth.watch(eth.coinbase, "", EtherEx.updateBalances);
+
+      // for (var i = EtherEx.markets.length - 1; i >= 1; i--)
+      //   eth.watch(EtherEx.markets[i].address, eth.coinbase, EtherEx.updateBalances);
     }
     else {
       var addrs = [];
-      for (var i = eth.keys.length - 1; i >= 0; i--) {
+      for (var i = eth.keys.length - 1; i >= 0; i--)
         addrs.push(eth.secretToAddress(eth.keys[i]));
-        // eth.watch({altered: addr}).changed(EtherEx.updateBalances);
-      }
+
       addrs.push(eth.coinbase);
-      addrs.push(EtherEx.markets[1].address);
-      // eth.watch({altered: eth.coinbase}).changed(EtherEx.updateBalances);
-      // eth.watch({altered: EtherEx.markets[1].address}).changed(EtherEx.updateBalances);
+
+      EtherEx.loadMarkets();
+
+      for (var i = EtherEx.markets.length - 1; i >= 1; i--)
+        addrs.push(EtherEx.markets[i].address);
+
       eth.watch({altered: addrs}).changed(EtherEx.updateBalances);
     }
 

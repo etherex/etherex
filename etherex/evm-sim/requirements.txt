@@ -1,5 +1,5 @@
-ethereum-serpent
-pyethereum
+ethereum-serpent==1.5.6
+pyethereum==0.2.3
 flake8==2.1.0
 pytest==2.5.2
 pytest-xdist==1.10

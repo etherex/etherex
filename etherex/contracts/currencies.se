@@ -27,27 +27,28 @@ code:
     # Get reference to exchange
     exchange = contract.storage[15]
 
-    # Get our last recorded pointer
-    last = contract.storage[18]
-
-    ret = 0
-    if msg.value > 0: // "Refunding excess value: %s" % msg.value
-        ret = send(tx.gas / 2, tx.origin, msg.value)
-
     # Logging
     contract.storage[20] = msg.datasize
     contract.storage[21] = tx.gas
     contract.storage[22] = ret
+    contract.storage[22] = block.timestamp
+
+    # Get our last recorded pointer
+    last = contract.storage[18]
+
+    if msg.value > 0: // "Refunding excess value: %s" % msg.value
+        send(tx.origin, msg.value)
 
     if status == 1:
         if msg.datasize == 1: // "Getting market"
             marketid = msg.data[0] - 1
-            market = array(4)
+            market = array(5)
             market[0] = contract.storage[marketid * 5 + 100] // "Name"
             market[1] = contract.storage[marketid * 5 + 101] // "Minimum amount"
-            market[2] = contract.storage[marketid * 5 + 102] // "Price"
-            market[3] = contract.storage[marketid * 5 + 103] // "Owner"
-            return(market, 4)
+            market[2] = contract.storage[marketid * 5 + 102] // "Price precision"
+            market[3] = contract.storage[marketid * 5 + 103] // "Contract"
+            market[4] = contract.storage[marketid * 5 + 104] // "Last price"
+            return(market, 5)
 
         elif msg.datasize == 5:
             if msg.data[0] == 1:
@@ -86,7 +87,7 @@ code:
                     markets[0] = 0
                     ret = 0
                     while i < total:
-                        owner = contract.storage[i * 5 + 103] // "Check by owner"
+                        owner = contract.storage[i * 5 + 103] // "Check by contract"
                         if owner == msg.data[4]:
                             trade = contract.storage[i * 5 + 100]
                             price = contract.storage[i * 5 + 101]
@@ -107,7 +108,7 @@ code:
     elif msg.sender == exchange:
 
         # NameReg
-        call(msg.data[1], 0x45746865724578202d204d61726b657473000000000000000000000000000000) # "EtherEx - Markets"
+        call(msg.data[1], msg.data[2])
 
         # Set contract parent and owner
         contract.storage[14] = msg.data[0] # Set c3D parent

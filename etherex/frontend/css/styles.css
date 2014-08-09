@@ -10,7 +10,7 @@ html, body {
   padding: 0;
 }
 body {
-  background: url(http://etherex.org/sites/etherex.org/files/bg.jpg) no-repeat center top;
+  background: url(../assets/bg.jpg) no-repeat center top;
   background-size: cover;
   color: #fff;
   font-family: Futura, "Trebuchet MS", Arial, sans-serif;
@@ -122,6 +122,10 @@ td:nth-child(2) span {
   white-space: nowrap;
   width: 100%;
 }
+
+/*.book .address {
+  line-height: 0.75em;
+}*/
 
 a:link,
 a:visited {

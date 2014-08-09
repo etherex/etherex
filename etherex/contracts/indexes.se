@@ -30,24 +30,19 @@ code:
     # Logging
     contract.storage[20] = msg.datasize
     contract.storage[21] = tx.gas
+    contract.storage[22] = block.timestamp
 
     # Get our last recorded pointer
     last = contract.storage[18]
 
-    ret = 0
     if msg.value > 0: // "Refunding excess value: %s" % msg.value
-        ret = send(tx.gas / 2, tx.origin, msg.value)
-
-    # Logging
-    contract.storage[20] = msg.datasize
-    contract.storage[21] = tx.gas
-    contract.storage[22] = ret
+        send(tx.origin, msg.value)
 
     if status == 1:
         slots = 2
         if msg.datasize == 1: // "Getting indexes"
             if !last:
-                last = 0
+                last = 100
             if last > 100:
                 total = (last - 100) / slots
             else:
@@ -80,11 +75,17 @@ code:
                     contract.storage[msg.data[1] * slots + 100] = 0
                     contract.storage[msg.data[1] * slots + 101] = 0
                     return(1)
+            # Return... price?
+            # if msg.datasize == 2:
+            #     last = sha3([msg.data[1], msg.data[2]], 2)
+            #     return contract.storage[last]
+
+
 
     elif msg.sender == exchange:
 
         # NameReg
-        call(msg.data[1], 0x45746865724578202d20496e6465786573000000000000000000000000000000) # "EtherEx - Indexes"
+        call(msg.data[1], msg.data[2])
 
         # Set contract parent and owner
         contract.storage[14] = msg.data[0] # Set c3D parent

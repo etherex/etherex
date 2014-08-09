@@ -7,7 +7,8 @@
 
 # NameReg
 init:
-    contract.storage[contract.address] = 0x45746865724578202d204e616d65526567000000000000000000000000000000 # "EtherEx - NameReg"
+    # "EtherEx - NameReg"
+    contract.storage[contract.address] = 0x45746865724578202d204e616d65526567000000000000000000000000000000
     contract.storage[0x45746865724578202d204e616d65526567000000000000000000000000000000] = contract.address
 code:
     if not contract.storage[msg.data[0]]: # or contract.storage[msg.data[0]] == msg.sender:

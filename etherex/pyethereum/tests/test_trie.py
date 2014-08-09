@@ -9,6 +9,7 @@ logger = logging.getLogger()
 
 
 
+
 def check_testdata(data_keys, expected_keys):
     assert set(data_keys) == set(expected_keys), \
         "test data changed, please adjust tests"
@@ -20,10 +21,9 @@ def load_tests():
     except IOError:
         raise IOError("Could not read trietests.json from fixtures",
             "Make sure you did 'git submodule init'")
-    #logger.debug(fixture.keys())
-    expected_keys = [u'foo', u'emptyValues', u'jeff', u'testy', u'singleItem',
-                     u'hex', u'smallValues', u'puppy', u'dogs']
-    assert fixture.keys() == expected_keys, "test data changed!"
+    expected_keys = set([u'foo', u'emptyValues', u'jeff', u'testy', u'singleItem',
+                     u'hex', u'smallValues', u'puppy', u'dogs'])
+    assert set(fixture.keys()) == expected_keys, "test data changed!"
     return fixture
 
 

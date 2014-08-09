@@ -1,4 +1,4 @@
-# balances.se -- Ethereum contract
+# xeth.se -- Ethereum contract
 #
 # Copyright (c) 2014 EtherEx
 #
@@ -6,7 +6,7 @@
 # of the MIT license.  See the LICENSE file for details.
 
 #
-# Balances
+# XETH
 #
 
 init:
@@ -34,11 +34,15 @@ code:
 
     if status == 1: // "Running contract..."
 
-        balance = contract.storage[msg.sender] // "Balance of %s: %d" % (msg.sender, balance)
+        balance = contract.storage[tx.origin] // "Balance of %s: %d" % (msg.sender, balance)
 
-        if msg.value > 0: // "Transfering value to ETH: %s" % msg.value
-            balance = balance + msg.value
-            contract.storage[msg.sender] = balance
+        if msg.value > 0 and msg.sender != exchange: // "Transfering value to XETH: %s" % msg.value
+            #
+            # Get price and adjust balance
+            #
+            price = call(exchange, ["price", 0, 1], 3)
+            balance = balance + (msg.value * price)
+            contract.storage[tx.origin] = balance
 
         # Get our inputs
         to = msg.data[0]
@@ -53,11 +57,11 @@ code:
 
             # Check for sufficient funds and adjust balances
             if balance < value:
-                return(4) // "Insufficient funds, %s has %d needs %d" % (msg.sender, balance, value)
+                return(4) // "Insufficient funds, %s has %d needs %d" % (tx.origin, balance, value)
 
             elif value > 0: // "Adjusting values by %d" % value
-                balance = contract.storage[msg.sender] - value
-                contract.storage[msg.sender] = balance
+                balance = contract.storage[tx.origin] - value
+                contract.storage[tx.origin] = balance
                 contract.storage[to] = contract.storage[to] + value
 
         # Operations
@@ -74,13 +78,22 @@ code:
                     sender = msg.data[0]
                     balance = contract.storage[sender]
                     if balance < value:
-                        return(0) // "Insufficient funds, %s had %d, needed %d" % (sender, balance, value)
+                        return(0) // "Insufficient funds, %s had %d, needed %d" % (msg.data[0], balance, value)
                 else:
                     sender = msg.sender
                     if balance < value:
-                        return(0) // "Insufficient funds, %s has %d needs %d" % (sender, balance, value)
-                contract.storage[sender] = contract.storage[sender] - value
-                send(msg.data[0], value)
+                        return(0) // "Insufficient funds, %s has %d needs %d" % (msg.sender, balance, value)
+
+                # Get price
+                price = call(exchange, ["price", 0, 1], 3)
+                amount = value * price
+
+                # Set new balance
+                contract.storage[sender] = contract.storage[sender] - amount
+
+                # Send amount
+                send(sender, amount)
+
                 return(1)
 
             # Check ownership
@@ -105,7 +118,19 @@ code:
 
     elif msg.sender == exchange:
 
-        contract.storage[msg.sender] = msg.value # Set balance for sender from endowment
+        contract.storage[msg.sender] = msg.value # DEBUG - Sets full value to sender
+
+        n = 3
+        owners = array(n)
+        owners[0] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31 // #define 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31=ALICE
+        owners[1] = 0xe559de5527492bcb42ec68d07df0742a98ec3f1e // #define 0xe559de5527492bcb42ec68d07df0742a98ec3f1e=BOB
+        owners[2] = 0xf9e57456f18d90886263fedd9cc30b27cd959137 // #define 0xf9e57456f18d90886263fedd9cc30b27cd959137=CHARLIE
+
+        # Split endowment between owners
+        i = 0
+        while i < n:
+            contract.storage[owners[i]] = 10 ^ 11 / n # DEBUG
+            i = i + 1
 
         # NameReg
         call(msg.data[1], msg.data[2])
@@ -115,6 +140,6 @@ code:
         contract.storage[15] = msg.data[0] // #define msg.data[0]=EX
 
         # Set contract as active
-        contract.storage[1] = 1 // "Initializing storage for %s" % msg.data[0]
+        contract.storage[1] = 1 // "Initializing storage for owners %s" % owners
 
         return(1)

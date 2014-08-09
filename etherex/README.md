@@ -127,9 +127,9 @@ Allowed values
 
 ### Currencies
 ```
-1 = ETH
-2 = BTC
-3 = XETH
+0 = ETH
+1 = XETH
+2 = XBTC
 ...
 ```
 
