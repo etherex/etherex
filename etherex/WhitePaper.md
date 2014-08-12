@@ -136,7 +136,6 @@ The adoption rate of the exchange will depend heavily on the adoption rate of Et
 
 The ecosystem of subcurrencies and DApps within Ethereum will also have a major influence on the adoption rate of the exchange. Even if the trading of off-chain assets could be enough to make the exchange a "killer app" and provide a sufficiently high adoption rate, a thriving subcurrency market will be needed to prove the usefulness of both Ethereum and a decentralized exchange.
 
-[ more about the ecosystem ]
 
 Implementation of a decentralized exchange on Ethereum
 ------------------------------------------------------
