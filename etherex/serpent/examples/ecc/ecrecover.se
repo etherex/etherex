@@ -1,0 +1,23 @@
+h = msg.data[0]
+v = msg.data[1]
+r = msg.data[2]
+s = msg.data[3]
+P = -4294968273
+Gx = 55066263022277343669578718895168534326250603453777594175500187360389116729240
+Gy = 32670510020758816978083085130507043184471273380659243275938904335757337482424
+
+x = r
+xcubed = modmul(modmul(x, x, P), x, P)
+beta = msg(EXP, 0, [modadd(xcubed, 7, P), div(P + 1, 4), P], 3)
+if mod(v, 2) xor mod(beta, 2):
+    y = beta
+else:
+    y = P - beta
+GZ = msg(JORDANMUL, 0, [Gx, 1, Gy, 1, h], 5, 4)
+XY = msg(JORDANMUL, 0, [x, 1, y, 1, s], 5, 4) 
+COMB = msg(JORDANADD, 0, [GZ[0], GZ[1], P - GZ[2], GZ[3], XY[0], XY[1], XY[2], XY[3]], 8, 4)
+e = msg(EXP, 0, [r, N - 2, N], 3)
+Q = msg(JORDANMUL, 0, e, 4, 4)
+ox = modmul(Q[0], call(EXP, 0, [Q[1], N - 2, N], 3), P)
+oy = modmul(Q[2], call(EXP, 0, [Q[3], N - 2, N], 3), P)
+return([ox, oy], 2)

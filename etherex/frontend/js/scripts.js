@@ -221,24 +221,29 @@
     var length = startkey + parseInt(lastkey);
 
     for (var i = startkey; i < length; i = i + 5) {
-      var value = eth.stateAt(EtherEx.addresses.trades, String(i)).dec();
+      var type = eth.stateAt(EtherEx.addresses.trades, String(i)).dec();
 
-      if (value) {
-        var type = eth.stateAt(EtherEx.addresses.trades, String(i)).dec();
-        var price = Ethereum.BigInteger(eth.stateAt(EtherEx.addresses.trades, String(i+1)).dec()) / Math.pow(10, 8);
+      if (type) {
+        var bigprice = Ethereum.BigInteger(eth.stateAt(EtherEx.addresses.trades, String(i+1)).dec());
+        var price = bigprice / Math.pow(10, 8);
         var market = eth.stateAt(EtherEx.addresses.trades, String(i+4)).dec();
         var strprice = price + " ETH/" + EtherEx.markets[market].name;
         var amount = eth.stateAt(EtherEx.addresses.trades, String(i+2)).dec();
         var stramount = EtherEx.formatBalance(amount) + "<br />@ ";
+        var value = Ethereum.BigInteger(amount).divide(bigprice);
+        var strvalue = '<br />' + value + ' ' + EtherEx.markets[market].name;
         var owner = eth.stateAt(EtherEx.addresses.trades, String(i+3)).substr(2);
         var strowner = '<br />by <span class="address">' + owner + '</span>';
-        var cancel = (owner == eth.coinbase.substr(2)) ? '<br /><button class="cancel" data-id="' + i + '" id="trade-'+ i +'">cancel</button>' : '';
-        // var buy = 
+        var cancel = (owner == eth.coinbase.substr(2)) ?
+          '<br /><button class="cancel" data-id="' + i + '" id="trade-' + i +'">cancel</button>' : '';
+
+        var fill = (cancel.length == 0) ?
+        '<br /><button class="fill" data-id="' + i + '" data-type="' + type + '" data-amount="' + amount + '" data-value="' + value + '" data-market="' + String(EtherEx.markets[market].name).substr(0, 4) + '" id="trade-' + i + '">fill</button>' : '';
 
         if (price) {
           table += "<tr>\
-                <td class='book'>" + ((type == 1) ? stramount + strprice + strowner + cancel : '') + "</td>\
-                <td class='book'>" + ((type == 2) ? stramount + strprice + strowner + cancel : '') + "</td>\
+                <td class='book'>" + ((type == 1) ? stramount + strprice + strvalue + strowner + fill + cancel : '') + "</td>\
+                <td class='book'>" + ((type == 2) ? stramount + strprice + strvalue + strowner + fill + cancel : '') + "</td>\
             </tr>";
           document.getElementById("lastprice").innerHTML = price;
           // document.getElementById("price").value = price;
@@ -253,13 +258,32 @@
 
     $(".cancel").on('click', function() {
       var tradeid = $(this).data('id');
-      // $('#log').append(';'+tradeid+';');
       if (window.confirm("Cancel trade # " + tradeid + " ?")) {
         eth.transact(
           eth.key,
           "0",
           EtherEx.coinbase,
           String(6).pad(32) + String(tradeid).pad(32),
+          "10000",
+          eth.gasPrice,
+          EtherEx.updateBalances
+        );
+      }
+    });
+
+    $(".fill").on('click', function() {
+      var amount = $(this).data('amount');
+      var value = $(this).data('value');
+      var market = $(this).data('market');
+      var tradeid = $(this).data('id');
+      var type = $(this).data('type');
+
+      if (window.confirm("Fill trade # " + tradeid + " at " + EtherEx.formatBalance(amount) + " for " + value + " " + market + " ?")) {
+        eth.transact(
+          eth.key,
+          (type == "1" ? String(amount) : "0"),
+          EtherEx.coinbase,
+          String(3).pad(32) + String(tradeid).pad(32),
           "10000",
           eth.gasPrice,
           EtherEx.updateBalances

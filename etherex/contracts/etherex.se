@@ -122,6 +122,10 @@ code:
                     if msg.value > 0: // "Refunding"
                         send(msg.sender, msg.value)
                     return(12) // "Minimum %s trade amount not met, minimum is %s, got %d" % (market[0], market[2], msg.value)
+
+                # Transfer subcurrency trade amount
+                # ret = call(market[3], [msg.sender, contract.address, amount / price], 3)
+
             else: # Check sell amount
                 if msg.value < market[1]:
                     return(13) // "Minimum %s value not met, minimum is %s, got %d" % (market[0], market[2], msg.value)
@@ -137,9 +141,9 @@ code:
                     send(msg.sender, msg.value - amount)
 
 
-            # "Trade amounts OK for %s" % market[0]
+            // "Trade amounts OK for %s" % market[0]
             pricekey = price
-            balances = market[3] // "TODO - Check %s balances" % market[0]
+            balances = market[3]
             indexes = contract.storage[4]
             trades = contract.storage[5]
 
@@ -204,7 +208,7 @@ code:
                     # TODO - Transfer amounts properly...
 
                     # Transfer sub / asset
-                    ret = call(market[3], [msg.sender, trade[2] / trade[1]], 2)
+                    ret = call(market[3], [trade[3], msg.sender, trade[2] / trade[1]], 3)
                     # # Would need standard returns values...
                     # if !ret:
                     #     return(0)
@@ -218,7 +222,7 @@ code:
                     if !ret:
                         return(0) // "Error"
 
-                else: # Check sell amount
+                elif trade[0] == 2: # Check sell amount
                     # TODO balances..
                     # if balance < trade[2]:
                     #     if msg.value > 0: // "Refunding"
@@ -226,7 +230,7 @@ code:
                     #     return(13) // "Insufficient balance"
 
                     # Transfer sub / asset
-                    ret = call(market[3], [trade[3], trade[2] / trade[1]], 2)
+                    ret = call(market[3], [msg.sender, trade[3], trade[2] / trade[1]], 3)
                     # # Would need standard returns values...
                     # if !ret:
                     #     return(0)

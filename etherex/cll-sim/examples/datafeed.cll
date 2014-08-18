@@ -1,3 +1,0 @@
-if tx.sender != FEEDOWNER:
-    stop
-contract.storage[data[0]] = data[1]

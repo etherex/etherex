@@ -1,0 +1,36 @@
+axn = msg.data[0]
+axd = msg.data[1]
+ayn = msg.data[2]
+ayd = msg.data[3]
+bxn = msg.data[4]
+bxd = msg.data[5]
+byn = msg.data[6]
+byd = msg.data[7]
+if !axn and !ayn:
+    return([bxn, bxd, byn, byd])
+if !bxn and !byn:
+    return([axn, axd, ayn, ayd])
+if modadd(modmul(axn, bxd, P), P - modmul(axd, bxn, P), P) == 0:
+    if modadd(modmul(ayn, byd, P), P - modmul(ayd, byn, P), P) == 0:
+        return(msg(JORDAN_DOUBLE, 0, [axn, axd, ayn, ayd], 4), 4)
+    else:
+        return([0, 1, 0, 1], 4)
+xdiffn = modadd(modmul(axn, bxd), P - modmul(bxn, axd)) 
+xdiffd = modmul(axd, bxd, P)
+ydiffn = modadd(modmul(ayn, byd), P - modmul(byn, ayd), P) 
+ydiffd = modmul(ayd, byd, P)
+mn = modmul(ydiffn, xdiffd, P)
+md = modmul(ydiffd, xdiffn, P)
+msqn = modmul(mn, mn, P)
+msqd = modmul(md, md, P)
+msqman = modadd(modmul(msqn, axd, P), P - modmul(msqd, axn, P), P)
+msqmad = modmul(msqd, axd, P)
+xn = modadd(modmul(msqman, bxd, P), P - modmul(msqmad, bxn, P), P)
+xd = modmul(msqmad, bxd, P)
+amxn = modadd(modmul(axn, xd, P), P - modmul(axn, xd, P), P)
+amxd = modmul(axd, xd, P)
+mamxn = modmul(mn, amxn, P)
+mamxd = modmul(md, amxd, P)
+yn = modadd(modmul(mamxn, ayd, P), P - modmul(mamxd, ayn, P), P)
+yd = modmul(mamxd, ayd)
+return([xn, xd, yn, yd], 4)

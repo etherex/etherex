@@ -7,7 +7,7 @@
 # of the MIT license.  See the LICENSE file for details.
 
 import subprocess
-import os
+# import os
 import sys
 import json
 sys.path.insert(0, './serpent')
@@ -91,20 +91,20 @@ def compile(f):
     if i >= len(t):
       break
 
-print '\n'
-print '==================='
-print 'Compiler tests'
-print '==================='
-origwd = os.getcwd() # remember our original working directory
-os.chdir('serpent')
-subprocess.call(["python", "runtests.py"])
-os.chdir(origwd)
+# print '\n'
+# print '==================='
+# print 'Compiler tests'
+# print '==================='
+# origwd = os.getcwd() # remember our original working directory
+# os.chdir('serpent')
+# subprocess.call(["python", "runtests.py"])
+# os.chdir(origwd)
 
-print '\n'
-print '==================='
-print 'EtherEx simulations'
-print '==================='
-subprocess.call(["cll-sim/run.py", "simulations/etherex.py"])
+# print '\n'
+# print '==================='
+# print 'EtherEx simulations'
+# print '==================='
+# subprocess.call(["cll-sim/run.py", "simulations/etherex.py"])
 
 print '\n'
 print '==================='

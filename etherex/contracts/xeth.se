@@ -34,35 +34,41 @@ code:
 
     if status == 1: // "Running contract..."
 
-        balance = contract.storage[tx.origin] // "Balance of %s: %d" % (msg.sender, balance)
-
-        if msg.value > 0 and msg.sender != exchange: // "Transfering value to XETH: %s" % msg.value
-            #
-            # Get price and adjust balance
-            #
-            price = call(exchange, ["price", 0, 1], 3)
-            balance = balance + (msg.value * price)
-            contract.storage[tx.origin] = balance
-
         # Get our inputs
-        to = msg.data[0]
-        value = msg.data[1]
+        if msg.sender == exchange:
+            sender = msg.data[0]
+            to = msg.data[1]
+            value = msg.data[2]
+        else:
+            sender = msg.sender
+            to = msg.data[0]
+            value = msg.data[1]
+
+            if msg.value > 0: // "Transfering value to XETH: %s" % msg.value
+                #
+                # Get price and adjust balance
+                #
+                price = call(exchange, ["price", 0, 1], 3)
+                balance = balance + (msg.value * price)
+                contract.storage[sender] = balance
+
+        balance = contract.storage[sender] // "Balance of %s: %d" % (sender, balance)
 
         # Check our inputs for transfers
-        if msg.datasize < 3:
-            if to < 100:
-                return(2) // "msg.data[0] out of bounds: %s" % to
-            if value < 1:
-                return(3) // "msg.data[1] out of bounds: %s" % value
+        # if msg.datasize < 4:
+        if to < 100:
+            return(2) // "msg.data[0] out of bounds: %s" % to
+        if value < 1:
+            return(3) // "msg.data[1] out of bounds: %s" % value
 
-            # Check for sufficient funds and adjust balances
-            if balance < value:
-                return(4) // "Insufficient funds, %s has %d needs %d" % (tx.origin, balance, value)
+        # Check for sufficient funds and adjust balances
+        if balance < value:
+            return(4) // "Insufficient funds, %s has %d needs %d" % (sender, balance, value)
 
-            elif value > 0: // "Adjusting values by %d" % value
-                balance = contract.storage[tx.origin] - value
-                contract.storage[tx.origin] = balance
-                contract.storage[to] = contract.storage[to] + value
+        elif value > 0: // "Adjusting values by %d" % value
+            balance = contract.storage[sender] - value
+            contract.storage[sender] = balance
+            contract.storage[to] = contract.storage[to] + value
 
         # Operations
         else:
@@ -74,19 +80,10 @@ code:
 
             # Withdraw
             elif msg.data[2] == 2: // "Withdraw"
-                if msg.sender == exchange:
-                    sender = msg.data[0]
-                    balance = contract.storage[sender]
-                    if balance < value:
-                        return(0) // "Insufficient funds, %s had %d, needed %d" % (msg.data[0], balance, value)
-                else:
-                    sender = msg.sender
-                    if balance < value:
-                        return(0) // "Insufficient funds, %s has %d needs %d" % (msg.sender, balance, value)
 
                 # Get price
                 price = call(exchange, ["price", 0, 1], 3)
-                amount = value * price
+                amount = value / price
 
                 # Set new balance
                 contract.storage[sender] = contract.storage[sender] - amount

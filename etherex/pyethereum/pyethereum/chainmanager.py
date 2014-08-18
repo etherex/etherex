@@ -343,7 +343,7 @@ class ChainManager(StoppableLoopThread):
 
             for t_block in reversed(transient_blocks): # oldest to newest
                 logger.debug('Deserializing %r', t_block)
-                logger.debug(t_block.rlpdata.encode('hex'))
+                #logger.debug(t_block.rlpdata.encode('hex'))
                 try:
                     block = blocks.Block.deserialize(t_block.rlpdata)
                 except processblock.InvalidTransaction as e:
@@ -388,7 +388,7 @@ class ChainManager(StoppableLoopThread):
         #         logger.debug('Missing uncle for block %r', block)
         #        return False
 
-        # check PoW
+        # check PoW and forward asap in order to avoid stale blocks
         if not len(block.nonce) == 32:
             logger.debug('Nonce not set %r', block)
             return False
@@ -397,8 +397,15 @@ class ChainManager(StoppableLoopThread):
             logger.debug('Invalid nonce %r', block)
             return False
 
+        # FIXME: Forward blocks w/ valid PoW asap
+
         if block.has_parent():
             try:
+                logger.debug('verifying: %s', block)
+                logger.debug('GETTING ACCOUNT FOR COINBASE:')
+                acct = block.get_acct(block.coinbase)
+                logger.debug('GOT ACCOUNT FOR COINBASE: %r', acct)
+
                 processblock.verify(block, block.get_parent())
             except AssertionError as e:
                 logger.debug('verification failed: %s', str(e))
