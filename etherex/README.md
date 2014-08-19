@@ -14,17 +14,15 @@ Components
 ----------
 
 * contracts: Serpent contracts
-* simulations: Python simulations (deprecated soon)
 * serpent: Serpent compiler by Vitalik Buterin [repo](https://github.com/ethereum/serpent)
 * pyethereum: Python Ethereum client [repo](https://github.com/ethereum/pyethereum)
 * evm-sim: EVM simulator by Joris Bontje [repo](https://github.com/EtherCasts/evm-sim)
-* ~~cll-sim: CLL simulator by Joris Bontje [repo](https://github.com/jorisbontje/cll-sim)~~
-* tests: EtherEx evm-sim tests
+* tests: EtherEx tests
 
 
 Requirements
 ------------
-* Python
+* Python 2.7.6
 * [EPM](https://github.com/project-douglas/epm) for deployment
 
 
@@ -109,26 +107,26 @@ Allowed values:
 ```
 
 ### Amounts
-* Amount in wei for ETH or XETH
+* Amount in wei for ETH or ETX
 * Amount in satoshi for BTC
-* Smallest denomination for other amounts (see future shared protocol)
+* Lowest denomination of each subcurrency
 
 ### Prices
-* Price in ETH/BTC * 10 ^ 8, as integer
-* Price in ETH/XETH * 10 ^ 8, as integer
+* Price in ETH/BTC * 10 ^ 8
+* Price in ETH/ETX * 10 ^ 8
 
 ### Market IDs
 Allowed values
 ```
 1 = ETH/BTC
-2 = ETH/XETH
+2 = ETH/ETX
 ...
 ```
 
 ### Currencies
 ```
 0 = ETH
-1 = XETH
+1 = ETX
 2 = XBTC
 ...
 ```
@@ -136,23 +134,26 @@ Allowed values
 ### Market names
 Follow the "ETH/<name>" convention for the market name, like "ETH/BOB" for BobCoin.
 
+
 ### Minimum trade amounts
-When adding a subcurrency, make the minimum trade amount high enough to make economic sense.
+When adding a subcurrency, set the minimum trade amount high enough to make economic sense. A minimum of 10 ETH (10000000000000000000 wei) is recommended.
+
 
 ### Examples
-Buy 1000 ETH at 1200 ETH/BTC (for 1.2 BTC)
+
+Buy 1000 ETH at 1200 ETH/ETX
 ```
 1 1000000000000000000000 120000000000 1
 ```
 
-Sell 1000 ETH at 1200 ETH/BTC (for 1.2 BTC)
+Sell 1000 ETH at 1500 ETH/ETX
 ```
-2 1000000000000000000000 120000000000 1
+2 1000000000000000000000 150000000000 1
 ```
 
-Fulfill trade
+Fulfill trade(s)
 ```
-3 0x3039
+3 0x3039 0x2f58 ...
 ```
 
 Deposit 1 BTC
@@ -187,7 +188,7 @@ TODO
 * Link price indexes to orderbook and check for lower/higher bids
 * Remove array values instead of setting them to 0, maybe combine first and second indexes of arrays then
 * Combine/optimize buy/sell operations in while loop
-* Make ETH/XETH transactions
+* Make ETH/ETX transactions
 * Trigger BTC transactions
 * Fees
 * Per user address storage, possible conflicts with price indexes

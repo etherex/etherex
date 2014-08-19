@@ -49,7 +49,7 @@ code:
                 # Get price and adjust balance
                 #
                 price = call(exchange, ["price", 0, 1], 3)
-                balance = balance + (msg.value * price)
+                balance = balance + (msg.value / price)
                 contract.storage[sender] = balance
 
         balance = contract.storage[sender] // "Balance of %s: %d" % (sender, balance)
@@ -83,7 +83,7 @@ code:
 
                 # Get price
                 price = call(exchange, ["price", 0, 1], 3)
-                amount = value / price
+                amount = value * price
 
                 # Set new balance
                 contract.storage[sender] = contract.storage[sender] - amount
@@ -126,7 +126,7 @@ code:
         # Split endowment between owners
         i = 0
         while i < n:
-            contract.storage[owners[i]] = 10 ^ 11 / n # DEBUG
+            contract.storage[owners[i]] = 10 ^ 24 / n # DEBUG
             i = i + 1
 
         # NameReg

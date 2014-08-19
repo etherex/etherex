@@ -108,7 +108,9 @@ code:
                 send(msg.sender, msg.value)
             return(11) // "Price out of range"
 
+        #
         # Buy / Sell actions
+        #
         if msg.data[0] < 3:
             market = array(4)
             marketid = msg.data[3]
@@ -116,17 +118,29 @@ code:
             # Get market
             market = call(markets, [marketid], 1, 4)
 
-            # Checking trade amounts and balances
-            if msg.data[0] == 1: # Check buy amount
+            #
+            # Check trade amounts and balances
+            #
+            if msg.data[0] == 1:
+                #
+                # Check buy amount
+                #
                 if amount < market[1]:
                     if msg.value > 0: // "Refunding"
                         send(msg.sender, msg.value)
                     return(12) // "Minimum %s trade amount not met, minimum is %s, got %d" % (market[0], market[2], msg.value)
 
                 # Transfer subcurrency trade amount
-                # ret = call(market[3], [msg.sender, contract.address, amount / price], 3)
+                ret = call(market[3], [msg.sender, contract.address, amount / price], 3)
 
-            else: # Check sell amount
+                # Expects standard returns values
+                if ret != 1:
+                    return(0)
+
+            else:
+                #
+                # Check sell amount
+                #
                 if msg.value < market[1]:
                     return(13) // "Minimum %s value not met, minimum is %s, got %d" % (market[0], market[2], msg.value)
 
@@ -163,7 +177,7 @@ code:
             contract.storage[100 + marketid] = booklength
 
             #
-            # XETH issuance
+            # ETX issuance
             #
 
             # Get market
@@ -174,7 +188,7 @@ code:
             data = array(2)
             data[0] = msg.sender
             data[1] = reward
-            call(xeth[3], data, 2) // #define xethaddr=XETH
+            call(xeth[3], data, 2) // #define xethaddr=ETX
 
             return(tradeid)
 
@@ -208,10 +222,11 @@ code:
                     # TODO - Transfer amounts properly...
 
                     # Transfer sub / asset
-                    ret = call(market[3], [trade[3], msg.sender, trade[2] / trade[1]], 3)
-                    # # Would need standard returns values...
-                    # if !ret:
-                    #     return(0)
+                    ret = call(market[3], [contract.address, msg.sender, trade[2] / trade[1]], 3)
+
+                    # Expects standard returns values
+                    if ret != 1:
+                        return(0)
 
                     # Transfer ETH
                     send(trade[3], trade[2])
@@ -219,7 +234,7 @@ code:
                     # Clear trade
                     ret = call(trades, [0, tradeid], 2)
 
-                    if !ret:
+                    if ret != 1:
                         return(0) // "Error"
 
                 elif trade[0] == 2: # Check sell amount
@@ -231,9 +246,10 @@ code:
 
                     # Transfer sub / asset
                     ret = call(market[3], [msg.sender, trade[3], trade[2] / trade[1]], 3)
-                    # # Would need standard returns values...
-                    # if !ret:
-                    #     return(0)
+
+                    # Expects standard returns values
+                    if ret != 1:
+                        return(0)
 
                     # Transfer ETH
                     send(msg.sender, trade[2])
@@ -241,7 +257,7 @@ code:
                     # Clear trade
                     ret = call(trades, [0, tradeid], 2)
 
-                    if !ret:
+                    if ret != 1:
                         return(0) // "Error"
 
                 # TODO - Update price indexes
@@ -251,7 +267,7 @@ code:
                 # Next trade
                 t = t + 1
 
-            if !ret:
+            if ret != 1:
                 return(0) // "Error"
             else:
                 return(ret) // "Trade(s) fulfilled"
@@ -298,12 +314,13 @@ code:
 
                 # Issue refunds
                 if trade[0] == 2:
+                    # ETH sell refund
                     send(msg.sender, trade[2])
-                # else:
-                    # TODO - subcurrency / off-chain / collateral refunds
-                    # value = trade[2]
-                    # if value > 0:
-                    #     send(trade[3], value)
+                # elif trade[0] == 1:
+                #     # TODO - Subcurrency refund
+                #     if trade[2] > 0:
+                #         market = call(markets, [trade[4]], 1, 5)
+                #         ret = call(market[3], [contract.address, trade[3], trade[2] / trade[1]], 3)
                 return(ret)
 
             if !ret:
@@ -332,7 +349,7 @@ code:
             # Store last count
             contract.storage[7] = ret
 
-            # TODO - Issue XETH to market creator ?
+            # TODO - Issue ETX to market creator ?
             # if msg.value > 0:
             #     xeth = array(4)
             #     xeth = call(markets, [1], 1, 4)

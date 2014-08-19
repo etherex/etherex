@@ -111,10 +111,6 @@ Trading data will need to be regularly optimized in order to maintain an accepta
 
 ### Off-chain coins and fiat integration
 
-Managing the integration of other cryptocurrencies is a challenging aspect of a decentralized exchange - and probably the main reason why none has emerged so far. Ethereum provides a solution to the security and decentralization, but also brings the necessary building blocks for other cryptocurrencies to start interacting. A decentralized exchange will be the first application of this kind to take advantage of these possibilities.
-
-Outside of the Ethereum network, a decentralized exchange will need secure wallets and their related APIs to communicate information back into the trading engine. The first implementations for the Ether/Bitcoin (ETH/BTC) trading pair might require a more centralized approach depending on the tools available to secure off-chain coins. Separate decisions will need to be made regarding other trading pairs, and easier and more direct implementations into the Ethereum network may also offer alternatives that will have to be considered when they arise.
-
 Ethereum will not be able to interact with off-chain assets such as Bitcoin and Litecoin without first having brought those off chain assets onto Ethereum. Since the ability to bring off-chain assets onto the Ethereum chain is not a feature built into the core of Ethereum, the exchange will have to implement this feature independently - all while staying true to its overarching goal of decentralization.
 
 At this point a few different solutions offer themselves. 
@@ -125,12 +121,10 @@ Fiat integration brings its own set of problems, as by nature fiat is not decent
 
 One possible solution to this conundrum is the use of shelling coins to hold a steady value. While it may not technically be fiat, shelling coins could be pegged to a steady value such as the USD, EUR or even commodities such as oil and gold. Another possible solution for fiat integration is that a third party with the existing infrastructure may decide it is profitable to issue Ethereum USD coins. If an entity takes up the role of taking in fiat and issuing Ethereum coins representing that fiat, it could be implemented or even used directly on the exchange.
 
-While the best approach to off-chain integration isn't yet clear, the EtherEx team is confident that a viable solution will present itself prior to the launch of the Ethereum platform.
-
 
 ### Adoption and ecosystem
 
-A decentralized exchange will require no sign-up of any kind from users to allow for its normal operations. However, users will be required to hold an initial balance of Ether to interact with the network in the first place. The exchange will play an important role within the ecosystem - for example, Vlad Zamfir describes the role of a “DAOex” in the (draft) paper The [DAOist protocol][2], and some work has already been done in that paper towards building a path toward easier adoption. Other elements of that protocol will need to be implemented by both the exchange and DAOs, and will be covered when a complete API is available.
+A decentralized exchange will require no sign-up of any kind from users to allow for its normal operations. However, users will be required to hold an initial balance of Ether to interact with the network in the first place. The exchange will play an important role within the ecosystem - for example, Vlad Zamfir describes the role of a “DAOex” in the (draft) paper The [DAOist protocol][2], and some work has already been done in that paper towards building a path toward easier adoption. Other elements of that protocol would need to be implemented by both the exchange and DAOs, and will be covered when a complete API is available if it is to be realized.
 
 The adoption rate of the exchange will depend heavily on the adoption rate of Ethereum itself. Adoption may accelerate once the exchange offers an assortment of off-chain assets. If EtherEx can become a decentralized version of widely-used exchanges such as Cryptsy, many users may potentially switch over in a short amount of time. As the overall Ethereum infrastructure may take some time to be built out, trading between off-chain assets will be a likely catalyst that speeds up the exchange's adoption.
 
@@ -142,7 +136,7 @@ Implementation of a decentralized exchange on Ethereum
 
 The decentralized exchange is comprised of a set of contracts running on the Ethereum blockchain. The EtherEx team has been running tests and simulations since the platform's first proof-of-concept (POC) was made available, and has already made a number of contributions to the codebase of Ethereum itself. Although very basic at the moment, these contributions were exactly what was needed to verify the feasibility of this project - a sort of "POC-within-a-POC."
 
-Below is an even more simplistic example outlining some of the basic ideas of a exchange contract :
+Below is an even more simplistic example outlining some of the basic ideas of an exchange contract :
 
 ```python
 init:
@@ -216,9 +210,16 @@ A full description of the final contract storage data structure will be provided
 * You only need an Ethereum client to use the API.
 
 
-### Trades (buy / sell)
+
+### Add buy / sell trade
 ```
 <operation> <amount> <price> <marketid>
+```
+
+
+### Trade
+```
+<operation> <tradeid[s]>
 ```
 
 
@@ -236,7 +237,7 @@ A full description of the final contract storage data structure will be provided
 
 ### Adding a market
 ```
-<operation> <minimum trade> <minimum price> <currency> <contract>
+<operation> <minimum trade> <price precision> <currency> <contract>
 ```
 
 
@@ -256,20 +257,20 @@ Allowed values:
 
 ### Amounts
 
-* Amount in wei for ETH or XETH
+* Amount in wei for ETH or ETX
 * Amount in satoshi for BTC
 * Lowest denomination of each subcurrency
 
 
 ### Prices
 
-* Price in ETH/XETH * 10 ^ 8, as long integer
-* Price in ETH/BTC * 10 ^ 8, as long integer
+* Price in ETH/ETX * 10 ^ 8
+* Price in ETH/BTC * 10 ^ 8
 
 
 ### Market IDs
 ```
-1 = ETH/XETH
+1 = ETH/ETX
 ```
 New market IDs will be created as DAO creators add their subcurrency to the exchange.
 
@@ -277,7 +278,7 @@ New market IDs will be created as DAO creators add their subcurrency to the exch
 ### Currencies
 ```
 0 = ETH
-1 = XETH
+1 = ETX
 2 = XBTC
 ...
 ```
@@ -289,24 +290,24 @@ Market names follow the "ETH/<name>" convention. When registering a new market, 
 
 
 ### Minimum trade amounts
-When adding a subcurrency, set the minimum trade amount high enough to make economic sense.
+When adding a subcurrency, set the minimum trade amount high enough to make economic sense. A minimum of 10 ETH (1000000000000000000000 wei) is recommended.
 
 
 ### Examples
 
-Buy 1000 ETH at 1200 ETH/XETH
+Buy 1000 ETH at 1200 ETH/ETX
 ```
 1 1000000000000000000000 120000000000 1
 ```
 
-Sell 1000 ETH at 1500 ETH/XETH
+Sell 1000 ETH at 1500 ETH/ETX
 ```
 2 1000000000000000000000 150000000000 1
 ```
 
-Fulfill trade
+Fulfill trade(s)
 ```
-3 0x3039
+3 0x3039 0x2f58 ...
 ```
 
 Deposit 1 BTC
@@ -363,3 +364,9 @@ Blockchain technology solves many problems by empowering both the exchange and i
 
 [2]: https://docs.google.com/a/coinculture.info/document/d/1h9WY8XbT3cuIVN5mFmlkRJ8tHj5pJSnEpQ4__fslxXI
 2: https://docs.google.com/a/coinculture.info/document/d/1h9WY8XbT3cuIVN5mFmlkRJ8tHj5pJSnEpQ4__fslxXI
+
+[3]: http://faculty.chicagobooth.edu/eric.budish/research/HFT-FrequentBatchAuctions.pdf
+3: http://faculty.chicagobooth.edu/eric.budish/research/HFT-FrequentBatchAuctions.pdf
+
+[4]: http://users.encs.concordia.ca/~clark/papers/2014_weis.pdf
+4: http://users.encs.concordia.ca/~clark/papers/2014_weis.pdf

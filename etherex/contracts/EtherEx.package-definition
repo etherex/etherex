@@ -29,7 +29,7 @@ deploy:
 deploy:
   currencies.se => {{Currencies}}
 deploy:
-  xeth.se => {{XETH}}
+  etx.se => {{ETX}}
 
 # Register with DOUG
 # transact:
@@ -55,9 +55,9 @@ transact:
 transact:
   {{Currencies}} => {{EtherEx}} {{NameReg}} EtherEx-Currencies
 transact:
-  {{XETH}} => {{EtherEx}} {{NameReg}} XETH
+  {{ETX}} => {{EtherEx}} {{NameReg}} ETX
 transact:
-  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 XETH {{XETH}}
+  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 ETX {{ETX}}
 
 # Log those deploys.
 #log:
@@ -75,6 +75,6 @@ log:
 log:
   Currencies => {{Currencies}}
 log:
-  XETH => {{XETH}}
+  ETX => {{ETX}}
 log:
   All => Done

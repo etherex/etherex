@@ -33,7 +33,7 @@
   EtherEx.markets = [
     {}, // Reserve markets[0] to ETH
     // {
-    //   name: "XETH",
+    //   name: "ETX",
     //   address: "0xdebd115297dbabd326ec3b1615a428b9ae090b9f",
     //   minamount: Ethereum.BigInteger("10").pow(18),
     //   minprice: Ethereum.BigInteger("10").pow(8),
@@ -152,7 +152,7 @@
     );
   };
 
-  EtherEx.sendXETH = function() {
+  EtherEx.sendETX = function() {
     eth.transact(
       eth.key,
       "0",
@@ -238,7 +238,7 @@
           '<br /><button class="cancel" data-id="' + i + '" id="trade-' + i +'">cancel</button>' : '';
 
         var fill = (cancel.length == 0) ?
-        '<br /><button class="fill" data-id="' + i + '" data-type="' + type + '" data-amount="' + amount + '" data-value="' + value + '" data-market="' + String(EtherEx.markets[market].name).substr(0, 4) + '" id="trade-' + i + '">fill</button>' : '';
+        '<br /><button class="fill" data-id="' + i + '" data-type="' + type + '" data-amount="' + amount + '" data-value="' + value + '" data-market="' + String(EtherEx.markets[market].name).substr(0, 3) + '" id="trade-' + i + '">fill</button>' : '';
 
         if (price) {
           table += "<tr>\
@@ -385,7 +385,7 @@
 
       // document.getElementById("eth").innerHTML = EtherEx.formatBalance(eth.balanceAt(eth.coinbase).dec()); // Ethereum.BigInteger(eth.balanceAt(eth.coinbase).dec()).divide(Ethereum.BigInteger("10").pow(18));
 
-      document.getElementById("xeth").innerHTML = eth.stateAt(EtherEx.markets[1].address, EtherEx.addrs[0]).dec();
+      document.getElementById("etx").innerHTML = Ethereum.BigInteger(eth.stateAt(EtherEx.markets[1].address, EtherEx.addrs[0]).dec()).divide(Ethereum.BigInteger("10").pow(18));
 
       document.getElementById("tot").innerHTML = eth.balanceAt(EtherEx.coinbase).dec();
 
@@ -494,13 +494,27 @@
     });
 
     $("#buy").on('click', function() {
-      if (window.confirm("Buy " + $("#amount").val() + " ETH at " + $("#price").val() + " ETH/XETH ?")) {
-        EtherEx.buy();
+      var amount = $("#amount").val();
+      var price = $("#price").val();
+      var value = Ethereum.BigInteger(amount).multiply(Ethereum.BigInteger("10").pow(18)).divide(Ethereum.BigInteger(price));
+      if (window.confirm("Buy " + amount + " ETH at " + price + " ETH/ETX for " + value + " ETX?")) {
+        // TODO - Check subcurrency balance
+        balance = Ethereum.BigInteger(eth.stateAt(EtherEx.markets[1].address, EtherEx.addrs[0]).dec());
+        // console.log(value);
+        if (balance.compareTo(value) < 0) {
+          alert("Insufficient balance, you have " + balance + " and need " + value);
+        }
+        else {
+          EtherEx.buy();
+        }
       }
     });
 
     $("#sell").on('click', function() {
-      if (window.confirm("Sell " + $("#amount").val() + " ETH at " + $("#price").val() + " ETH/XETH ?")) {
+      var amount = $("#amount").val();
+      var price = $("#price").val();
+      var value = amount * price;
+      if (window.confirm("Sell " + amount + " ETH at " + price + " ETH/ETX for " + value + " ETX?")) {
         EtherEx.sell();
       }
     });
@@ -547,13 +561,13 @@
       }
     });
 
-    $("#sendxeth").on('click', function() {
+    $("#sendetx").on('click', function() {
       if ($("#to").val() == "") {
         alert("Please provide a recipient address.");
         return;
       }
-      if (window.confirm("Send " + $("#value").val() + " XETH to " + $("#to").val() + " ?")) {
-        EtherEx.sendXETH();
+      if (window.confirm("Send " + $("#value").val() + " ETX to " + $("#to").val() + " ?")) {
+        EtherEx.sendETX();
       }
     });
 
