@@ -209,7 +209,7 @@
 
   EtherEx.getOrderbook = function() {
     var startkey = 100;
-    var lastkey = eth.stateAt(EtherEx.addresses.trades, "18").dec();
+    var lastkey = eth.stateAt(EtherEx.addresses.trades, String(18)).dec();
 
     document.getElementById("last").innerHTML = lastkey;
     // console.log(lastkey);
@@ -353,8 +353,7 @@
         var sub = false;
         $(EtherEx.markets).each( function(i, market) {
           if (l.to == market.address) {
-            var length = market.name.length - 4;
-            sub = market.name.substr(0, length);
+            sub = market.name;
           }
         });
 
@@ -385,22 +384,21 @@
 
       // document.getElementById("eth").innerHTML = EtherEx.formatBalance(eth.balanceAt(eth.coinbase).dec()); // Ethereum.BigInteger(eth.balanceAt(eth.coinbase).dec()).divide(Ethereum.BigInteger("10").pow(18));
 
-      document.getElementById("etx").innerHTML = Ethereum.BigInteger(eth.stateAt(EtherEx.markets[1].address, EtherEx.addrs[0]).dec()).divide(Ethereum.BigInteger("10").pow(18));
+      document.getElementById("etx").innerHTML = EtherEx.formatBalance(eth.stateAt(EtherEx.markets[1].address, EtherEx.addrs[0]).dec());
 
-      document.getElementById("tot").innerHTML = eth.balanceAt(EtherEx.coinbase).dec();
+      document.getElementById("tot").innerHTML = EtherEx.formatBalance(eth.balanceAt(EtherEx.addrs[0]).dec());
 
       for (var i = EtherEx.addrs.length - 1; i >= 0; i--) {
         var addr = EtherEx.addrs[i]; // eth.secretToAddress(eth.keys[i]);
-        var bal = Ethereum.BigInteger(eth.balanceAt(addr).dec()).divide(Ethereum.BigInteger("10").pow(18));
-        var entry = $('<tr><td><div><span class="address">' + addr.substr(2) + "</span></div></td><td>" + bal + " ETH</td></tr>");
+        var bal = EtherEx.formatBalance(eth.balanceAt(addr).dec());
+        var entry = $('<tr><td><div><span class="address">' + addr.substr(2) + "</span></div></td><td>" + bal + "</td></tr>");
 
         $("#addressbook > table > tbody").append(entry);
 
         try {
           for (var m = EtherEx.markets.length - 1; m >= 1; m--) {
-            var subbal = eth.stateAt(EtherEx.markets[m].address, addr).dec();
-            var length = EtherEx.markets[m].name.length - 4;
-            var subentry = $('<tr><td class="sub">+ ' + '</td><td><span class="address">' + subbal + "</span> " + EtherEx.markets[m].name.substr(0, length) + "</td></tr>");
+            var subbal = EtherEx.formatBalance(eth.stateAt(EtherEx.markets[m].address, addr).dec());
+            var subentry = $('<tr><td class="sub">+ ' + '</td><td><span class="address">' + subbal + "</span> " + EtherEx.markets[m].name + "</td></tr>");
 
             $("#addressbook > table > tbody").append(subentry);
           };
@@ -446,19 +444,18 @@
       window.eth.stateAt = window.eth.storageAt;
       window.eth.messages = function() { return {}; };
 
+      for (var i = eth.keys.length - 1; i >= 0; i--)
+        eth.watch(eth.secretToAddress(eth.keys[i]), "", EtherEx.updateBalances);
+
       EtherEx.loadMarkets();
 
-      eth.watch(eth.coinbase, "", EtherEx.updateBalances);
-
-      // for (var i = EtherEx.markets.length - 1; i >= 1; i--)
-      //   eth.watch(EtherEx.markets[i].address, eth.coinbase, EtherEx.updateBalances);
+      for (var i = EtherEx.markets.length - 1; i >= 1; i--)
+        eth.watch(EtherEx.markets[i].address, "", EtherEx.updateBalances);
     }
     else {
       var addrs = [];
       for (var i = eth.keys.length - 1; i >= 0; i--)
         addrs.push(eth.secretToAddress(eth.keys[i]));
-
-      addrs.push(eth.coinbase);
 
       EtherEx.loadMarkets();
 
@@ -495,25 +492,49 @@
 
     $("#buy").on('click', function() {
       var amount = $("#amount").val();
+      var bigamount = Ethereum.BigInteger(amount).multiply(Ethereum.BigInteger("10").pow(18));
+      var stramount = EtherEx.formatBalance(bigamount);
       var price = $("#price").val();
-      var value = Ethereum.BigInteger(amount).multiply(Ethereum.BigInteger("10").pow(18)).divide(Ethereum.BigInteger(price));
+      var value = bigamount.divide(Ethereum.BigInteger(price));
+
+      // TODO - get minimum amount from market
+      if (amount < 10) {
+        alert("Insufficient amount, 10 ETH required");
+        return;
+      }
+
+      var balance = Ethereum.BigInteger(eth.stateAt(EtherEx.markets[1].address, EtherEx.addrs[0]).dec());
+
+      if (balance.compareTo(bigamount) < 0) {
+        alert("Insufficient balance, you have " + EtherEx.formatBalance(balance) + " and need " + EtherEx.formatBalance(bigamount));
+        return;
+      }
+
       if (window.confirm("Buy " + amount + " ETH at " + price + " ETH/ETX for " + value + " ETX?")) {
-        // TODO - Check subcurrency balance
-        balance = Ethereum.BigInteger(eth.stateAt(EtherEx.markets[1].address, EtherEx.addrs[0]).dec());
-        // console.log(value);
-        if (balance.compareTo(value) < 0) {
-          alert("Insufficient balance, you have " + balance + " and need " + value);
-        }
-        else {
-          EtherEx.buy();
-        }
+        EtherEx.buy();
       }
     });
 
     $("#sell").on('click', function() {
       var amount = $("#amount").val();
+      var bigamount = Ethereum.BigInteger(amount).multiply(Ethereum.BigInteger("10").pow(18));
+      var stramount = EtherEx.formatBalance(bigamount);
       var price = $("#price").val();
-      var value = amount * price;
+      var value = bigamount.divide(Ethereum.BigInteger(price));
+
+      // TODO - get minimum amount from market
+      if (amount < 10) {
+        alert("Insufficient amount, 10 ETH required");
+        return;
+      }
+
+      var balance = Ethereum.BigInteger(eth.balanceAt(EtherEx.addrs[0]).dec());
+
+      if (balance.compareTo(bigamount) < 0) {
+        alert("Insufficient balance, you have " + EtherEx.formatBalance(balance) + " and need " + EtherEx.formatBalance(bigamount));
+        return;
+      }
+
       if (window.confirm("Sell " + amount + " ETH at " + price + " ETH/ETX for " + value + " ETX?")) {
         EtherEx.sell();
       }

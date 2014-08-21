@@ -37,7 +37,7 @@ code:
     last = contract.storage[18]
 
     if msg.value > 0: // "Refunding excess value: %s" % msg.value
-        send(tx.origin, msg.value)
+        send(msg.sender, msg.value)
 
     if status == 1:
         if msg.datasize == 1: // "Getting market"

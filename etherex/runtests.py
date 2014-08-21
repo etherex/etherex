@@ -112,7 +112,7 @@ print 'EtherEx LVM'
 print '==================='
 # subprocess.call(["serpent", "compile", "contracts/etherex.se"])
 
-print 'Balances (XETH)'
+print 'Balances'
 print '\n'
 f = 'contracts/balances.se'
 compile(f)
@@ -139,6 +139,14 @@ f = 'contracts/currencies.se'
 compile(f)
 print '=' * 20
 print '\n'
+
+print 'ETX'
+print '\n'
+f = 'contracts/etx.se'
+compile(f)
+print '=' * 20
+print '\n'
+
 
 print 'EtherEx'
 print '\n'

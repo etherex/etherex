@@ -105,7 +105,7 @@ class TestEtherEx(object):
         assert self._storage(self.tcontract, 15) == "0x" + self.contract
         assert self._storage(self.ccontract, 15) == "0x" + self.contract
 
-        ans = self.state.send(self.ALICE['key'], self.contract, 1 * 10 ** 18, [7, 1 * 10 ** 18, 1 * 10 ** 8, "ETX", self.xcontract])
+        ans = self.state.send(self.ALICE['key'], self.contract, 10 ** 18, [7, 1 * 10 ** 18, 1 * 10 ** 8, "ETX", self.xcontract])
 
         # print self.sim.get_storage_dict(self.ccontract)
         assert ans == [1]
@@ -338,7 +338,7 @@ class TestEtherEx(object):
 
         # initial_balance = self.state.block.get_balance(self.ALICE['address'])
 
-        ans = self.state.send(self.ALICE['key'], self.contract, 1 * 10 ** 21, [2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+        ans = self.state.send(self.ALICE['key'], self.contract, 10 ** 21, [2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
 
         assert ans == [100]
         assert self._storage(self.tcontract, 100) == self.xhex(2)
@@ -371,14 +371,18 @@ class TestEtherEx(object):
     def test_fulfill_first_sell_with_buy(self):
         self.test_first_sell()
 
-        ans = self.state.send(self.BOB['key'], self.contract, 10 ** 21, [3, 100])
+        # Load BOB with ETX from ALICE
+        ans = self.state.send(self.ALICE['key'], self.xcontract, 0, [self.BOB['address'], 10 ** 18 - 1000])
+        assert ans == [1]
+
+        ans = self.state.send(self.BOB['key'], self.contract, 0, [3, 100])
         assert ans == [1]
         # assert ans == [10 ** 21]
 
     def test_second_sell(self):
         self.test_first_sell()
 
-        ans = self.state.send(self.BOB['key'], self.contract, 1 * 10 ** 21, [2, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
+        ans = self.state.send(self.BOB['key'], self.contract, 10 ** 21, [2, 10 ** 21, 1000 * 10 ** 8, 1])
 
         assert ans == [105]
         assert self._storage(self.tcontract, 105) == self.xhex(2)
@@ -396,6 +400,10 @@ class TestEtherEx(object):
 
     def test_first_buy(self):
         self.test_second_sell()
+
+        # Load CHARLIE with ETX from ALICE
+        ans = self.state.send(self.ALICE['key'], self.xcontract, 0, [self.CHARLIE['address'], 10 ** 18 - 1000])
+        assert ans == [1]
 
         ans = self.state.send(self.CHARLIE['key'], self.contract, 0, [1, 1 * 10 ** 21, 1000 * 10 ** 8, 1])
 

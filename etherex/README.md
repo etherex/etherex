@@ -33,20 +33,6 @@ git clone https://github.com/etherex-crypto/etherex.git
 cd etherex && pip install --upgrade -r requirements.txt
 ```
 
-Then follow your platform specific instructions.
-
-### Linux
-```
-cd serpent && make
-sudo make install
-```
-
-### OS X
-```
-brew tap caktux/ethereum
-brew install serpent
-```
-
 
 Running tests
 -------------
@@ -59,8 +45,10 @@ Refer to [Serpent](https://github.com/ethereum/serpent) and the [simulator](http
 
 Local Blockchain tests
 ----------------------
+Requires a working [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) client and [EPM](https://github.com/project-douglas/epm)
+
 ```
-./etherex_init.py
+epm deploy contracts/EtherEx.package-definition
 ```
 
 

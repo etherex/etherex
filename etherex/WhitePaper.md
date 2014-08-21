@@ -95,6 +95,7 @@ As described above, centralized exchanges suffer from a serious trust problem. A
 
 
 * Possible blockchain bloat
+* Front-running
 * Off-chain coins and fiat integration
 * Adoption and ecosystem
 
@@ -107,6 +108,11 @@ Outside of the Ethereum network, a decentralized exchange will need secure walle
 ### Blockchain bloat
 
 Trading data will need to be regularly optimized in order to maintain an acceptable footprint on the Ethereum network. While further experimentation is needed, it's already clear that the operating costs will not be suited for high-frequency trading (HFT) and for very small trades. It will be the exchange's responsibility to be properly optimized both in its execution and storage use. However, other scaling issues will have to be resolved within the Ethereum platform itself, by its core development team and with the assistance of EtherEx and other Dapp developers.
+
+
+### Front-running
+
+By the very nature of blockchain technology, miners have an inherent possibility to hold back transactions proportional to their mining power within the network. While the consequences within Bitcoin are minimal (longer delays before a transaction gets included), the smart contracts within Ethereum are more vulnerable to manipulation depending on their behaviour regarding the order in which transactions are processed. Unless protocol level protections are implemented, a two-phase trading process will have to be used to prevent front-running. A process similar to [Frequent Batch Auctions][3] but adapted to the specifics of Ethereum could be a possible solution (see also [On Decentralizing Prediction Markets and Order Books][4]). Traders would submit sealed bids (commitments) to be ordered and processed in a later block while they're being reveiled.
 
 
 ### Off-chain coins and fiat integration

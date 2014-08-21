@@ -80,8 +80,6 @@ code:
             #     last = sha3([msg.data[1], msg.data[2]], 2)
             #     return contract.storage[last]
 
-
-
     elif msg.sender == exchange:
 
         # NameReg
