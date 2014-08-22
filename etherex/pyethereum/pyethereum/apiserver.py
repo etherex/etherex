@@ -7,12 +7,15 @@ import bottle
 from pyethereum.chainmanager import chain_manager
 from pyethereum.peermanager import peer_manager
 import pyethereum.dispatch as dispatch
-from pyethereum.blocks import block_structure
+from pyethereum.blocks import block_structure, Block
 import pyethereum.signals as signals
 from pyethereum.transactions import Transaction
+import pyethereum.processblock as processblock
+import pyethereum.utils as utils
+import pyethereum.rlp as rlp
 
 logger = logging.getLogger(__name__)
-base_url = '/api/v0alpha'
+base_url = '/api/v02a'
 
 app = bottle.Bottle()
 app.config['autojson'] = False
@@ -89,35 +92,140 @@ def blocks():
     logger.debug('blocks/')
     return make_blocks_response(chain_manager.get_chain(start='', count=20))
 
-
-@app.get(base_url + '/blocks/<blockhash>')
-def block(blockhash=None):
-    logger.debug('blocks/%s', blockhash)
-    blockhash = blockhash.decode('hex')
-    if blockhash in chain_manager:
-        return make_blocks_response([chain_manager.get(blockhash)])
-    else:
-        return bottle.abort(404, 'No block with id %s' % blockhash)
+@app.get(base_url + '/blocks/<arg>')
+def block(arg=None):
+    """
+    /blocks/            return N last blocks
+    /blocks/head        return head
+    /blocks/<int>       return block by number
+    /blocks/<hex>       return block by hexhash
+    """
+    logger.debug('blocks/%s', arg)
+    try:
+        if arg is None:
+            return blocks()
+        elif arg == 'head':
+            blk = chain_manager.head
+        elif arg.isdigit():
+            blk = chain_manager.get(chain_manager.index.get_block_by_number(int(arg)))
+        else:
+            try:
+                h = arg.decode('hex')
+            except TypeError:
+                raise KeyError
+            blk = chain_manager.get(h)
+    except KeyError:
+        return bottle.abort(404, 'Unknown Block  %s' % arg)
+    return make_blocks_response([blk])
 
 
 # ######## Transactions ############
+def make_transaction_response(txs):
+    return dict(transactions = [tx.to_dict() for tx in txs])
+
 @app.put(base_url + '/transactions/')
-def transactions():
+def add_transaction():
     # request.json FIXME / post json encoded data? i.e. the representation of
     # a tx
     hex_data = bottle.request.body.read()
     logger.debug('PUT transactions/ %s', hex_data)
     tx = Transaction.hex_deserialize(hex_data)
     signals.local_transaction_received.send(sender=None, transaction=tx)
-    return ''
-    #return bottle.redirect(base_url + '/transactions/' + tx.hex_hash())
-    """
+    return bottle.redirect(base_url + '/transactions/' + tx.hex_hash())
 
-    HTTP status code 200 OK for a successful PUT of an update to an existing resource. No response body needed. (Per Section 9.6, 204 No Content is even more appropriate.)
-    HTTP status code 201 Created for a successful PUT of a new resource, with URIs and metadata of the new resource echoed in the response body. (RFC 2616 Section 10.2.2)
-    HTTP status code 409 Conflict for a PUT that is unsuccessful due to a 3rd-party modification, with a list of differences between the attempted update and the current resource in the response body. (RFC 2616 Section 10.4.10)
-    HTTP status code 400 Bad Request for an unsuccessful PUT, with natural-language text (such as English) in the response body that explains why the PUT failed. (RFC 2616 Section 10.4)
+
+@app.get(base_url + '/transactions/<arg>')
+def get_transactions(arg=None):
     """
+    /transactions/<hex>          return transaction by hexhash
+    """
+    logger.debug('GET transactions/%s', arg)
+    try:
+        tx_hash = arg.decode('hex')
+    except TypeError:
+        bottle.abort(500, 'No hex  %s' % arg)
+    try: # index
+        tx, blk = chain_manager.index.get_transaction(tx_hash)
+    except KeyError:
+        # try miner
+        txs = chain_manager.miner.get_transactions()
+        found = [tx for tx in txs if tx.hex_hash() == arg]
+        if not found:
+            return bottle.abort(404, 'Unknown Transaction  %s' % arg)
+        tx, blk = found[0], chain_manager.miner.block
+    # response
+    tx = tx.to_dict()
+    tx['block'] = blk.hex_hash()
+    if not chain_manager.in_main_branch(blk):
+        tx['confirmations'] = 0
+    else:
+        tx['confirmations'] = chain_manager.head.number - blk.number
+    return dict(transactions=[tx])
+
+
+@app.get(base_url + '/pending/')
+def get_pending():
+    """
+    /pending/       return pending transactions
+    """
+    return dict(transactions=[tx.to_dict() for tx in chain_manager.miner.get_transactions()])
+
+
+
+# ########### Trace ############
+
+class TraceLogHandler(logging.Handler):
+    def __init__(self):
+        logging.Handler.__init__(self)
+        self.buffer = []
+
+    def emit(self, record):
+        self.buffer.append(record)
+
+
+@app.get(base_url + '/trace/<txhash>')
+def trace(txhash):
+    """
+    /trace/<hexhash>        return trace for transaction
+    """
+    logger.debug('GET trace/ %s', txhash)
+    try: # index
+        tx, blk = chain_manager.index.get_transaction(txhash.decode('hex'))
+    except (KeyError, TypeError):
+        return bottle.abort(404, 'Unknown Transaction  %s' % txhash)
+
+    # get the state we had before this transaction
+    test_blk = Block.init_from_parent(blk.get_parent(),
+                                        blk.coinbase,
+                                        extra_data=blk.extra_data,
+                                        timestamp=blk.timestamp,
+                                        uncles=blk.uncles)
+    pre_state = test_blk.state_root
+    for i in range(blk.transaction_count):
+        tx_lst_serialized, sr, _ = blk.get_transaction(i)
+        if utils.sha3(rlp.encode(tx_lst_serialized)) == tx.hash:
+            break
+        else:
+            pre_state = sr
+    test_blk.state.root_hash = pre_state
+
+    # collect debug output
+    tl = TraceLogHandler()
+    tl.setLevel(logging.DEBUG)
+    processblock.logger.addHandler(tl)
+
+    # apply tx (thread? we don't want logs from other invocations)
+    processblock.apply_transaction(test_blk, tx)
+
+    # stop collecting debug output
+    processblock.logger.removeHandler(tl)
+
+    # format
+    formatter = logging.Formatter('%(name)s:%(message)s')
+    res = '\n'.join(formatter.format(l) for l in tl.buffer)
+    return dict(trace=res)
+
+
 
 # ######## Accounts ############
 @app.get(base_url + '/accounts/')
