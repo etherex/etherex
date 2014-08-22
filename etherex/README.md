@@ -173,18 +173,31 @@ Notes
 
 TODO
 ----
-* Link price indexes to orderbook and check for lower/higher bids
-* Remove array values instead of setting them to 0, maybe combine first and second indexes of arrays then
-* Combine/optimize buy/sell operations in while loop
-* Make ETH/ETX transactions
+
+### Architecture
+
+* Link price indexes to orderbook and check for lower/higher bids (use head.se?)
+* Remove array values instead of setting them to 0, maybe combine first and second indexes of arrays then (what?)
+* ~~Combine/optimize buy/sell operations in while loop~~
+* ~~Make ETH/ETX transactions~~
 * Trigger BTC transactions
-* Fees
+* Fees (?)
 * Per user address storage, possible conflicts with price indexes
 * Pending queue for deposits/withdrawals
 * Deposit/withdrawal confirmation handling
 * GGF
 * Thousands more tests
 * ... and then some
+
+### UX/UI
+
+* Mockups / wireframes
+* Design elements
+* Choose JS framework
+* Quick port of current functionality to new framework
+* Plan next structure and implemention
+* Implement said new structure
+* Apply design elements
 
 
 ## License

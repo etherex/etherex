@@ -30,6 +30,7 @@ EtherEx is the world's first truly decentralized crypto exchange. Leveraging the
   - [A New Approach](#a-new-approach)
   - [Data structure and API](#data-structure-and-api)
     - [API](#api)
+  - [Trade API](#trade-api)
     - [Add buy / sell trade](#add-buy--sell-trade)
     - [Trade](#trade)
     - [Deposits / Withdrawals](#deposits--withdrawals)
@@ -43,6 +44,7 @@ EtherEx is the world's first truly decentralized crypto exchange. Leveraging the
     - [Market names](#market-names)
     - [Minimum trade amounts](#minimum-trade-amounts)
     - [Examples](#examples)
+    - [Subcurrency API](#subcurrency-api)
   - [Notes](#notes)
 - [Interface](#interface)
     - [JSON API](#json-api)
@@ -200,11 +202,15 @@ Ethereum now allows us to build an exchange with a decentralized (but shared) or
 
 The main contract handles most of the interactions with the users, dispatching commands or simply refunding the user in case of an invalid request. Once the interface is stable enough, most or all of these errors should be caught before becoming transactions and actual trades or operation requests. The main contract will handle most of the exchange's logic, including trade verifications, but will only hold a few meta-data objects and the nonces of price indexes. 
 
-A separate, possibly self-replicating contract will store those price indexes, which themselves include - at a bare minimum - prices and the total of trades per price. Another contract will handle a subcurrency as the base asset of the exchange. Its actual use is still being discussed since there is still a preference towards simply using Ether for all transactions if possible. However, a balance within the exchange still needs to be recorded, and such a subcurrency currently serves that purpose with that contract. A fourth contract, also self-replicating, will hold the actual trades and data. And, at the very least, a fifth contract is needed to hold the different markets being added.
+A separate, possibly self-replicating contract will store those price indexes, which themselves include different metrics and pointers to optimize contract execution. Another contract will handle a subcurrency as the base asset of the exchange. Its actual use is still being discussed since there is still a preference towards simply using Ether for all transactions if possible. However, a balance within the exchange still needs to be recorded, and such a subcurrency currently serves that purpose with that contract. A fourth contract, also self-replicating, will hold the actual trades and data. And, at the very least, a fifth contract is needed to hold the different markets being added.
 
-[ A simple diagram describing how these various contracts perform and and relate to one another would be a good fit here. For the visual-learning mofos out there. ]
+<p>&nbsp;</p>
+![contracts diagram](./contracts-diagram.png "Contracts overview")
 
-Other contracts will eventually get added for Contracts for Differences (CFDs) and any new features. It will also be up to the community to provide some of those contracts, something that should be made easy by copying a current set of contracts and their related interfaces.
+<div align="center">Contracts overview</div>
+
+
+Other contracts will eventually get added for Contracts for Differences (CFDs), batch auctions, and any new feature or core functionality. It will also be up to the community to provide some of those contracts, something that should be made easy by copying a current set of contracts and their related interfaces. The auditability of every line of code running the exchange as well as its execution at every step should be a refreshing change.
 
 
 Data structure and API
@@ -214,11 +220,13 @@ A full description of the final contract storage data structure will be provided
 
 ### API
 
-* __WARNING: Provisional API only, we are in the process of refactoring the API to offload more features to the interface__
+* Provisional API as more features are being moved to the interface.
 * The API is the format of the data field for the Ethereum transactions.
+* Subcurrency API is incomplete.
 * You only need an Ethereum client to use the API.
 
 
+## Trade API
 
 ### Add buy / sell trade
 ```
@@ -340,6 +348,11 @@ Add your subcurrency
 ```
 
 
+### Subcurrency API
+
+The current implementation uses a `<to> <value>` API for users and `<from> <to> <value>` for the exchange. This is subject to change shortly. There is also the [Metacoin API][5] to consider for support, compatibility or simply convenience. Other features will need to extend any core API for subcurrencies.
+
+
 Notes
 -----
 * Your Ethereum address is used as your identity
@@ -379,3 +392,6 @@ Blockchain technology solves many problems by empowering both the exchange and i
 
 [4]: http://users.encs.concordia.ca/~clark/papers/2014_weis.pdf
 4: http://users.encs.concordia.ca/~clark/papers/2014_weis.pdf
+
+[5]: https://github.com/ethereum/cpp-ethereum/wiki/MetaCoin-API
+5: https://github.com/ethereum/cpp-ethereum/wiki/MetaCoin-API
