@@ -24,7 +24,7 @@ EtherEx is the world's first truly decentralized crypto exchange. Leveraging the
   - [Problems and solutions](#problems-and-solutions)
     - [Blockchain bloat](#blockchain-bloat)
     - [Front-running](#front-running)
-    - [Off-chain coins and fiat integration](#off-chain-coins-and-fiat-integration)
+    - [Cross-chain coins and fiat integration](#cross-chain-coins-and-fiat-integration)
     - [Adoption and ecosystem](#adoption-and-ecosystem)
   - [Implementation of a decentralized exchange on Ethereum](#implementation-of-a-decentralized-exchange-on-ethereum)
   - [A New Approach](#a-new-approach)
@@ -90,7 +90,7 @@ Requirements
 
 * Fully operational Ethereum network
 * Standard balance check API
-* Off-chain interaction with other cryptocurrencies
+* Cross-chain interaction with other cryptocurrencies
 
 
 Problems and solutions
@@ -101,13 +101,13 @@ As described above, centralized exchanges suffer from a serious trust problem. A
 
 * Possible blockchain bloat
 * Front-running
-* Off-chain coins and fiat integration
+* Cross-chain coins and fiat integration
 * Adoption and ecosystem
 
 
-Managing the integration of other cryptocurrencies is a challenging aspect of a decentralized exchange - and probably the main reason why none has emerged so far. Ethereum provides a solution to the security and decentralization, but also brings the necessary building blocks for other cryptocurrencies to start interacting. A decentralized exchange will be the first application of this kind to take advantage of these possibilities.
+Managing the integration of other cryptocurrencies is a challenging aspect of a decentralized exchange - and probably the main reason why few have emerged so far. Ethereum provides a solution to the security and decentralization, but also brings the necessary building blocks for other cryptocurrencies to start interacting. A decentralized exchange will be the first application of this kind to take advantage of these possibilities.
 
-Outside of the Ethereum network, a decentralized exchange will need secure wallets and their related APIs to communicate information back into the trading engine. The first implementations for the Ether/Bitcoin (ETH/BTC) trading pair might require a more centralized approach depending on the tools available to secure off-chain coins. Seperate decisions will need to be made regarding other trading pairs, and easier and more direct implementations into the Ethereum network may also offer alternatives that will have to be considered when they arise.
+Outside of the Ethereum network, a decentralized exchange will need secure wallets and their related APIs to communicate information back into the trading engine. The first implementations for the Ether/Bitcoin (ETH/XBTC) trading pair might require a more centralized approach depending on the tools available to secure cross-chain coins. Separate decisions will need to be made regarding other trading pairs, and easier and more direct implementations into the Ethereum network may also offer alternatives that will have to be considered when they arise.
 
 
 ### Blockchain bloat
@@ -117,29 +117,31 @@ Trading data will need to be regularly optimized in order to maintain an accepta
 
 ### Front-running
 
-By the very nature of blockchain technology, miners have an inherent possibility to hold back transactions proportional to their mining power within the network. While the consequences within Bitcoin are minimal (longer delays before a transaction gets included), the smart contracts within Ethereum are more vulnerable to manipulation depending on their behaviour regarding the order in which transactions are processed. Unless protocol level protections are implemented, a two-phase trading process will have to be used to prevent front-running. A process similar to [Frequent Batch Auctions][3] but adapted to the specifics of Ethereum could be a possible solution (see also [On Decentralizing Prediction Markets and Order Books][4]). Traders would submit sealed bids (commitments) to be ordered and processed in a later block while they're being reveiled.
+Owing to the very nature of blockchain technology, miners have an inherent ability to hold back transactions proportional to their mining power within the network. While the consequences within Bitcoin are minimal (due to longer delays before a transaction gets included), the smart contracts within Ethereum are more vulnerable to manipulation depending on their behavior regarding the order in which transactions are processed. Unless protocol-level protections are implemented, a two-phase trading process will have to be used to prevent front-running. A process similar to [Frequent Batch Auctions][3] but adapted to the specifics of Ethereum could be a possible solution (see also [On Decentralizing Prediction Markets and Order Books][4]). Traders would submit sealed bids (commitments) to be ordered and processed in a later block while they're being revealed.
+
+While this potential problem is a relatively recent challenge to developing a decentralized exchange in Ethereum, we are confident that an elegant solution can be designed and implemented prior to launch.
 
 
-### Off-chain coins and fiat integration
+### Cross-chain coins and fiat integration
 
-Ethereum will not be able to interact with off-chain assets such as Bitcoin and Litecoin without first having brought those off chain assets onto Ethereum. Since the ability to bring off-chain assets onto the Ethereum chain is not a feature built into the core of Ethereum, the exchange will have to implement this feature independently - all while staying true to its overarching goal of decentralization.
+Ethereum will not be able to interact with cross-chain assets such as Bitcoin and Litecoin without first having brought those off chain assets onto Ethereum. Since the ability to bring cross-chain assets onto the Ethereum chain is not a feature built into the core of Ethereum, the exchange will have to implement this feature independently - all while staying true to its overarching goal of decentralization.
 
 At this point a few different solutions offer themselves. 
 
-It may be possible to use a combination of multi-signature wallets and oracles to create an environment where no one party has the ability to steal assets, or block them from moving. Another solution is to implement sidechains as a way to trustlessly handle these off chain assets. Unfortunately the Bitcoin technology is not in place to implement sidechains from their end - thus, this option will not be a viable one until the core Bitcoin technology is updated. (Though once it becomes a possibility, the sidechain approach might be the optimal way to implement off-chain assets.)
+It may be possible to use a combination of multi-signature wallets and oracles to create an environment where no one party has the ability to steal assets, or block them from moving. Another solution is to implement sidechains as a way to trustlessly handle these off chain assets. Unfortunately the Bitcoin technology is not in place to implement sidechains from their end - thus, this option will not be a viable one until the core Bitcoin technology is updated. (Though once it becomes a possibility, the sidechain approach might be the optimal way to implement cross-chain assets.)
 
-Fiat integration brings its own set of problems, as by nature fiat is not decentralized. If fiat existed on a blockchain, implementing it would be no different than adding any other off chain asset. Unfortunately, that is not the case.
+Fiat integration brings its own set of problems, as by nature fiat is not decentralized. If fiat existed on a blockchain, implementing it would be no different than adding any other cross-chain asset.
 
-One possible solution to this conundrum is the use of shelling coins to hold a steady value. While it may not technically be fiat, shelling coins could be pegged to a steady value such as the USD, EUR or even commodities such as oil and gold. Another possible solution for fiat integration is that a third party with the existing infrastructure may decide it is profitable to issue Ethereum USD coins. If an entity takes up the role of taking in fiat and issuing Ethereum coins representing that fiat, it could be implemented or even used directly on the exchange.
+One possible solution to this conundrum is the use of SchellingCoins to hold a steady value. While it may not technically be fiat, SchellingCoins could be pegged to a steady value such as the USD, EUR or even commodities such as oil and gold. Another possible solution for fiat integration is that a third party with the existing infrastructure may decide it is profitable to issue Ethereum USD coins. If an entity takes up the role of taking in fiat and issuing Ethereum coins representing that fiat, it could be implemented or even used directly on the exchange.
 
 
 ### Adoption and ecosystem
 
-A decentralized exchange will require no sign-up of any kind from users to allow for its normal operations. However, users will be required to hold an initial balance of Ether to interact with the network in the first place. The exchange will play an important role within the ecosystem - for example, Vlad Zamfir describes the role of a “DAOex” in the (draft) paper The [DAOist protocol][2], and some work has already been done in that paper towards building a path toward easier adoption. Other elements of that protocol would need to be implemented by both the exchange and DAOs, and will be covered when a complete API is available if it is to be realized.
+A decentralized exchange will require no sign-up of any kind from users to allow for its normal operations. However, users will be required to hold an initial balance of Ether to interact with the network in the first place. The exchange will play an important role within the ecosystem - for example, Vlad Zamfir describes the role of a “DAOex” in the (draft) paper The [DAOist protocol][2], and some work has already been done in that paper towards building a path toward easier adoption.
 
-The adoption rate of the exchange will depend heavily on the adoption rate of Ethereum itself. Adoption may accelerate once the exchange offers an assortment of off-chain assets. If EtherEx can become a decentralized version of widely-used exchanges such as Cryptsy, many users may potentially switch over in a short amount of time. As the overall Ethereum infrastructure may take some time to be built out, trading between off-chain assets will be a likely catalyst that speeds up the exchange's adoption.
+The adoption rate of the exchange will depend heavily on the adoption rate of Ethereum itself. Adoption may accelerate once the exchange offers an assortment of cross-chain assets. If EtherEx can become a decentralized version of widely-used exchanges such as Cryptsy, many users may potentially switch over in a short amount of time. As the overall Ethereum infrastructure may take some time to be built out, trading between cross-chain assets will be a likely catalyst that speeds up the exchange's adoption.
 
-The ecosystem of subcurrencies and DApps within Ethereum will also have a major influence on the adoption rate of the exchange. Even if the trading of off-chain assets could be enough to make the exchange a "killer app" and provide a sufficiently high adoption rate, a thriving subcurrency market will be needed to prove the usefulness of both Ethereum and a decentralized exchange.
+The ecosystem of subcurrencies and DApps within Ethereum will also have a major influence on the adoption rate of the exchange. Even if the trading of cross-chain assets could be enough to make the exchange a "killer app" and provide a sufficiently high adoption rate, a thriving subcurrency market will be needed to prove the usefulness of both Ethereum and a decentralized exchange.
 
 
 Implementation of a decentralized exchange on Ethereum
@@ -185,9 +187,9 @@ You will notice how this is a one-way exchange and barely touches the surface of
 
 Let's take a look at what this example would do.
 
-First we define the different storage indexes that will be used, and then get the contract status from the contract's storage. We then proceed to check if the contract has been initialized, and if not, make sure the owner is funding the exchange with at least 1 ether. If that verification passes, the owner's address is written into the contract's storage at the specified index and the contract's status is changed afterwards.
+First we define the different storage indexes that will be used, and then get the contract status from the contract's storage. We then proceed to check if the contract has been initialized, and if not, make sure the owner is funding the exchange with at least 1 Ether. If that verification passes, the owner's address is written into the contract's storage at the specified index and the contract's status is changed afterwards.
 
-Once the contract is initialized, after the else statement, the transaction's value is checked to be at least 1 ether - a fixed minimum for this example.
+Once the contract is initialized, after the else statement, the transaction's value is checked to be at least 1 Ether - a fixed minimum for this example.
 
 The `msg.data[0]` field is then checked to indicate a buy (passing 1 as first value) or a sell (passing 2 as first value) and the current balance available to buy. In our example, a seller would actually be giving away instead of selling. If the sender is buying and the balance allows it, we subtract the amount from the balance in storage and send twice the value to the buyer. If the sender is selling, as mentioned before, the transaction's value is added to the balance in storage and the sender can now feel very generous.
 
@@ -198,7 +200,7 @@ This example is greatly simplified. However, the actual contract implementation 
 A New Approach
 --------------
 
-Ethereum now allows us to build an exchange with a decentralized (but shared) order book, where every asset denominated in Ether can be handled in a trustless, automated, decentralized trading engine.
+Ethereum now allows us to build an exchange with a decentralized (but shared) order book, where every asset can be handled in a trustless, automated, decentralized trading engine.
 
 The main contract handles most of the interactions with the users, dispatching commands or simply refunding the user in case of an invalid request. Once the interface is stable enough, most or all of these errors should be caught before becoming transactions and actual trades or operation requests. The main contract will handle most of the exchange's logic, including trade verifications, but will only hold a few meta-data objects and the nonces of price indexes. 
 
@@ -210,7 +212,7 @@ A separate, possibly self-replicating contract will store those price indexes, w
 <div align="center">Contracts overview</div>
 
 
-Other contracts will eventually get added for Contracts for Differences (CFDs), batch auctions, and any new feature or core functionality. It will also be up to the community to provide some of those contracts, something that should be made easy by copying a current set of contracts and their related interfaces. The auditability of every line of code running the exchange as well as its execution at every step should be a refreshing change.
+Other contracts will eventually be added for Contracts for Differences (CFDs), batch auctions, and any new feature or core functionality. It will also be up to the community to provide some of those contracts - something that should be made easy by copying a current set of contracts and their related interfaces. The auditability of every line of code running the exchange, as well as its execution at every step, should be a refreshing change for traders seeking openness, transparency, and trustless trading.
 
 
 Data structure and API
@@ -275,14 +277,14 @@ Allowed values:
 ### Amounts
 
 * Amount in wei for ETH or ETX
-* Amount in satoshi for BTC
+* Amount in satoshi for XBTC
 * Lowest denomination of each subcurrency
 
 
 ### Prices
 
 * Price in ETH/ETX * 10 ^ 8
-* Price in ETH/BTC * 10 ^ 8
+* Price in ETH/XBTC * 10 ^ 8
 
 
 ### Market IDs
@@ -327,7 +329,7 @@ Fulfill trade(s)
 3 0x3039 0x2f58 ...
 ```
 
-Deposit 1 BTC
+Deposit 1 XBTC
 ```
 4 100000000 2
 ```
@@ -362,13 +364,14 @@ Notes
 Interface
 =========
 
-EtherEx will provide an open-source interface on the Ethereum platform - both as a standalone web app that connects to a node, and as a client-browser interface. Despite its decentralized nature, its user interface can be constructed to appear and behave very similar to what traders are used to with current centralized exchanges.
+EtherEx will provide an open-source interface on the Ethereum platform - both as a web app that connects to an Ethereum node and as a client-browser interface. Despite its decentralized nature, its user interface can be constructed to appear and behave very similar to what traders are used to with current centralized exchanges.
 
 
 ###JSON API
 
 While a complete JSON-RPC API will be provided to retrieve information about the exchange, users will be highly encouraged to provide their own nodes. All of the exchange's data will be available to users from the interface within the Ethereum client.
-There will be no JSON or other type of trading API since the exchange is using Ethereum. Trading is carried out by sending transactions directly to the contract(s) running the exchange.
+
+There will be no external trading API since the exchange is using Ethereum. Trading is carried out by sending transactions directly to the contract(s) running the exchange.
 
 The same transaction API used by the interface will be available for anyone to create trading bots. Those bots will have to make transactions on the user's behalf instead of normal network requests. They will also be limited by block times, block gas limits, and transaction costs - which in turn, should greatly reduce the impact of trading bots on the exchange. Seasoned traders will nonetheless see many benefits in automating most operations.
 
@@ -376,7 +379,11 @@ The same transaction API used by the interface will be available for anyone to c
 Conclusion
 ==========
 
-Blockchain technology solves many problems by empowering both the exchange and its users to easily access the same data. New challenges are introduced at many levels, and allocation of resources have to be carefully managed to create a favorable user experience, as well as provide useful decentralized services. However, these new possibilities - combined with the inherent security of the network - will allow for better, safer, and simpler trading tools operating in total transparency.
+Blockchain technology elegantly solves many fundamental problems by empowering both the exchange and its users to easily access the same data. Traders can feel free to enter a market where the open-source nature of contracts provides the inherent peace of mind that can only be provided by the elimination of both counter-party risk and corrupt-exchange risk. The era of being Goxxed is truly behind us.
+
+As described above, the development of a decentralized exchange introduces a variety of challenges. Meeting these challenges will require a careful allocation of resources as EtherEx strives to create a favorable user experience through a truly decentralized service. The EtherEx team is confident in its ability to solve these problems well before the launch of the Ethereum protocol.
+
+An exciting vision for the (not-too-distant) future is clear: new possibilities offered by the Ethereum blockchain - combined with the inherent security of the network - will provide users with better, safer, and simpler trading tools operating in total transparency. It is the fundamental goal of EtherEx to make this vision a reality.
 
 
 
