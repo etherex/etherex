@@ -112,7 +112,7 @@ Outside of the Ethereum network, a decentralized exchange will need secure walle
 
 ### Blockchain bloat
 
-Trading data will need to be regularly optimized in order to maintain an acceptable footprint on the Ethereum network. While further experimentation is needed, it's already clear that the operating costs will not be suited for high-frequency trading (HFT) and for very small trades. It will be the exchange's responsibility to be properly optimized both in its execution and storage use. However, other scaling issues will have to be resolved within the Ethereum platform itself, by its core development team and with the assistance of EtherEx and other Dapp developers.
+Trading data will need to be regularly optimized in order to maintain an acceptable footprint on the Ethereum network. While further experimentation is needed, it's already clear that the operating costs will not be suited for high-frequency trading (HFT) and for very small trades. It will be the exchange's responsibility to be properly optimized both in its execution and storage use. However, other scaling issues will have to be resolved within the Ethereum platform itself, by its core development team and with the assistance of EtherEx and other Đapp (distributed application) developers.
 
 
 ### Front-running
@@ -141,7 +141,7 @@ A decentralized exchange will require no sign-up of any kind from users to allow
 
 The adoption rate of the exchange will depend heavily on the adoption rate of Ethereum itself. Adoption may accelerate once the exchange offers an assortment of cross-chain assets. If EtherEx can become a decentralized version of widely-used exchanges such as Cryptsy, many users may potentially switch over in a short amount of time. As the overall Ethereum infrastructure may take some time to be built out, trading between cross-chain assets will be a likely catalyst that speeds up the exchange's adoption.
 
-The ecosystem of subcurrencies and DApps within Ethereum will also have a major influence on the adoption rate of the exchange. Even if the trading of cross-chain assets could be enough to make the exchange a "killer app" and provide a sufficiently high adoption rate, a thriving subcurrency market will be needed to prove the usefulness of both Ethereum and a decentralized exchange.
+The ecosystem of subcurrencies and Đapps within Ethereum will also have a major influence on the adoption rate of the exchange. Even if the trading of cross-chain assets could be enough to make the exchange a "killer app" and provide a sufficiently high adoption rate, a thriving subcurrency market will be needed to prove the usefulness of both Ethereum and a decentralized exchange.
 
 
 Implementation of a decentralized exchange on Ethereum
@@ -364,7 +364,7 @@ Notes
 Interface
 =========
 
-EtherEx will provide an open-source interface on the Ethereum platform - both as a web app that connects to an Ethereum node and as a client-browser interface. Despite its decentralized nature, its user interface can be constructed to appear and behave very similar to what traders are used to with current centralized exchanges.
+EtherEx will provide an open-source interface on the Ethereum platform - both as a standalone app that connects to a node, and as a Đapp interface for the EtherBrowser. Despite its decentralized nature, its user interface can be constructed to appear and behave very similar to what traders are used to with current centralized exchanges.
 
 
 ###JSON API
