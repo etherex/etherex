@@ -364,7 +364,7 @@ Notes
 Interface
 =========
 
-EtherEx will provide an open-source interface on the Ethereum platform - both as a standalone app that connects to a node, and as a Đapp interface for the EtherBrowser. Despite its decentralized nature, its user interface can be constructed to appear and behave very similar to what traders are used to with current centralized exchanges.
+EtherEx will provide an open-source interface on the Ethereum platform - both as a standalone client that connects to a node, and as a Đapp interface for the EtherBrowser. Despite its decentralized nature, its user interface can be constructed to appear and behave very similar to what traders are used to with current centralized exchanges.
 
 
 ###JSON API
