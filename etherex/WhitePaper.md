@@ -10,7 +10,7 @@ The dustbin of crypto-history is filled with defunct exchanges that succumbed to
 
 This White Paper lays the foundation for a better approach: a way forward that will bring an abrupt end to the phenomenon of getting “Goxxed”.
 
-EtherEx is the world's first truly decentralized crypto exchange. Leveraging the power of Ethereum, it will empower users to exchange in a secure and trustless fashion, as well as trade in ways not possible with first-generation blockchain technologies.
+EtherEx is a truly decentralized crypto exchange. Leveraging the power of Ethereum, it will empower users to exchange in a secure and trustless fashion, as well as trade in ways not possible with first-generation blockchain technologies.
 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
