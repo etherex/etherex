@@ -13,24 +13,37 @@ This repository contains the code that runs the exchange on Ethereum as a set of
 Components
 ----------
 
-* contracts: Serpent contracts
+* contracts: Ethereum contracts (Serpent)
 * serpent: Serpent compiler by Vitalik Buterin [repo](https://github.com/ethereum/serpent)
 * pyethereum: Python Ethereum client [repo](https://github.com/ethereum/pyethereum)
-* evm-sim: EVM simulator by Joris Bontje [repo](https://github.com/EtherCasts/evm-sim)
+* ~~evm-sim: EVM simulator by Joris Bontje [repo](https://github.com/EtherCasts/evm-sim)~~
+* frontend: React based UI [repo](https://github.com/facebook/react)
 * tests: EtherEx tests
 
 
 Requirements
 ------------
-* Python 2.7.6
+* Python ^2.7.6 for testing
 * [EPM](https://github.com/project-douglas/epm) for deployment
-
+* [npm](http://nodejs.org/) and [grunt](http://gruntjs.com/) for UI development
 
 Installation
 ------------
+
+Start by cloning this repository.
+
 ```
-git clone https://github.com/etherex-crypto/etherex.git
-cd etherex && pip install --upgrade -r requirements.txt
+git clone https://github.com/etherex/etherex.git
+```
+
+### Testing
+```
+pip install --upgrade -r requirements.txt
+```
+
+### UI
+```
+cd frontend && npm install
 ```
 
 
@@ -40,7 +53,7 @@ Running tests
 ./runtests.py
 ```
 
-Refer to [Serpent](https://github.com/ethereum/serpent) and the [simulator](https://github.com/EtherCasts/evm-sim) for their respective usage.
+Refer to [Serpent](https://github.com/ethereum/serpent) and [pyethereum.tester](https://github.com/ethereum/pyethereum) for their respective usage.
 
 
 Local Blockchain tests
@@ -51,65 +64,86 @@ Requires a working [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) clie
 epm deploy contracts/EtherEx.package-definition
 ```
 
+Then build the UI:
+```
+grunt
+```
+
 
 API
 ---
+
+* Provisional API as more features are being moved to the interface.
 * The API is the format of the data field for the Ethereum transactions.
+* Subcurrency API is incomplete.
 * You only need an Ethereum client to use the API.
+
+
+## Trade API
 
 ### Add buy / sell trade
 ```
 <operation> <amount> <price> <marketid>
 ```
 
+
 ### Trade
 ```
 <operation> <tradeid[s]>
 ```
+
 
 ### Deposits / Withdrawals
 ```
 <operation> <amount> <currency>
 ```
 
+
 ### Cancellations
 ```
 <operation> <id>
 ```
 
+
 ### Adding a market
 ```
-<operation> <name> <minimum trade> <owner[s]>
+<operation> <minimum trade> <price precision> <currency> <contract>
 ```
+
 
 ### Operations
+
 Allowed values:
 ```
-1 = Buy
-2 = Sell
-3 = Trade
-4 = Deposit
-5 = Withdraw
-6 = Cancel
-7 = Add market
+1 = BUY
+2 = SELL
+3 = TRADE
+4 = DEPOSIT
+5 = WITHDRAW
+6 = CANCEL
+7 = ADDMARKET
 ```
+
 
 ### Amounts
+
 * Amount in wei for ETH or ETX
-* Amount in satoshi for BTC
+* Amount in satoshi for XBTC
 * Lowest denomination of each subcurrency
 
+
 ### Prices
-* Price in ETH/BTC * 10 ^ 8
+
 * Price in ETH/ETX * 10 ^ 8
+* Price in ETH/XBTC * 10 ^ 8
+
 
 ### Market IDs
-Allowed values
 ```
-1 = ETH/BTC
-2 = ETH/ETX
-...
+1 = ETH/ETX
 ```
+New market IDs will be created as DAO creators add their subcurrency to the exchange.
+
 
 ### Currencies
 ```
@@ -118,13 +152,15 @@ Allowed values
 2 = XBTC
 ...
 ```
+New currency IDs will also be created as markets get added.
+
 
 ### Market names
-Follow the "ETH/<name>" convention for the market name, like "ETH/BOB" for BobCoin.
+Market names follow the "ETH/<name>" convention. When registering a new market, submit the currency name as a three or four letter uppercase identifier, ex.: "BOB" for BobCoin.
 
 
 ### Minimum trade amounts
-When adding a subcurrency, set the minimum trade amount high enough to make economic sense. A minimum of 10 ETH (10000000000000000000 wei) is recommended.
+When adding a subcurrency, set the minimum trade amount high enough to make economic sense. A minimum of 10 ETH (1000000000000000000000 wei) is recommended.
 
 
 ### Examples
@@ -144,7 +180,7 @@ Fulfill trade(s)
 3 0x3039 0x2f58 ...
 ```
 
-Deposit 1 BTC
+Deposit 1 XBTC
 ```
 4 100000000 2
 ```
@@ -161,14 +197,18 @@ Cancel operation
 
 Add your subcurrency
 ```
-7 1000000000000000000000 100000000 "ETH/BOB" 0xe559de5527492bcb42ec68d07df0742a98ec3f1e
+7 1000000000000000000000 100000000 "BOB" 0xe559de5527492bcb42ec68d07df0742a98ec3f1e
 ```
+
+
+### Subcurrency API
+
+The current implementation uses a `<to> <value>` API for users and `<from> <to> <value>` for the exchange. This is subject to change shortly. There is also the [Metacoin API][5] to consider for support, compatibility or simply convenience. Other features will need to extend any core API for subcurrencies.
 
 
 Notes
 -----
 * Your Ethereum address is used as your identity
-* You can only make trades for your address
 
 
 TODO
@@ -185,21 +225,20 @@ TODO
 * Per user address storage, possible conflicts with price indexes
 * Pending queue for deposits/withdrawals
 * Deposit/withdrawal confirmation handling
-* GGF
-* Thousands more tests
+* A few dozen other tests
 * ... and then some
 
 ### UX/UI
 
 * Mockups / wireframes
 * Design elements
-* Choose JS framework
-* Quick port of current functionality to new framework
-* Plan next structure and implemention
+* ~~Choose JS framework~~
+* Quick port of current functionality to new framework (in progress)
+* Plan next structure and implementation (in progress)
 * Implement said new structure
 * Apply design elements
 
 
 ## License
 
-Released under the MIT License.
+Released under the MIT License, see LICENSE file.

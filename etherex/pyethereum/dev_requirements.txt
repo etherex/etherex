@@ -1,5 +1,0 @@
-behave
-mock
-coveralls
-
-ethereum-serpent

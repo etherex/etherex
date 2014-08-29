@@ -1,2 +1,0 @@
-x = create("mul2.se")
-return(msg(tx.gas-100,x,0,[5],1))

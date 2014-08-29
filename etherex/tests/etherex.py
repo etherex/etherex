@@ -9,8 +9,8 @@ from pyethereum import tester
 
 # import logging
 
-from pyethereum import processblock
-processblock.enable_debug()
+# from pyethereum import processblock
+# processblock.enable_debug()
 
 class TestEtherEx(object):
 
