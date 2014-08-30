@@ -1,6 +1,12 @@
 var Ethereum = require("ethereumjs-lib");
 
 var fixtures = {
+    addresses: {
+        nameregs: ["0xf298931b974dfb01b13e44eae9e4428afa3ba7f4", "0x50441127ea5b9dfd835a9aba4e1dc9c1257b58ca"],
+        etherex: "0x3f2af2a311132b3730328a7b30db1025cd8579c3",
+        trades: "0x54d1b757675b6f42d59ccc7c6d1c947536447f7d",
+        markets: "0xad4665d4ffc60f0ea22a0f99dfc0988ce4b2c968"
+    },
     user: {
         id: "1a73636d",
         name: "Alice",

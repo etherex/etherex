@@ -1,18 +1,19 @@
 var utils = require("../js/utils");
+var fixtures = require("../js/fixtures");
 
 var EthereumClient = function() {
 
     this.loadMarkets = function(success, failure) {
         var markets = [];
-        var last = eth.toDecimal(eth.stateAt(EtherEx.addresses.markets, String(18)));
+        var last = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(18)));
         for (var i = 100; i <= 100 + parseInt(last); i = i + 5) {
-          var id = eth.toDecimal(eth.stateAt(EtherEx.addresses.markets, String(i+4)));
+          var id = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(i+4)));
           markets[id] = {
             id: id,
-            name: eth.toAscii(eth.stateAt(EtherEx.addresses.markets, String(i))),
-            address: eth.stateAt(EtherEx.addresses.markets, String(i+3)),
-            amount: eth.toDecimal(eth.stateAt(EtherEx.addresses.markets, String(i+1))),
-            precision: eth.toDecimal(eth.stateAt(EtherEx.addresses.markets, String(i+2))),
+            name: eth.toAscii(eth.stateAt(fixtures.addresses.markets, String(i))),
+            address: eth.stateAt(fixtures.addresses.markets, String(i+3)),
+            amount: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(i+1))),
+            precision: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(i+2))),
           };
         };
         // console.log(markets);

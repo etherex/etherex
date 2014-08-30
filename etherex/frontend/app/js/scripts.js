@@ -10,29 +10,6 @@
 
   EtherEx = {};
 
-  // EtherEx.btc = {
-  //   "address": "...",
-  //   "public": "..."
-  // };
-
-  EtherEx.coinbase = "0x3f2af2a311132b3730328a7b30db1025cd8579c3";
-
-  EtherEx.addresses = {
-    namereg: ["0xf298931b974dfb01b13e44eae9e4428afa3ba7f4", "0x50441127ea5b9dfd835a9aba4e1dc9c1257b58ca"], // "8b01a7e2317fbb6d8096bb667d0604ce898aeaf8"
-    trades: "0x54d1b757675b6f42d59ccc7c6d1c947536447f7d",
-    markets: "0xad4665d4ffc60f0ea22a0f99dfc0988ce4b2c968"
-  };
-
-  EtherEx.markets = [
-    {}, // Reserve markets[0] to ETH
-    // {
-    //   name: "ETX",
-    //   address: "0xdebd115297dbabd326ec3b1615a428b9ae090b9f",
-    //   minamount: Ethereum.BigInteger("10").pow(18),
-    //   minprice: Ethereum.BigInteger("10").pow(8),
-    // }
-  ];
-
   EtherEx.getAddress = function(_a) {
     ret = "";
     for (var i in EtherEx.addresses.namereg) {

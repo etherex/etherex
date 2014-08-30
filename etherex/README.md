@@ -14,9 +14,6 @@ Components
 ----------
 
 * contracts: Ethereum contracts (Serpent)
-* serpent: Serpent compiler by Vitalik Buterin [repo](https://github.com/ethereum/serpent)
-* pyethereum: Python Ethereum client [repo](https://github.com/ethereum/pyethereum)
-* ~~evm-sim: EVM simulator by Joris Bontje [repo](https://github.com/EtherCasts/evm-sim)~~
 * frontend: React based UI [repo](https://github.com/facebook/react)
 * tests: EtherEx tests
 
@@ -24,6 +21,9 @@ Components
 Requirements
 ------------
 * Python ^2.7.6 for testing
+* serpent: Serpent compiler by Vitalik Buterin [repo](https://github.com/ethereum/serpent)
+* pyethereum: Python Ethereum client [repo](https://github.com/ethereum/pyethereum)
+* ~~evm-sim: EVM simulator by Joris Bontje [repo](https://github.com/EtherCasts/evm-sim)~~
 * [EPM](https://github.com/project-douglas/epm) for deployment
 * [npm](http://nodejs.org/) and [grunt](http://gruntjs.com/) for UI development
 
