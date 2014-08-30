@@ -1,7 +1,7 @@
 # Package Name:       EtherEx
 # Package Author:     caktux
 # Package Email:      caktux@etherex.org
-# Package Repository: https://github.com/etherex-crypto/etherex
+# Package Repository: https://github.com/etherex/etherex
 
 # Precursor, set some variables.
 #set:
@@ -30,6 +30,12 @@ deploy:
   currencies.se => {{Currencies}}
 deploy:
   etx.se => {{ETX}}
+deploy:
+  xbtc.se => {{XBTC}}
+deploy:
+  cak.se => {{CAK}}
+deploy:
+  fab.se => {{FAB}}
 
 # Register with DOUG
 # transact:
@@ -57,7 +63,19 @@ transact:
 transact:
   {{ETX}} => {{EtherEx}} {{NameReg}} ETX
 transact:
+  {{XBTC}} => {{EtherEx}} {{NameReg}} XBTC
+transact:
+  {{CAK}} => {{EtherEx}} {{NameReg}} CAK
+transact:
+  {{FAB}} => {{EtherEx}} {{NameReg}} FAB
+transact:
   {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 ETX {{ETX}}
+transact:
+  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 XBTC {{XBTC}}
+transact:
+  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 CAK {{CAK}}
+transact:
+  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 FAB {{FAB}}
 
 # Log those deploys.
 #log:
@@ -76,5 +94,11 @@ log:
   Currencies => {{Currencies}}
 log:
   ETX => {{ETX}}
+log:
+  XBTC => {{XBTC}}
+log:
+  CAK => {{CAK}}
+log:
+  FAB => {{FAB}}
 log:
   All => Done

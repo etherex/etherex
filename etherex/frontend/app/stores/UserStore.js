@@ -18,7 +18,7 @@ var UserStore = Fluxxor.createStore({
     },
 
     onDeposit: function(payload) {
-        console.log("DEPOSIT", payload);
+        console.log("DEPOSIT: " + payload.amount);
         if (payload.amount > 0) {
             this.user.deposit += payload.amount;
         }
@@ -26,7 +26,7 @@ var UserStore = Fluxxor.createStore({
     },
 
     onWithdraw: function(payload) {
-        console.log("WITHDRAW", payload);
+        console.log("WITHDRAW: " + payload.amount);
         if (payload.amount <= this.user.deposit) {
             this.user.deposit -= payload.amount;
         }
@@ -34,14 +34,14 @@ var UserStore = Fluxxor.createStore({
     },
 
     onUpdateBalance: function(payload) {
-        console.log("BALANCE", payload);
+        console.log("BALANCE: " + payload.balance);
         this.user.balance = payload.balance;
         this.user.balance_unconfirmed = payload.balance_unconfirmed;
         this.emit(constants.CHANGE_EVENT);
     },
 
     onUpdateBalanceSub: function(payload) {
-        console.log("BALANCE_SUB", payload);
+        console.log("BALANCE_SUB: " + payload.balance);
         this.user.balance_sub = payload.balance;
         this.user.balance_sub_unconfirmed = payload.balance_unconfirmed;
         this.emit(constants.CHANGE_EVENT);

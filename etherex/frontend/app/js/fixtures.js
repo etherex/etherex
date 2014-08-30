@@ -8,37 +8,11 @@ var fixtures = {
     },
     market: {
         id: 1,
-        name: "ETX"
-    },
-    markets: [
-    {
-        id: 1,
         name: "ETX",
         address: "0xdebd115297dbabd326ec3b1615a428b9ae090b9f",
         amount: Ethereum.BigInteger("10").pow(18),
         precision: Ethereum.BigInteger("10").pow(8)
     },
-    {
-        id: 2,
-        name: "XBTC",
-        address: "0xad4665d4ffc60f0ea22a0f99dfc0988ce4b2c968",
-        amount: Ethereum.BigInteger("10").pow(18),
-        precision: Ethereum.BigInteger("10").pow(8)
-    },
-    {
-        id: 3,
-        name: "CAK",
-        address: "0xac873234d24964d3ef3ded0aa77493b40e5e5cf5",
-        amount: Ethereum.BigInteger("10").pow(18),
-        precision: Ethereum.BigInteger("10").pow(8)
-    },
-    {
-        id: 4,
-        name: "FAB",
-        address: "0xffabe02d3ef93ee947dd534e032812a41a109555",
-        amount: Ethereum.BigInteger("10").pow(18),
-        precision: Ethereum.BigInteger("10").pow(8)
-    }],
     trades: {
         'f70097659f329a09': {
             id: 'f70097659f329a09',

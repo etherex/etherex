@@ -35,8 +35,9 @@ var MarketActions = require("./actions/MarketActions");
 // TODO mock data
 var fixtures = require("./js/fixtures");
 
-var Firebase = require("Firebase");
-var FirebaseClient = require("./clients/FirebaseClient");
+// var Firebase = require("Firebase");
+var EthereumClient = require("./clients/EthereumClient");
+var client = new EthereumClient();
 
 // Load jQuery and bootstrap
 var jQuery = require("jquery");
@@ -44,10 +45,10 @@ window.$ = window.jQuery = jQuery;
 
 require("bootstrap/dist/js/bootstrap.js");
 // require("bootstrap/dist/css/bootstrap.min.css");
-require("./css/bootstrap-darkly.css");
 // require("bootstrap/dist/css/bootstrap-theme.min.css");
+require("./css/bootstrap-darkly.css");
 
-require("./css/rickshaw.min.css");
+// require("./css/rickshaw.min.css");
 require("./css/styles.css");
 
 var Ethereum = require("ethereumjs-lib");
@@ -65,10 +66,13 @@ if (!ethBrowser) {
   eth.stateAt = eth.storageAt;
   eth.messages = function() { return {}; };
   eth.toDecimal = function(x) { return x.dec(); };
+  eth.toAscii = function(x) { return x.bin().unpad(); };
+}
+else {
+  console.log = env.note;
 }
 
 require("./js/scripts.js");
-EtherEx.loadMarkets();
 
 var Route = Router.Route;
 var Routes = Router.Routes;
@@ -79,15 +83,15 @@ var stores = {
   // ReferenceStore: new ReferenceStore({references: fixtures.referencesList}),
   // ContactStore: new ContactStore({contacts: fixtures.contacts}),
   UserStore: new UserStore({user: fixtures.user}),
-  MarketStore: new MarketStore({market: fixtures.market}),
+  MarketStore: new MarketStore({market: fixtures.market, markets: []}),
 };
 
 var actions = {
     // trade: TradeActions,
     // reference: ReferenceActions,
     // contact: ContactActions,
-    user: UserActions,
-    market: MarketActions
+    user: new UserActions(client),
+    market: new MarketActions(client)
 };
 
 var flux = new Fluxxor.Flux(stores, actions);

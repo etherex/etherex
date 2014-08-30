@@ -1,4 +1,4 @@
-# etx.se -- Ethereum contract
+# xeth.se -- Ethereum contract
 #
 # Copyright (c) 2014 EtherEx
 #
@@ -6,7 +6,7 @@
 # of the MIT license.  See the LICENSE file for details.
 
 #
-# ETX
+# XBTC
 #
 
 init:
@@ -44,7 +44,7 @@ code:
             to = msg.data[0]
             value = msg.data[1]
 
-            if msg.value > 0: // "Transfering value to ETX: %s" % msg.value
+            if msg.value > 0: // "Transfering value to XBTC: %s" % msg.value
                 #
                 # Get price and adjust balance
                 #
@@ -100,12 +100,6 @@ code:
                     isowner = exchange
                 return(exchange)
 
-            # Add to balance - TODO - allow balance adjustments?
-            elif msg.data[2] == 4 and msg.sender == exchange: // #define 0x45746865724578=EX
-                if value < 1 or value > 1 * 10 ^ 18:
-                    return(0)
-                contract.storage[to] = contract.storage[to] + value // "Adjusting balance by %d" % value
-
             # Change ownership
             elif msg.data[2] == 5 and msg.sender == exchange:
                 contract.storage[15] = msg.data[1]
@@ -114,20 +108,6 @@ code:
         return(1)
 
     elif msg.sender == exchange:
-
-        contract.storage[msg.sender] = msg.value # DEBUG - Sets full value to sender
-
-        n = 3
-        owners = array(n)
-        owners[0] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31 // #define 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31=ALICE
-        owners[1] = 0xe559de5527492bcb42ec68d07df0742a98ec3f1e // #define 0xe559de5527492bcb42ec68d07df0742a98ec3f1e=BOB
-        owners[2] = 0xf9e57456f18d90886263fedd9cc30b27cd959137 // #define 0xf9e57456f18d90886263fedd9cc30b27cd959137=CHARLIE
-
-        # Split endowment between owners
-        i = 0
-        while i < n:
-            contract.storage[owners[i]] = 10 ^ 24 / n # DEBUG
-            i = i + 1
 
         # NameReg
         call(msg.data[1], msg.data[2])

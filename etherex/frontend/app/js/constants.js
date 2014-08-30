@@ -19,6 +19,9 @@ module.exports = {
     WITHDRAW: null
   }),
   market: keyMirror ({
-    CHANGE_MARKET: null
+    CHANGE_MARKET: null,
+    LOAD_MARKETS: null,
+    LOAD_MARKETS_FAIL: null,
+    LOAD_MARKETS_SUCCESS: null
   })
 };

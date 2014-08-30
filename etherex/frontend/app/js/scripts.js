@@ -10,10 +10,10 @@
 
   EtherEx = {};
 
-  EtherEx.btc = {
-    "address": "...",
-    "public": "..."
-  };
+  // EtherEx.btc = {
+  //   "address": "...",
+  //   "public": "..."
+  // };
 
   EtherEx.coinbase = "0x3f2af2a311132b3730328a7b30db1025cd8579c3";
 
@@ -22,13 +22,6 @@
     trades: "0x54d1b757675b6f42d59ccc7c6d1c947536447f7d",
     markets: "0xad4665d4ffc60f0ea22a0f99dfc0988ce4b2c968"
   };
-
-  EtherEx.init = [
-    "0xac873234d24964d3ef3ded0aa77493b40e5e5cf5",
-    "0x1e2130bab79f92547f446969328a8c95721a2e2c",
-    "0x8b01a7e2317fbb6d8096bb667d0604ce898aeaf8",
-    "0xffabe02d3ef93ee947dd534e032812a41a109555"
-  ];
 
   EtherEx.markets = [
     {}, // Reserve markets[0] to ETH
@@ -39,62 +32,6 @@
     //   minprice: Ethereum.BigInteger("10").pow(8),
     // }
   ];
-
-  EtherEx.units = {
-    "Uether": Ethereum.BigInteger("1000000000000000000000000000000000000000000000000000000"),
-    "Vether": Ethereum.BigInteger("1000000000000000000000000000000000000000000000000000"),
-    "Dether": Ethereum.BigInteger("1000000000000000000000000000000000000000000000000"),
-    "Nether": Ethereum.BigInteger("1000000000000000000000000000000000000000000000"),
-    "Yether": Ethereum.BigInteger("1000000000000000000000000000000000000000000"),
-    "Zether": Ethereum.BigInteger("1000000000000000000000000000000000000000"),
-    "Eether": Ethereum.BigInteger("1000000000000000000000000000000000000"),
-    "Pether": Ethereum.BigInteger("1000000000000000000000000000000000"),
-    "Tether": Ethereum.BigInteger("1000000000000000000000000000000"),
-    "Gether": Ethereum.BigInteger("1000000000000000000000000000"),
-    "Mether": Ethereum.BigInteger("1000000000000000000000000"),
-    "Kether": Ethereum.BigInteger("1000000000000000000000"),
-    "ether" : Ethereum.BigInteger("1000000000000000000"),
-    "finney": Ethereum.BigInteger("1000000000000000"),
-    "szabo" : Ethereum.BigInteger("1000000000000"),
-    "Gwei"  : Ethereum.BigInteger("1000000000"),
-    "Mwei"  : Ethereum.BigInteger("1000000"),
-    "Kwei"  : Ethereum.BigInteger("1000"),
-    "wei"   : Ethereum.BigInteger("1")
-  };
-
-  EtherEx.formatBalance = function(_b) {
-    // // if (_b.compareTo(EtherEx.units[0]) < 0)
-    // //   return _b.divide(EtherEx.units[0]) + " " + Object.keys(EtherEx.units)[0];
-    // for (i in EtherEx.units) {
-    //   if (EtherEx.units[i].valueOf() != 1 && _b.compareTo(EtherEx.units[i].multiply(Ethereum.BigInteger("100"))) >= 0) {
-    //     return _b.divide(EtherEx.units[i].divide(Ethereum.BigInteger("1000"))) + " " + i
-    //   }
-    // }
-    // return Ethereum.BigInteger(_b) + " wei";
-
-    if (_b > EtherEx.units[0] * 10000)
-      return (_b / EtherEx.units[0]).toFixed(2) + " " + Object.keys(EtherEx.units)[0];
-    for (i in EtherEx.units) {
-      if (EtherEx.units[i] != 1 && _b >= EtherEx.units[i] * 100) {
-        return ((_b / (EtherEx.units[i] / 1000)) / 1000).toFixed(2) + " " + i
-      }
-    }
-    return parseFloat(_b).toFixed(2) + " wei";
-  };
-
-  EtherEx.loadMarkets = function() {
-    var last = eth.stateAt(EtherEx.addresses.markets, String(18)).dec();
-    for (var i = 100; i <= 100 + parseInt(last); i = i + 5) {
-      var id = eth.stateAt(EtherEx.addresses.markets, String(i+4)).dec();
-      EtherEx.markets[id] = {
-        name: eth.stateAt(EtherEx.addresses.markets, String(i)).bin(),
-        address: eth.stateAt(EtherEx.addresses.markets, String(i+3)),
-        minamount: eth.stateAt(EtherEx.addresses.markets, String(i+1)).dec(),
-        minprice: eth.stateAt(EtherEx.addresses.markets, String(i+2)).dec(),
-      };
-    };
-    // console.log(EtherEx.markets);
-  };
 
   EtherEx.getAddress = function(_a) {
     ret = "";

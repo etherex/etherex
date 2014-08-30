@@ -1,4 +1,4 @@
-# etx.se -- Ethereum contract
+# cak.se -- Ethereum contract
 #
 # Copyright (c) 2014 EtherEx
 #
@@ -6,7 +6,7 @@
 # of the MIT license.  See the LICENSE file for details.
 
 #
-# ETX
+# CAK
 #
 
 init:
@@ -44,7 +44,7 @@ code:
             to = msg.data[0]
             value = msg.data[1]
 
-            if msg.value > 0: // "Transfering value to ETX: %s" % msg.value
+            if msg.value > 0: // "Transfering value to XETH: %s" % msg.value
                 #
                 # Get price and adjust balance
                 #
@@ -126,7 +126,7 @@ code:
         # Split endowment between owners
         i = 0
         while i < n:
-            contract.storage[owners[i]] = 10 ^ 24 / n # DEBUG
+            contract.storage[owners[i]] = 10 ^ 42 / n # DEBUG
             i = i + 1
 
         # NameReg

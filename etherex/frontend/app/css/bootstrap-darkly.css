@@ -144,6 +144,9 @@ button,
 select {
   text-transform: none;
 }
+select {
+  color: #000;
+}
 button,
 html input[type="button"],
 input[type="reset"],
