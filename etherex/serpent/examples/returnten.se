@@ -1,2 +1,0 @@
-x = create("mul2.se")
-return(call(x, 5))
