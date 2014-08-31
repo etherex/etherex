@@ -70,6 +70,15 @@ if (!ethBrowser) {
 }
 else {
   console.log = env.note;
+  window.onerror = function (errorMsg, url, lineNumber, column, errorObj) {
+    env.warn(
+      'Error: ' + errorMsg +
+      ', Script: ' + url +
+      ', Line: ' + lineNumber +
+      ', Column: ' + column +
+      ', StackTrace: ' + String(errorObj)
+    );
+  }
 }
 
 require("./js/scripts.js");
