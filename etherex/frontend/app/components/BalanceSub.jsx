@@ -31,8 +31,10 @@ var BalanceSub = React.createClass({
 
   render: function() {
     return (
-      <div>
-        <div>{this.props.user.balance_sub} <MarketSelect /> {this.props.user.balance_sub_unconfirmed}</div>
+      <div className="col-md-6">
+        <div className="btn-lg">
+          <MarketSelect /> {this.props.user.balance_sub} {this.props.user.balance_sub_unconfirmed}
+        </div>
       </div>
     );
   }

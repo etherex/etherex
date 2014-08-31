@@ -7,6 +7,9 @@ var FluxChildMixin = Fluxxor.FluxChildMixin(React),
 
 var constants = require("../js/constants");
 
+var DropdownButton = require('react-bootstrap/DropdownButton');
+var MenuItem = require('react-bootstrap/MenuItem');
+
 var MarketSelect = React.createClass({
   mixins: [FluxChildMixin, StoreWatchMixin("MarketStore", "UserStore")],
 
@@ -18,22 +21,21 @@ var MarketSelect = React.createClass({
     };
   },
 
-  handleChange: function() {
-    var id = this.refs.market.getDOMNode().value;
-
+  handleChange: function(id) {
     this.getFlux().actions.market.updateMarket(this.state.market.markets[id]);
 
     console.log("SUB/ADDR: " + this.state.market.markets[id].address + " / " + this.state.user.user.addresses[0]);
+
     this.getFlux().actions.user.updateBalanceSub(this.state.market.markets[id], this.state.user.user.addresses[0]);
   },
 
   render: function() {
     return (
-      <select ref="market" onChange={this.handleChange} defaultValue="1" value={this.state.market.market.id}>
+      <DropdownButton ref="market" className="btn-sm" onSelect={this.handleChange} key={1} title={this.state.market.market.name}>
         {this.state.market.markets.map(function(market) {
-          return <option key={market.id} value={market.id} label={market.name}>{market.name}</option>
+          return <MenuItem key={market.id}>{market.name}</MenuItem>
         })}
-      </select>
+      </DropdownButton>
     );
   }
 });

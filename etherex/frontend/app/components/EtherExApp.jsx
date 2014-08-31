@@ -45,8 +45,11 @@ var EtherExApp = React.createClass({
     return (
       <div>
         <NavBar user={this.state.user.user} />
-        <Balance user={this.state.user.user} />
-        <BalanceSub user={this.state.user.user} market={this.state.market} />
+        <div className="clearfix">
+          <Balance user={this.state.user.user} />
+          <BalanceSub user={this.state.user.user} market={this.state.market} />
+        </div>
+        <p>{' '}</p>
         <this.props.activeRouteHandler />
       </div>
     );
