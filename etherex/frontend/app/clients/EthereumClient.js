@@ -3,6 +3,15 @@ var fixtures = require("../js/fixtures");
 
 var EthereumClient = function() {
 
+    this.loadAddresses = function(success, failure) {
+        var addrs = eth.keys.map(function (k) { return eth.secretToAddress(k); });
+
+        if (addrs)
+            success(addrs);
+        else
+            failure("Unable to load addresses");
+    };
+
     this.loadMarkets = function(success, failure) {
         var markets = [];
         var last = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(18)));
@@ -26,9 +35,9 @@ var EthereumClient = function() {
         // console.log(EtherEx.markets);
     };
 
-    this.updateBalance = function(success, failure) {
-        var confirmed = eth.toDecimal(eth.balanceAt(EtherEx.addrs[0], -1));
-        var unconfirmed = eth.toDecimal(eth.balanceAt(EtherEx.addrs[0]));
+    this.updateBalance = function(address, success, failure) {
+        var confirmed = eth.toDecimal(eth.balanceAt(address, -1));
+        var unconfirmed = eth.toDecimal(eth.balanceAt(address));
 
         // DEBUG
         // console.log(eth.toDecimal(confirmed));
@@ -47,9 +56,9 @@ var EthereumClient = function() {
     };
 
 
-    this.updateBalanceSub = function(market, success, failure) {
-        var confirmed = eth.toDecimal(eth.stateAt(market.address, EtherEx.addrs[0], -1));
-        var unconfirmed = eth.toDecimal(eth.stateAt(market.address, EtherEx.addrs[0]));
+    this.updateBalanceSub = function(market, address, success, failure) {
+        var confirmed = eth.toDecimal(eth.stateAt(market.address, address, -1));
+        var unconfirmed = eth.toDecimal(eth.stateAt(market.address, address));
 
         // DEBUG
         // console.log(eth.toDecimal(confirmed));
@@ -67,6 +76,36 @@ var EthereumClient = function() {
         }
     };
 
+    this.addTrade = function(trade, success, failure) {
+        // EtherEx.buy = function() {
+        //   var data = EtherEx.txdata(1, 1);
+
+        //   eth.transact(
+        //     eth.key,
+        //     "0",
+        //     EtherEx.coinbase,
+        //     data,
+        //     "10000",
+        //     eth.gasPrice,
+        //     EtherEx.updateBalances
+        //   );
+        // };
+
+        // EtherEx.sell = function() {
+        //   var data = EtherEx.txdata(2, 1);
+
+        //   eth.transact(
+        //     eth.key,
+        //     String(Ethereum.BigInteger(document.getElementById("amount").value).multiply(Ethereum.BigInteger("10").pow(18))),
+        //     EtherEx.coinbase,
+        //     data,
+        //     "10000",
+        //     eth.gasPrice,
+        //     EtherEx.updateBalances
+        //   );
+        // };
+        failure("Not implemented yet, sorry mate.");
+    };
 };
 
 module.exports = EthereumClient;

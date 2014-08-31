@@ -12,9 +12,9 @@ var EtherExApp = require("./components/EtherExApp");
 
 var Placeholder = require("./components/Placeholder");
 
-// var Trades = require("./components/Trades");
-// var TradeStore = require("./stores/TradeStore");
-// var TradeActions = require("./actions/TradeActions");
+var Trades = require("./components/Trades");
+var TradeStore = require("./stores/TradeStore");
+var TradeActions = require("./actions/TradeActions");
 // var TradeDetails = require("./components/TradeDetails");
 
 // var References = require("./components/References");
@@ -79,19 +79,19 @@ var Routes = Router.Routes;
 var Redirect = Router.Redirect;
 
 var stores = {
-  // TradeStore: new TradeStore({trades: fixtures.trade}),
+  MarketStore: new MarketStore({market: fixtures.market, markets: []}),
+  TradeStore: new TradeStore({trades: fixtures.trades}),
+  UserStore: new UserStore({user: fixtures.user}),
   // ReferenceStore: new ReferenceStore({references: fixtures.referencesList}),
   // ContactStore: new ContactStore({contacts: fixtures.contacts}),
-  UserStore: new UserStore({user: fixtures.user}),
-  MarketStore: new MarketStore({market: fixtures.market, markets: []}),
 };
 
 var actions = {
-    // trade: TradeActions,
+    market: new MarketActions(client),
+    trade: new TradeActions(client),
+    user: new UserActions(client),
     // reference: ReferenceActions,
     // contact: ContactActions,
-    user: new UserActions(client),
-    market: new MarketActions(client)
 };
 
 var flux = new Fluxxor.Flux(stores, actions);
@@ -100,13 +100,13 @@ var routes = (
   <Routes>
     <Route handler={EtherExApp} flux={flux}>
       <Redirect from="/" to="trades" />
-      <Route name="trades" path="/trades" handler={Placeholder} flux={flux} />
-      <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} />
-      <Route name="wallet" path="/wallet" handler={Placeholder} flux={flux} />
-      <Route name="contacts" path="/contacts" handler={Placeholder} flux={flux} />
-      <Route name="contactDetails" path="/contact/:contactId" handler={Placeholder} flux={flux} />
-      <Route name="settings" path="/settings" handler={Placeholder} flux={flux} />
-      <Route name="help" path="/help" handler={Placeholder} flux={flux} />
+      <Route name="trades" path="/trades" handler={Trades} flux={flux} title="Trades" />
+      <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
+      <Route name="wallet" path="/wallet" handler={Placeholder} flux={flux} title="Wallet" />
+      <Route name="contacts" path="/contacts" handler={Placeholder} flux={flux} title="Contacts" />
+      <Route name="contactDetails" path="/contact/:contactId" handler={Placeholder} flux={flux} title="Contact details" />
+      <Route name="settings" path="/settings" handler={Placeholder} flux={flux} title="Settings" />
+      <Route name="help" path="/help" handler={Placeholder} flux={flux} title="Help" />
       <Route name="notfound" path="/notfound" handler={Placeholder} title="Contact or Trade ID not found" flux={flux} />
     </Route>
   </Routes>

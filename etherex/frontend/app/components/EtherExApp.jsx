@@ -22,9 +22,17 @@ var EtherExApp = React.createClass({
   },
 
   componentDidMount: function() {
+    this.getFlux().actions.user.loadAddresses();
     this.getFlux().actions.market.loadMarkets();
-    this.getFlux().actions.user.updateBalance();
-    this.getFlux().actions.user.updateBalanceSub(this.state.market.market);
+    // this.getFlux().actions.user.updateBalance(this.state.user.addresses[0]);
+    // this.getFlux().actions.user.updateBalanceSub(this.state.market.market, this.state.user.addresses[0]);
+
+    // if (ethBrowser)
+    //     eth.watch({altered: this.state.user.addresses}).changed(this.getFlux().actions.user.updateBalance);
+    // else {
+    //     for (var i = this.state.user.addresses.length - 1; i >= 0; i--)
+    //       eth.watch(this.state.user.addresses[i], "", this.getFlux().actions.user.updateBalance);
+    // }
 
     // console.log(this.state.market);
     // if (ethBrowser)

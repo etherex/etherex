@@ -16,13 +16,6 @@ var Balance = React.createClass({
     return flux.store("UserStore").getState();
   },
 
-  // componentDidMount: function() {
-  //   if (ethBrowser)
-  //       eth.watch({altered: EtherEx.addrs}).changed(this.updateBalance);
-  //   else
-  //       eth.watch(EtherEx.addrs[0], "", this.updateBalance);
-  // },
-
   render: function() {
     return (
       <div>

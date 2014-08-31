@@ -8,6 +8,11 @@ var MarketActions = function(client) {
 
         _client.loadMarkets(function(markets) {
             this.dispatch(constants.market.LOAD_MARKETS_SUCCESS, markets);
+            // console.log(this.flux.stores.UserStore.user);
+            // this.flux.actions.user.updateBalanceSub(
+            //   this.flux.stores.MarketStore.market.address,
+            //   this.flux.stores.UserStore.user.addresses[0]
+            // );
         }.bind(this), function(error) {
             console.log(String(error));
             this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});

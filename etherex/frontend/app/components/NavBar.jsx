@@ -45,8 +45,8 @@ var NavBar = React.createClass({
                             <Tab to="trades" className="icon-chart-line">Trades</Tab>
                             <Tab to="wallet" className="icon-wallet">Wallet</Tab>
                             <Tab to="contacts" className="icon-contacts">Contacts</Tab>
-                            <Tab to="contacts" className="icon-cog-alt">Settings</Tab>
-                            <Tab to="contacts" className="icon-help">Help</Tab>
+                            <Tab to="settings" className="icon-cog-alt">Settings</Tab>
+                            <Tab to="help" className="icon-help">Help</Tab>
                         </ul>
                         <form className="navbar-form navbar-right" role="search" onSubmit={this.onSubmitForm}>
                             <div className="form-group">

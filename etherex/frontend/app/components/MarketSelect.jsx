@@ -20,8 +20,11 @@ var MarketSelect = React.createClass({
 
   handleChange: function() {
     var id = this.refs.market.getDOMNode().value;
+
     this.getFlux().actions.market.updateMarket(this.state.market.markets[id]);
-    this.getFlux().actions.user.updateBalanceSub(this.state.market.markets[id]);
+
+    console.log("SUB/ADDR: " + this.state.market.markets[id].address + " / " + this.state.user.user.addresses[0]);
+    this.getFlux().actions.user.updateBalanceSub(this.state.market.markets[id], this.state.user.user.addresses[0]);
   },
 
   render: function() {
