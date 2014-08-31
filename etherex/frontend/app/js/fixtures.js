@@ -25,8 +25,7 @@ var fixtures = {
             type: 'buy',
             amount: 312.12,
             price: 12,
-            buyerId: '1a73636d',
-            sellerId: '91c24063',
+            owner: '1a73636d',
             status: 'new',
             market: {
                 id: 1,
@@ -38,7 +37,7 @@ var fixtures = {
             type: 'sell',
             amount: 1.21,
             price: 0.00074797,
-            sellerId: '1a73636d',
+            owner: '1a73636d',
             status: 'new',
             market: {
                 id: 2,

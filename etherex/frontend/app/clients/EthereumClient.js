@@ -32,7 +32,6 @@ var EthereumClient = function() {
         else {
             failure("Error loading markets.");
         }
-        // console.log(EtherEx.markets);
     };
 
     this.updateBalance = function(address, success, failure) {
@@ -76,35 +75,71 @@ var EthereumClient = function() {
         }
     };
 
+    this.loadTrades = function(markets, success, failure) {
+        var trades = [];
+        var last = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, "0x12"));
+
+        console.log("LAST TRADE AT: " + last);
+
+        for (var i = 100; i <= 100 + parseInt(last); i = i + 5) {
+            console.log(i);
+            var type = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i)));
+            if (typeof type !== 'undefined' && type > 0) {
+                var mid = parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+4))));
+                trades[String(i)] = {
+                    id: i,
+                    type: type == 1 ? 'buy' : 'sell',
+                    price: parseFloat(String(Ethereum.BigInteger(
+                            String(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+1))))
+                        ).divideAndRemainder(Ethereum.BigInteger("10").pow(8)))),
+                    amount: parseFloat(String(Ethereum.BigInteger(
+                            String(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+2))))
+                        ).divideAndRemainder(Ethereum.BigInteger("10").pow(18)))),
+                    // amount: eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+2))),
+                    owner: eth.stateAt(fixtures.addresses.trades, String(i+3)),
+                    market: {
+                        id: mid,
+                        name: markets[mid].name
+                    }
+                };
+            }
+        };
+
+        if (trades) {
+            success(trades);
+        }
+        else {
+            failure("Error loading trades.");
+        }
+    };
+
     this.addTrade = function(trade, success, failure) {
-        // EtherEx.buy = function() {
-        //   var data = EtherEx.txdata(1, 1);
 
-        //   eth.transact(
-        //     eth.key,
-        //     "0",
-        //     EtherEx.coinbase,
-        //     data,
-        //     "10000",
-        //     eth.gasPrice,
-        //     EtherEx.updateBalances
-        //   );
-        // };
 
-        // EtherEx.sell = function() {
-        //   var data = EtherEx.txdata(2, 1);
+        var bigamount = Ethereum.BigInteger(trade.amount)
+            .multiply(Ethereum.BigInteger("10").pow(18))
+            .divide(Ethereum.BigInteger(trade.price));
 
-        //   eth.transact(
-        //     eth.key,
-        //     String(Ethereum.BigInteger(document.getElementById("amount").value).multiply(Ethereum.BigInteger("10").pow(18))),
-        //     EtherEx.coinbase,
-        //     data,
-        //     "10000",
-        //     eth.gasPrice,
-        //     EtherEx.updateBalances
-        //   );
-        // };
-        failure("Not implemented yet, sorry mate.");
+        var data =
+            eth.pad(trade.type, 32) +
+            eth.pad(bigamount, 32) +
+            eth.pad(Ethereum.BigInteger(trade.price).multiply(Ethereum.BigInteger("10").pow(8)), 32) +
+            eth.pad(trade.market, 32);
+
+        try {
+            eth.transact(
+                eth.key,
+                (trade.type == 1) ? trade.amount / trade.price : "0",
+                fixtures.addresses.etherex,
+                data,
+                "10000",
+                eth.gasPrice,
+                success
+            );
+        }
+        catch(e) {
+            failure(e);
+        }
     };
 };
 

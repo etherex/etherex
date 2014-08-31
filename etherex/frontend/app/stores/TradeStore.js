@@ -19,7 +19,7 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onLoadTrades: function() {
-        this.trades = {};
+        this.trades = [];
         this.loading = true;
         this.error = null;
         this.emit(constants.CHANGE_EVENT);
@@ -33,6 +33,7 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onLoadTradesFail: function(payload) {
+        this.trades = [];
         this.loading = false;
         this.error = payload.error;
         this.emit(constants.CHANGE_EVENT);
@@ -41,10 +42,11 @@ var TradeStore = Fluxxor.createStore({
     onAddTrade: function(payload) {
         this.trades[payload.id] = {
             id: payload.id,
-            type: payload.type,
+            type: (payload.type == 1) ? 'buy' : 'sell',
             price: payload.price,
             amount: payload.amount,
-            market: payload.market
+            market: this.flux.store("MarketStore").getState().markets[payload.market],
+            status: 'pending'
         };
         this.emit(constants.CHANGE_EVENT);
     },

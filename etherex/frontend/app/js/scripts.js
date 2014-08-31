@@ -56,13 +56,13 @@
   //   );
   // };
 
-  EtherEx.txdata = function(op, market) {
-    var data = String(op).pad(32);
-    data += String(Ethereum.BigInteger(document.getElementById("amount").value).multiply(Ethereum.BigInteger("10").pow(18))).pad(32);
-    data += String(Ethereum.BigInteger(document.getElementById("price").value).multiply(Ethereum.BigInteger("10").pow(8))).pad(32);
-    data += String(market).pad(32);
-    return data;
-  };
+  // EtherEx.txdata = function(op, market) {
+  //   var data = String(op).pad(32);
+  //   data += String(Ethereum.BigInteger(document.getElementById("amount").value).multiply(Ethereum.BigInteger("10").pow(18))).pad(32);
+  //   data += String(Ethereum.BigInteger(document.getElementById("price").value).multiply(Ethereum.BigInteger("10").pow(8))).pad(32);
+  //   data += String(market).pad(32);
+  //   return data;
+  // };
 
   // EtherEx.sendETH = function() {
   //   eth.transact(

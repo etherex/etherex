@@ -13,10 +13,6 @@
   <title>EtherEx</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-<!--
-  <link rel="stylesheet" type="text/css" href="css/styles.css">
-  <link rel="stylesheet" type="text/css" href="css/rickshaw.min.css">
--->
   <script>
   if (typeof(window.eth) === "undefined")
     ethBrowser = false;
@@ -26,89 +22,6 @@
 </head>
 <body>
   <div id="app" class="container"></div>
-<!--
-  <h1>EtherEx</h1>
-  <div id="page">
-    <div><pre id="checkval"></pre></div>
-
-      <section id="main">
-        <div id="user">
-          <ul>
-            <li><label for="amount">Amount: </label><input id="amount" type="number" value="10" min="10" /></li>
-            <li><label for="price">Price: </label><input id="price" type="number" value="2000" min="1" /></li>
-            <li><button id="buy">Buy</button><button id="sell">Sell</button><button id="check">Check</button><button id="clear">Clear</button></li>
-          </ul>
-          <div id="book"></div>
-        </div>
-
-        <div id="send">
-          <ul>
-            <li><label for="to">To: </label><input id="to" type="text" value="" placeholder="Address or name" /><span id="toname"></span></li>
-            <li><label for="value">Value: </label><input id="value" type="number" value="100" min="1" /></li>
-            <li><button id="sendeth">Send ETH</button><button id="sendetx">Send ETX</button><button id="refresh">Refresh</button></li>
-          </ul>
-        </div>
-
-        <div id="wallets">
-          <div id="addressbook">
-            <table>
-              <thead>
-                <th>Address</th>
-                <th>Balance</th>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-          <ul id="latest"></ul>
-        </div>
-
-        <div id="contacts">
-          <h3>Lookup</h3>
-          <ul>
-            <li><label for="addr">Address: </label><input id="addr" type="text" value="" placeholder="Address" /></li>
-          </ul>
-          <div>Result: <span id="addrResult"></span></div>
-        </div>
-
-        <div id="trades">
-          <h2>Price: <span id="lastprice">0</span></h2>
-          <div>Market depth: <span id="tot">0</span></div>
-          <div class="column">
-            <div id="chart"></div>
-            <div id="legend"></div>
-            <div id="slider"></div>
-          </div>
-        </div>
-
-        <div id="settings">
-          <h3>Contract</h3>
-          <p id="addcontract">
-            <ul>
-              <li><label for="endowment">End.: </label><input id="endowment" type="number" placeholder="Endowment" value="0" min="0" /></li>
-              <li><label for="gas">Gas: </label><input id="gas" type="number" placeholder="Gas" value="10000" min="1000" /></li>
-              <li><label for="code">Code: </label><textarea id="code" placeholder="0x"></textarea></li>
-              <li><button id="create">Send</button></li>
-            </ul>
-          </p>
-          <h3>Transact</h3>
-          <p id="addtx">
-            <ul>
-              <li><label for="tto">To: </label><input id="tto" type="text" value="" placeholder="Address or name" /><span id="ttoname"></span></li>
-              <li><label for="tval">Val.: </label><input id="tval" type="number" placeholder="Value" value="0" min="0" /></li>
-              <li><label for="tgas">Gas: </label><input id="tgas" type="number" placeholder="Gas" value="10000" min="1000" /></li>
-              <li><label for="data">Code: </label><textarea id="data" placeholder="0x"></textarea></li>
-              <li><button id="transact">Send</button></li>
-            </ul>
-          </p>
-        </div>
-      </section>
-
-  </div>
--->
-  <pre>
-    Trade ID count: <span id="last">0</span>
-    Log: <span id="log"></span>
-  </pre>
   <script type="text/javascript" src="bundle.js"></script>
 </body>
 </html>

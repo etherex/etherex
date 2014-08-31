@@ -20,7 +20,7 @@ var Balance = React.createClass({
     return (
       <div className="col-md-6">
         <div className="btn-lg btn-primary">
-        ETH Balance: {this.props.user.balance} {this.props.user.balance_unconfirmed}
+          ETH Balance: {this.props.user.balance} {this.props.user.balance_unconfirmed}
         </div>
       </div>
     );

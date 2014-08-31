@@ -125,10 +125,29 @@ code:
                 #
                 # Check buy amount
                 #
-                if amount < market[1]:
+                if msg.value < market[1]:
                     if msg.value > 0: // "Refunding"
                         send(msg.sender, msg.value)
                     return(12) // "Minimum %s trade amount not met, minimum is %s, got %d" % (market[0], market[2], msg.value)
+
+                # Check msg.value and amount match
+                if msg.value < amount:
+                    if msg.value > 0: // "Refunding"
+                        send(msg.sender, msg.value)
+                    return(13) // "Trade amount mismatch"
+
+                # Refund excess value
+                if msg.value > amount:
+                    send(msg.sender, msg.value - amount)
+
+            else:
+                #
+                # Check sell amount
+                #
+                if amount < market[1]:
+                    if msg.value > 0: // "Refunding"
+                        send(msg.sender, msg.value)
+                    return(14) // "Minimum %s value not met, minimum is %s, got %d" % (market[0], market[2], msg.value)
 
                 # Transfer subcurrency trade amount
                 ret = call(market[3], [msg.sender, contract.address, amount / price], 3)
@@ -136,24 +155,6 @@ code:
                 # Expects standard returns values
                 if ret != 1:
                     return(0)
-
-            else:
-                #
-                # Check sell amount
-                #
-                if msg.value < market[1]:
-                    return(13) // "Minimum %s value not met, minimum is %s, got %d" % (market[0], market[2], msg.value)
-
-                # Check msg.value and amount match
-                if msg.value < amount:
-                    if msg.value > 0: // "Refunding"
-                        send(msg.sender, msg.value)
-                    return(14) // "Trade amount mismatch"
-
-                # Refund excess value
-                if msg.value > amount:
-                    send(msg.sender, msg.value - amount)
-
 
             // "Trade amounts OK for %s" % market[0]
             pricekey = price
@@ -184,7 +185,7 @@ code:
             xeth = array(4)
             xeth = call(markets, [1], 1, 4)
 
-            reward = (amount * price) / (1 * 10 ^ 23) // "Sending reward of %s to %s" % (reward, msg.sender)
+            reward = (amount * price) / (10 ^ 23) // "Sending reward of %s to %s" % (reward, msg.sender)
             data = array(2)
             data[0] = msg.sender
             data[1] = reward
@@ -210,6 +211,29 @@ code:
                 # TODO - Check subcurrency balances
                 # TODO - make trades...
                 if trade[0] == 1: # Check buy amount
+                    # TODO balances..
+                    # if balance < trade[2]:
+                    #     if msg.value > 0: // "Refunding"
+                    #         send(msg.sender, msg.value)
+                    #     return(13) // "Insufficient balance"
+
+                    # Transfer sub / asset
+                    ret = call(market[3], [msg.sender, trade[3], trade[2] / trade[1]], 3)
+
+                    # Expects standard returns values
+                    if ret != 1:
+                        return(0)
+
+                    # Transfer ETH
+                    send(msg.sender, trade[2])
+
+                    # Clear trade
+                    ret = call(trades, [0, tradeid], 2)
+
+                    if ret != 1:
+                        return(0) // "Error"
+
+                elif trade[0] == 2: # Check sell amount
                     if msg.value < trade[2]:
                         if msg.value > 0: // "Refunding"
                             send(msg.sender, msg.value)
@@ -230,29 +254,6 @@ code:
 
                     # Transfer ETH
                     send(trade[3], trade[2])
-
-                    # Clear trade
-                    ret = call(trades, [0, tradeid], 2)
-
-                    if ret != 1:
-                        return(0) // "Error"
-
-                elif trade[0] == 2: # Check sell amount
-                    # TODO balances..
-                    # if balance < trade[2]:
-                    #     if msg.value > 0: // "Refunding"
-                    #         send(msg.sender, msg.value)
-                    #     return(13) // "Insufficient balance"
-
-                    # Transfer sub / asset
-                    ret = call(market[3], [msg.sender, trade[3], trade[2] / trade[1]], 3)
-
-                    # Expects standard returns values
-                    if ret != 1:
-                        return(0)
-
-                    # Transfer ETH
-                    send(msg.sender, trade[2])
 
                     # Clear trade
                     ret = call(trades, [0, tradeid], 2)

@@ -18,16 +18,23 @@ var NewTradeForm = React.createClass({
           </div>
           <div className="panel-body">
             <form className="form-inline" onSubmit={this.onSubmitForm}>
-              <DropdownButton ref="type" onSelect={this.handleType} key={1}>
+              <DropdownButton ref="type" onSelect={this.handleType} key={1} title="Buy">
                 <MenuItem key={1}>Buy</MenuItem>
                 <MenuItem key={2}>Sell</MenuItem>
               </DropdownButton>
               <input type="hidden" ref="market" value={this.props.market.market.id} />
-              <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="10.0000" ref="amount" onChange={this.handleChange} /> {this.props.market.market.name}
-              {' '} @ {' '}
-              <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="2000.0000" ref="price" onChange={this.handleChange} /> {this.props.market.market.name}/ETH
-              {' '} for {' '}
-              <input type="number" min="0.00000001" step="0.00000001" className="form-control medium" placeholder="1" ref="total" onChange={this.handleChangeTotal} /> ETH
+              <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
+              <span className="btn">
+                {this.props.market.market.name} @
+              </span>
+              <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="2000.0000" ref="price" onChange={this.handleChange} />
+              <span className="btn">
+                {this.props.market.market.name}/ETH for
+              </span>
+              <input type="number" min="0.00000001" step="0.00000001" className="form-control medium" placeholder="1" ref="total" onChange={this.handleChangeTotal} />
+              <span className="btn">
+                ETH
+              </span>
               <button type="submit" className="btn btn-default">Place trade</button>
             </form>
           </div>
@@ -36,6 +43,7 @@ var NewTradeForm = React.createClass({
   },
 
   handleType: function(key) {
+    this.refs.type.props.key = key;
     this.refs.type.props.title = this.refs.type.props.children[key - 1].props.children;
   },
 
@@ -56,7 +64,7 @@ var NewTradeForm = React.createClass({
 
   onSubmitForm: function(e) {
     e.preventDefault();
-    var type = this.refs.type.getDOMNode().value;
+    var type = this.refs.type.props.key;
     var price = this.refs.price.getDOMNode().value.trim();
     var amount = this.refs.amount.getDOMNode().value.trim();
     var market = this.refs.market.getDOMNode().value;

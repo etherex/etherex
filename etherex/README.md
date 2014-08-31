@@ -7,25 +7,24 @@ Decentralized exchange built on Ethereum.
 About
 -----
 
-This repository contains the code that runs the exchange on Ethereum as a set of contracts, along with tests, simulations, tools and documentation.
+This repository contains the code that runs the exchange on Ethereum as a set of contracts, along with the UI, tests, tools and documentation.
 
 
 Components
 ----------
 
-* contracts: Ethereum contracts (Serpent)
-* frontend: React based UI [repo](https://github.com/facebook/react)
+* contracts: Ethereum contracts (serpent)
+* frontend: React.js UI [repo](https://github.com/facebook/react)
 * tests: EtherEx tests
 
 
 Requirements
 ------------
-* Python ^2.7.6 for testing
 * serpent: Serpent compiler by Vitalik Buterin [repo](https://github.com/ethereum/serpent)
-* pyethereum: Python Ethereum client [repo](https://github.com/ethereum/pyethereum)
-* ~~evm-sim: EVM simulator by Joris Bontje [repo](https://github.com/EtherCasts/evm-sim)~~
+* pyethereum: Python Ethereum client [repo](https://github.com/ethereum/pyethereum) (testing only)
 * [EPM](https://github.com/project-douglas/epm) for deployment
 * [npm](http://nodejs.org/) and [grunt](http://gruntjs.com/) for UI development
+
 
 Installation
 ------------
@@ -56,7 +55,7 @@ Running tests
 Refer to [Serpent](https://github.com/ethereum/serpent) and [pyethereum.tester](https://github.com/ethereum/pyethereum) for their respective usage.
 
 
-Local Blockchain tests
+Local blockchain tests
 ----------------------
 Requires a working [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) client and [EPM](https://github.com/project-douglas/epm)
 
@@ -64,7 +63,7 @@ Requires a working [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) clie
 epm deploy contracts/EtherEx.package-definition
 ```
 
-Then build the UI:
+Then run the UI:
 ```
 grunt
 ```
@@ -140,7 +139,7 @@ Allowed values:
 
 ### Market IDs
 ```
-1 = ETH/ETX
+1 = ETX/ETH
 ```
 New market IDs will be created as DAO creators add their subcurrency to the exchange.
 
@@ -156,7 +155,7 @@ New currency IDs will also be created as markets get added.
 
 
 ### Market names
-Market names follow the "ETH/<name>" convention. When registering a new market, submit the currency name as a three or four letter uppercase identifier, ex.: "BOB" for BobCoin.
+Market names follow the "<name>/ETH" convention. When registering a new market, submit the currency name as a three or four letter uppercase identifier, ex.: "BOB" for BobCoin.
 
 
 ### Minimum trade amounts
@@ -165,12 +164,12 @@ When adding a subcurrency, set the minimum trade amount high enough to make econ
 
 ### Examples
 
-Buy 1000 ETH at 1200 ETH/ETX
+Buy 1000 ETX at 1200 ETX/ETH
 ```
 1 1000000000000000000000 120000000000 1
 ```
 
-Sell 1000 ETH at 1500 ETH/ETX
+Sell 1000 ETX at 1500 ETX/ETH
 ```
 2 1000000000000000000000 150000000000 1
 ```
@@ -219,7 +218,7 @@ TODO
 * Link price indexes to orderbook and check for lower/higher bids (use head.se?)
 * Remove array values instead of setting them to 0, maybe combine first and second indexes of arrays then (what?)
 * ~~Combine/optimize buy/sell operations in while loop~~
-* ~~Make ETH/ETX transactions~~
+* ~~Make ETX/ETH transactions~~
 * Trigger BTC transactions
 * Fees (?)
 * Per user address storage, possible conflicts with price indexes

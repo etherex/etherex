@@ -5,8 +5,8 @@ var TradeActions = function(client) {
 
     this.loadTrades = function() {
         this.dispatch(constants.trade.LOAD_TRADES);
-
-        _client.loadTrades(function(trades) {
+        var markets = this.flux.store("MarketStore").getState().markets;
+        _client.loadTrades(markets, function(trades) {
             this.dispatch(constants.trade.LOAD_TRADES_SUCCESS, trades);
         }.bind(this), function(error) {
             console.log(error);

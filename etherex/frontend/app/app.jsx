@@ -67,6 +67,7 @@ if (!ethBrowser) {
   eth.messages = function() { return {}; };
   eth.toDecimal = function(x) { return x.dec(); };
   eth.toAscii = function(x) { return x.bin().unpad(); };
+  eth.pad = function(x, l) { return String(x).pad(l); };
 }
 else {
   console.log = env.note;
@@ -89,7 +90,7 @@ var Redirect = Router.Redirect;
 
 var stores = {
   MarketStore: new MarketStore({market: fixtures.market, markets: []}),
-  TradeStore: new TradeStore({trades: fixtures.trades}),
+  TradeStore: new TradeStore(), // {trades: fixtures.trades}),
   UserStore: new UserStore({user: fixtures.user}),
   // ReferenceStore: new ReferenceStore({references: fixtures.referencesList}),
   // ContactStore: new ContactStore({contacts: fixtures.contacts}),

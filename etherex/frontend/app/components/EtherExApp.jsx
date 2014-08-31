@@ -11,19 +11,21 @@ var Balance = require("./Balance");
 var BalanceSub = require("./BalanceSub");
 
 var EtherExApp = React.createClass({
-  mixins: [FluxMixin, StoreWatchMixin("MarketStore", "UserStore")],
+  mixins: [FluxMixin, StoreWatchMixin("UserStore", "MarketStore", "TradeStore")],
 
   getStateFromFlux: function() {
     var flux = this.getFlux();
     return {
       user: flux.store("UserStore").getState(),
-      market: flux.store("MarketStore").getState()
+      market: flux.store("MarketStore").getState(),
+      market: flux.store("TradeStore").getState()
     };
   },
 
   componentDidMount: function() {
     this.getFlux().actions.user.loadAddresses();
     this.getFlux().actions.market.loadMarkets();
+    this.getFlux().actions.trade.loadTrades();
     // this.getFlux().actions.user.updateBalance(this.state.user.addresses[0]);
     // this.getFlux().actions.user.updateBalanceSub(this.state.market.market, this.state.user.addresses[0]);
 
