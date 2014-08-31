@@ -20,15 +20,32 @@ var NewTradeForm = React.createClass({
                 <option>Sell</option>
               </select>
               <input type="hidden" ref="market" value={this.props.market.market.id} />
-              {' '}{' '}
-              <input type="number" min="0.0001" step="0.0001" className="form-control small" placeholder="10.0000" ref="amount" /> {this.props.market.market.name}
-              {' '}{' '}
-              <input type="number" min="0.0001" step="0.0001" className="form-control small" placeholder="2000.0000" ref="price" /> {this.props.market.market.name}/ETH
+              <input type="number" min="0.0001" step="0.0001" className="form-control small" placeholder="10.0000" ref="amount" onChange={this.handleChange} /> {this.props.market.market.name}
+              {' '} @ {' '}
+              <input type="number" min="0.0001" step="0.0001" className="form-control small" placeholder="2000.0000" ref="price" onChange={this.handleChange} /> {this.props.market.market.name}/ETH
+              {' '} for {' '}
+              <input type="number" min="0.00000001" step="0.00000001" className="form-control small" placeholder="1" ref="total" onChange={this.handleChangeTotal} /> ETH
               <p><button type="submit" className="btn btn-default">Place trade</button></p>
             </form>
           </div>
         </div>
     );
+  },
+
+  handleChange: function(e) {
+    var price = this.refs.price.getDOMNode().value.trim();
+    var amount = this.refs.amount.getDOMNode().value.trim();
+    console.log(amount / price);
+    var total = amount / price;
+    this.refs.total.getDOMNode().value = total;
+
+  },
+
+  handleChangeTotal: function(e) {
+    var price = this.refs.price.getDOMNode().value.trim();
+    var total = this.refs.total.getDOMNode().value.trim();
+    var amount = total * price;
+    this.refs.amount.getDOMNode().value = amount;
   },
 
   onSubmitForm: function(e) {
