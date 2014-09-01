@@ -7,6 +7,8 @@ var FluxChildMixin = Fluxxor.FluxChildMixin(React);
 var DropdownButton = require('react-bootstrap/DropdownButton');
 var MenuItem = require('react-bootstrap/MenuItem');
 
+var AlertDismissable = require('./AlertDismissable');
+
 var NewTradeForm = React.createClass({
   mixins: [FluxChildMixin],
 
@@ -17,6 +19,7 @@ var NewTradeForm = React.createClass({
             <h3 className="panel-title">New Trade</h3>
           </div>
           <div className="panel-body">
+            <AlertDismissable ref="alerts" level="" message="" />
             <form className="form-inline" onSubmit={this.onSubmitForm}>
               <DropdownButton ref="type" onSelect={this.handleType} key={1} title="Buy">
                 <MenuItem key={1}>Buy</MenuItem>
@@ -70,6 +73,9 @@ var NewTradeForm = React.createClass({
     var market = this.refs.market.getDOMNode().value;
 
     if (!type || !amount || !price || !market) {
+      this.refs.alerts.props.level = "info";
+      this.refs.alerts.props.message = "Fill it up!";
+      this.refs.alerts.setState({alertVisible: true});
       return false;
     }
 

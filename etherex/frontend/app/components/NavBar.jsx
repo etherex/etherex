@@ -2,8 +2,7 @@
 
 var React = require("react");
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxChildMixin(React),
-    StoreWatchMixin = Fluxxor.StoreWatchMixin;
+var FluxChildMixin = Fluxxor.FluxChildMixin(React);
 
 var Router = require("react-router");
 var Link = Router.Link;
@@ -12,17 +11,7 @@ var Tab = require("./Tab");
 var UserLink = require("./UserLink");
 
 var NavBar = React.createClass({
-    mixins: [FluxChildMixin, StoreWatchMixin("UserStore")], // "TradeStore", "ContactStore")],
-
-    getStateFromFlux: function() {
-        var flux = this.getFlux();
-        return {
-            user: flux.store("UserStore").getState(),
-            // market: flux.store("MarketStore").getState(),
-            // trades: flux.store("TradeStore").getState(),
-            // contacts: flux.store("ContactStore").getState()
-        };
-    },
+    mixins: [FluxChildMixin],
 
     render: function() {
         return (
@@ -32,8 +21,8 @@ var NavBar = React.createClass({
                         <button type="button" className="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
                             <span className="sr-only">Toggle navigation</span>
                             <span className="icon-chart-line"></span>
+                            <span className="icon-list"></span>
                             <span className="icon-wallet"></span>
-                            <span className="icon-contacts"></span>
                             <span className="icon-cog-alt"></span>
                             <span className="icon-help"></span>
                         </button>
@@ -43,19 +32,17 @@ var NavBar = React.createClass({
                     <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul className="nav navbar-nav">
                             <Tab to="trades" className="icon-chart-line">Trades</Tab>
+                            <Tab to="assets" className="icon-bitcoin">Assets</Tab>
                             <Tab to="wallet" className="icon-wallet">Wallet</Tab>
-                            <Tab to="contacts" className="icon-contacts">Contacts</Tab>
-                            <Tab to="settings" className="icon-cog-alt">Settings</Tab>
+                            <Tab to="tools" className="icon-cog-alt">Tools</Tab>
                             <Tab to="help" className="icon-help">Help</Tab>
                         </ul>
-                        <form className="navbar-form navbar-right" role="search" onSubmit={this.onSubmitForm}>
-                            <div className="form-group">
-                                <input type="text" className="form-control" placeholder="Contact or Trade ID" ref="searchId" />
-                            </div>
-                            <button type="submit" className="btn btn-default"><span className="glyphicon glyphicon-search"></span></button>
-                        </form>
                         <ul className="nav navbar-nav navbar-right">
-                            <li><UserLink id={this.props.user.id} showIcon={true} /></li>
+                            <li>
+                                {this.props.user.loading ?
+                                    <p className="navbar-text"><i className="fa fa-spinner fa-spin"></i></p> :
+                                    <UserLink id={this.props.user.user.id} showIcon={true} />}
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -63,17 +50,17 @@ var NavBar = React.createClass({
         );
     },
 
-    onSubmitForm: function(e) {
-        e.preventDefault();
-        var searchId = this.refs.searchId.getDOMNode().value.trim();
-        if (this.state.trades.tradeById[searchId] !== undefined) {
-            Router.transitionTo('tradeDetails', {tradeId: searchId});
-        } else if (this.state.contacts.contactById[searchId]) {
-            Router.transitionTo('contactDetails', {contactId: searchId});
-        } else {
-            Router.transitionTo('notfound');
-        }
-    }
+    // onSubmitForm: function(e) {
+    //     e.preventDefault();
+    //     var searchId = this.refs.searchId.getDOMNode().value.trim();
+    //     if (this.props.trades.tradeById[searchId] !== undefined) {
+    //         Router.transitionTo('tradeDetails', {tradeId: searchId});
+    //     } else if (this.props.contacts.contactById[searchId]) {
+    //         Router.transitionTo('contactDetails', {contactId: searchId});
+    //     } else {
+    //         Router.transitionTo('notfound');
+    //     }
+    // }
 });
 
 module.exports = NavBar;

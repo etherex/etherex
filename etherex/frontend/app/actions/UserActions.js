@@ -16,6 +16,7 @@ var UserActions = function(client) {
       // console.log(this.flux.store("MarketStore").getState());
       var market = this.flux.store("MarketStore").getState().market;
       this.flux.actions.user.updateBalanceSub(market, user.addresses[0]);
+
     }.bind(this), function(error) {
       console.log(error);
       this.dispatch(constants.user.LOAD_ADDRESSES_FAIL, {error: error});

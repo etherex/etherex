@@ -21,11 +21,11 @@ var TradeRow = React.createClass({
     }
 });
 
-var TradeList = React.createClass({
+var TradeTable = React.createClass({
     render: function() {
-        var tradeListNodes = this.props.tradeList.map(function (trade, user) {
+        var tradeListNodes = this.props.tradeList.map(function (trade) {
             return (
-                <TradeRow key={trade.id} trade={trade} user={user} />
+                <TradeRow key={trade.id} trade={trade} user={this.props.user} />
             );
         }.bind(this));
         return (
@@ -44,6 +44,18 @@ var TradeList = React.createClass({
                     {tradeListNodes}
                 </tbody>
             </table>
+        );
+    }
+});
+
+var TradeList = React.createClass({
+    render: function() {
+        return (
+            <div>
+                <h3>{this.props.title} {this.props.trades.loading && <i className="fa fa-spinner fa-spin"></i>}</h3>
+                {this.props.trades.error && <div className="alert alert-danger" role="alert"><strong>Error!</strong> {this.props.trades.error}</div>}
+                <TradeTable tradeList={this.props.trades.tradeList} user={this.props.user.user} />
+            </div>
         );
     }
 });

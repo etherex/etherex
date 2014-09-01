@@ -17,17 +17,9 @@ var TradeStore = require("./stores/TradeStore");
 var TradeActions = require("./actions/TradeActions");
 // var TradeDetails = require("./components/TradeDetails");
 
-// var References = require("./components/References");
-// var ReferenceStore = require("./stores/ReferenceStore");
-// var ReferenceActions = require("./actions/ReferenceActions");
-
-// var Contacts = require("./components/Contacts");
-// var ContactStore = require("./stores/ContactStore");
-// var ContactActions = require("./actions/ContactActions");
-// var ContactDetails = require("./components/ContactDetails");
-
 var UserStore = require("./stores/UserStore");
 var UserActions = require("./actions/UserActions");
+var UserDetails = require("./components/UserDetails");
 
 var MarketStore = require("./stores/MarketStore");
 var MarketActions = require("./actions/MarketActions");
@@ -35,7 +27,6 @@ var MarketActions = require("./actions/MarketActions");
 // TODO mock data
 var fixtures = require("./js/fixtures");
 
-// var Firebase = require("Firebase");
 var EthereumClient = require("./clients/EthereumClient");
 var client = new EthereumClient();
 
@@ -90,18 +81,14 @@ var Redirect = Router.Redirect;
 
 var stores = {
   MarketStore: new MarketStore({market: fixtures.market, markets: []}),
-  TradeStore: new TradeStore(), // {trades: fixtures.trades}),
-  UserStore: new UserStore({user: fixtures.user}),
-  // ReferenceStore: new ReferenceStore({references: fixtures.referencesList}),
-  // ContactStore: new ContactStore({contacts: fixtures.contacts}),
+  TradeStore: new TradeStore(),
+  UserStore: new UserStore({user: fixtures.user})
 };
 
 var actions = {
     market: new MarketActions(client),
     trade: new TradeActions(client),
-    user: new UserActions(client),
-    // reference: ReferenceActions,
-    // contact: ContactActions,
+    user: new UserActions(client)
 };
 
 var flux = new Fluxxor.Flux(stores, actions);
@@ -112,12 +99,12 @@ var routes = (
       <Redirect from="/" to="trades" />
       <Route name="trades" path="/trades" handler={Trades} flux={flux} title="Trades" />
       <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
+      <Route name="assets" path="/assets" handler={Placeholder} flux={flux} title="Assets" />
       <Route name="wallet" path="/wallet" handler={Placeholder} flux={flux} title="Wallet" />
-      <Route name="contacts" path="/contacts" handler={Placeholder} flux={flux} title="Contacts" />
-      <Route name="contactDetails" path="/contact/:contactId" handler={Placeholder} flux={flux} title="Contact details" />
-      <Route name="settings" path="/settings" handler={Placeholder} flux={flux} title="Settings" />
+      <Route name="tools" path="/tools" handler={Placeholder} flux={flux} title="Tools" />
       <Route name="help" path="/help" handler={Placeholder} flux={flux} title="Help" />
-      <Route name="notfound" path="/notfound" handler={Placeholder} title="Contact or Trade ID not found" flux={flux} />
+      <Route name="userDetails" path="/user/:userId" handler={Placeholder} flux={flux} title="User details" />
+      <Route name="notfound" path="/notfound" handler={Placeholder} title="User or Trade ID not found" flux={flux} />
     </Route>
   </Routes>
 );

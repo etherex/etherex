@@ -17,8 +17,8 @@ var EtherExApp = React.createClass({
     var flux = this.getFlux();
     return {
       user: flux.store("UserStore").getState(),
-      market: flux.store("MarketStore").getState(),
-      market: flux.store("TradeStore").getState()
+      trades: flux.store("TradeStore").getState(),
+      market: flux.store("MarketStore").getState()
     };
   },
 
@@ -26,45 +26,24 @@ var EtherExApp = React.createClass({
     this.getFlux().actions.user.loadAddresses();
     this.getFlux().actions.market.loadMarkets();
     this.getFlux().actions.trade.loadTrades();
-    // this.getFlux().actions.user.updateBalance(this.state.user.addresses[0]);
-    // this.getFlux().actions.user.updateBalanceSub(this.state.market.market, this.state.user.addresses[0]);
-
-    // if (ethBrowser)
-    //     eth.watch({altered: this.state.user.addresses}).changed(this.getFlux().actions.user.updateBalance);
-    // else {
-    //     for (var i = this.state.user.addresses.length - 1; i >= 0; i--)
-    //       eth.watch(this.state.user.addresses[i], "", this.getFlux().actions.user.updateBalance);
-    // }
-
-    // console.log(this.state.market);
-    // if (ethBrowser)
-    //     eth.watch({altered: EtherEx.markets[1].address}).changed(this.updateBalance);
-    // else
-    //     eth.watch(EtherEx.markets[1].address, "", this.updateBalance);
   },
 
   render: function() {
     return (
       <div>
-        <NavBar user={this.state.user.user} />
+        <NavBar user={this.state.user} />
         <div className="clearfix">
-          <Balance user={this.state.user.user} />
-          <BalanceSub user={this.state.user.user} market={this.state.market} />
+          <Balance user={this.state.user} />
+          <BalanceSub user={this.state.user} market={this.state.market} />
         </div>
         <p>{' '}</p>
-        <this.props.activeRouteHandler />
+        <this.props.activeRouteHandler
+          market={this.state.market}
+          trades={this.state.trades}
+          user={this.state.user}
+        />
       </div>
     );
-    // try {
-    // }
-    // catch(e) {
-    //   if (ethBrowser) {
-    //     env.warn(String(e));
-    //   }
-    //   else {
-    //     console.log(String(e));
-    //   }
-    // }
   }
 });
 

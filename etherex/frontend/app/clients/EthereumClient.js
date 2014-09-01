@@ -5,6 +5,19 @@ require('lodash');
 
 var EthereumClient = function() {
 
+    // if (ethBrowser)
+    //     eth.watch({altered: this.state.user.addresses}).changed(this.getFlux().actions.user.updateBalance);
+    // else {
+    //     for (var i = this.state.user.addresses.length - 1; i >= 0; i--)
+    //       eth.watch(this.state.user.addresses[i], "", this.getFlux().actions.user.updateBalance);
+    // }
+
+    // console.log(this.state.market);
+    // if (ethBrowser)
+    //     eth.watch({altered: EtherEx.markets[1].address}).changed(this.updateBalance);
+    // else
+    //     eth.watch(EtherEx.markets[1].address, "", this.updateBalance);
+
     this.loadAddresses = function(success, failure) {
         var addrs = eth.keys.map(function (k) { return eth.secretToAddress(k); });
 
@@ -39,16 +52,26 @@ var EthereumClient = function() {
     this.updateBalance = function(address, success, failure) {
         var confirmed = eth.toDecimal(eth.balanceAt(address, -1));
         var unconfirmed = eth.toDecimal(eth.balanceAt(address));
+        var showUnconfirmed = false;
 
         // DEBUG
-        // console.log(confirmed);
-        // console.log(unconfirmed);
+        // console.log("confirmed: " + confirmed);
+        // console.log("unconfirmed: " + unconfirmed);
         // console.log(utils.formatBalance(unconfirmed - confirmed));
+
+        if (unconfirmed > confirmed) {
+            showUnconfirmed = true;
+            unconfirmed = unconfirmed - confirmed;
+            if (unconfirmed < 0)
+                unconfirmed = "- " + utils.formatBalance(-unconfirmed);
+            else
+                unconfirmed = utils.formatBalance(unconfirmed);
+        }
 
         if (confirmed >= 0) {
             success(
               utils.formatBalance(confirmed),
-              (unconfirmed > confirmed) ? "(" + utils.formatBalance(unconfirmed - confirmed) + " unconfirmed)" : null
+              showUnconfirmed ? "(" + unconfirmed + " unconfirmed)" : null
             );
         }
         else {
