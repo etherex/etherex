@@ -1,25 +1,25 @@
-var Ethereum = require("ethereumjs-lib");
+var bigRat = require('big-rational');
 
 var units = {
-  "Uether": Ethereum.BigInteger("1000000000000000000000000000000000000000000000000000000"),
-  "Vether": Ethereum.BigInteger("1000000000000000000000000000000000000000000000000000"),
-  "Dether": Ethereum.BigInteger("1000000000000000000000000000000000000000000000000"),
-  "Nether": Ethereum.BigInteger("1000000000000000000000000000000000000000000000"),
-  "Yether": Ethereum.BigInteger("1000000000000000000000000000000000000000000"),
-  "Zether": Ethereum.BigInteger("1000000000000000000000000000000000000000"),
-  "Eether": Ethereum.BigInteger("1000000000000000000000000000000000000"),
-  "Pether": Ethereum.BigInteger("1000000000000000000000000000000000"),
-  "Tether": Ethereum.BigInteger("1000000000000000000000000000000"),
-  "Gether": Ethereum.BigInteger("1000000000000000000000000000"),
-  "Mether": Ethereum.BigInteger("1000000000000000000000000"),
-  "Kether": Ethereum.BigInteger("1000000000000000000000"),
-  "ether" : Ethereum.BigInteger("1000000000000000000"),
-  "finney": Ethereum.BigInteger("1000000000000000"),
-  "szabo" : Ethereum.BigInteger("1000000000000"),
-  "Gwei"  : Ethereum.BigInteger("1000000000"),
-  "Mwei"  : Ethereum.BigInteger("1000000"),
-  "Kwei"  : Ethereum.BigInteger("1000"),
-  "wei"   : Ethereum.BigInteger("1")
+  "Uether": bigRat("1000000000000000000000000000000000000000000000000000000"),
+  "Vether": bigRat("1000000000000000000000000000000000000000000000000000"),
+  "Dether": bigRat("1000000000000000000000000000000000000000000000000"),
+  "Nether": bigRat("1000000000000000000000000000000000000000000000"),
+  "Yether": bigRat("1000000000000000000000000000000000000000000"),
+  "Zether": bigRat("1000000000000000000000000000000000000000"),
+  "Eether": bigRat("1000000000000000000000000000000000000"),
+  "Pether": bigRat("1000000000000000000000000000000000"),
+  "Tether": bigRat("1000000000000000000000000000000"),
+  "Gether": bigRat("1000000000000000000000000000"),
+  "Mether": bigRat("1000000000000000000000000"),
+  "Kether": bigRat("1000000000000000000000"),
+  "ether" : bigRat("1000000000000000000"),
+  "finney": bigRat("1000000000000000"),
+  "szabo" : bigRat("1000000000000"),
+  "Gwei"  : bigRat("1000000000"),
+  "Mwei"  : bigRat("1000000"),
+  "Kwei"  : bigRat("1000"),
+  "wei"   : bigRat("1")
 };
 
 module.exports = units;

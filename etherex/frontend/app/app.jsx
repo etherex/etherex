@@ -42,9 +42,6 @@ require("./css/bootstrap-darkly.css");
 // require("./css/rickshaw.min.css");
 require("./css/styles.css");
 
-var Ethereum = require("ethereumjs-lib");
-window.Ethereum = Ethereum;
-
 if (!ethBrowser) {
   var bigInt = require("./js/eth/BigInteger.js");
   window.bigInt = bigInt;
@@ -57,19 +54,20 @@ if (!ethBrowser) {
   eth.stateAt = eth.storageAt;
   eth.messages = function() { return {}; };
   eth.toDecimal = function(x) { return x.dec(); };
+  eth.fromAscii = function(x) { return x.unbin(); };
   eth.toAscii = function(x) { return x.bin().unpad(); };
   eth.pad = function(x, l) { return String(x).pad(l); };
-}
-else {
-  console.log = env.note;
-  window.onerror = function (errorMsg, url, lineNumber, column, errorObj) {
-    env.warn(
-      'Error: ' + errorMsg +
-      ', Script: ' + url +
-      ', Line: ' + lineNumber +
-      ', Column: ' + column +
-      ', StackTrace: ' + String(errorObj)
-    );
+  eth.oldtransact = function(i, c) { // a_s, f_v, t, d, g, p, f) {
+    if (i.to == null) {
+      var r = eth.transact(JSON.stringify(i.from));
+      if (i.value)
+        i.value(r);
+    }
+    else {
+      console.log('POC 5 eth.transact is deprecated, tell DEV to fix eth.js');
+      eth.transact(i.from, i.value, i.to, i.data, i.gas, i.gasPrice);
+      if (f) f();
+    }
   }
 }
 

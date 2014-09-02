@@ -2,6 +2,7 @@ var utils = require("../js/utils");
 var fixtures = require("../js/fixtures");
 
 require('lodash');
+var bigRat = require('big-rational');
 
 var EthereumClient = function() {
 
@@ -59,6 +60,23 @@ var EthereumClient = function() {
         return unconfirmed;
     };
 
+    this.getAmounts = function(amount, price) {
+        var bigamount = bigRat(parseFloat(amount)).multiply(bigRat(fixtures.ether)).floor(true).toString();
+        var bigprice = bigRat(parseFloat(price)).multiply(bigRat(fixtures.precision)).floor(true).toString();
+        var total = bigRat(parseFloat(amount))
+            .divide(parseFloat(price))
+            .multiply(bigRat(fixtures.ether)).floor(true).toString();
+        // console.log("amount: " + bigamount);
+        // console.log("price: " + bigprice);
+        // console.log("total: " + total);
+
+        return {
+            amount: bigamount,
+            price: bigprice,
+            total: total
+        }
+    };
+
     this.updateBalance = function(address, success, failure) {
         var confirmed = eth.toDecimal(eth.balanceAt(address, -1));
         var unconfirmed = eth.toDecimal(eth.balanceAt(address));
@@ -69,7 +87,7 @@ var EthereumClient = function() {
         // console.log("unconfirmed: " + unconfirmed);
         // console.log(utils.formatBalance(unconfirmed - confirmed));
 
-        if (unconfirmed > confirmed) {
+        if (unconfirmed != confirmed) {
             showUnconfirmed = true;
             unconfirmed = this.formatUnconfirmed(confirmed, unconfirmed);
         }
@@ -96,7 +114,7 @@ var EthereumClient = function() {
         // console.log(eth.toDecimal(unconfirmed));
         // console.log(utils.formatBalance(unconfirmed - confirmed));
 
-        if (unconfirmed > confirmed) {
+        if (unconfirmed != confirmed) {
             showUnconfirmed = true;
             unconfirmed = this.formatUnconfirmed(confirmed, unconfirmed);
         }
@@ -125,12 +143,12 @@ var EthereumClient = function() {
                 trades[String(i)] = {
                     id: i,
                     type: type == 1 ? 'buy' : 'sell',
-                    price: parseFloat(Ethereum.BigInteger(
-                            String(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+1))))
-                        ).divideAndRemainder(Ethereum.BigInteger("10").pow(8)).toString().replace(',', '.')).toFixed(8),
-                    amount: parseFloat(Ethereum.BigInteger(
-                            String(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+2))))
-                        ).divideAndRemainder(Ethereum.BigInteger("10").pow(18)).toString().replace(',', '.')).toFixed(8),
+                    price: bigRat(
+                            eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+1)))
+                        ).divide(fixtures.precision).valueOf(),
+                    amount: bigRat(
+                            eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+2)))
+                        ).divide(fixtures.ether).valueOf(),
                     owner: eth.stateAt(fixtures.addresses.trades, String(i+3)),
                     market: {
                         id: mid,
@@ -150,26 +168,34 @@ var EthereumClient = function() {
 
 
     this.addTrade = function(trade, success, failure) {
-        var bigamount = Ethereum.BigInteger(trade.amount).multiply(Ethereum.BigInteger("10").pow(18));
-        var bigprice = Ethereum.BigInteger(trade.price).multiply(Ethereum.BigInteger("10").pow(8));
-        var bigtotal = bigamount.divide(Ethereum.BigInteger(trade.price));
+        var amounts = this.getAmounts(trade.amount, trade.price);
 
         var data =
             eth.pad(trade.type, 32) +
-            eth.pad(bigamount, 32) +
-            eth.pad(bigprice, 32) +
+            eth.pad(amounts.amount, 32) +
+            eth.pad(amounts.price, 32) +
             eth.pad(trade.market, 32);
 
         try {
-            eth.transact(
-                eth.key,
-                trade.type == 1 ? String(bigtotal) : "0",
-                fixtures.addresses.etherex,
-                data,
-                "10000",
-                eth.gasPrice,
-                success
-            );
+            if (ethBrowser)
+                eth.transact({
+                    from: eth.key,
+                    value: trade.type == 1 ? amounts.total : "0",
+                    to: fixtures.addresses.etherex,
+                    data: eth.fromAscii(data),
+                    gas: "10000",
+                    gasPrice: eth.gasPrice
+                }, success);
+            else
+                eth.transact(
+                    eth.key,
+                    trade.type == 1 ? amounts.total : "0",
+                    fixtures.addresses.etherex,
+                    data,
+                    "10000",
+                    eth.gasPrice,
+                    success
+                );
         }
         catch(e) {
             failure(e);
@@ -177,24 +203,32 @@ var EthereumClient = function() {
     };
 
     this.fillTrade = function(trade, success, failure) {
-        var bigamount = Ethereum.BigInteger(trade.amount).multiply(Ethereum.BigInteger("10").pow(18));
-        var bigprice = Ethereum.BigInteger(trade.price).multiply(Ethereum.BigInteger("10").pow(8));
-        var bigtotal = bigamount.divide(Ethereum.BigInteger(trade.price)).multiply(Ethereum.BigInteger("10").pow(18));
+        var amounts = this.getAmounts(trade.amount, trade.price);
 
         var data =
             eth.pad(3, 32) +
             eth.pad(trade.id, 32);
 
         try {
-            eth.transact(
-                eth.key,
-                trade.type == 2 ? String(bigtotal) : "0",
-                fixtures.addresses.etherex,
-                data,
-                "10000",
-                eth.gasPrice,
-                success
-            );
+            if (ethBrowser)
+                eth.transact({
+                    from: eth.key,
+                    value: trade.type == 2 ? amounts.total : "0",
+                    to: fixtures.addresses.etherex,
+                    data: eth.fromAscii(data),
+                    gas: "10000",
+                    gasPrice: eth.gasPrice
+                }, success);
+            else
+                eth.transact(
+                    eth.key,
+                    trade.type == 2 ? amounts.total : "0",
+                    fixtures.addresses.etherex,
+                    data,
+                    "10000",
+                    eth.gasPrice,
+                    success
+                );
         }
         catch(e) {
             failure(e);
@@ -207,15 +241,25 @@ var EthereumClient = function() {
             eth.pad(trade.id, 32);
 
         try {
-            eth.transact(
-                eth.key,
-                "0",
-                fixtures.addresses.etherex,
-                data,
-                "10000",
-                eth.gasPrice,
-                success
-            );
+            if (ethBrowser)
+                eth.transact({
+                    from: eth.key,
+                    value: "0",
+                    to: fixtures.addresses.etherex,
+                    data: eth.fromAscii(data),
+                    gas: "10000",
+                    gasPrice: eth.gasPrice
+                }, success);
+            else
+                eth.transact(
+                    eth.key,
+                    "0",
+                    fixtures.addresses.etherex,
+                    data,
+                    "10000",
+                    eth.gasPrice,
+                    success
+                );
         }
         catch(e) {
             failure(e);

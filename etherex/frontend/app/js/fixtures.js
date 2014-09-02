@@ -1,6 +1,11 @@
-var Ethereum = require("ethereumjs-lib");
+var ether = "1000000000000000000";
+var tenEther = "1000000000000000000";
+var precision = "100000000";
 
 var fixtures = {
+    ether: ether,
+    tenEther: tenEther,
+    precision: precision,
     addresses: {
         nameregs: ["0xf298931b974dfb01b13e44eae9e4428afa3ba7f4", "0x50441127ea5b9dfd835a9aba4e1dc9c1257b58ca"],
         etherex: "0x3f2af2a311132b3730328a7b30db1025cd8579c3",
@@ -11,8 +16,8 @@ var fixtures = {
         id: 1,
         name: "ETX",
         address: "0xdebd115297dbabd326ec3b1615a428b9ae090b9f",
-        amount: Ethereum.BigInteger("10").pow(18),
-        precision: Ethereum.BigInteger("10").pow(8)
+        amount: ether,
+        precision: precision
     },
     trades: {
         'f70097659f329a09': {
