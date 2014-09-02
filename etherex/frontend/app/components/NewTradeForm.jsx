@@ -34,7 +34,7 @@ var NewTradeForm = React.createClass({
               <span className="btn">
                 {this.props.market.market.name}/ETH for
               </span>
-              <input type="number" min="0.00000001" step="0.00000001" className="form-control medium" placeholder="1" ref="total" onChange={this.handleChangeTotal} />
+              <input type="number" min="10" step="0.00000001" className="form-control medium" placeholder="1" ref="total" onChange={this.handleChangeTotal} />
               <span className="btn">
                 ETH
               </span>

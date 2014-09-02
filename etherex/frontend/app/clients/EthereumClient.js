@@ -163,7 +163,7 @@ var EthereumClient = function() {
         try {
             eth.transact(
                 eth.key,
-                trade.type == 1 ? bigtotal : "0",
+                trade.type == 1 ? String(bigtotal) : "0",
                 fixtures.addresses.etherex,
                 data,
                 "10000",
@@ -188,7 +188,7 @@ var EthereumClient = function() {
         try {
             eth.transact(
                 eth.key,
-                trade.type == 2 ? bigtotal : "0",
+                trade.type == 2 ? String(bigtotal) : "0",
                 fixtures.addresses.etherex,
                 data,
                 "10000",
