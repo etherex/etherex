@@ -6,9 +6,14 @@ module.exports = {
         LOAD_TRADES: null,
         LOAD_TRADES_FAIL: null,
         LOAD_TRADES_SUCCESS: null,
-        ADD_TRADE: null
+        ADD_TRADE: null,
+        FILL_TRADE: null,
+        CANCEL_TRADE: null
     }),
     user: keyMirror ({
+        LOAD_USER: null,
+        LOAD_USER_FAIL: null,
+        LOAD_USER_SUCCESS: null,
         LOAD_ADDRESSES: null,
         LOAD_ADDRESSES_FAIL: null,
         LOAD_ADDRESSES_SUCCESS: null,

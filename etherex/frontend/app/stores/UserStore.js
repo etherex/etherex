@@ -5,24 +5,53 @@ var constants = require("../js/constants");
 var UserStore = Fluxxor.createStore({
 
     initialize: function(options) {
-        this.user = options.user;
+        this.user = options.user || { id: '[unknown]' };
+        this.createAccount = false;
         this.loading = false;
         this.error = null;
 
         this.bindActions(
-            constants.user.DEPOSIT, this.onDeposit,
-            constants.user.WITHDRAW, this.onWithdraw,
+            constants.user.LOAD_USER, this.onLoadUser,
+            constants.user.LOAD_USER_FAIL, this.onLoadUserFail,
+            constants.user.LOAD_USER_SUCCESS, this.onLoadUserSuccess,
             constants.user.LOAD_ADDRESSES, this.onLoadAddresses,
             constants.user.LOAD_ADDRESSES_FAIL, this.onLoadAddressesFail,
             constants.user.LOAD_ADDRESSES_SUCCESS, this.onLoadAddressesSuccess,
             constants.user.UPDATE_BALANCE, this.onUpdateBalance,
-            constants.user.UPDATE_BALANCE_SUB, this.onUpdateBalanceSub
+            constants.user.UPDATE_BALANCE_SUB, this.onUpdateBalanceSub,
+            constants.user.DEPOSIT, this.onDeposit,
+            constants.user.WITHDRAW, this.onWithdraw
         );
 
         this.setMaxListeners(1024); // prevent "possible EventEmitter memory leak detected"
     },
 
+    onLoadUser: function() {
+        this.user.name = '[unknown]';
+        this.createAccount = false;
+        this.loading = true;
+        this.error = null;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onLoadUserSuccess: function(payload) {
+        this.user = payload;
+        if (!payload.name) {
+            this.createAccount = true;
+        }
+        this.loading = false;
+        this.error = null;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onLoadUserFail: function(payload) {
+        this.loading = false;
+        this.error = payload.error;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
     onLoadAddresses: function(payload) {
+        this.user = {id: '[unknown]', name: '[unknown]'};
         this.loading = true;
         this.error = null;
         this.emit(constants.CHANGE_EVENT);
@@ -36,6 +65,7 @@ var UserStore = Fluxxor.createStore({
 
     onLoadAddressesSuccess: function(payload) {
         console.log("ADDRESSES: " + String(payload));
+        this.user.id = payload[0];
         this.user.addresses = payload;
         this.loading = false;
         this.error = null;

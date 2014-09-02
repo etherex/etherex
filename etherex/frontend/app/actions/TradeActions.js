@@ -24,6 +24,22 @@ var TradeActions = function(client) {
         }.bind(this));
     };
 
+    this.fillTrade = function(trade) {
+        _client.fillTrade(trade, function() {
+            this.dispatch(constants.trade.FILL_TRADE, trade);
+        }.bind(this), function(error) {
+            console.log(error);
+        }.bind(this));
+    };
+
+    this.cancelTrade = function(trade) {
+        _client.cancelTrade(trade, function() {
+            this.dispatch(constants.trade.CANCEL_TRADE, trade);
+        }.bind(this), function(error) {
+            console.log(error);
+        }.bind(this));
+    };
+
     var _client = client;
 };
 

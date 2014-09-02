@@ -14,7 +14,9 @@ var TradeStore = Fluxxor.createStore({
             constants.trade.LOAD_TRADES, this.onLoadTrades,
             constants.trade.LOAD_TRADES_SUCCESS, this.onLoadTradesSuccess,
             constants.trade.LOAD_TRADES_FAIL, this.onLoadTradesFail,
-            constants.trade.ADD_TRADE, this.onAddTrade
+            constants.trade.ADD_TRADE, this.onAddTrade,
+            constants.trade.FILL_TRADE, this.onFillTrade,
+            constants.trade.CANCEL_TRADE, this.onFillTrade
         );
     },
 
@@ -48,6 +50,16 @@ var TradeStore = Fluxxor.createStore({
             market: this.flux.store("MarketStore").getState().markets[payload.market],
             status: 'pending'
         };
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onFillTrade: function(payload) {
+        delete this.trades[payload.id];
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onCancelTrade: function(payload) {
+        delete this.trades[payload.id];
         this.emit(constants.CHANGE_EVENT);
     },
 

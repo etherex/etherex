@@ -7,11 +7,6 @@ var fixtures = {
         trades: "0x54d1b757675b6f42d59ccc7c6d1c947536447f7d",
         markets: "0xad4665d4ffc60f0ea22a0f99dfc0988ce4b2c968"
     },
-    user: {
-        id: "1a73636d",
-        name: "Alice",
-        deposit: 12
-    },
     market: {
         id: 1,
         name: "ETX",

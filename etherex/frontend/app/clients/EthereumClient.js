@@ -49,6 +49,16 @@ var EthereumClient = function() {
         }
     };
 
+    this.formatUnconfirmed = function(confirmed, unconfirmed) {
+        unconfirmed = unconfirmed - confirmed;
+        if (unconfirmed < 0)
+            unconfirmed = "- " + utils.formatBalance(-unconfirmed);
+        else
+            unconfirmed = utils.formatBalance(unconfirmed);
+
+        return unconfirmed;
+    };
+
     this.updateBalance = function(address, success, failure) {
         var confirmed = eth.toDecimal(eth.balanceAt(address, -1));
         var unconfirmed = eth.toDecimal(eth.balanceAt(address));
@@ -61,11 +71,7 @@ var EthereumClient = function() {
 
         if (unconfirmed > confirmed) {
             showUnconfirmed = true;
-            unconfirmed = unconfirmed - confirmed;
-            if (unconfirmed < 0)
-                unconfirmed = "- " + utils.formatBalance(-unconfirmed);
-            else
-                unconfirmed = utils.formatBalance(unconfirmed);
+            unconfirmed = this.formatUnconfirmed(confirmed, unconfirmed);
         }
 
         if (confirmed >= 0) {
@@ -83,13 +89,19 @@ var EthereumClient = function() {
     this.updateBalanceSub = function(market, address, success, failure) {
         var confirmed = eth.toDecimal(eth.stateAt(market.address, address, -1));
         var unconfirmed = eth.toDecimal(eth.stateAt(market.address, address));
+        var showUnconfirmed = false;
 
         // DEBUG
         // console.log(eth.toDecimal(confirmed));
         // console.log(eth.toDecimal(unconfirmed));
         // console.log(utils.formatBalance(unconfirmed - confirmed));
 
-        if (unconfirmed - confirmed >= 0) {
+        if (unconfirmed > confirmed) {
+            showUnconfirmed = true;
+            unconfirmed = this.formatUnconfirmed(confirmed, unconfirmed);
+        }
+
+        if (confirmed >= 0) {
             success(
               utils.formatBalance(confirmed),
               (unconfirmed > confirmed) ? "(" + utils.formatBalance(unconfirmed - confirmed) + " unconfirmed)" : null
@@ -151,7 +163,53 @@ var EthereumClient = function() {
         try {
             eth.transact(
                 eth.key,
-                (trade.type == 1) ? bigtotal : "0",
+                trade.type == 1 ? bigtotal : "0",
+                fixtures.addresses.etherex,
+                data,
+                "10000",
+                eth.gasPrice,
+                success
+            );
+        }
+        catch(e) {
+            failure(e);
+        }
+    };
+
+    this.fillTrade = function(trade, success, failure) {
+        var bigamount = Ethereum.BigInteger(trade.amount).multiply(Ethereum.BigInteger("10").pow(18));
+        var bigprice = Ethereum.BigInteger(trade.price).multiply(Ethereum.BigInteger("10").pow(8));
+        var bigtotal = bigamount.divide(Ethereum.BigInteger(trade.price)).multiply(Ethereum.BigInteger("10").pow(18));
+
+        var data =
+            eth.pad(3, 32) +
+            eth.pad(trade.id, 32);
+
+        try {
+            eth.transact(
+                eth.key,
+                trade.type == 2 ? bigtotal : "0",
+                fixtures.addresses.etherex,
+                data,
+                "10000",
+                eth.gasPrice,
+                success
+            );
+        }
+        catch(e) {
+            failure(e);
+        }
+    };
+
+    this.cancelTrade = function(trade, success, failure) {
+        var data =
+            eth.pad(6, 32) +
+            eth.pad(trade.id, 32);
+
+        try {
+            eth.transact(
+                eth.key,
+                "0",
                 fixtures.addresses.etherex,
                 data,
                 "10000",
