@@ -30,62 +30,6 @@
     return ret;
   };
 
-  // EtherEx.create = function() {
-  //   eth.create(
-  //     eth.key,
-  //     $("#endowment").val(),
-  //     $("#code").val(),
-  //     $("#gas").val(),
-  //     eth.gasPrice
-  //   );
-  // };
-
-  // EtherEx.transact = function(to, gas, value, data) {
-  //   // console.log(data);
-  //   var adata = data.split(" ");
-  //   var pdata = "";
-  //   for (var i in adata)
-  //     pdata += String(adata[i]).pad(32)
-  //   eth.transact(
-  //     eth.key,
-  //     String(value),
-  //     "0x" + to,
-  //     pdata,
-  //     String(gas),
-  //     eth.gasPrice
-  //   );
-  // };
-
-  // EtherEx.txdata = function(op, market) {
-  //   var data = String(op).pad(32);
-  //   data += String(Ethereum.BigInteger(document.getElementById("amount").value).multiply(Ethereum.BigInteger("10").pow(18))).pad(32);
-  //   data += String(Ethereum.BigInteger(document.getElementById("price").value).multiply(Ethereum.BigInteger("10").pow(8))).pad(32);
-  //   data += String(market).pad(32);
-  //   return data;
-  // };
-
-  // EtherEx.sendETH = function() {
-  //   eth.transact(
-  //     eth.key,
-  //     String(Ethereum.BigInteger($("#value").val()).multiply(Ethereum.BigInteger("10").pow(18))),
-  //     "0x" + $("#to").val(),
-  //     "",
-  //     "500",
-  //     eth.gasPrice
-  //   );
-  // };
-
-  // EtherEx.sendETX = function() {
-  //   eth.transact(
-  //     eth.key,
-  //     "0",
-  //     EtherEx.markets[1].address,
-  //     ("0x" + document.getElementById("to").value).pad(32) + document.getElementById("value").value.pad(32),
-  //     "1000",
-  //     eth.gasPrice
-  //   );
-  // };
-
 
   // TODO - checks and clear?
 
@@ -108,137 +52,8 @@
 
   // TODO - reimplement trade actions - in progress
 
-  // EtherEx.buy = function() {
-  //   var data = EtherEx.txdata(1, 1);
 
-  //   eth.transact(
-  //     eth.key,
-  //     "0",
-  //     EtherEx.coinbase,
-  //     data,
-  //     "10000",
-  //     eth.gasPrice,
-  //     EtherEx.updateBalances
-  //   );
-  // };
-
-  // EtherEx.sell = function() {
-  //   var data = EtherEx.txdata(2, 1);
-
-  //   eth.transact(
-  //     eth.key,
-  //     String(Ethereum.BigInteger(document.getElementById("amount").value).multiply(Ethereum.BigInteger("10").pow(18))),
-  //     EtherEx.coinbase,
-  //     data,
-  //     "10000",
-  //     eth.gasPrice,
-  //     EtherEx.updateBalances
-  //   );
-  // };
-
-
-  // TODO - (re)implement orderbook - in progress
-
-  // EtherEx.getOrderbook = function() {
-  //   var startkey = 100;
-  //   var lastkey = eth.stateAt(EtherEx.addresses.trades, String(18)).dec();
-
-  //   document.getElementById("last").innerHTML = lastkey;
-  //   // console.log(lastkey);
-
-  //   var table = "<table><tr><th class='book'>Buy</th><th class='book'>Sell</th></tr>";
-
-  //   var check = 0;
-  //   var booklength = lastkey / 5;
-  //   var length = startkey + parseInt(lastkey);
-
-  //   for (var i = startkey; i < length; i = i + 5) {
-  //     var type = eth.stateAt(EtherEx.addresses.trades, String(i)).dec();
-
-  //     if (type) {
-  //       var bigprice = Ethereum.BigInteger(eth.stateAt(EtherEx.addresses.trades, String(i+1)).dec());
-  //       var price = bigprice / Math.pow(10, 8);
-  //       var market = eth.stateAt(EtherEx.addresses.trades, String(i+4)).dec();
-  //       var strprice = price + " ETH/" + EtherEx.markets[market].name;
-  //       var amount = eth.stateAt(EtherEx.addresses.trades, String(i+2)).dec();
-  //       var stramount = EtherEx.formatBalance(amount) + "<br />@ ";
-  //       var value = Ethereum.BigInteger(amount).divide(bigprice);
-  //       var strvalue = '<br />' + value + ' ' + EtherEx.markets[market].name;
-  //       var owner = eth.stateAt(EtherEx.addresses.trades, String(i+3)).substr(2);
-  //       var strowner = '<br />by <span class="address">' + owner + '</span>';
-  //       var cancel = (owner == eth.coinbase.substr(2)) ?
-  //         '<br /><button class="cancel" data-id="' + i + '" id="trade-' + i +'">cancel</button>' : '';
-
-  //       var fill = (cancel.length == 0) ?
-  //       '<br /><button class="fill" data-id="' + i + '" data-type="' + type + '" data-amount="' + amount + '" data-value="' + value + '" data-market="' + String(EtherEx.markets[market].name).substr(0, 3) + '" id="trade-' + i + '">fill</button>' : '';
-
-  //       if (price) {
-  //         table += "<tr>\
-  //               <td class='book'>" + ((type == 1) ? stramount + strprice + strvalue + strowner + fill + cancel : '') + "</td>\
-  //               <td class='book'>" + ((type == 2) ? stramount + strprice + strvalue + strowner + fill + cancel : '') + "</td>\
-  //           </tr>";
-  //         document.getElementById("lastprice").innerHTML = price;
-  //         // document.getElementById("price").value = price;
-  //       };
-  //       // if (amount) {
-  //       //   document.getElementById("amount").value = amount;
-  //       // };
-  //     };
-  //   };
-  //   table += "</table>";
-  //   document.getElementById('book').innerHTML = table;
-
-  //   // TODO - reimplement cancel
-  //   $(".cancel").on('click', function() {
-  //     var tradeid = $(this).data('id');
-  //     if (window.confirm("Cancel trade # " + tradeid + " ?")) {
-  //       eth.transact(
-  //         eth.key,
-  //         "0",
-  //         EtherEx.coinbase,
-  //         String(6).pad(32) + String(tradeid).pad(32),
-  //         "10000",
-  //         eth.gasPrice,
-  //         EtherEx.updateBalances
-  //       );
-  //     }
-  //   });
-
-  //   // TODO - (re)implement trade fulfilment
-  //   $(".fill").on('click', function() {
-  //     var amount = $(this).data('amount');
-  //     var value = $(this).data('value');
-  //     var market = $(this).data('market');
-  //     var tradeid = $(this).data('id');
-  //     var type = $(this).data('type');
-
-  //     if (window.confirm("Fill trade # " + tradeid + " at " + EtherEx.formatBalance(amount) + " for " + value + " " + market + " ?")) {
-  //       eth.transact(
-  //         eth.key,
-  //         (type == "1" ? String(amount) : "0"),
-  //         EtherEx.coinbase,
-  //         String(3).pad(32) + String(tradeid).pad(32),
-  //         "10000",
-  //         eth.gasPrice,
-  //         EtherEx.updateBalances
-  //       );
-  //     }
-  //   });
-  // };
-
-
-
-  // TODO - error logging
-
-  // EtherEx.showError = function(e) {
-  //   var err = $('<a class="error" href="#"><i class="icon-cancel" title="Error - try reloading"></i></a>');
-  //   err.on('click', function() {
-  //     location.reload(true);
-  //   })
-  //   $("#page h2").eq(0).append(err);
-  //   $('#log').append(String(e) + "<br />");
-  // };
-
+  // TODO - reimplement orderbook - in progress
 
 
   // TODO - implement XBTC
@@ -521,6 +336,28 @@
 
 
     // TODO - reimplement simple wallet functions
+
+    // EtherEx.sendETH = function() {
+    //   eth.transact(
+    //     eth.key,
+    //     String(Ethereum.BigInteger($("#value").val()).multiply(Ethereum.BigInteger("10").pow(18))),
+    //     "0x" + $("#to").val(),
+    //     "",
+    //     "500",
+    //     eth.gasPrice
+    //   );
+    // };
+
+    // EtherEx.sendETX = function() {
+    //   eth.transact(
+    //     eth.key,
+    //     "0",
+    //     EtherEx.markets[1].address,
+    //     ("0x" + document.getElementById("to").value).pad(32) + document.getElementById("value").value.pad(32),
+    //     "1000",
+    //     eth.gasPrice
+    //   );
+    // };
 
     // $("#sendeth").on('click', function() {
     //   if ($("#to").val() == "") {
