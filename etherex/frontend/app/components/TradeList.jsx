@@ -8,6 +8,8 @@ var FluxChildMixin = Fluxxor.FluxChildMixin(React);
 
 var ModalTrigger = require('react-bootstrap/ModalTrigger');
 var ConfirmTradeModal = require('./ConfirmTradeModal');
+
+var Table = require("react-bootstrap/Table");
 var Button = require("react-bootstrap/Button");
 
 // var Link = Router.Link;
@@ -20,9 +22,9 @@ var TradeRow = React.createClass({
         return (
             <tr>
                 <td>{this.props.trade.type}</td>
-                <td>{this.props.trade.amount} {' '} {this.props.trade.market.name}</td>
-                <td>{this.props.trade.price} {' '} {this.props.trade.market.name}/ETH</td>
-                <td>{(this.props.trade.amount / this.props.trade.price).toFixed(8)} ETH</td>
+                <td>{this.props.trade.amount.toFixed(4)} {' '} {this.props.trade.market.name}</td>
+                <td>{this.props.trade.price.toFixed(4)} {' '} {this.props.trade.market.name}/ETH</td>
+                <td>{(this.props.trade.amount / this.props.trade.price).toFixed(4)} ETH</td>
                 <td>{this.props.trade.market.name}</td>
                 <td>{this.props.trade.owner}</td>
                 <td>{(this.props.trade.owner == this.props.user.id) ?
@@ -65,7 +67,7 @@ var TradeTable = React.createClass({
             );
         }.bind(this));
         return (
-            <table className="tradeList table table-striped">
+            <Table responsive striped>
                 <thead>
                     <tr>
                         <th>Type</th>
@@ -80,7 +82,7 @@ var TradeTable = React.createClass({
                 <tbody>
                     {tradeListNodes}
                 </tbody>
-            </table>
+            </Table>
         );
     }
 });
