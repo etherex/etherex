@@ -56,8 +56,8 @@ var EthereumClient = function() {
                 eth.watch(addresses[i], "", flux.actions.user.updateBalance);
 
                 flux.actions.user.updateBalanceSub();
-                for (var i = markets.length - 1; i >= 0; i--)
-                    eth.watch(markets[i].address, "", flux.actions.user.updateBalanceSub);
+                // for (var i = markets.length - 1; i >= 0; i--)
+                eth.watch(markets[i].address, "", flux.actions.user.updateBalanceSub);
             }
         }
     };
@@ -67,12 +67,13 @@ var EthereumClient = function() {
         var market_addresses = _.rest(_.pluck(markets, 'address'));
         if (ethBrowser)
             eth.watch({altered: market_addresses}).changed(flux.actions.trade.loadTrades);
-        else {
-            for (var i = market_addresses.length - 1; i >= 0; i--) {
-                flux.actions.trade.loadTrades();
-                eth.watch(market_addresses[i], "", flux.actions.trade.loadTrades);
-            }
-        }
+        else
+            flux.actions.trade.loadTrades();
+        //     for (var i = market_addresses.length - 1; i >= 0; i--) {
+        //         flux.actions.trade.loadTrades();
+        //         eth.watch(market_addresses[i], "", flux.actions.trade.loadTrades);
+        //     }
+        // }
     };
 
 
