@@ -44,10 +44,11 @@ var TradeStore = Fluxxor.createStore({
     onAddTrade: function(payload) {
         this.trades[payload.id] = {
             id: payload.id,
-            type: (payload.type == 1) ? 'buy' : 'sell',
+            type: (payload.type == "buy") ? 'buy' : 'sell',
             price: payload.price,
             amount: payload.amount,
             market: this.flux.store("MarketStore").getState().markets[payload.market],
+            owner: this.flux.store("UserStore").getState().user.id,
             status: 'pending'
         };
         this.emit(constants.CHANGE_EVENT);

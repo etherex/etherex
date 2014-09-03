@@ -7,7 +7,7 @@ var Fluxxor = require("fluxxor");
 var FluxChildMixin = Fluxxor.FluxChildMixin(React);
 
 var ModalTrigger = require('react-bootstrap/ModalTrigger');
-var ConfirmTradeModal = require('./ConfirmTradeModal');
+var ConfirmModal = require('./ConfirmModal');
 
 var Table = require("react-bootstrap/Table");
 var Button = require("react-bootstrap/Button");
@@ -27,35 +27,47 @@ var TradeRow = React.createClass({
                 <td>{(this.props.trade.amount / this.props.trade.price).toLocaleString()} ETH</td>
                 <td>{this.props.trade.market.name}</td>
                 <td><div className="ellipsis">{this.props.trade.owner}</div></td>
-                <td>{(this.props.trade.owner == this.props.user.id) ?
-                    <ModalTrigger modal={
-                            <ConfirmTradeModal
-                                type="cancel"
-                                message="Are you sure you want to cancel this trade?"
-                                trade={this.props.trade}
-                                flux={this.getFlux()}
-                            />
-                        }>
-                        <Button key="cancel">Cancel</Button>
-                    </ModalTrigger> :
-                    <ModalTrigger modal={
-                            <ConfirmTradeModal
-                                type="fill"
-                                message={
-                                    "Are you sure you want to " + (this.props.trade.type == "buy" ? "sell" : "buy") +
-                                    " " + this.props.trade.amount + " " + this.props.trade.market.name +
-                                    " at " + this.props.trade.price + " " + this.props.trade.market.name + "/ETH" +
-                                    " for " + (this.props.trade.amount / this.props.trade.price) + " ETH"
-                                }
-                                trade={this.props.trade}
-                                flux={this.getFlux()}
-                            />
-                        }>
-                        <Button key="fill">Fill</Button>
-                    </ModalTrigger>}
+                <td>{
+                    (this.props.trade.owner == this.props.user.id) ?
+                        <ModalTrigger modal={
+                                <ConfirmModal
+                                    type="cancel"
+                                    message="Are you sure you want to cancel this trade?"
+                                    trade={this.props.trade}
+                                    flux={this.getFlux()}
+                                    onSubmit={this.handleCancelTrade}
+                                />
+                            }>
+                            <Button key="cancel">Cancel</Button>
+                        </ModalTrigger> :
+
+                        <ModalTrigger modal={
+                                <ConfirmModal
+                                    type="fill"
+                                    message={
+                                        "Are you sure you want to " + (this.props.trade.type == "buy" ? "sell" : "buy") +
+                                        " " + this.props.trade.amount + " " + this.props.trade.market.name +
+                                        " at " + this.props.trade.price + " " + this.props.trade.market.name + "/ETH" +
+                                        " for " + (this.props.trade.amount / this.props.trade.price) + " ETH"
+                                    }
+                                    flux={this.getFlux()}
+                                    onSubmit={this.handleFillTrade}
+                                />
+                            }>
+                            <Button key="fill">Fill</Button>
+                        </ModalTrigger>
+                    }
                 </td>
             </tr>
         );
+    },
+
+    handleFillTrade: function(e) {
+        this.getFlux().actions.trade.fillTrade(this.props.trade);
+    },
+
+    handleCancelTrade: function(e) {
+        this.getFlux().actions.trade.cancelTrade(this.props.trade);
     }
 });
 
