@@ -8,14 +8,9 @@ var UserActions = function(client) {
         _client.loadAddresses(function(addresses) {
             this.dispatch(constants.user.LOAD_ADDRESSES_SUCCESS, addresses);
 
-            // console.log(addresses);
-            // console.log(this.flux.store("UserStore").getState());
-            var user = this.flux.store("UserStore").getState().user;
-            this.flux.actions.user.updateBalance(user.addresses[0]);
-
-            // console.log(this.flux.store("MarketStore").getState());
-            var market = this.flux.store("MarketStore").getState().market;
-            this.flux.actions.user.updateBalanceSub(market, user.addresses[0]);
+            // Update balance after loading addresses
+            // var user = this.flux.store("UserStore").getState().user;
+            this.flux.actions.user.updateBalance();
 
         }.bind(this), function(error) {
             console.log(error);
@@ -23,26 +18,35 @@ var UserActions = function(client) {
         }.bind(this));
     };
 
-    this.updateBalance = function(address) {
-        _client.updateBalance(address, function(confirmed, unconfirmed) {
-            this.dispatch(constants.user.UPDATE_BALANCE, {
-                balance: confirmed,
-                balance_unconfirmed: unconfirmed
-            });
-        }.bind(this), function(error) {
-            console.log(error);
-        }.bind(this));
+    this.updateBalance = function() {
+        var user = this.flux.store("UserStore").getState().user;
+
+        for (var i = user.addresses.length - 1; i >= 0; i--) {
+            _client.updateBalance(user.addresses[i], function(confirmed, unconfirmed) {
+                this.dispatch(constants.user.UPDATE_BALANCE, {
+                    balance: confirmed,
+                    balance_unconfirmed: unconfirmed
+                });
+            }.bind(this), function(error) {
+                console.log(error);
+            }.bind(this));
+        }
     };
 
-    this.updateBalanceSub = function(market, address) {
-        _client.updateBalanceSub(market, address, function(confirmed, unconfirmed) {
-            this.dispatch(constants.user.UPDATE_BALANCE_SUB, {
-                balance: confirmed,
-                balance_unconfirmed: unconfirmed
-            });
-        }.bind(this), function(error) {
-            console.log(error);
-        }.bind(this));
+    this.updateBalanceSub = function() {
+        var user = this.flux.store("UserStore").getState().user;
+        var market = this.flux.store("MarketStore").getState().market;
+
+        for (var i = user.addresses.length - 1; i >= 0; i--) {
+            _client.updateBalanceSub(market, user.addresses[i], function(confirmed, unconfirmed) {
+                this.dispatch(constants.user.UPDATE_BALANCE_SUB, {
+                    balance: confirmed,
+                    balance_unconfirmed: unconfirmed
+                });
+            }.bind(this), function(error) {
+                console.log(error);
+            }.bind(this));
+        }
     };
 
     // TODO

@@ -7,6 +7,13 @@
  */
 
 
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 5.5em;
+}
+
+
 /* Icons */
 
 @font-face {

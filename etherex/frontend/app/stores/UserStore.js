@@ -5,7 +5,7 @@ var constants = require("../js/constants");
 var UserStore = Fluxxor.createStore({
 
     initialize: function(options) {
-        this.user = options.user || { id: '[loading]' };
+        this.user = options.user || { id: 'loading' };
         this.createAccount = false;
         this.loading = false;
         this.error = null;
@@ -27,7 +27,7 @@ var UserStore = Fluxxor.createStore({
     },
 
     onLoadUser: function() {
-        this.user.name = '[loading]';
+        this.user.name = 'loading';
         this.createAccount = false;
         this.loading = true;
         this.error = null;
@@ -51,7 +51,7 @@ var UserStore = Fluxxor.createStore({
     },
 
     onLoadAddresses: function(payload) {
-        this.user = {id: '[loading]', name: '[loading]'};
+        this.user = {id: 'loading', name: 'loading'};
         this.loading = true;
         this.error = null;
         this.emit(constants.CHANGE_EVENT);

@@ -42,6 +42,7 @@ require("./css/bootstrap-darkly.css");
 // require("./css/rickshaw.min.css");
 require("./css/styles.css");
 
+// eth.js compatibility
 if (!ethBrowser) {
   var bigInt = require("./js/eth/BigInteger.js");
   window.bigInt = bigInt;
@@ -71,6 +72,7 @@ if (!ethBrowser) {
   }
 }
 
+// old scripts / TODOs
 require("./js/scripts.js");
 
 var Route = Router.Route;

@@ -126,7 +126,7 @@ code:
         # Split endowment between owners
         i = 0
         while i < n:
-            contract.storage[owners[i]] = 10 ^ 24 / n # DEBUG
+            contract.storage[owners[i]] = 75000000 / n # DEBUG
             i = i + 1
 
         # NameReg

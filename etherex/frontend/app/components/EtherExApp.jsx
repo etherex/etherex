@@ -25,7 +25,7 @@ var EtherExApp = React.createClass({
   componentDidMount: function() {
     this.getFlux().actions.user.loadAddresses();
     this.getFlux().actions.market.loadMarkets();
-    this.getFlux().actions.trade.loadTrades();
+    // this.getFlux().actions.trade.loadTrades();
   },
 
   render: function() {

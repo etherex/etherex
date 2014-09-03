@@ -22,11 +22,11 @@ var TradeRow = React.createClass({
         return (
             <tr>
                 <td>{this.props.trade.type}</td>
-                <td>{this.props.trade.amount.toFixed(4)} {' '} {this.props.trade.market.name}</td>
-                <td>{this.props.trade.price.toFixed(4)} {' '} {this.props.trade.market.name}/ETH</td>
-                <td>{(this.props.trade.amount / this.props.trade.price).toFixed(4)} ETH</td>
+                <td>{this.props.trade.amount.toLocaleString()} {' '} {this.props.trade.market.name}</td>
+                <td>{this.props.trade.price.toLocaleString()} {' '} {this.props.trade.market.name}/ETH</td>
+                <td>{(this.props.trade.amount / this.props.trade.price).toLocaleString()} ETH</td>
                 <td>{this.props.trade.market.name}</td>
-                <td>{this.props.trade.owner}</td>
+                <td><div className="ellipsis">{this.props.trade.owner}</div></td>
                 <td>{(this.props.trade.owner == this.props.user.id) ?
                     <ModalTrigger modal={
                             <ConfirmTradeModal

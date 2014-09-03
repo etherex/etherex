@@ -8,11 +8,14 @@ var MarketActions = function(client) {
 
         _client.loadMarkets(function(markets) {
             this.dispatch(constants.market.LOAD_MARKETS_SUCCESS, markets);
-            // console.log(this.flux.stores.UserStore.user);
-            // this.flux.actions.user.updateBalanceSub(
-            //   this.flux.stores.MarketStore.market.address,
-            //   this.flux.stores.UserStore.user.addresses[0]
-            // );
+
+            // Update balances after loading markets (watches)
+            var user = this.flux.store("UserStore").getState().user;
+            _client.setUserWatches(this.flux, user.addresses, markets);
+
+            // Update trades after loading markets (watches)
+            _client.setMarketWatches(this.flux, markets);
+
         }.bind(this), function(error) {
             console.log(String(error));
             this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});

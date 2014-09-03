@@ -12,6 +12,13 @@ var AlertDismissable = require('./AlertDismissable');
 var NewTradeForm = React.createClass({
   mixins: [FluxChildMixin],
 
+  getInitialState: function() {
+    return {
+      typekey: 1,
+      typename: "Buy"
+    };
+  },
+
   render: function() {
     return (
         <div className="panel panel-default">
@@ -21,7 +28,7 @@ var NewTradeForm = React.createClass({
           <div className="panel-body">
             <AlertDismissable ref="alerts" level="" message="" />
             <form className="form-inline" onSubmit={this.onSubmitForm}>
-              <DropdownButton ref="type" onSelect={this.handleType} key={1} title="Buy">
+              <DropdownButton ref="type" onSelect={this.handleType} key={this.state.typekey} title={this.state.typename}>
                 <MenuItem key={1}>Buy</MenuItem>
                 <MenuItem key={2}>Sell</MenuItem>
               </DropdownButton>
@@ -46,8 +53,9 @@ var NewTradeForm = React.createClass({
   },
 
   handleType: function(key) {
-    this.refs.type.props.key = key;
-    this.refs.type.props.title = this.refs.type.props.children[key - 1].props.children;
+    this.setState({typekey: key, typename: this.refs.type.props.children[key - 1].props.children});
+    // this.refs.type.props.key = key;
+    // this.refs.type.props.title = this.refs.type.props.children[key - 1].props.children;
   },
 
   handleChange: function(e) {

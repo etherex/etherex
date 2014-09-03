@@ -6,40 +6,31 @@ var bigRat = require('big-rational');
 
 var EthereumClient = function() {
 
-    // if (ethBrowser)
-    //     eth.watch({altered: this.state.user.addresses}).changed(this.getFlux().actions.user.updateBalance);
-    // else {
-    //     for (var i = this.state.user.addresses.length - 1; i >= 0; i--)
-    //       eth.watch(this.state.user.addresses[i], "", this.getFlux().actions.user.updateBalance);
-    // }
-
-    // console.log(this.state.market);
-    // if (ethBrowser)
-    //     eth.watch({altered: EtherEx.markets[1].address}).changed(this.updateBalance);
-    // else
-    //     eth.watch(EtherEx.markets[1].address, "", this.updateBalance);
-
     this.loadAddresses = function(success, failure) {
-        var addrs = eth.keys.map(function (k) { return eth.secretToAddress(k); });
+        var addresses = eth.keys.map(function (k) { return eth.secretToAddress(k); });
 
-        if (addrs)
-            success(addrs);
+        if (addresses)
+            success(addresses);
         else
             failure("Unable to load addresses. Lost your keys?");
     };
 
+
     this.loadMarkets = function(success, failure) {
         var markets = [];
+
         var last = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(18)));
         for (var i = 100; i <= 100 + parseInt(last); i = i + 5) {
           var id = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(i+4)));
-          markets[id] = {
-            id: id,
-            name: eth.toAscii(eth.stateAt(fixtures.addresses.markets, String(i))),
-            address: eth.stateAt(fixtures.addresses.markets, String(i+3)),
-            amount: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(i+1))),
-            precision: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(i+2))),
-          };
+            if (id) {
+                markets[id] = {
+                    id: id,
+                    name: eth.toAscii(eth.stateAt(fixtures.addresses.markets, String(i))),
+                    address: eth.stateAt(fixtures.addresses.markets, String(i+3)),
+                    amount: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(i+1))),
+                    precision: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(i+2))),
+                };
+            }
         };
 
         if (markets) {
@@ -50,42 +41,45 @@ var EthereumClient = function() {
         }
     };
 
-    this.formatUnconfirmed = function(confirmed, unconfirmed) {
-        unconfirmed = unconfirmed - confirmed;
-        if (unconfirmed < 0)
-            unconfirmed = "- " + utils.formatBalance(-unconfirmed);
-        else
-            unconfirmed = utils.formatBalance(unconfirmed);
 
-        return unconfirmed;
-    };
+    this.setUserWatches = function(flux, addresses, markets) {
+        if (ethBrowser) {
+            // ETH balance
+            eth.watch({altered: addresses}).changed(flux.actions.user.updateBalance);
 
-    this.getAmounts = function(amount, price) {
-        var bigamount = bigRat(parseFloat(amount)).multiply(bigRat(fixtures.ether)).floor(true).toString();
-        var bigprice = bigRat(parseFloat(price)).multiply(bigRat(fixtures.precision)).floor(true).toString();
-        var total = bigRat(parseFloat(amount))
-            .divide(parseFloat(price))
-            .multiply(bigRat(fixtures.ether)).floor(true).toString();
-        // console.log("amount: " + bigamount);
-        // console.log("price: " + bigprice);
-        // console.log("total: " + total);
+            // Sub balances
+            var market_addresses = _.rest(_.pluck(markets, 'address'));
+            eth.watch({altered: market_addresses}).changed(flux.actions.user.updateBalanceSub);
+        }
+        else {
+            for (var i = addresses.length - 1; i >= 0; i--) {
+                eth.watch(addresses[i], "", flux.actions.user.updateBalance);
 
-        return {
-            amount: bigamount,
-            price: bigprice,
-            total: total
+                flux.actions.user.updateBalanceSub();
+                for (var i = markets.length - 1; i >= 0; i--)
+                    eth.watch(markets[i].address, "", flux.actions.user.updateBalanceSub);
+            }
         }
     };
+
+
+    this.setMarketWatches = function(flux, markets) {
+        var market_addresses = _.rest(_.pluck(markets, 'address'));
+        if (ethBrowser)
+            eth.watch({altered: market_addresses}).changed(flux.actions.trade.loadTrades);
+        else {
+            for (var i = market_addresses.length - 1; i >= 0; i--) {
+                flux.actions.trade.loadTrades();
+                eth.watch(market_addresses[i], "", flux.actions.trade.loadTrades);
+            }
+        }
+    };
+
 
     this.updateBalance = function(address, success, failure) {
         var confirmed = eth.toDecimal(eth.balanceAt(address, -1));
         var unconfirmed = eth.toDecimal(eth.balanceAt(address));
         var showUnconfirmed = false;
-
-        // DEBUG
-        // console.log("confirmed: " + confirmed);
-        // console.log("unconfirmed: " + unconfirmed);
-        // console.log(utils.formatBalance(unconfirmed - confirmed));
 
         if (unconfirmed != confirmed) {
             showUnconfirmed = true;
@@ -110,9 +104,9 @@ var EthereumClient = function() {
         var showUnconfirmed = false;
 
         // DEBUG
-        // console.log(eth.toDecimal(confirmed));
-        // console.log(eth.toDecimal(unconfirmed));
-        // console.log(utils.formatBalance(unconfirmed - confirmed));
+        // console.log("confirmed: " + confirmed);
+        // console.log("unconfirmed: " + unconfirmed);
+        // console.log(this.formatUnconfirmed(confirmed, unconfirmed));
 
         if (unconfirmed != confirmed) {
             showUnconfirmed = true;
@@ -122,7 +116,7 @@ var EthereumClient = function() {
         if (confirmed >= 0) {
             success(
               utils.formatBalance(confirmed),
-              (unconfirmed > confirmed) ? "(" + utils.formatBalance(unconfirmed - confirmed) + " unconfirmed)" : null
+              showUnconfirmed ? "(" + unconfirmed + " unconfirmed)" : null
             );
         }
         else {
@@ -130,17 +124,19 @@ var EthereumClient = function() {
         }
     };
 
+
     this.loadTrades = function(markets, success, failure) {
         var trades = [];
         var last = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(18)));
 
-        console.log("LAST TRADE AT: " + last);
+        console.log("Last trade at: " + last);
 
         for (var i = 100; i <= 100 + parseInt(last); i = i + 5) {
             var type = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i)));
             if (!_.isUndefined(type) && type > 0) {
                 var mid = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+4))));
-                trades[String(i)] = {
+                console.log("Loading trade " + i + " for market " + markets[mid].name);
+                trades[i] = {
                     id: i,
                     type: type == 1 ? 'buy' : 'sell',
                     price: bigRat(
@@ -213,7 +209,7 @@ var EthereumClient = function() {
             if (ethBrowser)
                 eth.transact({
                     from: eth.key,
-                    value: trade.type == 2 ? amounts.total : "0",
+                    value: trade.type == "sell" ? amounts.total : "0",
                     to: fixtures.addresses.etherex,
                     data: eth.fromAscii(data),
                     gas: "10000",
@@ -222,7 +218,7 @@ var EthereumClient = function() {
             else
                 eth.transact(
                     eth.key,
-                    trade.type == 2 ? amounts.total : "0",
+                    trade.type == "sell" ? amounts.total : "0",
                     fixtures.addresses.etherex,
                     data,
                     "10000",
@@ -265,6 +261,34 @@ var EthereumClient = function() {
             failure(e);
         }
     };
+
+    this.getAmounts = function(amount, price) {
+        var bigamount = bigRat(parseFloat(amount)).multiply(bigRat(fixtures.ether)).floor(true).toString();
+        var bigprice = bigRat(parseFloat(price)).multiply(bigRat(fixtures.precision)).floor(true).toString();
+        var total = bigRat(parseFloat(amount))
+            .divide(parseFloat(price))
+            .multiply(bigRat(fixtures.ether)).floor(true).toString();
+        // console.log("amount: " + bigamount);
+        // console.log("price: " + bigprice);
+        // console.log("total: " + total);
+
+        return {
+            amount: bigamount,
+            price: bigprice,
+            total: total
+        }
+    };
+
+    this.formatUnconfirmed = function(confirmed, unconfirmed) {
+        unconfirmed = unconfirmed - confirmed;
+        if (unconfirmed < 0)
+            unconfirmed = "- " + utils.formatBalance(-unconfirmed);
+        else
+            unconfirmed = utils.formatBalance(unconfirmed);
+
+        return unconfirmed;
+    };
+
 };
 
 module.exports = EthereumClient;
