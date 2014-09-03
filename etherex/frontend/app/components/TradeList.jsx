@@ -6,6 +6,8 @@ var Router = require("react-router");
 var Fluxxor = require("fluxxor");
 var FluxChildMixin = Fluxxor.FluxChildMixin(React);
 
+var ModalTrigger = require('react-bootstrap/ModalTrigger');
+var ConfirmTradeModal = require('./ConfirmTradeModal');
 var Button = require("react-bootstrap/Button");
 
 // var Link = Router.Link;
@@ -23,23 +25,36 @@ var TradeRow = React.createClass({
                 <td>{(this.props.trade.amount / this.props.trade.price).toFixed(8)} ETH</td>
                 <td>{this.props.trade.market.name}</td>
                 <td>{this.props.trade.owner}</td>
-                <td>
-                    {this.props.trade.owner == this.props.user.id ?
-                        <Button onClick={this.handleCancelTrade} trade={this.props.trade}>Cancel</Button> :
-                        <Button onClick={this.handleFillTrade} trade={this.props.trade}>Fill</Button>
-                    }
+                <td>{(this.props.trade.owner == this.props.user.id) ?
+                    <ModalTrigger modal={
+                            <ConfirmTradeModal
+                                type="cancel"
+                                message="Are you sure you want to cancel this trade?"
+                                trade={this.props.trade}
+                                flux={this.getFlux()}
+                            />
+                        }>
+                        <Button key="cancel">Cancel</Button>
+                    </ModalTrigger> :
+                    <ModalTrigger modal={
+                            <ConfirmTradeModal
+                                type="fill"
+                                message={
+                                    "Are you sure you want to " + (this.props.trade.type == "buy" ? "sell" : "buy") +
+                                    " " + this.props.trade.amount + " " + this.props.trade.market.name +
+                                    " at " + this.props.trade.price + " " + this.props.trade.market.name + "/ETH" +
+                                    " for " + (this.props.trade.amount / this.props.trade.price) + " ETH"
+                                }
+                                trade={this.props.trade}
+                                flux={this.getFlux()}
+                            />
+                        }>
+                        <Button key="fill">Fill</Button>
+                    </ModalTrigger>}
                 </td>
             </tr>
         );
-    },
-
-    handleFillTrade: function(e) {
-        this.getFlux().actions.trade.fillTrade(this.props.trade);
-    },
-
-    handleCancelTrade: function(e) {
-        this.getFlux().actions.trade.cancelTrade(this.props.trade);
-    },
+    }
 });
 
 var TradeTable = React.createClass({

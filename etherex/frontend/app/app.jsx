@@ -78,7 +78,7 @@ var Routes = Router.Routes;
 var Redirect = Router.Redirect;
 
 var stores = {
-  MarketStore: new MarketStore({market: fixtures.market, markets: []}),
+  MarketStore: new MarketStore(),
   TradeStore: new TradeStore(),
   UserStore: new UserStore()
 };

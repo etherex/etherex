@@ -1,12 +1,13 @@
 var Fluxxor = require("fluxxor");
 
 var constants = require("../js/constants");
+var fixtures = require("../js/fixtures");
 
 var MarketStore = Fluxxor.createStore({
 
     initialize: function(options) {
-        this.market = options.market;
-        this.markets = options.markets;
+        this.market = options.market || fixtures.market;
+        this.markets = options.markets || [];
         this.loading = false;
         this.error = null;
 
