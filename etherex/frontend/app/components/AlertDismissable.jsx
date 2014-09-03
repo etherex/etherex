@@ -13,18 +13,15 @@ var AlertDismissable = React.createClass({
     if (this.state.alertVisible) {
       return (
         <Alert bsStyle={this.props.level} onDismiss={this.handleAlertDismiss}>
-          <h4>Oh snap!</h4>
-          <p>{this.props.message}</p>
-          <p>
+          <h3 className="text-center">Oh snap!</h3>
+          <h4 className="text-center">{this.props.message}</h4>
+          <p className="text-center">
             <Button onClick={this.handleAlertDismiss}>Got it</Button>
           </p>
         </Alert>
       );
     }
     return false;
-    // return (
-    //   <Button onClick={this.handleAlertShow}>Show Alert</Button>
-    // );
   },
 
   handleAlertDismiss: function() {

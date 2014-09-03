@@ -22,7 +22,10 @@ var NewTradeForm = React.createClass({
             typename: "Buy",
             amount: null,
             price: null,
-            total: null
+            total: null,
+            newTrade: false,
+            alertLevel: 'info',
+            alertMessage: ''
         };
     },
 
@@ -33,8 +36,8 @@ var NewTradeForm = React.createClass({
                 <h3 className="panel-title">New Trade</h3>
               </div>
               <div className="panel-body">
-                <AlertDismissable ref="alerts" level="" message="" />
-                <form className="form-inline" onSubmit={this.onSubmitForm}>
+                <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
+                <form className="form-inline" onSubmit={this.submit}>
                   <DropdownButton ref="type" onSelect={this.handleType} key={this.state.type} title={this.state.typename}>
                     <MenuItem key={1}>Buy</MenuItem>
                     <MenuItem key={2}>Sell</MenuItem>
@@ -52,20 +55,26 @@ var NewTradeForm = React.createClass({
                   <span className="btn">
                     ETH
                   </span>
-                  <ModalTrigger modal={
-                      <ConfirmModal
-                        message={
-                          "Are you sure you want to " + (this.state.type == 1 ? "buy" : "sell") +
-                          " " + this.state.amount + " " + this.props.market.market.name +
-                          " at " + this.state.price + " " + this.props.market.market.name + "/ETH" +
-                          " for " + (this.state.amount / this.state.price) + " ETH"
-                        }
-                        flux={this.getFlux()}
-                        onSubmit={this.onSubmitForm}
-                      />
-                    }>
-                    <Button key="newtrade">Place trade</Button>
-                  </ModalTrigger>
+                  {this.state.newTrade == true ?
+                    <span>
+                      <ModalTrigger modal={
+                          <ConfirmModal
+                            message={
+                              "Are you sure you want to " + (this.state.type == 1 ? "buy" : "sell") +
+                              " " + this.state.amount + " " + this.props.market.market.name +
+                              " at " + this.state.price + " " + this.props.market.market.name + "/ETH" +
+                              " for " + (this.state.amount / this.state.price) + " ETH"
+                            }
+                            flux={this.getFlux()}
+                            onSubmit={this.onSubmitForm}
+                          />
+                        }>
+                        <Button key="newtrade">Place trade</Button>
+                      </ModalTrigger>
+                    </span>
+                    :
+                    <Button key="newtrade" onClick={this.onSubmitForm}>Place trade</Button>
+                  }
                 </form>
               </div>
             </div>
@@ -125,10 +134,12 @@ var NewTradeForm = React.createClass({
         });
 
         if (!type || !market || !amount || !price || !total) {
-            this.refs.alerts.props.level = "info";
-            this.refs.alerts.props.message = "Fill it up!";
-            this.refs.alerts.setState({alertVisible: true});
-            return false;
+          this.setState({
+            alertLevel: 'warning',
+            alertMessage: "Fill it up!"
+          });
+          this.refs.alerts.setState({alertVisible: true});
+          return false;
         }
 
         this.getFlux().actions.trade.addTrade({
