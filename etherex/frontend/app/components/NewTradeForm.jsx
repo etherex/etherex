@@ -5,6 +5,9 @@ var React = require("react");
 var Fluxxor = require("fluxxor");
 var FluxChildMixin = Fluxxor.FluxChildMixin(React);
 
+var bigRat = require("big-rational");
+var fixtures = require("../js/fixtures");
+
 var DropdownButton = require('react-bootstrap/DropdownButton');
 var MenuItem = require('react-bootstrap/MenuItem');
 var Button = require('react-bootstrap/Button');
@@ -69,11 +72,11 @@ var NewTradeForm = React.createClass({
                             onSubmit={this.onSubmitForm}
                           />
                         }>
-                        <Button key="newtrade">Place trade</Button>
+                        <Button type="submit" key="newtrade">Place trade</Button>
                       </ModalTrigger>
                     </span>
                     :
-                    <Button key="newtrade" onClick={this.onSubmitForm}>Place trade</Button>
+                    <Button type="submit" key="newtrade" onClick={this.onSubmitForm}>Place trade</Button>
                   }
                 </form>
               </div>
@@ -86,12 +89,12 @@ var NewTradeForm = React.createClass({
           type: key,
           typename: this.refs.type.props.children[key - 1].props.children
         });
-        // this.refs.type.props.key = key;
-        // this.refs.type.props.title = this.refs.type.props.children[key - 1].props.children;
     },
 
     handleChange: function(e) {
         // TODO - proper back/forth handling
+        var type = this.refs.type.props.key;
+        var market = this.refs.market.getDOMNode().value;
         var price = this.refs.price.getDOMNode().value.trim();
         var amount = this.refs.amount.getDOMNode().value.trim();
         var total = (amount / price).toFixed(8);
@@ -103,9 +106,13 @@ var NewTradeForm = React.createClass({
         });
 
         this.refs.total.getDOMNode().value = total;
+
+        this.handleValidation(type, market, amount, price, total);
     },
 
     handleChangeTotal: function(e) {
+        var type = this.refs.type.props.key;
+        var market = this.refs.market.getDOMNode().value;
         var price = this.refs.price.getDOMNode().value.trim();
         var total = this.refs.total.getDOMNode().value.trim();
         var amount = (total * price).toFixed(8);
@@ -117,14 +124,31 @@ var NewTradeForm = React.createClass({
         });
 
         this.refs.amount.getDOMNode().value = amount;
+
+        this.handleValidation(type, market, amount, price, total);
+    },
+
+    handleValidation: function(type, market, amount, price, total) {
+        if (!type || !market || !amount || !price || !total || total < this.props.market.market.minTotal) {
+            this.setState({
+              newTrade: false
+            });
+        }
+        else {
+          this.setState({
+            newTrade: true
+          });
+          return true;
+        }
+        return false;
     },
 
     onSubmitForm: function(e) {
         e.preventDefault();
         var type = this.refs.type.props.key;
         var market = this.refs.market.getDOMNode().value;
-        var price = this.refs.price.getDOMNode().value.trim();
         var amount = this.refs.amount.getDOMNode().value.trim();
+        var price = this.refs.price.getDOMNode().value.trim();
         var total = this.refs.total.getDOMNode().value.trim();
 
         this.setState({
@@ -133,26 +157,34 @@ var NewTradeForm = React.createClass({
           total: total
         });
 
-        if (!type || !market || !amount || !price || !total) {
-          this.setState({
-            alertLevel: 'warning',
-            alertMessage: "Fill it up!"
-          });
+        if (this.handleValidation(type, market, amount, price, total) != true) {
+          if (amount && price && total && total < this.props.market.market.minTotal) {
+            this.setState({
+              alertLevel: 'warning',
+              alertMessage: "Minimum ETH total is " + this.props.market.market.minTotal
+            });
+          }
+          else {
+            this.setState({
+              alertLevel: 'warning',
+              alertMessage: "Fill it up mate!"
+            });
+          }
           this.refs.alerts.setState({alertVisible: true});
           return false;
         }
+
+        this.setState({
+          amount: null,
+          price: null,
+          total: null
+        });
 
         this.getFlux().actions.trade.addTrade({
             type: type,
             price: price,
             amount: amount,
             market: market
-        });
-
-        this.setState({
-          amount: null,
-          price: null,
-          total: null
         });
 
         return false;

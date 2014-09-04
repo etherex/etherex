@@ -1,5 +1,5 @@
 var ether = "1000000000000000000";
-var tenEther = "1000000000000000000";
+var tenEther = "10000000000000000000";
 var precision = "100000000";
 
 var fixtures = {
@@ -17,7 +17,8 @@ var fixtures = {
         name: "ETX",
         address: "0xdebd115297dbabd326ec3b1615a428b9ae090b9f",
         amount: ether,
-        precision: precision
+        precision: precision,
+        minTotal: 10
     },
     trades: {
         'f70097659f329a09': {

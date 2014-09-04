@@ -1,5 +1,7 @@
 var Fluxxor = require("fluxxor");
 
+var bigRat = require("big-rational");
+
 var constants = require("../js/constants");
 var fixtures = require("../js/fixtures");
 
@@ -23,6 +25,7 @@ var MarketStore = Fluxxor.createStore({
 
     onLoadMarkets: function() {
         console.log("MARKETS LOADING...");
+        this.market = fixtures.market;
         this.markets = [];
         this.loading = true;
         this.error = null;
@@ -38,6 +41,8 @@ var MarketStore = Fluxxor.createStore({
 
     onLoadMarketsSuccess: function(payload) {
         console.log("MARKETS LOADED: " + payload.length);
+        this.market = payload[1]; // Load ETX as default
+        this.market.minTotal = bigRat(this.market.amount).divide(fixtures.ether).valueOf();
         this.markets = payload;
         this.loading = false;
         this.error = null;
@@ -47,6 +52,7 @@ var MarketStore = Fluxxor.createStore({
     onChangeMarket: function(payload) {
         console.log("MARKET: " + payload.name);
         this.market = payload;
+        this.market.minTotal = bigRat(this.market.amount).divide(fixtures.ether).valueOf();
         this.emit(constants.CHANGE_EVENT);
     },
 

@@ -17,7 +17,6 @@ var MarketActions = function(client) {
             _client.setMarketWatches(this.flux, markets);
 
         }.bind(this), function(error) {
-            console.log(String(error));
             this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
         }.bind(this));
     };
