@@ -6,6 +6,7 @@ var Router = require("react-router");
 var Fluxxor = require("fluxxor");
 var FluxChildMixin = Fluxxor.FluxChildMixin(React);
 
+var ProgressBar = require('react-bootstrap/ProgressBar');
 var ModalTrigger = require('react-bootstrap/ModalTrigger');
 var ConfirmModal = require('./ConfirmModal');
 
@@ -100,10 +101,13 @@ var TradeTable = React.createClass({
 });
 
 var TradeList = React.createClass({
+    mixins: [FluxChildMixin],
+
     render: function() {
         return (
             <div>
-                <h3>{this.props.title} {this.props.trades.loading && <i className="fa fa-spinner fa-spin"></i>}</h3>
+                <h3>{this.props.trades.title} {this.props.trades.loading && <span>loading...</span>}</h3>
+                {this.props.trades.loading && <ProgressBar active now={this.props.trades.percent} />}
                 {this.props.trades.error && <div className="alert alert-danger" role="alert"><strong>Error!</strong> {this.props.trades.error}</div>}
                 <TradeTable tradeList={this.props.trades.tradeList} user={this.props.user.user} />
             </div>

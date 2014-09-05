@@ -23,7 +23,7 @@ Requirements
 * serpent: Serpent compiler by Vitalik Buterin [repo](https://github.com/ethereum/serpent)
 * pyethereum: Python Ethereum client [repo](https://github.com/ethereum/pyethereum) (testing only)
 * [EPM](https://github.com/project-douglas/epm) for deployment
-* [npm](http://nodejs.org/) and [grunt](http://gruntjs.com/) for UI development
+* [node](http://nodejs.org/) and [grunt](http://gruntjs.com/) for UI development
 
 
 Installation

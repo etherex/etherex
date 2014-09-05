@@ -25,6 +25,8 @@ var EtherExApp = React.createClass({
   componentDidMount: function() {
     this.getFlux().actions.user.loadAddresses();
     this.getFlux().actions.market.loadMarkets();
+
+    // Trades are loaded in EthereumClient using eth.watch
     // this.getFlux().actions.trade.loadTrades();
   },
 

@@ -65,15 +65,16 @@ var EthereumClient = function() {
 
     this.setMarketWatches = function(flux, markets) {
         var market_addresses = _.rest(_.pluck(markets, 'address'));
-        if (ethBrowser)
+        if (ethBrowser) {
             eth.watch({altered: market_addresses}).changed(flux.actions.trade.loadTrades);
-        else
+        }
+        else {
             flux.actions.trade.loadTrades();
         //     for (var i = market_addresses.length - 1; i >= 0; i--) {
         //         flux.actions.trade.loadTrades();
         //         eth.watch(market_addresses[i], "", flux.actions.trade.loadTrades);
         //     }
-        // }
+        }
     };
 
 
@@ -126,7 +127,7 @@ var EthereumClient = function() {
     };
 
 
-    this.loadTrades = function(markets, success, failure) {
+    this.loadTrades = function(flux, markets, success, failure) {
         var trades = [];
         var last = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(18)));
 
@@ -134,6 +135,7 @@ var EthereumClient = function() {
 
         for (var i = 100; i <= 100 + parseInt(last); i = i + 5) {
             var type = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i)));
+            flux.actions.trade.updateProgress((i - 100) * 100 / last);
             if (!_.isUndefined(type) && type > 0) {
                 var mid = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+4))));
                 console.log("Loading trade " + i + " for market " + markets[mid].name);

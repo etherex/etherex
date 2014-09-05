@@ -8,12 +8,16 @@ var TradeActions = function(client) {
 
         var markets = this.flux.store("MarketStore").getState().markets;
 
-        _client.loadTrades(markets, function(trades) {
+        _client.loadTrades(this.flux, markets, function(trades) {
             this.dispatch(constants.trade.LOAD_TRADES_SUCCESS, trades);
         }.bind(this), function(error) {
             console.log(error);
             this.dispatch(constants.trade.LOAD_TRADES_FAIL, {error: error});
         }.bind(this));
+    };
+
+    this.updateProgress = function(percent) {
+        this.dispatch(constants.trade.UPDATE_PROGRESS, percent);
     };
 
     this.addTrade = function(trade) {

@@ -6,6 +6,7 @@ module.exports = {
         LOAD_TRADES: null,
         LOAD_TRADES_FAIL: null,
         LOAD_TRADES_SUCCESS: null,
+        UPDATE_PROGRESS: null,
         ADD_TRADE: null,
         FILL_TRADE: null,
         CANCEL_TRADE: null
