@@ -98,6 +98,8 @@ var routes = (
     <Route handler={EtherExApp} flux={flux}>
       <Redirect from="/" to="trades" />
       <Route name="trades" path="/trades" handler={Trades} flux={flux} title="Trades" />
+      <Route name="trades/xchain" path="/trades/xchain" handler={Trades} flux={flux} title="X-Chain" />
+      <Route name="trades/marketplace" path="/trades/marketplace" handler={Trades} flux={flux} title="Marketplace" />
       <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
       <Route name="assets" path="/assets" handler={Placeholder} flux={flux} title="Assets" />
       <Route name="wallet" path="/wallet" handler={Placeholder} flux={flux} title="Wallet" />

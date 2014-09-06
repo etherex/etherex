@@ -7,6 +7,7 @@ var FluxMixin = Fluxxor.FluxMixin(React),
     StoreWatchMixin = Fluxxor.StoreWatchMixin;
 
 var NavBar = require("./NavBar");
+var SubNavBar = require("./SubNavBar");
 var Balance = require("./Balance");
 var BalanceSub = require("./BalanceSub");
 
@@ -34,6 +35,7 @@ var EtherExApp = React.createClass({
     return (
       <div>
         <NavBar user={this.state.user} />
+        <SubNavBar />
         <div className="clearfix">
           <Balance user={this.state.user} />
           <BalanceSub user={this.state.user} market={this.state.market} />

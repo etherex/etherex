@@ -15,7 +15,7 @@ var NavBar = React.createClass({
 
     render: function() {
         return (
-            <nav className="navbar navbar-default" role="navigation">
+            <nav className="navbar navbar-default" role="navigation" aria-label="Primary">
                 <div className="container-fluid">
                     <div className="navbar-header">
                         <button type="button" className="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
@@ -29,7 +29,7 @@ var NavBar = React.createClass({
                         <Link className="navbar-brand" to="trades">EtherEx</Link>
                     </div>
 
-                    <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <div className="collapse navbar-collapse" id="navbar-collapse">
                         <ul className="nav navbar-nav">
                             <Tab to="trades" className="icon-chart-line">Trades</Tab>
                             <Tab to="assets" className="icon-bitcoin">Assets</Tab>
@@ -48,19 +48,7 @@ var NavBar = React.createClass({
                 </div>
             </nav>
         );
-    },
-
-    // onSubmitForm: function(e) {
-    //     e.preventDefault();
-    //     var searchId = this.refs.searchId.getDOMNode().value.trim();
-    //     if (this.props.trades.tradeById[searchId] !== undefined) {
-    //         Router.transitionTo('tradeDetails', {tradeId: searchId});
-    //     } else if (this.props.contacts.contactById[searchId]) {
-    //         Router.transitionTo('contactDetails', {contactId: searchId});
-    //     } else {
-    //         Router.transitionTo('notfound');
-    //     }
-    // }
+    }
 });
 
 module.exports = NavBar;
