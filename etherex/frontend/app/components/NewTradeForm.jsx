@@ -40,7 +40,7 @@ var NewTradeForm = React.createClass({
               </div>
               <div className="panel-body">
                 <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
-                <form className="form-inline" onSubmit={this.submit}>
+                <form className="form-inline">
                   <DropdownButton ref="type" onSelect={this.handleType} key={this.state.type} title={this.state.typename}>
                     <MenuItem key={1}>Buy</MenuItem>
                     <MenuItem key={2}>Sell</MenuItem>
@@ -179,6 +179,9 @@ var NewTradeForm = React.createClass({
           price: null,
           total: null
         });
+        this.refs.amount.getDOMNode().value = '';
+        this.refs.price.getDOMNode().value = '';
+        this.refs.total.getDOMNode().value = '';
 
         this.getFlux().actions.trade.addTrade({
             type: type,
