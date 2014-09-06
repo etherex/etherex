@@ -103,11 +103,17 @@ var TradeTable = React.createClass({
 var TradeList = React.createClass({
     mixins: [FluxChildMixin],
 
+    // in bootstrap-darkly.css, .progress-bar needs this style: transition-duration: inherit;
+
     render: function() {
+        //console.log('this.props.trades.loading:', this.props.trades.loading);
+        var cssTransDur = this.props.trades.loading+"ms";
         return (
             <div>
                 <h3>{this.props.trades.title} {this.props.trades.loading && <span>loading...</span>}</h3>
-                {this.props.trades.loading && <ProgressBar active now={this.props.trades.percent} />}
+                {this.props.trades.loading &&
+                    <ProgressBar active now={this.props.trades.percent}
+                    style={{"transition-duration":cssTransDur}} />}
                 {this.props.trades.error && <div className="alert alert-danger" role="alert"><strong>Error!</strong> {this.props.trades.error}</div>}
                 <TradeTable tradeList={this.props.trades.tradeList} user={this.props.user.user} />
             </div>

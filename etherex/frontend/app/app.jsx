@@ -34,6 +34,9 @@ var client = new EthereumClient();
 var jQuery = require("jquery");
 window.$ = window.jQuery = jQuery;
 
+var _ = require('lodash');
+window._ = _;
+
 require("bootstrap/dist/js/bootstrap.js");
 // require("bootstrap/dist/css/bootstrap.min.css");
 // require("bootstrap/dist/css/bootstrap-theme.min.css");
@@ -41,6 +44,7 @@ require("./css/bootstrap-darkly.css");
 
 // require("./css/rickshaw.min.css");
 require("./css/styles.css");
+
 
 // eth.js compatibility
 if (!ethBrowser) {
