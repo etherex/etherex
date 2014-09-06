@@ -310,23 +310,23 @@ code:
 
             # Get the trade
             trade = call(trades, [msg.data[1]], 1, 5)
+            market = call(markets, [trade[4]], 1, 5)
 
             # Check the owner
             if msg.sender == trade[3]:
 
-                # Cancel the trade
+                # Clear the trade first
                 ret = call(trades, [0, msg.data[1]], 2)
 
                 # Issue refunds
-                if trade[0] == 2:
+                if trade[0] == 1:
                     # ETH sell refund
-                    send(msg.sender, trade[2])
-                # elif trade[0] == 1:
-                #     # TODO - Subcurrency refund
-                #     if trade[2] > 0:
-                #         market = call(markets, [trade[4]], 1, 5)
-                #         ret = call(market[3], [contract.address, trade[3], trade[2] / trade[1]], 3)
-                return(ret)
+                    value = (trade[2] * market[2]) / trade[1]
+                    send(msg.sender, value)
+
+                elif trade[0] == 2:
+                    # Subcurrency refund
+                    ret = call(market[3], [contract.address, trade[3], trade[2] / 10 ^ 18], 3)
 
             if !ret:
                 return(0) // "Error"
