@@ -8,7 +8,7 @@ var fixtures = require("../js/fixtures");
 var MarketStore = Fluxxor.createStore({
 
     initialize: function(options) {
-        this.market = options.market || fixtures.market;
+        this.market = options.market || {};
         this.markets = options.markets || [];
         this.loading = true;
         this.error = null;
