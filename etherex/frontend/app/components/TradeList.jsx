@@ -23,10 +23,10 @@ var TradeRow = React.createClass({
         return (
             <tr>
                 <td>{this.props.trade.type}</td>
-                <td>{this.props.trade.amount.toLocaleString()} {' '} {this.props.trade.market.name}</td>
-                <td>{this.props.trade.price.toLocaleString()} {' '} {this.props.trade.market.name}/ETH</td>
-                <td>{(this.props.trade.amount / this.props.trade.price).toLocaleString()} ETH</td>
+                <td>{this.props.trade.amount.toLocaleString()} {' '}</td>
                 <td>{this.props.trade.market.name}</td>
+                <td>{this.props.trade.price.toLocaleString()} {' '}</td>
+                <td>{(this.props.trade.amount / this.props.trade.price).toLocaleString()} ETH</td>
                 <td><div className="ellipsis">{this.props.trade.owner}</div></td>
                 <td>{
                     (this.props.trade.owner == this.props.user.id) ?
@@ -87,9 +87,9 @@ var TradeTable = React.createClass({
                         <tr>
                             <th>Type</th>
                             <th>Amount</th>
+                            <th>Market</th>
                             <th>Price</th>
                             <th>Total</th>
-                            <th>Market</th>
                             <th>By</th>
                             <th>Op</th>
                         </tr>
