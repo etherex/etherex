@@ -23,7 +23,7 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onLoadTrades: function() {
-        this.trades = [];
+        this.trades = {};
         this.loading = true;
         this.error = null;
         this.percent = 0;
@@ -32,13 +32,19 @@ var TradeStore = Fluxxor.createStore({
 
     onLoadTradesProgress: function(payload) {
         console.log("Progress: ", payload.percent);
-        this.trades = payload.trades || [];
+        // this.trades = payload.trades || [];
         this.percent = payload.percent;
         this.emit(constants.CHANGE_EVENT);
     },
 
     onLoadTradesSuccess: function(payload) {
-        this.trades = payload;
+        // Split in buys/sells
+        var trades = _.groupBy(payload, 'type');
+
+        // Sort
+        this.trades.buys = _.sortBy(trades.buy, 'price').reverse();
+        this.trades.sells = _.sortBy(trades.sell, 'price');
+
         this.loading = false;
         this.error = null;
         this.percent = 100;
@@ -46,7 +52,7 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onLoadTradesFail: function(payload) {
-        this.trades = payload || [];
+        this.trades = payload || {};
         this.loading = false;
         this.percent = 0;
         this.error = payload.error;
@@ -54,15 +60,21 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onAddTrade: function(payload) {
-        this.trades[payload.id] = {
+        var trade = {
             id: payload.id,
-            type: (payload.type == "buy") ? 'buy' : 'sell',
+            type: (payload.type == 1) ? 'buy' : 'sell',
             price: payload.price,
             amount: payload.amount,
             market: this.flux.store("MarketStore").getState().markets[payload.market],
             owner: this.flux.store("UserStore").getState().user.id,
             status: 'pending'
         };
+
+        if (payload.type == 1)
+            this.trades.buys[payload.id] = trade;
+        else
+            this.trades.sells[payload.id] = trade;
+
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -78,8 +90,9 @@ var TradeStore = Fluxxor.createStore({
 
     getState: function() {
         return {
-            tradeList: _.values(this.trades),
-            tradeById: this.trades,
+            tradeBuys: _.values(this.trades.buys),
+            tradeSells: _.values(this.trades.sells),
+            // tradeById: this.trades,
             loading: this.loading,
             error: this.error,
             title: this.title,

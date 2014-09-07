@@ -138,7 +138,7 @@ var EthereumClient = function() {
             if (!_.isUndefined(type) && type > 0) {
                 var mid = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+4))));
                 console.log("Loading trade " + i + " for market " + markets[mid].name);
-                trades[i] = {
+                trades.push({
                     id: i,
                     type: type == 1 ? 'buy' : 'sell',
                     price: bigRat(
@@ -152,10 +152,10 @@ var EthereumClient = function() {
                         id: mid,
                         name: markets[mid].name
                     }
-                };
+                });
             }
 
-            progress({trades: trades, percent: (i - 100) * 100 / last });
+            progress({percent: (i - 100) * 100 / last });
         };
 
         setTimeout(function() { // temporary slowdown while testing

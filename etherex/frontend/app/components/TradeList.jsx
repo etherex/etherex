@@ -80,22 +80,25 @@ var TradeTable = React.createClass({
             );
         }.bind(this));
         return (
-            <Table responsive striped>
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Amount</th>
-                        <th>Price</th>
-                        <th>Total</th>
-                        <th>Market</th>
-                        <th>By</th>
-                        <th>Op</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tradeListNodes}
-                </tbody>
-            </Table>
+            <div>
+                <h4>{this.props.title}</h4>
+                <Table responsive striped condensed>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th>Market</th>
+                            <th>By</th>
+                            <th>Op</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {tradeListNodes}
+                    </tbody>
+                </Table>
+            </div>
         );
     }
 });
@@ -111,7 +114,14 @@ var TradeList = React.createClass({
                     <ProgressBar active now={this.props.trades.percent} />}
                 {this.props.trades.error &&
                     <div className="alert alert-danger" role="alert"><strong>Error!</strong> {this.props.trades.error}</div>}
-                <TradeTable tradeList={this.props.trades.tradeList} user={this.props.user.user} />
+                <div className="container-fluid">
+                    <div className="col-md-6">
+                        <TradeTable title="Buys" tradeList={this.props.trades.tradeBuys} user={this.props.user.user} />
+                    </div>
+                    <div className="col-md-6">
+                        <TradeTable title="Sells" tradeList={this.props.trades.tradeSells} user={this.props.user.user} />
+                    </div>
+                </div>
             </div>
         );
     }
