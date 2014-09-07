@@ -56,8 +56,8 @@ var EthereumClient = function() {
                 eth.watch(addresses[i], "", flux.actions.user.updateBalance);
 
                 flux.actions.user.updateBalanceSub();
-                for (var i = markets.length - 1; i >= 0; i--)
-                    eth.watch(markets[i].address, "", flux.actions.user.updateBalanceSub);
+                for (var m = markets.length - 1; m >= 0; m--)
+                    eth.watch(markets[m].address, "", flux.actions.user.updateBalanceSub);
             }
         }
     };
