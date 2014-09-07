@@ -5,7 +5,7 @@ var Fluxxor = require("fluxxor");
 var Router = require("react-router");
 
 /* global window */
-// expost React globally for DevTools
+// expose React globally for DevTools
 window.React = React;
 
 var EtherExApp = require("./components/EtherExApp");

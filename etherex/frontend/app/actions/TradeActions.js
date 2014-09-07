@@ -4,23 +4,17 @@ var utils = require("../js/utils");
 var TradeActions = function(client) {
 
     this.loadTrades = function() {
-        console.log('TradeActions loadTrades');
         this.dispatch(constants.trade.LOAD_TRADES);
 
         var markets = this.flux.store("MarketStore").getState().markets;
 
         _client.loadTrades(this.flux, markets, function(trades) {
-            //console.log('dispatch LOAD_TRADES_SUCCESS trades:', trades);
+            this.dispatch(constants.trade.LOAD_TRADES_PROGRESS, trades);
+        }.bind(this), function(trades) {
             this.dispatch(constants.trade.LOAD_TRADES_SUCCESS, trades);
         }.bind(this), function(error) {
-            console.log(error);
             this.dispatch(constants.trade.LOAD_TRADES_FAIL, {error: error});
         }.bind(this));
-    };
-
-    this.updateProgress = function(percent) {
-        //console.log('TradeActions updateProgress percent:', percent);
-        this.dispatch(constants.trade.UPDATE_PROGRESS, percent);
     };
 
     this.addTrade = function(trade) {

@@ -1,7 +1,6 @@
 var utils = require("../js/utils");
 var fixtures = require("../js/fixtures");
 
-require('lodash');
 var bigRat = require('big-rational');
 
 var EthereumClient = function() {
@@ -49,6 +48,7 @@ var EthereumClient = function() {
 
             // Sub balances
             var market_addresses = _.rest(_.pluck(markets, 'address'));
+
             eth.watch({altered: market_addresses}).changed(flux.actions.user.updateBalanceSub);
         }
         else {
@@ -56,8 +56,8 @@ var EthereumClient = function() {
                 eth.watch(addresses[i], "", flux.actions.user.updateBalance);
 
                 flux.actions.user.updateBalanceSub();
-                // for (var i = markets.length - 1; i >= 0; i--)
-                eth.watch(markets[i].address, "", flux.actions.user.updateBalanceSub);
+                for (var i = markets.length - 1; i >= 0; i--)
+                    eth.watch(markets[i].address, "", flux.actions.user.updateBalanceSub);
             }
         }
     };
@@ -127,8 +127,7 @@ var EthereumClient = function() {
     };
 
 
-    this.loadTrades = function(flux, markets, success, failure) {
-        console.log('EthereumClient loadTrades markets:', markets);
+    this.loadTrades = function(flux, markets, progress, success, failure) {
         var trades = [];
         var last = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(18)));
 
@@ -136,7 +135,6 @@ var EthereumClient = function() {
 
         for (var i = 100; i <= 100 + parseInt(last); i = i + 5) {
             var type = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i)));
-            //console.log('loading i='+i+'  type:'+type+'  last:',last);
             if (!_.isUndefined(type) && type > 0) {
                 var mid = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+4))));
                 console.log("Loading trade " + i + " for market " + markets[mid].name);
@@ -156,46 +154,18 @@ var EthereumClient = function() {
                     }
                 };
             }
+
+            progress({trades: trades, percent: (i - 100) * 100 / last });
         };
 
-        if (!trades) {
-            failure("Unable to load trades. Playing cards.");
-            return;
-        }
-
-        var tradesForDisplay = _.compact(trades);
-        console.log('tradesForDisplay:', tradesForDisplay);
-
-        var PROGRESSIVE_DISPLAY_DURATION = 2000; // display all trades over a 2 second interval. should be the same as the progress bar animation duration, set in TradeStore.js
-        var interval_per_trade = Math.floor(PROGRESSIVE_DISPLAY_DURATION / tradesForDisplay.length);
-
-        var displayTrades = function(display_i) {
-            if (display_i <= tradesForDisplay.length) {
-
-                success(tradesForDisplay.slice(0, display_i)); // show first trade
-
-                if (display_i === 1) {
-                    flux.actions.trade.updateProgress(100); // start animation when first trade displays.
-                }
-
-                if (display_i === 0) {
-                    display_interval = 50; // immediately do next, to show first time.
-                } else {
-                    display_interval = interval_per_trade;
-                }
-
-                setTimeout(function() { displayTrades(display_i + 1); }, display_interval);
-            } else {
-                // show a full bar for one extra interval. then use a value > 100 to hide it.
-                setTimeout(function() {
-                    flux.actions.trade.updateProgress(101);
-                }, display_interval);
+        setTimeout(function() { // temporary slowdown while testing
+            if (trades) {
+                success(trades);
             }
-        };
-
-
-        displayTrades(0); // start recursive loop to progressively display each trade
-
+            else {
+                failure("Unable to load trades. Playing cards.");
+            }
+        }, 500);
     };
 
 
