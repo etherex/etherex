@@ -2653,7 +2653,7 @@ select[multiple].input-lg {
 @media (min-width: 768px) {
   .form-inline .form-group {
     display: inline-block;
-    margin-bottom: 0;
+    margin-bottom: 1em;
     vertical-align: middle;
   }
   .form-inline .form-control {
@@ -2668,6 +2668,7 @@ select[multiple].input-lg {
   .form-inline .input-group .input-group-addon,
   .form-inline .input-group .input-group-btn,
   .form-inline .input-group .form-control {
+    border-color: #555;
     width: auto;
   }
   .form-inline .input-group > .form-control {

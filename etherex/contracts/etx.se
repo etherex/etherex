@@ -119,9 +119,9 @@ code:
 
         n = 3
         owners = array(n)
-        owners[0] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31 // #define 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31=ALICE
-        owners[1] = 0xe559de5527492bcb42ec68d07df0742a98ec3f1e // #define 0xe559de5527492bcb42ec68d07df0742a98ec3f1e=BOB
-        owners[2] = 0xf9e57456f18d90886263fedd9cc30b27cd959137 // #define 0xf9e57456f18d90886263fedd9cc30b27cd959137=CHARLIE
+        owners[0] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31 // #define 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31=CAK
+        owners[1] = 0xe559de5527492bcb42ec68d07df0742a98ec3f1e // #define 0xe559de5527492bcb42ec68d07df0742a98ec3f1e=ZG
+        owners[2] = 0x90004d8d1d3c85f87bc8b7152a69ef14235504cb // #define 0x90004d8d1d3c85f87bc8b7152a69ef14235504cb=FAB
 
         # Split endowment between owners
         i = 0
