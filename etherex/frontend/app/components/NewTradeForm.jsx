@@ -43,7 +43,7 @@ var NewTradeForm = React.createClass({
                 <form className="form-inline" role="form">
                   <input type="hidden" ref="market" value={this.props.market.market.id} />
                   <div className="form-group">
-                    <label className="sr-only" for="type">Buy or sell</label>
+                    <label className="sr-only" forHtml="type">Buy or sell</label>
                     <DropdownButton className="btn-fixed" ref="type" onSelect={this.handleType} key={this.state.type} title={this.state.typename}>
                       <MenuItem key={1}>Buy</MenuItem>
                       <MenuItem key={2}>Sell</MenuItem>
@@ -51,13 +51,13 @@ var NewTradeForm = React.createClass({
                   </div>
                   <div className="form-group">
                     <div className="input-group">
-                      <label className="sr-only" for="amount">Amount</label>
+                      <label className="sr-only" forHtml="amount">Amount</label>
                       <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
                       <div className="input-group-addon">{this.props.market.market.name}</div>
                     </div>
                   </div>
                   <div className="form-group">
-                    <label className="sr-only" for="price">Price</label>
+                    <label className="sr-only" forHtml="price">Price</label>
                     <div className="input-group">
                       <div className="input-group-addon">@</div>
                       <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="2000.0000" ref="price" onChange={this.handleChange} />
