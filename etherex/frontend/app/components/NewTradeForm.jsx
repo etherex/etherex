@@ -44,14 +44,14 @@ var NewTradeForm = React.createClass({
               <form className="form-horizontal" role="form">
                 <input type="hidden" ref="market" value={this.props.market.market.id} />
                 <div className="form-group">
-                  <label className="sr-only" forHtml="type">Buy or sell</label>
-                  <DropdownButton className="btn-fixed" ref="type" onSelect={this.handleType} key={this.state.type} title={this.state.typename}>
-                    <MenuItem key={1}>Buy</MenuItem>
-                    <MenuItem key={2}>Sell</MenuItem>
-                  </DropdownButton>
-                </div>
-                <div className="form-group">
                   <div className="input-group">
+                    <label className="sr-only" forHtml="type">Buy or sell</label>
+                    <div className="input-group-btn">
+                      <DropdownButton className="btn-fixed" ref="type" onSelect={this.handleType} key={this.state.type} title={this.state.typename}>
+                        <MenuItem key={1}>Buy</MenuItem>
+                        <MenuItem key={2}>Sell</MenuItem>
+                      </DropdownButton>
+                    </div>
                     <label className="sr-only" forHtml="amount">Amount</label>
                     <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
                     <div className="input-group-addon">{this.props.market.market.name}</div>
@@ -76,7 +76,7 @@ var NewTradeForm = React.createClass({
                     </div>
                   </div>
                 </div>
-                <div className="form-group pull-right">
+                <div className="form-group">
                   {this.state.newTrade == true ?
                     <span>
                       <ModalTrigger modal={
@@ -91,11 +91,11 @@ var NewTradeForm = React.createClass({
                             onSubmit={this.onSubmitForm}
                           />
                         }>
-                        <Button type="submit" key="newtrade">Place trade</Button>
+                        <Button className="btn-block" type="submit" key="newtrade">Place trade</Button>
                       </ModalTrigger>
                     </span>
                     :
-                    <Button type="submit" key="newtrade" onClick={this.onSubmitForm}>Place trade</Button>
+                    <Button className="btn-block" type="submit" key="newtrade" onClick={this.onSubmitForm}>Place trade</Button>
                   }
                 </div>
               </form>
