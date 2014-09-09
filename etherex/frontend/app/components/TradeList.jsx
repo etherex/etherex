@@ -22,13 +22,12 @@ var TradeRow = React.createClass({
     render: function() {
         return (
             <tr>
-                <td>{this.props.trade.type}</td>
-                <td>{this.props.trade.amount.toLocaleString()} {' '}</td>
-                <td>{this.props.trade.market.name}</td>
-                <td>{this.props.trade.price.toLocaleString()} {' '}</td>
-                <td>{(this.props.trade.amount / this.props.trade.price).toLocaleString()} ETH</td>
-                <td><div className="ellipsis">{this.props.trade.owner}</div></td>
-                <td>{
+                <td><div className="btn">{this.props.trade.amount.toLocaleString()}</div></td>
+                <td><div className="btn">{this.props.trade.market.name}</div></td>
+                <td><div className="btn">{this.props.trade.price.toLocaleString()}</div></td>
+                <td><div className="btn">{(this.props.trade.amount / this.props.trade.price).toLocaleString()} ETH</div></td>
+                <td><div className="btn"><div className="ellipsis">{this.props.trade.owner}</div></div></td>
+                <td><div className="pull-right">{
                     (this.props.trade.owner == this.props.user.id) ?
                         <ModalTrigger modal={
                                 <ConfirmModal
@@ -57,7 +56,7 @@ var TradeRow = React.createClass({
                             }>
                             <Button key="fill">Fill</Button>
                         </ModalTrigger>
-                    }
+                    }</div>
                 </td>
             </tr>
         );
@@ -82,16 +81,15 @@ var TradeTable = React.createClass({
         return (
             <div>
                 <h4>{this.props.title}</h4>
-                <Table responsive striped condensed>
+                <Table striped condensed hover responsive>
                     <thead>
                         <tr>
-                            <th>Type</th>
-                            <th>Amount</th>
-                            <th>Market</th>
-                            <th>Price</th>
-                            <th>Total</th>
-                            <th>By</th>
-                            <th>Op</th>
+                            <th className="text-center">Amount</th>
+                            <th className="text-center">Market</th>
+                            <th className="text-center">Price</th>
+                            <th className="text-center">Total</th>
+                            <th className="text-center">By</th>
+                            <th className="text-center">Op</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -114,13 +112,11 @@ var TradeList = React.createClass({
                     <ProgressBar active now={this.props.trades.percent} />}
                 {this.props.trades.error &&
                     <div className="alert alert-danger" role="alert"><strong>Error!</strong> {this.props.trades.error}</div>}
-                <div className="container-fluid">
-                    <div className="col-md-6">
-                        <TradeTable title="Buys" tradeList={this.props.trades.tradeBuys} user={this.props.user.user} />
-                    </div>
-                    <div className="col-md-6">
-                        <TradeTable title="Sells" tradeList={this.props.trades.tradeSells} user={this.props.user.user} />
-                    </div>
+                <div className="col-md-6">
+                    <TradeTable title="Buys" tradeList={this.props.trades.tradeBuys} user={this.props.user.user} />
+                </div>
+                <div className="col-md-6">
+                    <TradeTable title="Sells" tradeList={this.props.trades.tradeSells} user={this.props.user.user} />
                 </div>
             </div>
         );

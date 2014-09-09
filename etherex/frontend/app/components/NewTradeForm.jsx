@@ -182,7 +182,7 @@ var NewTradeForm = React.createClass({
           if (amount && price && total && total < this.props.market.market.minTotal) {
             this.setState({
               alertLevel: 'warning',
-              alertMessage: "Minimum ETH total is " + this.props.market.market.minTotal
+              alertMessage: "Minimum total is " + this.props.market.market.minTotal + " ETH"
             });
           }
           else {

@@ -15,14 +15,12 @@ var SubNavBar = React.createClass({
 
     render: function() {
         return (
-            <nav id="subnav" role="navigation" aria-label="Secondary">
-                <div className="container-fluid">
-                    <ul className="nav nav-pills nav-justified">
-                        <SubTab to="trades" className="icon-chart-line">Subcurrencies</SubTab>
-                        <SubTab to="trades/xchain" className="icon-bitcoin">X-Chain</SubTab>
-                        <SubTab to="trades/marketplace" className="icon-wallet">Marketplace</SubTab>
-                    </ul>
-                </div>
+            <nav className="panel-group" role="navigation" aria-label="Secondary">
+                <ul className="nav nav-pills nav-justified">
+                    <SubTab to="trades" className="icon-chart-line">Subcurrencies</SubTab>
+                    <SubTab to="trades/xchain" className="icon-bitcoin">X-Chain</SubTab>
+                    <SubTab to="trades/marketplace" className="icon-wallet">Marketplace</SubTab>
+                </ul>
             </nav>
         );
     }
