@@ -33,74 +33,76 @@ var NewTradeForm = React.createClass({
     },
 
     render: function() {
-        return (
-            <div className="panel panel-default">
-              <div className="panel-heading">
-                <h3 className="panel-title">New Trade</h3>
-              </div>
-              <div className="panel-body">
-                <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
-                <form className="form-inline" role="form">
-                  <input type="hidden" ref="market" value={this.props.market.market.id} />
-                  <div className="form-group">
-                    <label className="sr-only" forHtml="type">Buy or sell</label>
-                    <DropdownButton className="btn-fixed" ref="type" onSelect={this.handleType} key={this.state.type} title={this.state.typename}>
-                      <MenuItem key={1}>Buy</MenuItem>
-                      <MenuItem key={2}>Sell</MenuItem>
-                    </DropdownButton>
+      return (
+        <div className="panel panel-default">
+          <div className="panel-heading">
+            <h3 className="panel-title">New Trade</h3>
+          </div>
+          <div className="panel-body">
+            <div className="container-fluid">
+              <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
+              <form className="form-horizontal" role="form">
+                <input type="hidden" ref="market" value={this.props.market.market.id} />
+                <div className="form-group">
+                  <label className="sr-only" forHtml="type">Buy or sell</label>
+                  <DropdownButton className="btn-fixed" ref="type" onSelect={this.handleType} key={this.state.type} title={this.state.typename}>
+                    <MenuItem key={1}>Buy</MenuItem>
+                    <MenuItem key={2}>Sell</MenuItem>
+                  </DropdownButton>
+                </div>
+                <div className="form-group">
+                  <div className="input-group">
+                    <label className="sr-only" forHtml="amount">Amount</label>
+                    <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
+                    <div className="input-group-addon">{this.props.market.market.name}</div>
                   </div>
-                  <div className="form-group">
-                    <div className="input-group">
-                      <label className="sr-only" forHtml="amount">Amount</label>
-                      <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
-                      <div className="input-group-addon">{this.props.market.market.name}</div>
+                </div>
+                <div className="form-group">
+                  <label className="sr-only" forHtml="price">Price</label>
+                  <div className="input-group">
+                    <div className="input-group-addon">@</div>
+                    <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="2000.0000" ref="price" onChange={this.handleChange} />
+                    <div className="input-group-addon">
+                      {this.props.market.market.name}/ETH
                     </div>
                   </div>
-                  <div className="form-group">
-                    <label className="sr-only" forHtml="price">Price</label>
-                    <div className="input-group">
-                      <div className="input-group-addon">@</div>
-                      <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="2000.0000" ref="price" onChange={this.handleChange} />
-                      <div className="input-group-addon">
-                        {this.props.market.market.name}/ETH
-                      </div>
+                </div>
+                <div className="form-group">
+                  <div className="input-group">
+                    <div className="input-group-addon">{"="}</div>
+                    <input type="number" min="10" step="0.00000001" className="form-control medium" placeholder="1" ref="total" onChange={this.handleChangeTotal} />
+                    <div className="input-group-addon">
+                      ETH
                     </div>
                   </div>
-                  <div className="form-group">
-                    <div className="input-group">
-                      <div className="input-group-addon">{"="}</div>
-                      <input type="number" min="10" step="0.00000001" className="form-control medium" placeholder="1" ref="total" onChange={this.handleChangeTotal} />
-                      <div className="input-group-addon">
-                        ETH
-                      </div>
-                    </div>
-                  </div>
-                  <div className="form-group pull-right">
-                    {this.state.newTrade == true ?
-                      <span>
-                        <ModalTrigger modal={
-                            <ConfirmModal
-                              message={
-                                "Are you sure you want to " + (this.state.type == 1 ? "buy" : "sell") +
-                                " " + this.state.amount + " " + this.props.market.market.name +
-                                " at " + this.state.price + " " + this.props.market.market.name + "/ETH" +
-                                " for " + (this.state.amount / this.state.price) + " ETH"
-                              }
-                              flux={this.getFlux()}
-                              onSubmit={this.onSubmitForm}
-                            />
-                          }>
-                          <Button type="submit" key="newtrade">Place trade</Button>
-                        </ModalTrigger>
-                      </span>
-                      :
-                      <Button type="submit" key="newtrade" onClick={this.onSubmitForm}>Place trade</Button>
-                    }
-                  </div>
-                </form>
-              </div>
+                </div>
+                <div className="form-group pull-right">
+                  {this.state.newTrade == true ?
+                    <span>
+                      <ModalTrigger modal={
+                          <ConfirmModal
+                            message={
+                              "Are you sure you want to " + (this.state.type == 1 ? "buy" : "sell") +
+                              " " + this.state.amount + " " + this.props.market.market.name +
+                              " at " + this.state.price + " " + this.props.market.market.name + "/ETH" +
+                              " for " + (this.state.amount / this.state.price) + " ETH"
+                            }
+                            flux={this.getFlux()}
+                            onSubmit={this.onSubmitForm}
+                          />
+                        }>
+                        <Button type="submit" key="newtrade">Place trade</Button>
+                      </ModalTrigger>
+                    </span>
+                    :
+                    <Button type="submit" key="newtrade" onClick={this.onSubmitForm}>Place trade</Button>
+                  }
+                </div>
+              </form>
             </div>
-        );
+          </div>
+        </div>
+      );
     },
 
     handleType: function(key) {
