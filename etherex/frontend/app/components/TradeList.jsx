@@ -81,7 +81,7 @@ var TradeTable = React.createClass({
         return (
             <div>
                 <h4>{this.props.title}</h4>
-                <Table striped condensed hover responsive>
+                <Table condensed hover responsive striped>
                     <thead>
                         <tr>
                             <th className="text-center">Amount</th>
@@ -112,10 +112,10 @@ var TradeList = React.createClass({
                     <ProgressBar active now={this.props.trades.percent} />}
                 {this.props.trades.error &&
                     <div className="alert alert-danger" role="alert"><strong>Error!</strong> {this.props.trades.error}</div>}
-                <div className="col-md-6">
+                <div className="col-lg-6">
                     <TradeTable title="Buys" tradeList={this.props.trades.tradeBuys} user={this.props.user.user} />
                 </div>
-                <div className="col-md-6">
+                <div className="col-lg-6">
                     <TradeTable title="Sells" tradeList={this.props.trades.tradeSells} user={this.props.user.user} />
                 </div>
             </div>
