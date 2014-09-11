@@ -10,6 +10,7 @@ var TradeStore = Fluxxor.createStore({
         this.loading = true;
         this.error = null;
         this.percent = 0;
+        this.type = 1;
 
         this.bindActions(
             constants.trade.LOAD_TRADES, this.onLoadTrades,
@@ -18,7 +19,8 @@ var TradeStore = Fluxxor.createStore({
             constants.trade.LOAD_TRADES_FAIL, this.onLoadTradesFail,
             constants.trade.ADD_TRADE, this.onAddTrade,
             constants.trade.FILL_TRADE, this.onFillTrade,
-            constants.trade.CANCEL_TRADE, this.onFillTrade
+            constants.trade.CANCEL_TRADE, this.onFillTrade,
+            constants.trade.SWITCH_TYPE, this.switchType
         );
     },
 
@@ -88,6 +90,11 @@ var TradeStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
+    switchType: function(payload) {
+        this.type = payload;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
     getState: function() {
         return {
             tradeBuys: _.values(this.trades.buys),
@@ -96,6 +103,7 @@ var TradeStore = Fluxxor.createStore({
             loading: this.loading,
             error: this.error,
             title: this.title,
+            type: this.type,
             percent: this.percent
         };
     }

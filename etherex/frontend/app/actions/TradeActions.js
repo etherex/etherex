@@ -57,6 +57,10 @@ var TradeActions = function(client) {
         }.bind(this));
     };
 
+    this.switchType = function(type) {
+        this.dispatch(constants.trade.SWITCH_TYPE, type);
+    };
+
     var _client = client;
 };
 

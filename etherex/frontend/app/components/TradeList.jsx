@@ -112,12 +112,24 @@ var TradeList = React.createClass({
                     <ProgressBar active now={this.props.trades.percent} />}
                 {this.props.trades.error &&
                     <div className="alert alert-danger" role="alert"><strong>Error!</strong> {this.props.trades.error}</div>}
-                <div className="col-lg-6">
-                    <TradeTable title="Buys" tradeList={this.props.trades.tradeBuys} user={this.props.user.user} />
+                {(this.props.trades.type == 1) ?
+                <div>
+                    <div className="col-lg-6">
+                        <TradeTable title="Sells" tradeList={this.props.trades.tradeSells} user={this.props.user.user} />
+                    </div>
+                    <div className="col-lg-6">
+                        <TradeTable title="Buys" tradeList={this.props.trades.tradeBuys} user={this.props.user.user} />
+                    </div>
+                </div> :
+                <div>
+                    <div className="col-lg-6">
+                        <TradeTable title="Buys" tradeList={this.props.trades.tradeBuys} user={this.props.user.user} />
+                    </div>
+                    <div className="col-lg-6">
+                        <TradeTable title="Sells" tradeList={this.props.trades.tradeSells} user={this.props.user.user} />
+                    </div>
                 </div>
-                <div className="col-lg-6">
-                    <TradeTable title="Sells" tradeList={this.props.trades.tradeSells} user={this.props.user.user} />
-                </div>
+                }
             </div>
         );
     }

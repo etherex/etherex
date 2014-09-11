@@ -110,6 +110,7 @@ var NewTradeForm = React.createClass({
           type: key,
           typename: this.refs.type.props.children[key - 1].props.children
         });
+        this.getFlux().actions.trade.switchType(key);
     },
 
     handleChange: function(e) {
