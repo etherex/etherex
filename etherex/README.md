@@ -241,6 +241,7 @@ TODO
 * Split buy/sell forms
 * Implement the live updating "which trade gets filled" while changing amount/price/total
 * Handle and color code new/pending/mined trades
+* Animations/transitions
 * More/new mockups / wireframes
 * More/new design elements
 * Implement new mockups / design elements
