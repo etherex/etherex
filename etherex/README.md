@@ -226,6 +226,7 @@ TODO
 * Actually use `balances.se` to keep track of each address' balance within the exchange
 * Link price indexes to orderbook and check for lower/higher bids (use heap.se?)
 * Support partial fills
+* Make sure trades are mined before allowing them to get filled... (obvious HFT prevention)
 * Deposit/withdrawal queues and confirmation handling (?)
 * Go back to TDD when serpent/pyethereum become usable
 * Port contracts to [Solidity](https://github.com/ethereum/cpp-ethereum/wiki/ABI-in-PoC-7)
