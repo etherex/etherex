@@ -7,21 +7,23 @@ Decentralized exchange built on Ethereum.
 About
 -----
 
-This repository contains the code that runs the exchange on Ethereum as a set of contracts, along with the UI, tests, tools and documentation.
+This repository contains the source code that runs the exchange on Ethereum as a set of contracts, along with the UI, tests, tools and documentation.
 
 
 Components
 ----------
 
-* contracts: Ethereum contracts (serpent)
-* frontend: React.js UI [repo](https://github.com/facebook/react)
+* contracts: Ethereum contracts in [Serpent](https://github.com/ethereum/serpent)
+* frontend: [React.js](https://github.com/facebook/react) UI
 * tests: EtherEx tests
 
 
 Requirements
 ------------
-* serpent: Serpent compiler by Vitalik Buterin [repo](https://github.com/ethereum/serpent)
-* pyethereum: Python Ethereum client [repo](https://github.com/ethereum/pyethereum) (testing only)
+* [Serpent](https://github.com/ethereum/serpent) compiler by Vitalik Buterin
+* [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) browser (AlethZero or Third) by Gavin Wood
+* [go-ethereum](https://github.com/ethereum/go-ethereum) (alternative browser) by Jeffrey Wilcke
+* [pyethereum](https://github.com/ethereum/pyethereum) Python Ethereum client (tests only)
 * [EPM](https://github.com/project-douglas/epm) for deployment
 * [node](http://nodejs.org/) and [grunt](http://gruntjs.com/) for UI development
 
@@ -35,37 +37,41 @@ Start by cloning this repository.
 git clone https://github.com/etherex/etherex.git
 ```
 
-### Testing
+
+### Development / testing
+
+This will install `pyethereum` and `ethereum-serpent` if you don't already have those installed.
+
 ```
 pip install --upgrade -r requirements.txt
 ```
 
-### UI
-```
-cd frontend && npm install
-```
+#### Running tests
 
-
-Running tests
--------------
 ```
 ./runtests.py
 ```
 
-Refer to [Serpent](https://github.com/ethereum/serpent) and [pyethereum.tester](https://github.com/ethereum/pyethereum) for their respective usage.
+Refer to [Serpent](https://github.com/ethereum/serpent) and [pyethereum](https://github.com/ethereum/pyethereum) for their respective usage.
 
 
-Local blockchain tests
-----------------------
-Requires a working [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) client and [EPM](https://github.com/project-douglas/epm)
+### UI development
+
+You will need a working node.js setup ([instructions](https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager)) and globally installed `grunt-cli` ([instructions](http://gruntjs.com/getting-started)).
+
+```
+cd frontend
+npm install
+grunt
+```
+
+
+### Deployment
+
+Requires a working [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) client, [Serpent](https://github.com/ethereum/serpent) and [EPM](https://github.com/project-douglas/epm)
 
 ```
 epm deploy contracts/EtherEx.package-definition
-```
-
-Then run the UI:
-```
-grunt
 ```
 
 
@@ -215,27 +221,36 @@ TODO
 
 ### Architecture
 
-* Link price indexes to orderbook and check for lower/higher bids (use head.se?)
-* Remove array values instead of setting them to 0, maybe combine first and second indexes of arrays then (what?)
-* ~~Combine/optimize buy/sell operations in while loop~~
-* ~~Make ETX/ETH transactions~~
-* Trigger BTC transactions
-* Fees (?)
-* Per user address storage, possible conflicts with price indexes
-* Pending queue for deposits/withdrawals
-* Deposit/withdrawal confirmation handling
-* A few dozen other tests
-* ... and then some
+* Rename `currencies.se` to `markets.se`
+* Linked list contracts for `trades.se` and `markets.se`
+* Actually use `balances.se` to keep track of each address' balance within the exchange
+* Link price indexes to orderbook and check for lower/higher bids (use heap.se?)
+* Support partial fills
+* Deposit/withdrawal queues and confirmation handling (?)
+* Go back to TDD when serpent/pyethereum become usable
+* Port contracts to [Solidity](https://github.com/ethereum/cpp-ethereum/wiki/ABI-in-PoC-7)
+* Look into how [Whisper](https://github.com/ethereum/cpp-ethereum/wiki/Whisper) and [Swarm](https://github.com/ethereum/cpp-ethereum/wiki/Swarm) should be used and integrated
+* Start working on X-Chain
+* Update this TODO more frequently
+* Start using GitHub issues instead
+* Better, rock solid tests, and way more of them
 
 ### UX/UI
 
-* Mockups / wireframes
-* Design elements
-* ~~Choose JS framework~~
-* Quick port of current functionality to new framework (in progress)
-* Plan next structure and implementation (in progress)
-* Implement said new structure
-* Apply design elements
+* ~~Port current implementation to new framework~~
+* Split buy/sell forms
+* Implement the live updating "which trade gets filled" while changing amount/price/total
+* Handle and color code new/pending/mined trades
+* More/new mockups / wireframes
+* More/new design elements
+* Implement new mockups / design elements
+
+### ETX/EETX
+
+* Draft and start implementing the ETX subcurrency
+* Discuss and decide how EETX should work and be managed
+* Discuss and decide if another DAO should be used to manage EETX
+* Begin work on the EETX contract(s) and UI otherwise
 
 
 ## License

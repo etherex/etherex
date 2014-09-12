@@ -1,12 +1,2 @@
 pyethereum
 ethereum-serpent
-flake8
-pytest
-pytest-xdist
-leveldb
-bitcoin
-pysha3
-miniupnpc
-bottle
-waitress
-six
