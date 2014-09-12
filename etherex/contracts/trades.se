@@ -11,7 +11,7 @@
 
 init:
     # c3D definitions
-    contract.storage[10] = 585546221227 # 0x88554646AB
+    contract.storage[10] = 0x88554646ab # 0x88554646AB
     contract.storage[15] = msg.sender
     contract.storage[16] = msg.sender
     contract.storage[17] = block.timestamp

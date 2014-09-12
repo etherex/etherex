@@ -101,6 +101,30 @@ var TradeTable = React.createClass({
     }
 });
 
+var TradeBuys = React.createClass({
+    mixins: [FluxChildMixin],
+
+    render: function() {
+        return (
+            <div className="col-lg-6">
+                <TradeTable title="Buys" tradeList={this.props.trades.tradeBuys} user={this.props.user.user} />
+            </div>
+        );
+    }
+});
+
+var TradeSells = React.createClass({
+    mixins: [FluxChildMixin],
+
+    render: function() {
+        return (
+            <div className="col-lg-6">
+                <TradeTable title="Sells" tradeList={this.props.trades.tradeSells} user={this.props.user.user} />
+            </div>
+        );
+    }
+});
+
 var TradeList = React.createClass({
     mixins: [FluxChildMixin],
 
@@ -114,20 +138,12 @@ var TradeList = React.createClass({
                     <div className="alert alert-danger" role="alert"><strong>Error!</strong> {this.props.trades.error}</div>}
                 {(this.props.trades.type == 1) ?
                 <div>
-                    <div className="col-lg-6">
-                        <TradeTable title="Sells" tradeList={this.props.trades.tradeSells} user={this.props.user.user} />
-                    </div>
-                    <div className="col-lg-6">
-                        <TradeTable title="Buys" tradeList={this.props.trades.tradeBuys} user={this.props.user.user} />
-                    </div>
+                    <TradeSells trades={this.props.trades} user={this.props.user} />
+                    <TradeBuys trades={this.props.trades} user={this.props.user} />
                 </div> :
                 <div>
-                    <div className="col-lg-6">
-                        <TradeTable title="Buys" tradeList={this.props.trades.tradeBuys} user={this.props.user.user} />
-                    </div>
-                    <div className="col-lg-6">
-                        <TradeTable title="Sells" tradeList={this.props.trades.tradeSells} user={this.props.user.user} />
-                    </div>
+                    <TradeBuys trades={this.props.trades} user={this.props.user} />
+                    <TradeSells trades={this.props.trades} user={this.props.user} />
                 </div>
                 }
             </div>
