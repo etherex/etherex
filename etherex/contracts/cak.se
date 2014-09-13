@@ -11,10 +11,10 @@
 
 init:
     # c3D definitions
-    contract.storage[10] = 0x88554646bb # 0x88554646BB
-    contract.storage[15] = msg.sender
-    contract.storage[16] = msg.sender
-    contract.storage[17] = block.timestamp
+    contract.storage[10] = 0x88554646AA # c3D action contract
+    contract.storage[15] = msg.sender # Owner of this c3D contract
+    contract.storage[16] = msg.sender # Creator of this c3D contract
+    contract.storage[17] = block.timestamp # TimeStamp this c3D contract was created
 
 code:
     # Basic gas check

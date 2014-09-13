@@ -221,8 +221,8 @@ TODO
 
 ### Architecture
 
-* Rename `currencies.se` to `markets.se`
-* Linked list contracts for `trades.se` and `markets.se`
+* ~~Rename `currencies.se` to `markets.se`~~
+* ~~Linked list contracts for `trades.se` and `markets.se`~~
 * Actually use `balances.se` to keep track of each address' balance within the exchange
 * Link price indexes to orderbook and check for lower/higher bids (use heap.se?)
 * Support partial fills

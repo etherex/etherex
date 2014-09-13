@@ -28,7 +28,7 @@ class TestEtherEx(object):
         cls.bcode = open('contracts/balances.se').read()
         cls.icode = open('contracts/indexes.se').read()
         cls.tcode = open('contracts/trades.se').read()
-        cls.ccode = open('contracts/currencies.se').read()
+        cls.ccode = open('contracts/markets.se').read()
         cls.xcode = open('contracts/etx.se').read()
 
         # cls.sim = Simulator({cls.ALICE.address: 10**24,
@@ -61,7 +61,7 @@ class TestEtherEx(object):
         return self.state.block.account_to_dict(contract)['storage'].get(idx)
 
     def test_creation(self):
-        assert self._storage(self.contract, 10) == "0x88554646bb"
+        assert self._storage(self.contract, 10) == 0x88554646AA
         assert self._storage(self.contract, 15) == "0x" + self.ALICE['address']
         assert self._storage(self.bcontract, 15) == "0x" + self.ALICE['address']
         assert self._storage(self.icontract, 15) == "0x" + self.ALICE['address']
@@ -88,17 +88,18 @@ class TestEtherEx(object):
         ans = self.state.send(self.ALICE['key'], self.tcontract, 0, [self.contract, self.ncontract, "EtherEx - Trades"])
         assert ans == [1]
 
-        ans = self.state.send(self.ALICE['key'], self.ccontract, 0, [self.contract, self.ncontract, "EtherEx - Currencies"])
+        ans = self.state.send(self.ALICE['key'], self.ccontract, 0, [self.contract, self.ncontract, "EtherEx - Markets"])
         assert ans == [1]
 
         ans = self.state.send(self.ALICE['key'], self.xcontract, 10 ** 18, [self.contract, self.ncontract, "ETX"])
         assert ans == [1]
 
+        assert self._storage(self.contract, 1) == 1
         assert self._storage(self.contract, 3) == "0x" + self.bcontract
         assert self._storage(self.contract, 4) == "0x" + self.icontract
         assert self._storage(self.contract, 5) == "0x" + self.tcontract
         assert self._storage(self.contract, 6) == "0x" + self.ccontract
-        # assert self._storage(self.bcontract, "b5b8c62dd5a20793b6c562e002e7e0aa68316d31") == 333333333333333333
+
         assert self._storage(self.bcontract, int(self.ALICE['address'], 16)) == self.xhex(10 ** 18)
         assert self._storage(self.bcontract, 15) == "0x" + self.contract
         assert self._storage(self.icontract, 15) == "0x" + self.contract

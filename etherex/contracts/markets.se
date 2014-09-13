@@ -1,4 +1,4 @@
-# trades.se -- Ethereum contract
+# currencies.se -- Ethereum contract
 #
 # Copyright (c) 2014 EtherEx
 #
@@ -6,7 +6,7 @@
 # of the MIT license.  See the LICENSE file for details.
 
 #
-# Trades
+# Markets
 #
 
 init:
@@ -43,48 +43,54 @@ code:
 
     # Slots used per data group
     slots = 10
-    used = 5 # Current number of slots used
+    used = 6 # Current number of slots used
 
-    # DEBUG
-    if msg.value > 0: // "Refunding value: %s" % msg.value
-        send(tx.origin, msg.value)
+    if msg.value > 0: // "Refunding excess value: %s" % msg.value
+        send(msg.sender, msg.value)
 
     if status == 1:
-        if msg.datasize == 1: // "Getting trade"
-            trade = array(slots - used)
-            trade[0] = contract.storage[msg.data[0]] // "Buy or sell"
-            trade[1] = contract.storage[msg.data[0] + 1] // "Price"
-            trade[2] = contract.storage[msg.data[0] + 2] // "Amount"
-            trade[3] = contract.storage[msg.data[0] + 3] // "Owner"
-            trade[4] = contract.storage[msg.data[0] + 4] // "Market"
-            return(trade, slots - used)
+        #
+        # Get market
+        #
+        if msg.datasize == 1:
+            marketid = msg.data[0] - 1
+            market = array(slots - used)
+            market[0] = contract.storage[marketid * slots + start] // "Name"
+            market[1] = contract.storage[marketid * slots + start + 1] // "Minimum amount"
+            market[2] = contract.storage[marketid * slots + start + 2] // "Price precision"
+            market[3] = contract.storage[marketid * slots + start + 3] // "Contract"
+            market[4] = contract.storage[marketid * slots + start + 4] // "Last price"
+            market[5] = contract.storage[marketid * slots + start + 5] // "Decimal precision"
+            return(market, slots - used)
 
         #
-        # Add trade
+        # Add market
         #
-        elif msg.datasize == 6:
+        elif msg.datasize == 5:
             if msg.data[0] == 1:
                 if msg.sender == exchange:
-                    trade = msg.data[1]
-                    price = msg.data[2]
-                    amount = msg.data[3]
+                    name = msg.data[1]
+                    amount = msg.data[2]
+                    price = msg.data[3]
                     owner = msg.data[4]
-                    market = msg.data[5]
+                    market = ((last - start) / slots) + 1
+                    contract.storage[9] = market
 
-                    if trade < 1 or trade > 2:
-                        return(2) // "Invalid trade type"
-                    if price < 1 or price > 2^254:
-                        return(3) // "Invalid price"
                     if amount < 1 or amount > 2^254:
-                        return(4) // "Invalid amount"
+                        return(0) // "Invalid minimum amount"
+                    if price < 1 or price > 2^254:
+                        return(0) // "Invalid price"
                     if owner < 1 or owner > 2^254:
-                        return(5) // "Invalid owner"
-                    if market < 1 or market > 2^254: // "TODO - Get and check market count"
-                        return(6) // "Invalid market"
+                        return(0) // "Invalid owner"
+                    if market < 1 or market > 2^254:
+                        return(0) // "Invalid market ID"
 
                     i = 0
                     while i < slots - 2:
-                        contract.storage[last + i] = msg.data[i + 1]
+                        if i == slots - 3: # Save market id at slot 7
+                            contract.storage[last + i] = market
+                        else: # Save data at slot 0-6
+                            contract.storage[last + i] = msg.data[i + 1]
                         i = i + 1
 
                     # Set previous and next pointers
@@ -98,28 +104,28 @@ code:
                     # Increment total
                     contract.storage[2] = total + 1
 
-                    return(next)
+                    return(market)
 
         #
-        # Remove trade
+        # Remove market
         #
         elif msg.datasize == 2:
             if msg.data[0] == 0:
                 if msg.sender == exchange:
-                    if contract.storage[msg.data[1]]: # Check there is a trade to remove
+                    if msg.data[1] > 100: # Do not allow removing first market (ETX)
 
                         # Get previous and next pointers
                         previous = contract.storage[msg.data[1] + 8]
                         next = contract.storage[msg.data[1] + 9]
 
-                        # Set previous pointer of next trade to this trade's previous
-                        if msg.data[1] == start: # First trade sets start pointer to next
+                        # Set previous pointer of next market to this market's previous
+                        if msg.data[1] == start: # First market sets start pointer to next
                             contract.storage[18] = next
                         else:
                             contract.storage[previous + 8] = previous
 
-                        # Set next pointer of previous trade to this trade's next
-                        if msg.data[1] == last: # Last trade sets last pointer to itself
+                        # Set next pointer of previous market to this market's next
+                        if msg.data[1] == last: # Last market sets last pointer to itself
                             contract.storage[19] = msg.data[1]
                         elif next != last:
                             contract.storage[next + 9] = next

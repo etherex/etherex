@@ -11,10 +11,10 @@
 
 init:
     # c3D definitions
-    contract.storage[10] = 0x88554646bb # 0x88554646BB
-    contract.storage[15] = msg.sender
-    contract.storage[16] = msg.sender
-    contract.storage[17] = block.timestamp
+    contract.storage[10] = 0x88554646BA # c3D linked list
+    contract.storage[15] = msg.sender # Owner of this c3D contract
+    contract.storage[16] = msg.sender # Creator of this c3D contract
+    contract.storage[17] = block.timestamp # TimeStamp this c3D contract was created
 
 code:
     # Basic gas check
@@ -32,6 +32,7 @@ code:
     contract.storage[21] = tx.gas
     contract.storage[22] = block.timestamp
 
+    # Operate only if initialized
     if status == 1: // "Running contract..."
 
         balance = contract.storage[msg.sender] // "Balance of %s: %d" % (msg.sender, balance)

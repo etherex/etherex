@@ -27,7 +27,7 @@ deploy:
 deploy:
   trades.se => {{Trades}}
 deploy:
-  currencies.se => {{Currencies}}
+  markets.se => {{Markets}}
 deploy:
   etx.se => {{ETX}}
 deploy:
@@ -47,11 +47,11 @@ deploy:
 # transact:
 #   {{DOUG}} => register trades {{Trades}}
 # transact:
-#   {{DOUG}} => register currencies {{Currencies}}
+#   {{DOUG}} => register markets {{Markets}}
 
 # Initialize
 transact:
-  {{EtherEx}} => {{Balances}} {{Indexes}} {{Trades}} {{Currencies}} {{NameReg}} EtherEx
+  {{EtherEx}} => {{Balances}} {{Indexes}} {{Trades}} {{Markets}} {{NameReg}} EtherEx
 transact:
   {{Balances}} => {{EtherEx}} {{NameReg}} EtherEx-Balances
 transact:
@@ -59,7 +59,7 @@ transact:
 transact:
   {{Trades}} => {{EtherEx}} {{NameReg}} EtherEx-Trades
 transact:
-  {{Currencies}} => {{EtherEx}} {{NameReg}} EtherEx-Currencies
+  {{Markets}} => {{EtherEx}} {{NameReg}} EtherEx-Markets
 transact:
   {{ETX}} => {{EtherEx}} {{NameReg}} ETX
 transact:
@@ -91,7 +91,7 @@ log:
 log:
   Trades => {{Trades}}
 log:
-  Currencies => {{Currencies}}
+  Markets => {{Markets}}
 log:
   ETX => {{ETX}}
 log:

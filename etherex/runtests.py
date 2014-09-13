@@ -133,9 +133,9 @@ compile(f)
 print '=' * 20
 print '\n'
 
-print 'Currencies (Markets)'
+print 'Markets'
 print '\n'
-f = 'contracts/currencies.se'
+f = 'contracts/markets.se'
 compile(f)
 print '=' * 20
 print '\n'

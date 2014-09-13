@@ -16,20 +16,31 @@ var EthereumClient = function() {
 
 
     this.loadMarkets = function(success, failure) {
-        var markets = [];
+        var markets = [{}];
 
-        var last = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(18)));
-        for (var i = 100; i <= 100 + parseInt(last); i = i + 5) {
-          var id = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(i+4)));
+        var total = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(2))));
+        var ptr = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(18))));
+        var last = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(19))));
+
+        console.log("TOTAL MARKETS: " + total);
+        console.log("MARKETS START: " + ptr);
+        console.log("MARKETS LAST: " + last);
+
+        for (var i = 0; i < total; i++) {
+            var id = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+7)));
+            console.log("LOADING MARKET ID: " + id);
             if (id) {
-                markets[id] = {
+                markets.push({
                     id: id,
-                    name: eth.toAscii(eth.stateAt(fixtures.addresses.markets, String(i))),
-                    address: eth.stateAt(fixtures.addresses.markets, String(i+3)),
-                    amount: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(i+1))),
-                    precision: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(i+2))),
-                };
+                    name: eth.toAscii(eth.stateAt(fixtures.addresses.markets, String(ptr))),
+                    address: eth.stateAt(fixtures.addresses.markets, String(ptr+3)),
+                    amount: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+1))),
+                    precision: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+2))),
+                    price: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+4))),
+                    decimals: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+5))),
+                });
             }
+            ptr = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+9))));
         };
 
         if (markets) {
@@ -129,33 +140,39 @@ var EthereumClient = function() {
 
     this.loadTrades = function(flux, markets, progress, success, failure) {
         var trades = [];
-        var last = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(18)));
+        var total = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(2))));
+        var ptr = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(18))));
+        var last = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(19))));
+        var start = ptr;
 
-        console.log("Last trade at: " + last);
+        console.log("TOTAL TRADES: " + total);
+        console.log("TRADES START: " + ptr);
+        console.log("TRADES LAST: " + last);
 
-        for (var i = 100; i <= 100 + parseInt(last); i = i + 5) {
-            var type = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i)));
-            if (!_.isUndefined(type) && type > 0) {
-                var mid = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+4))));
+        for (var i = 0; i < total; i++) {
+            var type = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr)));
+            if (type) {
+                var mid = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+4))));
                 console.log("Loading trade " + i + " for market " + markets[mid].name);
                 trades.push({
-                    id: i,
+                    id: ptr,
                     type: type == 1 ? 'buy' : 'sell',
                     price: bigRat(
-                            eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+1)))
+                            eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+1)))
                         ).divide(fixtures.precision).valueOf(),
                     amount: bigRat(
-                            eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(i+2)))
+                            eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+2)))
                         ).divide(fixtures.ether).valueOf(),
-                    owner: eth.stateAt(fixtures.addresses.trades, String(i+3)),
+                    owner: eth.stateAt(fixtures.addresses.trades, String(ptr+3)),
                     market: {
                         id: mid,
                         name: markets[mid].name
                     }
                 });
             }
+            ptr = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+9))));
 
-            progress({percent: (i - 100) * 100 / last });
+            progress({percent: (i + 1) / total * 100 });
         };
 
         setTimeout(function() { // temporary slowdown while testing
