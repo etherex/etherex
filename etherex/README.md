@@ -223,13 +223,17 @@ TODO
 
 * ~~Rename `currencies.se` to `markets.se`~~
 * ~~Linked list contracts for `trades.se` and `markets.se`~~
+* Make sure / fix linked list last/next are set properly (ie. removing first and only trade)
 * Actually use `balances.se` to keep track of each address' balance within the exchange
 * Link price indexes to orderbook and check for lower/higher bids (use heap.se?)
 * Support partial fills
+* Implement subcurrency decimal precision
+* Implement proper price precision also
+* Use scientific notation for big sub amounts (?)
 * Assign a trade ID instead of using only slot #, match both for a valid trade
 * Make sure trades are mined before allowing them to get filled... (obvious HFT prevention)
 * Deposit/withdrawal queues and confirmation handling (?)
-* Go back to TDD when serpent/pyethereum become usable
+* ~~Go back to TDD~~ when serpent/pyethereum are usable
 * Port contracts to [Solidity](https://github.com/ethereum/cpp-ethereum/wiki/ABI-in-PoC-7)
 * Look into how [Whisper](https://github.com/ethereum/cpp-ethereum/wiki/Whisper) and [Swarm](https://github.com/ethereum/cpp-ethereum/wiki/Swarm) should be used and integrated
 * Start working on X-Chain

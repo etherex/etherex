@@ -98,7 +98,7 @@ code:
                     # Increment total
                     contract.storage[2] = total + 1
 
-                    return(next)
+                    return(last)
 
         #
         # Remove trade

@@ -61,7 +61,7 @@ class TestEtherEx(object):
         return self.state.block.account_to_dict(contract)['storage'].get(idx)
 
     def test_creation(self):
-        assert self._storage(self.contract, 10) == 0x88554646AA
+        assert self._storage(self.contract, 10) == "0x88554646aa"
         assert self._storage(self.contract, 15) == "0x" + self.ALICE['address']
         assert self._storage(self.bcontract, 15) == "0x" + self.ALICE['address']
         assert self._storage(self.icontract, 15) == "0x" + self.ALICE['address']
@@ -76,8 +76,8 @@ class TestEtherEx(object):
 
         ans = self.state.send(self.ALICE['key'], self.contract, 0, [self.bcontract, self.icontract, self.tcontract, self.ccontract, self.ncontract, "EtherEx"])
         assert ans == [1]
-        assert self._storage(self.ncontract, int(self.contract, 16)) == "0x" + "EtherEx".encode('hex') # 0x4574686572457800000000000000000000000000000000000000000000000000
-        assert self._storage(self.contract, 10) == "0x88554646bb"
+        assert self._storage(self.ncontract, int(self.contract, 16)) == "0x" + "EtherEx".encode('hex')
+        assert self._storage(self.contract, 10) == "0x88554646aa"
 
         ans = self.state.send(self.ALICE['key'], self.bcontract, 10 ** 18, [self.contract, self.ncontract, "EtherEx - Balances"])
         assert ans == [1]
@@ -94,27 +94,30 @@ class TestEtherEx(object):
         ans = self.state.send(self.ALICE['key'], self.xcontract, 10 ** 18, [self.contract, self.ncontract, "ETX"])
         assert ans == [1]
 
-        assert self._storage(self.contract, 1) == 1
+        # Check references to subcontracts
+        assert self._storage(self.contract, 1) == self.xhex(1)
         assert self._storage(self.contract, 3) == "0x" + self.bcontract
         assert self._storage(self.contract, 4) == "0x" + self.icontract
         assert self._storage(self.contract, 5) == "0x" + self.tcontract
         assert self._storage(self.contract, 6) == "0x" + self.ccontract
 
+        # Check subcontracts reference back to exchange, and exchange has proper creator
         assert self._storage(self.bcontract, int(self.ALICE['address'], 16)) == self.xhex(10 ** 18)
         assert self._storage(self.bcontract, 15) == "0x" + self.contract
         assert self._storage(self.icontract, 15) == "0x" + self.contract
         assert self._storage(self.tcontract, 15) == "0x" + self.contract
         assert self._storage(self.ccontract, 15) == "0x" + self.contract
 
-        ans = self.state.send(self.ALICE['key'], self.contract, 10 ** 18, [7, 1 * 10 ** 18, 1 * 10 ** 8, "ETX", self.xcontract])
-
-        # print self.sim.get_storage_dict(self.ccontract)
+        # Register ETX
+        ans = self.state.send(self.ALICE['key'], self.contract, 10 ** 18, [7, 1 * 10 ** 18, 1 * 10 ** 8, "ETX", self.xcontract, 5])
         assert ans == [1]
-        assert self._storage(self.ccontract, 100) == "0x" + "ETX".encode('hex')
-        assert self._storage(self.ccontract, 101) == self.xhex(10 ** 18)
-        assert self._storage(self.ccontract, 102) == self.xhex(10 ** 8)
-        assert self._storage(self.ccontract, 103) == "0x" + self.xcontract
-        assert self._storage(self.ccontract, 104) == self.xhex(1)
+        assert self._storage(self.ccontract, 100) == "0x" + "ETX".encode('hex') # Name
+        assert self._storage(self.ccontract, 101) == self.xhex(10 ** 18) # Minimum amount
+        assert self._storage(self.ccontract, 102) == self.xhex(10 ** 8) # Price precision
+        assert self._storage(self.ccontract, 103) == "0x" + self.xcontract # Contract address
+        assert self._storage(self.ccontract, 104) == self.xhex(5) # Decimal precision
+        assert self._storage(self.ccontract, 107) == self.xhex(1) # Market ID
+        # print self.sim.get_storage_dict(self.ccontract)
 
     def test_change_ownership(self):
         self.test_initialize()
@@ -283,6 +286,7 @@ class TestEtherEx(object):
 
         assert ans == [11] #.startswith("Price out of range")
 
+    # TODO - Move to X-Chain tests
     # # def test_insufficient_btc_trade(self):
     # #     tx = Tx(sender='alice', value=0, data=[1, 1 * 10 ** 6, 1000 * 10 ** 8, 1])
     # #     self.run(tx, self.contract)
@@ -300,35 +304,41 @@ class TestEtherEx(object):
         self.test_initialize()
 
         ans = self.state.send(self.ALICE['key'], self.contract, 0, [2, 10 ** 17, 1000 * 10 ** 8, 1])
-        assert ans == [14] #.startswith("Minimum ETH value not met")
+        assert ans == [12] #.startswith("Minimum ETH value not met")
 
     def test_insufficient_mismatch_buy_trade(self):
         self.test_initialize()
 
-        ans = self.state.send(self.BOB['key'], self.contract, 10 ** 18, [1, 10 ** 19, 1000 * 10 ** 8, 1])
+        ans = self.state.send(self.BOB['key'], self.contract, 10 ** 18, [1, 10 ** 19, 10 ** 8, 1])
         assert ans == [13] #.startswith("Minimum ETH value not met")
 
     def test_add_bob_coin(self):
         self.test_initialize()
 
-        ans = self.state.send(self.BOB['key'], self.contract, 10 * 10 ** 18, [7, 10 ** 18, 10 ** 8, "BOB", self.BOB['address']]) # AKA BobScam
+        ans = self.state.send(self.BOB['key'], self.contract, 10 * 10 ** 18, [7, 10 ** 18, 10 ** 8, "BOB", self.BOB['address'], 4]) # AKA BobScam, TODO regulations! j/k...
 
-        # print self.sim.get_storage_dict(self.ccontract)
         assert ans == [2]
-        assert self._storage(self.ccontract, 105) == "0x" + "BOB".encode('hex')
-        assert self._storage(self.ccontract, 106) == self.xhex(1 * 10 ** 18)
-        assert self._storage(self.ccontract, 107) == self.xhex(1 * 10 ** 8)
-        assert self._storage(self.ccontract, 108) == "0x" + self.BOB['address']
-        assert self._storage(self.ccontract, 109) == self.xhex(2)
+        assert self._storage(self.ccontract, 110) == "0x" + "BOB".encode('hex')
+        assert self._storage(self.ccontract, 111) == self.xhex(1 * 10 ** 18)
+        assert self._storage(self.ccontract, 112) == self.xhex(1 * 10 ** 8)
+        assert self._storage(self.ccontract, 113) == "0x" + self.BOB['address']
+        assert self._storage(self.ccontract, 114) == self.xhex(4)
+        assert self._storage(self.ccontract, 115) == None
+        assert self._storage(self.ccontract, 117) == self.xhex(2)
 
     def test_check_bob_coin(self):
         self.test_add_bob_coin()
 
-        # print self.sim.get_storage_dict(self.contract)
-        # print self.sim.get_storage_dict(self.ccontract)
         ans = self.state.send(self.ALICE['key'], self.contract, 10 ** 18, [1, 10 ** 18, 1000 * 10 ** 8, 2])
         assert ans == [100] #[int("ETH/BOB".encode('hex'), 16)]
-        # assert ans == [int(self.BOB['address'], 16)]
+        assert self._storage(self.tcontract, 100) == self.xhex(1)
+        assert self._storage(self.tcontract, 101) == self.xhex(1000 * 10 ** 8)
+        assert self._storage(self.tcontract, 102) == self.xhex(1 * 10 ** 18)
+        assert self._storage(self.tcontract, 103) == "0x" + self.ALICE['address']
+        assert self._storage(self.tcontract, 104) == self.xhex(2)
+
+        # TODO - Check market recorded last price
+        # assert self._storage(self.ccontract, 115) == 1000 * 10 ** 8
 
 
     #
@@ -337,7 +347,7 @@ class TestEtherEx(object):
     def test_first_buy(self):
         self.test_initialize()
 
-        # initial_balance = self.state.block.get_balance(self.ALICE['address'])
+        self.initial_balance = self.state.block.get_balance(self.ALICE['address'])
 
         ans = self.state.send(self.ALICE['key'], self.contract, 10 ** 21, [1, 10 ** 21, 1000 * 10 ** 8, 1])
 
@@ -353,15 +363,15 @@ class TestEtherEx(object):
     def test_cancel_trade(self):
         self.test_first_buy()
 
-        initial_balance = self.state.block.get_balance(self.ALICE['address'])
+        # initial_balance = self.state.block.get_balance(self.ALICE['address'])
 
         ans = self.state.send(self.ALICE['key'], self.contract, 0, [6, 100])
 
         assert ans == [1]
-
-        # assert len(self.state.block.get_transactions()) == 17
-        assert self._storage(self.tcontract, 100) == None
-        assert self.state.block.get_balance(self.ALICE['address']) == initial_balance
+        for x in xrange(100,109):
+            assert self._storage(self.tcontract, x) == None
+        assert self.state.block.get_balance(self.ALICE['address']) == self.initial_balance
+        assert len(self.state.block.get_transactions()) == 17
 
     def test_cancel_trade_invalid(self):
         self.test_first_buy()
@@ -378,26 +388,19 @@ class TestEtherEx(object):
 
         ans = self.state.send(self.BOB['key'], self.contract, 0, [3, 100])
         assert ans == [1]
-        # assert ans == [10 ** 21]
+        # TODO - proper balance assertions
 
     def test_second_buy(self):
         self.test_first_buy()
 
         ans = self.state.send(self.BOB['key'], self.contract, 10 ** 21, [1, 10 ** 21, 1000 * 10 ** 8, 1])
 
-        assert ans == [105]
-        assert self._storage(self.tcontract, 105) == self.xhex(1)
-        assert self._storage(self.tcontract, 106) == self.xhex(1000 * 10 ** 8)
-        assert self._storage(self.tcontract, 107) == self.xhex(10 ** 21)
-        assert self._storage(self.tcontract, 108) == "0x" + self.BOB['address']
-        assert self._storage(self.tcontract, 109) == self.xhex(1)
-        # print self.sim.get_storage_dict(self.contract)
-        # print "=" * 20
-        # print self.sim.get_storage_dict(self.bcontract)
-        # print "=" * 20
-        # print self.sim.get_storage_dict(self.icontract)
-        # print "=" * 20
-        # print self.sim.get_storage_dict(self.tcontract)
+        assert ans == [110]
+        assert self._storage(self.tcontract, 110) == self.xhex(1)
+        assert self._storage(self.tcontract, 111) == self.xhex(1000 * 10 ** 8)
+        assert self._storage(self.tcontract, 112) == self.xhex(10 ** 21)
+        assert self._storage(self.tcontract, 113) == "0x" + self.BOB['address']
+        assert self._storage(self.tcontract, 114) == self.xhex(1)
 
     def test_first_sell(self):
         self.test_second_buy()
@@ -408,19 +411,13 @@ class TestEtherEx(object):
 
         ans = self.state.send(self.CHARLIE['key'], self.contract, 0, [2, 10 ** 21, 1000 * 10 ** 8, 1])
 
-        assert ans == [110]
-        assert self._storage(self.tcontract, 110) == self.xhex(2) # TODO status
-        assert self._storage(self.tcontract, 111) == self.xhex(1000 * 10 ** 8)
-        assert self._storage(self.tcontract, 112) == self.xhex(10 ** 21)
-        assert self._storage(self.tcontract, 113) == "0x" + self.CHARLIE['address']
-        assert self._storage(self.tcontract, 114) == self.xhex(1)
-        # print self.sim.get_storage_dict(self.contract)
-        # print "=" * 20
-        # print self.sim.get_storage_dict(self.bcontract)
-        # print "=" * 20
-        # print self.sim.get_storage_dict(self.icontract)
-        # print "=" * 20
-        # print self.sim.get_storage_dict(self.tcontract)
+        assert ans == [120]
+        assert self._storage(self.tcontract, 120) == self.xhex(2) # TODO status
+        assert self._storage(self.tcontract, 121) == self.xhex(1000 * 10 ** 8)
+        assert self._storage(self.tcontract, 122) == self.xhex(10 ** 21)
+        assert self._storage(self.tcontract, 123) == "0x" + self.CHARLIE['address']
+        assert self._storage(self.tcontract, 124) == self.xhex(1)
+        # TODO - proper balance assertions
 
     # def test_second_buy_with_leftover(self):
     #     tx = Tx(sender='alice', value=0, data=[1, 1500 * 10 ** 18, 1000 * 10 ** 8, 1])

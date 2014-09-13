@@ -59,14 +59,14 @@ code:
             market[1] = contract.storage[marketid * slots + start + 1] // "Minimum amount"
             market[2] = contract.storage[marketid * slots + start + 2] // "Price precision"
             market[3] = contract.storage[marketid * slots + start + 3] // "Contract"
-            market[4] = contract.storage[marketid * slots + start + 4] // "Last price"
-            market[5] = contract.storage[marketid * slots + start + 5] // "Decimal precision"
+            market[4] = contract.storage[marketid * slots + start + 4] // "Decimal precision"
+            market[5] = contract.storage[marketid * slots + start + 5] // "Last price"
             return(market, slots - used)
 
         #
         # Add market
         #
-        elif msg.datasize == 5:
+        elif msg.datasize == used:
             if msg.data[0] == 1:
                 if msg.sender == exchange:
                     name = msg.data[1]
@@ -74,6 +74,9 @@ code:
                     price = msg.data[3]
                     owner = msg.data[4]
                     market = ((last - start) / slots) + 1
+                    precision = msg.data[5]
+
+                    # Save last registered Market ID
                     contract.storage[9] = market
 
                     if amount < 1 or amount > 2^254:
@@ -84,6 +87,8 @@ code:
                         return(0) // "Invalid owner"
                     if market < 1 or market > 2^254:
                         return(0) // "Invalid market ID"
+                    if precision < 1 or precision > 2^254:
+                        return(0) // "Invalid decimal precision"
 
                     i = 0
                     while i < slots - 2:
