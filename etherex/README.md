@@ -112,7 +112,7 @@ API
 
 ### Adding a market
 ```
-<operation> <minimum trade> <price precision> <currency> <contract>
+<operation> <minimum trade> <price precision> <currency> <contract> <decimal precision>
 ```
 
 
@@ -202,7 +202,7 @@ Cancel operation
 
 Add your subcurrency
 ```
-7 1000000000000000000000 100000000 "BOB" 0xe559de5527492bcb42ec68d07df0742a98ec3f1e
+7 1000000000000000000000 100000000 "BOB" 0xe559de5527492bcb42ec68d07df0742a98ec3f1e 4
 ```
 
 

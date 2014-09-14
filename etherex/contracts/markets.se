@@ -73,7 +73,7 @@ code:
                     amount = msg.data[2]
                     price = msg.data[3]
                     owner = msg.data[4]
-                    market = ((last - start) / slots) + 1
+                    market = total + 1 # TODO - fix this...
                     precision = msg.data[5]
 
                     # Save last registered Market ID
@@ -90,20 +90,29 @@ code:
                     if precision < 1 or precision > 2^254:
                         return(0) // "Invalid decimal precision"
 
+                    # Find our next available slots
+                    next = contract.storage[last + 9]
+                    if !next:
+                        next = start
+
                     i = 0
                     while i < slots - 2:
                         if i == slots - 3: # Save market id at slot 7
-                            contract.storage[last + i] = market
+                            contract.storage[next + i] = market
                         else: # Save data at slot 0-6
-                            contract.storage[last + i] = msg.data[i + 1]
+                            contract.storage[next + i] = msg.data[i + 1]
                         i = i + 1
 
                     # Set previous and next pointers
-                    next = last + slots
-                    contract.storage[last + 8] = last
-                    contract.storage[last + 9] = next
+                    contract.storage[next + 8] = last
+                    contract.storage[next + 9] = next + slots
+                    # # Find next available slot
+                    # nextavailable = next + slots
+                    # while contract.storage[nextavailable]:
+                    #     nextavailable = nextavailable + slots
+                    # contract.storage[next + 9] = nextavailable
 
-                    # Set last pointer
+                    # Set new last pointer
                     contract.storage[19] = next
 
                     # Increment total
@@ -123,17 +132,33 @@ code:
                         previous = contract.storage[msg.data[1] + 8]
                         next = contract.storage[msg.data[1] + 9]
 
-                        # Set previous pointer of next market to this market's previous
-                        if msg.data[1] == start: # First market sets start pointer to next
+                        #
+                        # Update pointers
+                        #
+                        if msg.data[1] != start and msg.data[1] != last:
+                            # Market is neither the start or last
+                            # Update previous market's next to next market
+                            contract.storage[previous + 9] = next
+                            # Update next market's previous to previous market
+                            contract.storage[next + 8] = previous
+                        elif msg.data[1] == start and msg.data[1] != last:
+                            # Market is the start market, but not the last
+                            # Update start to next market
                             contract.storage[18] = next
+                            # Update next market's previous to itself
+                            contract.storage[next + 8] = next
+                        elif msg.data[1] != start and msg.data[1] == last:
+                            # Market is the last market, but not the start
+                            # Update previous markets's next to this market
+                            contract.storage[previous + 9] = msg.data[1]
+                            # Update last to this market's previous
+                            contract.storage[19] = previous
                         else:
-                            contract.storage[previous + 8] = previous
-
-                        # Set next pointer of previous market to this market's next
-                        if msg.data[1] == last: # Last market sets last pointer to itself
-                            contract.storage[19] = msg.data[1]
-                        elif next != last:
-                            contract.storage[next + 9] = next
+                            # Only one market in list as start and last
+                            # Update start to this market
+                            contract.storage[18] = msg.data[1]
+                            # Update last to this market
+                            contract.storage[19] = 0
 
                         # Decrement total
                         contract.storage[2] = total - 1

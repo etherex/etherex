@@ -7,10 +7,9 @@
 
 from pyethereum import tester
 
-# import logging
-
-# from pyethereum import processblock
-# processblock.enable_debug()
+# DEBUG
+# tester.enable_logging()
+# tester.pb.pblogger.log_op = True
 
 class TestEtherEx(object):
 
@@ -74,23 +73,29 @@ class TestEtherEx(object):
         assert ans == [1]
         assert self._storage(self.ncontract, int(self.ALICE['address'], 16)) == "0x" + "Alice".encode('hex')
 
+        # Initialize EtherEx
         ans = self.state.send(self.ALICE['key'], self.contract, 0, [self.bcontract, self.icontract, self.tcontract, self.ccontract, self.ncontract, "EtherEx"])
         assert ans == [1]
         assert self._storage(self.ncontract, int(self.contract, 16)) == "0x" + "EtherEx".encode('hex')
         assert self._storage(self.contract, 10) == "0x88554646aa"
 
+        # Initialize Balances
         ans = self.state.send(self.ALICE['key'], self.bcontract, 10 ** 18, [self.contract, self.ncontract, "EtherEx - Balances"])
         assert ans == [1]
 
+        # Initialize Indexes
         ans = self.state.send(self.ALICE['key'], self.icontract, 0, [self.contract, self.ncontract, "EtherEx - Indexes"])
         assert ans == [1]
 
+        # Initialize Trades
         ans = self.state.send(self.ALICE['key'], self.tcontract, 0, [self.contract, self.ncontract, "EtherEx - Trades"])
         assert ans == [1]
 
+        # Initialize Markets
         ans = self.state.send(self.ALICE['key'], self.ccontract, 0, [self.contract, self.ncontract, "EtherEx - Markets"])
         assert ans == [1]
 
+        # Initialize ETX
         ans = self.state.send(self.ALICE['key'], self.xcontract, 10 ** 18, [self.contract, self.ncontract, "ETX"])
         assert ans == [1]
 
@@ -117,22 +122,17 @@ class TestEtherEx(object):
         assert self._storage(self.ccontract, 103) == "0x" + self.xcontract # Contract address
         assert self._storage(self.ccontract, 104) == self.xhex(5) # Decimal precision
         assert self._storage(self.ccontract, 107) == self.xhex(1) # Market ID
-        # print self.sim.get_storage_dict(self.ccontract)
 
     def test_change_ownership(self):
         self.test_initialize()
 
         ans = self.state.send(self.ALICE['key'], self.contract, 0, [8, 0xf9e57456f18d90886263fedd9cc30b27cd959137])
         assert ans == [0xf9e57456f18d90886263fedd9cc30b27cd959137]
-        # self.run(tx, self.contract)
-        # print 20 * "="
 
     #
     # ETX
     #
     def test_alice_to_bob(self):
-        # ans = self.state.send(self.ALICE['key'], self.bcontract, 10**18, [self.contract])
-        # assert ans == [1]
         self.test_initialize()
 
         ans = self.state.send(self.ALICE['key'], self.xcontract, 0, [self.BOB['address'], 1000])
@@ -142,8 +142,6 @@ class TestEtherEx(object):
         assert self._storage(self.xcontract, int(self.BOB['address'], 16)) == self.xhex(1000)
 
     def test_bob_to_charlie_invalid(self):
-        # ans = self.state.send(self.ALICE['key'], self.bcontract, 10**18, [self.contract])
-        # assert ans == [1]
         self.test_initialize()
 
         ans = self.state.send(self.BOB['key'], self.xcontract, 0, [self.CHARLIE['address'], 2000])
@@ -154,8 +152,6 @@ class TestEtherEx(object):
         assert self._storage(self.xcontract, int(self.CHARLIE['address'], 16)) == None
 
     def test_alice_to_bob_to_charlie_valid(self):
-        # ans = self.state.send(self.ALICE['key'], self.bcontract, 10**18, [self.contract])
-        # assert ans == [1]
         self.test_initialize()
 
         ans = self.state.send(self.ALICE['key'], self.xcontract, 0, [self.BOB['address'], 1000])
@@ -358,12 +354,22 @@ class TestEtherEx(object):
         assert self._storage(self.tcontract, 103) == "0x" + self.ALICE['address']
         assert self._storage(self.tcontract, 104) == self.xhex(1)
 
-        # assert self.state.block.get_balance(self.ALICE['address']) == 998997926207000000000000 # 10 ** 24 - 10 ** 21
+    def test_linked_list_pointers_after_first_trade(self):
+        self.test_first_buy()
+
+        assert self._storage(self.tcontract, 18) == self.xhex(100)
+        assert self._storage(self.tcontract, 19) == self.xhex(100)
+        assert self._storage(self.tcontract, 108) == self.xhex(100) # first trade's previous should point to itself
+        assert self._storage(self.tcontract, 109) == self.xhex(110) # first trade's next should point to next available slot
+
+    def test_cancel_trade_invalid(self):
+        self.test_first_buy()
+
+        ans = self.state.send(self.BOB['key'], self.contract, 0, [6, 100])
+        assert ans == [0]
 
     def test_cancel_trade(self):
         self.test_first_buy()
-
-        # initial_balance = self.state.block.get_balance(self.ALICE['address'])
 
         ans = self.state.send(self.ALICE['key'], self.contract, 0, [6, 100])
 
@@ -373,22 +379,16 @@ class TestEtherEx(object):
         assert self.state.block.get_balance(self.ALICE['address']) == self.initial_balance
         assert len(self.state.block.get_transactions()) == 17
 
-    def test_cancel_trade_invalid(self):
+    def test_linked_list_pointers_after_cancel_single_trade(self):
         self.test_first_buy()
 
-        ans = self.state.send(self.BOB['key'], self.contract, 0, [6, 100])
-        assert ans == [0]
+        ans = self.state.send(self.ALICE['key'], self.contract, 0, [6, 100])
 
-    def test_fulfill_first_buy_with_sell(self):
-        self.test_first_buy()
-
-        # Load BOB with ETX from ALICE
-        ans = self.state.send(self.ALICE['key'], self.xcontract, 10 ** 21, [self.BOB['address'], 10 ** 18 - 1000])
         assert ans == [1]
-
-        ans = self.state.send(self.BOB['key'], self.contract, 0, [3, 100])
-        assert ans == [1]
-        # TODO - proper balance assertions
+        assert self._storage(self.tcontract, 18) == self.xhex(100)
+        assert self._storage(self.tcontract, 19) == None
+        assert self._storage(self.tcontract, 108) == None # cancelled trade's previous should be empty
+        assert self._storage(self.tcontract, 109) == None # cancelled trade's next should be empty
 
     def test_second_buy(self):
         self.test_first_buy()
@@ -402,6 +402,27 @@ class TestEtherEx(object):
         assert self._storage(self.tcontract, 113) == "0x" + self.BOB['address']
         assert self._storage(self.tcontract, 114) == self.xhex(1)
 
+    def test_linked_list_pointers_after_second_trade(self):
+        self.test_second_buy()
+
+        assert self._storage(self.tcontract, 18) == self.xhex(100)
+        assert self._storage(self.tcontract, 19) == self.xhex(110)
+        assert self._storage(self.tcontract, 118) == self.xhex(100) # second trade's previous should point to first trade
+        assert self._storage(self.tcontract, 119) == self.xhex(120) # second trade's next should point to next available slot
+
+    def test_linked_list_pointers_after_cancel_second_trade(self):
+        self.test_second_buy()
+
+        ans = self.state.send(self.BOB['key'], self.contract, 0, [6, 110])
+
+        assert ans == [1]
+        for x in xrange(110,119):
+            assert self._storage(self.tcontract, x) == None
+        assert self._storage(self.tcontract, 18) == self.xhex(100)
+        assert self._storage(self.tcontract, 19) == self.xhex(100)
+        assert self._storage(self.tcontract, 108) == self.xhex(100) # first trade's previous should point to itself
+        assert self._storage(self.tcontract, 109) == self.xhex(110) # first trade's next should point to next available slot
+
     def test_first_sell(self):
         self.test_second_buy()
 
@@ -409,15 +430,74 @@ class TestEtherEx(object):
         ans = self.state.send(self.ALICE['key'], self.xcontract, 0, [self.CHARLIE['address'], 10 ** 18 - 1000])
         assert ans == [1]
 
-        ans = self.state.send(self.CHARLIE['key'], self.contract, 0, [2, 10 ** 21, 1000 * 10 ** 8, 1])
+        ans = self.state.send(self.CHARLIE['key'], self.contract, 0, [2, 10 ** 21, 10 ** 8, 1])
 
         assert ans == [120]
         assert self._storage(self.tcontract, 120) == self.xhex(2) # TODO status
-        assert self._storage(self.tcontract, 121) == self.xhex(1000 * 10 ** 8)
+        assert self._storage(self.tcontract, 121) == self.xhex(10 ** 8)
         assert self._storage(self.tcontract, 122) == self.xhex(10 ** 21)
         assert self._storage(self.tcontract, 123) == "0x" + self.CHARLIE['address']
         assert self._storage(self.tcontract, 124) == self.xhex(1)
         # TODO - proper balance assertions
+
+    def test_linked_list_pointers_after_third_trade(self):
+        self.test_first_sell()
+
+        assert self._storage(self.tcontract, 18) == self.xhex(100)
+        assert self._storage(self.tcontract, 19) == self.xhex(120)
+        assert self._storage(self.tcontract, 128) == self.xhex(110) # third trade's previous should point to second trade
+        assert self._storage(self.tcontract, 129) == self.xhex(130) # third trade's next should point to next available slot
+
+    def test_fulfill_first_buy_with_sell(self):
+        self.test_first_buy()
+
+        # Load BOB with ETX from ALICE
+        ans = self.state.send(self.ALICE['key'], self.xcontract, 10 ** 21, [self.BOB['address'], 10 ** 18 - 1000])
+        assert ans == [1]
+
+        ans = self.state.send(self.BOB['key'], self.contract, 0, [3, 100])
+        assert ans == [1]
+        for x in xrange(100,109):
+            assert self._storage(self.tcontract, x) == None
+        # TODO - proper balance assertions
+
+    def test_linked_list_pointers_after_single_trade_fulfillment(self):
+        self.test_fulfill_first_buy_with_sell()
+
+        assert self._storage(self.tcontract, 18) == self.xhex(100)
+        assert self._storage(self.tcontract, 19) == None
+
+    def test_fulfill_first_buy_with_sell_after_second_trade(self):
+        self.test_second_buy()
+
+        # Load BOB with ETX from ALICE
+        ans = self.state.send(self.ALICE['key'], self.xcontract, 10 ** 21, [self.BOB['address'], 10 ** 18 - 1000])
+        assert ans == [1]
+
+        ans = self.state.send(self.BOB['key'], self.contract, 0, [3, 100])
+        assert ans == [1]
+        for x in xrange(100,109):
+            assert self._storage(self.tcontract, x) == None
+
+    def test_linked_list_pointers_after_first_trade_fulfillment(self):
+        self.test_fulfill_first_buy_with_sell_after_second_trade()
+
+        assert self._storage(self.tcontract, 18) == self.xhex(110)
+        assert self._storage(self.tcontract, 19) == self.xhex(110)
+        assert self._storage(self.tcontract, 118) == self.xhex(110) # second trade's previous should point to itself
+        assert self._storage(self.tcontract, 119) == self.xhex(120) # second trade's next should point to next available slot
+
+    def test_fulfill_first_sell_with_buy_and_check_pointers(self):
+        self.test_first_sell()
+
+        ans = self.state.send(self.BOB['key'], self.contract, 10 ** 21, [3, 120])
+        assert ans == [1]
+        for x in xrange(120,129):
+            assert self._storage(self.tcontract, x) == None
+        assert self._storage(self.tcontract, 18) == self.xhex(100)
+        assert self._storage(self.tcontract, 19) == self.xhex(110)
+        assert self._storage(self.tcontract, 118) == self.xhex(100) # previous trade's previous should point to first trade
+        assert self._storage(self.tcontract, 119) == self.xhex(120) # previous trade's next should point to this trade
 
     # def test_second_buy_with_leftover(self):
     #     tx = Tx(sender='alice', value=0, data=[1, 1500 * 10 ** 18, 1000 * 10 ** 8, 1])

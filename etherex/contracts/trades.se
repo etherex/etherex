@@ -82,23 +82,27 @@ code:
                     if market < 1 or market > 2^254: // "TODO - Get and check market count"
                         return(6) // "Invalid market"
 
+                    # Find our next available slots
+                    next = contract.storage[last + 9]
+                    if !next:
+                        next = start
+
                     i = 0
                     while i < slots - 2:
-                        contract.storage[last + i] = msg.data[i + 1]
+                        contract.storage[next + i] = msg.data[i + 1]
                         i = i + 1
 
                     # Set previous and next pointers
-                    next = last + slots
-                    contract.storage[last + 8] = last
-                    contract.storage[last + 9] = next
+                    contract.storage[next + 8] = last
+                    contract.storage[next + 9] = next + slots
 
-                    # Set last pointer
+                    # Set new last pointer
                     contract.storage[19] = next
 
                     # Increment total
                     contract.storage[2] = total + 1
 
-                    return(last)
+                    return(next)
 
         #
         # Remove trade
@@ -112,17 +116,33 @@ code:
                         previous = contract.storage[msg.data[1] + 8]
                         next = contract.storage[msg.data[1] + 9]
 
-                        # Set previous pointer of next trade to this trade's previous
-                        if msg.data[1] == start: # First trade sets start pointer to next
+                        #
+                        # Update pointers
+                        #
+                        if msg.data[1] != start and msg.data[1] != last:
+                            # Trade is neither the start or last's previous
+                            # Update previous trade's next to next trade
+                            contract.storage[previous + 9] = next
+                            # Update next trade's previous to previous trade
+                            contract.storage[next + 8] = previous
+                        elif msg.data[1] == start and msg.data[1] != last:
+                            # Trade is the start trade, but not the last
+                            # Update start to next trade
                             contract.storage[18] = next
+                            # Update next trade's previous to itself
+                            contract.storage[next + 8] = next
+                        elif msg.data[1] != start and msg.data[1] == last:
+                            # Trade is the last trade, but not the start
+                            # Update previous trade's next to this trade
+                            contract.storage[previous + 9] = msg.data[1]
+                            # Update last to this trade's previous
+                            contract.storage[19] = previous
                         else:
-                            contract.storage[previous + 8] = previous
-
-                        # Set next pointer of previous trade to this trade's next
-                        if msg.data[1] == last: # Last trade sets last pointer to itself
-                            contract.storage[19] = msg.data[1]
-                        elif next != last:
-                            contract.storage[next + 9] = next
+                            # Only one trade in list as start and last
+                            # Update start to this trade
+                            contract.storage[18] = msg.data[1]
+                            # Update last to this trade
+                            contract.storage[19] = 0
 
                         # Decrement total
                         contract.storage[2] = total - 1
