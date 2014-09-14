@@ -69,13 +69,13 @@ transact:
 transact:
   {{FAB}} => {{EtherEx}} {{NameReg}} FAB
 transact:
-  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 ETX {{ETX}}
+  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 ETX {{ETX}} 5
 transact:
-  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 XBTC {{XBTC}}
+  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 XBTC {{XBTC}} 8
 transact:
-  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 CAK {{CAK}}
+  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 CAK {{CAK}} 4
 transact:
-  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 FAB {{FAB}}
+  {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 FAB {{FAB}} 4
 
 # Log those deploys.
 #log:
