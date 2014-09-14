@@ -152,7 +152,7 @@ var EthereumClient = function() {
         for (var i = 0; i < total; i++) {
             var type = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr)));
             if (type) {
-                var mid = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+4))));
+                var mid = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+4)));
                 console.log("Loading trade " + i + " for market " + markets[mid].name);
                 trades.push({
                     id: ptr,
@@ -170,7 +170,7 @@ var EthereumClient = function() {
                     }
                 });
             }
-            ptr = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+9))));
+            ptr = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+9))));
 
             progress({percent: (i + 1) / total * 100 });
         };
