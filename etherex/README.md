@@ -223,11 +223,12 @@ TODO
 
 * ~~Rename `currencies.se` to `markets.se`~~
 * ~~Linked list contracts for `trades.se` and `markets.se`~~
-* Make sure / fix linked list last/next are set properly (ie. removing first and only trade)
+* ~~Make sure / fix linked list's last/next are set properly (ie. removing first and only trade)~~
 * Actually use `balances.se` to keep track of each address' balance within the exchange
 * Link price indexes to orderbook and check for lower/higher bids (use heap.se?)
+* Record last fulfilled trade's price in `markets.se`
 * Support partial fills
-* Implement subcurrency decimal precision
+* Implement subcurrency decimal precision (in progress)
 * Implement proper price precision also
 * Use scientific notation for big sub amounts (?)
 * Assign a trade ID instead of using only slot #, match both for a valid trade
@@ -247,6 +248,7 @@ TODO
 * Split buy/sell forms
 * Implement the live updating "which trade gets filled" while changing amount/price/total
 * Handle and color code new/pending/mined trades
+* Advanced trading features (limit vs market orders, etc.)
 * Animations/transitions
 * More/new mockups / wireframes
 * More/new design elements
