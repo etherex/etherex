@@ -247,6 +247,7 @@ TODO
 * Update this TODO more frequently
 * Start using GitHub issues instead
 * Better, rock solid tests, and way more of them
+* Total unilateral world takeover
 
 ### UX/UI
 
