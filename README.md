@@ -233,9 +233,14 @@ TODO
 * Implement proper price precision also
 * ~~Use scientific notation for big sub amounts~~
 * Assign a trade ID instead of using only slot #, match both for a valid trade
+* Balance and sub-balance checks before adding/filling trades
 * Make sure trades are mined before allowing them to get filled... (obvious HFT prevention)
+* Implement Wallet section (transactions, balances, etc.)
+* Re-implement simple wallet functions (send/receive)
 * Deposit/withdrawal queues and confirmation handling (?)
 * ~~Go back to TDD~~ when serpent/pyethereum are usable
+* Re-implement NameReg support and integration
+* Start the Tools section, find and list ideas (Subcurrency creation tools/wizard, raw transact, trading tools, etc.)
 * Port contracts to [Solidity](https://github.com/ethereum/cpp-ethereum/wiki/ABI-in-PoC-7)
 * Look into how [Whisper](https://github.com/ethereum/cpp-ethereum/wiki/Whisper) and [Swarm](https://github.com/ethereum/cpp-ethereum/wiki/Swarm) should be used and integrated
 * Start working on X-Chain
@@ -249,8 +254,11 @@ TODO
 * Split buy/sell forms
 * Implement the live updating "which trade gets filled" while changing amount/price/total
 * Handle and color code new/pending/mined trades
+* Graphs, beautiful graphs
 * Advanced trading features (limit vs market orders, etc.)
 * Animations/transitions
+* Check/clear buttons (?)
+* Wallet design and theming
 * More/new mockups / wireframes
 * More/new design elements
 * Implement new mockups / design elements
