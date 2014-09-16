@@ -33,7 +33,7 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onLoadTradesProgress: function(payload) {
-        console.log("Progress: ", payload.percent);
+        console.log("Progress: " + payload.percent);
         // this.trades = payload.trades || [];
         this.percent = payload.percent;
         this.emit(constants.CHANGE_EVENT);

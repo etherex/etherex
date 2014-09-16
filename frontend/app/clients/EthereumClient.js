@@ -96,7 +96,7 @@ var EthereumClient = function() {
 
         if (unconfirmed != confirmed) {
             showUnconfirmed = true;
-            unconfirmed = this.formatUnconfirmed(confirmed, unconfirmed);
+            unconfirmed = this.formatUnconfirmed(confirmed, unconfirmed, utils.formatBalance);
         }
 
         if (confirmed >= 0) {
@@ -123,12 +123,12 @@ var EthereumClient = function() {
 
         if (unconfirmed != confirmed) {
             showUnconfirmed = true;
-            unconfirmed = this.formatUnconfirmed(confirmed, unconfirmed);
+            unconfirmed = this.formatUnconfirmed(confirmed, unconfirmed, utils.format);
         }
 
         if (confirmed >= 0) {
             success(
-              utils.formatBalance(confirmed),
+              confirmed > 0 ? utils.format(confirmed) : 0,
               showUnconfirmed ? "(" + unconfirmed + " unconfirmed)" : null
             );
         }
@@ -302,12 +302,12 @@ var EthereumClient = function() {
         }
     };
 
-    this.formatUnconfirmed = function(confirmed, unconfirmed) {
+    this.formatUnconfirmed = function(confirmed, unconfirmed, fn) {
         unconfirmed = unconfirmed - confirmed;
         if (unconfirmed < 0)
-            unconfirmed = "- " + utils.formatBalance(-unconfirmed);
+            unconfirmed = "- " + fn(-unconfirmed);
         else
-            unconfirmed = utils.formatBalance(unconfirmed);
+            unconfirmed = fn(unconfirmed);
 
         return unconfirmed;
     };

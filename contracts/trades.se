@@ -1,4 +1,4 @@
-# currencies.se -- Ethereum contract
+# trades.se -- Ethereum contract
 #
 # Copyright (c) 2014 EtherEx
 #
@@ -6,7 +6,7 @@
 # of the MIT license.  See the LICENSE file for details.
 
 #
-# Markets
+# Trades
 #
 
 init:
@@ -43,74 +43,61 @@ code:
 
     # Slots used per data group
     slots = 10
-    used = 6 # Current number of slots used
+    used = 5 # Current number of slots used
 
-    if msg.value > 0: // "Refunding excess value: %s" % msg.value
-        send(msg.sender, msg.value)
+    # DEBUG
+    if msg.value > 0: // "Refunding value: %s" % msg.value
+        send(tx.origin, msg.value)
 
     if status == 1:
-        #
-        # Get market
-        #
-        if msg.datasize == 1:
-            marketid = msg.data[0] - 1
-            market = array(slots - used)
-            market[0] = contract.storage[marketid * slots + start] // "Name"
-            market[1] = contract.storage[marketid * slots + start + 1] // "Minimum amount"
-            market[2] = contract.storage[marketid * slots + start + 2] // "Price precision"
-            market[3] = contract.storage[marketid * slots + start + 3] // "Contract"
-            market[4] = contract.storage[marketid * slots + start + 4] // "Decimal precision"
-            market[5] = contract.storage[marketid * slots + start + 5] // "Last price"
-            return(market, slots - used)
+        if msg.datasize == 1: // "Getting trade"
+            trade = array(slots - used)
+            trade[0] = contract.storage[msg.data[0]] // "Buy or sell"
+            trade[1] = contract.storage[msg.data[0] + 1] // "Price"
+            trade[2] = contract.storage[msg.data[0] + 2] // "Amount"
+            trade[3] = contract.storage[msg.data[0] + 3] // "Owner"
+            trade[4] = contract.storage[msg.data[0] + 4] // "Market"
+            return(trade, slots - used)
 
         #
-        # Add market
+        # Add trade
         #
-        elif msg.datasize == used:
+        elif msg.datasize == 6:
             if msg.data[0] == 1:
                 if msg.sender == exchange:
-                    name = msg.data[1]
-                    amount = msg.data[2]
-                    price = msg.data[3]
+                    trade = msg.data[1]
+                    price = msg.data[2]
+                    amount = msg.data[3]
                     owner = msg.data[4]
-                    market = total + 1 # TODO - fix this...
-                    precision = msg.data[5]
+                    market = msg.data[5]
 
-                    # Save last registered Market ID
-                    contract.storage[9] = market
-
-                    if amount < 1 or amount > 2^254:
-                        return(0) // "Invalid minimum amount"
+                    if trade < 1 or trade > 2:
+                        return(2) // "Invalid trade type"
                     if price < 1 or price > 2^254:
-                        return(0) // "Invalid price"
+                        return(3) // "Invalid price"
+                    if amount < 1 or amount > 2^254:
+                        return(4) // "Invalid amount"
                     if owner < 1 or owner > 2^254:
-                        return(0) // "Invalid owner"
-                    if market < 1 or market > 2^254:
-                        return(0) // "Invalid market ID"
-                    if precision < 1 or precision > 2^254:
-                        return(0) // "Invalid decimal precision"
+                        return(5) // "Invalid owner"
+                    if market < 1 or market > 2^254: // "TODO - Get and check market count"
+                        return(6) // "Invalid market"
 
                     # Find our next available slots
                     next = contract.storage[last + 9]
+
+                    # Use start for first trade
+                    # TODO - check if that can be moved to setting an initial value and handling it when clearing a trade
                     if !next:
                         next = start
 
                     i = 0
                     while i < slots - 2:
-                        if i == slots - 3: # Save market id at slot 7
-                            contract.storage[next + i] = market
-                        else: # Save data at slot 0-6
-                            contract.storage[next + i] = msg.data[i + 1]
+                        contract.storage[next + i] = msg.data[i + 1]
                         i = i + 1
 
                     # Set previous and next pointers
                     contract.storage[next + 8] = last
-                    contract.storage[next + 9] = next + slots
-                    # # Find next available slot
-                    # nextavailable = next + slots
-                    # while contract.storage[nextavailable]:
-                    #     nextavailable = nextavailable + slots
-                    # contract.storage[next + 9] = nextavailable
+                    contract.storage[next + 9] = next + slots # TODO - fix this...
 
                     # Set new last pointer
                     contract.storage[19] = next
@@ -118,15 +105,15 @@ code:
                     # Increment total
                     contract.storage[2] = total + 1
 
-                    return(market)
+                    return(next)
 
         #
-        # Remove market
+        # Remove trade
         #
         elif msg.datasize == 2:
             if msg.data[0] == 0:
                 if msg.sender == exchange:
-                    if msg.data[1] > 100: # Do not allow removing first market (ETX)
+                    if contract.storage[msg.data[1]]: # Check there is a trade to remove
 
                         # Get previous and next pointers
                         previous = contract.storage[msg.data[1] + 8]
@@ -136,36 +123,40 @@ code:
                         # Update pointers
                         #
                         if msg.data[1] != start and msg.data[1] != last:
-                            # Market is neither the start or last
-                            # Update previous market's next to next market
+                            # Trade is neither the start or the last
+                            # Update previous trade's next to next trade
                             contract.storage[previous + 9] = next
-                            # Update next market's previous to previous market
+                            # Update next trade's previous to previous trade
                             contract.storage[next + 8] = previous
+                            # TODO - Prefill this trade's next with last's next?
+                            # contract.storage[msg.data[1] + 9] = contract.storage[last + 9]
+                            # Set last's next to this slot for replacement
+                            # contract.storage[last + 9] = msg.data[1]
                         elif msg.data[1] == start and msg.data[1] != last:
-                            # Market is the start market, but not the last
-                            # Update start to next market
+                            # Trade is the start trade, but not the last
+                            # Update start to next trade
                             contract.storage[18] = next
-                            # Update next market's previous to itself
+                            # Update next trade's previous to itself
                             contract.storage[next + 8] = next
                         elif msg.data[1] != start and msg.data[1] == last:
-                            # Market is the last market, but not the start
-                            # Update previous markets's next to this market
+                            # Trade is the last trade, but not the start
+                            # Update previous trade's next to this trade
                             contract.storage[previous + 9] = msg.data[1]
-                            # Update last to this market's previous
+                            # Update last to this trade's previous
                             contract.storage[19] = previous
                         else:
-                            # Only one market in list as start and last
-                            # Update start to this market
+                            # Only one trade in list as start and last
+                            # Update start to this trade
                             contract.storage[18] = msg.data[1]
-                            # Update last to this market
-                            contract.storage[19] = 0
+                            # Update last to this trade
+                            contract.storage[19] = msg.data[1]
 
                         # Decrement total
                         contract.storage[2] = total - 1
 
                         # Clear storage
                         c = 0
-                        while c < slots:
+                        while c < slots: # Leave next pointer set above
                             contract.storage[msg.data[1] + c] = 0
                             c = c + 1
 

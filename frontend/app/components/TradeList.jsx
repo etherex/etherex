@@ -13,6 +13,8 @@ var ConfirmModal = require('./ConfirmModal');
 var Table = require("react-bootstrap/Table");
 var Button = require("react-bootstrap/Button");
 
+var utils = require("../js/utils");
+
 // var Link = Router.Link;
 // var UserLink = require("./UserLink");
 
@@ -22,12 +24,33 @@ var TradeRow = React.createClass({
     render: function() {
         return (
             <tr>
-                <td><div className="btn">{this.props.trade.amount.toLocaleString()}</div></td>
-                <td><div className="btn">{this.props.trade.market.name}</div></td>
-                <td><div className="btn">{this.props.trade.price.toLocaleString()}</div></td>
-                <td><div className="btn">{(this.props.trade.amount / this.props.trade.price).toLocaleString()} ETH</div></td>
-                <td><div className="btn"><div className="ellipsis">{this.props.trade.owner}</div></div></td>
-                <td><div className="pull-right">{
+                <td>
+                    <div className="text-right">
+                        {utils.numeral(this.props.trade.amount, 2)}
+                    </div>
+                </td>
+                <td>
+                    <div className="text-center">
+                        {this.props.trade.market.name}
+                    </div>
+                </td>
+                <td>
+                    <div className="text-right">
+                        {utils.numeral(this.props.trade.price, 2)}
+                    </div>
+                </td>
+                <td>
+                    <div className="text-right">
+                        {utils.numeral(this.props.trade.amount / this.props.trade.price, 2)} ETH
+                    </div>
+                </td>
+                <td>
+                    <div className="center-block ellipsis">
+                        {this.props.trade.owner}
+                    </div>
+                </td>
+                <td>
+                    <div className="pull-right">{
                     (this.props.trade.owner == this.props.user.id) ?
                         <ModalTrigger modal={
                                 <ConfirmModal

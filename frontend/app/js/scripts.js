@@ -8,7 +8,7 @@
 
 (function($) {
 
-  EtherEx = {};
+  window.EtherEx = {};
 
   EtherEx.getAddress = function(_a) {
     ret = "";
@@ -48,12 +48,6 @@
   //   document.getElementById("checkval").innerHTML = "";
   //   document.getElementById("log").innerHTML = "";
   // };
-
-
-  // TODO - reimplement trade actions - in progress
-
-
-  // TODO - reimplement orderbook - in progress
 
 
   // TODO - implement XBTC
@@ -184,36 +178,6 @@
 
 
 
-  // $(document).ready(function() {
-
-    // TODO reimplement basic watches
-
-    // if (!ethBrowser) {
-    //   window.eth.stateAt = window.eth.storageAt;
-    //   window.eth.messages = function() { return {}; };
-
-    //   for (var i = eth.keys.length - 1; i >= 0; i--)
-    //     eth.watch(eth.secretToAddress(eth.keys[i]), "", EtherEx.updateBalances);
-
-    //   EtherEx.loadMarkets();
-
-    //   for (var i = EtherEx.markets.length - 1; i >= 1; i--)
-    //     eth.watch(EtherEx.markets[i].address, "", EtherEx.updateBalances);
-    // }
-    // else {
-    //   var addrs = [];
-    //   for (var i = eth.keys.length - 1; i >= 0; i--)
-    //     addrs.push(eth.secretToAddress(eth.keys[i]));
-
-    //   EtherEx.loadMarkets();
-
-    //   for (var i = EtherEx.markets.length - 1; i >= 1; i--)
-    //     addrs.push(EtherEx.markets[i].address);
-
-    //   eth.watch({altered: addrs}).changed(EtherEx.updateBalances);
-    // }
-
-
     // TODO - graphs
 
     // var graph = new Rickshaw.Graph( {
@@ -237,7 +201,7 @@
 
 
 
-    // TODO - checks (balance, minimums per market, etc)
+    // TODO - checks (balance, ~~minimums per market~~, etc)
 
     // $("#check").on('click', function() {
     //   EtherEx.check();
@@ -249,53 +213,6 @@
     //   var stramount = EtherEx.formatBalance(bigamount);
     //   var price = $("#price").val();
     //   var value = bigamount.divide(Ethereum.BigInteger(price));
-
-    //   // TODO - get minimum amount from market
-
-    //   if (amount < 10) {
-    //     alert("Insufficient amount, 10 ETH required");
-    //     return;
-    //   }
-
-    //   var balance = Ethereum.BigInteger(eth.stateAt(EtherEx.markets[1].address, EtherEx.addrs[0]).dec());
-
-    //   if (balance.compareTo(bigamount) < 0) {
-    //     alert("Insufficient balance, you have " + EtherEx.formatBalance(balance) + " and need " + EtherEx.formatBalance(bigamount));
-    //     return;
-    //   }
-
-    //   // TODO - reimplement confirmations
-
-    //   if (window.confirm("Buy " + amount + " ETH at " + price + " ETH/ETX for " + value + " ETX?")) {
-    //     EtherEx.buy();
-    //   }
-    // });
-
-    // $("#sell").on('click', function() {
-    //   var amount = $("#amount").val();
-    //   var bigamount = Ethereum.BigInteger(amount).multiply(Ethereum.BigInteger("10").pow(18));
-    //   var stramount = EtherEx.formatBalance(bigamount);
-    //   var price = $("#price").val();
-    //   var value = bigamount.divide(Ethereum.BigInteger(price));
-
-    //   // TODO - get minimum amount from market
-    //   if (amount < 10) {
-    //     alert("Insufficient amount, 10 ETH required");
-    //     return;
-    //   }
-
-    //   var balance = Ethereum.BigInteger(eth.balanceAt(EtherEx.addrs[0]).dec());
-
-    //   if (balance.compareTo(bigamount) < 0) {
-    //     alert("Insufficient balance, you have " + EtherEx.formatBalance(balance) + " and need " + EtherEx.formatBalance(bigamount));
-    //     return;
-    //   }
-
-    //   // TODO - reimplement confirmations
-    //   if (window.confirm("Sell " + amount + " ETH at " + price + " ETH/ETX for " + value + " ETX?")) {
-    //     EtherEx.sell();
-    //   }
-    // });
 
 
 

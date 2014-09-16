@@ -386,7 +386,7 @@ class TestEtherEx(object):
 
         assert ans == [1]
         assert self._storage(self.tcontract, 18) == self.xhex(100)
-        assert self._storage(self.tcontract, 19) == None
+        assert self._storage(self.tcontract, 19) == self.xhex(100)
         assert self._storage(self.tcontract, 108) == None # cancelled trade's previous should be empty
         assert self._storage(self.tcontract, 109) == None # cancelled trade's next should be empty
 
@@ -465,7 +465,7 @@ class TestEtherEx(object):
         self.test_fulfill_first_buy_with_sell()
 
         assert self._storage(self.tcontract, 18) == self.xhex(100)
-        assert self._storage(self.tcontract, 19) == None
+        assert self._storage(self.tcontract, 19) == self.xhex(100)
 
     def test_fulfill_first_buy_with_sell_after_second_trade(self):
         self.test_second_buy()
@@ -498,6 +498,23 @@ class TestEtherEx(object):
         assert self._storage(self.tcontract, 19) == self.xhex(110)
         assert self._storage(self.tcontract, 118) == self.xhex(100) # previous trade's previous should point to first trade
         assert self._storage(self.tcontract, 119) == self.xhex(120) # previous trade's next should point to this trade
+
+    def test_fulfill_first_trade_after_third_trade_and_check_pointers(self):
+        self.test_first_sell()
+
+        # Load BOB with ETX from ALICE
+        ans = self.state.send(self.ALICE['key'], self.xcontract, 10 ** 21, [self.BOB['address'], 10 ** 18 - 1000])
+        assert ans == [1]
+
+        ans = self.state.send(self.BOB['key'], self.contract, 10 ** 21, [3, 100])
+        assert ans == [1]
+        for x in xrange(100,109):
+            assert self._storage(self.tcontract, x) == None
+        assert self._storage(self.tcontract, 18) == self.xhex(110)
+        assert self._storage(self.tcontract, 19) == self.xhex(120)
+        assert self._storage(self.tcontract, 118) == self.xhex(110) # previous trade's previous should point to itself
+        assert self._storage(self.tcontract, 119) == self.xhex(120) # previous trade's next should point to third trade
+
 
     # def test_second_buy_with_leftover(self):
     #     tx = Tx(sender='alice', value=0, data=[1, 1500 * 10 ** 18, 1000 * 10 ** 8, 1])
