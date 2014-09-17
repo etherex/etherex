@@ -234,7 +234,8 @@ TODO
 * ~~Use scientific notation for big sub amounts~~
 * Assign a trade ID instead of using only slot #, match both for a valid trade
 * Balance and sub-balance checks before adding/filling trades
-* Make sure trades are mined before allowing them to get filled... (obvious HFT prevention)
+* ~~Make sure trades are mined before allowing them to get filled... (obvious HFT prevention)~~
+* Document error codes of return values
 * Implement Wallet section (transactions, balances, etc.)
 * Re-implement simple wallet functions (send/receive)
 * Deposit/withdrawal queues and confirmation handling (?)

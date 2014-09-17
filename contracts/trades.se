@@ -9,6 +9,16 @@
 # Trades
 #
 
+# Slot allocation:
+# n + 1: Type (buy/sell)
+# n + 2: Price
+# n + 3: Amount
+# n + 4: Owner (buyer/seller)
+# n + 5: Market
+# n + 7: Block #
+# n + 8: Previous trade pointer
+# n + 9: Next trade pointer
+
 init:
     # c3D definitions
     contract.storage[10] = 0x88554646BA # c3D linked list
@@ -91,9 +101,12 @@ code:
                         next = start
 
                     i = 0
-                    while i < slots - 2:
+                    while i < slots - 3:
                         contract.storage[next + i] = msg.data[i + 1]
                         i = i + 1
+
+                    # Set block number
+                    contract.storage[next + 7] = block.number
 
                     # Set previous and next pointers
                     contract.storage[next + 8] = last

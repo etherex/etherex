@@ -448,8 +448,19 @@ class TestEtherEx(object):
         assert self._storage(self.tcontract, 128) == self.xhex(110) # third trade's previous should point to second trade
         assert self._storage(self.tcontract, 129) == self.xhex(130) # third trade's next should point to next available slot
 
+    def test_basic_hft_prevention_using_block_number(self):
+        self.test_first_buy()
+
+        # Load BOB with ETX from ALICE
+        ans = self.state.send(self.ALICE['key'], self.xcontract, 10 ** 21, [self.BOB['address'], 10 ** 18 - 1000])
+        assert ans == [1]
+
+        ans = self.state.send(self.BOB['key'], self.contract, 0, [3, 100])
+        assert ans == [14]
+
     def test_fulfill_first_buy_with_sell(self):
         self.test_first_buy()
+        self.state.mine(1)
 
         # Load BOB with ETX from ALICE
         ans = self.state.send(self.ALICE['key'], self.xcontract, 10 ** 21, [self.BOB['address'], 10 ** 18 - 1000])
@@ -469,6 +480,7 @@ class TestEtherEx(object):
 
     def test_fulfill_first_buy_with_sell_after_second_trade(self):
         self.test_second_buy()
+        self.state.mine(1)
 
         # Load BOB with ETX from ALICE
         ans = self.state.send(self.ALICE['key'], self.xcontract, 10 ** 21, [self.BOB['address'], 10 ** 18 - 1000])
@@ -489,6 +501,7 @@ class TestEtherEx(object):
 
     def test_fulfill_first_sell_with_buy_and_check_pointers(self):
         self.test_first_sell()
+        self.state.mine(1)
 
         ans = self.state.send(self.BOB['key'], self.contract, 10 ** 21, [3, 120])
         assert ans == [1]
@@ -501,6 +514,7 @@ class TestEtherEx(object):
 
     def test_fulfill_first_trade_after_third_trade_and_check_pointers(self):
         self.test_first_sell()
+        self.state.mine(1)
 
         # Load BOB with ETX from ALICE
         ans = self.state.send(self.ALICE['key'], self.xcontract, 10 ** 21, [self.BOB['address'], 10 ** 18 - 1000])

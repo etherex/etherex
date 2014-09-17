@@ -207,6 +207,11 @@ code:
 
             while t < msg.datasize:
                 tradeid = msg.data[t]
+
+                # Make sure the trade has been mined, obvious HFT prevention
+                if block.number <= trade[7]:
+                    return(14)
+
                 trade = call(trades, [tradeid], 1, 5)
                 market = call(markets, [trade[4]], 1, 5)
 
@@ -214,7 +219,6 @@ code:
 
                 # Checking trade amounts and balances
                 # TODO - Check subcurrency balances
-                # TODO - make trades...
                 if trade[0] == 1: # Check buy amount
                     # TODO balance check or using return values?
                     # if balance < trade[2]:
@@ -248,7 +252,7 @@ code:
                     if msg.value > value:
                         send(msg.sender, msg.value - value)
 
-                    # TODO - Transfer amounts properly...
+                    # TODO - Better precision handling
 
                     # Transfer ETH
                     send(trade[3], value)
