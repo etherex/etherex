@@ -4,7 +4,7 @@ var React = require("react");
 var Fluxxor = require("fluxxor");
 var FluxChildMixin = Fluxxor.FluxChildMixin(React);
 
-var NewTradeForm = require("./NewTradeForm");
+var TradeForm = require("./TradeForm");
 var TradeList = require("./TradeList");
 
 var Trades = React.createClass({
@@ -13,7 +13,7 @@ var Trades = React.createClass({
   render: function() {
     return (
       <div>
-        <NewTradeForm market={this.props.market} />
+        <TradeForm market={this.props.market} trades={this.props.trades} />
         <div className="container-fluid">
           <div className="row">
             <TradeList market={this.props.market} trades={this.props.trades} user={this.props.user} />

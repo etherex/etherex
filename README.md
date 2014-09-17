@@ -252,7 +252,7 @@ TODO
 ### UX/UI
 
 * ~~Port current implementation to new framework~~
-* Split buy/sell forms
+* ~~Split buy/sell forms~~
 * Implement the live updating "which trade gets filled" while changing amount/price/total
 * Handle and color code new/pending/mined trades
 * Graphs, beautiful graphs

@@ -129,7 +129,7 @@ var TradeBuys = React.createClass({
 
     render: function() {
         return (
-            <div className="col-lg-6">
+            <div className="col-md-6">
                 <TradeTable title="Buys" tradeList={this.props.trades.tradeBuys} user={this.props.user.user} />
             </div>
         );
@@ -141,7 +141,7 @@ var TradeSells = React.createClass({
 
     render: function() {
         return (
-            <div className="col-lg-6">
+            <div className="col-md-6">
                 <TradeTable title="Sells" tradeList={this.props.trades.tradeSells} user={this.props.user.user} />
             </div>
         );
