@@ -23,7 +23,7 @@ var TradeRow = React.createClass({
 
     render: function() {
         return (
-            <tr>
+            <tr className={"trade-" + this.props.trade.status}>
                 <td>
                     <div className="text-right">
                         {utils.numeral(this.props.trade.amount, 2)}
@@ -41,7 +41,7 @@ var TradeRow = React.createClass({
                 </td>
                 <td>
                     <div className="text-right">
-                        {utils.numeral(this.props.trade.amount / this.props.trade.price, 2)} ETH
+                        {utils.numeral(this.props.trade.total, 2)} ETH
                     </div>
                 </td>
                 <td>

@@ -13,6 +13,26 @@
   width: 5.5em;
 }
 
+tr.trade-new td {
+  background-color: #e74c3c !important;
+}
+tr.trade-new:hover td {
+  background-color: #d62c1a !important;
+}
+
+tr.trade-pending td {
+  background-color: #f39c12 !important;
+}
+tr.trade-pending:hover td {
+  background-color: #c87f0a !important;
+}
+
+tr.trade-filling td {
+  background-color: #3498db !important;
+}
+tr.trade-filling:hover td {
+  background-color: #217dbb !important;
+}
 
 /* Icons */
 

@@ -1,18 +1,3 @@
-// if (typeof(window.eth) === "undefined")
-// {
-// if (typeof(require) !== "undefined")
-// 	require( ['ethString'], function() {} )
-// else if (typeof(String.prototype.pad) === "undefined")
-// {
-// 	var scriptTag = document.getElementsByTagName('script');
-// 	scriptTag = scriptTag[scriptTag.length - 1]; 
-// 	var scriptPath = scriptTag.src; 
-// 	var path = scriptPath.substr(0, scriptPath.lastIndexOf( '/' ));
-// 	var start = '<script src="' + path + '/';
-// 	var slash = '"><'+'/script>';
-// 	document.write(start + 'BigInteger.js' + slash);
-// 	document.write(start + 'ethString.js' + slash);
-// }
 
 var eth = (function () {
 
@@ -27,6 +12,7 @@ var eth = (function () {
               { "method": "peerCount", "params": null, "order": [], "returns" : 0 },
               { "method": "balanceAt", "params": { "a": "" }, "order": ["a"], "returns" : "" },
               { "method": "storageAt", "params": { "a": "", "x": "" }, "order": ["a", "x"], "returns" : "" },
+              { "method": "stateAt", "params": { "a": "", "x": "", "s": "" }, "order": ["a", "x", "s"], "returns" : "" },
               { "method": "txCountAt", "params": { "a": "" },"order": ["a"], "returns" : "" },
               { "method": "isContractAt", "params": { "a": "" }, "order": ["a"], "returns" : false },
               { "method": "create", "params": { "sec": "", "xEndowment": "", "bCode": "", "xGas": "", "xGasPrice": "" }, "order": ["sec", "xEndowment", "bCode", "xGas", "xGasPrice"] , "returns": "" },
@@ -43,7 +29,7 @@ var eth = (function () {
 		m_reqId++
 		var request = new XMLHttpRequest();	
         request.open("POST", "http://localhost:8080", false)
-//		console.log("Sending " + JSON.stringify(req))
+		// console.log("Sending " + JSON.stringify(req))
         request.send(JSON.stringify(req))
         return reformat(m, JSON.parse(request.responseText).result)
 	}
@@ -71,9 +57,14 @@ var eth = (function () {
 		var m = s.method;
 		var am = "get" + m.slice(0, 1).toUpperCase() + m.slice(1);
 		var getParams = function(a) {
-			var p = s.params ? {} : null
+			var p = s.params ? {} : null;
+			if (m == "stateAt")
+				if (a.length == 2)
+					a[2] = "0";
+				else
+					a[2] = String(a[2]);
 			for (j in s.order)
-				p[s.order[j]] = (s.order[j][0] === "b") ? a[j].unbin() : a[j]
+				p[s.order[j]] = (s.order[j][0] === "b") ? a[j].unbin() : a[j];
 			return p
 		};
 		if (m == "create" || m == "transact")
@@ -98,7 +89,7 @@ var eth = (function () {
 		for (var w in m_watching)
 			watching.push(w)
 		var changed = reqSync("check", { "a": watching } );
-//		console.log("Got " + JSON.stringify(changed));
+		// console.log("Got " + JSON.stringify(changed));
 		for (var c in changed)
 			m_watching[changed[c]]()
 		var that = this;
@@ -131,6 +122,3 @@ var eth = (function () {
 if (typeof module !== "undefined") {
   module.exports = eth;
 }
-
-// }
-

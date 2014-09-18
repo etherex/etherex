@@ -151,23 +151,35 @@ var EthereumClient = function() {
 
         for (var i = 0; i < total; i++) {
             var type = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr)));
+
             if (type) {
-                var mid = eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+4)));
-                console.log("Loading trade " + i + " for market " + markets[mid].name);
+                var marketid = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+4))));
+
+                console.log("Loading trade " + i + " for market " + markets[marketid].name);
+
+                var price =bigRat(
+                    eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+1)))
+                ).divide(fixtures.precision).valueOf()
+                var amount = bigRat(
+                    eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+2)))
+                ).divide(fixtures.ether).valueOf();
+
+                // console.log("Pending: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr))));
+                // console.log("Mined: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr), -1)));
+
                 trades.push({
                     id: ptr,
                     type: type == 1 ? 'buy' : 'sell',
-                    price: bigRat(
-                            eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+1)))
-                        ).divide(fixtures.precision).valueOf(),
-                    amount: bigRat(
-                            eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+2)))
-                        ).divide(fixtures.ether).valueOf(),
+                    price: price,
+                    amount: amount,
+                    total: amount / price,
                     owner: eth.stateAt(fixtures.addresses.trades, String(ptr+3)),
                     market: {
-                        id: mid,
-                        name: markets[mid].name
-                    }
+                        id: marketid,
+                        name: markets[marketid].name
+                    },
+                    status: (eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+1), -1)) == 0) ?
+                        "pending" : "mined"
                 });
             }
             ptr = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+9))));

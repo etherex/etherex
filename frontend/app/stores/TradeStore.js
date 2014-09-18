@@ -67,15 +67,20 @@ var TradeStore = Fluxxor.createStore({
             type: (payload.type == 1) ? 'buy' : 'sell',
             price: payload.price,
             amount: payload.amount,
+            total: payload.amount / payload.price,
             market: this.flux.store("MarketStore").getState().markets[payload.market],
             owner: this.flux.store("UserStore").getState().user.id,
-            status: 'pending'
+            status: payload.status
         };
 
         if (payload.type == 1)
             this.trades.buys[payload.id] = trade;
         else
             this.trades.sells[payload.id] = trade;
+
+        // Sort
+        this.trades.buys = _.sortBy(this.trades.buy, 'price').reverse();
+        this.trades.sells = _.sortBy(this.trades.sell, 'price');
 
         this.emit(constants.CHANGE_EVENT);
     },

@@ -17,22 +17,10 @@ var TradeActions = function(client) {
         }.bind(this));
     };
 
-    // this.sortTrades = function(trades) {
-    //     this.dispatch(constants.trade.SORT_TRADES);
-
-    //     // Split in buys/sells
-    //     trades = _.groupBy(trades, 'type');
-
-    //     // Sort
-    //     trades.buy = _.sortBy(trades.buy, 'price');
-    //     trades.sell = _.sortBy(trades.sell, 'price').reverse();
-
-    //     console.log("Sorted: ", trades);
-    // };
-
     this.addTrade = function(trade) {
         var id = utils.randomId();
         trade.id = id;
+        trade.status = "new";
 
         _client.addTrade(trade, function() {
             this.dispatch(constants.trade.ADD_TRADE, trade);
