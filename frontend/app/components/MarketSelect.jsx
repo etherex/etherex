@@ -13,11 +13,14 @@ var MarketSelect = React.createClass({
   mixins: [FluxChildMixin],
 
   handleChange: function(id) {
+    // Update market and trigger filtering of trades
     this.getFlux().actions.market.updateMarket(this.props.market.markets[id]);
 
-    console.log("SUB/ADDR: " + this.props.market.markets[id].address + " / " + this.props.user.user.addresses[0]);
-
+    // Update sub balance
     this.getFlux().actions.user.updateBalanceSub(this.props.market.markets[id], this.props.user.user.addresses[0]);
+
+    // Filter trades
+    // this.getFlux().actions.trade.switchMarket(this.props.market.markets[id]);
   },
 
   render: function() {

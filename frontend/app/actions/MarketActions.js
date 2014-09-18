@@ -23,6 +23,8 @@ var MarketActions = function(client) {
 
     this.updateMarket = function(market) {
         this.dispatch(constants.market.CHANGE_MARKET, market);
+        this.dispatch(constants.trade.SWITCH_MARKET, market);
+
         // _client.updateMarket(market, function() {
         //     this.dispatch(constants.market.UPDATE_MARKET, market);
         // }.bind(this), function(error) {

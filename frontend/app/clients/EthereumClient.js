@@ -169,7 +169,7 @@ var EthereumClient = function() {
 
                 trades.push({
                     id: ptr,
-                    type: type == 1 ? 'buy' : 'sell',
+                    type: type == 1 ? 'buys' : 'sells',
                     price: price,
                     amount: amount,
                     total: amount / price,

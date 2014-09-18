@@ -10,6 +10,7 @@ module.exports = {
         ADD_TRADE: null,
         FILL_TRADE: null,
         CANCEL_TRADE: null,
+        SWITCH_MARKET: null,
         SWITCH_TYPE: null
     }),
     user: keyMirror ({

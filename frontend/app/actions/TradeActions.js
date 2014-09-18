@@ -49,6 +49,10 @@ var TradeActions = function(client) {
         this.dispatch(constants.trade.SWITCH_TYPE, type);
     };
 
+    this.switchMarket = function(market) {
+        this.dispatch(constants.trade.SWITCH_MARKET, market);
+    };
+
     var _client = client;
 };
 
