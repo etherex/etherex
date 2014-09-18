@@ -19,7 +19,7 @@ var TradeStore = Fluxxor.createStore({
             constants.trade.LOAD_TRADES_FAIL, this.onLoadTradesFail,
             constants.trade.ADD_TRADE, this.onAddTrade,
             constants.trade.FILL_TRADE, this.onFillTrade,
-            constants.trade.CANCEL_TRADE, this.onFillTrade,
+            constants.trade.CANCEL_TRADE, this.onCancelTrade,
             constants.trade.SWITCH_TYPE, this.switchType
         );
     },
@@ -73,26 +73,46 @@ var TradeStore = Fluxxor.createStore({
             status: payload.status
         };
 
-        if (payload.type == 1)
-            this.trades.buys[payload.id] = trade;
-        else
-            this.trades.sells[payload.id] = trade;
-
-        // Sort
-        this.trades.buys = _.sortBy(this.trades.buy, 'price').reverse();
-        this.trades.sells = _.sortBy(this.trades.sell, 'price');
+        // Add and re-sort...
+        (payload.type == 1) ? this.trades.buys.push(trade) : this.trades.sells.push(trade);
+        var trades = _.sortBy((payload.type == 1) ? this.trades.buys : this.trades.sells, 'price');
+        (payload.type == 1) ? this.trades.buys = trades : this.trades.sells = trades;
 
         this.emit(constants.CHANGE_EVENT);
+
+        if (!ethBrowser)
+            setTimeout(this.flux.actions.trade.loadTrades, 2000);
     },
 
     onFillTrade: function(payload) {
-        delete this.trades[payload.id];
+        var index = _.findIndex((payload.type == 1) ? this.trades.buys : this.trades.sells, {'id': payload.id});
+
+        console.log("Filling trade ", payload, " at index " + index);
+
+        (payload.type == 1) ? this.trades.buys[index].status = "new" : this.trades.sells[index].status = "new";
+
         this.emit(constants.CHANGE_EVENT);
+
+        if (!ethBrowser)
+            setTimeout(this.flux.actions.trade.loadTrades, 2000);
     },
 
     onCancelTrade: function(payload) {
-        delete this.trades[payload.id];
+        var index = _.findIndex((payload.type == 1) ? this.trades.buys : this.trades.sells, {'id': payload.id});
+
+        console.log("Cancelling trade ", payload, " at index " + index);
+
+        (payload.type == 1) ? this.trades.buys[index].status = "new" : this.trades.sells[index].status = "new";
+
+        // if (payload.type == 1)
+        //     delete this.trades.buys[index];
+        // else
+        //     delete this.trades.sells[index];
+
         this.emit(constants.CHANGE_EVENT);
+
+        if (!ethBrowser)
+            setTimeout(this.flux.actions.trade.loadTrades, 2000);
     },
 
     switchType: function(payload) {

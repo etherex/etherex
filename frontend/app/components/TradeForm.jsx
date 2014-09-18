@@ -7,6 +7,7 @@ var FluxChildMixin = Fluxxor.FluxChildMixin(React);
 
 var bigRat = require("big-rational");
 var fixtures = require("../js/fixtures");
+var constants = require("../js/constants");
 
 // var mq = require('react-responsive');
 
@@ -86,6 +87,27 @@ var SplitTradeForm = React.createClass({
     );
   },
 
+  highlightFilling: function(type, price, amount, total) {
+      var trades = (type == 1) ? this.props.trades.tradeSells : this.props.trades.tradeBuys;
+      var trades_total = 0;
+      for (var i = 0; i <= trades.length - 1; i++) {
+        trades_total += trades[i].amount / trades[i].price;
+        if (price >= trades[i].price && total >= trades_total) {
+          // console.log("Would fill " + i + " at total of " + trades_total);
+          (type == 1) ?
+            this.props.trades.tradeSells[i].status = "filling" :
+            this.props.trades.tradeBuys[i].status = "filling"
+          this.getFlux().store("TradeStore").emit(constants.CHANGE_EVENT);
+        }
+        else if (price < trades[i].price || total < trades_total) {
+          (type == 1) ?
+            this.props.trades.tradeSells[i].status = "mined" :
+            this.props.trades.tradeBuys[i].status = "mined"
+          this.getFlux().store("TradeStore").emit(constants.CHANGE_EVENT);
+        }
+      };
+  },
+
   handleChange: function(e) {
       // TODO - proper back/forth handling
       var type = this.props.type;
@@ -101,6 +123,8 @@ var SplitTradeForm = React.createClass({
       });
 
       this.refs.total.getDOMNode().value = total;
+
+      this.highlightFilling(type, price, amount, total);
 
       this.handleValidation(type, market, amount, price, total);
   },
@@ -119,6 +143,8 @@ var SplitTradeForm = React.createClass({
       });
 
       this.refs.amount.getDOMNode().value = amount;
+
+      this.highlightFilling(type, price, amount, total);
 
       this.handleValidation(type, market, amount, price, total);
   },
@@ -220,10 +246,10 @@ var TradeForm = React.createClass({
                 <div>
                   {(this.props.trades.type == 1) ?
                   <div className="container-fluid">
-                    <SplitTradeForm type={this.state.type} market={this.props.market} />
+                    <SplitTradeForm type={this.state.type} market={this.props.market} trades={this.props.trades} />
                   </div> :
                   <div className="container-fluid">
-                    <SplitTradeForm type={this.state.type} market={this.props.market} />
+                    <SplitTradeForm type={this.state.type} market={this.props.market} trades={this.props.trades} />
                   </div>}
                 </div>
               </div>
@@ -231,13 +257,13 @@ var TradeForm = React.createClass({
                 <div className="col-md-6">
                   <div className="container-fluid">
                     <h4 className="text-center">Buy</h4>
-                    <SplitTradeForm type={1} market={this.props.market} />
+                    <SplitTradeForm type={1} market={this.props.market} trades={this.props.trades} />
                   </div>
                 </div>
                 <div className="col-md-6">
                   <h4 className="text-center">Sell</h4>
                   <div className="container-fluid">
-                    <SplitTradeForm type={2} market={this.props.market} />
+                    <SplitTradeForm type={2} market={this.props.market} trades={this.props.trades} />
                   </div>
                 </div>
               </div>
