@@ -241,7 +241,12 @@ TODO
 * Deposit/withdrawal queues and confirmation handling (?)
 * ~~Go back to TDD~~ when serpent/pyethereum are usable
 * Re-implement NameReg support and integration
-* Start the Tools section, find and list ideas (Subcurrency creation tools/wizard, raw transact, trading tools, etc.)
+* Start the Tools section, find and list ideas
+    - subcurrency registration
+    - subcurrency creation tools/wizard
+    - raw transact (?)
+    - trading tools (...)
+    - ...
 * Port contracts to [Solidity](https://github.com/ethereum/cpp-ethereum/wiki/ABI-in-PoC-7)
 * Look into how [Whisper](https://github.com/ethereum/cpp-ethereum/wiki/Whisper) and [Swarm](https://github.com/ethereum/cpp-ethereum/wiki/Swarm) should be used and integrated
 * Start working on X-Chain
@@ -256,6 +261,10 @@ TODO
 * ~~Split buy/sell forms~~
 * ~~Implement the live updating "which trade gets filled" while changing amount/price/total~~
 * ~~Handle and color code new/pending/mined trades~~
+* Filter by market...
+* Auto trade filling from the live highlighting
+* Clickable trades auto-fills form values
+* My Trades section (where?)
 * Graphs, beautiful graphs
 * Advanced trading features (limit vs market orders, etc.)
 * Animations/transitions
