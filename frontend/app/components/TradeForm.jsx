@@ -93,14 +93,14 @@ var SplitTradeForm = React.createClass({
       for (var i = 0; i <= trades.length - 1; i++) {
         if (trades[i].owner != this.props.user.user.id)
           trades_total += trades[i].amount / trades[i].price;
-        if (price >= trades[i].price && total >= trades_total && trades[i].owner != this.props.user.user.id) {
+        if (price >= trades[i].price && total >= trades_total && trades[i].owner != this.props.user.user.id && trades[i].status == "mined") {
           // console.log("Would fill " + i + " at total of " + trades_total);
           (type == 1) ?
             this.props.trades.tradeSells[i].status = "filling" :
             this.props.trades.tradeBuys[i].status = "filling"
           this.getFlux().store("TradeStore").emit(constants.CHANGE_EVENT);
         }
-        else if (price < trades[i].price || total < trades_total) {
+        else if ((price < trades[i].price || total < trades_total) && trades[i].status == "filling") {
           (type == 1) ?
             this.props.trades.tradeSells[i].status = "mined" :
             this.props.trades.tradeBuys[i].status = "mined"
