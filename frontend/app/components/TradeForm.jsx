@@ -91,8 +91,9 @@ var SplitTradeForm = React.createClass({
       var trades = (type == 1) ? this.props.trades.tradeSells : this.props.trades.tradeBuys;
       var trades_total = 0;
       for (var i = 0; i <= trades.length - 1; i++) {
-        trades_total += trades[i].amount / trades[i].price;
-        if (price >= trades[i].price && total >= trades_total) {
+        if (trades[i].owner != this.props.user.user.id)
+          trades_total += trades[i].amount / trades[i].price;
+        if (price >= trades[i].price && total >= trades_total && trades[i].owner != this.props.user.user.id) {
           // console.log("Would fill " + i + " at total of " + trades_total);
           (type == 1) ?
             this.props.trades.tradeSells[i].status = "filling" :
@@ -246,10 +247,10 @@ var TradeForm = React.createClass({
                 <div>
                   {(this.props.trades.type == 1) ?
                   <div className="container-fluid">
-                    <SplitTradeForm type={this.state.type} market={this.props.market} trades={this.props.trades} />
+                    <SplitTradeForm type={this.state.type} market={this.props.market} trades={this.props.trades} user={this.props.user} />
                   </div> :
                   <div className="container-fluid">
-                    <SplitTradeForm type={this.state.type} market={this.props.market} trades={this.props.trades} />
+                    <SplitTradeForm type={this.state.type} market={this.props.market} trades={this.props.trades} user={this.props.user} />
                   </div>}
                 </div>
               </div>
@@ -257,13 +258,13 @@ var TradeForm = React.createClass({
                 <div className="col-md-6">
                   <div className="container-fluid">
                     <h4 className="text-center">Buy</h4>
-                    <SplitTradeForm type={1} market={this.props.market} trades={this.props.trades} />
+                    <SplitTradeForm type={1} market={this.props.market} trades={this.props.trades} user={this.props.user} />
                   </div>
                 </div>
                 <div className="col-md-6">
                   <h4 className="text-center">Sell</h4>
                   <div className="container-fluid">
-                    <SplitTradeForm type={2} market={this.props.market} trades={this.props.trades} />
+                    <SplitTradeForm type={2} market={this.props.market} trades={this.props.trades} user={this.props.user} />
                   </div>
                 </div>
               </div>

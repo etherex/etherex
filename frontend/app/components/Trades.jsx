@@ -13,7 +13,7 @@ var Trades = React.createClass({
   render: function() {
     return (
       <div>
-        <TradeForm market={this.props.market} trades={this.props.trades} />
+        <TradeForm market={this.props.market} trades={this.props.trades} user={this.props.user} />
         <div className="container-fluid">
           <div className="row">
             <TradeList market={this.props.market} trades={this.props.trades} user={this.props.user} />
