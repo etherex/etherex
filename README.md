@@ -261,12 +261,12 @@ TODO
 * ~~Split buy/sell forms~~
 * ~~Implement the live updating "which trade gets filled" while changing amount/price/total~~
 * ~~Handle and color code new/pending/mined trades~~
-* Filter by market...
+* ~~Filter by market~~
 * Auto trade filling from the live highlighting
 * Clickable trades auto-fills form values
-* My Trades section (where?)
+* My Trades in User section (+ cancel -> [x] in trade list?)
 * Graphs, beautiful graphs
-* Advanced trading features (limit vs market orders, etc.)
+* Advanced trading features (limit vs market orders, stoploss, etc.)
 * Animations/transitions
 * Check/clear buttons (?)
 * Wallet design and theming
