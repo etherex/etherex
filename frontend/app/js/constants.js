@@ -8,10 +8,17 @@ module.exports = {
         LOAD_TRADES_SUCCESS: null,
         LOAD_TRADES_PROGRESS: null,
         ADD_TRADE: null,
+        ADD_TRADE_FAIL: null,
         FILL_TRADE: null,
+        FILL_TRADE_FAIL: null,
+        FILL_TRADES: null,
+        FILL_TRADES_FAIL: null,
         CANCEL_TRADE: null,
+        CANCEL_TRADE_FAIL: null,
         SWITCH_MARKET: null,
-        SWITCH_TYPE: null
+        SWITCH_MARKET_FAIL: null,
+        SWITCH_TYPE: null,
+        SWITCH_TYPE_FAIL: null
     }),
     user: keyMirror ({
         LOAD_USER: null,

@@ -34,6 +34,14 @@ tr.trade-filling:hover td {
   background-color: #217dbb !important;
 }
 
+tr.trade-success td {
+  background-color: #00bc8c !important;
+}
+tr.trade-success:hover td {
+  background-color: #008966 !important;
+}
+
+
 /* Icons */
 
 @font-face {

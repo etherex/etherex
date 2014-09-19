@@ -41,7 +41,7 @@ var MarketStore = Fluxxor.createStore({
 
     onLoadMarketsSuccess: function(payload) {
         console.log("MARKETS LOADED: " + payload.length);
-        this.market = payload[1]; // Load ETX as default
+        this.market = payload[1]; // Load ETX as default (TODO favorites / custom menu)
         this.market.minTotal = bigRat(this.market.amount).divide(fixtures.ether).valueOf();
         this.markets = payload;
         this.loading = false;

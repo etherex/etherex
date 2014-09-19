@@ -90,22 +90,47 @@ var SplitTradeForm = React.createClass({
   highlightFilling: function(type, price, amount, total) {
       var trades = (type == 1) ? this.props.trades.tradeSells : this.props.trades.tradeBuys;
       var trades_total = 0;
+      var filling = [];
+
       for (var i = 0; i <= trades.length - 1; i++) {
         if (trades[i].owner != this.props.user.user.id)
           trades_total += trades[i].amount / trades[i].price;
-        if (price >= trades[i].price && total >= trades_total && trades[i].owner != this.props.user.user.id && trades[i].status == "mined") {
+
+        // Highlight trades that would get filled, or partially (TODO)
+        if (price >= trades[i].price &&
+            total >= trades_total &&
+            trades[i].owner != this.props.user.user.id &&
+            trades[i].status == "mined") {
           // console.log("Would fill " + i + " at total of " + trades_total);
           (type == 1) ?
             this.props.trades.tradeSells[i].status = "filling" :
             this.props.trades.tradeBuys[i].status = "filling"
+
+          filling.push(trades[i]);
+
           this.getFlux().store("TradeStore").emit(constants.CHANGE_EVENT);
         }
-        else if ((price < trades[i].price || total < trades_total) && trades[i].status == "filling") {
+        // Reset to normal otherwise
+        else if ((price < trades[i].price ||
+                  total < trades_total)
+                  && trades[i].status == "filling") {
           (type == 1) ?
             this.props.trades.tradeSells[i].status = "mined" :
             this.props.trades.tradeBuys[i].status = "mined"
+
+          // Remove from state for filling trades for fillTrades
+          _.pull(filling, {'id': trades[i].id});
+
           this.getFlux().store("TradeStore").emit(constants.CHANGE_EVENT);
         }
+
+        // console.log("Filling " + _.pluck(filling, 'id').join(', '));
+
+        // Set state for filling trades for fillTrades
+        this.setState({
+          filling: filling
+        });
+        // console.log(filling);
       };
   },
 
@@ -196,23 +221,29 @@ var SplitTradeForm = React.createClass({
         return false;
       }
 
+      // Fill existing trades
+      // console.log("Filling " + _.pluck(this.state.filling, 'id').join(', '));
+      if (this.state.filling.length > 0)
+        this.getFlux().actions.trade.fillTrades(this.state.filling);
+      else // Add a new trade
+        this.getFlux().actions.trade.addTrade({
+            type: type,
+            price: price,
+            amount: amount,
+            market: market
+        });
+
+      this.refs.amount.getDOMNode().value = '';
+      this.refs.price.getDOMNode().value = '';
+      this.refs.total.getDOMNode().value = '';
+
       this.setState({
         amount: null,
         price: null,
         total: null
       });
-      this.refs.amount.getDOMNode().value = '';
-      this.refs.price.getDOMNode().value = '';
-      this.refs.total.getDOMNode().value = '';
 
-      this.getFlux().actions.trade.addTrade({
-          type: type,
-          price: price,
-          amount: amount,
-          market: market
-      });
-
-      return false;
+      return;
   }
 });
 

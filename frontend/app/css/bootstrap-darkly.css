@@ -1206,7 +1206,7 @@ a.bg-primary:hover {
   background-color: #28415b;
 }
 .bg-success {
-  background-color: #333; /*#00bc8c*/
+  background-color: #00bc8c;
 }
 a.bg-success:hover {
   background-color: #008966;

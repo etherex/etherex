@@ -21,24 +21,27 @@ var eth = (function () {
               { "method": "lll", "params": { "s": "" }, "order": ["s"], "returns" : "" }
   ];
 
-	var m_reqId = 0
-	var ret = {}
+	var m_reqId = 0;
+	var ret = {};
     function reformat(m, d) { return m == "lll" ? d.bin() : d; }
 	function reqSync(m, p) {
-		var req = { "jsonrpc": "2.0", "method": m, "params": p, "id": m_reqId }
-		m_reqId++
+		var r = { "jsonrpc": "2.0", "method": m, "params": p, "id": m_reqId };
+		var req = JSON.stringify(r);
+		m_reqId++;
+		// console.log("Sending", r);
 		var request = new XMLHttpRequest();	
-        request.open("POST", "http://localhost:8080", false)
-		// console.log("Sending " + JSON.stringify(req))
-        request.send(JSON.stringify(req))
-        return reformat(m, JSON.parse(request.responseText).result)
+				request.open("POST", "http://localhost:8080", false);
+				request.send(req);
+				return reformat(m, JSON.parse(request.responseText).result);
 	}
 	function reqAsync(m, p, f) {
-		var req = { "jsonrpc": "2.0", "method": m, "params": p, "id": m_reqId }
-		m_reqId++
+		var r = { "jsonrpc": "2.0", "method": m, "params": p, "id": m_reqId };
+		var req = JSON.stringify(r);
+		m_reqId++;
+		// console.log("Sending", r);
 		var request = new XMLHttpRequest();	
-        request.open("POST", "http://localhost:8080", true)
-        request.send(JSON.stringify(req))
+				request.open("POST", "http://localhost:8080", true);
+				request.send(req);
 		request.onreadystatechange = function() {
 			if (request.readyState === 4)
                 f(reformat(m, JSON.parse(request.responseText).result))

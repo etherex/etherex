@@ -25,7 +25,15 @@ var TradeActions = function(client) {
         _client.addTrade(trade, function() {
             this.dispatch(constants.trade.ADD_TRADE, trade);
         }.bind(this), function(error) {
-            console.log(error);
+            this.dispatch(constants.trade.ADD_TRADE_FAIL, {error: error});
+        }.bind(this));
+    };
+
+    this.fillTrades = function(trades) {
+        _client.fillTrades(trades, function() {
+            this.dispatch(constants.trade.FILL_TRADES, trades);
+        }.bind(this), function(error) {
+            this.dispatch(constants.trade.FILL_TRADES_FAIL, {error: error});
         }.bind(this));
     };
 
@@ -33,7 +41,7 @@ var TradeActions = function(client) {
         _client.fillTrade(trade, function() {
             this.dispatch(constants.trade.FILL_TRADE, trade);
         }.bind(this), function(error) {
-            console.log(error);
+            this.dispatch(constants.trade.FILL_TRADE_FAIL, {error: error});
         }.bind(this));
     };
 
@@ -41,7 +49,7 @@ var TradeActions = function(client) {
         _client.cancelTrade(trade, function() {
             this.dispatch(constants.trade.CANCEL_TRADE, trade);
         }.bind(this), function(error) {
-            console.log(error);
+            this.dispatch(constants.trade.CANCEL_TRADE_FAIL, {error: error});
         }.bind(this));
     };
 

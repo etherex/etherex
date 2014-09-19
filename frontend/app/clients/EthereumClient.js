@@ -164,7 +164,8 @@ var EthereumClient = function() {
                     eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+2)))
                 ).divide(fixtures.ether).valueOf();
 
-                // console.log("Pending: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr))));
+                // console.log("Filling: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr))));
+                // console.log("Pending: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr), 0)));
                 // console.log("Mined: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr), -1)));
 
                 trades.push({
@@ -178,8 +179,9 @@ var EthereumClient = function() {
                         id: marketid,
                         name: markets[marketid].name
                     },
-                    status: (eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+1), -1)) == 0) ?
-                        "pending" : "mined"
+                    status: (eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+1), 0)) == 0 ||
+                             eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+1), -1)) == 0) ?
+                            "pending" : "mined"
                 });
             }
             ptr = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+9))));
@@ -224,6 +226,52 @@ var EthereumClient = function() {
                     fixtures.addresses.etherex,
                     data,
                     "10000",
+                    eth.gasPrice,
+                    success
+                );
+        }
+        catch(e) {
+            failure(e);
+        }
+    };
+
+    this.fillTrades = function(trades, success, failure) {
+        var total = bigRat(0);
+
+        for (var i = trades.length - 1; i >= 0; i--) {
+            var amounts = this.getAmounts(trades[i].amount, trades[i].price);
+            total += bigRat(amounts.total);
+        };
+
+        var ids = _.pluck(trades, 'id');
+        var data = eth.pad(3, 32);
+
+        for (var i = ids.length - 1; i >= 0; i--) {
+            data += eth.pad(ids[i], 32);
+        };
+
+        var gas = 10000 + ids.length * 10000;
+
+        // console.log("Posting " + eth.fromAscii(data));
+        // console.log("with value " + utils.formatBalance(total.toString()));
+
+        try {
+            if (ethBrowser)
+                eth.transact({
+                    from: eth.key,
+                    value: total > 0 ? total.toString() : "0",
+                    to: fixtures.addresses.etherex,
+                    data: eth.fromAscii(data),
+                    gas: String(gas),
+                    gasPrice: eth.gasPrice
+                }, success);
+            else
+                eth.transact(
+                    eth.key,
+                    total > 0 ? total.toString() : "0",
+                    fixtures.addresses.etherex,
+                    data,
+                    String(gas),
                     eth.gasPrice,
                     success
                 );
