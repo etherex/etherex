@@ -161,6 +161,7 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onTradesFail: function(payload) {
+        console.log("TRADES ERROR: " + payload.error);
         this.trades = payload || {};
         this.loading = false;
         this.percent = 0;

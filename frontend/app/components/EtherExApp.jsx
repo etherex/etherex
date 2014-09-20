@@ -10,6 +10,7 @@ var NavBar = require("./NavBar");
 var SubNavBar = require("./SubNavBar");
 var Balance = require("./Balance");
 var BalanceSub = require("./BalanceSub");
+var AlertDismissable = require('./AlertDismissable');
 
 var EtherExApp = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin("UserStore", "MarketStore", "TradeStore")],
@@ -39,14 +40,23 @@ var EtherExApp = React.createClass({
         <div className="navbar">
           <div className="row">
             <Balance user={this.state.user} />
-            <BalanceSub user={this.state.user} market={this.state.market} />
+            {(this.state.market.error) ?
+                <div className="col-md-6">
+                  <div className="alert alert-danger" role="alert">
+                    <h4>Error!</h4>
+                    {this.state.market.error}
+                  </div>
+                </div> :
+                <BalanceSub user={this.state.user} market={this.state.market} />
+            }
           </div>
         </div>
-        <this.props.activeRouteHandler
-          market={this.state.market}
-          trades={this.state.trades}
-          user={this.state.user}
-        />
+        {(!this.state.market.error) &&
+          <this.props.activeRouteHandler
+            market={this.state.market}
+            trades={this.state.trades}
+            user={this.state.user}
+          />}
       </div>
     );
   }

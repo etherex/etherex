@@ -16,7 +16,8 @@ var Trades = React.createClass({
         <TradeForm market={this.props.market} trades={this.props.trades} user={this.props.user} />
         <div className="container-fluid">
           <div className="row">
-            <TradeList market={this.props.market} trades={this.props.trades} user={this.props.user} />
+            {!this.props.market.error &&
+              <TradeList market={this.props.market} trades={this.props.trades} user={this.props.user} />}
           </div>
         </div>
       </div>

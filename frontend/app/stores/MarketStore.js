@@ -33,7 +33,7 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onLoadMarketsFail: function(payload) {
-        console.log("MARKETS ERROR: " + payload);
+        console.log("MARKETS ERROR: " + payload.error);
         this.loading = false;
         this.error = payload.error;
         this.emit(constants.CHANGE_EVENT);

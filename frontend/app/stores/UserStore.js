@@ -1,6 +1,7 @@
 var Fluxxor = require("fluxxor");
 
 var constants = require("../js/constants");
+var utils = require("../js/utils");
 
 var UserStore = Fluxxor.createStore({
 
@@ -18,9 +19,13 @@ var UserStore = Fluxxor.createStore({
             constants.user.LOAD_ADDRESSES_FAIL, this.onLoadAddressesFail,
             constants.user.LOAD_ADDRESSES_SUCCESS, this.onLoadAddressesSuccess,
             constants.user.UPDATE_BALANCE, this.onUpdateBalance,
+            constants.user.UPDATE_BALANCE_FAIL, this.onUserFail,
             constants.user.UPDATE_BALANCE_SUB, this.onUpdateBalanceSub,
+            constants.user.UPDATE_BALANCE_SUB_FAIL, this.onUserFail,
             constants.user.DEPOSIT, this.onDeposit,
-            constants.user.WITHDRAW, this.onWithdraw
+            constants.user.DEPOSIT_FAIL, this.onUserFail,
+            constants.user.WITHDRAW, this.onWithdraw,
+            constants.user.WITHDRAW_FAIL, this.onUserFail
         );
 
         this.setMaxListeners(1024); // prevent "possible EventEmitter memory leak detected"
@@ -90,7 +95,8 @@ var UserStore = Fluxxor.createStore({
 
     onUpdateBalance: function(payload) {
         console.log("BALANCE: " + payload.balance);
-        this.user.balance = payload.balance;
+        this.user.balance = utils.formatBalance(payload.balance);
+        this.user.balance_raw = payload.balance;
         this.user.balance_unconfirmed = payload.balance_unconfirmed;
         this.emit(constants.CHANGE_EVENT);
     },
@@ -98,7 +104,14 @@ var UserStore = Fluxxor.createStore({
     onUpdateBalanceSub: function(payload) {
         console.log("BALANCE_SUB: " + payload.balance);
         this.user.balance_sub = payload.balance;
+        this.user.balance_sub_raw = payload.balance;
         this.user.balance_sub_unconfirmed = payload.balance_unconfirmed;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onUserFail: function(payload) {
+        this.loading = false;
+        this.error = payload.error;
         this.emit(constants.CHANGE_EVENT);
     },
 

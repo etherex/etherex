@@ -43,11 +43,11 @@ var EthereumClient = function() {
             ptr = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+9))));
         };
 
-        if (markets) {
+        if (markets.length > 1) {
             success(markets);
         }
         else {
-            failure("Unable to load markets. Make a wish!");
+            failure("Unable to load markets. Make a wish! (no really, can't find the contracts...)");
         }
     };
 
@@ -101,7 +101,7 @@ var EthereumClient = function() {
 
         if (confirmed >= 0) {
             success(
-              utils.formatBalance(confirmed),
+              confirmed,
               showUnconfirmed ? "(" + unconfirmed + " unconfirmed)" : null
             );
         }
@@ -128,7 +128,7 @@ var EthereumClient = function() {
 
         if (confirmed >= 0) {
             success(
-              confirmed > 0 ? utils.format(confirmed) : 0,
+              confirmed > 0 ? confirmed : 0,
               showUnconfirmed ? "(" + unconfirmed + " unconfirmed)" : null
             );
         }
@@ -250,7 +250,7 @@ var EthereumClient = function() {
             data += eth.pad(ids[i], 32);
         };
 
-        var gas = 10000 + ids.length * 10000;
+        var gas = ids.length * 10000;
 
         // console.log("Posting " + eth.fromAscii(data));
         // console.log("with value " + utils.formatBalance(total.toString()));

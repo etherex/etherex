@@ -13,7 +13,6 @@ var UserActions = function(client) {
             this.flux.actions.user.updateBalance();
 
         }.bind(this), function(error) {
-            console.log(error);
             this.dispatch(constants.user.LOAD_ADDRESSES_FAIL, {error: error});
         }.bind(this));
     };
@@ -28,7 +27,7 @@ var UserActions = function(client) {
                     balance_unconfirmed: unconfirmed
                 });
             }.bind(this), function(error) {
-                console.log(error);
+                this.dispatch(constants.user.UPDATE_BALANCE_FAIL, {error: error});
             }.bind(this));
         }
     };
@@ -44,7 +43,7 @@ var UserActions = function(client) {
                     balance_unconfirmed: unconfirmed
                 });
             }.bind(this), function(error) {
-                console.log(error);
+                this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
             }.bind(this));
         }
     };

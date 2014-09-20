@@ -8,6 +8,7 @@ var FluxChildMixin = Fluxxor.FluxChildMixin(React);
 var bigRat = require("big-rational");
 var fixtures = require("../js/fixtures");
 var constants = require("../js/constants");
+var utils = require("../js/utils");
 
 // var mq = require('react-responsive');
 
@@ -27,7 +28,9 @@ var SplitTradeForm = React.createClass({
           amount: null,
           price: null,
           total: null,
-          newTrade: false
+          newTrade: false,
+          filling: [],
+          available: null
       };
   },
 
@@ -89,37 +92,71 @@ var SplitTradeForm = React.createClass({
 
   highlightFilling: function(type, price, amount, total) {
       var trades = (type == 1) ? this.props.trades.tradeSells : this.props.trades.tradeBuys;
+      var siblings = (type == 1) ? this.props.trades.tradeBuys : this.props.trades.tradeSells;
+      var total_amount = 0;
       var trades_total = 0;
       var filling = [];
+      var available = total;
+
+      // Reset same type trades
+      for (var i = 0; i <= siblings.length - 1; i++) {
+        if (siblings[i].status == "filling")
+          (type == 1) ?
+            this.props.trades.tradeBuys[i].status = "mined" :
+            this.props.trades.tradeSells[i].status = "mined"
+      }
 
       for (var i = 0; i <= trades.length - 1; i++) {
-        if (trades[i].owner != this.props.user.user.id)
-          trades_total += trades[i].amount / trades[i].price;
+
+        if (trades[i].owner != this.props.user.user.id) {
+          var this_total = trades[i].amount / trades[i].price;
+          // console.log("against total of " + this_total);
+          total_amount += trades[i].amount;
+          trades_total += this_total;
+        }
 
         // Highlight trades that would get filled, or partially (TODO)
-        if (price >= trades[i].price &&
-            total >= trades_total &&
-            trades[i].owner != this.props.user.user.id &&
-            trades[i].status == "mined") {
-          // console.log("Would fill " + i + " at total of " + trades_total);
-          (type == 1) ?
-            this.props.trades.tradeSells[i].status = "filling" :
-            this.props.trades.tradeBuys[i].status = "filling"
+        if (((type == 1 && price >= trades[i].price) ||
+             (type == 2 && price <= trades[i].price)) &&
+              price > 0 &&
+              amount >= total_amount &&
+              total >= this_total &&
+              ((type == 2 && available >= this_total) || (type == 1 && this.props.user.user.balance_raw > this_total)) &&
+              trades[i].owner != this.props.user.user.id &&
+              trades[i].status == "mined") {
+          console.log("Would fill " + i + " at total of " + trades_total);
+
+          if (available >= this_total)
+            (type == 1) ?
+              this.props.trades.tradeSells[i].status = "filling" :
+              this.props.trades.tradeBuys[i].status = "filling"
 
           filling.push(trades[i]);
+
+          // Remove total from available total
+          available -= this_total;
+
+          console.log("Available left: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
+          console.log("From balance of " + this.props.user.user.balance);
 
           this.getFlux().store("TradeStore").emit(constants.CHANGE_EVENT);
         }
         // Reset to normal otherwise
-        else if ((price < trades[i].price ||
-                  total < trades_total)
-                  && trades[i].status == "filling") {
+        else if ((((type == 1 && price < trades[i].price) ||
+                   (type == 2 && price > trades[i].price)) ||
+                    price <= 0 ||
+                    available < this_total ||
+                    amount < total_amount) &&
+                    trades[i].status == "filling") {
           (type == 1) ?
             this.props.trades.tradeSells[i].status = "mined" :
             this.props.trades.tradeBuys[i].status = "mined"
 
           // Remove from state for filling trades for fillTrades
           _.pull(filling, {'id': trades[i].id});
+
+          console.log("Available left: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
+          console.log("From balance of " + this.props.user.user.balance);
 
           this.getFlux().store("TradeStore").emit(constants.CHANGE_EVENT);
         }
@@ -128,7 +165,8 @@ var SplitTradeForm = React.createClass({
 
         // Set state for filling trades for fillTrades
         this.setState({
-          filling: filling
+          filling: filling,
+          available: total
         });
         // console.log(filling);
       };
@@ -140,7 +178,15 @@ var SplitTradeForm = React.createClass({
       var market = this.refs.market.getDOMNode().value;
       var price = this.refs.price.getDOMNode().value.trim();
       var amount = this.refs.amount.getDOMNode().value.trim();
-      var total = (amount / price).toFixed(8);
+      var total = 0;
+
+      // Ceil to precision
+      if (price)
+        var total = bigRat(String(amount / price))
+                .multiply(bigRat(fixtures.precision))
+                .ceil()
+                .divide(bigRat(fixtures.precision))
+                .valueOf();
 
       this.setState({
         price: price,
@@ -160,7 +206,7 @@ var SplitTradeForm = React.createClass({
       var market = this.refs.market.getDOMNode().value;
       var price = this.refs.price.getDOMNode().value.trim();
       var total = this.refs.total.getDOMNode().value.trim();
-      var amount = (total * price).toFixed(8);
+      var amount = (total * price).toPrecision(9);
 
       this.setState({
         price: price,
@@ -305,11 +351,11 @@ var TradeForm = React.createClass({
     },
 
     handleType: function(key) {
-        this.setState({
-          type: key,
-          typename: this.refs.type.props.children[key - 1].props.children
-        });
-        this.getFlux().actions.trade.switchType(key);
+      this.setState({
+        type: key,
+        typename: this.refs.type.props.children[key - 1].props.children
+      });
+      this.getFlux().actions.trade.switchType(key);
     }
 });
 

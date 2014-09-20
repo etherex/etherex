@@ -27,11 +27,14 @@ module.exports = {
         LOAD_ADDRESSES: null,
         LOAD_ADDRESSES_FAIL: null,
         LOAD_ADDRESSES_SUCCESS: null,
-        LOAD_ADDRESSES: null,
         UPDATE_BALANCE: null,
+        UPDATE_BALANCE_FAIL: null,
         UPDATE_BALANCE_SUB: null,
+        UPDATE_BALANCE_SUB_FAIL: null,
         DEPOSIT: null,
-        WITHDRAW: null
+        DEPOSIT_FAIL: null,
+        WITHDRAW: null,
+        WITHDRAW_FAIL: null
     }),
     market: keyMirror ({
         CHANGE_MARKET: null,

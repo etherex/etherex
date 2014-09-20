@@ -4,10 +4,16 @@
 # Package Repository: https://github.com/etherex/etherex
 
 # Precursor, set some variables.
-#set:
-#  {{swarum_blob_id}} => 0xb5e0478618d5e91682efc0e2a95b3d32cdae546c03f6014dc8df659c2f0f94c3
-# set:
-#   {{NameReg}} => 0x50441127ea5b9dfd835a9aba4e1dc9c1257b58ca
+# #set:
+# #  {{swarum_blob_id}} => 0xb5e0478618d5e91682efc0e2a95b3d32cdae546c03f6014dc8df659c2f0f94c3
+# # set:
+# #   {{NameReg}} => 0x50441127ea5b9dfd835a9aba4e1dc9c1257b58ca
+set:
+  {{ZG}} => 0xe559de5527492bcb42ec68d07df0742a98ec3f1e
+set:
+  {{CAK}} => 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31
+set:
+  {{FAB}} => 0x90004d8d1d3c85f87bc8b7152a69ef14235504cb
 
 # First We Deploy DOUG
 # deploy:
@@ -77,9 +83,17 @@ transact:
 transact:
   {{EtherEx}} => 0x7 0x8ac7230489e80000 0x5f5e100 FAB {{FAB}} 4
 
+# DEBUG - Endow with 10,000 ether
+endow:
+  {{CAK}} => 15000000000000000000000
+endow:
+  {{ZG}} => 15000000000000000000000
+endow:
+  {{FAB}} => 15000000000000000000000
+
 # Log those deploys.
-#log:
-#  Doug => {{DOUG}}
+# # log:
+# #   Doug => {{DOUG}}
 log:
   NameReg => {{NameReg}}
 log:

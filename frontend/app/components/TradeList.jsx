@@ -158,7 +158,7 @@ var TradeList = React.createClass({
                 {this.props.trades.loading &&
                     <ProgressBar active now={this.props.trades.percent} />}
                 {this.props.trades.error &&
-                    <div className="alert alert-danger" role="alert"><strong>Error!</strong> {this.props.trades.error}</div>}
+                    <AlertDismissable ref="alerts" level={"alert"} message={this.props.trades.error} />}
                 {(this.props.trades.type == 1) ?
                 <div>
                     <TradeSells trades={this.props.trades} user={this.props.user} />

@@ -262,7 +262,7 @@ TODO
 * ~~Implement the live updating "which trade gets filled" while changing amount/price/total~~
 * ~~Handle and color code new/pending/mined trades~~
 * ~~Filter by market~~
-* Auto trade filling from the live highlighting
+* ~~Auto trade filling from the live highlighting~~
 * Clickable trades auto-fills form values
 * My Trades in User section (+ cancel -> [x] in trade list?)
 * Graphs, beautiful graphs
