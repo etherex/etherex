@@ -18,7 +18,9 @@ var ConfirmModal = React.createClass({
             <Modal title="Confirmation required" animation={true}>
                 <form onSubmit={this.confirmSubmit}>
                     <div className="modal-body">
-                        <p>{this.props.message}</p>
+                        <h4>{this.props.message}</h4>
+                        {(this.props.note) ?
+                            this.props.note : ""}
                     </div>
                     <div className="modal-footer">
                         <Button onClick={this.props.onRequestHide}>No</Button>

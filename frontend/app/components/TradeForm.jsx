@@ -30,6 +30,7 @@ var SplitTradeForm = React.createClass({
           total: null,
           newTrade: false,
           filling: [],
+          amountLeft: null,
           available: null
       };
   },
@@ -71,10 +72,24 @@ var SplitTradeForm = React.createClass({
                   <ConfirmModal
                     message={
                       "Are you sure you want to " + (this.props.type == 1 ? "buy" : "sell") +
-                      " " + this.state.amount + " " + this.props.market.market.name +
-                      " at " + this.state.price + " " + this.props.market.market.name + "/ETH" +
-                      " for " + this.state.total + " ETH"
-                    }
+                        " " + utils.numeral(this.state.amount, 4) + " " + this.props.market.market.name +
+                        " at " + utils.numeral(this.state.price, 4) + " " + this.props.market.market.name + "/ETH" +
+                        " for " + utils.formatBalance(bigRat(this.state.total).multiply(fixtures.ether)) + " ?"}
+                    note={
+                      (this.state.filling.length > 0 ?
+                        "You will be filling " + this.state.filling.length + " trade" +
+                        (this.state.filling.length > 1 ? "s" : "") + "." : "") +
+                      (this.state.amountLeft / this.state.price >= this.props.market.market.minTotal &&
+                       this.state.filling.length > 0 ?
+                        " You will also be adding a new trade of " +
+                          utils.numeral(this.state.amountLeft, 4) + " " + this.props.market.market.name + " for " +
+                          utils.formatBalance(bigRat(this.state.available).multiply(fixtures.ether)) + "." : "") +
+                      (this.state.amountLeft / this.state.price < this.props.market.market.minTotal &&
+                       this.state.amountLeft > Math.pow(10, this.props.market.market.decimals) &&
+                       this.state.filling.length > 0 ?
+                        " Not enough left for a new trade with " +
+                          utils.numeral(this.state.amountLeft, 4) + " " + this.props.market.market.name + " for " +
+                          utils.formatBalance(bigRat(this.state.available).multiply(fixtures.ether)) + "." : "")}
                     flux={this.getFlux()}
                     onSubmit={this.onSubmitForm}
                   />
@@ -95,7 +110,8 @@ var SplitTradeForm = React.createClass({
       var siblings = (type == 1) ? this.props.trades.tradeBuys : this.props.trades.tradeSells;
       var total_amount = 0;
       var trades_total = 0;
-      var filling = [];
+      var filling = this.state.filling;
+      var amountLeft = amount;
       var available = total;
 
       // Reset same type trades
@@ -105,6 +121,14 @@ var SplitTradeForm = React.createClass({
             this.props.trades.tradeBuys[i].status = "mined" :
             this.props.trades.tradeSells[i].status = "mined"
       }
+
+      // Remove currently filling amounts and totals
+      for (var i = filling.length - 1; i >= 0; i--) {
+        amountLeft -= filling[i].amount;
+        available -= filling[i].amount / filling[i].price;
+      };
+
+      // console.log("=====");
 
       for (var i = 0; i <= trades.length - 1; i++) {
 
@@ -119,13 +143,13 @@ var SplitTradeForm = React.createClass({
         if (((type == 1 && price >= trades[i].price) ||
              (type == 2 && price <= trades[i].price)) &&
               price > 0 &&
-              amount >= total_amount &&
+              amount >= trades[i].amount &&
               total >= this_total &&
               ((type == 2 && available >= this_total) || (type == 1 && this.props.user.user.balance_raw > this_total)) &&
               trades[i].owner != this.props.user.user.id &&
               trades[i].status == "mined") {
 
-          console.log("Would fill trade # " + i + " with total of " + trades_total);
+          // console.log("Would fill trade # " + i + " with total of " + trades_total);
 
           if (available >= this_total)
             (type == 1) ?
@@ -136,9 +160,10 @@ var SplitTradeForm = React.createClass({
 
           // Remove total from available total
           available -= this_total;
+          amountLeft -= trades[i].amount;
 
-          console.log("Available left: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
-          console.log("From balance of " + this.props.user.user.balance);
+          // console.log("Available left: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
+          // console.log("From balance of " + this.props.user.user.balance);
 
           this.getFlux().store("TradeStore").emit(constants.CHANGE_EVENT);
         }
@@ -154,22 +179,41 @@ var SplitTradeForm = React.createClass({
             this.props.trades.tradeBuys[i].status = "mined"
 
           // Remove from state for filling trades for fillTrades
-          _.pull(filling, {'id': trades[i].id});
+          _.remove(filling, {'id': trades[i].id});
 
-          console.log("Available left: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
-          console.log("From balance of " + this.props.user.user.balance);
+          // Add back to available and amountLeft
+          available += this_total;
+          amountLeft += trades[i].amount;
+
+          // console.log("Unfilling, available left: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
+          // console.log("From balance of " + this.props.user.user.balance);
 
           this.getFlux().store("TradeStore").emit(constants.CHANGE_EVENT);
         }
 
-        // console.log("Filling " + _.pluck(filling, 'id').join(', '));
+        // // DEBUG Partial filling adds a new trade for remaining available
+        // if (price > 0) {
+        //   if (amountLeft / price >= this.props.market.market.minTotal &&
+        //       filling.length > 0) {
+        //     console.log("Would also add new trade for " + amountLeft + " " + this.props.market.market.name + " for " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
+        //   }
+        //   else if (amountLeft / price < this.props.market.market.minTotal &&
+        //            filling.length > 0 &&
+        //            amountLeft > Math.pow(10, this.props.market.market.decimals)) {
+        //     console.log("Not enough left for a new trade, needs " + trades[i].amount + " " + this.props.market.market.name + " for " + this.props.market.market.minTotal + " ETH and got " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
+        //   }
+        //   else if (filling.length == 0) {
+        //     console.log("Would add new trade for " + amount + " " + this.props.market.market.name + " for " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
+        //   }
+        // }
+        // console.log("Filling " + filling.length + " trade(s): " + _.pluck(filling, 'id').join(', '));
 
         // Set state for filling trades for fillTrades
         this.setState({
           filling: filling,
+          amountLeft: amountLeft,
           available: available
         });
-        // console.log(filling);
       };
   },
 
@@ -280,6 +324,16 @@ var SplitTradeForm = React.createClass({
             market: market
         });
 
+      // Partial filling adds a new trade for remaining available
+      if (this.state.amountLeft / price >= this.props.market.market.minTotal && this.state.filling.length > 0) {
+        this.getFlux().actions.trade.addTrade({
+            type: type,
+            price: price,
+            amount: this.state.amountLeft,
+            market: market
+        });
+      }
+
       this.refs.amount.getDOMNode().value = '';
       this.refs.price.getDOMNode().value = '';
       this.refs.total.getDOMNode().value = '';
@@ -287,7 +341,11 @@ var SplitTradeForm = React.createClass({
       this.setState({
         amount: null,
         price: null,
-        total: null
+        total: null,
+        newTrade: false,
+        filling: [],
+        amountLeft: null,
+        available: null
       });
 
       return;
