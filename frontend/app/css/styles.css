@@ -13,6 +13,11 @@
   width: 5.5em;
 }
 
+th.trade-op,
+td.trade-op {
+  width: 1.5em;
+}
+
 tr.trade-new td {
   background-color: #e74c3c !important;
 }

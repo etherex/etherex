@@ -125,7 +125,7 @@ var SplitTradeForm = React.createClass({
               trades[i].owner != this.props.user.user.id &&
               trades[i].status == "mined") {
 
-          console.log("Would fill " + i + " at total of " + trades_total);
+          console.log("Would fill trade # " + i + " with total of " + trades_total);
 
           if (available >= this_total)
             (type == 1) ?

@@ -12,6 +12,7 @@ var ConfirmModal = require('./ConfirmModal');
 
 var Table = require("react-bootstrap/Table");
 var Button = require("react-bootstrap/Button");
+var Glyphicon = require("react-bootstrap/Glyphicon");
 
 var utils = require("../js/utils");
 
@@ -49,7 +50,7 @@ var TradeRow = React.createClass({
                         {this.props.trade.owner}
                     </div>
                 </td>
-                <td>
+                <td className="trade-op">
                     <div className="pull-right">{
                     (this.props.trade.owner == this.props.user.id) ?
                         <ModalTrigger modal={
@@ -61,7 +62,7 @@ var TradeRow = React.createClass({
                                     onSubmit={this.handleCancelTrade}
                                 />
                             }>
-                            <Button key="cancel">Cancel</Button>
+                            <Button key="cancel"><Glyphicon glyph="remove" /></Button>
                         </ModalTrigger> :
 
                         <ModalTrigger modal={
@@ -77,7 +78,7 @@ var TradeRow = React.createClass({
                                     onSubmit={this.handleFillTrade}
                                 />
                             }>
-                            <Button key="fill">Fill</Button>
+                            <Button key="fill"><Glyphicon glyph="screenshot" /></Button>
                         </ModalTrigger>
                     }</div>
                 </td>
@@ -107,12 +108,12 @@ var TradeTable = React.createClass({
                 <Table condensed hover responsive striped>
                     <thead>
                         <tr>
-                            <th className="text-center">Amount</th>
+                            <th className="text-right">Amount</th>
                             <th className="text-center">Market</th>
-                            <th className="text-center">Price</th>
-                            <th className="text-center">Total</th>
+                            <th className="text-right">Price</th>
+                            <th className="text-right">Total</th>
                             <th className="text-center">By</th>
-                            <th className="text-center">Op</th>
+                            <th className="text-center trade-op"></th>
                         </tr>
                     </thead>
                     <tbody>
