@@ -103,7 +103,7 @@ var UserStore = Fluxxor.createStore({
 
     onUpdateBalanceSub: function(payload) {
         console.log("BALANCE_SUB: " + payload.balance);
-        this.user.balance_sub = payload.balance;
+        this.user.balance_sub = payload.balance ? utils.format(payload.balance) : 0;
         this.user.balance_sub_raw = payload.balance;
         this.user.balance_sub_unconfirmed = payload.balance_unconfirmed;
         this.emit(constants.CHANGE_EVENT);

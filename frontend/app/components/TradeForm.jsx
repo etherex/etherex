@@ -124,6 +124,7 @@ var SplitTradeForm = React.createClass({
               ((type == 2 && available >= this_total) || (type == 1 && this.props.user.user.balance_raw > this_total)) &&
               trades[i].owner != this.props.user.user.id &&
               trades[i].status == "mined") {
+
           console.log("Would fill " + i + " at total of " + trades_total);
 
           if (available >= this_total)
@@ -166,7 +167,7 @@ var SplitTradeForm = React.createClass({
         // Set state for filling trades for fillTrades
         this.setState({
           filling: filling,
-          available: total
+          available: available
         });
         // console.log(filling);
       };
@@ -181,7 +182,7 @@ var SplitTradeForm = React.createClass({
       var total = 0;
 
       // Ceil to precision
-      if (price)
+      if (price > 0)
         var total = bigRat(String(amount / price))
                 .multiply(bigRat(fixtures.precision))
                 .ceil()

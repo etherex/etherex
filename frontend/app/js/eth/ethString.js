@@ -56,7 +56,7 @@ String.prototype.dec = function() {
 }
 
 String.prototype.hex = function() {
-    return bigIng(this.substr(0)).toHex()
+    return bigInt(this.substr(0)).toHex()
 }
 
 
