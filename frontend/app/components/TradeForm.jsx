@@ -85,7 +85,6 @@ var SplitTradeForm = React.createClass({
                           utils.numeral(this.state.amountLeft, 4) + " " + this.props.market.market.name + " for " +
                           utils.formatBalance(bigRat(this.state.available).multiply(fixtures.ether)) + "." : "") +
                       (this.state.amountLeft / this.state.price < this.props.market.market.minTotal &&
-                       this.state.amountLeft > Math.pow(10, this.props.market.market.decimals) &&
                        this.state.filling.length > 0 ?
                         " Not enough left for a new trade with " +
                           utils.numeral(this.state.amountLeft, 4) + " " + this.props.market.market.name + " for " +
@@ -128,7 +127,7 @@ var SplitTradeForm = React.createClass({
         available -= filling[i].amount / filling[i].price;
       };
 
-      // console.log("=====");
+      console.log("=====");
 
       for (var i = 0; i <= trades.length - 1; i++) {
 
@@ -139,40 +138,12 @@ var SplitTradeForm = React.createClass({
           trades_total += this_total;
         }
 
-        // Highlight trades that would get filled, or partially (TODO)
-        if (((type == 1 && price >= trades[i].price) ||
-             (type == 2 && price <= trades[i].price)) &&
-              price > 0 &&
-              amount >= trades[i].amount &&
-              total >= this_total &&
-              ((type == 2 && available >= this_total) || (type == 1 && this.props.user.user.balance_raw > this_total)) &&
-              trades[i].owner != this.props.user.user.id &&
-              trades[i].status == "mined") {
-
-          // console.log("Would fill trade # " + i + " with total of " + trades_total);
-
-          if (available >= this_total)
-            (type == 1) ?
-              this.props.trades.tradeSells[i].status = "filling" :
-              this.props.trades.tradeBuys[i].status = "filling"
-
-          filling.push(trades[i]);
-
-          // Remove total from available total
-          available -= this_total;
-          amountLeft -= trades[i].amount;
-
-          // console.log("Available left: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
-          // console.log("From balance of " + this.props.user.user.balance);
-
-          this.getFlux().store("TradeStore").emit(constants.CHANGE_EVENT);
-        }
-        // Reset to normal otherwise
-        else if ((((type == 1 && price < trades[i].price) ||
+        // Reset to normal first if we no longer have enough
+        if ((((type == 1 && price < trades[i].price) ||
                    (type == 2 && price > trades[i].price)) ||
                     price <= 0 ||
                     available < this_total ||
-                    amount < total_amount) &&
+                    amountLeft < trades[i].amount) &&
                     trades[i].status == "filling") {
           (type == 1) ?
             this.props.trades.tradeSells[i].status = "mined" :
@@ -185,28 +156,36 @@ var SplitTradeForm = React.createClass({
           available += this_total;
           amountLeft += trades[i].amount;
 
-          // console.log("Unfilling, available left: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
-          // console.log("From balance of " + this.props.user.user.balance);
+          // console.log("Unfilling, available: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
 
           this.getFlux().store("TradeStore").emit(constants.CHANGE_EVENT);
         }
 
-        // // DEBUG Partial filling adds a new trade for remaining available
-        // if (price > 0) {
-        //   if (amountLeft / price >= this.props.market.market.minTotal &&
-        //       filling.length > 0) {
-        //     console.log("Would also add new trade for " + amountLeft + " " + this.props.market.market.name + " for " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
-        //   }
-        //   else if (amountLeft / price < this.props.market.market.minTotal &&
-        //            filling.length > 0 &&
-        //            amountLeft > Math.pow(10, this.props.market.market.decimals)) {
-        //     console.log("Not enough left for a new trade, needs " + trades[i].amount + " " + this.props.market.market.name + " for " + this.props.market.market.minTotal + " ETH and got " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
-        //   }
-        //   else if (filling.length == 0) {
-        //     console.log("Would add new trade for " + amount + " " + this.props.market.market.name + " for " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
-        //   }
-        // }
-        // console.log("Filling " + filling.length + " trade(s): " + _.pluck(filling, 'id').join(', '));
+        // Highlight trades that would get filled, or partially (TODO)
+        if (((type == 1 && price >= trades[i].price) ||
+             (type == 2 && price <= trades[i].price)) &&
+              price > 0 &&
+              amount >= trades[i].amount &&
+              total >= this_total &&
+              ((type == 2 && available >= this_total) || (type == 1 && this.props.user.user.balance_raw > this_total)) &&
+              trades[i].owner != this.props.user.user.id &&
+              trades[i].status == "mined") {
+
+          console.log("Would fill trade # " + i + " with total of " + trades_total);
+
+          if (available >= this_total)
+            (type == 1) ?
+              this.props.trades.tradeSells[i].status = "filling" :
+              this.props.trades.tradeBuys[i].status = "filling"
+
+          filling.push(trades[i]);
+
+          // Remove total from available total
+          available -= this_total;
+          amountLeft -= trades[i].amount;
+
+          this.getFlux().store("TradeStore").emit(constants.CHANGE_EVENT);
+        }
 
         // Set state for filling trades for fillTrades
         this.setState({
@@ -215,18 +194,37 @@ var SplitTradeForm = React.createClass({
           available: available
         });
       };
+
+      // // DEBUG Partial filling adds a new trade for remaining available
+      console.log("Available: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
+      // console.log("From balance of " + this.props.user.user.balance);
+      if (price > 0) {
+        if (amountLeft / price >= this.props.market.market.minTotal &&
+            filling.length > 0) {
+          console.log("Would also add new trade for " + amountLeft + " " + this.props.market.market.name + " for " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
+        }
+        else if (amountLeft / price < this.props.market.market.minTotal &&
+                 filling.length > 0 &&
+                 available > 0) {
+          console.log("Not enough left for a new trade, needs " + utils.formatBalance(bigRat(this.props.market.market.minTotal).multiply(fixtures.ether)) + " and got " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
+        }
+        else if (filling.length == 0) {
+          console.log("Would add new trade for " + amount + " " + this.props.market.market.name + " for " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
+        }
+      }
+      console.log("Filling " + filling.length + " trade(s): " + _.pluck(filling, 'id').join(', '));
   },
 
   handleChange: function(e) {
       // TODO - proper back/forth handling
       var type = this.props.type;
-      var market = this.refs.market.getDOMNode().value;
+      var market = this.refs.market.getDOMNode().value.trim();
       var price = this.refs.price.getDOMNode().value.trim();
       var amount = this.refs.amount.getDOMNode().value.trim();
       var total = 0;
 
-      // Ceil to precision
       if (price > 0)
+        // var total = amount / price;
         var total = bigRat(String(amount / price))
                 .multiply(bigRat(fixtures.precision))
                 .ceil()
@@ -283,20 +281,10 @@ var SplitTradeForm = React.createClass({
 
   onSubmitForm: function(e) {
       e.preventDefault();
-      var type = this.props.type;
-      var market = this.refs.market.getDOMNode().value;
-      var amount = this.refs.amount.getDOMNode().value.trim();
-      var price = this.refs.price.getDOMNode().value.trim();
-      var total = this.refs.total.getDOMNode().value.trim();
 
-      this.setState({
-        price: price,
-        amount: amount,
-        total: total
-      });
-
-      if (this.handleValidation(type, market, amount, price, total) != true) {
-        if (amount && price && total && total < this.props.market.market.minTotal) {
+      console.log(this.props.market.market.id, this.state.amount, this.state.price, this.state.total);
+      if (this.handleValidation(this.props.type, this.props.market.market.id, this.state.amount, this.state.price, this.state.total) != true) {
+        if (this.props.market.market.id && this.state.amount && this.state.price && this.state.total && this.state.total < this.props.market.market.minTotal) {
           this._owner.setState({
             alertLevel: 'warning',
             alertMessage: "Minimum total is " + this.props.market.market.minTotal + " ETH"
@@ -316,21 +304,23 @@ var SplitTradeForm = React.createClass({
       // console.log("Filling " + _.pluck(this.state.filling, 'id').join(', '));
       if (this.state.filling.length > 0)
         this.getFlux().actions.trade.fillTrades(this.state.filling);
-      else // Add a new trade
+
+      // Add a new trade
+      else
         this.getFlux().actions.trade.addTrade({
-            type: type,
-            price: price,
-            amount: amount,
-            market: market
+            type: this.props.type,
+            price: this.state.price,
+            amount: this.state.amount,
+            market: this.props.market.market.id
         });
 
       // Partial filling adds a new trade for remaining available
-      if (this.state.amountLeft / price >= this.props.market.market.minTotal && this.state.filling.length > 0) {
+      if (this.state.amountLeft / this.state.price >= this.props.market.market.minTotal && this.state.filling.length > 0) {
         this.getFlux().actions.trade.addTrade({
-            type: type,
-            price: price,
+            type: this.props.type,
+            price: this.state.price,
             amount: this.state.amountLeft,
-            market: market
+            market: this.props.market.market.id
         });
       }
 
