@@ -6,12 +6,20 @@ var bigRat = require('big-rational');
 var EthereumClient = function() {
 
     this.loadAddresses = function(success, failure) {
-        var addresses = eth.keys.map(function (k) { return eth.secretToAddress(k); });
+        var addresses = [];
+        var error = null;
 
-        if (addresses)
+        try {
+            addresses = eth.keys.map(function (k) { return eth.secretToAddress(k); });
+        }
+        catch (e) {
+            error = String(e);
+        }
+
+        if (!error)
             success(addresses);
         else
-            failure("Unable to load addresses. Lost your keys?");
+            failure("Unable to load addresses. Lost your keys? The actual error was: " + error);
     };
 
 
@@ -27,17 +35,17 @@ var EthereumClient = function() {
         console.log("MARKETS LAST: " + last);
 
         for (var i = 0; i < total; i++) {
-            var id = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+7)));
+            var id = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+6)));
             console.log("LOADING MARKET ID: " + id);
             if (id) {
                 markets.push({
                     id: id,
                     name: eth.toAscii(eth.stateAt(fixtures.addresses.markets, String(ptr))),
-                    address: eth.stateAt(fixtures.addresses.markets, String(ptr+3)),
-                    amount: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+1))),
-                    precision: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+2))),
-                    decimals: _.parseInt(eth.toAscii(eth.stateAt(fixtures.addresses.markets, String(ptr+4)))),
-                    price: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+5))),
+                    address: eth.stateAt(fixtures.addresses.markets, String(ptr+1)),
+                    decimals: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+2))),
+                    minimum: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+3))),
+                    precision: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+4))),
+                    // price: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+5))),
                 });
             }
             ptr = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+9))));

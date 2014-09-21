@@ -10,11 +10,11 @@
 #
 
 # Slot allocation:
-# n + 1: Type (buy/sell)
-# n + 2: Price
-# n + 3: Amount
-# n + 4: Owner (buyer/seller)
-# n + 5: Market
+# n + 0: Type (buy/sell)
+# n + 1: Price
+# n + 2: Amount
+# n + 3: Owner (buyer/seller)
+# n + 4: Market
 # n + 7: Block #
 # n + 8: Previous trade pointer
 # n + 9: Next trade pointer
@@ -72,7 +72,7 @@ code:
         #
         # Add trade
         #
-        elif msg.datasize == 6:
+        elif msg.datasize == used + 1:
             if msg.data[0] == 1:
                 if msg.sender == exchange:
                     trade = msg.data[1]
@@ -101,7 +101,7 @@ code:
                         next = start
 
                     i = 0
-                    while i < slots - 3:
+                    while i < used:
                         contract.storage[next + i] = msg.data[i + 1]
                         i = i + 1
 

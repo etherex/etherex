@@ -9,6 +9,18 @@
 # Markets
 #
 
+# Slot allocation:
+# n + 0: Name
+# n + 1: Contract
+# n + 2: Decimal precision
+# n + 3: Minimum total
+# n + 4: Price denominator
+# n + 5: Last price (?)
+# n + 6: Market ID
+# n + 7: Block #
+# n + 8: Previous market pointer
+# n + 9: Next market pointer
+
 init:
     # c3D definitions
     contract.storage[10] = 0x88554646BA # c3D linked list
@@ -32,7 +44,7 @@ code:
     contract.storage[21] = tx.gas
     contract.storage[22] = block.timestamp
 
-    # Get the total number of markets
+    # Get the total number of active markets
     total = contract.storage[2]
 
     # Get our linked list start
@@ -43,7 +55,7 @@ code:
 
     # Slots used per data group
     slots = 10
-    used = 6 # Current number of slots used
+    used = 5 # Current number of slots used
 
     if msg.value > 0: // "Refunding excess value: %s" % msg.value
         send(msg.sender, msg.value)
@@ -56,56 +68,64 @@ code:
             marketid = msg.data[0] - 1
             market = array(slots - used)
             market[0] = contract.storage[marketid * slots + start] // "Name"
-            market[1] = contract.storage[marketid * slots + start + 1] // "Minimum amount"
-            market[2] = contract.storage[marketid * slots + start + 2] // "Price precision"
-            market[3] = contract.storage[marketid * slots + start + 3] // "Contract"
-            market[4] = contract.storage[marketid * slots + start + 4] // "Decimal precision"
-            market[5] = contract.storage[marketid * slots + start + 5] // "Last price"
+            market[1] = contract.storage[marketid * slots + start + 1] // "Contract"
+            market[2] = contract.storage[marketid * slots + start + 2] // "Decimal precision"
+            market[3] = contract.storage[marketid * slots + start + 3] // "Minimum total"
+            market[4] = contract.storage[marketid * slots + start + 4] // "Price denominator"
+            # market[5] = contract.storage[marketid * slots + start + 5] // "Last price"
             return(market, slots - used)
 
         #
         # Add market
         #
-        elif msg.datasize == used:
+        elif msg.datasize == used + 1:
             if msg.data[0] == 1:
                 if msg.sender == exchange:
+                    lastid = contract.storage[3]
                     name = msg.data[1]
-                    amount = msg.data[2]
-                    price = msg.data[3]
-                    owner = msg.data[4]
-                    market = total + 1 # TODO - fix this...
-                    precision = msg.data[5]
+                    contract = msg.data[2]
+                    decimals = msg.data[3]
+                    minimum = msg.data[4]
+                    denominator = msg.data[5]
+                    market = lastid + 1
 
                     # Save last registered Market ID
                     contract.storage[9] = market
 
-                    if amount < 1 or amount > 2^254:
-                        return(0) // "Invalid minimum amount"
-                    if price < 1 or price > 2^254:
-                        return(0) // "Invalid price"
-                    if owner < 1 or owner > 2^254:
-                        return(0) // "Invalid owner"
-                    if market < 1 or market > 2^254:
-                        return(0) // "Invalid market ID"
-                    if precision < 1 or precision > 2^254:
+                    if !name:
+                        return(0) // "Invalid name"
+                    if !contract or contract > 2^254:
+                        return(0) // "Invalid contract"
+                    if decimals > 2^254:
                         return(0) // "Invalid decimal precision"
+                    if !minimum or minimum > 2^254:
+                        return(0) // "Invalid minimum amount"
+                    if !denominator or denominator > 2^254:
+                        return(0) // "Invalid price denominator"
+                    if !market or market > 2^254:
+                        return(0) // "Invalid market ID"
 
                     # Find our next available slots
                     next = contract.storage[last + 9]
                     if !next:
                         next = start
 
+                    # Save data from slot 0 to `used`
                     i = 0
-                    while i < slots - 2:
-                        if i == slots - 3: # Save market id at slot 7
-                            contract.storage[next + i] = market
-                        else: # Save data at slot 0-6
-                            contract.storage[next + i] = msg.data[i + 1]
+                    while i < used:
+                        contract.storage[next + i] = msg.data[i + 1]
                         i = i + 1
+
+                    # Save market id at slot 6
+                    contract.storage[next + 6] = market
+
+                    # Set block number
+                    contract.storage[next + 7] = block.number
 
                     # Set previous and next pointers
                     contract.storage[next + 8] = last
                     contract.storage[next + 9] = next + slots
+
                     # # Find next available slot
                     # nextavailable = next + slots
                     # while contract.storage[nextavailable]:
@@ -117,6 +137,9 @@ code:
 
                     # Increment total
                     contract.storage[2] = total + 1
+
+                    # Set new market as last market ID
+                    contract.storage[3] = market
 
                     return(market)
 

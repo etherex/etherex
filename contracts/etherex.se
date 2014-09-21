@@ -119,7 +119,7 @@ code:
             # Get market
             market = call(markets, [marketid], 1, 4)
 
-            value = (amount * price) / market[2]
+            value = (amount * price) / market[4]
 
             #
             # Check trade amounts and balances
@@ -128,10 +128,10 @@ code:
                 #
                 # Check buy value
                 #
-                if msg.value < market[1]:
+                if msg.value < market[3]:
                     if msg.value > 0: // "Refunding"
                         send(msg.sender, msg.value)
-                    return(12) // "Minimum %s trade amount not met, minimum is %s, got %d" % (market[0], market[2], msg.value)
+                    return(12) // "Minimum ETH trade amount not met, minimum is %s, got %d" % (market[3], msg.value)
 
                 # Check msg.value and value match
                 if msg.value < value:
@@ -147,22 +147,22 @@ code:
                 #
                 # Check sell value
                 #
-                if value < market[1]:
+                if value < market[3]:
                     if msg.value > 0: // "Refunding"
                         send(msg.sender, msg.value)
-                    return(12) // "Minimum %s trade amount not met, minimum is %s, got %d" % (market[0], market[2], msg.value)
+                    return(12) // "Minimum ETH trade amount not met, minimum is %s, got %d" % (market[3], msg.value)
 
                 # Transfer subcurrency trade amount
-                ret = call(market[3], [msg.sender, contract.address, amount / 10 ^ 18], 3)
+                ret = call(market[1], [msg.sender, contract.address, amount / 10 ^ 18], 3)
 
                 # Expects standard returns values
                 if ret != 1:
                     return(0)
 
             // "Trade amounts OK for %s" % market[0]
-            pricekey = price
-            balances = market[3]
-            indexes = contract.storage[4]
+            # pricekey = price
+            # balances = market[1]
+            # indexes = contract.storage[4]
             trades = contract.storage[5]
 
             # New trade
@@ -175,10 +175,13 @@ code:
             trade[5] = marketid
 
             tradeid = call(trades, trade, 6) # Trade added
+
+            # Record last added trade
             contract.storage[9] = tradeid
-            booklength = (tradeid - 100) / 5 + 1
+
+            # booklength = (tradeid - 100) / 10 + 1
             # contract.storage[pricekey] = booklength
-            contract.storage[100 + marketid] = booklength
+            # contract.storage[100 + marketid] = booklength
 
             #
             # ETX issuance
@@ -215,7 +218,7 @@ code:
                 trade = call(trades, [tradeid], 1, 5)
                 market = call(markets, [trade[4]], 1, 5)
 
-                value = (trade[2] * trade[1]) / market[2]
+                value = (trade[2] * trade[1]) / market[4]
 
                 # Checking trade amounts and balances
                 # TODO - Check subcurrency balances
@@ -227,7 +230,7 @@ code:
                     #     return(13) // "Insufficient balance"
 
                     # Transfer sub / asset
-                    ret = call(market[3], [msg.sender, trade[3], trade[2] / 10 ^ 18], 3)
+                    ret = call(market[1], [msg.sender, trade[3], trade[2] / 10 ^ 18], 3)
 
                     # Expects standard returns values
                     if ret != 1:
@@ -326,12 +329,12 @@ code:
                 # Issue refunds
                 if trade[0] == 1:
                     # ETH sell refund
-                    value = (trade[2] * market[2]) / trade[1]
+                    value = (trade[2] * trade[1]) / market[4]
                     send(msg.sender, value)
 
                 elif trade[0] == 2:
                     # Subcurrency refund
-                    ret = call(market[3], [contract.address, trade[3], trade[2] / 10 ^ 18], 3)
+                    ret = call(market[1], [contract.address, trade[3], trade[2] / 10 ^ 18], 3)
 
             if !ret:
                 return(0) // "Error"
@@ -350,9 +353,9 @@ code:
             markets = contract.storage[6]
             market = array(6) // "TODO - Check data..."
             market[0] = 1
-            market[1] = msg.data[3]
-            market[2] = amount
-            market[3] = price
+            market[1] = msg.data[1]
+            market[2] = msg.data[2]
+            market[3] = msg.data[3]
             market[4] = msg.data[4]
             market[5] = msg.data[5]
             ret = call(markets, market, 6) // "Updating Currencies"

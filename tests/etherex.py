@@ -114,14 +114,15 @@ class TestEtherEx(object):
         assert self._storage(self.ccontract, 15) == "0x" + self.contract
 
         # Register ETX
-        ans = self.state.send(self.ALICE['key'], self.contract, 10 ** 18, [7, 1 * 10 ** 18, 1 * 10 ** 8, "ETX", self.xcontract, 5])
+        ans = self.state.send(self.ALICE['key'], self.contract, 10 ** 18, [7, "ETX", self.xcontract, 5, 10 ** 18, 10 ** 8])
         assert ans == [1]
         assert self._storage(self.ccontract, 100) == "0x" + "ETX".encode('hex') # Name
-        assert self._storage(self.ccontract, 101) == self.xhex(10 ** 18) # Minimum amount
-        assert self._storage(self.ccontract, 102) == self.xhex(10 ** 8) # Price precision
-        assert self._storage(self.ccontract, 103) == "0x" + self.xcontract # Contract address
-        assert self._storage(self.ccontract, 104) == self.xhex(5) # Decimal precision
-        assert self._storage(self.ccontract, 107) == self.xhex(1) # Market ID
+        assert self._storage(self.ccontract, 101) == "0x" + self.xcontract # Contract address
+        assert self._storage(self.ccontract, 102) == self.xhex(5) # Decimal precision
+        assert self._storage(self.ccontract, 103) == self.xhex(10 ** 18) # Minimum amount
+        assert self._storage(self.ccontract, 104) == self.xhex(10 ** 8) # Price precision
+        assert self._storage(self.ccontract, 105) == None
+        assert self._storage(self.ccontract, 106) == self.xhex(1) # Market ID
 
     def test_change_ownership(self):
         self.test_initialize()
@@ -282,6 +283,31 @@ class TestEtherEx(object):
 
         assert ans == [11] #.startswith("Price out of range")
 
+    def test_add_bob_coin(self):
+        self.test_initialize()
+
+        ans = self.state.send(self.BOB['key'], self.contract, 10 * 10 ** 18, [7, "BOB", self.BOB['address'], 4, 10 ** 18, 10 ** 5]) # AKA BobScam, TODO regulations! j/k...
+
+        assert ans == [2]
+        assert self._storage(self.ccontract, 110) == "0x" + "BOB".encode('hex')
+        assert self._storage(self.ccontract, 111) == "0x" + self.BOB['address']
+        assert self._storage(self.ccontract, 112) == self.xhex(4)
+        assert self._storage(self.ccontract, 113) == self.xhex(1 * 10 ** 18)
+        assert self._storage(self.ccontract, 114) == self.xhex(1 * 10 ** 5)
+        assert self._storage(self.ccontract, 115) == None
+        assert self._storage(self.ccontract, 116) == self.xhex(2)
+
+    def test_check_bob_coin(self):
+        self.test_add_bob_coin()
+
+        ans = self.state.send(self.ALICE['key'], self.contract, 10 ** 18, [1, 10 ** 18, 1000 * 10 ** 8, 2])
+        assert ans == [100] #[int("ETH/BOB".encode('hex'), 16)]
+        assert self._storage(self.tcontract, 100) == self.xhex(1)
+        assert self._storage(self.tcontract, 101) == self.xhex(1000 * 10 ** 8)
+        assert self._storage(self.tcontract, 102) == self.xhex(1 * 10 ** 18)
+        assert self._storage(self.tcontract, 103) == "0x" + self.ALICE['address']
+        assert self._storage(self.tcontract, 104) == self.xhex(2)
+
     # TODO - Move to X-Chain tests
     # # def test_insufficient_btc_trade(self):
     # #     tx = Tx(sender='alice', value=0, data=[1, 1 * 10 ** 6, 1000 * 10 ** 8, 1])
@@ -307,31 +333,6 @@ class TestEtherEx(object):
 
         ans = self.state.send(self.BOB['key'], self.contract, 10 ** 18, [1, 10 ** 19, 10 ** 8, 1])
         assert ans == [13] #.startswith("Minimum ETH value not met")
-
-    def test_add_bob_coin(self):
-        self.test_initialize()
-
-        ans = self.state.send(self.BOB['key'], self.contract, 10 * 10 ** 18, [7, 10 ** 18, 10 ** 8, "BOB", self.BOB['address'], 4]) # AKA BobScam, TODO regulations! j/k...
-
-        assert ans == [2]
-        assert self._storage(self.ccontract, 110) == "0x" + "BOB".encode('hex')
-        assert self._storage(self.ccontract, 111) == self.xhex(1 * 10 ** 18)
-        assert self._storage(self.ccontract, 112) == self.xhex(1 * 10 ** 8)
-        assert self._storage(self.ccontract, 113) == "0x" + self.BOB['address']
-        assert self._storage(self.ccontract, 114) == self.xhex(4)
-        assert self._storage(self.ccontract, 115) == None
-        assert self._storage(self.ccontract, 117) == self.xhex(2)
-
-    def test_check_bob_coin(self):
-        self.test_add_bob_coin()
-
-        ans = self.state.send(self.ALICE['key'], self.contract, 10 ** 18, [1, 10 ** 18, 1000 * 10 ** 8, 2])
-        assert ans == [100] #[int("ETH/BOB".encode('hex'), 16)]
-        assert self._storage(self.tcontract, 100) == self.xhex(1)
-        assert self._storage(self.tcontract, 101) == self.xhex(1000 * 10 ** 8)
-        assert self._storage(self.tcontract, 102) == self.xhex(1 * 10 ** 18)
-        assert self._storage(self.tcontract, 103) == "0x" + self.ALICE['address']
-        assert self._storage(self.tcontract, 104) == self.xhex(2)
 
         # TODO - Check market recorded last price
         # assert self._storage(self.ccontract, 115) == 1000 * 10 ** 8

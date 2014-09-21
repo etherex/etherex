@@ -7,16 +7,16 @@ var UserStore = Fluxxor.createStore({
 
     initialize: function(options) {
         this.user = options.user || { id: 'loading' };
-        this.createAccount = false;
+        // this.createAccount = false;
         this.loading = false;
         this.error = null;
 
         this.bindActions(
             constants.user.LOAD_USER, this.onLoadUser,
-            constants.user.LOAD_USER_FAIL, this.onLoadUserFail,
+            constants.user.LOAD_USER_FAIL, this.onUserFail,
             constants.user.LOAD_USER_SUCCESS, this.onLoadUserSuccess,
             constants.user.LOAD_ADDRESSES, this.onLoadAddresses,
-            constants.user.LOAD_ADDRESSES_FAIL, this.onLoadAddressesFail,
+            constants.user.LOAD_ADDRESSES_FAIL, this.onUserFail,
             constants.user.LOAD_ADDRESSES_SUCCESS, this.onLoadAddressesSuccess,
             constants.user.UPDATE_BALANCE, this.onUpdateBalance,
             constants.user.UPDATE_BALANCE_FAIL, this.onUserFail,
@@ -33,7 +33,7 @@ var UserStore = Fluxxor.createStore({
 
     onLoadUser: function() {
         this.user.name = 'loading';
-        this.createAccount = false;
+        // this.createAccount = false;
         this.loading = true;
         this.error = null;
         this.emit(constants.CHANGE_EVENT);
@@ -41,30 +41,18 @@ var UserStore = Fluxxor.createStore({
 
     onLoadUserSuccess: function(payload) {
         this.user = payload;
-        if (!payload.name) {
-            this.createAccount = true;
-        }
+        // if (!payload.name)
+        //     this.createAccount = true;
         this.loading = false;
         this.error = null;
-        this.emit(constants.CHANGE_EVENT);
-    },
-
-    onLoadUserFail: function(payload) {
-        this.loading = false;
-        this.error = payload.error;
         this.emit(constants.CHANGE_EVENT);
     },
 
     onLoadAddresses: function(payload) {
+        console.log("LOADING ADDRESSES");
         this.user = {id: 'loading', name: 'loading'};
         this.loading = true;
         this.error = null;
-        this.emit(constants.CHANGE_EVENT);
-    },
-
-    onLoadAddressesFail: function(payload) {
-        this.loading = false;
-        this.error = payload.error;
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -110,6 +98,7 @@ var UserStore = Fluxxor.createStore({
     },
 
     onUserFail: function(payload) {
+        console.log("ERROR: " + payload.error);
         this.loading = false;
         this.error = payload.error;
         this.emit(constants.CHANGE_EVENT);
@@ -117,7 +106,9 @@ var UserStore = Fluxxor.createStore({
 
     getState: function() {
         return {
-            user: this.user
+            user: this.user,
+            loading: this.loading,
+            error: this.error
         };
     }
 });

@@ -36,14 +36,19 @@ var SplitTradeForm = React.createClass({
   },
 
   render: function() {
-    var precision = 1 /
-      (_.parseInt(this.props.market.market.precision) > 0 ?
-        _.parseInt(this.props.market.market.precision) :
-        1000);
-    var priceDecimals = bigRat(precision).toString().length - 3;
-    var decimals = this.props.market.market.decimals > 0 ? this.props.market.market.decimals : 5;
-    var amountPrecision = 1 / Math.pow(10, decimals);
-    // console.log(bigRat(precision).toString(), priceDecimals, amountPrecision, decimals);
+    // Price precision
+    var priceDecimals = this.props.market.market.precision ? this.props.market.market.precision.length - 1 : 0;
+    var precision = (1 / (this.props.market.market.precision ?
+                          _.parseInt(this.props.market.market.precision) : 1000)).toFixed(priceDecimals);
+
+    // Amount decimals
+    var decimals = this.props.market.market.decimals ? this.props.market.market.decimals : 5;
+    var amountPrecision = (1 / Math.pow(10, decimals)).toFixed(decimals);
+
+    // Minimum total
+    var minimum = bigRat(this.props.market.market.minimum).divide(fixtures.ether).valueOf().toFixed(priceDecimals);
+
+    // console.log(precision, priceDecimals, amountPrecision, decimals, minimum);
 
     return (
       <form className="form-horizontal" role="form">
@@ -51,7 +56,7 @@ var SplitTradeForm = React.createClass({
         <div className="form-group">
           <div className="input-group">
             <label className="sr-only" forHtml="amount">Amount</label>
-            <input type="number" min={utils.numeral(amountPrecision, decimals)} step={utils.numeral(amountPrecision, decimals)} className="form-control medium" placeholder={utils.numeral(amountPrecision, decimals)} ref="amount" onChange={this.handleChange} />
+            <input type="number" min={amountPrecision} step={amountPrecision} className="form-control medium" placeholder={amountPrecision} ref="amount" onChange={this.handleChange} />
             <div className="input-group-addon">{this.props.market.market.name}</div>
           </div>
         </div>
@@ -59,7 +64,7 @@ var SplitTradeForm = React.createClass({
           <label className="sr-only" forHtml="price">Price</label>
           <div className="input-group">
             <div className="input-group-addon">@</div>
-            <input type="number" min={utils.numeral(precision, priceDecimals)} step={utils.numeral(precision, priceDecimals)} className="form-control medium" placeholder={utils.numeral(precision, priceDecimals)} ref="price" onChange={this.handleChange} />
+            <input type="number" min={precision} step={precision} className="form-control medium" placeholder={precision} ref="price" onChange={this.handleChange} />
             <div className="input-group-addon">
               {this.props.market.market.name}/ETH
             </div>
@@ -68,7 +73,7 @@ var SplitTradeForm = React.createClass({
         <div className="form-group">
           <div className="input-group">
             <div className="input-group-addon">{"="}</div>
-            <input type="number" min={this.props.market.market.minTotal} step="0.00000001" className="form-control medium" placeholder="10" ref="total" onChange={this.handleChangeTotal} />
+            <input type="number" min={minimum} step={precision} className="form-control medium" placeholder={minimum} ref="total" onChange={this.handleChangeTotal} />
             <div className="input-group-addon">
               ETH
             </div>
@@ -233,7 +238,7 @@ var SplitTradeForm = React.createClass({
       var amount = this.refs.amount.getDOMNode().value.trim();
       var total = this.refs.total.getDOMNode().value.trim();
 
-      if (price > 0)
+      if (price > 0 && amount > 0)
         var total = amount * price;
         // var total = bigRat(String(amount / price))
         //         .multiply(bigRat(fixtures.precision))
@@ -259,8 +264,8 @@ var SplitTradeForm = React.createClass({
       var market = this.refs.market.getDOMNode().value;
       var price = this.refs.price.getDOMNode().value.trim();
       var total = this.refs.total.getDOMNode().value.trim();
-      var amount = 0
-      if (price > 0)
+      var amount = 0;
+      if (price > 0 && total)
         amount = (total / price).toPrecision(9);
 
       this.setState({

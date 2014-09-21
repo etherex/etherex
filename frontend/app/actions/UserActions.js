@@ -12,6 +12,10 @@ var UserActions = function(client) {
             // var user = this.flux.store("UserStore").getState().user;
             this.flux.actions.user.updateBalance();
 
+            // Load markets
+            if (!this.flux.store("UserStore").getState().user.error)
+              this.flux.actions.market.loadMarkets();
+
         }.bind(this), function(error) {
             this.dispatch(constants.user.LOAD_ADDRESSES_FAIL, {error: error});
         }.bind(this));

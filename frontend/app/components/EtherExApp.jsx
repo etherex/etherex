@@ -26,7 +26,10 @@ var EtherExApp = React.createClass({
 
   componentDidMount: function() {
     this.getFlux().actions.user.loadAddresses();
-    this.getFlux().actions.market.loadMarkets();
+    // console.log(this.state.user);
+
+    // Markets get loaded on loadAddressesSuccess
+    // this.getFlux().actions.market.loadMarkets();
 
     // Trades are loaded in EthereumClient using eth.watch
     // this.getFlux().actions.trade.loadTrades();
@@ -37,6 +40,13 @@ var EtherExApp = React.createClass({
       <div>
         <NavBar user={this.state.user} />
         <SubNavBar />
+        {(this.state.user.error) ?
+            <div className="container">
+              <div className="alert alert-danger" role="alert">
+                <h4>Error!</h4>
+                {this.state.user.error}
+              </div>
+            </div> :
         <div className="navbar">
           <div className="row">
             <Balance user={this.state.user} />
@@ -50,8 +60,8 @@ var EtherExApp = React.createClass({
                 <BalanceSub user={this.state.user} market={this.state.market} />
             }
           </div>
-        </div>
-        {(!this.state.market.error) &&
+        </div>}
+        {(!this.state.market.error && !this.state.user.error) &&
           <this.props.activeRouteHandler
             market={this.state.market}
             trades={this.state.trades}

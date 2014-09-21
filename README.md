@@ -112,7 +112,7 @@ API
 
 ### Adding a market
 ```
-<operation> <minimum trade> <price precision> <currency> <contract> <decimal precision>
+<operation> <currency> <contract> <decimal precision> <minimum total> <price denominator>
 ```
 
 
@@ -130,17 +130,27 @@ Allowed values:
 ```
 
 
-### Amounts
+### Market names
 
-* Amount in wei for ETH or ETX
-* Amount in satoshi for XBTC
-* Lowest denomination of each subcurrency
+Market names follow the "<name>/ETH" convention. When registering a new market, submit the currency name as a three or four letter uppercase identifier, ex.: "BOB" for BobCoin.
+
+### Contract address
+
+The subcurrency contract address.
 
 
-### Prices
+### Decimal precision
 
-* Price in ETH/ETX * 10 ^ 8
-* Price in ETH/XBTC * 10 ^ 8
+The subcurrency's decimal precision as an integer.
+
+
+### Minimum trade total
+When adding a subcurrency, set the minimum trade total high enough to make economic sense. A minimum of 10 ETH (1000000000000000000000 wei) is recommended.
+
+
+### Price denominator
+
+* Denominator for price precision, ex. 10000 (10000 => 1 / 10000 => 0.0001)
 
 
 ### Market IDs
@@ -158,14 +168,6 @@ New market IDs will be created as DAO creators add their subcurrency to the exch
 ...
 ```
 New currency IDs will also be created as markets get added.
-
-
-### Market names
-Market names follow the "<name>/ETH" convention. When registering a new market, submit the currency name as a three or four letter uppercase identifier, ex.: "BOB" for BobCoin.
-
-
-### Minimum trade amounts
-When adding a subcurrency, set the minimum trade amount high enough to make economic sense. A minimum of 10 ETH (1000000000000000000000 wei) is recommended.
 
 
 ### Examples
@@ -202,7 +204,7 @@ Cancel operation
 
 Add your subcurrency
 ```
-7 1000000000000000000000 100000000 "BOB" 0xe559de5527492bcb42ec68d07df0742a98ec3f1e 4
+7 "BOB" 0xe559de5527492bcb42ec68d07df0742a98ec3f1e 4 1000000000000000000000 100000000
 ```
 
 
