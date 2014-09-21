@@ -36,13 +36,22 @@ var SplitTradeForm = React.createClass({
   },
 
   render: function() {
+    var precision = 1 /
+      (_.parseInt(this.props.market.market.precision) > 0 ?
+        _.parseInt(this.props.market.market.precision) :
+        1000);
+    var priceDecimals = bigRat(precision).toString().length - 3;
+    var decimals = this.props.market.market.decimals > 0 ? this.props.market.market.decimals : 5;
+    var amountPrecision = 1 / Math.pow(10, decimals);
+    // console.log(bigRat(precision).toString(), priceDecimals, amountPrecision, decimals);
+
     return (
       <form className="form-horizontal" role="form">
         <input type="hidden" ref="market" value={this.props.market.market.id} />
         <div className="form-group">
           <div className="input-group">
             <label className="sr-only" forHtml="amount">Amount</label>
-            <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
+            <input type="number" min={utils.numeral(amountPrecision, decimals)} step={utils.numeral(amountPrecision, decimals)} className="form-control medium" placeholder={utils.numeral(amountPrecision, decimals)} ref="amount" onChange={this.handleChange} />
             <div className="input-group-addon">{this.props.market.market.name}</div>
           </div>
         </div>
@@ -50,7 +59,7 @@ var SplitTradeForm = React.createClass({
           <label className="sr-only" forHtml="price">Price</label>
           <div className="input-group">
             <div className="input-group-addon">@</div>
-            <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="2000.0000" ref="price" onChange={this.handleChange} />
+            <input type="number" min={utils.numeral(precision, priceDecimals)} step={utils.numeral(precision, priceDecimals)} className="form-control medium" placeholder={utils.numeral(precision, priceDecimals)} ref="price" onChange={this.handleChange} />
             <div className="input-group-addon">
               {this.props.market.market.name}/ETH
             </div>
@@ -59,7 +68,7 @@ var SplitTradeForm = React.createClass({
         <div className="form-group">
           <div className="input-group">
             <div className="input-group-addon">{"="}</div>
-            <input type="number" min="10" step="0.00000001" className="form-control medium" placeholder="1" ref="total" onChange={this.handleChangeTotal} />
+            <input type="number" min={this.props.market.market.minTotal} step="0.00000001" className="form-control medium" placeholder="10" ref="total" onChange={this.handleChangeTotal} />
             <div className="input-group-addon">
               ETH
             </div>
@@ -79,12 +88,12 @@ var SplitTradeForm = React.createClass({
                       (this.state.filling.length > 0 ?
                         "You will be filling " + this.state.filling.length + " trade" +
                         (this.state.filling.length > 1 ? "s" : "") + "." : "") +
-                      (this.state.amountLeft / this.state.price >= this.props.market.market.minTotal &&
+                      (this.state.amountLeft * this.state.price >= this.props.market.market.minTotal &&
                        this.state.filling.length > 0 ?
                         " You will also be adding a new trade of " +
                           utils.numeral(this.state.amountLeft, 4) + " " + this.props.market.market.name + " for " +
                           utils.formatBalance(bigRat(this.state.available).multiply(fixtures.ether)) + "." : "") +
-                      (this.state.amountLeft / this.state.price < this.props.market.market.minTotal &&
+                      (this.state.amountLeft * this.state.price < this.props.market.market.minTotal &&
                        this.state.filling.length > 0 ?
                         " Not enough left for a new trade with " +
                           utils.numeral(this.state.amountLeft, 4) + " " + this.props.market.market.name + " for " +
@@ -124,7 +133,7 @@ var SplitTradeForm = React.createClass({
       // Remove currently filling amounts and totals
       for (var i = filling.length - 1; i >= 0; i--) {
         amountLeft -= filling[i].amount;
-        available -= filling[i].amount / filling[i].price;
+        available -= filling[i].amount * filling[i].price;
       };
 
       console.log("=====");
@@ -132,7 +141,7 @@ var SplitTradeForm = React.createClass({
       for (var i = 0; i <= trades.length - 1; i++) {
 
         if (trades[i].owner != this.props.user.user.id) {
-          var this_total = trades[i].amount / trades[i].price;
+          var this_total = trades[i].amount * trades[i].price;
           // console.log("against total of " + this_total);
           total_amount += trades[i].amount;
           trades_total += this_total;
@@ -181,7 +190,8 @@ var SplitTradeForm = React.createClass({
           filling.push(trades[i]);
 
           // Remove total from available total
-          available -= this_total;
+          if (available - this_total > 0)
+            available -= this_total;
           amountLeft -= trades[i].amount;
 
           this.getFlux().store("TradeStore").emit(constants.CHANGE_EVENT);
@@ -199,11 +209,11 @@ var SplitTradeForm = React.createClass({
       console.log("Available: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
       // console.log("From balance of " + this.props.user.user.balance);
       if (price > 0) {
-        if (amountLeft / price >= this.props.market.market.minTotal &&
+        if (amountLeft * price >= this.props.market.market.minTotal &&
             filling.length > 0) {
           console.log("Would also add new trade for " + amountLeft + " " + this.props.market.market.name + " for " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
         }
-        else if (amountLeft / price < this.props.market.market.minTotal &&
+        else if (amountLeft * price < this.props.market.market.minTotal &&
                  filling.length > 0 &&
                  available > 0) {
           console.log("Not enough left for a new trade, needs " + utils.formatBalance(bigRat(this.props.market.market.minTotal).multiply(fixtures.ether)) + " and got " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
@@ -221,15 +231,15 @@ var SplitTradeForm = React.createClass({
       var market = this.refs.market.getDOMNode().value.trim();
       var price = this.refs.price.getDOMNode().value.trim();
       var amount = this.refs.amount.getDOMNode().value.trim();
-      var total = 0;
+      var total = this.refs.total.getDOMNode().value.trim();
 
       if (price > 0)
-        // var total = amount / price;
-        var total = bigRat(String(amount / price))
-                .multiply(bigRat(fixtures.precision))
-                .ceil()
-                .divide(bigRat(fixtures.precision))
-                .valueOf();
+        var total = amount * price;
+        // var total = bigRat(String(amount / price))
+        //         .multiply(bigRat(fixtures.precision))
+        //         .ceil()
+        //         .divide(bigRat(fixtures.precision))
+        //         .valueOf();
 
       this.setState({
         price: price,
@@ -249,7 +259,9 @@ var SplitTradeForm = React.createClass({
       var market = this.refs.market.getDOMNode().value;
       var price = this.refs.price.getDOMNode().value.trim();
       var total = this.refs.total.getDOMNode().value.trim();
-      var amount = (total * price).toPrecision(9);
+      var amount = 0
+      if (price > 0)
+        amount = (total / price).toPrecision(9);
 
       this.setState({
         price: price,
@@ -282,7 +294,7 @@ var SplitTradeForm = React.createClass({
   onSubmitForm: function(e) {
       e.preventDefault();
 
-      console.log(this.props.market.market.id, this.state.amount, this.state.price, this.state.total);
+      // console.log([this.props.market.market.id, this.state.amount, this.state.price, this.state.total].join(", "));
       if (this.handleValidation(this.props.type, this.props.market.market.id, this.state.amount, this.state.price, this.state.total) != true) {
         if (this.props.market.market.id && this.state.amount && this.state.price && this.state.total && this.state.total < this.props.market.market.minTotal) {
           this._owner.setState({
@@ -315,7 +327,7 @@ var SplitTradeForm = React.createClass({
         });
 
       // Partial filling adds a new trade for remaining available
-      if (this.state.amountLeft / this.state.price >= this.props.market.market.minTotal && this.state.filling.length > 0) {
+      if (this.state.amountLeft * this.state.price >= this.props.market.market.minTotal && this.state.filling.length > 0) {
         this.getFlux().actions.trade.addTrade({
             type: this.props.type,
             price: this.state.price,

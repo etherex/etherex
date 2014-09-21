@@ -69,7 +69,7 @@ code:
                     send(msg.sender, msg.value)
                 return(5)
 
-            elif msg.data[2] < 1 * 10 ^ 8: // "Invalid price"
+            elif msg.data[2] < 1: // "Invalid price"
                 if msg.value > 0: // "Refunding"
                     send(msg.sender, msg.value)
                 return(6)
@@ -119,7 +119,7 @@ code:
             # Get market
             market = call(markets, [marketid], 1, 4)
 
-            value = (amount * market[2]) / price
+            value = (amount * price) / market[2]
 
             #
             # Check trade amounts and balances
@@ -215,7 +215,7 @@ code:
                 trade = call(trades, [tradeid], 1, 5)
                 market = call(markets, [trade[4]], 1, 5)
 
-                value = (trade[2] * market[2]) / trade[1]
+                value = (trade[2] * trade[1]) / market[2]
 
                 # Checking trade amounts and balances
                 # TODO - Check subcurrency balances

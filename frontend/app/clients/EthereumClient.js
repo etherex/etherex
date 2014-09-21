@@ -173,7 +173,7 @@ var EthereumClient = function() {
                     type: type == 1 ? 'buys' : 'sells',
                     price: price,
                     amount: amount,
-                    total: amount / price,
+                    total: amount * price,
                     owner: eth.stateAt(fixtures.addresses.trades, String(ptr+3)),
                     market: {
                         id: marketid,
@@ -208,6 +208,9 @@ var EthereumClient = function() {
             eth.pad(amounts.amount, 32) +
             eth.pad(amounts.price, 32) +
             eth.pad(trade.market, 32);
+
+        console.log("Sending " + eth.fromAscii(data));
+        console.log("with " + amounts.total + " wei");
 
         try {
             if (ethBrowser)
@@ -346,10 +349,10 @@ var EthereumClient = function() {
     };
 
     this.getAmounts = function(amount, price) {
-        var bigamount = bigRat(parseFloat(amount)).multiply(bigRat(fixtures.ether)).floor(true).toString();
-        var bigprice = bigRat(parseFloat(price)).multiply(bigRat(fixtures.precision)).floor(true).toString();
-        var total = bigRat(parseFloat(amount))
-            .divide(parseFloat(price))
+        var bigamount = bigRat(amount).multiply(bigRat(fixtures.ether)).floor(true).toString();
+        var bigprice = bigRat(price).multiply(bigRat(fixtures.precision)).floor(true).toString();
+        var total = bigRat(amount)
+            .multiply(price)
             .multiply(bigRat(fixtures.ether)).floor(true).toString();
         // console.log("amount: " + bigamount);
         // console.log("price: " + bigprice);

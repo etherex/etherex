@@ -75,7 +75,7 @@ var TradeStore = Fluxxor.createStore({
             type: (payload.type == 1) ? 'buy' : 'sell',
             price: payload.price,
             amount: payload.amount,
-            total: payload.amount / payload.price,
+            total: payload.amount * payload.price,
             market: this.flux.store("MarketStore").getState().markets[payload.market],
             owner: this.flux.store("UserStore").getState().user.id,
             status: payload.status
