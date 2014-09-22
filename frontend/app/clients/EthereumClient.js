@@ -211,7 +211,7 @@ var EthereumClient = function() {
 
 
     this.addTrade = function(trade, market, success, failure) {
-        console.log(trade.amount, trade.price, trade);
+        // console.log(trade.amount, trade.price, trade);
         var amounts = this.getAmounts(trade.amount, trade.price, market.decimals, market.precision);
 
         var data =
