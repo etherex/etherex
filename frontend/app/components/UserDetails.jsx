@@ -12,20 +12,19 @@ var UserDetails = React.createClass({
     mixins: [FluxChildMixin],
 
     render: function() {
-        var user = this.props.user.user.id;
-        // var user = this.props.params.userId;
-        // if (this.props.params.userId === this.props.user.user.id) {
-        //     user = this.props.user.user;
-        // }
-        // } else {
-        //     user = this.props.contacts.contactById[this.props.params.userId];
-        // }
+        var own = {tradeBuys: [], tradeSells: []};
+        if (this.props.user && this.props.trades && (this.props.trades.tradeBuys.length > 0) || (this.props.trades.tradeSells.length > 0)) {
+            own.tradeBuys = _.filter(this.props.trades.tradeBuys, {'owner': this.props.user.user.id});
+            own.tradeSells = _.filter(this.props.trades.tradeSells, {'owner': this.props.user.user.id});
+            own.title = "Your trades"; // this.props.user.user.id.substr(0,8) + "\u2026 " + "'s trades";
+        }
 
-        if (user) {
+        if (this.props.user.user.id) {
             return (
                 <div>
-                    <UserSummaryPane user={user} tradeList={this.props.trades.tradeList} />
-                    <TradeList title={user.name + "'s Active Trades"} trades={this.props.trades} user={this.props.user.user} />
+                    <UserSummaryPane user={this.props.user} trades={own} />
+                    {(own.tradeBuys && own.tradeSells) &&
+                        <TradeList market={this.props.market} trades={own} user={this.props.user} />}
                 </div>
             );
         } else {

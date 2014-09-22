@@ -107,7 +107,7 @@ var SplitTradeForm = React.createClass({
                     onSubmit={this.onSubmitForm}
                   />
                 }>
-                <Button className="btn-block" type="submit" key="newtrade">Place trade</Button>
+                <Button className="btn-block btn-primary" type="submit" key="newtrade">Place trade</Button>
               </ModalTrigger>
             </span>
             :
@@ -238,7 +238,7 @@ var SplitTradeForm = React.createClass({
       var amount = this.refs.amount.getDOMNode().value.trim();
       var total = this.refs.total.getDOMNode().value.trim();
 
-      if (price > 0 && amount > 0)
+      if (price && amount)
         var total = amount * price;
         // var total = bigRat(String(amount / price))
         //         .multiply(bigRat(fixtures.precision))

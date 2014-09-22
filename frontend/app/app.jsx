@@ -97,7 +97,7 @@ var routes = (
       <Route name="wallet" path="/wallet" handler={Placeholder} flux={flux} title="Wallet" />
       <Route name="tools" path="/tools" handler={Placeholder} flux={flux} title="Tools" />
       <Route name="help" path="/help" handler={Placeholder} flux={flux} title="Help" />
-      <Route name="userDetails" path="/user/:userId" handler={Placeholder} flux={flux} title="User details" />
+      <Route name="userDetails" path="/user/:userId" handler={UserDetails} flux={flux} title="User details" />
       <Route name="notfound" path="/notfound" handler={Placeholder} title="User or Trade ID not found" flux={flux} />
     </Route>
   </Routes>

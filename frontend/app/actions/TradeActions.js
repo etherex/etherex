@@ -17,6 +17,20 @@ var TradeActions = function(client) {
         }.bind(this));
     };
 
+    this.updateTrades = function() {
+        this.dispatch(constants.trade.UPDATE_TRADES);
+
+        var markets = this.flux.store("MarketStore").getState().markets;
+
+        _client.loadTrades(this.flux, markets, function(trades) {
+            this.dispatch(constants.trade.UPDATE_TRADES_PROGRESS, trades);
+        }.bind(this), function(trades) {
+            this.dispatch(constants.trade.UPDATE_TRADES_SUCCESS, trades);
+        }.bind(this), function(error) {
+            this.dispatch(constants.trade.UPDATE_TRADES_FAIL, {error: error});
+        }.bind(this));
+    };
+
     this.addTrade = function(trade) {
         var id = utils.randomId();
         trade.id = id;

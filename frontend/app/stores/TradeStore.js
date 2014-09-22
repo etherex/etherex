@@ -8,6 +8,7 @@ var TradeStore = Fluxxor.createStore({
         this.title = "Trades";
         this.trades = options.trades || {};
         this.loading = true;
+        this.updating = false;
         this.error = null;
         this.percent = 0;
         this.type = 1;
@@ -17,6 +18,10 @@ var TradeStore = Fluxxor.createStore({
             constants.trade.LOAD_TRADES_PROGRESS, this.onLoadTradesProgress,
             constants.trade.LOAD_TRADES_SUCCESS, this.onLoadTradesSuccess,
             constants.trade.LOAD_TRADES_FAIL, this.onTradesFail,
+            constants.trade.UPDATE_TRADES, this.onUpdateTrades,
+            constants.trade.UPDATE_TRADES_PROGRESS, this.onLoadTradesProgress,
+            constants.trade.UPDATE_TRADES_SUCCESS, this.onLoadTradesSuccess,
+            constants.trade.UPDATE_TRADES_FAIL, this.onTradesFail,
             constants.trade.ADD_TRADE, this.onAddTrade,
             constants.trade.ADD_TRADE_FAIL, this.onTradesFail,
             constants.trade.FILL_TRADES, this.onFillTrades,
@@ -35,6 +40,14 @@ var TradeStore = Fluxxor.createStore({
     onLoadTrades: function() {
         this.trades = {};
         this.loading = true;
+        this.error = null;
+        this.percent = 0;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onUpdateTrades: function() {
+        this.loading = true;
+        this.updating = true;
         this.error = null;
         this.percent = 0;
         this.emit(constants.CHANGE_EVENT);
@@ -64,6 +77,7 @@ var TradeStore = Fluxxor.createStore({
         this.filterMarket(market, this.trades);
 
         this.loading = false;
+        this.updating = false;
         this.error = null;
         this.percent = 100;
         this.emit(constants.CHANGE_EVENT);
@@ -85,7 +99,7 @@ var TradeStore = Fluxxor.createStore({
         (payload.type == 1) ? this.trades.buys.push(trade) : this.trades.sells.push(trade);
         (payload.type == 1) ?
             this.trades.buys = _.sortBy(this.trades.buys, 'price').reverse() :
-            this.trades.trades = _.sortBy(this.trades.sells, 'price');
+            this.trades.sells = _.sortBy(this.trades.sells, 'price');
 
         this.emit(constants.CHANGE_EVENT);
 
@@ -162,7 +176,7 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onTradesFail: function(payload) {
-        console.log("TRADES ERROR: " + payload.error);
+        console.log("TRADES ERROR: ", payload.error);
         this.trades = payload || {};
         this.loading = false;
         this.percent = 0;

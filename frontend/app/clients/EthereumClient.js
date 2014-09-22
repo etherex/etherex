@@ -63,21 +63,24 @@ var EthereumClient = function() {
     this.setUserWatches = function(flux, addresses, markets) {
         if (ethBrowser) {
             // ETH balance
+            // eth.watch({altered: addresses}).uninstall();
             eth.watch({altered: addresses}).changed(flux.actions.user.updateBalance);
 
             // Sub balances
             var market_addresses = _.rest(_.pluck(markets, 'address'));
 
+            // eth.watch({altered: market_addresses}).uninstall();
             eth.watch({altered: market_addresses}).changed(flux.actions.user.updateBalanceSub);
         }
         else {
-            for (var i = addresses.length - 1; i >= 0; i--) {
-                eth.watch(addresses[i], "", flux.actions.user.updateBalance);
+            // for (var i = addresses.length - 1; i >= 0; i--) {
+            eth.unwatch("", addresses[0]);
+            eth.watch(addresses[0], "", flux.actions.user.updateBalance);
 
-                flux.actions.user.updateBalanceSub();
-                for (var m = markets.length - 1; m >= 0; m--)
-                    eth.watch(markets[m].address, "", flux.actions.user.updateBalanceSub);
-            }
+            flux.actions.user.updateBalanceSub();
+            // for (var m = markets.length - 1; m >= 0; m--)
+            eth.unwatch("", markets[1].address);
+            eth.watch(markets[1].address, "", flux.actions.user.updateBalanceSub);
         }
     };
 
@@ -85,10 +88,12 @@ var EthereumClient = function() {
     this.setMarketWatches = function(flux, markets) {
         var market_addresses = _.rest(_.pluck(markets, 'address'));
         if (ethBrowser) {
-            eth.watch({altered: market_addresses}).changed(flux.actions.trade.loadTrades);
+            eth.watch({altered: market_addresses}).changed(flux.actions.trade.updateTrades);
         }
         else {
             flux.actions.trade.loadTrades();
+            // eth.unwatch("", market_addresses[1]);
+            eth.watch(market_addresses[0], "", flux.actions.trade.updateTrades);
         //     for (var i = market_addresses.length - 1; i >= 0; i--) {
         //         flux.actions.trade.loadTrades();
         //         eth.watch(market_addresses[i], "", flux.actions.trade.loadTrades);

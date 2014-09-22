@@ -155,9 +155,17 @@ var TradeList = React.createClass({
     render: function() {
         return (
             <div>
-                <h3>{this.props.trades.title} {this.props.trades.loading && <span>loading...</span>}</h3>
-                {this.props.trades.loading &&
-                    <ProgressBar active now={this.props.trades.percent} />}
+                <div className="container-fluid row">
+                    <div className="col-md-3 col-xs-6">
+                        <h3>{this.props.trades.title} {this.props.trades.loading && <span>loading...</span>}</h3>
+                    </div>
+                    <div className="col-md-9 col-xs-6">
+                        <div style={{marginTop: 28}}>
+                            {this.props.trades.loading &&
+                                <ProgressBar active now={this.props.trades.percent} className="" />}
+                        </div>
+                    </div>
+                </div>
                 {this.props.trades.error &&
                     <AlertDismissable ref="alerts" level={"alert"} message={this.props.trades.error} />}
                 {(this.props.trades.type == 1) ?
