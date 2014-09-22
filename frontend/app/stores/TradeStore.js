@@ -83,7 +83,9 @@ var TradeStore = Fluxxor.createStore({
 
         // Add and re-sort... TODO improve that...
         (payload.type == 1) ? this.trades.buys.push(trade) : this.trades.sells.push(trade);
-        var trades = _.sortBy((payload.type == 1) ? this.trades.buys : this.trades.sells, 'price');
+        (payload.type == 1) ?
+            var trades = _.sortBy(this.trades.buys, 'price').reverse() :
+            var trades = _.sortBy(this.trades.sells, 'price');
         (payload.type == 1) ? this.trades.buys = trades : this.trades.sells = trades;
 
         this.emit(constants.CHANGE_EVENT);
