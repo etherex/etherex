@@ -162,15 +162,17 @@ var EthereumClient = function() {
 
             if (type) {
                 var marketid = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+4))));
+                var amountPrecision = Math.pow(10, markets[marketid].decimals);
+                var precision = markets[marketid].precision;
 
                 console.log("Loading trade " + i + " for market " + markets[marketid].name);
 
-                var price =bigRat(
+                var price = bigRat(
                     eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+1)))
-                ).divide(fixtures.precision).valueOf()
+                ).divide(precision).valueOf()
                 var amount = bigRat(
                     eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+2)))
-                ).divide(fixtures.ether).valueOf();
+                ).divide(amountPrecision).valueOf();
 
                 // console.log("Filling: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr))));
                 // console.log("Pending: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr), 0)));
@@ -208,8 +210,8 @@ var EthereumClient = function() {
     };
 
 
-    this.addTrade = function(trade, success, failure) {
-        var amounts = this.getAmounts(trade.amount, trade.price);
+    this.addTrade = function(trade, market, success, failure) {
+        var amounts = this.getAmounts(trade.amount, trade.price, market.decimals, market.precision);
 
         var data =
             eth.pad(trade.type, 32) +
@@ -246,11 +248,11 @@ var EthereumClient = function() {
         }
     };
 
-    this.fillTrades = function(trades, success, failure) {
+    this.fillTrades = function(trades, market, success, failure) {
         var total = bigRat(0);
 
         for (var i = trades.length - 1; i >= 0; i--) {
-            var amounts = this.getAmounts(trades[i].amount, trades[i].price);
+            var amounts = this.getAmounts(trades[i].amount, trades[i].price, market.decimals, market.precision);
             total += bigRat(amounts.total);
         };
 
@@ -292,8 +294,8 @@ var EthereumClient = function() {
         }
     };
 
-    this.fillTrade = function(trade, success, failure) {
-        var amounts = this.getAmounts(trade.amount, trade.price);
+    this.fillTrade = function(trade, market, success, failure) {
+        var amounts = this.getAmounts(trade.amount, trade.price, market.decimals, market.precision);
 
         var data =
             eth.pad(3, 32) +
@@ -356,9 +358,9 @@ var EthereumClient = function() {
         }
     };
 
-    this.getAmounts = function(amount, price) {
-        var bigamount = bigRat(amount).multiply(bigRat(fixtures.ether)).floor(true).toString();
-        var bigprice = bigRat(price).multiply(bigRat(fixtures.precision)).floor(true).toString();
+    this.getAmounts = function(amount, price, decimals, precision) {
+        var bigamount = bigRat(amount).multiply(bigRat(Math.pow(10, decimals))).floor(true).toString();
+        var bigprice = bigRat(price).multiply(bigRat(precision)).floor(true).toString();
         var total = bigRat(amount)
             .multiply(price)
             .multiply(bigRat(fixtures.ether)).floor(true).toString();

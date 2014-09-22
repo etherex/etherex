@@ -117,9 +117,9 @@ code:
             marketid = msg.data[3]
 
             # Get market
-            market = call(markets, [marketid], 1, 4)
+            market = call(markets, [marketid], 1, 5)
 
-            value = (amount * price) / market[4]
+            value = ((amount * price) / (market[4] * 10 ^ market[2])) * 10 ^ 18
 
             #
             # Check trade amounts and balances
@@ -152,17 +152,15 @@ code:
                         send(msg.sender, msg.value)
                     return(12) // "Minimum ETH trade amount not met, minimum is %s, got %d" % (market[3], msg.value)
 
-                # Transfer subcurrency trade amount
-                ret = call(market[1], [msg.sender, contract.address, amount / 10 ^ 18], 3)
+                # Transfer subcurrency trade amount - TODO handle amount precision in sub contracts?
+                ret = call(market[1], [msg.sender, contract.address, amount / 10 ^ market[2]], 3)
 
                 # Expects standard returns values
                 if ret != 1:
                     return(0)
 
             // "Trade amounts OK for %s" % market[0]
-            # pricekey = price
-            # balances = market[1]
-            # indexes = contract.storage[4]
+
             trades = contract.storage[5]
 
             # New trade
@@ -178,24 +176,6 @@ code:
 
             # Record last added trade
             contract.storage[9] = tradeid
-
-            # booklength = (tradeid - 100) / 10 + 1
-            # contract.storage[pricekey] = booklength
-            # contract.storage[100 + marketid] = booklength
-
-            #
-            # ETX issuance
-            #
-
-            # # Get market
-            # xeth = array(4)
-            # xeth = call(markets, [1], 1, 4)
-
-            # reward = (amount * price) / (10 ^ 24) // "Sending reward of %s to %s" % (reward, msg.sender)
-            # data = array(2)
-            # data[0] = msg.sender
-            # data[1] = reward
-            # call(xeth[3], data, 2) // #define xethaddr=ETX
 
             return(tradeid)
 
@@ -218,7 +198,7 @@ code:
                 trade = call(trades, [tradeid], 1, 5)
                 market = call(markets, [trade[4]], 1, 5)
 
-                value = (trade[2] * trade[1]) / market[4]
+                value = ((trade[2] * trade[1]) / (market[4] * 10 ^ market[2])) * 10 ^ 18
 
                 # Checking trade amounts and balances
                 # TODO - Check subcurrency balances
@@ -230,7 +210,7 @@ code:
                     #     return(13) // "Insufficient balance"
 
                     # Transfer sub / asset
-                    ret = call(market[1], [msg.sender, trade[3], trade[2] / 10 ^ 18], 3)
+                    ret = call(market[1], [msg.sender, trade[3], trade[2] / 10 ^ market[2]], 3)
 
                     # Expects standard returns values
                     if ret != 1:
@@ -261,7 +241,7 @@ code:
                     send(trade[3], value)
 
                     # Transfer sub / asset
-                    ret = call(market[3], [contract.address, msg.sender, trade[2] / 10 ^ 18], 3)
+                    ret = call(market[1], [contract.address, msg.sender, trade[2] / 10 ^ market[2]], 3)
 
                     # Expects standard returns values
                     if ret != 1:
@@ -329,12 +309,12 @@ code:
                 # Issue refunds
                 if trade[0] == 1:
                     # ETH sell refund
-                    value = (trade[2] * trade[1]) / market[4]
+                    value = ((trade[2] * trade[1]) / (market[4] * 10 ^ market[2])) * 10 ^ 18
                     send(msg.sender, value)
 
                 elif trade[0] == 2:
                     # Subcurrency refund
-                    ret = call(market[1], [contract.address, trade[3], trade[2] / 10 ^ 18], 3)
+                    ret = call(market[1], [contract.address, trade[3], trade[2] / 10 ^ market[2]], 3)
 
             if !ret:
                 return(0) // "Error"

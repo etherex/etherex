@@ -22,7 +22,10 @@ var TradeActions = function(client) {
         trade.id = id;
         trade.status = "new";
 
-        _client.addTrade(trade, function() {
+        var market = this.flux.store("MarketStore").getState().market;
+        console.log("ON MARKET", market);
+
+        _client.addTrade(trade, market, function() {
             this.dispatch(constants.trade.ADD_TRADE, trade);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.ADD_TRADE_FAIL, {error: error});
@@ -30,7 +33,9 @@ var TradeActions = function(client) {
     };
 
     this.fillTrades = function(trades) {
-        _client.fillTrades(trades, function() {
+        var market = this.flux.store("MarketStore").getState().market;
+
+        _client.fillTrades(trades, market, function() {
             this.dispatch(constants.trade.FILL_TRADES, trades);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.FILL_TRADES_FAIL, {error: error});
@@ -38,7 +43,9 @@ var TradeActions = function(client) {
     };
 
     this.fillTrade = function(trade) {
-        _client.fillTrade(trade, function() {
+        var market = this.flux.store("MarketStore").getState().market;
+
+        _client.fillTrade(trade, market, function() {
             this.dispatch(constants.trade.FILL_TRADE, trade);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.FILL_TRADE_FAIL, {error: error});
