@@ -211,6 +211,7 @@ var EthereumClient = function() {
 
 
     this.addTrade = function(trade, market, success, failure) {
+        console.log(trade.amount, trade.price, trade);
         var amounts = this.getAmounts(trade.amount, trade.price, market.decimals, market.precision);
 
         var data =
@@ -220,7 +221,8 @@ var EthereumClient = function() {
             eth.pad(trade.market, 32);
 
         console.log("Sending " + eth.fromAscii(data));
-        console.log("with " + amounts.total + " wei");
+        if (trade.type == 1)
+            console.log("with " + amounts.total + " wei");
 
         try {
             if (ethBrowser)

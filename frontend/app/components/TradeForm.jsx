@@ -300,6 +300,7 @@ var SplitTradeForm = React.createClass({
       e.preventDefault();
 
       // console.log([this.props.market.market.id, this.state.amount, this.state.price, this.state.total].join(", "));
+
       if (this.handleValidation(this.props.type, this.props.market.market.id, this.state.amount, this.state.price, this.state.total) != true) {
         if (this.props.market.market.id && this.state.amount && this.state.price && this.state.total && this.state.total < this.props.market.market.minTotal) {
           this._owner.setState({

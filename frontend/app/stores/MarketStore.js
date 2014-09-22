@@ -42,7 +42,7 @@ var MarketStore = Fluxxor.createStore({
     onLoadMarketsSuccess: function(payload) {
         console.log("MARKETS LOADED: " + payload.length);
         this.market = payload[1]; // Load ETX as default (TODO favorites / custom menu)
-        this.market.minTotal = bigRat(this.market.amount).divide(fixtures.ether).valueOf();
+        this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
         this.markets = payload;
         this.loading = false;
         this.error = null;
@@ -52,7 +52,7 @@ var MarketStore = Fluxxor.createStore({
     onChangeMarket: function(payload) {
         console.log("MARKET: " + payload.name);
         this.market = payload;
-        this.market.minTotal = bigRat(this.market.amount).divide(fixtures.ether).valueOf();
+        this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
         this.emit(constants.CHANGE_EVENT);
     },
 

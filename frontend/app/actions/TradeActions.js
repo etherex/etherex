@@ -23,7 +23,7 @@ var TradeActions = function(client) {
         trade.status = "new";
 
         var market = this.flux.store("MarketStore").getState().market;
-        console.log("ON MARKET", market);
+        console.log("ON MARKET: " + market.name);
 
         _client.addTrade(trade, market, function() {
             this.dispatch(constants.trade.ADD_TRADE, trade);
