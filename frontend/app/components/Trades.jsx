@@ -11,6 +11,7 @@ var Trades = React.createClass({
   mixins: [FluxChildMixin],
 
   render: function() {
+    this.props.user.user.own = false;
     return (
       <div>
         <TradeForm market={this.props.market} trades={this.props.trades} user={this.props.user} />

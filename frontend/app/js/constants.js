@@ -19,6 +19,8 @@ module.exports = {
         FILL_TRADES_FAIL: null,
         CANCEL_TRADE: null,
         CANCEL_TRADE_FAIL: null,
+        HIGHLIGHT_FILLING: null,
+        HIGHLIGHT_FILLING_FAIL: null,
         SWITCH_MARKET: null,
         SWITCH_MARKET_FAIL: null,
         SWITCH_TYPE: null,

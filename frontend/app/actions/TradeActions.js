@@ -26,6 +26,22 @@ var TradeActions = function(client) {
             this.dispatch(constants.trade.UPDATE_TRADES_PROGRESS, trades);
         }.bind(this), function(trades) {
             this.dispatch(constants.trade.UPDATE_TRADES_SUCCESS, trades);
+
+            // Highlight filling trades
+            var store = this.flux.store("TradeStore").getState();
+            var market = this.flux.store("MarketStore").getState().market;
+            var user = this.flux.store("UserStore").getState().user;
+
+            // console.log(store);
+            if (store.type && store.price && store.amount && store.total && market && user)
+                this.flux.actions.trade.highlightFilling({
+                    type: store.type,
+                    price: store.price,
+                    amount: store.amount,
+                    total: store.total,
+                    market: market,
+                    user: user
+                });
         }.bind(this), function(error) {
             this.dispatch(constants.trade.UPDATE_TRADES_FAIL, {error: error});
         }.bind(this));
@@ -72,6 +88,10 @@ var TradeActions = function(client) {
         }.bind(this), function(error) {
             this.dispatch(constants.trade.CANCEL_TRADE_FAIL, {error: error});
         }.bind(this));
+    };
+
+    this.highlightFilling = function(values) {
+        this.dispatch(constants.trade.HIGHLIGHT_FILLING, values);
     };
 
     this.switchType = function(type) {

@@ -24,6 +24,8 @@ var UserDetails = require("./components/UserDetails");
 var MarketStore = require("./stores/MarketStore");
 var MarketActions = require("./actions/MarketActions");
 
+var Send = require("./components/Send");
+
 // TODO mock data
 var fixtures = require("./js/fixtures");
 
@@ -95,7 +97,7 @@ var routes = (
       <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
       <Route name="assets" path="/assets" handler={Placeholder} flux={flux} title="Assets" />
       <Route name="wallet" path="/wallet" handler={Placeholder} flux={flux} title="Wallet" />
-      <Route name="tools" path="/tools" handler={Placeholder} flux={flux} title="Tools" />
+      <Route name="tools" path="/tools" handler={Send} flux={flux} title="Tools" />
       <Route name="help" path="/help" handler={Placeholder} flux={flux} title="Help" />
       <Route name="userDetails" path="/user/:userId" handler={UserDetails} flux={flux} title="User details" />
       <Route name="notfound" path="/notfound" handler={Placeholder} title="User or Trade ID not found" flux={flux} />

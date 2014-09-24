@@ -17,6 +17,7 @@ var UserDetails = React.createClass({
             own.tradeBuys = _.filter(this.props.trades.tradeBuys, {'owner': this.props.user.user.id});
             own.tradeSells = _.filter(this.props.trades.tradeSells, {'owner': this.props.user.user.id});
             own.title = "Your trades"; // this.props.user.user.id.substr(0,8) + "\u2026 " + "'s trades";
+            this.props.user.user.own = true;
         }
 
         if (this.props.user.user.id) {

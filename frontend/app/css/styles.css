@@ -46,6 +46,9 @@ tr.trade-success:hover td {
   background-color: #008966 !important;
 }
 
+tr.disabled td {
+  opacity: 0.5;
+}
 
 /* Icons */
 

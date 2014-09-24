@@ -23,8 +23,9 @@ var TradeRow = React.createClass({
     mixins: [FluxChildMixin],
 
     render: function() {
+        var isOwn = (this.props.trade.owner == this.props.user.id);
         return (
-            <tr className={"trade-" + this.props.trade.status}>
+            <tr className={"trade-" + this.props.trade.status + ((isOwn && !this.props.user.own) ? " disabled" : "")}>
                 <td>
                     <div className="text-right">
                         {utils.numeral(this.props.trade.amount, 2)}
@@ -37,7 +38,7 @@ var TradeRow = React.createClass({
                 </td>
                 <td>
                     <div className="text-right">
-                        {utils.numeral(this.props.trade.price, 2)}
+                        {utils.numeral(this.props.trade.price, 4)}
                     </div>
                 </td>
                 <td>
