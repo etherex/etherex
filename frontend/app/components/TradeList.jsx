@@ -169,16 +169,24 @@ var TradeList = React.createClass({
                 </div>
                 {this.props.trades.error &&
                     <AlertDismissable ref="alerts" level={"alert"} message={this.props.trades.error} />}
-                {(this.props.trades.type == 1) ?
-                <div>
-                    <TradeSells trades={this.props.trades} user={this.props.user} />
-                    <TradeBuys trades={this.props.trades} user={this.props.user} />
-                </div> :
-                <div>
-                    <TradeBuys trades={this.props.trades} user={this.props.user} />
-                    <TradeSells trades={this.props.trades} user={this.props.user} />
+                <div className="visible-xs visible-sm">
+                    {(this.props.trades.type == 1) ?
+                    <div>
+                        <TradeSells trades={this.props.trades} user={this.props.user} />
+                        <TradeBuys trades={this.props.trades} user={this.props.user} />
+                    </div> :
+                    <div>
+                        <TradeBuys trades={this.props.trades} user={this.props.user} />
+                        <TradeSells trades={this.props.trades} user={this.props.user} />
+                    </div>
+                    }
                 </div>
-                }
+                <div className="hidden-xs hidden-sm">
+                    <div>
+                        <TradeSells trades={this.props.trades} user={this.props.user} />
+                        <TradeBuys trades={this.props.trades} user={this.props.user} />
+                    </div>
+                </div>
             </div>
         );
     }

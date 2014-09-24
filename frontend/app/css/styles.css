@@ -13,6 +13,14 @@
   width: 5.5em;
 }
 
+.text-overflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  width: 100%;
+  white-space: nowrap !important;
+}
+
 th.trade-op,
 td.trade-op {
   width: 1.5em;

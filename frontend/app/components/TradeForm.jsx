@@ -107,7 +107,7 @@ var SplitTradeForm = React.createClass({
                     onSubmit={this.onSubmitForm}
                   />
                 }>
-                <Button className="btn-block btn-primary" type="submit" key="newtrade">Place trade</Button>
+                <Button className="btn-block btn-primary" type="submit" key="newtrade" onClick={this.handleChange}>Place trade</Button>
               </ModalTrigger>
             </span>
             :
@@ -186,9 +186,9 @@ var SplitTradeForm = React.createClass({
 
   handleValidation: function(type, market, amount, price, total) {
       if (!type || !market || !amount || !price || !total || total < this.props.market.market.minTotal) {
-          this.setState({
-            newTrade: false
-          });
+        this.setState({
+          newTrade: false
+        });
       }
       else {
         this.setState({
@@ -200,63 +200,64 @@ var SplitTradeForm = React.createClass({
   },
 
   onSubmitForm: function(e) {
-      e.preventDefault();
+    e.preventDefault();
 
-      // console.log([this.props.market.market.id, this.state.amount, this.state.price, this.state.total].join(", "));
+    // console.log([this.props.market.market.id, this.state.amount, this.state.price, this.state.total].join(", "));
 
-      if (this.handleValidation(this.props.type, this.props.market.market.id, this.state.amount, this.state.price, this.state.total) != true) {
-        if (this.props.market.market.id && this.state.amount && this.state.price && this.state.total && this.state.total < this.props.market.market.minTotal) {
-          this._owner.setState({
-            alertLevel: 'warning',
-            alertMessage: "Minimum total is " + this.props.market.market.minTotal + " ETH"
-          });
-        }
-        else {
-          this._owner.setState({
-            alertLevel: 'warning',
-            alertMessage: "Fill it up mate!"
-          });
-        }
-        this._owner.refs.alerts.setState({alertVisible: true});
-        return false;
-      }
-
-      // Fill existing trades
-      // console.log("Filling " + _.pluck(this.props.trades.filling, 'id').join(', '));
-      if (this.props.trades.filling.length > 0)
-        this.getFlux().actions.trade.fillTrades(this.props.trades.filling);
-
-      // Add a new trade
-      else
-        this.getFlux().actions.trade.addTrade({
-            type: this.props.type,
-            price: this.state.price,
-            amount: this.state.amount,
-            market: this.props.market.market.id
-        });
-
-      // Partial filling adds a new trade for remaining available
-      if (this.props.trades.amountLeft * this.state.price >= this.props.market.market.minTotal && this.props.trades.filling.length > 0) {
-        this.getFlux().actions.trade.addTrade({
-            type: this.props.type,
-            price: this.state.price,
-            amount: this.props.trades.amountLeft,
-            market: this.props.market.market.id
+    if (this.handleValidation(this.props.type, this.props.market.market.id, this.state.amount, this.state.price, this.state.total) != true) {
+      if (this.props.market.market.id && this.state.amount && this.state.price && this.state.total && this.state.total < this.props.market.market.minTotal) {
+        this._owner.setState({
+          alertLevel: 'warning',
+          alertMessage: "Minimum total is " + this.props.market.market.minTotal + " ETH"
         });
       }
+      else {
+        this._owner.setState({
+          alertLevel: 'warning',
+          alertMessage: "Fill it up mate!"
+        });
+      }
+      this._owner.refs.alerts.setState({alertVisible: true});
+      return false;
+    }
 
-      this.refs.amount.getDOMNode().value = '';
-      this.refs.price.getDOMNode().value = '';
-      this.refs.total.getDOMNode().value = '';
+    // Fill existing trades
+    // console.log("Filling " + _.pluck(this.props.trades.filling, 'id').join(', '));
+    if (this.props.trades.filling.length > 0)
+      this.getFlux().actions.trade.fillTrades(this.props.trades.filling);
 
-      this.setState({
-        amount: null,
-        price: null,
-        total: null,
-        newTrade: false
+    // Add a new trade
+    else
+      this.getFlux().actions.trade.addTrade({
+        type: this.props.type,
+        price: this.state.price,
+        amount: this.state.amount,
+        market: this.props.market.market.id
       });
 
-      // return;
+    // Partial filling adds a new trade for remaining available
+    if (this.props.trades.amountLeft * this.state.price >= this.props.market.market.minTotal &&
+        this.props.trades.filling.length > 0) {
+      this.getFlux().actions.trade.addTrade({
+        type: this.props.type,
+        price: this.state.price,
+        amount: this.props.trades.amountLeft,
+        market: this.props.market.market.id
+      });
+    }
+
+    this.refs.amount.getDOMNode().value = '';
+    this.refs.price.getDOMNode().value = '';
+    this.refs.total.getDOMNode().value = '';
+
+    this.setState({
+      amount: null,
+      price: null,
+      total: null,
+      newTrade: false
+    });
+
+    return true;
   }
 });
 
@@ -289,13 +290,9 @@ var TradeForm = React.createClass({
                   </DropdownButton>
                 </div>
                 <div>
-                  {(this.props.trades.type == 1) ?
                   <div className="container-fluid">
                     <SplitTradeForm type={this.state.type} market={this.props.market} trades={this.props.trades} user={this.props.user} />
-                  </div> :
-                  <div className="container-fluid">
-                    <SplitTradeForm type={this.state.type} market={this.props.market} trades={this.props.trades} user={this.props.user} />
-                  </div>}
+                  </div>
                 </div>
               </div>
               <div className="visible-md visible-lg">
