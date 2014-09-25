@@ -93,7 +93,8 @@ var EthereumClient = function() {
         else {
             flux.actions.trade.loadTrades();
             // eth.unwatch("", market_addresses[1]);
-            eth.watch(market_addresses[0], "", flux.actions.trade.updateTrades);
+            // eth.watch(market_addresses[0], "", flux.actions.trade.updateTrades);
+            setTimeout(flux.actions.trade.updateTrades, 60000);
         //     for (var i = market_addresses.length - 1; i >= 0; i--) {
         //         flux.actions.trade.loadTrades();
         //         eth.watch(market_addresses[i], "", flux.actions.trade.loadTrades);

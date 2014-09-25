@@ -5,7 +5,7 @@ var Button = require('react-bootstrap/Button');
 var AlertDismissable = React.createClass({
   getInitialState: function() {
     return {
-      alertVisible: false
+      alertVisible: !this.props.show ? false : true
     };
   },
 
