@@ -110,8 +110,7 @@ var SplitTradeForm = React.createClass({
                 <Button className="btn-block btn-primary" type="submit" key="newtrade" onClick={this.handleChange}>Place trade</Button>
               </ModalTrigger>
             </span>
-            :
-            <Button className="btn-block" type="submit" key="newtrade" onClick={this.onSubmitForm}>Place trade</Button>
+            : <Button className="btn-block" type="submit" key="newtrade" onClick={this.onSubmitForm}>Place trade</Button>
           }
         </div>
       </form>
@@ -235,17 +234,6 @@ var SplitTradeForm = React.createClass({
         market: this.props.market.market.id
       });
 
-    // Partial filling adds a new trade for remaining available
-    if (this.props.trades.amountLeft * this.state.price >= this.props.market.market.minTotal &&
-        this.props.trades.filling.length > 0) {
-      this.getFlux().actions.trade.addTrade({
-        type: this.props.type,
-        price: this.state.price,
-        amount: this.props.trades.amountLeft,
-        market: this.props.market.market.id
-      });
-    }
-
     this.refs.amount.getDOMNode().value = '';
     this.refs.price.getDOMNode().value = '';
     this.refs.total.getDOMNode().value = '';
@@ -257,7 +245,7 @@ var SplitTradeForm = React.createClass({
       newTrade: false
     });
 
-    return true;
+    return;
   }
 });
 

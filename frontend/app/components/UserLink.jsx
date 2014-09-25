@@ -21,9 +21,9 @@ var UserLink = React.createClass({
             return null;
         }
         var shortId = this.props.id.substr(0, this.shortIdLength);
-
+        // userId={this.props.id}>
         return (
-            <Link to="userDetails" userId={this.props.id}>
+            <Link to="userDetails">
                 {this.props.showIcon && <span className="glyphicon glyphicon-user"></span>} ({shortId + '\u2026'})
             </Link>
         );

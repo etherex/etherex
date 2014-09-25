@@ -28,17 +28,17 @@ var TradeActions = function(client) {
             this.dispatch(constants.trade.UPDATE_TRADES_SUCCESS, trades);
 
             // Highlight filling trades
-            var store = this.flux.store("TradeStore").getState();
+            var trade = this.flux.store("TradeStore").getState();
             var market = this.flux.store("MarketStore").getState().market;
             var user = this.flux.store("UserStore").getState().user;
 
             // console.log(store);
-            if (store.type && store.price && store.amount && store.total && market && user)
+            if (trade.type && trade.price && trade.amount && trade.total && market && user)
                 this.flux.actions.trade.highlightFilling({
-                    type: store.type,
-                    price: store.price,
-                    amount: store.amount,
-                    total: store.total,
+                    type: trade.type,
+                    price: trade.price,
+                    amount: trade.amount,
+                    total: trade.total,
                     market: market,
                     user: user
                 });
@@ -66,6 +66,18 @@ var TradeActions = function(client) {
         var market = this.flux.store("MarketStore").getState().market;
 
         _client.fillTrades(trades, market, function() {
+            var trade = this.flux.store("TradeStore").getState();
+            // Partial filling adds a new trade for remaining available
+            if (trade.amountLeft * trade.price >= market.minTotal &&
+                trade.filling.length > 0) {
+              this.flux.actions.trade.addTrade({
+                type: trade.type,
+                price: trade.price,
+                amount: trade.amountLeft,
+                market: market.id
+              });
+            }
+
             this.dispatch(constants.trade.FILL_TRADES, trades);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.FILL_TRADES_FAIL, {error: error});

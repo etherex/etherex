@@ -32,7 +32,7 @@
     ]
   },
   "devDependencies": {
-    "css-loader": "^0.8.0",
+    "css-loader": "^0.9.0",
     "grunt": "^0.4.5",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-watch": "^0.6.1",
@@ -41,16 +41,16 @@
     "grunt-jsxhint": "^0.3.0",
     "grunt-webpack": "^1.0.8",
     "jest": "^0.1.37",
-    "jest-cli": "^0.1.17",
+    "jest-cli": "^0.1.18",
     "jsx-loader": "^0.11.0",
-    "less": "^1.7.4",
+    "less": "^1.7.5",
     "less-loader": "^0.7.7",
-    "react-bootstrap": "^0.11.1",
-    "react-hot-loader": "^0.4.2",
-    "react-tools": "^0.11.1",
-    "style-loader": "^0.7.1",
-    "webpack": "^1.4.0-beta1",
-    "webpack-dev-server": "^1.5.0"
+    "react-bootstrap": "^0.12.0",
+    "react-hot-loader": "^0.4.5",
+    "react-tools": "^0.11.2",
+    "style-loader": "^0.8.0",
+    "webpack": "^1.4.3",
+    "webpack-dev-server": "^1.6.5"
   },
   "dependencies": {
     "big-rational": "^0.9.7",
@@ -61,7 +61,7 @@
     "lodash": "^2.4.1",
     "numeral": "^1.5.3",
     "react": "^0.11.2",
-    "react-router": "^0.5.2",
+    "react-router": "^0.7.0",
     "si-prefix": "^0.1.0",
     "url-loader": "^0.5.5"
   }
