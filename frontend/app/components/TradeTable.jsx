@@ -64,7 +64,7 @@ var TradeRow = React.createClass({
                                     onSubmit={this.handleCancelTrade}
                                 />
                             }>
-                            <Button key="cancel"><Glyphicon glyph="remove" /></Button>
+                            <Button className="btn-xs" key="cancel"><Glyphicon glyph="remove" /></Button>
                         </ModalTrigger> :
 
                         <ModalTrigger modal={
@@ -80,7 +80,7 @@ var TradeRow = React.createClass({
                                     onSubmit={this.handleFillTrade}
                                 />
                             }>
-                            <Button key="fill"><Glyphicon glyph="screenshot" /></Button>
+                            <Button className="btn-xs" key="fill"><Glyphicon glyph="screenshot" /></Button>
                         </ModalTrigger>
                     }</div>
                 </td>}

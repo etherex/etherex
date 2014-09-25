@@ -173,11 +173,11 @@ var TradeStore = Fluxxor.createStore({
 
     onHighlightFilling: function(payload) { // type, price, amount, total, market, user
         // console.log(payload);
-        var trades = (payload.type == 1) ? this.trades.tradeSells : this.trades.tradeBuys.reverse();
-        var siblings = (payload.type == 1) ? this.trades.tradeBuys.reverse() : this.trades.tradeSells;
+        var trades = (payload.type == 1) ? this.trades.tradeSells : this.trades.tradeBuys;
+        var siblings = (payload.type == 1) ? this.trades.tradeBuys : this.trades.tradeSells;
         var total_amount = 0;
         var trades_total = 0;
-        var filling = this.filling;
+        var filling = []; //this.filling;
         var amountLeft = payload.amount;
         var available = payload.total;
 
@@ -185,8 +185,8 @@ var TradeStore = Fluxxor.createStore({
 
         // Reset same type trades
         for (var i = 0; i <= siblings.length - 1; i++) {
-            if (_.find(filling, {'id': siblings[i].id})) {
-                _.remove(filling, {'id': siblings[i].id})
+            if (_.find(this.filling, {'id': siblings[i].id})) {
+                _.remove(this.filling, {'id': siblings[i].id})
                 if (siblings[i].status == "filling")
                     siblings[i].status = "mined";
                 // Add back to available and amountLeft
@@ -196,15 +196,16 @@ var TradeStore = Fluxxor.createStore({
         }
 
         // Remove currently filling amounts and totals
-        for (var i = filling.length - 1; i >= 0; i--) {
-            amountLeft -= filling[i].amount;
-            available -= filling[i].amount * filling[i].price;
-        };
+        // for (var i = filling.length - 1; i >= 0; i--) {
+        //     amountLeft -= filling[i].amount;
+        //     available -= filling[i].amount * filling[i].price;
+        // };
 
         console.log("=====");
 
         for (var i = 0; i <= trades.length - 1; i++) {
 
+            // Add totals and amounts
             if (trades[i].owner != payload.user.id) {
                 var this_total = trades[i].amount * trades[i].price;
                 // console.log("against total of " + this_total);
