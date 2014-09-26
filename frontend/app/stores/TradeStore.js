@@ -184,16 +184,17 @@ var TradeStore = Fluxxor.createStore({
         // console.log(filling);
 
         // Reset same type trades
-        for (var i = 0; i <= siblings.length - 1; i++) {
-            if (_.find(this.filling, {'id': siblings[i].id})) {
-                _.remove(this.filling, {'id': siblings[i].id})
-                if (siblings[i].status == "filling")
-                    siblings[i].status = "mined";
-                // Add back to available and amountLeft
-                // amountLeft += siblings[i].amount;
-                // available += siblings[i].amount * siblings[i].price;
+        if (siblings)
+            for (var i = 0; i <= siblings.length - 1; i++) {
+                if (_.find(this.filling, {'id': siblings[i].id})) {
+                    _.remove(this.filling, {'id': siblings[i].id})
+                    if (siblings[i].status == "filling")
+                        siblings[i].status = "mined";
+                    // Add back to available and amountLeft
+                    // amountLeft += siblings[i].amount;
+                    // available += siblings[i].amount * siblings[i].price;
+                }
             }
-        }
 
         // Remove currently filling amounts and totals
         // for (var i = filling.length - 1; i >= 0; i--) {

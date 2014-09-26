@@ -24,7 +24,6 @@ var SplitTradeForm = React.createClass({
   mixins: [FluxChildMixin],
 
   getInitialState: function() {
-      this.handleValidation(false);
       return {
           amount: null,
           price: null,
@@ -86,7 +85,6 @@ var SplitTradeForm = React.createClass({
         </div>
         <div className="form-group">
           {this.state.newTrade == true ?
-            <span>
               <ModalTrigger modal={
                   <ConfirmModal
                     message={
@@ -122,7 +120,6 @@ var SplitTradeForm = React.createClass({
                 }>
                 <Button className="btn-block btn-primary" type="submit" key="newtrade" onClick={this.handleChange}>Place trade</Button>
               </ModalTrigger>
-            </span>
             : <Button className="btn-block" type="submit" key="newtrade_fail">Place trade</Button>
           }
         </div>
@@ -154,6 +151,8 @@ var SplitTradeForm = React.createClass({
 
       this.refs.total.getDOMNode().value = total.toFixed(this.props.market.market.precision.length);
 
+      this.handleValidation(e, false);
+
       this.getFlux().actions.trade.highlightFilling({
         type: type,
         price: price,
@@ -162,8 +161,6 @@ var SplitTradeForm = React.createClass({
         market: this.props.market.market,
         user: this.props.user.user
       });
-
-      this.handleValidation(false);
   },
 
   handleChangeTotal: function(e) {
@@ -183,6 +180,8 @@ var SplitTradeForm = React.createClass({
 
       this.refs.amount.getDOMNode().value = amount;
 
+      this.handleValidation(e, false);
+
       // this.highlightFilling(type, price, amount, total);
       this.getFlux().actions.trade.highlightFilling({
         type: type,
@@ -192,11 +191,12 @@ var SplitTradeForm = React.createClass({
         market: this.props.market.market,
         user: this.props.user.user
       });
-
-      this.handleValidation(false);
   },
 
-  handleValidation: function(showAlerts) {
+  handleValidation: function(e, showAlerts) {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (!this.props.type ||
         !this.props.market.market.id ||
         !this.state.amount ||
@@ -224,16 +224,18 @@ var SplitTradeForm = React.createClass({
           alertMessage: "Fill it up mate!"
         });
       }
+
       if (showAlerts)
         this._owner.refs.alerts.setState({alertVisible: true});
+
     }
     else {
       this.setState({
         newTrade: true
       });
-      // console.log(this);
-      // this.emit(constants.CHANGE_EVENT);
+
       this._owner.refs.alerts.setState({alertVisible: false});
+
       return true;
     }
     return false;
@@ -245,7 +247,7 @@ var SplitTradeForm = React.createClass({
 
     // console.log([this.props.market.market.id, this.state.amount, this.state.price, this.state.total].join(", "));
 
-    if (!this.handleValidation(true)) {
+    if (!this.handleValidation(e, true)) {
       return false;
     }
 

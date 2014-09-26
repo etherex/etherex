@@ -1,2 +1,2 @@
 pyethereum
-ethereum-serpent==1.6.5
+ethereum-serpent
