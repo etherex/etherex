@@ -102,12 +102,28 @@ var TradeActions = function(client) {
         }.bind(this));
     };
 
-    this.highlightFilling = function(values) {
-        this.dispatch(constants.trade.HIGHLIGHT_FILLING, values);
+    this.highlightFilling = function(trades) {
+        this.dispatch(constants.trade.HIGHLIGHT_FILLING, trades);
     };
 
     this.switchType = function(type) {
         this.dispatch(constants.trade.SWITCH_TYPE, type);
+
+        // Highlight filling trades
+        var trade = this.flux.store("TradeStore").getState();
+        var market = this.flux.store("MarketStore").getState().market;
+        var user = this.flux.store("UserStore").getState().user;
+
+        // console.log(store);
+        if (trade.type && trade.price && trade.amount && trade.total && market && user)
+            this.flux.actions.trade.highlightFilling({
+                type: trade.type,
+                price: trade.price,
+                amount: trade.amount,
+                total: trade.total,
+                market: market,
+                user: user
+            });
     };
 
     this.switchMarket = function(market) {

@@ -84,7 +84,7 @@ var SplitTradeForm = React.createClass({
           </div>
         </div>
         <div className="form-group">
-          {this.state.newTrade == true ?
+          {(this.state.price > 0 && this.state.amount > 0 && this.state.total > this.props.market.market.minTotal) ?
               <ModalTrigger modal={
                   <ConfirmModal
                     message={
@@ -118,7 +118,7 @@ var SplitTradeForm = React.createClass({
                     onSubmit={this.onSubmitForm}
                   />
                 }>
-                <Button className="btn-block btn-primary" type="submit" key="newtrade" onClick={this.handleChange}>Place trade</Button>
+                <Button className="btn-block btn-primary" type="submit" key="newtrade">Place trade</Button>
               </ModalTrigger>
             : <Button className="btn-block" type="submit" key="newtrade_fail">Place trade</Button>
           }
@@ -128,6 +128,7 @@ var SplitTradeForm = React.createClass({
   },
 
   handleChange: function(e) {
+      e.preventDefault();
       // TODO - proper back/forth handling
       var type = this.props.type;
       var market = this.refs.market.getDOMNode().value.trim();
@@ -164,12 +165,13 @@ var SplitTradeForm = React.createClass({
   },
 
   handleChangeTotal: function(e) {
+      e.preventDefault();
       var type = this.props.type;
       var market = this.refs.market.getDOMNode().value;
       var price = parseFloat(this.refs.price.getDOMNode().value.trim());
       var total = parseFloat(this.refs.total.getDOMNode().value.trim());
       var amount = 0;
-      if (price > 0 && total)
+      if (price > 0 && total > 0)
         amount = (total / price).toPrecision(9);
 
       this.setState({
@@ -182,7 +184,6 @@ var SplitTradeForm = React.createClass({
 
       this.handleValidation(e, false);
 
-      // this.highlightFilling(type, price, amount, total);
       this.getFlux().actions.trade.highlightFilling({
         type: type,
         price: price,
@@ -195,7 +196,6 @@ var SplitTradeForm = React.createClass({
 
   handleValidation: function(e, showAlerts) {
     e.preventDefault();
-    e.stopPropagation();
 
     if (!this.props.type ||
         !this.props.market.market.id ||
@@ -296,18 +296,23 @@ var TradeForm = React.createClass({
       return (
         <div className="panel panel-default">
           <div className="panel-heading">
-            <h3 className="panel-title">New Trade</h3>
+            <div className="visible-md visible-lg">
+              <h3 className="panel-title">New Trade</h3>
+            </div>
+            <div className="visible-xs visible-sm text-center">
+              <div className="pull-left h4">New Trade</div>
+              <span className="panel-title">
+              <label className="sr-only" forHtml="type">Buy or sell</label>
+              <DropdownButton bsStyle="primary" bsSize="medium" ref="type" onSelect={this.handleType} key={this.state.type} title={this.state.typename}>
+                <MenuItem key={1}>Buy</MenuItem>
+                <MenuItem key={2}>Sell</MenuItem>
+              </DropdownButton>
+              </span>
+            </div>
           </div>
           <div className="panel-body">
               <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
               <div className="visible-xs visible-sm">
-                <div className="form-group text-center">
-                  <label className="sr-only" forHtml="type">Buy or sell</label>
-                  <DropdownButton bsStyle="primary" bsSize="large" ref="type" onSelect={this.handleType} key={this.state.type} title={this.state.typename} block>
-                    <MenuItem key={1}>Buy</MenuItem>
-                    <MenuItem key={2}>Sell</MenuItem>
-                  </DropdownButton>
-                </div>
                 <div>
                   <div className="container-fluid">
                     <SplitTradeForm type={this.state.type} market={this.props.market} trades={this.props.trades} user={this.props.user} />
