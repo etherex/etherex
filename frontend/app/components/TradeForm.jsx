@@ -49,10 +49,6 @@ var SplitTradeForm = React.createClass({
     var totalLeft = this.props.trades.amountLeft * this.state.price;
 
     // console.log(precision, priceDecimals, amountPrecision, decimals, minimum);
-    // var filling = {
-    //   tradeBuys: (this.props.type == 1) ? this.props.trades.filling : [],
-    //   tradeSells: (this.props.type == 2) ? this.props.trades.filling : []
-    // };
 
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
@@ -84,7 +80,12 @@ var SplitTradeForm = React.createClass({
           </div>
         </div>
         <div className="form-group">
-          {(this.state.price > 0 && this.state.amount > 0 && this.state.total > this.props.market.market.minTotal) ?
+          {(this.state.price > 0 &&
+            this.state.amount > 0 &&
+            this.state.total > this.props.market.market.minTotal &&
+            ((this.props.type == 1 && bigRat(this.props.user.user.balance_raw).greaterOrEquals(bigRat(this.state.total).multiply(fixtures.ether))) ||
+             (this.props.type == 2 && this.props.user.user.balance_sub_raw >= this.state.amount)
+            )) ?
               <ModalTrigger modal={
                   <ConfirmModal
                     message={
@@ -163,7 +164,7 @@ var SplitTradeForm = React.createClass({
 
       this.refs.total.getDOMNode().value = total.toFixed(this.props.market.market.precision.length);
 
-      this.handleValidation(e, false);
+      // this.handleValidation(e, false);
 
       this.getFlux().actions.trade.highlightFilling({
         type: type,
@@ -182,6 +183,7 @@ var SplitTradeForm = React.createClass({
       var price = parseFloat(this.refs.price.getDOMNode().value.trim());
       var total = parseFloat(this.refs.total.getDOMNode().value.trim());
       var amount = 0;
+
       if (price > 0 && total > 0)
         amount = (total / price).toPrecision(9);
 
@@ -193,7 +195,7 @@ var SplitTradeForm = React.createClass({
 
       this.refs.amount.getDOMNode().value = amount;
 
-      this.handleValidation(e, false);
+      // this.handleValidation(e, false);
 
       this.getFlux().actions.trade.highlightFilling({
         type: type,
@@ -208,37 +210,36 @@ var SplitTradeForm = React.createClass({
   handleValidation: function(e, showAlerts) {
     e.preventDefault();
 
+    this.handleChange(e);
+
     if (!this.props.type ||
         !this.props.market.market.id ||
         !this.state.amount ||
         !this.state.price ||
-        !this.state.total ||
-        this.state.total < this.props.market.market.minTotal) {
+        !this.state.total) {
 
-      this.setState({
-        newTrade: false
-      });
-
-      if (this.props.market.market.id &&
-          this.state.amount &&
-          this.state.price &&
-          this.state.total &&
-          this.state.total < this.props.market.market.minTotal) {
-        this._owner.setState({
-          alertLevel: 'warning',
-          alertMessage: "Minimum total is " + this.props.market.market.minTotal + " ETH"
-        });
-      }
-      else {
         this._owner.setState({
           alertLevel: 'warning',
           alertMessage: "Fill it up mate!"
         });
-      }
-
-      if (showAlerts)
-        this._owner.refs.alerts.setState({alertVisible: true});
-
+    }
+    else if (this.state.total < this.props.market.market.minTotal) {
+        this._owner.setState({
+          alertLevel: 'warning',
+          alertMessage: "Minimum total is " + this.props.market.market.minTotal + " ETH"
+        });
+    }
+    else if (this.props.type == 1 && bigRat(this.props.user.user.balance_raw).lesser(bigRat(this.state.total).multiply(fixtures.ether))) {
+        this._owner.setState({
+          alertLevel: 'warning',
+          alertMessage: "Not enough ETH for this trade, " + utils.formatBalance(bigRat(this.state.total).multiply(fixtures.ether)) + " required."
+        });
+    }
+    else if (this.props.type == 2 && this.props.user.user.balance_sub_raw < this.state.amount) {
+        this._owner.setState({
+          alertLevel: 'warning',
+          alertMessage: "Not enough " + this.props.market.market.name + " for this trade, " + this.state.amount + " " + this.props.market.market.name + " required."
+        });
     }
     else {
       this.setState({
@@ -249,6 +250,14 @@ var SplitTradeForm = React.createClass({
 
       return true;
     }
+
+    this.setState({
+      newTrade: false
+    });
+
+    if (showAlerts)
+      this._owner.refs.alerts.setState({alertVisible: true});
+
     return false;
   },
 

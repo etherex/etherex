@@ -235,6 +235,7 @@ var TradeStore = Fluxxor.createStore({
                   amountLeft >= trades[i].amount &&
                   available >= this_total &&
                   trades[i].owner != payload.user.id &&
+                  trades[i].market.id == payload.market.id &&
                   trades[i].status != "pending" &&
                   trades[i].status != "new") {
 
