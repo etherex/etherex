@@ -57,6 +57,7 @@ var TradeActions = function(client) {
 
         _client.addTrade(trade, market, function() {
             this.dispatch(constants.trade.ADD_TRADE, trade);
+            this.flux.actions.trade.updateTrades();
         }.bind(this), function(error) {
             this.dispatch(constants.trade.ADD_TRADE_FAIL, {error: error});
         }.bind(this));
@@ -79,6 +80,7 @@ var TradeActions = function(client) {
             }
 
             this.dispatch(constants.trade.FILL_TRADES, trades);
+            this.flux.actions.trade.updateTrades();
         }.bind(this), function(error) {
             this.dispatch(constants.trade.FILL_TRADES_FAIL, {error: error});
         }.bind(this));
@@ -89,6 +91,7 @@ var TradeActions = function(client) {
 
         _client.fillTrade(trade, market, function() {
             this.dispatch(constants.trade.FILL_TRADE, trade);
+            this.flux.actions.trade.updateTrades();
         }.bind(this), function(error) {
             this.dispatch(constants.trade.FILL_TRADE_FAIL, {error: error});
         }.bind(this));
@@ -97,6 +100,7 @@ var TradeActions = function(client) {
     this.cancelTrade = function(trade) {
         _client.cancelTrade(trade, function() {
             this.dispatch(constants.trade.CANCEL_TRADE, trade);
+            this.flux.actions.trade.updateTrades();
         }.bind(this), function(error) {
             this.dispatch(constants.trade.CANCEL_TRADE_FAIL, {error: error});
         }.bind(this));
@@ -128,6 +132,22 @@ var TradeActions = function(client) {
 
     this.switchMarket = function(market) {
         this.dispatch(constants.trade.SWITCH_MARKET, market);
+
+        // Highlight filling trades
+        var trade = this.flux.store("TradeStore").getState();
+        var market = this.flux.store("MarketStore").getState().market;
+        var user = this.flux.store("UserStore").getState().user;
+
+        // console.log(store);
+        if (trade.type && trade.price && trade.amount && trade.total && market && user)
+            this.flux.actions.trade.highlightFilling({
+                type: trade.type,
+                price: trade.price,
+                amount: trade.amount,
+                total: trade.total,
+                market: market,
+                user: user
+            });
     };
 
     var _client = client;

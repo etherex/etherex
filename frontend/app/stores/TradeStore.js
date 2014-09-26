@@ -113,22 +113,16 @@ var TradeStore = Fluxxor.createStore({
             this.trades.sells = _.sortBy(this.trades.sells, 'price');
 
         this.emit(constants.CHANGE_EVENT);
-
-        if (!ethBrowser)
-            setTimeout(this.flux.actions.trade.updateTrades, 1000);
     },
 
     onFillTrade: function(payload) {
-        var index = _.findIndex((payload.type == 1) ? this.trades.buys : this.trades.sells, {'id': payload.id});
+        var index = _.findIndex((payload.type == "buys") ? this.trades.buys : this.trades.sells, {'id': payload.id});
 
         console.log("Filling trade ", payload, " at index " + index);
 
-        (payload.type == 1) ? this.trades.buys[index].status = "success" : this.trades.sells[index].status = "success";
+        (payload.type == "buys") ? this.trades.buys[index].status = "success" : this.trades.sells[index].status = "success";
 
         this.emit(constants.CHANGE_EVENT);
-
-        if (!ethBrowser)
-            setTimeout(this.flux.actions.trade.updateTrades, 1000);
     },
 
     onFillTrades: function(payload) {
@@ -153,22 +147,16 @@ var TradeStore = Fluxxor.createStore({
         this.price = null;
         this.amount = null;
         this.total = null;
-
-        if (!ethBrowser)
-            setTimeout(this.flux.actions.trade.updateTrades, 1000);
     },
 
     onCancelTrade: function(payload) {
-        var index = _.findIndex((payload.type == 1) ? this.trades.buys : this.trades.sells, {'id': payload.id});
+        var index = _.findIndex((payload.type == "buys") ? this.trades.buys : this.trades.sells, {'id': payload.id});
 
         console.log("Cancelling trade ", payload, " at index " + index);
 
-        (payload.type == 1) ? this.trades.buys[index].status = "new" : this.trades.sells[index].status = "new";
+        (payload.type == "buys") ? this.trades.buys[index].status = "new" : this.trades.sells[index].status = "new";
 
         this.emit(constants.CHANGE_EVENT);
-
-        if (!ethBrowser)
-            setTimeout(this.flux.actions.trade.updateTrades, 1000);
     },
 
     onHighlightFilling: function(payload) { // type, price, amount, total, market, user

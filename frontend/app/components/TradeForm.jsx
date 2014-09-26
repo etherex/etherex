@@ -95,7 +95,13 @@ var SplitTradeForm = React.createClass({
                     note={
                       (this.props.trades.filling.length > 0 ?
                         "You will be filling " + this.props.trades.filling.length + " trade" +
-                        (this.props.trades.filling.length > 1 ? "s" : "") + "." : "") +
+                        (this.props.trades.filling.length > 1 ? "s" : "") +
+                        " for a total of " +
+                        utils.formatBalance(bigRat(this.state.total - this.props.trades.available).multiply(fixtures.ether)) +
+                        (this.props.trades.available > 0 ? " (" +
+                          utils.formatBalance(bigRat(this.props.trades.available).multiply(fixtures.ether)) + " left)" : "") +
+                        "."
+                        : "") +
                       (totalLeft >= this.props.market.market.minTotal &&
                        this.props.trades.filling.length > 0 &&
                        this.props.trades.available ?
@@ -105,14 +111,19 @@ var SplitTradeForm = React.createClass({
                         " at " + utils.numeral(this.state.price, 4) + " " + this.props.market.market.name + "/ETH" +
                         " for " + utils.formatBalance(bigRat(this.props.trades.amountLeft)
                                     .multiply(this.state.price)
-                                    .multiply(fixtures.ether)) + "." : "") +
+                                    .multiply(fixtures.ether)) +
+                        "."
+                        : "") +
                       (totalLeft < this.props.market.market.minTotal &&
                        this.props.trades.filling.length > 0 &&
                        this.props.trades.amountLeft > 0 &&
                        this.props.trades.available > 0 ?
                         " Not enough left for a new trade with " +
                           utils.numeral(this.props.trades.amountLeft, 4) + " " + this.props.market.market.name + " for " +
-                          utils.formatBalance(bigRat(totalLeft).multiply(fixtures.ether)) + "." : "")}
+                          utils.formatBalance(bigRat(totalLeft).multiply(fixtures.ether)) +
+                          "."
+                          : "")
+                    }
                     tradeList={this.props.trades.filling}
                     user={this.props.user}
                     onSubmit={this.onSubmitForm}
