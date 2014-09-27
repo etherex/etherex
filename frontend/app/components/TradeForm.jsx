@@ -32,6 +32,17 @@ var SplitTradeForm = React.createClass({
       };
   },
 
+  componentWillReceiveProps: function(nextProps) {
+    if (nextProps.trades.newAmount && this.props.type == nextProps.trades.type) {
+      this.setState({
+        type: nextProps.trades.type,
+        amount: parseFloat(nextProps.trades.amount.toFixed(this.props.market.market.decimals)),
+        price: parseFloat(nextProps.trades.price.toFixed(this.props.market.market.precision.length - 1)),
+        total: parseFloat(nextProps.trades.total.toPrecision(this.props.market.market.decimals))
+      });
+    }
+  },
+
   render: function() {
     // Price precision
     var priceDecimals = this.props.market.market.precision ? this.props.market.market.precision.length - 1 : 0;
@@ -56,7 +67,7 @@ var SplitTradeForm = React.createClass({
         <div className="form-group">
           <div className="input-group">
             <label className="sr-only" forHtml="amount">Amount</label>
-            <input type="number" min={amountPrecision} step={amountPrecision} className="form-control medium" placeholder={amountPrecision} ref="amount" onChange={this.handleChange} />
+            <input type="number" min={amountPrecision} step={amountPrecision} className="form-control medium" placeholder={amountPrecision} ref="amount" onChange={this.handleChange} value={this.state.amount} />
             <div className="input-group-addon">{this.props.market.market.name}</div>
           </div>
         </div>
@@ -64,7 +75,7 @@ var SplitTradeForm = React.createClass({
           <label className="sr-only" forHtml="price">Price</label>
           <div className="input-group">
             <div className="input-group-addon">@</div>
-            <input type="number" min={precision} step={precision} className="form-control medium" placeholder={precision} ref="price" onChange={this.handleChange} />
+            <input type="number" min={precision} step={precision} className="form-control medium" placeholder={precision} ref="price" onChange={this.handleChange} value={this.state.price} />
             <div className="input-group-addon">
               {this.props.market.market.name}/ETH
             </div>
@@ -73,7 +84,7 @@ var SplitTradeForm = React.createClass({
         <div className="form-group">
           <div className="input-group">
             <div className="input-group-addon">{"="}</div>
-            <input type="number" min={minimum} step={precision} className="form-control medium" placeholder={minimum} ref="total" onChange={this.handleChangeTotal} />
+            <input type="number" min={minimum} step={precision} className="form-control medium" placeholder={minimum} ref="total" onChange={this.handleChangeTotal} value={this.state.total} />
             <div className="input-group-addon">
               ETH
             </div>
@@ -310,6 +321,14 @@ var TradeForm = React.createClass({
             alertLevel: 'info',
             alertMessage: ''
         };
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        if (nextProps.trades.newAmount && this.props.type != nextProps.trades.type)
+            this.setState({
+                type: nextProps.trades.type,
+                typename: nextProps.trades.type == 1 ? "Buy" : "Sell"
+            });
     },
 
     render: function() {

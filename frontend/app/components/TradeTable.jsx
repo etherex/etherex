@@ -14,6 +14,8 @@ var Table = require("react-bootstrap/Table");
 var Button = require("react-bootstrap/Button");
 var Glyphicon = require("react-bootstrap/Glyphicon");
 
+var bigRat = require("big-rational");
+var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 
 // var Link = Router.Link;
@@ -22,10 +24,17 @@ var utils = require("../js/utils");
 var TradeRow = React.createClass({
     mixins: [FluxChildMixin],
 
+    getInitialState: function() {
+        return {
+            payload: null
+        };
+    },
+
+
     render: function() {
         var isOwn = (this.props.trade.owner == this.props.user.id);
         return (
-            <tr className={"trade-" + (!this.props.review ? this.props.trade.status : "review") + ((isOwn && !this.props.user.own) ? " disabled" : "")}>
+            <tr className={"trade-" + (!this.props.review ? this.props.trade.status : "review") + ((isOwn && !this.props.user.own) ? " disabled" : "")} onMouseEnter={this.handleHover} onMouseLeave={this.handleHoverOut} onClick={this.handleClick}>
                 <td>
                     <div className="text-right">
                         {utils.numeral(this.props.trade.amount, 2)}
@@ -71,7 +80,7 @@ var TradeRow = React.createClass({
                                 <ConfirmModal
                                     type="fill"
                                     message={
-                                        "Are you sure you want to " + (this.props.trade.type == "buy" ? "sell" : "buy") +
+                                        "Are you sure you want to " + (this.props.trade.type == "buys" ? "sell" : "buy") +
                                         " " + this.props.trade.amount + " " + this.props.trade.market.name +
                                         " at " + this.props.trade.price + " " + this.props.trade.market.name + "/ETH" +
                                         " for " + (this.props.trade.amount / this.props.trade.price) + " ETH"
@@ -94,6 +103,87 @@ var TradeRow = React.createClass({
 
     handleCancelTrade: function(e) {
         this.getFlux().actions.trade.cancelTrade(this.props.trade);
+    },
+
+    handleHover: function(e) {
+        if (this.props.review)
+            return;
+
+        // Select previous trades
+        var totalAmount = 0;
+        var thisUser = this.props.user;
+        var thisTrade = this.props.trade;
+        var trades = _.filter(this._owner.props.tradeList, function(trade) {
+            return (
+                thisUser.id != trade.owner &&
+                trade.status != "pending" &&
+                trade.status != "new" &&
+                ((trade.type == "buys" && thisTrade.price <= trade.price) ||
+                 (trade.type == "sells" && thisTrade.price >= trade.price)
+                )
+            );
+        });
+
+        if (!trades.length)
+            return;
+
+        totalAmount = _.reduce(_.pluck(trades, 'amount'), function(sum, num) {
+            return parseFloat(sum) + parseFloat(num);
+        });
+        totalValue = _.reduce(_.pluck(trades, 'total'), function(sum, num) {
+            return parseFloat(sum) + parseFloat(num);
+        });
+
+        if (!totalAmount || !totalValue)
+            return;
+
+        var total = totalAmount * this.props.trade.price;
+
+        console.log("======")
+        console.log("Needs " + totalAmount + " " + this.props.trade.market.name + " for " + utils.formatBalance(bigRat(total).multiply(fixtures.ether))); // , trades);
+
+        var isBuy = (this.props.trade.type == "buys" ? true : false);
+        var payload = {
+            type: (isBuy ? 1 : 2),
+            price: this.props.trade.price,
+            amount: isBuy ? totalValue / this.props.trade.price : totalAmount,
+            total: isBuy ? totalValue : total,
+            market: this.props.trade.market,
+            user: this.props.user
+        };
+
+        this.getFlux().actions.trade.highlightFilling(payload);
+
+        _.forEach(this._owner.props.tradeList, function(trade) {
+            if (!_.find(trades, {'id': trade.id}) && trade.status == "filling")
+                trade.status = "mined";
+            else if (_.find(trades, {'id': trade.id}) && trade.status == "mined")
+                trade.status = "filling";
+        });
+
+        this.setState({
+            payload: payload
+        });
+    },
+
+    handleHoverOut: function(e) {
+        if (!this._owner._owner.props.trades)
+            return;
+
+        var payload = {
+            type: this._owner._owner.props.trades.type,
+            price: this._owner._owner.props.trades.price,
+            amount: this._owner._owner.props.trades.amount,
+            total: this._owner._owner.props.trades.total,
+            market: this.props.trade.market,
+            user: this.props.user
+        };
+
+        this.getFlux().actions.trade.highlightFilling(payload);
+    },
+
+    handleClick: function(e) {
+        this.getFlux().actions.trade.clickFill(this.state.payload);
     }
 });
 

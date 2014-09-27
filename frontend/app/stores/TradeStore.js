@@ -21,6 +21,8 @@ var TradeStore = Fluxxor.createStore({
         this.filling = [];
         this.amountLeft = null;
         this.available = null;
+        this.newAmount = null;
+        this.newPrice = null;
 
         this.bindActions(
             constants.trade.LOAD_TRADES, this.onLoadTrades,
@@ -41,6 +43,9 @@ var TradeStore = Fluxxor.createStore({
             constants.trade.CANCEL_TRADE_FAIL, this.onTradesFail,
             constants.trade.HIGHLIGHT_FILLING, this.onHighlightFilling,
             constants.trade.HIGHLIGHT_FILLING_FAIL, this.onTradesFail,
+            constants.trade.CLICK_FILL, this.onClickFill,
+            constants.trade.CLICK_FILL_FAIL, this.onTradesFail,
+            constants.trade.CLICK_FILL_SUCCESS, this.onClickFillSuccess,
             constants.trade.SWITCH_MARKET, this.switchMarket,
             constants.trade.SWITCH_MARKET_FAIL, this.onTradesFail,
             constants.trade.SWITCH_TYPE, this.switchType,
@@ -190,7 +195,7 @@ var TradeStore = Fluxxor.createStore({
         //     available -= filling[i].amount * filling[i].price;
         // };
 
-        console.log("=====");
+        console.log("===");
 
         for (var i = 0; i <= trades.length - 1; i++) {
 
@@ -285,15 +290,32 @@ var TradeStore = Fluxxor.createStore({
         console.log("Filling " + filling.length + " trade(s): " + _.pluck(filling, 'id').join(', '));
 
         // Set state for filling trades for fillTrades
-        this.type = payload.type;
-        this.price = payload.price;
-        this.amount = payload.amount;
-        this.total = payload.total;
+        // this.type = payload.type;
+        // this.price = payload.price;
+        // this.amount = payload.amount;
+        // this.total = payload.total;
         this.filling = filling;
         this.amountLeft = amountLeft;
         this.available = available;
+        // console.log(this);
 
         this.emit(constants.CHANGE_EVENT);
+    },
+
+    onClickFill: function(payload) {
+        this.amount = payload.amount;
+        this.price = payload.price;
+        this.total = payload.total;
+        this.newAmount = true;
+        this.type = payload.type == 1 ? 2 : 1;
+        this.emit(constants.CHANGE_EVENT);
+        this.newAmount = false;
+    },
+
+    onClickFillSuccess: function(payload) {
+        this.newAmount = false;
+        // this.type = payload.type == 1 ? 2 : 1;
+        // this.emit(constants.CHANGE_EVENT);
     },
 
     switchType: function(payload) {
@@ -342,7 +364,9 @@ var TradeStore = Fluxxor.createStore({
             total: this.total,
             filling: this.filling,
             amountLeft: this.amountLeft,
-            available: this.available
+            available: this.available,
+            newAmount: this.newAmount,
+            newPrice: this.newPrice
         };
     }
 });

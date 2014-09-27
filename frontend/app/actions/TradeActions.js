@@ -110,6 +110,14 @@ var TradeActions = function(client) {
         this.dispatch(constants.trade.HIGHLIGHT_FILLING, trades);
     };
 
+    this.clickFill = function(trades) {
+        this.dispatch(constants.trade.CLICK_FILL, trades);
+    };
+
+    this.clickFillSuccess = function(trades) {
+        this.dispatch(constants.trade.CLICK_FILL_SUCCESS, trades);
+    };
+
     this.switchType = function(type) {
         this.dispatch(constants.trade.SWITCH_TYPE, type);
 
