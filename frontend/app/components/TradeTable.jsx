@@ -26,10 +26,9 @@ var TradeRow = React.createClass({
 
     getInitialState: function() {
         return {
-            payload: null
+            payload: {}
         };
     },
-
 
     render: function() {
         var isOwn = (this.props.trade.owner == this.props.user.id);
@@ -109,6 +108,9 @@ var TradeRow = React.createClass({
         if (this.props.review)
             return;
 
+        if (!this.props.trade.price || !this.props.trade.amount || !this.props.trade.total)
+            return;
+
         // Select previous trades
         var totalAmount = 0;
         var thisUser = this.props.user;
@@ -140,7 +142,8 @@ var TradeRow = React.createClass({
         var total = totalAmount * this.props.trade.price;
 
         console.log("======")
-        console.log("Needs " + totalAmount + " " + this.props.trade.market.name + " for " + utils.formatBalance(bigRat(total).multiply(fixtures.ether))); // , trades);
+        console.log("Needs " + totalAmount + " " + this.props.trade.market.name +
+                    " for " + utils.formatBalance(bigRat(total).multiply(fixtures.ether))); // , trades);
 
         var isBuy = (this.props.trade.type == "buys" ? true : false);
         var payload = {
@@ -151,6 +154,8 @@ var TradeRow = React.createClass({
             market: this.props.trade.market,
             user: this.props.user
         };
+
+        // console.log(payload);
 
         this.getFlux().actions.trade.highlightFilling(payload);
 
@@ -183,7 +188,8 @@ var TradeRow = React.createClass({
     },
 
     handleClick: function(e) {
-        this.getFlux().actions.trade.clickFill(this.state.payload);
+        if (this.state.payload)
+            this.getFlux().actions.trade.clickFill(this.state.payload);
     }
 });
 

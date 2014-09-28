@@ -42,7 +42,7 @@ var EthereumClient = function() {
                     id: id,
                     name: eth.toAscii(eth.stateAt(fixtures.addresses.markets, String(ptr))),
                     address: eth.stateAt(fixtures.addresses.markets, String(ptr+1)),
-                    decimals: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+2))),
+                    decimals: _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+2)))),
                     minimum: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+3))),
                     precision: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+4))),
                     // price: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+5))),

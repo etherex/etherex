@@ -36,9 +36,9 @@ var SplitTradeForm = React.createClass({
     if (nextProps.trades.newAmount && this.props.type == nextProps.trades.type) {
       this.setState({
         type: nextProps.trades.type,
-        amount: parseFloat(nextProps.trades.amount.toFixed(this.props.market.market.decimals)),
-        price: parseFloat(nextProps.trades.price.toFixed(this.props.market.market.precision.length - 1)),
-        total: parseFloat(nextProps.trades.total.toPrecision(this.props.market.market.decimals))
+        amount: parseFloat(nextProps.trades.amount),
+        price: parseFloat(nextProps.trades.price),
+        total: parseFloat(nextProps.trades.total)
       });
     }
   },
@@ -128,8 +128,8 @@ var SplitTradeForm = React.createClass({
                         : "") +
                       (totalLeft < this.props.market.market.minTotal &&
                        this.props.trades.filling.length > 0 &&
-                       this.props.trades.amountLeft > 0 &&
-                       this.props.trades.available > 0 ?
+                       this.props.trades.amountLeft &&
+                       this.props.trades.available ?
                         " Not enough left for a new trade with " +
                           utils.numeral(this.props.trades.amountLeft, 4) + " " + this.props.market.market.name + " for " +
                           utils.formatBalance(bigRat(totalLeft).multiply(fixtures.ether)) +
@@ -155,27 +155,24 @@ var SplitTradeForm = React.createClass({
       // TODO - proper back/forth handling
       var type = this.props.type;
       var market = this.refs.market.getDOMNode().value.trim();
-      var price = parseFloat(this.refs.price.getDOMNode().value.trim());
-      var amount = parseFloat(this.refs.amount.getDOMNode().value.trim());
+      var price = this.refs.price.getDOMNode().value.trim();
+      var amount = this.refs.amount.getDOMNode().value.trim();
       var total = parseFloat(this.refs.total.getDOMNode().value.trim());
+      var precision = this.props.market.market.precision.length - 1;
 
       if (price && amount)
-        var total = amount * price;
-        // var total = bigRat(String(amount / price))
-        //         .multiply(bigRat(fixtures.precision))
+        total = parseFloat(amount) * parseFloat(price);
+        // total = bigRat(parseFloat(amount) * parseFloat(price))
+        //         .multiply(bigRat(Math.pow(10, precision)))
         //         .ceil()
-        //         .divide(bigRat(fixtures.precision))
+        //         .divide(bigRat(Math.pow(10, decimals)))
         //         .valueOf();
 
       this.setState({
-        price: price,
-        amount: amount,
-        total: total
+        price: parseFloat(price),
+        amount: parseFloat(amount),
+        total: total.toFixed(precision)
       });
-
-      this.refs.total.getDOMNode().value = total.toFixed(this.props.market.market.precision.length);
-
-      // this.handleValidation(e, false);
 
       this.getFlux().actions.trade.highlightFilling({
         type: type,
@@ -191,22 +188,24 @@ var SplitTradeForm = React.createClass({
       e.preventDefault();
       var type = this.props.type;
       var market = this.refs.market.getDOMNode().value;
-      var price = parseFloat(this.refs.price.getDOMNode().value.trim());
-      var total = parseFloat(this.refs.total.getDOMNode().value.trim());
+      var price = this.refs.price.getDOMNode().value.trim();
+      var total = this.refs.total.getDOMNode().value.trim();
       var amount = 0;
+      var decimals = this.props.market.market.decimals;
 
-      if (price > 0 && total > 0)
-        amount = (total / price).toPrecision(9);
+      if (price && total)
+        amount = parseFloat(total) / parseFloat(price); // .toFixed(decimals);
+        // amount = bigRat(parseFloat(total) / parseFloat(price))
+        //         .multiply(bigRat(Math.pow(10, decimals)))
+        //         .ceil()
+        //         .divide(bigRat(Math.pow(10, decimals)))
+        //         .valueOf();
 
       this.setState({
-        price: price,
-        amount: amount,
-        total: total
+        price: parseFloat(price),
+        amount: amount.toFixed(decimals),
+        total: parseFloat(total)
       });
-
-      this.refs.amount.getDOMNode().value = amount;
-
-      // this.handleValidation(e, false);
 
       this.getFlux().actions.trade.highlightFilling({
         type: type,
