@@ -44,6 +44,10 @@ var SplitTradeForm = React.createClass({
   },
 
   render: function() {
+    var amount = parseFloat(this.state.amount);
+    var price = parseFloat(this.state.price);
+    var total = parseFloat(this.state.total);
+
     // Price precision
     var priceDecimals = this.props.market.market.precision ? this.props.market.market.precision.length - 1 : 0;
     var precision = (1 / (this.props.market.market.precision ?
@@ -57,7 +61,7 @@ var SplitTradeForm = React.createClass({
     var minimum = bigRat(this.props.market.market.minimum).divide(fixtures.ether).valueOf().toFixed(priceDecimals);
 
     // Total left
-    var totalLeft = this.props.trades.amountLeft * this.state.price;
+    var totalLeft = this.props.trades.amountLeft ? this.props.trades.amountLeft * price : 0;
 
     // console.log(precision, priceDecimals, amountPrecision, decimals, minimum);
 
@@ -91,25 +95,26 @@ var SplitTradeForm = React.createClass({
           </div>
         </div>
         <div className="form-group">
-          {(this.state.price > 0 &&
-            this.state.amount > 0 &&
-            this.state.total > this.props.market.market.minTotal &&
-            ((this.props.type == 1 && bigRat(this.props.user.user.balance_raw).greaterOrEquals(bigRat(this.state.total).multiply(fixtures.ether))) ||
-             (this.props.type == 2 && this.props.user.user.balance_sub_raw >= this.state.amount)
+          {(price > 0 &&
+            amount > 0 &&
+            total > this.props.market.market.minTotal &&
+            ((this.props.type == 1 && bigRat(this.props.user.user.balance_raw).greaterOrEquals(bigRat(total).multiply(fixtures.ether))) ||
+             (this.props.type == 2 && this.props.user.user.balance_sub_raw >= amount)
             )) ?
               <ModalTrigger modal={
                   <ConfirmModal
                     message={
                       "Are you sure you want to " + (this.props.type == 1 ? "buy" : "sell") +
-                        " " + utils.numeral(this.state.amount, 4) + " " + this.props.market.market.name +
-                        " at " + utils.numeral(this.state.price, 4) + " " + this.props.market.market.name + "/ETH" +
-                        " for " + utils.formatBalance(bigRat(this.state.total).multiply(fixtures.ether)) + " ?"}
+                        " " + utils.numeral(amount, 4) + " " + this.props.market.market.name +
+                        " at " + utils.numeral(price, 4) + " " + this.props.market.market.name + "/ETH" +
+                        " for " + utils.formatBalance(bigRat(total).multiply(fixtures.ether)) + " ?"
+                    }
                     note={
                       (this.props.trades.filling.length > 0 ?
                         "You will be filling " + this.props.trades.filling.length + " trade" +
                         (this.props.trades.filling.length > 1 ? "s" : "") +
                         " for a total of " +
-                        utils.formatBalance(bigRat(this.state.total - this.props.trades.available).multiply(fixtures.ether)) +
+                        utils.formatBalance(bigRat(total - this.props.trades.available).multiply(fixtures.ether)) +
                         (this.props.trades.available > 0 ? " (" +
                           utils.formatBalance(bigRat(this.props.trades.available).multiply(fixtures.ether)) + " left)" : "") +
                         "."
@@ -120,9 +125,9 @@ var SplitTradeForm = React.createClass({
                         " You will also be adding a new trade of " +
                           utils.numeral(this.props.trades.amountLeft, this.props.market.market.decimals) + " " +
                           this.props.market.market.name +
-                        " at " + utils.numeral(this.state.price, 4) + " " + this.props.market.market.name + "/ETH" +
+                        " at " + utils.numeral(price, 4) + " " + this.props.market.market.name + "/ETH" +
                         " for " + utils.formatBalance(bigRat(this.props.trades.amountLeft)
-                                    .multiply(this.state.price)
+                                    .multiply(price)
                                     .multiply(fixtures.ether)) +
                         "."
                         : "") +
@@ -169,16 +174,16 @@ var SplitTradeForm = React.createClass({
         //         .valueOf();
 
       this.setState({
-        price: parseFloat(price),
-        amount: parseFloat(amount),
+        price: price,
+        amount: amount,
         total: total.toFixed(precision)
       });
 
       this.getFlux().actions.trade.highlightFilling({
         type: type,
-        price: price,
-        amount: amount,
-        total: total,
+        price: parseFloat(price),
+        amount: parseFloat(amount),
+        total: parseFloat(total),
         market: this.props.market.market,
         user: this.props.user.user
       });
@@ -202,16 +207,16 @@ var SplitTradeForm = React.createClass({
         //         .valueOf();
 
       this.setState({
-        price: parseFloat(price),
+        price: price,
         amount: amount.toFixed(decimals),
-        total: parseFloat(total)
+        total: total
       });
 
       this.getFlux().actions.trade.highlightFilling({
         type: type,
-        price: price,
-        amount: amount,
-        total: total,
+        price: parseFloat(price),
+        amount: parseFloat(amount),
+        total: parseFloat(total),
         market: this.props.market.market,
         user: this.props.user.user
       });
@@ -222,33 +227,43 @@ var SplitTradeForm = React.createClass({
 
     this.handleChange(e);
 
+    var amount = parseFloat(this.state.amount);
+    var price = parseFloat(this.state.price);
+    var total = parseFloat(this.state.total);
+
+    this.setState({
+      amount: amount,
+      price: price,
+      total: total,
+    });
+
     if (!this.props.type ||
         !this.props.market.market.id ||
-        !this.state.amount ||
-        !this.state.price ||
-        !this.state.total) {
+        !amount ||
+        !price ||
+        !total) {
 
         this._owner.setState({
           alertLevel: 'warning',
           alertMessage: "Fill it up mate!"
         });
     }
-    else if (this.state.total < this.props.market.market.minTotal) {
+    else if (total < this.props.market.market.minTotal) {
         this._owner.setState({
           alertLevel: 'warning',
           alertMessage: "Minimum total is " + this.props.market.market.minTotal + " ETH"
         });
     }
-    else if (this.props.type == 1 && bigRat(this.props.user.user.balance_raw).lesser(bigRat(this.state.total).multiply(fixtures.ether))) {
+    else if (this.props.type == 1 && bigRat(this.props.user.user.balance_raw).lesser(bigRat(total).multiply(fixtures.ether))) {
         this._owner.setState({
           alertLevel: 'warning',
-          alertMessage: "Not enough ETH for this trade, " + utils.formatBalance(bigRat(this.state.total).multiply(fixtures.ether)) + " required."
+          alertMessage: "Not enough ETH for this trade, " + utils.formatBalance(bigRat(total).multiply(fixtures.ether)) + " required."
         });
     }
-    else if (this.props.type == 2 && this.props.user.user.balance_sub_raw < this.state.amount) {
+    else if (this.props.type == 2 && this.props.user.user.balance_sub_raw < amount) {
         this._owner.setState({
           alertLevel: 'warning',
-          alertMessage: "Not enough " + this.props.market.market.name + " for this trade, " + this.state.amount + " " + this.props.market.market.name + " required."
+          alertMessage: "Not enough " + this.props.market.market.name + " for this trade, " + amount + " " + this.props.market.market.name + " required."
         });
     }
     else {

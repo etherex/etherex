@@ -19,10 +19,9 @@ var TradeStore = Fluxxor.createStore({
         this.amount = null;
         this.total = null;
         this.filling = [];
-        this.amountLeft = null;
-        this.available = null;
+        this.amountLeft = 0;
+        this.available = 0;
         this.newAmount = false;
-        this.newPrice = null;
 
         this.bindActions(
             constants.trade.LOAD_TRADES, this.onLoadTrades,
@@ -270,13 +269,18 @@ var TradeStore = Fluxxor.createStore({
         // console.log("Available: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
         // console.log("From balance of " + this.props.user.user.balance);
         if (payload.price > 0) {
-            if (amountLeft * payload.price >= payload.market.minTotal && filling.length > 0) {
+            if (amountLeft * payload.price >= payload.market.minTotal &&
+                filling.length > 0 &&
+                available > 0) {
                 console.log("Would also add new trade for " + amountLeft + " " + payload.market.name +
-                            " for " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
+                            " for " + utils.formatBalance(bigRat(amountLeft)
+                                    .multiply(payload.price)
+                                    .multiply(fixtures.ether)));
             }
             else if (amountLeft * payload.price >= payload.market.minTotal &&
                      filling.length > 0 &&
-                     available) {
+                     amountLeft > 0 &&
+                     available > 0) {
                 console.log("Not enough left for a new trade, needs " +
                     utils.formatBalance(bigRat(payload.market.minTotal).multiply(fixtures.ether)) +
                     ", total left is " + utils.formatBalance(bigRat(amountLeft).multiply(payload.price).multiply(fixtures.ether)) +
@@ -306,7 +310,7 @@ var TradeStore = Fluxxor.createStore({
         var market = this.flux.store("MarketStore").getState().markets[payload.market.id];
         var decimals = market.decimals;
         var precision = market.precision.length - 1;
-        var amount = payload.type == 2 ?
+        var amount = (payload.type == 2 || !payload.fills || payload.fills <= 1) ?
             payload.amount.toFixed(decimals) :
             (parseFloat(payload.amount) + 1 / Math.pow(10, decimals)).toFixed(decimals)
         this.amount = amount;
@@ -314,6 +318,7 @@ var TradeStore = Fluxxor.createStore({
         this.total = (amount * payload.price).toFixed(precision) || payload.total;
         this.newAmount = true;
         this.type = payload.type == 1 ? 2 : 1;
+
         this.emit(constants.CHANGE_EVENT);
         this.newAmount = false;
     },
@@ -371,8 +376,7 @@ var TradeStore = Fluxxor.createStore({
             filling: this.filling,
             amountLeft: this.amountLeft,
             available: this.available,
-            newAmount: this.newAmount,
-            newPrice: this.newPrice
+            newAmount: this.newAmount
         };
     }
 });

@@ -82,7 +82,7 @@ var TradeRow = React.createClass({
                                         "Are you sure you want to " + (this.props.trade.type == "buys" ? "sell" : "buy") +
                                         " " + this.props.trade.amount + " " + this.props.trade.market.name +
                                         " at " + this.props.trade.price + " " + this.props.trade.market.name + "/ETH" +
-                                        " for " + (this.props.trade.amount / this.props.trade.price) + " ETH"
+                                        " for " + (this.props.trade.amount * this.props.trade.price) + " ETH"
                                     }
                                     flux={this.getFlux()}
                                     onSubmit={this.handleFillTrade}
@@ -166,6 +166,7 @@ var TradeRow = React.createClass({
                 trade.status = "filling";
         });
 
+        payload.fills = trades.length;
         this.setState({
             payload: payload
         });
