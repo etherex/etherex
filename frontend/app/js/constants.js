@@ -49,6 +49,7 @@ module.exports = {
         CHANGE_MARKET: null,
         LOAD_MARKETS: null,
         LOAD_MARKETS_FAIL: null,
-        LOAD_MARKETS_SUCCESS: null
+        LOAD_MARKETS_SUCCESS: null,
+        UPDATE_MARKET_BALANCE: null
     })
 };

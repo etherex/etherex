@@ -1,0 +1,88 @@
+/** @jsx React.DOM */
+
+var React = require("react");
+var Router = require("react-router");
+
+var Fluxxor = require("fluxxor");
+var FluxChildMixin = Fluxxor.FluxChildMixin(React);
+
+var ProgressBar = require('react-bootstrap/ProgressBar');
+var ModalTrigger = require('react-bootstrap/ModalTrigger');
+var ConfirmModal = require('./ConfirmModal');
+
+var Table = require("react-bootstrap/Table");
+var Button = require("react-bootstrap/Button");
+var Glyphicon = require("react-bootstrap/Glyphicon");
+
+var bigRat = require("big-rational");
+var fixtures = require("../js/fixtures");
+var utils = require("../js/utils");
+
+// var Link = Router.Link;
+// var UserLink = require("./UserLink");
+
+var MarketRow = React.createClass({
+    mixins: [FluxChildMixin],
+
+    render: function() {
+        return (
+            <tr className={"market-" + this.props.market.status ? this.props.market.status : "default"} onClick={this.handleClick}>
+                <td>
+                    <div className="text-right">
+                        {this.props.market.name}/ETH
+                    </div>
+                </td>
+                <td>
+                    <div className="text-right">
+                        {utils.numeral(this.props.market.lastPrice, 4)}
+                    </div>
+                </td>
+                <td>
+                    <div className="text-center">
+                        {this.props.market.change}
+                    </div>
+                </td>
+                <td>
+                    <div className="text-right">
+                        {this.props.market.balance > 0 ? utils.format(this.props.market.balance) : 0} {this.props.market.balance_unconfirmed ? this.props.market.balance_unconfirmed : ""}
+                    </div>
+                </td>
+            </tr>
+        );
+    },
+
+    handleClick: function(e) {
+        if (this.props.market)
+            this.getFlux().actions.market.updateMarket(this.props.market);
+    }
+});
+
+var MarketTable = React.createClass({
+    render: function() {
+        var marketListNodes = _.rest(this.props.market.markets).map(function (market) {
+            return (
+                <MarketRow key={market.id} market={market} /> //user={this.props.user} review={this.props.review} />
+            );
+        }.bind(this));
+        return (
+            <div>
+                <h4>{this.props.title}</h4>
+                <Table condensed hover responsive striped>
+                    <thead>
+                        <tr>
+                            <th className="text-right">Currency pair</th>
+                            <th className="text-right">Last Price</th>
+                            <th className="text-center">% change in<br />24h/1w/1m</th>
+                            <th className="text-right">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {marketListNodes}
+                    </tbody>
+                </Table>
+            </div>
+        );
+    }
+});
+
+module.exports = MarketTable;

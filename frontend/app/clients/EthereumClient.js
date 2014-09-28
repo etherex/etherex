@@ -23,7 +23,7 @@ var EthereumClient = function() {
     };
 
 
-    this.loadMarkets = function(success, failure) {
+    this.loadMarkets = function(user, success, failure) {
         var markets = [{}];
 
         var total = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(2))));
@@ -34,18 +34,21 @@ var EthereumClient = function() {
         console.log("MARKETS START: " + ptr);
         console.log("MARKETS LAST: " + last);
 
+        console.log(user);
         for (var i = 0; i < total; i++) {
             var id = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+6)));
             console.log("LOADING MARKET ID: " + id);
             if (id) {
+                var address = eth.stateAt(fixtures.addresses.markets, String(ptr+1));
                 markets.push({
                     id: id,
                     name: eth.toAscii(eth.stateAt(fixtures.addresses.markets, String(ptr))),
-                    address: eth.stateAt(fixtures.addresses.markets, String(ptr+1)),
+                    address: address,
                     decimals: _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+2)))),
                     minimum: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+3))),
                     precision: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+4))),
-                    // price: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+5))),
+                    lastPrice: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+5))),
+                    balance: eth.toDecimal(eth.stateAt(address, user.addresses[0], -1)),
                 });
             }
             ptr = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+9))));
@@ -86,12 +89,13 @@ var EthereumClient = function() {
 
 
     this.setMarketWatches = function(flux, markets) {
-        var market_addresses = _.rest(_.pluck(markets, 'address'));
+        // var market_addresses = _.rest(_.pluck(markets, 'address'));
         if (ethBrowser) {
-            eth.watch({altered: market_addresses}).changed(flux.actions.trade.updateTrades);
+            eth.watch({altered: fixtures.addresses.trades}).changed(flux.actions.trade.updateTrades);
         }
         else {
             flux.actions.trade.loadTrades();
+            // eth.watch(fixtures.addresses.trades, "", flux.actions.trade.updateTrades);
             // eth.unwatch("", market_addresses[1]);
             // eth.watch(market_addresses[0], "", flux.actions.trade.updateTrades);
             setTimeout(flux.actions.trade.updateTrades, 60000);

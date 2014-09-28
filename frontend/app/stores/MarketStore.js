@@ -17,7 +17,8 @@ var MarketStore = Fluxxor.createStore({
             constants.market.LOAD_MARKETS, this.onLoadMarkets,
             constants.market.LOAD_MARKETS_FAIL, this.onLoadMarketsFail,
             constants.market.LOAD_MARKETS_SUCCESS, this.onLoadMarketsSuccess,
-            constants.market.CHANGE_MARKET, this.onChangeMarket
+            constants.market.CHANGE_MARKET, this.onChangeMarket,
+            constants.market.UPDATE_MARKET_BALANCE, this.onUpdateMarketBalance
         );
 
         this.setMaxListeners(1024); // prevent "possible EventEmitter memory leak detected"
@@ -53,6 +54,14 @@ var MarketStore = Fluxxor.createStore({
         console.log("MARKET: " + payload.name);
         this.market = payload;
         this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onUpdateMarketBalance: function(payload) {
+        console.log("UPDATING MARKET " + payload.market.name + " WITH " + payload.balance.confirmed);
+        var index = _.findIndex(this.markets, {'id': payload.market.id});
+        this.markets[index].balance = payload.balance.confirmed;
+        this.markets[index].balance_unconfirmed = payload.balance.unconfirmed;
         this.emit(constants.CHANGE_EVENT);
     },
 

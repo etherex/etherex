@@ -46,6 +46,7 @@ var UserActions = function(client) {
                     balance: confirmed,
                     balance_unconfirmed: unconfirmed
                 });
+                this.flux.actions.market.updateMarketBalance(market, confirmed, unconfirmed);
             }.bind(this), function(error) {
                 this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
             }.bind(this));

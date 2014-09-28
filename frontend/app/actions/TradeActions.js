@@ -57,7 +57,9 @@ var TradeActions = function(client) {
 
         _client.addTrade(trade, market, function() {
             this.dispatch(constants.trade.ADD_TRADE, trade);
-            this.flux.actions.trade.updateTrades();
+
+            if (!ethBrowser)
+                this.flux.actions.trade.updateTrades();
         }.bind(this), function(error) {
             this.dispatch(constants.trade.ADD_TRADE_FAIL, {error: error});
         }.bind(this));
@@ -80,7 +82,9 @@ var TradeActions = function(client) {
             }
 
             this.dispatch(constants.trade.FILL_TRADES, trades);
-            this.flux.actions.trade.updateTrades();
+
+            if (!ethBrowser)
+                this.flux.actions.trade.updateTrades();
         }.bind(this), function(error) {
             this.dispatch(constants.trade.FILL_TRADES_FAIL, {error: error});
         }.bind(this));
@@ -91,7 +95,9 @@ var TradeActions = function(client) {
 
         _client.fillTrade(trade, market, function() {
             this.dispatch(constants.trade.FILL_TRADE, trade);
-            this.flux.actions.trade.updateTrades();
+
+            if (!ethBrowser)
+                this.flux.actions.trade.updateTrades();
         }.bind(this), function(error) {
             this.dispatch(constants.trade.FILL_TRADE_FAIL, {error: error});
         }.bind(this));
@@ -100,7 +106,9 @@ var TradeActions = function(client) {
     this.cancelTrade = function(trade) {
         _client.cancelTrade(trade, function() {
             this.dispatch(constants.trade.CANCEL_TRADE, trade);
-            this.flux.actions.trade.updateTrades();
+
+            if (!ethBrowser)
+                this.flux.actions.trade.updateTrades();
         }.bind(this), function(error) {
             this.dispatch(constants.trade.CANCEL_TRADE_FAIL, {error: error});
         }.bind(this));
