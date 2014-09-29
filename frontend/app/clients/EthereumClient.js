@@ -371,14 +371,35 @@ var EthereumClient = function() {
     };
 
     this.loadTransactions = function(addresses, success, failure) {
-        if (ethBrowser)
-            var latest = eth.messages({altered: addresses[0]});
+        if (ethBrowser) {
+            var txs = [];
+            var from = eth.messages({max: 20, latest: -1, altered: addresses[0], from: fixtures.addresses.etherex});
+            // console.log(from.length);
+            // var to = eth.messages({latest: -1, altered: addresses[0], to: addresses[1]});
+            // console.log(to.length);
+            var origin = eth.messages({max: 20, latest: -1, altered: addresses[0], to: fixtures.addresses.etherex});
+            // console.log(origin.length);
+            // var to = eth.messages({latest: -1, altered: addresses[0], from: fixtures.addresses.etherex, to: addresses[0]});
+            var latest = _.merge(from, origin);
+            // console.log(latest.length);
+
+            // if (typeof(addresses) == 'array' && addresses.length == 2)
+            //     latest = _.filter(latest, {'to': addresses[1]});
+            // for (var i = 0; i < addresses.length; i++) {
+                // txs.push(_.filter(latest, {'to': addresses[1]}));
+                // txs.push(_.filter(latest, {'from': addresses[1]}));
+                // txs.push(_.filter(latest, {'origin': addresses[i]}));
+            // };
             // latest.push(_.where(eth.messages({altered: addresses[0]}), {'from': addresses[1]}));
             // latest.push(eth.messages({latest: -1, from: addresses[1], to: addresses[0]}));
+        }
         else
-            var latest = [{}]; // no eth.messages in eth.js...
+            var latest = []; // no eth.messages in eth.js...
 
-        if (latest && latest.length > 0)
+        // if (latest.length <=0)
+        //     var latest = [{}];
+
+        if (latest) // && latest.length > 0)
             success(latest);
         else
             failure("Could not get transactions.");

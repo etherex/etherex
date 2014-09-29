@@ -58,6 +58,45 @@ tr.disabled td {
   opacity: 0.5;
 }
 
+
+/* Chart */
+.rickshaw-container {
+  margin-bottom: 3em;
+  position: relative;
+}
+/*
+.rickshaw_graph {
+  display: inline-block;
+  margin: 3em 5% 1em;
+  height: 300px;
+  width: 90%;
+}
+*/
+.rickshaw-container .rickshaw_legend {
+  /*background: rgba(255,255,255,0.25);*/
+  /*display: inline-block;*/
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+/*
+.rickshaw_graph svg {
+  margin: 0 auto;
+}
+
+.rickshaw_slider {
+  margin: 0 auto 3em;
+  width: 90%;
+}
+
+.rickshaw_slider svg {
+  left: 0;
+}
+*/
+.rickshaw_legend .line { color: #eee }
+.rickshaw_graph .detail .x_label { color: #333; }
+
+
 /* Icons */
 
 @font-face {

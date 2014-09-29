@@ -9,7 +9,8 @@ var MarketStore = Fluxxor.createStore({
 
     initialize: function(options) {
         this.market = options.market || {};
-        this.market.txs = {error: null};
+        this.market.txs = [];
+        this.market.data = {};
         this.markets = options.markets || [];
         this.loading = true;
         this.error = null;
@@ -28,7 +29,7 @@ var MarketStore = Fluxxor.createStore({
 
     onLoadMarkets: function() {
         console.log("MARKETS LOADING...");
-        this.market = {txs: {error: null}};
+        this.market = {txs: [], data: {}};
         this.markets = [];
         this.loading = true;
         this.error = null;
@@ -45,7 +46,8 @@ var MarketStore = Fluxxor.createStore({
     onLoadMarketsSuccess: function(payload) {
         console.log("MARKETS LOADED: " + payload.length);
         this.market = payload[1]; // Load ETX as default (TODO favorites / custom menu)
-        this.market.txs = {error: null};
+        this.market.txs = [];
+        this.market.data = {};
         this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
         this.markets = payload;
         this.loading = false;
@@ -56,7 +58,8 @@ var MarketStore = Fluxxor.createStore({
     onChangeMarket: function(payload) {
         console.log("MARKET: " + payload.name);
         this.market = payload;
-        this.market.txs = {error: null};
+        this.market.txs = [];
+        this.market.data = {};
         this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
         this.emit(constants.CHANGE_EVENT);
     },
@@ -71,7 +74,31 @@ var MarketStore = Fluxxor.createStore({
 
     onLoadTransactions: function(payload) {
         this.market.txs = payload;
-        this.market.txs.error = null;
+        if (ethBrowser && payload.length)
+            this.market.data = {
+                // sum = _.reduce(_.pluck(payload, 'amount'), function(sum, num) { return parseFloat(sum) + parseFloat(num) });
+                price: _.map(payload.reverse(), function(tx, i) {
+                    // var sum = _.reduce(_.pluck(payload, 'input'), function(sum, num) { return parseFloat(sum) + parseFloat(eth.toDecimal("0x" + tx.input.substr(130,64))) });
+                    // console.log(price);
+                    if (tx.number && tx.timestamp)
+                        return {
+                            x: i, // tx.timestamp - i,
+                            y: tx.number
+                        };
+                }),
+                volume: _.map(payload.reverse(), function(tx, i) {
+                    var value = parseFloat(eth.toDecimal("0x" + tx.input.substr(130,64)));
+                    if (tx.timestamp && value)
+                        return {
+                            x: i, // tx.timestamp - i,
+                            y: value
+                        };
+                })
+            };
+        else if (!ethBrowser)
+            this.market.data = [];
+        else
+            this.market.data = {price: [{x: 0, y: 0}], volume: [{x: 0, y: 0}]};
         this.emit(constants.CHANGE_EVENT);
     },
 

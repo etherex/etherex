@@ -64,12 +64,13 @@ if (!ethBrowser) {
   eth.messages = function() { return {}; };
   eth.toDecimal = function(x) { return x.dec(); };
   eth.fromAscii = function(x) { return x.unbin(); };
+  eth.fromFixed = function(x) { return x.unpad().unbin(); };
   eth.toAscii = function(x) { return x.bin().unpad(); };
   eth.pad = function(x, l) { return String(x).pad(l); };
 }
 
-// old scripts / TODOs
-require("./js/scripts.js");
+// old scripts / TODO cleanup
+// require("./js/scripts.js");
 
 var Route = Router.Route;
 var Routes = Router.Routes;

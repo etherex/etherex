@@ -5,8 +5,8 @@ var Fluxxor = require("fluxxor");
 var FluxChildMixin = Fluxxor.FluxChildMixin(React);
 
 // var MarketFilter = require("./MarketFilter"); TODO
-var GraphPrice = require('./GraphPrice');
 var MarketList = require("./MarketList");
+var TxsList = require("./TxsList");
 
 var Markets = React.createClass({
   mixins: [FluxChildMixin],
@@ -18,12 +18,12 @@ var Markets = React.createClass({
       <div>
         <div className="container-fluid">
           <div className="row">
-            {!this.props.market.error && (
-              <div>
-                <GraphPrice market={this.props.market} />
-                <MarketList title={this.props.title} market={this.props.market} trades={this.props.trades} user={this.props.user} />
-              </div>
-            )}
+            {!this.props.market.error &&
+              <MarketList title="Currencies" market={this.props.market} trades={this.props.trades} user={this.props.user} />}
+          </div>
+          <div className="row">
+            {(!this.props.market.market.txs.error) &&
+              <TxsList title="Transactions" market={this.props.market} txs={this.props.market.market.txs} user={this.props.user} />}
           </div>
         </div>
       </div>
