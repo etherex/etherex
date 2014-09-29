@@ -28,7 +28,7 @@ var NavBar = React.createClass({
                         <div className="collapse navbar-collapse" id="navbar-collapse">
                             <ul className="nav navbar-nav">
                                 <Tab to="trades" className="icon-chart-line">Trades</Tab>
-                                <Tab to="assets" className="icon-bitcoin">Assets</Tab>
+                                <Tab to="markets" className="icon-bitcoin">Markets</Tab>
                                 <Tab to="wallet" className="icon-wallet">Wallet</Tab>
                                 <Tab to="tools" className="icon-cog-alt">Tools</Tab>
                                 <Tab to="help" className="icon-help">Help</Tab>

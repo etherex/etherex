@@ -18,6 +18,13 @@ var MarketActions = function(client) {
             // Update trades after loading markets (watches)
             _client.setMarketWatches(this.flux, markets);
 
+            // Load ETX txs
+            _client.loadTransactions([markets[1].address, user.id], function(txs) {
+                this.dispatch(constants.market.LOAD_TRANSACTIONS, txs);
+            }.bind(this), function(error) {
+                this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
+            }.bind(this));
+
         }.bind(this), function(error) {
             this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
         }.bind(this));
@@ -25,7 +32,17 @@ var MarketActions = function(client) {
 
     this.updateMarket = function(market) {
         this.dispatch(constants.market.CHANGE_MARKET, market);
+
+        var user = this.flux.store("UserStore").getState().user;
+
+        _client.loadTransactions([market.address, user.id], function(txs) {
+            this.dispatch(constants.market.LOAD_TRANSACTIONS, txs);
+        }.bind(this), function(error) {
+            this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
+        }.bind(this));
+
         this.dispatch(constants.trade.SWITCH_MARKET, market);
+
         this.flux.actions.user.updateBalanceSub();
 
         // _client.updateMarket(market, function() {

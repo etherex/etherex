@@ -32,7 +32,6 @@ var TradeActions = function(client) {
             var market = this.flux.store("MarketStore").getState().market;
             var user = this.flux.store("UserStore").getState().user;
 
-            // console.log(store);
             if (trade.type && trade.price && trade.amount && trade.total && market && user)
                 this.flux.actions.trade.highlightFilling({
                     type: trade.type,
@@ -70,6 +69,7 @@ var TradeActions = function(client) {
 
         _client.fillTrades(trades, market, function() {
             var trade = this.flux.store("TradeStore").getState();
+
             // Partial filling adds a new trade for remaining available
             if (trade.amountLeft * trade.price >= market.minTotal &&
                 trade.filling.length > 0) {
@@ -134,7 +134,6 @@ var TradeActions = function(client) {
         var market = this.flux.store("MarketStore").getState().market;
         var user = this.flux.store("UserStore").getState().user;
 
-        // console.log(store);
         if (trade.type && trade.price && trade.amount && trade.total && market && user)
             this.flux.actions.trade.highlightFilling({
                 type: trade.type,

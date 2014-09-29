@@ -33,13 +33,16 @@ var MarketRow = React.createClass({
                     </div>
                 </td>
                 <td>
-                    <div className="text-right">
-                        {utils.numeral(this.props.market.lastPrice, 4)}
+                    <div className="text-center">
+                        <span className="text-danger">-</span>0.54 /
+                        <span className="text-success">+</span>5.9 /
+                        <span className="text-danger">-</span>2.2
+                        {this.props.market.change}
                     </div>
                 </td>
                 <td>
-                    <div className="text-center">
-                        {this.props.market.change}
+                    <div className="text-right">
+                        {utils.numeral(this.props.market.lastPrice, 4)}
                     </div>
                 </td>
                 <td>
@@ -71,8 +74,8 @@ var MarketTable = React.createClass({
                     <thead>
                         <tr>
                             <th className="text-right">Currency pair</th>
-                            <th className="text-right">Last Price</th>
                             <th className="text-center">% change in<br />24h/1w/1m</th>
+                            <th className="text-right">Last Price</th>
                             <th className="text-right">Balance</th>
                         </tr>
                     </thead>

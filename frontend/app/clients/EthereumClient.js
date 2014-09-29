@@ -34,7 +34,7 @@ var EthereumClient = function() {
         console.log("MARKETS START: " + ptr);
         console.log("MARKETS LAST: " + last);
 
-        console.log(user);
+        // console.log(user);
         for (var i = 0; i < total; i++) {
             var id = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+6)));
             console.log("LOADING MARKET ID: " + id);
@@ -368,6 +368,20 @@ var EthereumClient = function() {
         catch(e) {
             failure(e);
         }
+    };
+
+    this.loadTransactions = function(addresses, success, failure) {
+        if (ethBrowser)
+            var latest = eth.messages({altered: addresses[0]});
+            // latest.push(_.where(eth.messages({altered: addresses[0]}), {'from': addresses[1]}));
+            // latest.push(eth.messages({latest: -1, from: addresses[1], to: addresses[0]}));
+        else
+            var latest = [{}]; // no eth.messages in eth.js...
+
+        if (latest && latest.length > 0)
+            success(latest);
+        else
+            failure("Could not get transactions.");
     };
 
     this.getAmounts = function(amount, price, decimals, precision) {

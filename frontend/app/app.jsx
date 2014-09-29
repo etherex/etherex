@@ -25,6 +25,7 @@ var Markets = require("./components/Markets");
 var MarketStore = require("./stores/MarketStore");
 var MarketActions = require("./actions/MarketActions");
 
+var Wallet = require("./components/Wallet");
 var Send = require("./components/Send");
 
 // TODO mock data
@@ -96,8 +97,8 @@ var routes = (
       <Route name="trades/xchain" path="/trades/xchain" handler={Trades} flux={flux} title="X-Chain" />
       <Route name="trades/marketplace" path="/trades/marketplace" handler={Trades} flux={flux} title="Marketplace" />
       <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
-      <Route name="assets" path="/assets" handler={Markets} flux={flux} title="Assets" />
-      <Route name="wallet" path="/wallet" handler={Placeholder} flux={flux} title="Wallet" />
+      <Route name="markets" path="/markets" handler={Markets} flux={flux} title="Markets" />
+      <Route name="wallet" path="/wallet" handler={Wallet} flux={flux} title="Wallet" />
       <Route name="tools" path="/tools" handler={Send} flux={flux} title="Tools" />
       <Route name="help" path="/help" handler={Placeholder} flux={flux} title="Help" />
       <Route name="userDetails" path="/user" handler={UserDetails} flux={flux} title="User details" />

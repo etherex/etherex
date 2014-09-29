@@ -307,6 +307,8 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onClickFill: function(payload) {
+        if (!payload.market)
+            return;
         var market = this.flux.store("MarketStore").getState().markets[payload.market.id];
         var decimals = market.decimals;
         var precision = market.precision.length - 1;
