@@ -1,0 +1,27 @@
+<!-- index.html - EtherEx frontend
+ *
+ * Copyright (c) 2014 EtherEx
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ *
+ * https://github.com/etherex-crypto/etherex
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EtherEx</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+  if (typeof(window.eth) === "undefined")
+    ethBrowser = false;
+  else
+    ethBrowser = true;
+  </script>
+</head>
+<body>
+  <div id="app" class="container"></div>
+  <script type="text/javascript" src="bundle.js"></script>
+</body>
+</html>
