@@ -3,6 +3,7 @@ EtherEx
 
 Decentralized exchange built on Ethereum.
 
+<img align="right" src="/frontend/screenshot.png" />
 
 About
 -----
@@ -134,6 +135,7 @@ Allowed values:
 
 Market names follow the "<name>/ETH" convention. When registering a new market, submit the currency name as a three or four letter uppercase identifier, ex.: "BOB" for BobCoin.
 
+
 ### Contract address
 
 The subcurrency contract address.
@@ -229,16 +231,16 @@ TODO
 * Make sure removed items from linked lists get replaced
 * Actually use `balances.se` to keep track of each address' balance within the exchange
 * Link price indexes to orderbook and check for lower/higher bids (use heap.se?)
-* Record last fulfilled trade's price in `markets.se`
-* Support partial fills
-* Implement subcurrency decimal precision (in progress)
-* Implement proper price precision also
+* ~~Record last fulfilled trade's price in `markets.se`~~
+* Support partial fills (done in UI, TBD in contracts)
+* ~~Implement subcurrency decimal precision~~
+* ~~Implement proper price precision~~
 * ~~Use scientific notation for big sub amounts~~
 * Assign a trade ID instead of using only slot #, match both for a valid trade
-* Balance and sub-balance checks before adding/filling trades
+* ~~Balance and sub-balance checks before adding/filling trades~~
 * ~~Make sure trades are mined before allowing them to get filled... (obvious HFT prevention)~~
 * Document error codes of return values
-* Implement Wallet section (transactions, balances, etc.)
+* Implement Wallet section (transactions, balances, etc.) (in progress)
 * Re-implement simple wallet functions (send/receive)
 * Deposit/withdrawal queues and confirmation handling (?)
 * ~~Go back to TDD~~ when serpent/pyethereum are usable
@@ -249,8 +251,8 @@ TODO
     - raw transact (?)
     - trading tools (...)
     - ...
-* Port contracts to [Solidity](https://github.com/ethereum/cpp-ethereum/wiki/ABI-in-PoC-7)
-* Look into how [Whisper](https://github.com/ethereum/cpp-ethereum/wiki/Whisper) and [Swarm](https://github.com/ethereum/cpp-ethereum/wiki/Swarm) should be used and integrated
+* Port contracts to [Solidity](https://github.com/ethereum/wiki/wiki/Solidity,-Docs-and-ABI)
+* Look into how [Whisper](https://github.com/ethereum/wiki/wiki/Whisper-Overview) and [Swarm](https://github.com/ethereum/cpp-ethereum/wiki/Swarm) should be used and integrated
 * Start working on X-Chain
 * Update this TODO more frequently
 * Start using GitHub issues instead
@@ -265,8 +267,8 @@ TODO
 * ~~Handle and color code new/pending/mined trades~~
 * ~~Filter by market~~
 * ~~Auto trade filling from the live highlighting~~
-* Clickable trades auto-fills form values
-* My Trades in User section (+ cancel -> [x] in trade list?)
+* ~~Clickable trades auto-fills form values~~
+* ~~My Trades in User section (+ cancel -> [x] in trade list?)~~
 * Graphs, beautiful graphs
 * Advanced trading features (limit vs market orders, stoploss, etc.)
 * Animations/transitions

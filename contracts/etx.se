@@ -96,11 +96,12 @@ code:
 
         contract.storage[msg.sender] = msg.value # DEBUG - Sets full value to sender
 
-        n = 3
+        n = 4
         owners = array(n)
         owners[0] = 0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31
         owners[1] = 0x90004d8d1d3c85f87bc8b7152a69ef14235504cb
-        owners[2] = 0xe559de5527492bcb42ec68d07df0742a98ec3f1e # DEBUG
+        owners[2] = 0xe559de5527492bcb42ec68d07df0742a98ec3f1e
+        owners[3] = 0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826 # DEBUG
 
         values = array(n)
         values[0] = 3000000 # C
@@ -111,6 +112,7 @@ code:
         # values[5] = 1650000 # FZ
         # values[6] = 1000000 # FC
         values[2] = 5200000 # Z # DEBUG
+        values[3] = 2000000 # cow
 
         # Split endowment between owners
         i = 0

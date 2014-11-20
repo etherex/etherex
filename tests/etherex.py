@@ -449,15 +449,28 @@ class TestEtherEx(object):
         assert self._storage(self.tcontract, 128) == self.xhex(110) # third trade's previous should point to second trade
         assert self._storage(self.tcontract, 129) == self.xhex(130) # third trade's next should point to next available slot
 
-    def test_basic_hft_prevention_using_block_number(self):
+    def test_basic_hft_prevention_using_block_number_fail(self):
+        self.state.mine(1)
         self.test_first_buy()
 
         # Load BOB with ETX from ALICE
         ans = self.state.send(self.ALICE['key'], self.xcontract, 125 * 10 ** 18, [self.BOB['address'], 10 ** 18 - 1000])
         assert ans == [1]
 
+        assert self._storage(self.tcontract, 107) == self.xhex(self.state.block.number)
+
         ans = self.state.send(self.BOB['key'], self.contract, 0, [3, 100])
         assert ans == [14]
+
+    def test_basic_hft_prevention_using_block_number(self):
+        self.test_basic_hft_prevention_using_block_number_fail()
+        self.state.mine(1)
+
+        assert self._storage(self.tcontract, 107) == self.xhex(self.state.block.number - 1)
+
+        ans = self.state.send(self.BOB['key'], self.contract, 0, [3, 100])
+        assert ans == [1]
+
 
     def test_fulfill_first_buy_with_sell(self):
         self.test_first_buy()
@@ -530,6 +543,15 @@ class TestEtherEx(object):
         assert self._storage(self.tcontract, 118) == self.xhex(110) # previous trade's previous should point to itself
         assert self._storage(self.tcontract, 119) == self.xhex(120) # previous trade's next should point to third trade
 
+    def test_set_last_price(self):
+        self.test_fulfill_first_trade_after_third_trade_and_check_pointers()
+        self.state.mine(1)
+
+        assert self._storage(self.ccontract, 105) == self.xhex(int(0.25 * 10 ** 8))
+
+        ans = self.state.send(self.ALICE['key'], self.contract, 0, ["price", 1])
+
+        assert ans == [int(0.25 * 10 ** 8)]
 
     # def test_second_buy_with_leftover(self):
     #     tx = Tx(sender='alice', value=0, data=[1, 1500 * 10 ** 18, 1000 * 10 ** 8, 1])

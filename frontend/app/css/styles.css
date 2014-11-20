@@ -60,10 +60,16 @@ tr.disabled td {
 
 
 /* Chart */
-.rickshaw-container {
+#chart {
+  height: 300px;
+}
+
+.rickshaw-container,
+.highcharts-container {
   margin-bottom: 3em;
   position: relative;
 }
+
 /*
 .rickshaw_graph {
   display: inline-block;
@@ -77,6 +83,10 @@ tr.disabled td {
   /*display: inline-block;*/
   position: absolute;
   right: 0;
+  bottom: 35%;
+}
+.rickshaw_graph.y_axis {
+  position: absolute !important;
   top: 0;
 }
 /*

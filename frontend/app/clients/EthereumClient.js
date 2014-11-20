@@ -39,15 +39,21 @@ var EthereumClient = function() {
             var id = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+6)));
             console.log("LOADING MARKET ID: " + id);
             if (id) {
+                var name = eth.toAscii(eth.stateAt(fixtures.addresses.markets, String(ptr)));
                 var address = eth.stateAt(fixtures.addresses.markets, String(ptr+1));
+                var decimals = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+2))));
+                var minimum = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+3)));
+                var precision = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+4)));
+                var lastPrice = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+5)))) / Math.pow(10, precision.length - 1);
+
                 markets.push({
                     id: id,
-                    name: eth.toAscii(eth.stateAt(fixtures.addresses.markets, String(ptr))),
+                    name: name,
                     address: address,
-                    decimals: _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+2)))),
-                    minimum: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+3))),
-                    precision: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+4))),
-                    lastPrice: eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+5))),
+                    decimals: decimals,
+                    minimum: minimum,
+                    precision: precision,
+                    lastPrice: lastPrice,
                     balance: eth.toDecimal(eth.stateAt(address, user.addresses[0], -1)),
                 });
             }
@@ -370,14 +376,31 @@ var EthereumClient = function() {
         }
     };
 
-    this.loadTransactions = function(addresses, success, failure) {
+    this.loadTransactions = function(addresses, market, success, failure) {
+        var latest = []; // no eth.messages in eth.js...
+        var prices = [];
+
         if (ethBrowser) {
-            var txs = [];
-            var from = eth.messages({max: 20, latest: -1, altered: addresses[0], from: fixtures.addresses.etherex});
+            var slot = ((market.id - 1) * 10 + 105).toString(16);
+            var prices = eth.messages({
+                max: 100,
+                latest: -1,
+                from: fixtures.addresses.etherex,
+                to: fixtures.addresses.markets,
+                altered: {
+                    id: fixtures.addresses.markets,
+                    at: "0x" + slot // "0x69" // TODO get market price slot
+                }
+            });
+            console.log("PRICE CHANGES: " + prices.length);
+            if (prices.length)
+                console.log("PRICE DATA: " + prices[0].input);
+
+            var from = eth.messages({max: 100, latest: -1, altered: addresses[0], from: fixtures.addresses.etherex});
             // console.log(from.length);
             // var to = eth.messages({latest: -1, altered: addresses[0], to: addresses[1]});
             // console.log(to.length);
-            var origin = eth.messages({max: 20, latest: -1, altered: addresses[0], to: fixtures.addresses.etherex});
+            var origin = eth.messages({max: 100, latest: -1, altered: addresses[0], to: fixtures.addresses.etherex});
             // console.log(origin.length);
             // var to = eth.messages({latest: -1, altered: addresses[0], from: fixtures.addresses.etherex, to: addresses[0]});
             var latest = _.merge(from, origin);
@@ -393,14 +416,17 @@ var EthereumClient = function() {
             // latest.push(_.where(eth.messages({altered: addresses[0]}), {'from': addresses[1]}));
             // latest.push(eth.messages({latest: -1, from: addresses[1], to: addresses[0]}));
         }
-        else
-            var latest = []; // no eth.messages in eth.js...
+
+        var payload = {
+            latest: latest,
+            prices: prices
+        };
 
         // if (latest.length <=0)
         //     var latest = [{}];
 
-        if (latest) // && latest.length > 0)
-            success(latest);
+        if (latest || prices) // && latest.length > 0)
+            success(payload);
         else
             failure("Could not get transactions.");
     };

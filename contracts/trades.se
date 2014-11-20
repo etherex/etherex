@@ -61,13 +61,14 @@ code:
 
     if status == 1:
         if msg.datasize == 1: // "Getting trade"
-            trade = array(slots - used)
+            trade = array(used + 1)
             trade[0] = contract.storage[msg.data[0]] // "Buy or sell"
             trade[1] = contract.storage[msg.data[0] + 1] // "Price"
             trade[2] = contract.storage[msg.data[0] + 2] // "Amount"
             trade[3] = contract.storage[msg.data[0] + 3] // "Owner"
             trade[4] = contract.storage[msg.data[0] + 4] // "Market"
-            return(trade, slots - used)
+            trade[5] = contract.storage[msg.data[0] + 7] // "Block number"
+            return(trade, used + 1)
 
         #
         # Add trade

@@ -128,7 +128,7 @@ var TxRow = React.createClass({
 
 var TxsTable = React.createClass({
     render: function() {
-        var txsListNodes = this.props.txs.map(function (tx) {
+        var txsListNodes = this.props.txs.reverse().map(function (tx) {
             return (
                 <TxRow key={tx.number + "-" + tx.path} tx={tx} market={this.props.market} user={this.props.user} />
             );

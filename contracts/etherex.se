@@ -47,6 +47,21 @@ code:
                 send(msg.sender, msg.value)
             return(0)
 
+        #
+        # Get price by market ID
+        #
+        elif msg.data[0] == "price" and msg.datasize == 2:
+            if msg.value > 0: // "Refunding"
+                send(msg.sender, msg.value)
+            if msg.datasize > 2: // "Too many arguments"
+                return(9)
+            markets = contract.storage[6]
+            price = call(markets, ["price", msg.data[1]], 2)
+            return(price)
+
+        #
+        # Operations checks
+        #
         if msg.data[0] < 1 or msg.data[0] > 10: // "Invalid operation"
             if msg.value > 0: // "Refunding"
                 send(msg.sender, msg.value)
@@ -117,7 +132,7 @@ code:
             marketid = msg.data[3]
 
             # Get market
-            market = call(markets, [marketid], 1, 5)
+            market = call(markets, [marketid], 1, 6)
 
             value = ((amount * price) / (market[4] * 10 ^ market[2])) * 10 ^ 18
 
@@ -190,12 +205,12 @@ code:
 
             while t < msg.datasize:
                 tradeid = msg.data[t]
+                trade = call(trades, [tradeid], 1, 6)
 
                 # Make sure the trade has been mined, obvious HFT prevention
-                if block.number <= trade[7]:
+                if block.number <= trade[5]:
                     return(14)
 
-                trade = call(trades, [tradeid], 1, 5)
                 market = call(markets, [trade[4]], 1, 5)
 
                 value = ((trade[2] * trade[1]) / (market[4] * 10 ^ market[2])) * 10 ^ 18
@@ -253,6 +268,10 @@ code:
                     if ret != 1:
                         return(0) // "Error"
 
+                # Update market last price
+                p = call(markets, [market[6], trade[1]], 2, 1)
+                # return(p)
+
                 # TODO - Update price indexes
                 # indexes = contract.storage[4]
                 # call(indexes, [trade[4], trade[1]], 2)
@@ -297,8 +316,8 @@ code:
             trades = contract.storage[5]
 
             # Get the trade
-            trade = call(trades, [msg.data[1]], 1, 5)
-            market = call(markets, [trade[4]], 1, 5)
+            trade = call(trades, [msg.data[1]], 1, 6)
+            market = call(markets, [trade[4]], 1, 6)
 
             # Check the owner
             if msg.sender == trade[3]:
@@ -373,22 +392,6 @@ code:
         #
         elif msg.data[0] == 10:
             return(0) // "Not implemented yet"
-
-        #
-        # Get price
-        #
-        elif msg.data[0] == "price":
-            if msg.value > 0: // "Refunding"
-                send(msg.sender, msg.value)
-            if msg.datasize > 3: // "Too many arguments"
-                return(9)
-
-            #
-            # Get last price
-            #
-            indexes = contract.storage[4]
-            price = call(indexes, [msg.data[1], msg.data[2]], 2)
-            return(price)
 
         #
         # "Input out of range"

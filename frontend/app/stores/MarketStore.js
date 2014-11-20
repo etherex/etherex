@@ -8,9 +8,7 @@ var fixtures = require("../js/fixtures");
 var MarketStore = Fluxxor.createStore({
 
     initialize: function(options) {
-        this.market = options.market || {};
-        this.market.txs = [];
-        this.market.data = {};
+        this.market = options.market || {txs: [], data: {}};
         this.markets = options.markets || [];
         this.loading = true;
         this.error = null;
@@ -73,30 +71,39 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onLoadTransactions: function(payload) {
-        this.market.txs = payload;
-        if (ethBrowser && payload.length)
+        var market = this.market;
+        this.market.txs = payload.latest;
+        if (ethBrowser && payload.prices.length) {
             this.market.data = {
                 // sum = _.reduce(_.pluck(payload, 'amount'), function(sum, num) { return parseFloat(sum) + parseFloat(num) });
-                price: _.map(payload.reverse(), function(tx, i) {
+                price: _.map(payload.prices.reverse(), function(tx, i) {
                     // var sum = _.reduce(_.pluck(payload, 'input'), function(sum, num) { return parseFloat(sum) + parseFloat(eth.toDecimal("0x" + tx.input.substr(130,64))) });
                     // console.log(price);
-                    if (tx.number && tx.timestamp)
+                    var price = 0;
+
+                    if (tx.input)
+                        price = eth.toDecimal("0x" + tx.input.substr(66, 64)) / Math.pow(10, market.precision.length - 1);
+
+                    if (tx.timestamp && typeof(price) != 'undefined')
                         return {
-                            x: i, // tx.timestamp - i,
-                            y: tx.number
+                            x: tx.timestamp,
+                            y: price
                         };
                 }),
-                volume: _.map(payload.reverse(), function(tx, i) {
+                volume: _.map(payload.latest.reverse(), function(tx, i) {
                     var value = parseFloat(eth.toDecimal("0x" + tx.input.substr(130,64)));
-                    if (tx.timestamp && value)
+                    if (tx.timestamp && typeof(value) != 'undefined')
                         return {
-                            x: i, // tx.timestamp - i,
+                            x: tx.timestamp,
                             y: value
                         };
                 })
             };
+            // for (var i = 0; i < this.market.data.price.length; i++)
+            //     console.log("Price: " + this.market.data.price[i].y + ", block: " + this.market.data.price[i].x + ", loop: " + i);
+        }
         else if (!ethBrowser)
-            this.market.data = [];
+            this.market.data = {};
         else
             this.market.data = {price: [{x: 0, y: 0}], volume: [{x: 0, y: 0}]};
         this.emit(constants.CHANGE_EVENT);

@@ -55,7 +55,7 @@ code:
 
     # Slots used per data group
     slots = 10
-    used = 5 # Current number of slots used
+    used = 6 # Current number of slots used
 
     if msg.value > 0: // "Refunding excess value: %s" % msg.value
         send(msg.sender, msg.value)
@@ -66,19 +66,31 @@ code:
         #
         if msg.datasize == 1:
             marketid = msg.data[0] - 1
-            market = array(slots - used)
-            market[0] = contract.storage[marketid * slots + start] // "Name"
-            market[1] = contract.storage[marketid * slots + start + 1] // "Contract"
-            market[2] = contract.storage[marketid * slots + start + 2] // "Decimal precision"
-            market[3] = contract.storage[marketid * slots + start + 3] // "Minimum total"
-            market[4] = contract.storage[marketid * slots + start + 4] // "Price denominator"
-            # market[5] = contract.storage[marketid * slots + start + 5] // "Last price"
-            return(market, slots - used)
+            market = array(used)
+            slot = marketid * slots + start
+            market[0] = contract.storage[slot] // "Name"
+            market[1] = contract.storage[slot + 1] // "Contract"
+            market[2] = contract.storage[slot + 2] // "Decimal precision"
+            market[3] = contract.storage[slot + 3] // "Minimum total"
+            market[4] = contract.storage[slot + 4] // "Price denominator"
+            market[5] = contract.storage[slot + 5] // "Last price"
+            return(market, used)
+
+        #
+        # Get last price
+        #
+        if msg.data[0] == "price" and msg.datasize == 2:
+            marketid = msg.data[1] - 1
+            slot = marketid * slots + start + 5
+            if marketid > total or slot > last + slots:
+                return(0)
+            price = contract.storage[slot]
+            return(price)
 
         #
         # Add market
         #
-        elif msg.datasize == used + 1:
+        elif msg.datasize == used:
             if msg.data[0] == 1:
                 if msg.sender == exchange:
                     lastid = contract.storage[3]
@@ -110,9 +122,9 @@ code:
                     if !next:
                         next = start
 
-                    # Save data from slot 0 to `used`
+                    # Save data from slot 0 to `used` - 1 for last price
                     i = 0
-                    while i < used:
+                    while i < used - 1:
                         contract.storage[next + i] = msg.data[i + 1]
                         i = i + 1
 
@@ -144,9 +156,21 @@ code:
                     return(market)
 
         #
-        # Remove market
+        # Market operations
         #
         elif msg.datasize == 2:
+            #
+            # Set last price
+            #
+            if msg.data[0]:
+                if msg.sender == exchange:
+                    marketid = msg.data[0] - 1
+                    contract.storage[marketid * slots + start + 5] = msg.data[1]
+                    return(1)
+
+            #
+            # Remove market
+            #
             if msg.data[0] == 0:
                 if msg.sender == exchange:
                     if msg.data[1] > 100: # Do not allow removing first market (ETX)
