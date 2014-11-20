@@ -3,7 +3,7 @@ EtherEx
 
 Decentralized exchange built on Ethereum.
 
-<img align="right" src="/frontend/screenshot.png" />
+<img src="/frontend/screenshot.png" />
 
 About
 -----
