@@ -6,14 +6,6 @@ var Router = require("react-router");
 var Fluxxor = require("fluxxor");
 var FluxChildMixin = Fluxxor.FluxChildMixin(React);
 
-// var ProgressBar = require('react-bootstrap/ProgressBar');
-// var ModalTrigger = require('react-bootstrap/ModalTrigger');
-// var ConfirmModal = require('./ConfirmModal');
-
-// var Table = require("react-bootstrap/Table");
-// var Button = require("react-bootstrap/Button");
-// var Glyphicon = require("react-bootstrap/Glyphicon");
-
 var bigRat = require("big-rational");
 var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
@@ -21,9 +13,6 @@ var utils = require("../js/utils");
 var d3 = require("d3");
 require("../css/rickshaw.min.css");
 var Rickshaw = require("../js/rickshaw.min.js");
-
-// var Link = Router.Link;
-// var UserLink = require("./UserLink");
 
 var Chart = React.createClass({
     mixins: [FluxChildMixin],
@@ -49,51 +38,19 @@ var Chart = React.createClass({
     },
 
     componentDidMount: function() {
-        var seriesData = [ [], [] ]; // , [], [], [] ];
+        var seriesData = [ [], [] ];
         var random = new Rickshaw.Fixtures.RandomData(50);
-        // var seriesData = [];
 
         if (!this.props.data || this.props.market.error)
             return;
-        // else if (this.props.data.length > 1) {
-        //     // console.log(this.props.data.length)
-        //     _.forEach(this.props.data,
-        //         function(tx) {
-        //             if (typeof(tx) != 'undefined' && tx && tx.timestamp && tx.number)
-        //                 seriesData[0].push({x: tx.timestamp, y: tx.number});
-        //             // console.log(tx);
-        //         }
-        //     );
 
-        // console.log(typeof(seriesData));
-        // console.log("DATA");
-        // console.log(this.props.data.length);
-        // console.log("-----");
-        // console.log(seriesData[0].length);
-
-        // seriesData[0] = this.props.data;
-        if (!ethBrowser) {//(!this.props.data.volume || !this.props.data.price) {
+        if (!ethBrowser) {
             for (var i = 0; i < 75; i++) {
               random.addData(seriesData);
             }
             this.props.data.price = seriesData.shift().map(function(d) { return { x: d.x, y: d.y} });
             this.props.data.volume = seriesData.shift().map(function(d) { return { x: d.x, y: d.y / 4 } });
         }
-
-
-        // console.log(typeof this.props.data);
-        // for (var i = this.props.data.length - 1; i >= 0; i--) {
-        //     // if (!seriesData[0][i].x || !seriesData[0][i].y)
-        //     //     console.log('fail');
-        //     console.log(typeof(this.props.data[i].x));
-        //     console.log(this.props.data[i].x);
-        //     console.log(typeof(this.props.data[i].y));
-        //     console.log(this.props.data[i].y);
-        // };
-
-
-        // else
-        //     this.props.data = seriesData.shift();
 
         chart = this.refs.chart.getDOMNode();
 
@@ -124,10 +81,12 @@ var Chart = React.createClass({
             ]
         });
 
+        var filler = new Rickshaw.Series.fill(graph.series, 0);
+
         graph.setRenderer('multi');
 
         // var time = new Rickshaw.Fixtures.Time();
-        // var seconds = time.unit('4.2 seconds');
+        // var seconds = time.unit('12 seconds');
 
         var x_axis = new Rickshaw.Graph.Axis.Time({ graph: graph}); //, timeUnit: seconds });
 
@@ -178,19 +137,7 @@ var Chart = React.createClass({
         this.setState({
             graph: graph
         });
-
-        // d3.select(this.getDOMNode())
-        //     .call(chart(this.props));
     },
-
-    // componentWillReceiveProps: function(props) {
-    //     if (this.state.graph && props.data.volume && props.data.price) {
-    //         var graph = this.state.graph;
-    //         graph.series[0].data = props.data.volume;
-    //         graph.series[1].data = props.data.price;
-    //         this.state.graph.render();
-    //     }
-    // },
 
     shouldComponentUpdate: function(props) {
         if (this.state.graph && props.data.volume && props.data.price) {
@@ -210,26 +157,12 @@ var Chart = React.createClass({
             graph.series[1].data = seriesData.shift().map(function(d) { return { x: d.x, y: d.y / 4 } });
             graph.render();
         }
-        // if (this.state.graph && this.props.data)
-        //     this.state.graph.render();
-        // d3.select(this.getDOMNode())
-        //     .call(chart(props));
         return false;
     }
-
-    // handleClick: function(e) {
-    //     if (this.props.market)
-    //         this.getFlux().actions.market.updateMarket(this.props.market);
-    // }
 });
 
 var GraphPrice = React.createClass({
     render: function() {
-        // var txsListNodes = _.rest(this.props.txs).map(function (tx) {
-        //     return (
-        //         <TxRow key={tx.nonce} tx={tx} market={this.props.market} user={this.props.user} />
-        //     );
-        // }.bind(this));
         return (
             <div>
                 <h4>{this.props.title}</h4>
