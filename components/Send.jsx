@@ -32,31 +32,29 @@ var Send = React.createClass({
             <form className="form-horizontal" role="form">
                 <div className="form-group">
                   <div className="input-group">
-                    <label className="sr-only" forHtml="amount">Name or address</label>
+                    <label className="sr-only" forHtml="address">Name or address</label>
                     <input type="text" className="form-control" pattern="\w{1,40}" placeholder="Name or address" ref="address" />
-                    <div className="input-group-addon"></div>
                   </div>
                 </div>
                 <div className="form-group">
                   <div className="input-group">
                     <label className="sr-only" forHtml="amount">Amount</label>
                     <input type="number" min="0.0001" step="0.00000001" className="form-control medium" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
-                    <div className="input-group-addon"></div>
                   </div>
                 </div>
                 <div className="form-group">
-                      <ModalTrigger modal={
-                          <ConfirmModal
-                            message={
-                              "Are you sure you want to send" +
-                                " " + utils.numeral(this.state.amount, 4) + " " +
-                                " to " + this.state.recipient + " ?"}
-                            flux={this.getFlux()}
-                            onSubmit={this.onSubmitForm}
-                          />
-                        }>
-                        <Button className="btn-block btn-primary" type="submit" key="newtrade">Send</Button>
-                      </ModalTrigger>
+                  <ModalTrigger modal={
+                      <ConfirmModal
+                        message={
+                          "Are you sure you want to send" +
+                            " " + utils.numeral(this.state.amount, 4) + " " +
+                            " to " + this.state.recipient + " ?"}
+                        flux={this.getFlux()}
+                        onSubmit={this.onSubmitForm}
+                      />
+                    }>
+                    <Button className="btn-block btn-primary" type="submit" key="newtrade">Send</Button>
+                  </ModalTrigger>
                 </div>
             </form>
         );

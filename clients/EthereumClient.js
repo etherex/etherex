@@ -68,6 +68,40 @@ var EthereumClient = function() {
         }
     };
 
+    this.registerMarket = function(market, success, failure) {
+        var data =
+            eth.pad(7, 32) +
+            eth.pad(market.name, 32) +
+            eth.pad(market.address, 32) +
+            eth.pad(market.minimum, 32) +
+            eth.pad(market.decimals, 32) +
+            eth.pad(market.precision, 32);
+
+        try {
+            if (ethBrowser)
+                eth.transact({
+                    from: eth.key,
+                    value: "0",
+                    to: fixtures.addresses.etherex,
+                    data: eth.fromAscii(data),
+                    gas: "10000",
+                    gasPrice: eth.gasPrice
+                }, success);
+            else
+                eth.transact(
+                    eth.key,
+                    "0",
+                    fixtures.addresses.etherex,
+                    data,
+                    "10000",
+                    eth.gasPrice,
+                    success
+                );
+        }
+        catch(e) {
+            failure(e);
+        }
+    };
 
     this.setUserWatches = function(flux, addresses, markets) {
         if (ethBrowser) {

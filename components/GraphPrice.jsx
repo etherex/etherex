@@ -11,8 +11,8 @@ var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 
 var d3 = require("d3");
-require("../css/rickshaw.min.css");
-var Rickshaw = require("../js/rickshaw.min.js");
+require("rickshaw/rickshaw.css");
+var Rickshaw = require("rickshaw");
 
 var Chart = React.createClass({
     mixins: [FluxChildMixin],
@@ -56,7 +56,7 @@ var Chart = React.createClass({
 
         // TODO - proper scaling
         var volumeScale = d3.scale.linear().domain([0, Math.pow(10, this.props.market.decimals - 2)]).nice();
-        var priceScale = d3.scale.linear().domain([0, 100]).nice();
+        var priceScale = d3.scale.linear().domain([0, 1]).nice();
 
         var graph = new Rickshaw.Graph( {
             element: chart,
