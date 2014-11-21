@@ -11,8 +11,9 @@ var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 
 var d3 = require("d3");
-require("../css/rickshaw.min.css");
-var Rickshaw = require("../js/rickshaw.min.js");
+require("rickshaw/rickshaw.css");
+var Rickshaw = require("rickshaw");
+var crossfilter = require("crossfilter");
 
 var Chart = React.createClass({
     mixins: [FluxChildMixin],
@@ -23,7 +24,9 @@ var Chart = React.createClass({
 
     getInitialState: function() {
         return {
-            graph: null
+            graph: null,
+            priceScale: null,
+            volumeScale: null
         };
     },
 
@@ -33,6 +36,8 @@ var Chart = React.createClass({
                 <div ref="chart"></div>
                 <div ref="legend"></div>
                 <div ref="slider"></div>
+                <div ref="yaxis"></div>
+                <div ref="yaxistoo"></div>
             </div>
         );
     },
@@ -40,9 +45,6 @@ var Chart = React.createClass({
     componentDidMount: function() {
         var seriesData = [ [], [] ];
         var random = new Rickshaw.Fixtures.RandomData(50);
-
-        if (!this.props.data || this.props.market.error)
-            return;
 
         if (!ethBrowser) {
             for (var i = 0; i < 75; i++) {
@@ -52,56 +54,78 @@ var Chart = React.createClass({
             this.props.data.volume = seriesData.shift().map(function(d) { return { x: d.x, y: d.y / 4 } });
         }
 
+        if (!this.props.data.price || !this.props.data.volume || this.props.market.error)
+            return;
+
         chart = this.refs.chart.getDOMNode();
 
         // TODO - proper scaling
-        var volumeScale = d3.scale.linear().domain([0, Math.pow(10, this.props.market.decimals - 2)]).nice();
-        var priceScale = d3.scale.linear().domain([0, 100]).nice();
+        var priceScale = d3.scale.linear().domain([0, 10]).nice();
+        var volumeScale = d3.scale.linear().domain([0, Math.pow(10, this.props.market.decimals - 1)]).nice();
+
+        var reducedVolumes = this.reducedVolumes(this.props.data.volume);
+        var reducedPrices = this.reducedPrices(this.props.data.price);
+
+        // for (var i = 0; i < reducedVolumes.length; i++) {
+        //     if (typeof(reducedVolumes[i].x) == 'undefined' || typeof(reducedVolumes[i].y) == 'undefined') {
+        //         console.log("x: " + reducedVolumes[i].x);
+        //         console.log("y: " + reducedVolumes[i].y);
+        //         console.log("---");
+        //     }
+        // };
 
         var graph = new Rickshaw.Graph( {
             element: chart,
             // width: 300,
-            // height: 200,
+            // height: 300,
             renderer: 'multi',
+            // interpolation: 'step-after',
+            stack: false,
             series: [
                 {
                     name: 'Volume',
                     color: 'steelblue',
-                    data: this.props.data.volume, // .map(function(d) { return { x: d.x, y: d.y / 4 } }),
+                    data: reducedVolumes, // _.compact(this.props.data.volume),
                     renderer: 'bar',
-                    scale: volumeScale
+                    scale: volumeScale,
+                    stack: false,
+                    // fill: true,
+                    // unstack: true,
                 },
                 {
                     name: 'Price',
                     color: 'lightblue',
-                    data: this.props.data.price, // .map(function(d) { return { x: d.x, y: d.y } })),
+                    data: this.props.data.price, //.map(function(d) { return { x: d.x, y: d.y } }),
                     renderer: 'line',
-                    scale: priceScale
-                }
+                    scale: priceScale,
+                    stack: false,
+                    // fill: true,
+                    // unstack: true
+                },
             ]
         });
 
         var filler = new Rickshaw.Series.fill(graph.series, 0);
 
-        graph.setRenderer('multi');
-
         // var time = new Rickshaw.Fixtures.Time();
-        // var seconds = time.unit('12 seconds');
+        // var seconds = time.unit('second');
 
-        var x_axis = new Rickshaw.Graph.Axis.Time({ graph: graph}); //, timeUnit: seconds });
+        var x_axis = new Rickshaw.Graph.Axis.Time({ graph: graph }); // , timeUnit: seconds });
 
         var y_axis = new Rickshaw.Graph.Axis.Y.Scaled({
             graph: graph,
-            orientation: 'left',
-            tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-            scale: priceScale
-        });
-
-        var z_axis = new Rickshaw.Graph.Axis.Y.Scaled({
-            graph: graph,
             orientation: 'right',
             tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-            scale: volumeScale
+            scale: priceScale,
+            // element: this.refs.yaxis.getDOMNode()
+        });
+
+        var y_axis_too = new Rickshaw.Graph.Axis.Y.Scaled({
+            graph: graph,
+            orientation: 'left',
+            tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+            scale: volumeScale,
+            // element: this.refs.yaxistoo.getDOMNode()
         });
 
         var slider = new Rickshaw.Graph.RangeSlider.Preview({
@@ -135,15 +159,18 @@ var Chart = React.createClass({
         graph.render();
 
         this.setState({
-            graph: graph
+            graph: graph,
+            priceScale: priceScale,
+            volumeScale: volumeScale
         });
     },
 
     shouldComponentUpdate: function(props) {
         if (this.state.graph && props.data.volume && props.data.price) {
             var graph = this.state.graph;
-            graph.series[0].data = props.data.volume;
+            graph.series[0].data = this.reducedVolumes(props.data.volume);
             graph.series[1].data = props.data.price;
+
             graph.render();
         }
         else if (this.state.graph && !props.data.length) {
@@ -158,6 +185,32 @@ var Chart = React.createClass({
             graph.render();
         }
         return false;
+    },
+
+    reducedVolumes: function(data) {
+        return _.map(_.groupBy(data, "x"), function(value, key) {
+            var values = _.pluck(value, 'y');
+            return {
+                x: _.parseInt(key),
+                y: _.reduce(values, function(result, currentObject) {
+                    return result + currentObject || 0;
+                })
+            };
+        });
+    },
+
+    reducedPrices: function(data) {
+        return _.map(_.groupBy(data, "x"), function(value, key) {
+            var values = _.pluck(value, "y");
+            if (values.length > 1 && key) {
+                var max = _.max(values);
+                // console.log("MAX: ", max);
+                return {
+                    x: _.parseInt(key),
+                    y: max
+                };
+            }
+        })
     }
 });
 

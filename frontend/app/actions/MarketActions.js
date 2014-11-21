@@ -62,6 +62,16 @@ var MarketActions = function(client) {
         });
     };
 
+    this.registerMarket = function(market) {
+        var user = this.flux.store("UserStore").getState().user;
+
+        _client.registerMarket(market, function(id) {
+            this.dispatch(constants.market.REGISTER_MARKET, id);
+        }.bind(this), function(error) {
+            this.dispatch(constants.market.REGISTER_MARKET_FAIL, {error: error});
+        }.bind(this));
+    };
+
     var _client = client;
 };
 

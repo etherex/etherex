@@ -15,7 +15,7 @@
 # n + 2: Decimal precision
 # n + 3: Minimum total
 # n + 4: Price denominator
-# n + 5: Last price (?)
+# n + 5: Last price
 # n + 6: Market ID
 # n + 7: Block #
 # n + 8: Previous market pointer

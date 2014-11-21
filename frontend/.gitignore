@@ -1,4 +1,8 @@
 node_modules
 app/bundle.js
 app/bundle.js.map
+app/*.svg
+app/*.woff
+app/*.eot
+app/*.ttf
 .grunt/

@@ -26,7 +26,7 @@ var MarketStore = require("./stores/MarketStore");
 var MarketActions = require("./actions/MarketActions");
 
 var Wallet = require("./components/Wallet");
-var Send = require("./components/Send");
+var Tools = require("./components/Tools");
 
 // TODO mock data
 var fixtures = require("./js/fixtures");
@@ -83,9 +83,9 @@ var stores = {
 };
 
 var actions = {
-    market: new MarketActions(client),
-    trade: new TradeActions(client),
-    user: new UserActions(client)
+  market: new MarketActions(client),
+  trade: new TradeActions(client),
+  user: new UserActions(client)
 };
 
 var flux = new Fluxxor.Flux(stores, actions);
@@ -100,7 +100,7 @@ var routes = (
       <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
       <Route name="markets" path="/markets" handler={Markets} flux={flux} title="Markets" />
       <Route name="wallet" path="/wallet" handler={Wallet} flux={flux} title="Wallet" />
-      <Route name="tools" path="/tools" handler={Send} flux={flux} title="Tools" />
+      <Route name="tools" path="/tools" handler={Tools} flux={flux} title="Tools" />
       <Route name="help" path="/help" handler={Placeholder} flux={flux} title="Help" />
       <Route name="userDetails" path="/user" handler={UserDetails} flux={flux} title="User details" />
       <Route name="notfound" path="/notfound" handler={Placeholder} title="User or Trade ID not found" flux={flux} />
