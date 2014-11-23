@@ -3,7 +3,7 @@
 var React = require("react");
 
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxChildMixin(React);
+var FluxChildMixin = Fluxxor.FluxMixin(React);
 
 var Button = require('react-bootstrap/Button');
 var Modal = require('react-bootstrap/Modal');
