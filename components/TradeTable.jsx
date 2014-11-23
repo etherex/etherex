@@ -115,14 +115,15 @@ var TradeRow = React.createClass({
         var totalAmount = 0;
         var thisUser = this.props.user;
         var thisTrade = this.props.trade;
-        var trades = _.filter(this._owner.props.tradeList, function(trade) {
+        var count = this.props.count;
+        var trades = _.filter(this._owner.props.tradeList, function(trade, i) {
             return (
                 thisUser.id != trade.owner &&
                 trade.status != "pending" &&
                 trade.status != "new" &&
                 ((trade.type == "buys" && thisTrade.price <= trade.price) ||
-                 (trade.type == "sells" && thisTrade.price >= trade.price)
-                )
+                 (trade.type == "sells" && thisTrade.price >= trade.price)) &&
+                i <= count
             );
         });
 
@@ -167,6 +168,7 @@ var TradeRow = React.createClass({
         });
 
         payload.fills = trades.length;
+
         this.setState({
             payload: payload
         });
@@ -196,9 +198,9 @@ var TradeRow = React.createClass({
 
 var TradeTable = React.createClass({
     render: function() {
-        var tradeListNodes = this.props.tradeList.map(function (trade) {
+        var tradeListNodes = this.props.tradeList.map(function (trade, i) {
             return (
-                <TradeRow key={trade.id} trade={trade} user={this.props.user} review={this.props.review} />
+                <TradeRow key={trade.id} count={i} trade={trade} user={this.props.user} review={this.props.review} />
             );
         }.bind(this));
         return (
