@@ -4,7 +4,7 @@ var React = require("react");
 var Router = require("react-router");
 
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxChildMixin(React);
+var FluxChildMixin = Fluxxor.FluxMixin(React);
 
 var ProgressBar = require('react-bootstrap/ProgressBar');
 var ModalTrigger = require('react-bootstrap/ModalTrigger');

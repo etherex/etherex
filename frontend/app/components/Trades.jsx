@@ -2,7 +2,7 @@
 
 var React = require("react");
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxChildMixin(React);
+var FluxChildMixin = Fluxxor.FluxMixin(React);
 
 var TradeForm = require("./TradeForm");
 var TradeList = require("./TradeList");

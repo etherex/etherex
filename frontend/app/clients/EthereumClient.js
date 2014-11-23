@@ -19,7 +19,7 @@ var EthereumClient = function() {
         if (!error)
             success(addresses);
         else
-            failure("Unable to load addresses. Lost your keys? The actual error was: " + error);
+            failure("Unable to load addresses, are you running an Ethereum node? Please load this URL in AlethZero, or with a cpp-ethereum node with JSONRPC enabled running alongside a regular browser.");
     };
 
 

@@ -3,7 +3,7 @@
 var React = require("react");
 
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxChildMixin(React);
+var FluxChildMixin = Fluxxor.FluxMixin(React);
 
 var bigRat = require("big-rational");
 var fixtures = require("../js/fixtures");
@@ -143,6 +143,7 @@ var SplitTradeForm = React.createClass({
                     }
                     tradeList={this.props.trades.filling}
                     user={this.props.user}
+                    flux={this.getFlux()}
                     onSubmit={this.onSubmitForm}
                   />
                 }>

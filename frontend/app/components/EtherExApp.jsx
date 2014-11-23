@@ -34,7 +34,7 @@ var EtherExApp = React.createClass({
         <NavBar user={this.state.user} />
         <SubNavBar />
         {(this.state.user.error) ?
-            <div className="container">
+            <div className="container-fluid">
               <div className="alert alert-danger" role="alert">
                 <h4>Error!</h4>
                 {this.state.user.error}
