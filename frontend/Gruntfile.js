@@ -86,12 +86,14 @@ module.exports = function(grunt) {
         base: 'app',
         repo: 'https://github.com/etherex/etherex.git'
       },
-      src: ['**']
-    }
+      src: ['index.html', 'bundle.js', '*.svg', '*.woff', '*.eot', '*.ttf']
+    },
+    clean: ["app/*.svg", "app/*.woff", "app/*.eot", "app/*.ttf"]
   });
 
   grunt.loadNpmTasks('grunt-jest');
   grunt.loadNpmTasks('grunt-jsxhint');
+  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-webpack');
   grunt.loadNpmTasks('grunt-gh-pages');
@@ -99,5 +101,5 @@ module.exports = function(grunt) {
   grunt.registerTask("default", ["webpack-dev-server:start"]);
   grunt.registerTask("dev", ["jshint", "jest", "webpack:build-dev", "watch:app"]);
   grunt.registerTask("build", ["jshint", "webpack:build"]);
-  grunt.registerTask("publish", ["build", "gh-pages"]);
+  grunt.registerTask("publish", ["clean", "build", "gh-pages"]);
 };
