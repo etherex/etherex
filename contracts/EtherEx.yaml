@@ -17,7 +17,8 @@
     EtherEx:
       contract: etherex.se
       gas: 100000
-      wait: True
+      # endowment: 1000000000000000000
+      # wait: True
     ETX:
       contract: etx.se
 
