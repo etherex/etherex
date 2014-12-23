@@ -1,20 +1,5 @@
-# namereg.se -- Ethereum contract
-#
-# Copyright (c) 2014 EtherEx
-#
-# This software may be modified and distributed under the terms
-# of the MIT license.  See the LICENSE file for details.
-
-# NameReg
-init:
-    # "EtherEx - NameReg"
-    name = "EtherEx-NameReg" * 256 ^ (32 - 15)
-    contract.storage[contract.address] = name
-    contract.storage[name] = contract.address
-code:
-    if not contract.storage[msg.data[0]] or contract.storage[msg.data[0]] == msg.sender:
-        contract.storage[msg.sender] = msg.data[0]
-        contract.storage[msg.data[0]] = msg.sender
+def register(k, v):
+    if !self.storage[k] or k == msg.sender:
+        self.storage[k] = v
         return(1)
-    else:
-        return(0)
+    return(0)

@@ -9,19 +9,22 @@
 # EtherEx
 #
 
-data type
-data owner
-data creator
-data created
-data status
-data last_market
+data type # 0x
+data owner # 0x1
+data creator # 0x2
+data created # 0x3
+data status # 0x4
+data last_market # 0x5
 
-data trades[2^160](type, market, amount, price, owner, block)
+data log_gas # 0x6
+data log_last_trade # 0x7
+data log_timestamp # 0x8
+
+data markets_ptr # 0x9
+data trades_ptr # 0xA
+
 data markets[2^160](id, name, contract, decimals, precision, minimum, last_price, owner, block)
-
-data log_gas
-data log_last_trade
-data log_timestamp
+data trades[2^160](type, market, amount, price, owner, block)
 
 extern any: [call]
 
@@ -301,9 +304,10 @@ def add_market(name, contract, decimals, precision, minimum):
 
     id = self.last_market + 1
 
-    market = [id, name, contract, decimals, precision, minimum] // "TODO - Check data..."
-
-    market_key = sha3(market, 6)
+    # "TODO - Check data..."
+    # market = [id, name, contract, decimals, precision, minimum]
+    # market_key = sha3(market, 6)
+    market_key = sha3(name)
 
     self.markets[market_key].id = id
     self.markets[market_key].name = name
@@ -311,6 +315,16 @@ def add_market(name, contract, decimals, precision, minimum):
     self.markets[market_key].decimals = decimals
     self.markets[market_key].precision = precision
     self.markets[market_key].minimum = minimum
+    self.markets[market_key].owner = msg.sender
+    self.markets[market_key].block = block.number
+
+    # Set market pointer
+    if id == 1:
+        self.markets_ptr = ref(self.markets[market_key].id)
+        # self.trades_ptr = market_key
+
+    # Set last market ID
+    self.last_market = id
 
     # TODO - Issue ETX to market creator ?
     # if msg.value > 0:
@@ -327,5 +341,6 @@ def add_market(name, contract, decimals, precision, minimum):
 def change_ownership(new_owner):
     if msg.sender == self.owner:
         self.owner = new_owner // "Set owner to %s" % new_owner
-        return(new_owner)
+        return(1)
+    return(0)
 

@@ -47,8 +47,8 @@ print '==================='
 
 print 'EtherEx'
 print '\n'
-f = 'contracts/etherex.se'
-compile(f)
+# f = 'contracts/etherex.se'
+# compile(f)
 
 subprocess.call(["py.test", "tests/etherex.py", "-v", "-x"])
 

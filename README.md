@@ -22,10 +22,10 @@ Components
 Requirements
 ------------
 * [Serpent](https://github.com/ethereum/serpent) compiler by Vitalik Buterin
-* [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) browser (AlethZero or Third) by Gavin Wood
-* [go-ethereum](https://github.com/ethereum/go-ethereum) (alternative browser) by Jeffrey Wilcke
+* [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) node by Gavin Wood
+* [go-ethereum](https://github.com/ethereum/go-ethereum) browser by Jeffrey Wilcke
 * [pyethereum](https://github.com/ethereum/pyethereum) Python Ethereum client (tests only)
-* [EPM](https://github.com/project-douglas/epm) for deployment
+* [PyEPM](https://github.com/etherex/pyepm) for deployment
 * [node](http://nodejs.org/) and [grunt](http://gruntjs.com/) for UI development
 
 
@@ -69,10 +69,10 @@ grunt
 
 ### Deployment
 
-Requires a working [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) client, [Serpent](https://github.com/ethereum/serpent) and [EPM](https://github.com/project-douglas/epm)
+Requires a working [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) client with JSONRPC, [Serpent](https://github.com/ethereum/serpent) and [PyEPM](https://github.com/etherex/pyepm)
 
 ```
-epm deploy contracts/EtherEx.package-definition
+pyepm contracts/EtherEx.yaml
 ```
 
 
@@ -246,12 +246,14 @@ TODO
 * ~~Go back to TDD~~ when serpent/pyethereum are usable
 * Re-implement NameReg support and integration
 * Start the Tools section, find and list ideas
-    - subcurrency registration
+    - subcurrency registration (in progress)
     - subcurrency creation tools/wizard
     - raw transact (?)
     - trading tools (...)
     - ...
 * Port contracts to [Solidity](https://github.com/ethereum/wiki/wiki/Solidity,-Docs-and-ABI)
+    - Make that Serpent 2 which supports the ABI
+    - See also [NatSpec](https://github.com/ethereum/wiki/wiki/Ethereum-Natural-Specification-Format)
 * Look into how [Whisper](https://github.com/ethereum/wiki/wiki/Whisper-Overview) and [Swarm](https://github.com/ethereum/cpp-ethereum/wiki/Swarm) should be used and integrated
 * Start working on X-Chain
 * Update this TODO more frequently
