@@ -1,0 +1,69 @@
+# Package Name:       EtherEx
+# Package Author:     caktux
+# Package Email:      caktux@etherex.org
+# Package Repository: https://github.com/etherex/etherex
+
+# Set some variables.
+-
+  set:
+    NameReg: "0x72ba7d8e73fe8eb666ea66babc8116a41bfb10e2"
+    CAK: "0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31"
+
+# Deploy contracts
+-
+  deploy:
+    OwnNameReg:
+      contract: namereg.se
+    EtherEx:
+      contract: etherex.se
+      gas: 100000
+      wait: True
+    ETX:
+      contract: etx.se
+
+# Initialize
+-
+  transact:
+    NameReg:
+      to: $NameReg
+      funid: 0
+      data:
+        - EtherEx
+        - $EtherEx
+    OwnNameReg:
+      to: $OwnNameReg
+      funid: 0
+      data:
+        - EtherEx
+        - $EtherEx
+    RegisterETX:
+      to: $EtherEx
+      funid: 7
+      data:
+        - ETX
+        - $ETX
+        - 5
+        - 1000000000000000000
+        - 100000000
+
+# Fill up
+-
+  transact:
+    CAK:
+      to: $CAK
+      value: 1000000000000000000
+
+# # Contract calls with return values
+# -
+#   call:
+#     MyContract:
+#       to: $NameReg
+#       value: 0
+#       funid: 2
+#       data: 0x12345
+
+# More deploy
+# -
+# deploy:
+#   extra:
+#     contract: short_namecoin.se
