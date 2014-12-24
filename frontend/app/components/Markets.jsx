@@ -2,14 +2,14 @@
 
 var React = require("react");
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxMixin(React);
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 // var MarketFilter = require("./MarketFilter"); TODO
 var GraphPrice = require('./GraphPriceRickshaw');
 var MarketList = require("./MarketList");
 
-var Markets = React.createClass({
-  mixins: [FluxChildMixin],
+var Markets = React.createFactory(React.createClass({
+  mixins: [FluxMixin],
 
   render: function() {
     // console.log(this.props);
@@ -30,6 +30,6 @@ var Markets = React.createClass({
     );
   }
 
-});
+}));
 
 module.exports = Markets;

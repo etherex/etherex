@@ -2,13 +2,13 @@
 
 var React = require("react");
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxMixin(React);
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 var Router = require("react-router");
 var Link = Router.Link;
 
-var UserLink = React.createClass({
-    mixins: [FluxChildMixin],
+var UserLink = React.createFactory(React.createClass({
+    mixins: [FluxMixin],
 
     propTypes: {
         id: React.PropTypes.string.isRequired
@@ -28,6 +28,6 @@ var UserLink = React.createClass({
             </Link>
         );
     }
-});
+}));
 
 module.exports = UserLink;

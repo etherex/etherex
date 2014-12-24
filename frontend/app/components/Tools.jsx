@@ -4,15 +4,15 @@ var React = require("react");
 var Router = require("react-router");
 
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxMixin(React);
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 var AlertDismissable = require('./AlertDismissable');
 
 var RegisterSub = require('./RegisterSub');
 var Send = require('./Send');
 
-var TradeList = React.createClass({
-    mixins: [FluxChildMixin],
+var TradeList = React.createFactory(React.createClass({
+    mixins: [FluxMixin],
 
     getInitialState: function() {
         return {
@@ -50,6 +50,6 @@ var TradeList = React.createClass({
             </div>
         );
     }
-});
+}));
 
 module.exports = TradeList;

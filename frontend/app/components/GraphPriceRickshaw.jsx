@@ -4,7 +4,7 @@ var React = require("react");
 var Router = require("react-router");
 
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxMixin(React);
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 var bigRat = require("big-rational");
 var fixtures = require("../js/fixtures");
@@ -15,8 +15,8 @@ require("rickshaw/rickshaw.css");
 var Rickshaw = require("rickshaw");
 var crossfilter = require("crossfilter");
 
-var Chart = React.createClass({
-    mixins: [FluxChildMixin],
+var Chart = React.createFactory(React.createClass({
+    mixins: [FluxMixin],
 
     // propTypes: {
     //     data: React.PropTypes.array
@@ -212,9 +212,9 @@ var Chart = React.createClass({
             }
         })
     }
-});
+}));
 
-var GraphPrice = React.createClass({
+var GraphPrice = React.createFactory(React.createClass({
     render: function() {
         return (
             <div>
@@ -225,6 +225,6 @@ var GraphPrice = React.createClass({
             </div>
         );
     }
-});
+}));
 
 module.exports = GraphPrice;

@@ -4,7 +4,7 @@ var React = require("react");
 var Router = require("react-router");
 
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxMixin(React);
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 var AlertDismissable = require('./AlertDismissable');
 
@@ -12,8 +12,8 @@ var ProgressBar = require('react-bootstrap/ProgressBar');
 
 var TxsTable = require('./TxsTable');
 
-var TxsList = React.createClass({
-    mixins: [FluxChildMixin],
+var TxsList = React.createFactory(React.createClass({
+    mixins: [FluxMixin],
 
     render: function() {
         return (
@@ -37,6 +37,6 @@ var TxsList = React.createClass({
             </div>
         );
     }
-});
+}));
 
 module.exports = TxsList;

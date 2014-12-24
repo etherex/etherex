@@ -5,7 +5,7 @@ var Router = require("react-router");
 var Link = Router.Link;
 var ActiveState = Router.ActiveState;
 
-var Tab = React.createClass({
+var Tab = React.createFactory(React.createClass({
 
   mixins: [ ActiveState ],
 
@@ -25,6 +25,6 @@ var Tab = React.createClass({
     return <li className={className}>{link}</li>;
   }
 
-});
+}));
 
 module.exports = Tab;

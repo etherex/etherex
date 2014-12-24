@@ -2,15 +2,15 @@
 
 var React = require("react");
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxMixin(React);
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 var utils = require("../js/utils");
 var constants = require("../js/constants");
 
 var MarketSelect = require("./MarketSelect")
 
-var BalanceSub = React.createClass({
-  mixins: [FluxChildMixin],
+var BalanceSub = React.createFactory(React.createClass({
+  mixins: [FluxMixin],
 
   render: function() {
     return (
@@ -30,6 +30,6 @@ var BalanceSub = React.createClass({
       </div>
     );
   }
-});
+}));
 
 module.exports = BalanceSub;

@@ -2,7 +2,7 @@
 
 var React = require("react");
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxMixin(React);
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 var Router = require("react-router");
 var Link = Router.Link;
@@ -10,8 +10,8 @@ var Link = Router.Link;
 var Tab = require("./Tab");
 var UserLink = require("./UserLink");
 
-var NavBar = React.createClass({
-    mixins: [FluxChildMixin],
+var NavBar = React.createFactory(React.createClass({
+    mixins: [FluxMixin],
 
     render: function() {
         return (
@@ -46,6 +46,6 @@ var NavBar = React.createClass({
             </nav>
         );
     }
-});
+}));
 
 module.exports = NavBar;

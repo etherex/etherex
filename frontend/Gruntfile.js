@@ -91,7 +91,7 @@ module.exports = function(grunt) {
     clean: ["app/*.svg", "app/*.woff", "app/*.eot", "app/*.ttf"]
   });
 
-  grunt.loadNpmTasks('grunt-jest');
+  // grunt.loadNpmTasks('grunt-jest');
   grunt.loadNpmTasks('grunt-jsxhint');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-watch');

@@ -4,7 +4,7 @@ var React = require("react");
 var Router = require("react-router");
 
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxMixin(React);
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 var ProgressBar = require('react-bootstrap/ProgressBar');
 var ModalTrigger = require('react-bootstrap/ModalTrigger');
@@ -21,8 +21,8 @@ var utils = require("../js/utils");
 // var Link = Router.Link;
 // var UserLink = require("./UserLink");
 
-var TradeRow = React.createClass({
-    mixins: [FluxChildMixin],
+var TradeRow = React.createFactory(React.createClass({
+    mixins: [FluxMixin],
 
     getInitialState: function() {
         return {
@@ -194,9 +194,9 @@ var TradeRow = React.createClass({
         if (this.state.payload)
             this.getFlux().actions.trade.clickFill(this.state.payload);
     }
-});
+}));
 
-var TradeTable = React.createClass({
+var TradeTable = React.createFactory(React.createClass({
     render: function() {
         var tradeListNodes = this.props.tradeList.map(function (trade, i) {
             return (
@@ -225,6 +225,6 @@ var TradeTable = React.createClass({
             </div>
         );
     }
-});
+}));
 
 module.exports = TradeTable;

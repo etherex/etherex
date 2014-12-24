@@ -6,7 +6,7 @@ var ModalTrigger = require('react-bootstrap/ModalTrigger');
 
 // var UserIdModal = require("./UserIdModal");
 
-var UserSummaryPane = React.createClass({
+var UserSummaryPane = React.createFactory(React.createClass({
   render: function() {
     // console.log(this.props.user);
     return (
@@ -39,6 +39,6 @@ var UserSummaryPane = React.createClass({
         </div>
     );
   }
-});
+}));
 
 module.exports = UserSummaryPane;

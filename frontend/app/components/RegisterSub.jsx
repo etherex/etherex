@@ -2,7 +2,7 @@
 
 var React = require("react");
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxMixin(React);
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 var Router = require("react-router");
 
@@ -16,8 +16,8 @@ var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 var bigRat = require("big-rational");
 
-var RegisterSub = React.createClass({
-  mixins: [FluxChildMixin],
+var RegisterSub = React.createFactory(React.createClass({
+  mixins: [FluxMixin],
 
   getInitialState: function() {
     return {
@@ -195,6 +195,6 @@ var RegisterSub = React.createClass({
       });
 
   }
-});
+}));
 
 module.exports = RegisterSub;

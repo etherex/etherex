@@ -12,11 +12,12 @@ var Balance = require("./Balance");
 var BalanceSub = require("./BalanceSub");
 var AlertDismissable = require('./AlertDismissable');
 
-var EtherExApp = React.createClass({
+var EtherExApp = React.createFactory(React.createClass({
   mixins: [FluxMixin, StoreWatchMixin("UserStore", "MarketStore", "TradeStore")],
 
   getStateFromFlux: function() {
     var flux = this.getFlux();
+
     return {
       user: flux.store("UserStore").getState(),
       trades: flux.store("TradeStore").getState(),
@@ -63,6 +64,6 @@ var EtherExApp = React.createClass({
       </div>
     );
   }
-});
+}));
 
 module.exports = EtherExApp;

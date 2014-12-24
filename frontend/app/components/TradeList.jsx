@@ -4,7 +4,7 @@ var React = require("react");
 var Router = require("react-router");
 
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxMixin(React);
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 var AlertDismissable = require('./AlertDismissable');
 
@@ -12,8 +12,8 @@ var ProgressBar = require('react-bootstrap/ProgressBar');
 
 var TradeTable = require('./TradeTable');
 
-var TradeBuys = React.createClass({
-    mixins: [FluxChildMixin],
+var TradeBuys = React.createFactory(React.createClass({
+    mixins: [FluxMixin],
 
     render: function() {
         return (
@@ -22,10 +22,10 @@ var TradeBuys = React.createClass({
             </div>
         );
     }
-});
+}));
 
-var TradeSells = React.createClass({
-    mixins: [FluxChildMixin],
+var TradeSells = React.createFactory(React.createClass({
+    mixins: [FluxMixin],
 
     render: function() {
         return (
@@ -34,10 +34,10 @@ var TradeSells = React.createClass({
             </div>
         );
     }
-});
+}));
 
-var TradeList = React.createClass({
-    mixins: [FluxChildMixin],
+var TradeList = React.createFactory(React.createClass({
+    mixins: [FluxMixin],
 
     render: function() {
         return (
@@ -76,6 +76,6 @@ var TradeList = React.createClass({
             </div>
         );
     }
-});
+}));
 
 module.exports = TradeList;

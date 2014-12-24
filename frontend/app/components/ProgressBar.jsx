@@ -2,7 +2,7 @@
 
 var React = require("react");
 
-var ProgressBar = React.createClass({
+var ProgressBar = React.createFactory(React.createClass({
     render: function() {
         var divStyle = {
             width: this.props.pct + '%'
@@ -15,6 +15,6 @@ var ProgressBar = React.createClass({
             </div>
         );
     }
-});
+}));
 
 module.exports = ProgressBar;

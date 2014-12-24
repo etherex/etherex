@@ -2,15 +2,15 @@
 
 var React = require("react");
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxMixin(React);
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 var constants = require("../js/constants");
 
 var DropdownButton = require('react-bootstrap/DropdownButton');
 var MenuItem = require('react-bootstrap/MenuItem');
 
-var MarketSelect = React.createClass({
-  mixins: [FluxChildMixin],
+var MarketSelect = React.createFactory(React.createClass({
+  mixins: [FluxMixin],
 
   handleChange: function(id) {
     // Update market and trigger filtering of trades
@@ -33,6 +33,6 @@ var MarketSelect = React.createClass({
       </DropdownButton>
     );
   }
-});
+}));
 
 module.exports = MarketSelect;

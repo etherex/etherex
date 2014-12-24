@@ -3,21 +3,21 @@
 var React = require("react");
 
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxMixin(React);
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 var Button = require('react-bootstrap/Button');
 var Modal = require('react-bootstrap/Modal');
 
-// XXX should be FluxChildMixin, but then flux object doesn't get passed along somehow
+// XXX should be FluxMixin, but then flux object doesn't get passed along somehow
 
-var ConfirmModal = React.createClass({
-    mixins: [FluxChildMixin],
+var ConfirmModal = React.createFactory(React.createClass({
+    mixins: [FluxMixin],
 
     render: function() {
         // console.log(this);
         if (this.props.tradeList)
             var TradeTable = require("./TradeTable");
-        return this.transferPropsTo(
+        return (
             <Modal title="Confirmation required" animation={true}>
                 <form onSubmit={this.confirmSubmit}>
                     <div className="modal-body">
@@ -40,6 +40,6 @@ var ConfirmModal = React.createClass({
         e.preventDefault();
         this.props.onRequestHide();
     }
-});
+}));
 
 module.exports = ConfirmModal;

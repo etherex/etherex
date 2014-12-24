@@ -3,7 +3,7 @@
 var React = require("react");
 
 var Fluxxor = require("fluxxor");
-var FluxChildMixin = Fluxxor.FluxMixin(React);
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 var bigRat = require("big-rational");
 var fixtures = require("../js/fixtures");
@@ -20,8 +20,8 @@ var ConfirmModal = require('./ConfirmModal');
 
 var AlertDismissable = require('./AlertDismissable');
 
-var SplitTradeForm = React.createClass({
-  mixins: [FluxChildMixin],
+var SplitTradeForm = React.createFactory(React.createClass({
+  mixins: [FluxMixin],
 
   getInitialState: function() {
       return {
@@ -324,10 +324,10 @@ var SplitTradeForm = React.createClass({
 
     return;
   }
-});
+}));
 
-var TradeForm = React.createClass({
-    mixins: [FluxChildMixin],
+var TradeForm = React.createFactory(React.createClass({
+    mixins: [FluxMixin],
 
     getInitialState: function() {
         return {
@@ -399,6 +399,6 @@ var TradeForm = React.createClass({
       });
       this.getFlux().actions.trade.switchType(key);
     }
-});
+}));
 
 module.exports = TradeForm;

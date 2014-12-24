@@ -3,10 +3,11 @@
 var React = require("react");
 var Fluxxor = require("fluxxor");
 var Router = require("react-router");
-
-/* global window */
-// expose React globally for DevTools
-window.React = React;
+var Route = Router.Route;
+var NotFoundRoute = Router.NotFoundRoute;
+var DefaultRoute = Router.DefaultRoute;
+var Link = Router.Link;
+var RouteHandler = Router.RouteHandler;
 
 var EtherExApp = require("./components/EtherExApp");
 
@@ -90,23 +91,31 @@ var actions = {
 
 var flux = new Fluxxor.Flux(stores, actions);
 
+flux.on("dispatch", function(type, payload) {
+  if (console && console.log) {
+    console.log("[Dispatch]", type, payload);
+  }
+});
+
 var routes = (
-  <Routes>
-    <Route handler={EtherExApp} flux={flux}>
-      <Redirect from="/" to="trades" />
-      <Route name="trades" path="/trades" handler={Trades} flux={flux} title="Trades" />
-      <Route name="trades/xchain" path="/trades/xchain" handler={Trades} flux={flux} title="X-Chain" />
-      <Route name="trades/marketplace" path="/trades/marketplace" handler={Trades} flux={flux} title="Marketplace" />
-      <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
-      <Route name="markets" path="/markets" handler={Markets} flux={flux} title="Markets" />
-      <Route name="wallet" path="/wallet" handler={Wallet} flux={flux} title="Wallet" />
-      <Route name="tools" path="/tools" handler={Tools} flux={flux} title="Tools" />
-      <Route name="help" path="/help" handler={Placeholder} flux={flux} title="Help" />
-      <Route name="userDetails" path="/user" handler={UserDetails} flux={flux} title="User details" />
-      <Route name="notfound" path="/notfound" handler={Placeholder} title="User or Trade ID not found" flux={flux} />
-    </Route>
-  </Routes>
+  <Route name="app" handler={EtherExApp} flux={flux}>
+    <DefaultRoute handler={Trades} flux={flux} title="Trades" />
+    <Route name="home" path="/" handler={Trades} flux={flux} title="Trades" />
+    <Route name="trades" path="/trades" handler={Trades} flux={flux} title="Trades" />
+    <Route name="trades/xchain" path="/trades/xchain" handler={Trades} flux={flux} title="X-Chain" />
+    <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
+    <Route name="markets" path="/markets" handler={Markets} flux={flux} title="Markets" />
+    <Route name="wallet" path="/wallet" handler={Wallet} flux={flux} title="Wallet" />
+    <Route name="tools" path="/tools" handler={Tools} flux={flux} title="Tools" />
+    <Route name="help" path="/help" handler={Placeholder} flux={flux} title="Help" />
+    <Route name="userDetails" path="/user" handler={UserDetails} flux={flux} title="User details" />
+    <NotFoundRoute name="notfound" handler={Placeholder} title="User or Trade ID not found" flux={flux} />
+  </Route>
 );
 
+Router.run(routes, Router.HistoryLocation, function (Handler) {
+  React.render(<Handler flux={flux}/>, document.body);
+});
+
 /* global document */
-React.renderComponent(routes, document.getElementById("app"));
+// React.render(React.createElement(routes), document.getElementById("app"));
