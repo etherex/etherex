@@ -42,7 +42,7 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onLoadMarketsSuccess: function(payload) {
-        console.log("MARKETS LOADED: " + payload.length);
+        console.log("MARKETS LOADED: ", payload.length);
         this.market = payload[1]; // Load ETX as default (TODO favorites / custom menu)
         this.market.txs = [];
         this.market.data = {};

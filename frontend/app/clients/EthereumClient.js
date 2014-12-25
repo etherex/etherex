@@ -11,6 +11,9 @@ if (ethBrowser)
 else
     web3.setProvider(new web3.providers.HttpRpcProvider('http://localhost:8080'));
 
+var contract = web3.contract(fixtures.addresses.etherex, fixtures.contract_desc);
+console.log("CONTRACT", contract);
+
 // web3.setProvider(new web3.providers.WebSocketProvider('ws://localhost:40404/eth'));
 // web3.setProvider(new web3.providers.AutoProvider());
 
@@ -40,203 +43,12 @@ var EthereumClient = function() {
         var total = 0;
         var markets = [{}];
 
-        var contract;
-        var desc =  [
-            {
-                "name": "price",
-                "inputs": [
-                    {
-                        "name": "id",
-                        "type": "uint256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "name": "price",
-                        "type": "uint256"
-                    }
-                ]
-            },
-            {
-                "name": "buy",
-                "inputs": [
-                    {
-                        "name": "a",
-                        "type": "uint256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "name": "result",
-                        "type": "uint256"
-                    }
-                ]
-            },
-            {
-                "name": "sell",
-                "inputs": [
-                    {
-                        "name": "a",
-                        "type": "uint256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "name": "result",
-                        "type": "uint256"
-                    }
-                ]
-            },
-            {
-                "name": "trade",
-                "inputs": [
-                    {
-                        "name": "a",
-                        "type": "uint256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "name": "result",
-                        "type": "uint256"
-                    }
-                ]
-            },
-            {
-                "name": "deposit",
-                "inputs": [
-                    {
-                        "name": "a",
-                        "type": "uint256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "name": "result",
-                        "type": "uint256"
-                    }
-                ]
-            },
-            {
-                "name": "withdraw",
-                "inputs": [
-                    {
-                        "name": "a",
-                        "type": "uint256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "name": "result",
-                        "type": "uint256"
-                    }
-                ]
-            },
-            {
-                "name": "cancel",
-                "inputs": [
-                    {
-                        "name": "id",
-                        "type": "uint256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "name": "result",
-                        "type": "uint256"
-                    }
-                ]
-            },
-            {
-                "name": "add_market",
-                "inputs": [
-                    {
-                        "name": "a",
-                        "type": "uint256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "name": "result",
-                        "type": "uint256"
-                    }
-                ]
-            },
-            {
-                "name": "change_ownership",
-                "inputs": [
-                    {
-                        "name": "a",
-                        "type": "uint256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "name": "result",
-                        "type": "uint256"
-                    }
-                ]
-            },
-            {
-                "name": "get_market",
-                "inputs": [
-                    {
-                        "name": "id",
-                        "type": "uint256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "name": "id",
-                        "type": "uint256"
-                    },
-                    {
-                        "name": "name",
-                        "type": "uint256"
-                    },
-                    {
-                        "name": "contract",
-                        "type": "uint256"
-                    },
-                    {
-                        "name": "decimals",
-                        "type": "uint256"
-                    },
-                    {
-                        "name": "precision",
-                        "type": "uint256"
-                    },
-                    {
-                        "name": "minimum",
-                        "type": "uint256"
-                    },
-                    {
-                        "name": "last_price",
-                        "type": "uint256"
-                    },
-                    {
-                        "name": "owner",
-                        "type": "uint256"
-                    },
-                    {
-                        "name": "block",
-                        "type": "uint256"
-                    }
-                ]
-            },
-        ];
-
         try {
-            contract = web3.contract(fixtures.addresses.etherex, desc);
-            console.log("CONTRACT", contract);
-
             web3.eth.stateAt(fixtures.addresses.etherex, "0x5").then(function (hextotal) {
                 total = _.parseInt(web3.toDecimal(hextotal));
                 console.log("TOTAL MARKETS: " + total);
 
                 for (var id = 1; id < total + 1; id++) {
-                    console.log("Getting market ID", id);
-
                     contract.get_market(String(id)).call().then(function (market) {
                         console.log("Got", market);
 
@@ -252,7 +64,7 @@ var EthereumClient = function() {
                         var owner = market[7];
                         var block = _.parseInt(market[8]);
 
-                        web3.eth.stateAt(address, "0x" + user.addresses[0]).then(function (balance) {
+                        web3.eth.stateAt(address, user.addresses[0]).then(function (balance) {
                             markets.push({
                                 id: id,
                                 name: name,
@@ -272,7 +84,6 @@ var EthereumClient = function() {
                         failure("Error getting market: " + String(e));
                     });
                 };
-                console.log("MARKETS", markets);
                 success(markets);
             }, function(e) {
                 error = "There seems to be a contract there, but no market was found: " + String(e);
