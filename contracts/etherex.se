@@ -23,6 +23,8 @@ data log_timestamp # 0x8
 data markets_ptr # 0x9
 data trades_ptr # 0xA
 
+TRADE_FIELDS = 6
+MARKET_FIELDS = 9
 data markets[2^160](id, name, contract, decimals, precision, minimum, last_price, owner, block)
 data trades[2^160](type, market, amount, price, owner, block)
 
@@ -305,23 +307,16 @@ def add_market(name, contract, decimals, precision, minimum):
     id = self.last_market + 1
 
     # "TODO - Check data..."
-    # market = [id, name, contract, decimals, precision, minimum]
-    # market_key = sha3(market, 6)
-    market_key = sha3(name)
 
-    self.markets[market_key].id = id
-    self.markets[market_key].name = name
-    self.markets[market_key].contract = contract
-    self.markets[market_key].decimals = decimals
-    self.markets[market_key].precision = precision
-    self.markets[market_key].minimum = minimum
-    self.markets[market_key].owner = msg.sender
-    self.markets[market_key].block = block.number
-
-    # Set market pointer
-    if id == 1:
-        self.markets_ptr = ref(self.markets[market_key].id)
-        # self.trades_ptr = market_key
+    self.markets[id].id = id
+    self.markets[id].name = name
+    self.markets[id].contract = contract
+    self.markets[id].decimals = decimals
+    self.markets[id].precision = precision
+    self.markets[id].minimum = minimum
+    self.markets[id].last_price = text("null")
+    self.markets[id].owner = msg.sender
+    self.markets[id].block = block.number
 
     # Set last market ID
     self.last_market = id
@@ -334,7 +329,6 @@ def add_market(name, contract, decimals, precision, minimum):
 
     return(1)
 
-
 #
 # Change ownership
 #
@@ -344,3 +338,22 @@ def change_ownership(new_owner):
         return(1)
     return(0)
 
+#
+# Getters
+#
+def get_market(id):
+    market = array(MARKET_FIELDS)
+
+    market[0] = self.markets[id].id
+    market[1] = self.markets[id].name
+    market[2] = self.markets[id].contract
+    market[3] = self.markets[id].decimals
+    market[4] = self.markets[id].precision
+    market[5] = self.markets[id].minimum
+    market[6] = self.markets[id].last_price
+    market[7] = self.markets[id].owner
+    market[8] = self.markets[id].block
+
+    if market:
+        return(market, MARKET_FIELDS)
+    return(0)

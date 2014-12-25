@@ -34,7 +34,7 @@ var EtherExApp = React.createFactory(React.createClass({
 
   render: function() {
     return (
-      <div>
+      <div className="container">
         <NavBar user={this.state.user} />
         <SubNavBar />
         {(this.state.user.error) ?

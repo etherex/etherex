@@ -3,68 +3,284 @@ var fixtures = require("../js/fixtures");
 
 var bigRat = require('big-rational');
 
+var web3 = require('ethereum.js');
+window.web3 = web3;
+
+if (ethBrowser)
+    web3.setProvider(new web3.providers.QtProvider());
+else
+    web3.setProvider(new web3.providers.HttpRpcProvider('http://localhost:8080'));
+
+// web3.setProvider(new web3.providers.WebSocketProvider('ws://localhost:40404/eth'));
+// web3.setProvider(new web3.providers.AutoProvider());
+
 var EthereumClient = function() {
 
     this.loadAddresses = function(success, failure) {
-        var addresses = [];
         var error = null;
 
         try {
-            addresses = eth.keys.map(function (k) { return eth.secretToAddress(k); });
+            web3.eth.accounts.then(function(accounts) {
+                if (!accounts.length)
+                    failure("No accounts were found on this Ethereum node.");
+                success(accounts);
+            }, function(e) {
+                error = String(e);
+                throw error;
+            });
         }
-        catch (e) {
-            error = String(e);
+        catch(e) {
+            failure("Unable to load addresses, are you running an Ethereum node? Please load this URL in AlethZero, or with a cpp-ethereum node with JSONRPC enabled running alongside a regular browser. The actual error was: " + error);
         }
-
-        if (!error)
-            success(addresses);
-        else
-            failure("Unable to load addresses, are you running an Ethereum node? Please load this URL in AlethZero, or with a cpp-ethereum node with JSONRPC enabled running alongside a regular browser.");
     };
 
-
     this.loadMarkets = function(user, success, failure) {
+        var error = null;
+        var ptr = null;
+        var total = 0;
         var markets = [{}];
 
-        var total = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(2))));
-        var ptr = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(18))));
-        var last = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(19))));
+        var contract;
+        var desc =  [
+            {
+                "name": "price",
+                "inputs": [
+                    {
+                        "name": "id",
+                        "type": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "price",
+                        "type": "uint256"
+                    }
+                ]
+            },
+            {
+                "name": "buy",
+                "inputs": [
+                    {
+                        "name": "a",
+                        "type": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "result",
+                        "type": "uint256"
+                    }
+                ]
+            },
+            {
+                "name": "sell",
+                "inputs": [
+                    {
+                        "name": "a",
+                        "type": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "result",
+                        "type": "uint256"
+                    }
+                ]
+            },
+            {
+                "name": "trade",
+                "inputs": [
+                    {
+                        "name": "a",
+                        "type": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "result",
+                        "type": "uint256"
+                    }
+                ]
+            },
+            {
+                "name": "deposit",
+                "inputs": [
+                    {
+                        "name": "a",
+                        "type": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "result",
+                        "type": "uint256"
+                    }
+                ]
+            },
+            {
+                "name": "withdraw",
+                "inputs": [
+                    {
+                        "name": "a",
+                        "type": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "result",
+                        "type": "uint256"
+                    }
+                ]
+            },
+            {
+                "name": "cancel",
+                "inputs": [
+                    {
+                        "name": "id",
+                        "type": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "result",
+                        "type": "uint256"
+                    }
+                ]
+            },
+            {
+                "name": "add_market",
+                "inputs": [
+                    {
+                        "name": "a",
+                        "type": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "result",
+                        "type": "uint256"
+                    }
+                ]
+            },
+            {
+                "name": "change_ownership",
+                "inputs": [
+                    {
+                        "name": "a",
+                        "type": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "result",
+                        "type": "uint256"
+                    }
+                ]
+            },
+            {
+                "name": "get_market",
+                "inputs": [
+                    {
+                        "name": "id",
+                        "type": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "name": "name",
+                        "type": "uint256"
+                    },
+                    {
+                        "name": "contract",
+                        "type": "uint256"
+                    },
+                    {
+                        "name": "decimals",
+                        "type": "uint256"
+                    },
+                    {
+                        "name": "precision",
+                        "type": "uint256"
+                    },
+                    {
+                        "name": "minimum",
+                        "type": "uint256"
+                    },
+                    {
+                        "name": "last_price",
+                        "type": "uint256"
+                    },
+                    {
+                        "name": "owner",
+                        "type": "uint256"
+                    },
+                    {
+                        "name": "block",
+                        "type": "uint256"
+                    }
+                ]
+            },
+        ];
 
-        console.log("TOTAL MARKETS: " + total);
-        console.log("MARKETS START: " + ptr);
-        console.log("MARKETS LAST: " + last);
+        try {
+            contract = web3.contract(fixtures.addresses.etherex, desc);
+            console.log("CONTRACT", contract);
 
-        // console.log(user);
-        for (var i = 0; i < total; i++) {
-            var id = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+6)));
-            console.log("LOADING MARKET ID: " + id);
-            if (id) {
-                var name = eth.toAscii(eth.stateAt(fixtures.addresses.markets, String(ptr)));
-                var address = eth.stateAt(fixtures.addresses.markets, String(ptr+1));
-                var decimals = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+2))));
-                var minimum = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+3)));
-                var precision = eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+4)));
-                var lastPrice = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+5)))) / Math.pow(10, precision.length - 1);
+            web3.eth.stateAt(fixtures.addresses.etherex, "0x5").then(function (hextotal) {
+                total = _.parseInt(web3.toDecimal(hextotal));
+                console.log("TOTAL MARKETS: " + total);
 
-                markets.push({
-                    id: id,
-                    name: name,
-                    address: address,
-                    decimals: decimals,
-                    minimum: minimum,
-                    precision: precision,
-                    lastPrice: lastPrice,
-                    balance: eth.toDecimal(eth.stateAt(address, user.addresses[0], -1)),
-                });
-            }
-            ptr = _.parseInt(eth.toDecimal(eth.stateAt(fixtures.addresses.markets, String(ptr+9))));
-        };
+                for (var id = 1; id < total + 1; id++) {
+                    console.log("Getting market ID", id);
 
-        if (markets.length > 1) {
-            success(markets);
+                    contract.get_market(String(id)).call().then(function (market) {
+                        console.log("Got", market);
+
+                        var name = web3.toAscii(market[1]);
+                        var address = market[2];
+                        var decimals = _.parseInt(market[3]);
+                        var precision = _.parseInt(market[4]);
+                        var minimum = _.parseInt(market[5]);
+                        if (market[6] == '2336')
+                            var lastPrice = null;
+                        else
+                            var lastPrice = _.parseInt(_.parseInt(market[6])) / Math.pow(10, precision.length - 1);
+                        var owner = market[7];
+                        var block = _.parseInt(market[8]);
+
+                        web3.eth.stateAt(address, "0x" + user.addresses[0]).then(function (balance) {
+                            markets.push({
+                                id: id,
+                                name: name,
+                                address: web3.fromDecimal(bigRat(address).valueOf()),
+                                decimals: decimals,
+                                minimum: minimum,
+                                precision: precision,
+                                lastPrice: lastPrice,
+                                owner: web3.fromDecimal(bigRat(owner).valueOf()),
+                                block: block,
+                                balance: _.parseInt(balance),
+                            });
+                        }, function(e) {
+                            failure("Unable to get market balance: " + String(e));
+                        });
+                    }, function(e) {
+                        failure("Error getting market: " + String(e));
+                    });
+                };
+                console.log("MARKETS", markets);
+                success(markets);
+            }, function(e) {
+                error = "There seems to be a contract there, but no market was found: " + String(e);
+            });
         }
-        else {
-            failure("Unable to load markets. Make a wish! (no really, can't find the contracts...)");
+        catch (e) {
+            error = "Unable to load markets: " + String(e);
+            failure(error);
         }
     };
 
@@ -104,95 +320,94 @@ var EthereumClient = function() {
     };
 
     this.setUserWatches = function(flux, addresses, markets) {
-        if (ethBrowser) {
-            // ETH balance
-            // eth.watch({altered: addresses}).uninstall();
-            eth.watch({altered: addresses}).changed(flux.actions.user.updateBalance);
+        // ETH balance
+        web3.eth.watch({altered: addresses}).changed(flux.actions.user.updateBalance);
 
-            // Sub balances
-            var market_addresses = _.rest(_.pluck(markets, 'address'));
-
-            // eth.watch({altered: market_addresses}).uninstall();
-            eth.watch({altered: market_addresses}).changed(flux.actions.user.updateBalanceSub);
-        }
-        else {
-            // for (var i = addresses.length - 1; i >= 0; i--) {
-            eth.unwatch("", addresses[0]);
-            eth.watch(addresses[0], "", flux.actions.user.updateBalance);
-
-            flux.actions.user.updateBalanceSub();
-            // for (var m = markets.length - 1; m >= 0; m--)
-            eth.unwatch("", markets[1].address);
-            eth.watch(markets[1].address, "", flux.actions.user.updateBalanceSub);
-        }
+        // Sub balances
+        var market_addresses = _.rest(_.pluck(markets, 'address'));
+        eth.watch({altered: market_addresses}).changed(flux.actions.user.updateBalanceSub);
     };
 
 
     this.setMarketWatches = function(flux, markets) {
-        // var market_addresses = _.rest(_.pluck(markets, 'address'));
-        if (ethBrowser) {
-            eth.watch({altered: fixtures.addresses.trades}).changed(flux.actions.trade.updateTrades);
-        }
-        else {
-            flux.actions.trade.loadTrades();
-            // eth.watch(fixtures.addresses.trades, "", flux.actions.trade.updateTrades);
-            // eth.unwatch("", market_addresses[1]);
-            // eth.watch(market_addresses[0], "", flux.actions.trade.updateTrades);
-            setTimeout(flux.actions.trade.updateTrades, 60000);
-        //     for (var i = market_addresses.length - 1; i >= 0; i--) {
-        //         flux.actions.trade.loadTrades();
-        //         eth.watch(market_addresses[i], "", flux.actions.trade.loadTrades);
-        //     }
-        }
+        web3.eth.watch({altered: fixtures.addresses.trades}).changed(flux.actions.trade.updateTrades);
     };
 
 
     this.updateBalance = function(address, success, failure) {
-        var confirmed = eth.toDecimal(eth.balanceAt(address, -1));
-        var unconfirmed = eth.toDecimal(eth.balanceAt(address));
-        var showUnconfirmed = false;
+        error = "Failed to update balance.";
 
-        if (unconfirmed != confirmed) {
-            showUnconfirmed = true;
-            unconfirmed = this.formatUnconfirmed(confirmed, unconfirmed, utils.formatBalance);
+        try {
+            web3.eth.balanceAt(address).then(function (hexbalance) {
+                balance = web3.toDecimal(hexbalance);
+                success(balance, null);
+            }, function(e) {
+                failure(error + " Actual error was: " + e);
+            });
+        }
+        catch(e) {
+            failure(error);
         }
 
-        if (confirmed >= 0) {
-            success(
-              confirmed,
-              showUnconfirmed ? "(" + unconfirmed + " unconfirmed)" : null
-            );
-        }
-        else {
-            failure("Failed to update balance. We fell.");
-        }
+        // var confirmed = web3.toDecimal(web3.eth.balanceAt(address, -1));
+        // var unconfirmed = web3.toDecimal(web3.eth.balanceAt(address));
+        // var showUnconfirmed = false;
+
+        // if (unconfirmed != confirmed) {
+        //     showUnconfirmed = true;
+        //     unconfirmed = this.formatUnconfirmed(confirmed, unconfirmed, utils.formatBalance);
+        // }
+
+        // if (confirmed >= 0) {
+        //     success(
+        //       confirmed,
+        //       showUnconfirmed ? "(" + unconfirmed + " unconfirmed)" : null
+        //     );
+        // }
+        // else {
+        //     failure("Failed to update balance. We fell.");
+        // }
     };
 
 
     this.updateBalanceSub = function(market, address, success, failure) {
-        var confirmed = eth.toDecimal(eth.stateAt(market.address, address, -1));
-        var unconfirmed = eth.toDecimal(eth.stateAt(market.address, address));
-        var showUnconfirmed = false;
+        error = "Failed to update subcurrency balance.";
 
-        // DEBUG
-        // console.log("confirmed: " + confirmed);
-        // console.log("unconfirmed: " + unconfirmed);
-        // console.log(this.formatUnconfirmed(confirmed, unconfirmed));
-
-        if (unconfirmed != confirmed) {
-            showUnconfirmed = true;
-            unconfirmed = this.formatUnconfirmed(confirmed, unconfirmed, utils.format);
+        try {
+            web3.eth.stateAt(market.address, address).then(function (hexbalance) {
+                balance = web3.toDecimal(hexbalance);
+                success(balance, null);
+            }, function(e) {
+                failure(error + " Actual error was: " + e);
+            });
+        }
+        catch(e) {
+            failure(error);
         }
 
-        if (confirmed >= 0) {
-            success(
-              confirmed > 0 ? confirmed : 0,
-              showUnconfirmed ? "(" + unconfirmed + " unconfirmed)" : null
-            );
-        }
-        else {
-            failure("Failed to update subcurrency balance. No dice.");
-        }
+        // var confirmed = web3.toDecimal(web3.eth.stateAt(market.address, address, -1));
+        // var unconfirmed = web3.toDecimal(web3.eth.stateAt(market.address, address));
+        // var showUnconfirmed = false;
+
+        // // DEBUG
+        // // console.log("confirmed: " + confirmed);
+        // // console.log("unconfirmed: " + unconfirmed);
+        // // console.log(this.formatUnconfirmed(confirmed, unconfirmed));
+
+        // if (unconfirmed != confirmed) {
+        //     showUnconfirmed = true;
+        //     unconfirmed = this.formatUnconfirmed(confirmed, unconfirmed, utils.format);
+        // }
+
+        // if (confirmed >= 0) {
+        //     success(
+        //       confirmed > 0 ? confirmed : 0,
+        //       showUnconfirmed ? "(" + unconfirmed + " unconfirmed)" : null
+        //     );
+        // }
+        // else {
+        //     failure("Failed to update subcurrency balance. No dice.");
+        // }
     };
 
 
@@ -420,9 +635,9 @@ var EthereumClient = function() {
                 max: 100,
                 latest: -1,
                 from: fixtures.addresses.etherex,
-                to: fixtures.addresses.markets,
+                to: fixtures.addresses.etherex,
                 altered: {
-                    id: fixtures.addresses.markets,
+                    id: fixtures.addresses.etherex,
                     at: "0x" + slot // "0x69" // TODO get market price slot
                 }
             });

@@ -6,7 +6,6 @@ var Router = require("react-router");
 var Route = Router.Route;
 var NotFoundRoute = Router.NotFoundRoute;
 var DefaultRoute = Router.DefaultRoute;
-// var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;
 
 var EtherExApp = require("./components/EtherExApp");
@@ -50,31 +49,7 @@ require("./css/bootstrap-darkly.css");
 // require("./css/rickshaw.min.css");
 require("./css/styles.css");
 
-
-// eth.js compatibility
-if (!ethBrowser) {
-  var bigInt = require("./js/eth/BigInteger.js");
-  window.bigInt = bigInt;
-
-  require("./js/eth/ethString.js");
-
-  var eth = require("./js/eth/eth.js");
-  window.eth = eth;
-
-  // eth.stateAt = eth.storageAt;
-  eth.messages = function() { return {}; };
-  eth.toDecimal = function(x) { return x.dec(); };
-  eth.fromAscii = function(x) { return x.unbin(); };
-  eth.fromFixed = function(x) { return x.unpad().unbin(); };
-  eth.toAscii = function(x) { return x.bin().unpad(); };
-  eth.pad = function(x, l) { return String(x).pad(l); };
-}
-
-// old scripts / TODO cleanup
-// require("./js/scripts.js");
-
 var Route = Router.Route;
-var Routes = Router.Routes;
 var Redirect = Router.Redirect;
 
 var stores = {
@@ -99,19 +74,19 @@ flux.on("dispatch", function(type, payload) {
 });
 
 var routes = (
-  <Route name="app" handler={EtherExApp} flux={flux}>
-    <DefaultRoute handler={Trades} flux={flux} title="Trades" />
-    <Route name="home" path="/" handler={Trades} flux={flux} title="Trades" />
-    <Route name="trades" path="/trades" handler={Trades} flux={flux} title="Trades" />
-    <Route name="trades/xchain" path="/trades/xchain" handler={Trades} flux={flux} title="X-Chain" />
-    <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
-    <Route name="markets" path="/markets" handler={Markets} flux={flux} title="Markets" />
-    <Route name="wallet" path="/wallet" handler={Wallet} flux={flux} title="Wallet" />
-    <Route name="tools" path="/tools" handler={Tools} flux={flux} title="Tools" />
-    <Route name="help" path="/help" handler={Placeholder} flux={flux} title="Help" />
-    <Route name="userDetails" path="/user" handler={UserDetails} flux={flux} title="User details" />
-    <NotFoundRoute name="notfound" handler={Placeholder} title="User or Trade ID not found" flux={flux} />
-  </Route>
+    <Route name="app" handler={EtherExApp} flux={flux}>
+      <DefaultRoute handler={Trades} flux={flux} title="Trades" />
+      <Route name="home" path="/" handler={Trades} flux={flux} title="Trades" />
+      <Route name="trades" path="/trades" handler={Trades} flux={flux} title="Trades" />
+      <Route name="trades/xchain" path="/trades/xchain" handler={Trades} flux={flux} title="X-Chain" />
+      <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
+      <Route name="markets" path="/markets" handler={Markets} flux={flux} title="Markets" />
+      <Route name="wallet" path="/wallet" handler={Wallet} flux={flux} title="Wallet" />
+      <Route name="tools" path="/tools" handler={Tools} flux={flux} title="Tools" />
+      <Route name="help" path="/help" handler={Placeholder} flux={flux} title="Help" />
+      <Route name="userDetails" path="/user" handler={UserDetails} flux={flux} title="User details" />
+      <NotFoundRoute name="notfound" handler={Placeholder} title="User or Trade ID not found" flux={flux} />
+    </Route>
 );
 
 Router.run(routes, Router.HistoryLocation, function (Handler) {
