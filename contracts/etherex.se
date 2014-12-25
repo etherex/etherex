@@ -15,18 +15,16 @@ data creator # 0x2
 data created # 0x3
 data status # 0x4
 data last_market # 0x5
+data last_trade # 0x6
 
-data log_gas # 0x6
-data log_last_trade # 0x7
-data log_timestamp # 0x8
+data log_gas # 0x7
+data log_last_trade # 0x8
+data log_timestamp # 0x9
 
-data markets_ptr # 0x9
-data trades_ptr # 0xA
-
-TRADE_FIELDS = 6
+TRADE_FIELDS = 7
 MARKET_FIELDS = 9
 data markets[2^160](id, name, contract, decimals, precision, minimum, last_price, owner, block)
-data trades[2^160](type, market, amount, price, owner, block)
+data trades[2^160](id, type, market, amount, price, owner, block)
 
 extern any: [call]
 
@@ -35,11 +33,15 @@ macro refund():
         send(msg.sender, msg.value)
 
 macro save_trade($type, $amount, $price, $market_id):
+    # FIXME
+    # self.last_trade = self.last_trade + 1
+
     trade = [$type, $market_id, $amount, $price, msg.sender, block.number]
     trade_id = sha3(trade, 6)
 
     # Save trade
-    if !self.trades[trade_id].type:
+    if !self.trades[trade_id].id:
+        self.trades[trade_id].id = trade_id
         self.trades[trade_id].type = trade[0]
         self.trades[trade_id].market = trade[1]
         self.trades[trade_id].amount = trade[2]
@@ -55,6 +57,7 @@ macro save_trade($type, $amount, $price, $market_id):
     return(trade_id)
 
 macro remove_trade($trade_id):
+    self.trades[$trade_id].id = 0
     self.trades[$trade_id].type = 0
     self.trades[$trade_id].market = 0
     self.trades[$trade_id].amount = 0
@@ -97,6 +100,9 @@ def price(market_id):
 # Buy / Sell actions
 #
 def buy(amount, price, market_id):
+    # FIXME
+    self.last_trade = self.last_trade + 1
+
     # Calculate ETH value
     value = ((amount * price) / (self.markets[market_id].precision * 10 ^ self.markets[market_id].decimals)) * 10 ^ 18
 
@@ -344,7 +350,7 @@ def change_ownership(new_owner):
 def get_market(id):
     market = array(MARKET_FIELDS)
 
-    market[0] = self.markets[id].id
+    market[0] = id
     market[1] = self.markets[id].name
     market[2] = self.markets[id].contract
     market[3] = self.markets[id].decimals
@@ -356,4 +362,19 @@ def get_market(id):
 
     if market:
         return(market, MARKET_FIELDS)
+    return(0)
+
+def get_trade(id):
+    trade = array(TRADE_FIELDS)
+
+    trade[0] = id
+    trade[1] = self.trades[id].type
+    trade[2] = self.trades[id].market
+    trade[3] = self.trades[id].amount
+    trade[4] = self.trades[id].price
+    trade[5] = self.trades[id].owner
+    trade[6] = self.trades[id].block
+
+    if trade:
+        return(trade, TRADE_FIELDS)
     return(0)
