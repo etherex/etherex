@@ -3,6 +3,9 @@
 var React = require("react");
 var Fluxxor = require("fluxxor");
 
+var Router = require("react-router");
+var RouteHandler = Router.RouteHandler;
+
 var FluxMixin = Fluxxor.FluxMixin(React),
     StoreWatchMixin = Fluxxor.StoreWatchMixin;
 
@@ -56,7 +59,7 @@ var EtherExApp = React.createFactory(React.createClass({
           </div>
         </div>}
         {(!this.state.market.error && !this.state.user.error) &&
-          <this.props.activeRouteHandler
+          <RouteHandler
             market={this.state.market}
             trades={this.state.trades}
             user={this.state.user}

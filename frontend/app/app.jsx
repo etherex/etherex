@@ -6,7 +6,7 @@ var Router = require("react-router");
 var Route = Router.Route;
 var NotFoundRoute = Router.NotFoundRoute;
 var DefaultRoute = Router.DefaultRoute;
-var Link = Router.Link;
+// var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;
 
 var EtherExApp = require("./components/EtherExApp");
@@ -91,6 +91,7 @@ var actions = {
 
 var flux = new Fluxxor.Flux(stores, actions);
 
+// DEBUG
 flux.on("dispatch", function(type, payload) {
   if (console && console.log) {
     console.log("[Dispatch]", type, payload);
@@ -116,6 +117,3 @@ var routes = (
 Router.run(routes, Router.HistoryLocation, function (Handler) {
   React.render(<Handler flux={flux}/>, document.body);
 });
-
-/* global document */
-// React.render(React.createElement(routes), document.getElementById("app"));
