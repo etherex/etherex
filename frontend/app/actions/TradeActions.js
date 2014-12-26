@@ -51,10 +51,11 @@ var TradeActions = function(client) {
         trade.id = id;
         trade.status = "new";
 
+        var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
         console.log("ON MARKET: " + market.name);
 
-        _client.addTrade(trade, market, function() {
+        _client.addTrade(user, trade, market, function(result) {
             this.dispatch(constants.trade.ADD_TRADE, trade);
 
             if (!ethBrowser)
@@ -65,9 +66,10 @@ var TradeActions = function(client) {
     };
 
     this.fillTrades = function(trades) {
+        var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
 
-        _client.fillTrades(trades, market, function() {
+        _client.fillTrades(user, trades, market, function(result) {
             var trade = this.flux.store("TradeStore").getState();
 
             // Partial filling adds a new trade for remaining available
@@ -91,9 +93,10 @@ var TradeActions = function(client) {
     };
 
     this.fillTrade = function(trade) {
+        var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
 
-        _client.fillTrade(trade, market, function() {
+        _client.fillTrade(user, trade, market, function(result) {
             this.dispatch(constants.trade.FILL_TRADE, trade);
 
             if (!ethBrowser)
@@ -104,7 +107,8 @@ var TradeActions = function(client) {
     };
 
     this.cancelTrade = function(trade) {
-        _client.cancelTrade(trade, function() {
+        var user = this.flux.store("UserStore").getState().user;
+        _client.cancelTrade(user, trade, function(result) {
             this.dispatch(constants.trade.CANCEL_TRADE, trade);
 
             if (!ethBrowser)

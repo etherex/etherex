@@ -358,8 +358,8 @@ var TradeForm = React.createFactory(React.createClass({
               <span className="panel-title">
               <label className="sr-only" forHtml="type">Buy or sell</label>
               <DropdownButton bsStyle="primary" bsSize="medium" ref="type" onSelect={this.handleType} key={this.state.type} title={this.state.typename}>
-                <MenuItem key={1}>Buy</MenuItem>
-                <MenuItem key={2}>Sell</MenuItem>
+                <MenuItem eventKey={1}>Buy</MenuItem>
+                <MenuItem eventKey={2}>Sell</MenuItem>
               </DropdownButton>
               </span>
             </div>

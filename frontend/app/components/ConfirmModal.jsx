@@ -14,11 +14,10 @@ var ConfirmModal = React.createFactory(React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
-        // console.log(this);
         if (this.props.tradeList)
             var TradeTable = require("./TradeTable");
         return (
-            <Modal title="Confirmation required" animation={true}>
+            <Modal {...this.props} title="Confirmation required" animation={true}>
                 <form onSubmit={this.confirmSubmit}>
                     <div className="modal-body">
                         <h4>{this.props.message}</h4>
@@ -28,7 +27,7 @@ var ConfirmModal = React.createFactory(React.createClass({
                             <TradeTable tradeList={this.props.tradeList} user={this.props.user} review={true} />}
                     </div>
                     <div className="modal-footer">
-                        <Button onClick={this.props.onRequestHide}>No</Button>
+                        <Button onClick={this.onRequestHide}>No</Button>
                         <Button type="submit" bsStyle="primary">Yes</Button>
                     </div>
                 </form>
