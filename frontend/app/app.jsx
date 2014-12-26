@@ -90,5 +90,5 @@ var routes = (
 );
 
 Router.run(routes, Router.HistoryLocation, function (Handler) {
-  React.render(<Handler flux={flux}/>, document.body);
+  React.render(<Handler flux={flux}/>, document.getElementById('app'));
 });
