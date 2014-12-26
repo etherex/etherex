@@ -207,12 +207,7 @@ var fixtures = {
                     "type": "uint256"
                 }
             ],
-            "outputs": [
-                {
-                    "name": "id",
-                    "type": "uint256"
-                }
-            ]
+            "outputs": []
         },
         {
             "name": "get_trade",
@@ -225,7 +220,7 @@ var fixtures = {
             "outputs": [
                 {
                     "name": "id",
-                    "type": "uint256"
+                    "type": "hash256"
                 },
                 {
                     "name": "type",
@@ -245,7 +240,7 @@ var fixtures = {
                 },
                 {
                     "name": "owner",
-                    "type": "hash64"
+                    "type": "hash256"
                 },
                 {
                     "name": "block",

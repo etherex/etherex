@@ -55,8 +55,7 @@ macro save_trade($type, $amount, $price, $market_id):
         self.trades[trade_id].block = trade[5]
 
         # Update market
-        total_trades = self.markets[$market_id].total_trades
-        new_total = total_trades + 1
+        new_total = self.markets[$market_id].total_trades + 1
         self.markets[$market_id].total_trades = new_total
         self.markets[$market_id].trade_ids[new_total].id = trade_id
     else:

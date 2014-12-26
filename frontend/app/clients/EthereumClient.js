@@ -14,6 +14,11 @@ else
 var contract = web3.contract(fixtures.addresses.etherex, fixtures.contract_desc);
 console.log("CONTRACT", contract);
 
+web3.padDecimal = function (string, chars) {
+    string = web3.fromDecimal(string).substr(2);
+    return Array(chars - string.length + 1).join("0") + string;
+};
+
 // web3.setProvider(new web3.providers.WebSocketProvider('ws://localhost:40404/eth'));
 // web3.setProvider(new web3.providers.AutoProvider());
 
@@ -22,20 +27,17 @@ var EthereumClient = function() {
     // Loading methods
 
     this.loadAddresses = function(success, failure) {
-        var error = null;
-
         try {
-            web3.eth.accounts.then(function(accounts) {
+            web3.eth.accounts.then(function (accounts) {
                 if (!accounts.length)
                     failure("No accounts were found on this Ethereum node.");
                 success(accounts);
             }, function(e) {
-                error = String(e);
-                throw error;
+                throw String(e);
             });
         }
         catch(e) {
-            failure("Unable to load addresses, are you running an Ethereum node? Please load this URL in AlethZero, or with a cpp-ethereum node with JSONRPC enabled running alongside a regular browser. The actual error was: " + error);
+            failure("Unable to load addresses, are you running an Ethereum node? Please load this URL in AlethZero, or with a cpp-ethereum node with JSONRPC enabled running alongside a regular browser. The actual error was: " + String(e));
         }
     };
 
@@ -68,6 +70,7 @@ var EthereumClient = function() {
                                     var lastPrice = _.parseInt(_.parseInt(market[6])) / Math.pow(10, precision.length - 1);
                                 var owner = market[7].replace("0x000000000000000000000000", "0x");
                                 var block = _.parseInt(market[8]);
+                                var total_trades = _.parseInt(market[9]);
 
                                 console.log(id, name, address, decimals, precision, minimum, lastPrice, owner, block);
 
@@ -82,6 +85,7 @@ var EthereumClient = function() {
                                         lastPrice: lastPrice,
                                         owner: owner,
                                         block: block,
+                                        total_trades: total_trades,
                                         balance: _.parseInt(balance),
                                     });
                                 }, function(e) {
@@ -115,25 +119,42 @@ var EthereumClient = function() {
 
     this.loadTrades = function(flux, market, progress, success, failure) {
         try {
-            contract.get_trade_ids(String(market.id)).call().then(function (trade_ids) {
-                if (!trade_ids[0]) {
+            // funid=11 -> 0x0a...
+            var calldata = "0x0a" + web3.padDecimal(String(market.id), 64);
+            // console.log("CALLDATA", calldata);
+
+            // contract.get_trade_ids(String(market.id)).call().then(function (trade_ids) {
+            web3.eth.call({to: fixtures.addresses.etherex, data: calldata}).then( function(raw_trade_ids) {
+                // console.log("RAW TRADE IDS", raw_trade_ids);
+
+                var trade_ids = [];
+                raw_trade_ids = raw_trade_ids.substr(2);
+
+                for (var i = 0; i < market.total_trades; i++) {
+                    trade_ids.push(raw_trade_ids.slice(0, 64));
+                    raw_trade_ids = raw_trade_ids.slice(64);
+                };
+                // console.log("TRADE IDS", trade_ids);
+
+                if (!trade_ids) {
                     failure("No trades found");
                     return;
                 }
 
                 var total = trade_ids.length;
-                console.log("TOTAL TRADES: ", total, trade_ids);
+                console.log("TOTAL TRADES: ", total);
 
                 var tradePromises = [];
 
                 for (var i = 0; i < total; i++) {
-                    id = trade_ids[i]
                     var tradePromise = new Promise(function (resolve, reject) {
-                        contract.get_trade(String(id)).call().then(function (trade) {
+                        var id = trade_ids[i];
+                        var p = i;
+                        contract.get_trade("0x" + id).call().then(function (trade) {
                             try {
                                 console.log("Trade from ABI:", trade);
 
-                                var id = _.parseInt(trade[0]);
+                                var id = trade[0];
                                 var type = _.parseInt(trade[1]);
                                 var marketid = _.parseInt(trade[2]);
                                 var amountPrecision = Math.pow(10, market.decimals);
@@ -141,8 +162,8 @@ var EthereumClient = function() {
 
                                 console.log("Loading trade " + id + " for market " + market.name);
 
-                                var amount = bigRat(web3.toDecimal(trade[3])).divide(amountPrecision).valueOf();
-                                var price = bigRat(web3.toDecimal(trade[4])).divide(precision).valueOf();
+                                var amount = bigRat(_.parseInt(trade[3])).divide(amountPrecision).valueOf();
+                                var price = bigRat(_.parseInt(trade[4])).divide(precision).valueOf();
 
                                 // console.log("Filling: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr))));
                                 // console.log("Pending: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr), 0)));
@@ -154,12 +175,12 @@ var EthereumClient = function() {
                                     price: price,
                                     amount: amount,
                                     total: amount * price,
-                                    owner: trade[5],
+                                    owner: trade[5].replace("0x000000000000000000000000", "0x"),
                                     market: {
                                         id: market.id,
                                         name: market.name
                                     },
-                                    status: 'pending',
+                                    status: 'mined',
                                     // status: (eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+1), 0)) == 0 ||
                                              // eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+1), -1)) == 0) ?
                                             // "pending" : "mined"
@@ -167,7 +188,7 @@ var EthereumClient = function() {
                                 });
 
                                 // Update progress
-                                progress({percent: (i + 1) / total * 100 });
+                                progress({percent: (p + 1) / total * 100 });
                             }
                             catch(e) {
                                 reject(e);

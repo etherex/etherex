@@ -6,9 +6,9 @@ var TradeActions = function(client) {
     this.loadTrades = function() {
         this.dispatch(constants.trade.LOAD_TRADES);
 
-        var markets = this.flux.store("MarketStore").getState().markets;
+        var market = this.flux.store("MarketStore").getState().market;
 
-        _client.loadTrades(this.flux, markets, function(trades) {
+        _client.loadTrades(this.flux, market, function(trades) {
             this.dispatch(constants.trade.LOAD_TRADES_PROGRESS, trades);
         }.bind(this), function(trades) {
             this.dispatch(constants.trade.LOAD_TRADES_SUCCESS, trades);
@@ -20,9 +20,9 @@ var TradeActions = function(client) {
     this.updateTrades = function() {
         this.dispatch(constants.trade.UPDATE_TRADES);
 
-        var markets = this.flux.store("MarketStore").getState().markets;
+        var market = this.flux.store("MarketStore").getState().market;
 
-        _client.loadTrades(this.flux, markets, function(trades) {
+        _client.loadTrades(this.flux, market, function(trades) {
             this.dispatch(constants.trade.UPDATE_TRADES_PROGRESS, trades);
         }.bind(this), function(trades) {
             this.dispatch(constants.trade.UPDATE_TRADES_SUCCESS, trades);
