@@ -27,28 +27,37 @@ var EthereumClient = function() {
     // Loading methods
 
     this.loadAddresses = function(success, failure) {
-        try {
+        var loadPromise = new Promise(function (resolve, reject) {
             web3.eth.accounts.then(function (accounts) {
-                if (!accounts.length)
-                    failure("No accounts were found on this Ethereum node.");
-                success(accounts);
-            }, function(e) {
-                throw String(e);
+                if (!accounts || accounts.length == 0)
+                    reject("No accounts were found on this Ethereum node.");
+                resolve(accounts);
+            }, function (e) {
+                reject("Error loading accounts: " + String(e));
             });
-        }
-        catch(e) {
-            failure("Unable to load addresses, are you running an Ethereum node? Please load this URL in AlethZero, or with a cpp-ethereum node with JSONRPC enabled running alongside a regular browser. The actual error was: " + String(e));
-        }
+            setTimeout(function() {
+                reject("Unable to load addresses, are you running an Ethereum node? Please load this URL in AlethZero, or with a cpp-ethereum node with JSONRPC enabled running alongside a regular browser.");
+            }, 5000);
+        });
+
+        loadPromise.then(function (accounts) {
+            success(accounts);
+        }, function (e) {
+            failure(e);
+        });
     };
 
     this.loadMarkets = function(user, success, failure) {
         try {
             web3.eth.stateAt(fixtures.addresses.etherex, "0x5").then(function (hextotal) {
                 var total = _.parseInt(web3.toDecimal(hextotal));
+
                 console.log("TOTAL MARKETS: ", total, hextotal);
 
-                if (hextotal == "0x")
-                    failure("No market found, it seems like contracts are missing: " + String(e));
+                if (!total || hextotal == "0x") {
+                    failure("No market found, seems like contracts are missing.");
+                    return;
+                }
 
                 var marketPromises = [];
 
@@ -136,7 +145,7 @@ var EthereumClient = function() {
                 };
                 // console.log("TRADE IDS", trade_ids);
 
-                if (!trade_ids) {
+                if (!trade_ids || trade_ids.length == 0) {
                     failure("No trades found");
                     return;
                 }
@@ -275,16 +284,22 @@ var EthereumClient = function() {
     // Balances
 
     this.updateBalance = function(address, success, failure) {
+        var error = "Failed to update balance: ";
+
         try {
             web3.eth.balanceAt(address).then(function (hexbalance) {
+                if (!hexbalance || hexbalance == "0x") {
+                    success(0, false);
+                    return;
+                }
                 balance = web3.toDecimal(hexbalance);
-                success(balance, null);
+                success(balance, false);
             }, function(e) {
                 failure(error + e);
             });
         }
         catch(e) {
-            failure("Failed to update balance: " + e);
+            failure(error + e);
         }
 
         // var confirmed = web3.toDecimal(web3.eth.balanceAt(address, -1));
@@ -308,17 +323,22 @@ var EthereumClient = function() {
     };
 
     this.updateBalanceSub = function(market, address, success, failure) {
+        var error = "Failed to update subcurrency balance: ";
+
         try {
             web3.eth.stateAt(market.address, address).then(function (hexbalance) {
+                if (!hexbalance || hexbalance == "0x") {
+                    success(0, false);
+                    return;
+                }
                 balance = web3.toDecimal(hexbalance);
-                console.log("SUBBALANCE", balance);
-                success(balance, null);
+                success(balance, false);
             }, function(e) {
-                failure("Failed to update subcurrency balance: " + e);
+                failure(error + e);
             });
         }
         catch(e) {
-            failure(error);
+            failure(error + e);
         }
 
         // var confirmed = web3.toDecimal(web3.eth.stateAt(market.address, address, -1));
