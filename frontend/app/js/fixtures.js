@@ -163,11 +163,11 @@ var fixtures = {
                 },
                 {
                     "name": "name",
-                    "type": "uint256"
+                    "type": "hash256"
                 },
                 {
                     "name": "contract",
-                    "type": "uint256"
+                    "type": "hash256"
                 },
                 {
                     "name": "decimals",
@@ -187,10 +187,29 @@ var fixtures = {
                 },
                 {
                     "name": "owner",
-                    "type": "uint256"
+                    "type": "hash256"
                 },
                 {
                     "name": "block",
+                    "type": "uint256"
+                },
+                {
+                    "name": "total_trades",
+                    "type": "uint256"
+                }
+            ]
+        },
+        {
+            "name": "get_trade_ids",
+            "inputs": [
+                {
+                    "name": "market_id",
+                    "type": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "id",
                     "type": "uint256"
                 }
             ]
@@ -226,7 +245,7 @@ var fixtures = {
                 },
                 {
                     "name": "owner",
-                    "type": "uint256"
+                    "type": "hash64"
                 },
                 {
                     "name": "block",

@@ -9,7 +9,6 @@ var UserActions = function(client) {
             this.dispatch(constants.user.LOAD_ADDRESSES_SUCCESS, addresses);
 
             // Update balance after loading addresses
-            // var user = this.flux.store("UserStore").getState().user;
             this.flux.actions.user.updateBalance();
 
             // Load markets

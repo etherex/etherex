@@ -54,7 +54,7 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onChangeMarket: function(payload) {
-        console.log("MARKET: " + payload.name);
+        console.log("MARKET: ", payload.name);
         this.market = payload;
         this.market.txs = [];
         this.market.data = {};

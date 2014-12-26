@@ -7,6 +7,7 @@
 
 from pyethereum import tester
 from pyethereum.utils import sha3
+import logging as logger
 
 # DEBUG
 # tester.enable_logging()
@@ -26,19 +27,18 @@ class TestEtherEx(object):
     etx = 'contracts/etx.se'
 
     # ABI function IDs
-    price = 0
-    buy = 1
-    sell = 2
-    trade = 3
-    deposit = 4
-    withdraw = 5
-    cancel = 6
-    add_market = 7
-    change_ownership = 8
-
-    # Storate offsets
-    trades_offset = 8
-    markets_offset = 2 ** 160
+    PRICE = 0
+    BUY = 1
+    SELL = 2
+    TRADE = 3
+    DEPOSIT = 4
+    WITHDRAW = 5
+    CANCEL = 6
+    ADD_MARKET = 7
+    CHANGE_OWNERSHIP = 8
+    GET_MARKET = 9
+    GET_TRADE_IDS = 10
+    GET_TRADE = 11
 
     # Utilities
     def hex_pad(self, x):
@@ -51,7 +51,7 @@ class TestEtherEx(object):
         return value
 
     def ptr_add(self, ptr, x=1):
-        return hex(int(ptr, 16) + x)[:-1]
+        return hex(int(ptr, 16) + x)
 
     def _storage(self, contract, idx):
         return self.state.block.account_to_dict(contract)['storage'].get(idx)
@@ -103,54 +103,31 @@ class TestEtherEx(object):
         assert ans == [1]
         assert self._storage(self.namereg_contract, "0x" + self.etx_contract) == "0x" + "ETX".encode('hex')
 
-        # Check references to subcontracts
-        # assert self._storage(self.contract, 1) == self.xhex(1)
-        # assert self._storage(self.contract, 3) == "0x" + self.bcontract
-        # assert self._storage(self.contract, 4) == "0x" + self.icontract
-        # assert self._storage(self.contract, 5) == "0x" + self.tcontract
-        # assert self._storage(self.contract, 6) == "0x" + self.contract
-
-        # Check subcontracts reference back to exchange, and exchange has proper creator
-        # assert self._storage(self.bcontract, int(self.ALICE['address'], 16)) == self.xhex(10 ** 18)
-        # assert self._storage(self.bcontract, 15) == "0x" + self.contract
-        # assert self._storage(self.icontract, 15) == "0x" + self.contract
-        # assert self._storage(self.tcontract, 15) == "0x" + self.contract
-        # assert self._storage(self.contract, 15) == "0x" + self.contract
 
         # Register ETX
         ans = self.state.send(
             self.ALICE['key'],
             self.contract,
             10 ** 18,
-            funid=7,
+            funid=self.ADD_MARKET,
             abi=["0x" + "ETX".encode('hex'), self.etx_contract, 5, 10 ** 8, 10 ** 18])
         assert ans == [1]
 
-        # print self._storage(self.contract, "0x")
-        # print self._storage(self.contract, "0x01")
-        # print self._storage(self.contract, "0x02")
-        # print self._storage(self.contract, "0x03")
-        # print self._storage(self.contract, "0x04")
-        # print self._storage(self.contract, "0x05")
-        # print self._storage(self.contract, "0x06")
-        # print self._storage(self.contract, "0x07")
-        # print self._storage(self.contract, "0x08")
-        # print self._storage(self.contract, "0x09")
-        # print self._storage(self.contract, "0x0a")
-        # ptr = sha3("ETX").encode('hex')
+        # Get markets pointer...
+        self.ptr = self._storage(self.contract, "0x07")
+        logger.info("Markets start at %s, then %s ..." % (self.ptr, self.ptr_add(self.ptr, 1)))
+        logger.info(self.state.block.account_to_dict(self.contract)['storage'])
+        logger.info("===")
 
-        # Get market pointer...
-        # ptr = self._storage(self.contract, "0x09")
-
-        # assert self._storage(self.contract, self.ptr_add(ptr, 0)) == self.xhex(1) # Market ID
-        # assert self._storage(self.contract, self.ptr_add(ptr, 1)) == "0x" + "ETX".encode('hex') # Name
-        # assert self._storage(self.contract, self.ptr_add(ptr, 2)) == "0x" + self.etx_contract # Contract address
-        # assert self._storage(self.contract, self.ptr_add(ptr, 3)) == self.xhex(5) # Decimal precision
-        # assert self._storage(self.contract, self.ptr_add(ptr, 4)) == self.xhex(10 ** 8) # Price precision
-        # assert self._storage(self.contract, self.ptr_add(ptr, 5)) == self.xhex(10 ** 18) # Minimum amount
-        # assert self._storage(self.contract, self.ptr_add(ptr, 6)) == None # Last price
-        # assert self._storage(self.contract, self.ptr_add(ptr, 7)) == "0x" + self.ALICE['address'] # Owner
-        # assert self._storage(self.contract, self.ptr_add(ptr, 8)) == None # Block #
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 0)) == self.xhex(1) # Market ID
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 1)) == "0x" + "ETX".encode('hex') # Name
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 2)) == "0x" + self.etx_contract # Contract address
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 3)) == self.xhex(5) # Decimal precision
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 4)) == self.xhex(10 ** 8) # Price precision
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 5)) == self.xhex(10 ** 18) # Minimum amount
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 6)) == None # Last price
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 7)) == "0x" + self.ALICE['address'] # Owner
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 8)) == None # Block #
 
         # assert self._storage(self.contract, "0xb") == self.xhex(1) # Market ID
         # assert self._storage(self.contract, hex(12)) == "0x" + "ETX".encode('hex') # Name
@@ -172,7 +149,7 @@ class TestEtherEx(object):
             self.ALICE['key'],
             self.contract,
             0,
-            funid=8,
+            funid=self.CHANGE_OWNERSHIP,
             abi=[new_owner])
         assert ans == [1]
         assert self._storage(self.contract, "0x01") == new_owner
@@ -184,11 +161,70 @@ class TestEtherEx(object):
             self.ALICE['key'],
             self.contract,
             0,
-            funid=9,
+            funid=self.GET_MARKET,
             abi=[1])
         self.state.mine(3)
 
-        assert ans == []
+        assert ans == [1, 4543576, 584202455294917676171628316407181071088652546483L, 5, 100000000, 1000000000000000000, 0, 745948140856946866108753121277737810491401257713L, 0, 0, 0]
+
+    def test_add_trades(self):
+        self.test_initialize()
+
+        # Add buy trade
+        ans = self.state.send(
+            self.ALICE['key'],
+            self.contract,
+            125 * 10 ** 18,
+            funid=self.BUY,
+            abi=[500 * 10 ** 5, int(0.25 * 10 ** 8), 1])
+        assert ans == [23490291715255176443338864873375620519154876621682055163056454432194948412040L]
+
+        # Another buy trade
+        ans = self.state.send(
+            self.ALICE['key'],
+            self.contract,
+            150 * 10 ** 18,
+            funid=self.BUY,
+            abi=[600 * 10 ** 5, int(0.25 * 10 ** 8), 1])
+        assert ans == [-35168633768494065610302920664120686116555617894816459733689825088489895266148L]
+
+        # Add sell trade
+        ans = self.state.send(
+            self.ALICE['key'],
+            self.contract,
+            0,
+            funid=self.SELL,
+            abi=[500 * 10 ** 5, int(0.25 * 10 ** 8), 1])
+        assert ans == [49800558551364658298467690253710486242473574128865389798518930174170604985043L]
+
+        logger.info("Added trades:")
+        logger.info(self.state.block.account_to_dict(self.contract)['storage'])
+        logger.info("===")
+
+    def test_trade_already_exists(self):
+        self.test_add_trades()
+
+        ans = self.state.send(
+            self.ALICE['key'],
+            self.contract,
+            0,
+            funid=self.SELL,
+            abi=[500 * 10 ** 5, int(0.25 * 10 ** 8), 1])
+        assert ans == [15]
+
+    def test_get_trade_ids(self):
+        self.test_add_trades()
+
+        ans = self.state.send(
+            self.ALICE['key'],
+            self.contract,
+            0,
+            funid=self.GET_TRADE_IDS,
+            abi=[1])
+        assert ans == [
+            23490291715255176443338864873375620519154876621682055163056454432194948412040L,
+            -35168633768494065610302920664120686116555617894816459733689825088489895266148L,
+            49800558551364658298467690253710486242473574128865389798518930174170604985043L]
 
     #
     # ETX
