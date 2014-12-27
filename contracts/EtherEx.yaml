@@ -7,40 +7,91 @@
 -
   set:
     NameReg: "0x72ba7d8e73fe8eb666ea66babc8116a41bfb10e2"
+    Owner: "0xe559de5527492bcb42ec68d07df0742a98ec3f1e"
     caktux: "0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31"
 
 # Deploy contracts
 -
   deploy:
-    OwnNameReg:
-      contract: namereg.se
     EtherEx:
       contract: etherex.se
       gas: 100000
       # endowment: 1000000000000000000
       # wait: True
+-
+  deploy:
+    OwnNameReg:
+      contract: namereg.se
+-
+  deploy:
     ETX:
       contract: etx.se
+-
+  deploy:
     CAK:
       contract: etx.se
+-
+  deploy:
     FAB:
       contract: etx.se
+# -
+#   deploy:
+#     Update:
+#       contract: update.se
 
 # Initialize
 -
   transact:
-    NameReg:
-      to: $NameReg
-      funid: 0
+    # NameReg:
+    #   to: $EtherEx
+    #   funid: 12
+    #   data:
+    #     - "0x72ba7d8e73fe8eb666ea66babc8116a41bfb10e2"
+
+    # Set exchange address in subcurrency contracts
+    SetExchangeETX:
+      to: $ETX
+      funid: 2
       data:
-        - EtherEx
         - $EtherEx
-    OwnNameReg:
+    SetExchangeCAK:
+      to: $CAK
+      funid: 2
+      data:
+        - $EtherEx
+    SetExchangeFAB:
+      to: $FAB
+      funid: 2
+      data:
+        - $EtherEx
+
+    # Register names to our own NameReg
+    OwnNameRegEtherEx:
       to: $OwnNameReg
       funid: 0
       data:
-        - EtherEx
         - $EtherEx
+        - EtherEx
+    OwnNameRegETX:
+      to: $OwnNameReg
+      funid: 0
+      data:
+        - $ETX
+        - ETX
+    OwnNameRegCAK:
+      to: $OwnNameReg
+      funid: 0
+      data:
+        - $CAK
+        - CAK
+    OwnNameRegFAB:
+      to: $OwnNameReg
+      funid: 0
+      data:
+        - $FAB
+        - FAB
+
+    # Register subcurrencies on the exchange
     RegisterETX:
       to: $EtherEx
       funid: 7
@@ -65,9 +116,16 @@
       data:
         - FAB
         - $FAB
-        - 5
+        - 3
         - 10000
         - 1000000000000000000
+
+    # Update:
+    #   to: $Update
+    #   funid: 0
+    #   data:
+    #     - $Owner
+    #     - $EtherEx
 
 # Fill up
 -

@@ -10,6 +10,8 @@ if (ethBrowser)
     web3.setProvider(new web3.providers.QtProvider());
 else
     web3.setProvider(new web3.providers.HttpRpcProvider('http://localhost:8080'));
+// web3.setProvider(new web3.providers.AutoProvider());
+// web3.setProvider(new web3.providers.WebSocketProvider('ws://localhost:40404/eth'));
 
 var contract = web3.contract(fixtures.addresses.etherex, fixtures.contract_desc);
 console.log("CONTRACT", contract);
@@ -18,9 +20,6 @@ web3.padDecimal = function (string, chars) {
     string = web3.fromDecimal(string).substr(2);
     return Array(chars - string.length + 1).join("0") + string;
 };
-
-// web3.setProvider(new web3.providers.WebSocketProvider('ws://localhost:40404/eth'));
-// web3.setProvider(new web3.providers.AutoProvider());
 
 var EthereumClient = function() {
 

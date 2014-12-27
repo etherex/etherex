@@ -1,11 +1,41 @@
-def init():
-    self.storage[msg.sender] = 1000000
+data owner
+data exchange
 
-def balance_query(k):
-    return(self.storage[addr])
+extern exchange: [price, buy, sell, trade, deposit:a, withdraw]
+
+def init():
+    self.owner = msg.sender
+    self.storage[msg.sender] = 1000000 * 10 ** 5
 
 def send(to, value):
-    fromvalue = self.storage[msg.sender]
-    if fromvalue >= value:
-        self.storage[from] = fromvalue - value
+    # Get user balance
+    balance = self.storage[msg.sender]
+
+    # Make sure balance is above or equal to value
+    if balance >= value:
+
+        # Update balances
+        self.storage[msg.sender] = balance - value
         self.storage[to] += value
+
+        # Notify exchange of deposit
+        if to == self.exchange:
+            ret = self.exchange.deposit([msg.sender, value, 1], datasz=3)
+            # Exchange returns the amount as confirmation
+            if ret == value:
+                return(1)
+            # We return 2 as error code for notification failure
+            else:
+                return(2)
+
+        return(1)
+    return(0)
+
+def balance_query(addr):
+    return(self.storage[addr])
+
+def set_exchange(addr):
+    if msg.sender == self.owner:
+        self.exchange = addr
+        return(1)
+    return(0)

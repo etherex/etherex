@@ -1,5 +1,9 @@
-def register(k, v):
-    if !self.storage[k] or k == msg.sender:
-        self.storage[k] = v
+def register(key, value):
+    if !self.storage[key] or key == msg.sender:
+        self.storage[key] = value
+        self.storage[value] = key
         return(1)
     return(0)
+
+def get_nameoraddress(key):
+    return(self.storage[key])
