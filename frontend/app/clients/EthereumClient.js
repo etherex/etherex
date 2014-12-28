@@ -330,13 +330,23 @@ var EthereumClient = function() {
         var error = "Failed to update subcurrency balance: ";
 
         try {
-            contract.get_sub_balance(address, String(market.id)).call().then(function (balance) {
-                if (!balance || balance == "0") {
+            contract.get_sub_balance(address, String(market.id)).call().then(function (balances) {
+                var available = balances[0];
+                var trading = balances[1];
+
+                if (!available || available == "0")
+                    available = 0;
+                if (!trading || trading == "0")
+                    trading = 0;
+                if (available == 0 && trading == 0) {
                     success(0, false);
                     return;
                 }
-                balance = bigRat(String(balance)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
-                success(balance, false);
+                if (available)
+                    available = bigRat(String(available)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
+                if (trading)
+                    trading = bigRat(String(trading)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
+                success(available, "(" + String(trading) + " in trades)");
             }, function(e) {
                 failure(error + e);
                 return;

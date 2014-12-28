@@ -28,7 +28,14 @@ var SplitTradeForm = React.createClass({
           amount: null,
           price: null,
           total: null,
-          newTrade: false
+          newTrade: false,
+          amountPrecision: null,
+          precision: null,
+          minimum: null,
+          totalLeft: null,
+          isValid: false,
+          message: null,
+          note: null
       };
   },
 
@@ -41,37 +48,101 @@ var SplitTradeForm = React.createClass({
         total: parseFloat(nextProps.trades.total)
       });
     }
-  },
 
-  render: function() {
-    var amount = parseFloat(this.state.amount);
-    var price = parseFloat(this.state.price);
-    var total = parseFloat(this.state.total);
+    // Pre-check if trade will be valid
+    if (this.state.price > 0 &&
+        this.state.amount > 0 &&
+        this.state.total > nextProps.market.market.minTotal &&
+        ((nextProps.type == 1 && bigRat(nextProps.user.user.balance_raw).greaterOrEquals(bigRat(this.state.total).multiply(fixtures.ether))) ||
+         (nextProps.type == 2 && nextProps.user.user.balance_sub_raw >= this.state.amount)
+        )) {
+
+      // Dialog messages and notes
+      if (this.state.amount && this.state.price && this.state.total) {
+        var message = "Are you sure you want to " + (nextProps.type == 1 ? "buy" : "sell") +
+          " " + utils.numeral(this.state.amount, 4) + " " + nextProps.market.market.name +
+          " at " + utils.numeral(this.state.price, 4) + " " + nextProps.market.market.name + "/ETH" +
+          " for " + utils.formatBalance(bigRat(this.state.total).multiply(fixtures.ether)) + " ?";
+        var note = (this.props.trades.filling.length > 0 ?
+            "You will be filling " + this.props.trades.filling.length + " trade" +
+            (this.props.trades.filling.length > 1 ? "s" : "") +
+            " for a total of " +
+            utils.formatBalance(bigRat(this.state.total - this.props.trades.available).multiply(fixtures.ether)) +
+            (this.props.trades.available > 0 ? " (" +
+              utils.formatBalance(bigRat(this.props.trades.available).multiply(fixtures.ether)) + " left)" : "") +
+            "."
+            : "") +
+          (this.state.totalLeft >= this.props.market.market.minTotal &&
+           this.props.trades.filling.length > 0 &&
+           this.props.trades.available ?
+            " You will also be adding a new trade of " +
+              utils.numeral(this.props.trades.amountLeft, this.props.market.market.decimals) + " " +
+              this.props.market.market.name +
+            " at " + utils.numeral(this.state.price, 4) + " " + this.props.market.market.name + "/ETH" +
+            " for " + utils.formatBalance(bigRat(this.props.trades.amountLeft)
+                        .multiply(this.state.price)
+                        .multiply(fixtures.ether)) +
+            "."
+            : "") +
+          (this.state.totalLeft < this.props.market.market.minTotal &&
+           this.props.trades.filling.length > 0 &&
+           this.props.trades.amountLeft &&
+           this.props.trades.available ?
+            " Not enough left for a new trade with " +
+              utils.numeral(this.props.trades.amountLeft, 4) + " " + this.props.market.market.name + " for " +
+              utils.formatBalance(bigRat(this.state.totalLeft).multiply(fixtures.ether)) +
+              "."
+              : "")
+      }
+      else {
+        var message = null;
+        var note = null;
+      }
+
+      this.setState({
+        message: message,
+        note: note,
+        isValid: true
+      });
+    }
+    else {
+      this.setState({
+        isValid: false
+      });
+
+    }
 
     // Price precision
-    var priceDecimals = this.props.market.market.precision ? this.props.market.market.precision.length - 1 : 0;
-    var precision = (1 / (this.props.market.market.precision ?
-                          _.parseInt(this.props.market.market.precision) : 1000)).toFixed(priceDecimals);
+    var marketPrecision = nextProps.market.market.precision;
+    var priceDecimals = marketPrecision ? String(marketPrecision).length - 1 : 0;
+    var precision = (1 / (nextProps.market.market.precision ?
+                          _.parseInt(nextProps.market.market.precision) : 1000)).toFixed(priceDecimals);
 
     // Amount decimals
-    var decimals = this.props.market.market.decimals ? this.props.market.market.decimals : 5;
+    var decimals = nextProps.market.market.decimals ? nextProps.market.market.decimals : 5;
     var amountPrecision = (1 / Math.pow(10, decimals)).toFixed(decimals);
 
     // Minimum total
-    var minimum = bigRat(this.props.market.market.minimum).divide(fixtures.ether).valueOf().toFixed(priceDecimals);
+    var minimum = bigRat(nextProps.market.market.minimum).divide(fixtures.ether).valueOf().toFixed(priceDecimals);
 
-    // Total left
-    var totalLeft = this.props.trades.amountLeft ? this.props.trades.amountLeft * price : 0;
+    this.setState({
+      amountPrecision: amountPrecision,
+      precision: precision,
+      minimum: minimum,
+      message: message,
+      note: note,
+      totalLeft: nextProps.trades.amountLeft ? nextProps.trades.amountLeft * this.state.price : 0
+    });
+  },
 
-    // console.log(precision, priceDecimals, amountPrecision, decimals, minimum);
-
+  render: function() {
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
         <input type="hidden" ref="market" value={this.props.market.market.id} />
         <div className="form-group">
           <div className="input-group">
             <label className="sr-only" forHtml="amount">Amount</label>
-            <input type="number" min={amountPrecision} step={amountPrecision} className="form-control medium" placeholder={amountPrecision} ref="amount" onChange={this.handleChange} value={this.state.amount} />
+            <input type="number" min={this.state.amountPrecision} step={this.state.amountPrecision} className="form-control medium" placeholder={this.state.amountPrecision} ref="amount" onChange={this.handleChange} value={this.state.amount} />
             <div className="input-group-addon">{this.props.market.market.name}</div>
           </div>
         </div>
@@ -79,7 +150,7 @@ var SplitTradeForm = React.createClass({
           <label className="sr-only" forHtml="price">Price</label>
           <div className="input-group">
             <div className="input-group-addon">@</div>
-            <input type="number" min={precision} step={precision} className="form-control medium" placeholder={precision} ref="price" onChange={this.handleChange} value={this.state.price} />
+            <input type="number" min={this.state.precision} step={this.state.precision} className="form-control medium" placeholder={this.state.precision} ref="price" onChange={this.handleChange} value={this.state.price} />
             <div className="input-group-addon">
               {this.props.market.market.name}/ETH
             </div>
@@ -88,59 +159,17 @@ var SplitTradeForm = React.createClass({
         <div className="form-group">
           <div className="input-group">
             <div className="input-group-addon">{"="}</div>
-            <input type="number" min={minimum} step={precision} className="form-control medium" placeholder={minimum} ref="total" onChange={this.handleChangeTotal} value={this.state.total} />
+            <input type="number" min={this.state.minimum} step={this.state.precision} className="form-control medium" placeholder={this.state.minimum} ref="total" onChange={this.handleChangeTotal} value={this.state.total} />
             <div className="input-group-addon">
               ETH
             </div>
           </div>
         </div>
         <div className="form-group">
-          {(price > 0 &&
-            amount > 0 &&
-            total > this.props.market.market.minTotal &&
-            ((this.props.type == 1 && bigRat(this.props.user.user.balance_raw).greaterOrEquals(bigRat(total).multiply(fixtures.ether))) ||
-             (this.props.type == 2 && this.props.user.user.balance_sub_raw >= amount)
-            )) ?
+          {this.state.isValid ?
               <ModalTrigger modal={
-                  <ConfirmModal
-                    message={
-                      "Are you sure you want to " + (this.props.type == 1 ? "buy" : "sell") +
-                        " " + utils.numeral(amount, 4) + " " + this.props.market.market.name +
-                        " at " + utils.numeral(price, 4) + " " + this.props.market.market.name + "/ETH" +
-                        " for " + utils.formatBalance(bigRat(total).multiply(fixtures.ether)) + " ?"
-                    }
-                    note={
-                      (this.props.trades.filling.length > 0 ?
-                        "You will be filling " + this.props.trades.filling.length + " trade" +
-                        (this.props.trades.filling.length > 1 ? "s" : "") +
-                        " for a total of " +
-                        utils.formatBalance(bigRat(total - this.props.trades.available).multiply(fixtures.ether)) +
-                        (this.props.trades.available > 0 ? " (" +
-                          utils.formatBalance(bigRat(this.props.trades.available).multiply(fixtures.ether)) + " left)" : "") +
-                        "."
-                        : "") +
-                      (totalLeft >= this.props.market.market.minTotal &&
-                       this.props.trades.filling.length > 0 &&
-                       this.props.trades.available ?
-                        " You will also be adding a new trade of " +
-                          utils.numeral(this.props.trades.amountLeft, this.props.market.market.decimals) + " " +
-                          this.props.market.market.name +
-                        " at " + utils.numeral(price, 4) + " " + this.props.market.market.name + "/ETH" +
-                        " for " + utils.formatBalance(bigRat(this.props.trades.amountLeft)
-                                    .multiply(price)
-                                    .multiply(fixtures.ether)) +
-                        "."
-                        : "") +
-                      (totalLeft < this.props.market.market.minTotal &&
-                       this.props.trades.filling.length > 0 &&
-                       this.props.trades.amountLeft &&
-                       this.props.trades.available ?
-                        " Not enough left for a new trade with " +
-                          utils.numeral(this.props.trades.amountLeft, 4) + " " + this.props.market.market.name + " for " +
-                          utils.formatBalance(bigRat(totalLeft).multiply(fixtures.ether)) +
-                          "."
-                          : "")
-                    }
+                  <ConfirmModal message={this.state.message}
+                    note={this.state.note}
                     tradeList={this.props.trades.filling}
                     user={this.props.user}
                     flux={this.getFlux()}
@@ -283,8 +312,6 @@ var SplitTradeForm = React.createClass({
 
     if (showAlerts)
       this._owner.refs.alerts.setState({alertVisible: true});
-
-    return false;
   },
 
   onSubmitForm: function(e) {
@@ -294,7 +321,7 @@ var SplitTradeForm = React.createClass({
     // console.log([this.props.market.market.id, this.state.amount, this.state.price, this.state.total].join(", "));
 
     if (!this.handleValidation(e, true)) {
-      return false;
+      return;
     }
 
     // Fill existing trades
@@ -321,8 +348,6 @@ var SplitTradeForm = React.createClass({
       total: null,
       newTrade: false
     });
-
-    return;
   }
 });
 

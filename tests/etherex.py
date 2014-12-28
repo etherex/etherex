@@ -295,7 +295,7 @@ class TestEtherEx(object):
             0,
             funid=self.GET_SUB_BALANCE,
             abi=[self.ALICE['address'], 1])
-        assert ans == [1000 * 10 ** 5]
+        assert ans == [1000 * 10 ** 5, 0]
 
     # def test_withdraw_eth(self):
     #     self.test_deposit_eth()
@@ -505,7 +505,7 @@ class TestEtherEx(object):
             self.BOB['key'],
             self.contract,
             0,
-            funid=6,
+            funid=self.CANCEL,
             abi=[100])
         assert ans == [0]
 
@@ -516,7 +516,7 @@ class TestEtherEx(object):
             self.ALICE['key'],
             self.contract,
             0,
-            funid=6,
+            funid=self.CANCEL,
             abi=[23490291715255176443338864873375620519154876621682055163056454432194948412040L])
 
         assert ans == [1]
@@ -533,8 +533,8 @@ class TestEtherEx(object):
             self.BOB['key'],
             self.contract,
             0,
-            funid=3,
-            abi=[[23490291715255176443338864873375620519154876621682055163056454432194948412040L]])
+            funid=self.TRADE,
+            abi=[23490291715255176443338864873375620519154876621682055163056454432194948412040L])
         assert ans == [14]
 
     def test_fulfill_first_buy_fail(self):
@@ -545,8 +545,8 @@ class TestEtherEx(object):
             self.BOB['key'],
             self.contract,
             0,
-            funid=3,
-            abi=[[23490291715255176443338864873375620519154876621682055163056454432194948412040L]])
+            funid=self.TRADE,
+            abi=[23490291715255176443338864873375620519154876621682055163056454432194948412040L])
         assert ans == [12]
         # for x in xrange(100,109):
         #     assert self._storage(self.tcontract, x) == None
@@ -580,8 +580,8 @@ class TestEtherEx(object):
             self.BOB['key'],
             self.contract,
             0,
-            funid=3,
-            abi=[[23490291715255176443338864873375620519154876621682055163056454432194948412040L]])
+            funid=self.TRADE,
+            abi=[23490291715255176443338864873375620519154876621682055163056454432194948412040L])
         assert ans == [1]
         # for x in xrange(100,109):
         #     assert self._storage(self.tcontract, x) == None
@@ -597,7 +597,7 @@ class TestEtherEx(object):
             self.ALICE['key'],
             self.contract,
             0,
-            funid=0,
+            funid=self.PRICE,
             abi=[1])
         assert ans == [int(0.25 * 10 ** 8)]
 
@@ -609,17 +609,13 @@ class TestEtherEx(object):
             self.BOB['key'],
             self.contract,
             125 * 10 ** 18,
-            funid=3,
-            abi=[[49800558551364658298467690253710486242473574128865389798518930174170604985043L]])
+            funid=self.TRADE,
+            abi=[49800558551364658298467690253710486242473574128865389798518930174170604985043L])
         assert ans == [1]
         # for x in xrange(120,129):
         #     assert self._storage(self.tcontract, x) == None
 
-    def test_get_trade_ids(self):
-        self.test_add_buy_trades()
-        self.test_add_sell_trades(False)
-
-    def test_fulfill_multiple_trades(self):
+    def test_fulfill_multiple_trades_fail(self):
         self.test_add_buy_trades()
         self.test_add_sell_trades(False)
         self.test_transfer_to_bob_and_deposit()
@@ -630,9 +626,9 @@ class TestEtherEx(object):
             self.BOB['key'],
             self.contract,
             0,
-            funid=3,
+            funid=self.TRADE,
             abi=[[23490291715255176443338864873375620519154876621682055163056454432194948412040L, -35168633768494065610302920664120686116555617894816459733689825088489895266148L]])
-        assert ans == [1]
+        assert ans == [0]
 
     # def test_second_buy_with_leftover(self):
     #     tx = Tx(sender='alice', value=0, data=[1, 1500 * 10 ** 18, 1000 * 10 ** 8, 1])

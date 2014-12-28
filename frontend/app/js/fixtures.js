@@ -314,7 +314,11 @@ var fixtures = {
             ],
             "outputs": [
                 {
-                    "name": "balance",
+                    "name": "available",
+                    "type": "uint256"
+                },
+                {
+                    "name": "trading",
                     "type": "uint256"
                 }
             ]

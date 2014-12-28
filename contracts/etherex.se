@@ -26,7 +26,7 @@ data log_timestamp # 0xb
 
 data markets[2^160](id, name, contract, decimals, precision, minimum, last_price, owner, block, total_trades, trade_ids[](id))
 data trades[2^160](id, type, market, amount, price, owner, block)
-data balances[][]
+data balances[][](available, trading)
 
 MARKET_FIELDS = 11
 TRADE_FIELDS = 7
@@ -59,6 +59,10 @@ macro save_trade($type, $amount, $price, $market_id):
         self.trades[trade_id].price = trade[3]
         self.trades[trade_id].owner = trade[4]
         self.trades[trade_id].block = trade[5]
+
+        # Update available and trading amounts
+        self.balances[msg.sender][$market_id].available -= $amount
+        self.balances[msg.sender][$market_id].trading += $amount
 
         # Update market
         new_total = self.markets[$market_id].total_trades + 1
@@ -155,7 +159,7 @@ def sell(amount, price, market_id):
         return(12) // "Minimum ETH trade amount not met, minimum is %s, got %d" % (self.markets[market_id].minimum, msg.value)
 
     # Check balance of subcurrency
-    balance = self.balances[msg.sender][market_id]
+    balance = self.balances[msg.sender][market_id].available
     if balance >= amount:
         save_trade(2, amount, price, market_id)
 
@@ -191,10 +195,10 @@ def trade(trade_id):
 
     if type == 1:
         # Transfer sub / asset
-        balance = self.balances[msg.sender][market_id]
+        balance = self.balances[msg.sender][market_id].available
         if balance >= amount:
-            self.balances[msg.sender][market_id] -= amount
-            self.balances[owner][market_id] += amount
+            self.balances[msg.sender][market_id].trading -= amount
+            self.balances[owner][market_id].available += amount
 
             # Transfer ETH
             send(msg.sender, value)
@@ -218,8 +222,8 @@ def trade(trade_id):
         send(owner, value)
 
         # Transfer sub / asset
-        self.balances[self][market_id] -= amount
-        self.balances[msg.sender][market_id] += amount
+        self.balances[self][market_id].trading -= amount
+        self.balances[msg.sender][market_id].available += amount
 
         # Clear trade
         remove_trade(trade_id)
@@ -241,18 +245,19 @@ def trade(trade_id):
 def deposit(serpentbug, address, amount, market_id):
     # Serpent 2 bug requires an extra arg...
     if msg.sender == self.markets[market_id].contract:
-        balance = self.balances[address][market_id]
-        self.balances[address][market_id] = balance + amount
-        return(self.balances[address][market_id])
+        balance = self.balances[address][market_id].available
+        newbalance = balance + amount
+        self.balances[address][market_id].available = newbalance
+        return(newbalance)
     return(0)
 
 #
 # Withdrawal - to subcurrency contracts only
 #
 def withdraw(address, amount, market_id):
-    balance = self.balances[address][market_id]
+    balance = self.balances[address][market_id].available
     if balance >= amount:
-        self.balances[address][market_id] = balance - amount
+        self.balances[address][market_id].available = balance - amount
         ret = self.markets[market_id].contract.call([address, amount])
         return(ret)
     return(0)
@@ -287,8 +292,8 @@ def cancel(trade_id):
 
         elif type == 2:
             # Subcurrency refund
-            self.balances[self][market_id] -= amount
-            self.balances[msg.sender][market_id] += amount
+            self.balances[self][market_id].trading -= amount
+            self.balances[msg.sender][market_id].available += amount
             # ret = contract.call(data=[self, msg.sender, price / 10 ^ decimals], datasz=3, outsz=1)
 
         return(1)
@@ -391,7 +396,7 @@ def get_trade(id):
     return(0)
 
 def get_sub_balance(address, market_id):
-    return(self.balances[address][market_id])
+    return([self.balances[address][market_id].available, self.balances[address][market_id].trading], 2)
 
 def register(namereg):
     if msg.sender == self.owner:
