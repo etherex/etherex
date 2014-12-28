@@ -7,7 +7,8 @@
 -
   set:
     NameReg: "0x72ba7d8e73fe8eb666ea66babc8116a41bfb10e2"
-    Owner: "0xe559de5527492bcb42ec68d07df0742a98ec3f1e"
+    Cow: "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826"
+    ZG: "0xe559de5527492bcb42ec68d07df0742a98ec3f1e"
     caktux: "0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31"
 
 # Deploy contracts
@@ -127,12 +128,37 @@
     #     - $Owner
     #     - $EtherEx
 
+# Change ownership
+-
+  transact:
+    SetExchangeOwner:
+      to: $EtherEx
+      funid: 8
+      data:
+        - $ZG
+
 # Fill up
 -
   transact:
+    ZG:
+      to: $ZG
+      value: 1000000000000000000000
     CAK:
       to: $caktux
-      value: 50000000000000000000
+      value: 1000000000000000000000
+    ZGetx:
+      to: $ETX
+      funid: 0
+      data:
+        - $ZG
+        - 10000000000
+    CAKetx:
+      to: $ETX
+      funid: 0
+      data:
+        - $caktux
+        - 10000000000
+
 
 # # Contract calls with return values
 # -

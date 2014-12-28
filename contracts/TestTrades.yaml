@@ -4,10 +4,10 @@
 # Package Repository: https://github.com/etherex/etherex
 -
   set:
-    EtherEx: "0xf298931b974dfb01b13e44eae9e4428afa3ba7f4"
-    ETX: "0xcd91d7a2eeb6e23b30ec6e501e3ffd5688c3104e"
+    EtherEx: "0x77045e71a7a2c50903d88e564cd72fab11e82051"
+    ETX: "0x83c5541a6c8d2dbad642f385d8d06ca9b6c731ee"
 
-# Test trades
+# Deposit into exchange
 -
   transact:
     deposit:
@@ -16,6 +16,8 @@
       data:
         - $EtherEx
         - 1000000000
+
+# Test trades
 -
   transact:
     # Sells

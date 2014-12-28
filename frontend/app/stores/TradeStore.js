@@ -164,7 +164,8 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onHighlightFilling: function(payload) { // type, price, amount, total, market, user
-        // console.log(payload);
+
+        // console.log(payload.type, arguments.callee.caller.toString());
         var trades = (payload.type == 1) ? this.trades.tradeSells : this.trades.tradeBuys;
         var siblings = (payload.type == 1) ? this.trades.tradeBuys : this.trades.tradeSells;
         var total_amount = 0;

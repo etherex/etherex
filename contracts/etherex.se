@@ -164,74 +164,76 @@ def sell(amount, price, market_id):
 #
 # Trade
 #
-def trade(trade_ids:a, size):
+def trade(trade_id):
     # Try to fulfill each trade passed
-    t = 0
-    while t < size:
-        trade_id = trade_ids[t]
+    # size = len(trade_ids)
+    # t = 0
+    # while t < size:
+    #     trade_id = trade_ids[t]
 
-        # Make sure the trade has been mined, obvious HFT prevention
-        if block.number <= self.trades[trade_id].block:
-            return(14)
+    # Make sure the trade has been mined, obvious HFT prevention
+    if block.number <= self.trades[trade_id].block:
+        return(14)
 
-        # Get market
-        market_id = self.trades[trade_id].market
-        contract = self.markets[market_id].contract
-        decimals = self.markets[market_id].decimals
-        precision = self.markets[market_id].precision
+    # Get market
+    market_id = self.trades[trade_id].market
+    contract = self.markets[market_id].contract
+    decimals = self.markets[market_id].decimals
+    precision = self.markets[market_id].precision
 
-        # Get trade
-        type = self.trades[trade_id].type
-        amount = self.trades[trade_id].amount
-        price = self.trades[trade_id].price
-        owner = self.trades[trade_id].owner
+    # Get trade
+    type = self.trades[trade_id].type
+    amount = self.trades[trade_id].amount
+    price = self.trades[trade_id].price
+    owner = self.trades[trade_id].owner
 
-        value = ((amount * price) / (precision * 10 ^ decimals)) * 10 ^ 18
+    value = ((amount * price) / (precision * 10 ^ decimals)) * 10 ^ 18
 
-        if type == 1:
-            # Transfer sub / asset
-            balance = self.balances[msg.sender][market_id]
-            if balance >= amount:
-                self.balances[msg.sender][market_id] -= amount
-                self.balances[owner][market_id] += amount
-
-                # Transfer ETH
-                send(msg.sender, value)
-
-                # Clear trade
-                remove_trade(trade_id)
-            else:
-                return(12)
-
-        elif type == 2:
-            # Check sell amount
-            if msg.value < value:
-                refund()
-                return(13) // "Minimum trade amount not met, minimum is %s, got %d" % (value, msg.value)
-
-            # Refund excess value
-            if msg.value > value:
-                send(msg.sender, msg.value - value)
+    if type == 1:
+        # Transfer sub / asset
+        balance = self.balances[msg.sender][market_id]
+        if balance >= amount:
+            self.balances[msg.sender][market_id] -= amount
+            self.balances[owner][market_id] += amount
 
             # Transfer ETH
-            send(owner, value)
-
-            # Transfer sub / asset
-            self.balances[self][market_id] -= amount
-            self.balances[msg.sender][market_id] += amount
+            send(msg.sender, value)
 
             # Clear trade
             remove_trade(trade_id)
+        else:
+            return(12)
 
-        # Update market last price
-        self.markets[market_id].last_price = price
+    elif type == 2:
+        # Check sell amount
+        if msg.value < value:
+            refund()
+            return(13) // "Minimum trade amount not met, minimum is %s, got %d" % (value, msg.value)
 
-        # Next trade
-        t = t + 1
+        # Refund excess value
+        if msg.value > value:
+            send(msg.sender, msg.value - value)
 
-    if t == size:
-        return(1)
-    return(0)
+        # Transfer ETH
+        send(owner, value)
+
+        # Transfer sub / asset
+        self.balances[self][market_id] -= amount
+        self.balances[msg.sender][market_id] += amount
+
+        # Clear trade
+        remove_trade(trade_id)
+
+    # Update market last price
+    self.markets[market_id].last_price = price
+
+    #     # Next trade
+    #     t = t + 1
+
+    # if t == size:
+    #     return(1)
+    # return(0)
+    return(1)
 
 #
 # Deposit - from subcurrency contracts only

@@ -142,10 +142,6 @@ var TradeRow = React.createClass({
 
         var total = totalAmount * this.props.trade.price;
 
-        // console.log("======")
-        // console.log("Needs " + totalAmount + " " + this.props.trade.market.name +
-        //             " for " + utils.formatBalance(bigRat(total).multiply(fixtures.ether))); // , trades);
-
         var isBuy = (this.props.trade.type == "buys" ? true : false);
         var payload = {
             type: (isBuy ? 1 : 2),
@@ -155,10 +151,6 @@ var TradeRow = React.createClass({
             market: this.props.trade.market,
             user: this.props.user
         };
-
-        // console.log(payload);
-
-        this.getFlux().actions.trade.highlightFilling(payload);
 
         _.forEach(this._owner.props.tradeList, function(trade) {
             if (!_.find(trades, {'id': trade.id}) && trade.status == "filling")

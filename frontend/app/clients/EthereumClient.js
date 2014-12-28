@@ -163,6 +163,11 @@ var EthereumClient = function() {
                                 // console.log("Trade from ABI:", trade);
 
                                 var id = trade[0];
+
+                                // Resolve on filled trades
+                                if (id == "0x" + web3.padDecimal("0", 64))
+                                    resolve({});
+
                                 var type = _.parseInt(trade[1]);
                                 var marketid = _.parseInt(trade[2]);
                                 var amountPrecision = Math.pow(10, market.decimals);
@@ -330,9 +335,11 @@ var EthereumClient = function() {
                     success(0, false);
                     return;
                 }
+                balance = bigRat(String(balance)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
                 success(balance, false);
             }, function(e) {
                 failure(error + e);
+                return;
             });
         }
         catch(e) {
@@ -423,23 +430,60 @@ var EthereumClient = function() {
     };
 
     this.fillTrades = function(user, trades, market, success, failure) {
-        var total = bigRat(0);
-
+        // Workaround for lack of array support
         for (var i = trades.length - 1; i >= 0; i--) {
-            var amounts = this.getAmounts(trades[i].amount, trades[i].price, market.decimals, market.precision);
-            total += bigRat(amounts.total);
-        };
+            this.fillTrade(user, trades[i], market, success, failure);
+        }
 
-        var ids = _.pluck(trades, 'id');
-        var gas = ids.length * 10000;
+        // var total = bigRat(0);
+
+        // for (var i = trades.length - 1; i >= 0; i--) {
+        //     if (trades[i].type == 'sells') {
+        //         var amounts = this.getAmounts(trades[i].amount, trades[i].price, market.decimals, market.precision);
+        //         total += bigRat(amounts.total);
+        //     }
+        // };
+
+        // var ids = _.pluck(trades, 'id');
+
+        // var gas = ids.length * 10000;
+
+        // try {
+        //     web3.eth.gasPrice.then(function (gasPrice) {
+        //         contract.trade(ids).transact({
+        //             from: user.addresses[0],
+        //             value: total > 0 ? total.toString() : "0",
+        //             to: fixtures.addresses.etherex,
+        //             gas: String(gas),
+        //             gasPrice: gasPrice
+        //         }).then(function (result) {
+        //             success();
+        //         }, function(e) {
+        //             failure(e);
+        //         });
+        //     }, function (e) {
+        //         failure(e);
+        //     });
+        // }
+        // catch(e) {
+        //     failure(e);
+        // }
+    };
+
+    this.fillTrade = function(user, trade, market, success, failure) {
+        var amounts = this.getAmounts(trade.amount, trade.price, market.decimals, market.precision);
+
+        // var calldata = "0x03" + trade.id.substr(2);
 
         try {
             web3.eth.gasPrice.then(function (gasPrice) {
-                contract.trade(ids, ids.length).transact({
+                // web3.eth.transact({
+                contract.trade(trade.id).transact({
                     from: user.addresses[0],
-                    value: total > 0 ? total.toString() : "0",
+                    value: trade.type == "sells" ? amounts.total : "0",
                     to: fixtures.addresses.etherex,
-                    gas: String(gas),
+                    // data: calldata,
+                    gas: "10000",
                     gasPrice: gasPrice
                 }).then(function (result) {
                     success();
@@ -481,13 +525,13 @@ var EthereumClient = function() {
     this.registerMarket = function(user, market, success, failure) {
         try {
             web3.eth.gasPrice.then(function (gasPrice) {
-                contract.add_market([
+                contract.add_market(
                     market.name,
                     market.address,
                     market.minimum,
                     market.decimals,
                     market.precision
-                ]).transact({
+                ).transact({
                     from: user.addresses[0],
                     value: "0",
                     to: fixtures.addresses.etherex,

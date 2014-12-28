@@ -96,7 +96,7 @@ var TradeActions = function(client) {
         var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
 
-        _client.fillTrades(user, [trade], market, function(result) {
+        _client.fillTrade(user, trade, market, function(result) {
             this.dispatch(constants.trade.FILL_TRADE, trade);
 
             if (!ethBrowser)

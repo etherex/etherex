@@ -35,6 +35,11 @@ var ConfirmModal = React.createClass({
         );
     },
 
+    onRequestHide: function(e) {
+        e.preventDefault();
+        this.props.onRequestHide();
+    },
+
     confirmSubmit: function(e) {
         e.preventDefault();
         this.props.onRequestHide();
