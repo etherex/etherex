@@ -21,7 +21,7 @@ var utils = require("../js/utils");
 // var Link = Router.Link;
 // var UserLink = require("./UserLink");
 
-var TradeRow = React.createFactory(React.createClass({
+var TradeRow = React.createClass({
     mixins: [FluxMixin],
 
     getInitialState: function() {
@@ -142,9 +142,9 @@ var TradeRow = React.createFactory(React.createClass({
 
         var total = totalAmount * this.props.trade.price;
 
-        console.log("======")
-        console.log("Needs " + totalAmount + " " + this.props.trade.market.name +
-                    " for " + utils.formatBalance(bigRat(total).multiply(fixtures.ether))); // , trades);
+        // console.log("======")
+        // console.log("Needs " + totalAmount + " " + this.props.trade.market.name +
+        //             " for " + utils.formatBalance(bigRat(total).multiply(fixtures.ether))); // , trades);
 
         var isBuy = (this.props.trade.type == "buys" ? true : false);
         var payload = {
@@ -194,9 +194,9 @@ var TradeRow = React.createFactory(React.createClass({
         if (this.state.payload)
             this.getFlux().actions.trade.clickFill(this.state.payload);
     }
-}));
+});
 
-var TradeTable = React.createFactory(React.createClass({
+var TradeTable = React.createClass({
     render: function() {
         var tradeListNodes = this.props.tradeList.map(function (trade, i) {
             return (
@@ -225,6 +225,6 @@ var TradeTable = React.createFactory(React.createClass({
             </div>
         );
     }
-}));
+});
 
 module.exports = TradeTable;

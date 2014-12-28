@@ -4,7 +4,7 @@ var React = require("react");
 var Alert = require('react-bootstrap/Alert');
 var Button = require('react-bootstrap/Button');
 
-var AlertDismissable = React.createFactory(React.createClass({
+var AlertDismissable = React.createClass({
   getInitialState: function() {
     return {
       alertVisible: !this.props.show ? false : true
@@ -33,6 +33,6 @@ var AlertDismissable = React.createFactory(React.createClass({
   handleAlertShow: function() {
     this.setState({alertVisible: true});
   }
-}));
+});
 
 module.exports = AlertDismissable;

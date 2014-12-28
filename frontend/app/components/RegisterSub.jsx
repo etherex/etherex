@@ -16,7 +16,7 @@ var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 var bigRat = require("big-rational");
 
-var RegisterSub = React.createFactory(React.createClass({
+var RegisterSub = React.createClass({
   mixins: [FluxMixin],
 
   getInitialState: function() {
@@ -195,6 +195,6 @@ var RegisterSub = React.createFactory(React.createClass({
       });
 
   }
-}));
+});
 
 module.exports = RegisterSub;

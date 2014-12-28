@@ -7,7 +7,7 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 var Router = require("react-router");
 var Link = Router.Link;
 
-var UserLink = React.createFactory(React.createClass({
+var UserLink = React.createClass({
     mixins: [FluxMixin],
 
     propTypes: {
@@ -28,6 +28,6 @@ var UserLink = React.createFactory(React.createClass({
             </Link>
         );
     }
-}));
+});
 
 module.exports = UserLink;

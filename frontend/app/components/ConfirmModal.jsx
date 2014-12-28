@@ -10,7 +10,7 @@ var Modal = require('react-bootstrap/Modal');
 
 // XXX should be FluxMixin, but then flux object doesn't get passed along somehow
 
-var ConfirmModal = React.createFactory(React.createClass({
+var ConfirmModal = React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
@@ -39,6 +39,6 @@ var ConfirmModal = React.createFactory(React.createClass({
         e.preventDefault();
         this.props.onRequestHide();
     }
-}));
+});
 
 module.exports = ConfirmModal;

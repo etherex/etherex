@@ -5,7 +5,7 @@ var Router = require("react-router");
 var Link = Router.Link;
 var ActiveState = Router.ActiveState;
 
-var SubTab = React.createFactory(React.createClass({
+var SubTab = React.createClass({
 
   mixins: [ ActiveState ],
 
@@ -21,14 +21,13 @@ var SubTab = React.createFactory(React.createClass({
 
   render: function() {
     var className = this.state.isActive ? ' active' : '';
-    var link = Link(this.props);
     return (
       <li className={className}>
-        {link}
+        <Link {...this.props} />
       </li>
     );
   }
 
-}));
+});
 
 module.exports = SubTab;

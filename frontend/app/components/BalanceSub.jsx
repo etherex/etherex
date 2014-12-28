@@ -9,7 +9,7 @@ var constants = require("../js/constants");
 
 var MarketSelect = require("./MarketSelect")
 
-var BalanceSub = React.createFactory(React.createClass({
+var BalanceSub = React.createClass({
   mixins: [FluxMixin],
 
   render: function() {
@@ -30,6 +30,6 @@ var BalanceSub = React.createFactory(React.createClass({
       </div>
     );
   }
-}));
+});
 
 module.exports = BalanceSub;

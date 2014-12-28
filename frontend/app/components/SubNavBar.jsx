@@ -10,7 +10,7 @@ var Link = Router.Link;
 var SubTab = require("./SubTab");
 var UserLink = require("./UserLink");
 
-var SubNavBar = React.createFactory(React.createClass({
+var SubNavBar = React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
@@ -26,6 +26,6 @@ var SubNavBar = React.createFactory(React.createClass({
             </div>
         );
     }
-}));
+});
 
 module.exports = SubNavBar;

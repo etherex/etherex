@@ -12,7 +12,7 @@ var ProgressBar = require('react-bootstrap/ProgressBar');
 
 var TxsTable = require('./TxsTable');
 
-var TxsList = React.createFactory(React.createClass({
+var TxsList = React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
@@ -37,6 +37,6 @@ var TxsList = React.createFactory(React.createClass({
             </div>
         );
     }
-}));
+});
 
 module.exports = TxsList;

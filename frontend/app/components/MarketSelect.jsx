@@ -9,7 +9,7 @@ var constants = require("../js/constants");
 var DropdownButton = require('react-bootstrap/DropdownButton');
 var MenuItem = require('react-bootstrap/MenuItem');
 
-var MarketSelect = React.createFactory(React.createClass({
+var MarketSelect = React.createClass({
   mixins: [FluxMixin],
 
   handleChange: function(key) {
@@ -28,11 +28,11 @@ var MarketSelect = React.createFactory(React.createClass({
       <DropdownButton ref="market" className="btn-lg" onSelect={this.handleChange} key={1} title={this.props.market.market.name} pullRight>
         {this.props.market.markets.map(function(market) {
           if (market.id > 0)
-            return <MenuItem eventKey={market.id}>{market.name}</MenuItem>
+            return <MenuItem key={market.id} eventKey={market.id}>{market.name}</MenuItem>
         })}
       </DropdownButton>
     );
   }
-}));
+});
 
 module.exports = MarketSelect;

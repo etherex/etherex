@@ -21,7 +21,7 @@ var utils = require("../js/utils");
 // var Link = Router.Link;
 // var UserLink = require("./UserLink");
 
-var MarketRow = React.createFactory(React.createClass({
+var MarketRow = React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
@@ -58,9 +58,9 @@ var MarketRow = React.createFactory(React.createClass({
         if (this.props.market)
             this.getFlux().actions.market.updateMarket(this.props.market);
     }
-}));
+});
 
-var MarketTable = React.createFactory(React.createClass({
+var MarketTable = React.createClass({
     render: function() {
         var marketListNodes = _.rest(this.props.market.markets).map(function (market) {
             return (
@@ -86,6 +86,6 @@ var MarketTable = React.createFactory(React.createClass({
             </div>
         );
     }
-}));
+});
 
 module.exports = MarketTable;

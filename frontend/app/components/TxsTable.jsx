@@ -21,7 +21,7 @@ var utils = require("../js/utils");
 // var Link = Router.Link;
 // var UserLink = require("./UserLink");
 
-var TxRow = React.createFactory(React.createClass({
+var TxRow = React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
@@ -124,9 +124,9 @@ var TxRow = React.createFactory(React.createClass({
     //     if (this.props.market)
     //         this.getFlux().actions.market.updateMarket(this.props.market);
     // }
-}));
+});
 
-var TxsTable = React.createFactory(React.createClass({
+var TxsTable = React.createClass({
     render: function() {
         var txsListNodes = this.props.txs.reverse().map(function (tx) {
             return (
@@ -159,6 +159,6 @@ var TxsTable = React.createFactory(React.createClass({
             </div>
         );
     }
-}));
+});
 
 module.exports = TxsTable;

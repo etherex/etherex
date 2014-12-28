@@ -12,7 +12,7 @@ var ProgressBar = require('react-bootstrap/ProgressBar');
 
 var TradeTable = require('./TradeTable');
 
-var TradeBuys = React.createFactory(React.createClass({
+var TradeBuys = React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
@@ -22,9 +22,9 @@ var TradeBuys = React.createFactory(React.createClass({
             </div>
         );
     }
-}));
+});
 
-var TradeSells = React.createFactory(React.createClass({
+var TradeSells = React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
@@ -34,9 +34,9 @@ var TradeSells = React.createFactory(React.createClass({
             </div>
         );
     }
-}));
+});
 
-var TradeList = React.createFactory(React.createClass({
+var TradeList = React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
@@ -76,6 +76,6 @@ var TradeList = React.createFactory(React.createClass({
             </div>
         );
     }
-}));
+});
 
 module.exports = TradeList;

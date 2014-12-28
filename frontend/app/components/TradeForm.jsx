@@ -20,7 +20,7 @@ var ConfirmModal = require('./ConfirmModal');
 
 var AlertDismissable = require('./AlertDismissable');
 
-var SplitTradeForm = React.createFactory(React.createClass({
+var SplitTradeForm = React.createClass({
   mixins: [FluxMixin],
 
   getInitialState: function() {
@@ -324,9 +324,9 @@ var SplitTradeForm = React.createFactory(React.createClass({
 
     return;
   }
-}));
+});
 
-var TradeForm = React.createFactory(React.createClass({
+var TradeForm = React.createClass({
     mixins: [FluxMixin],
 
     getInitialState: function() {
@@ -399,6 +399,6 @@ var TradeForm = React.createFactory(React.createClass({
       });
       this.getFlux().actions.trade.switchType(key);
     }
-}));
+});
 
 module.exports = TradeForm;

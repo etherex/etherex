@@ -15,7 +15,7 @@ require("rickshaw/rickshaw.css");
 var Rickshaw = require("rickshaw");
 var crossfilter = require("crossfilter");
 
-var Chart = React.createFactory(React.createClass({
+var Chart = React.createClass({
     mixins: [FluxMixin],
 
     // propTypes: {
@@ -212,9 +212,9 @@ var Chart = React.createFactory(React.createClass({
             }
         })
     }
-}));
+});
 
-var GraphPrice = React.createFactory(React.createClass({
+var GraphPrice = React.createClass({
     render: function() {
         return (
             <div>
@@ -225,6 +225,6 @@ var GraphPrice = React.createFactory(React.createClass({
             </div>
         );
     }
-}));
+});
 
 module.exports = GraphPrice;

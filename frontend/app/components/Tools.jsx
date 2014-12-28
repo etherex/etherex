@@ -11,7 +11,7 @@ var AlertDismissable = require('./AlertDismissable');
 var RegisterSub = require('./RegisterSub');
 var Send = require('./Send');
 
-var TradeList = React.createFactory(React.createClass({
+var TradeList = React.createClass({
     mixins: [FluxMixin],
 
     getInitialState: function() {
@@ -50,6 +50,6 @@ var TradeList = React.createFactory(React.createClass({
             </div>
         );
     }
-}));
+});
 
 module.exports = TradeList;

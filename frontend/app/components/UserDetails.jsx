@@ -8,7 +8,7 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 var UserSummaryPane = require("./UserSummaryPane");
 var TradeList = require("./TradeList");
 
-var UserDetails = React.createFactory(React.createClass({
+var UserDetails = React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
@@ -34,6 +34,6 @@ var UserDetails = React.createFactory(React.createClass({
             );
         }
     }
-}));
+});
 
 module.exports = UserDetails;

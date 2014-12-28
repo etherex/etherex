@@ -7,7 +7,7 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 var TradeForm = require("./TradeForm");
 var TradeList = require("./TradeList");
 
-var Trades = React.createFactory(React.createClass({
+var Trades = React.createClass({
   mixins: [FluxMixin],
 
   render: function() {
@@ -25,6 +25,6 @@ var Trades = React.createFactory(React.createClass({
     );
   }
 
-}));
+});
 
 module.exports = Trades;

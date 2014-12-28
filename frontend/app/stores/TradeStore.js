@@ -69,7 +69,7 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onLoadTradesProgress: function(payload) {
-        console.log("Progress: " + payload.percent);
+        // console.log("Progress: " + payload.percent);
         // this.trades = payload.trades || [];
         this.percent = payload.percent;
         this.emit(constants.CHANGE_EVENT);
@@ -122,7 +122,7 @@ var TradeStore = Fluxxor.createStore({
     onFillTrade: function(payload) {
         var index = _.findIndex((payload.type == "buys") ? this.trades.buys : this.trades.sells, {'id': payload.id});
 
-        console.log("Filling trade ", payload, " at index " + index);
+        // console.log("Filling trade ", payload, " at index " + index);
 
         (payload.type == "buys") ? this.trades.buys[index].status = "success" : this.trades.sells[index].status = "success";
 
@@ -132,7 +132,7 @@ var TradeStore = Fluxxor.createStore({
     onFillTrades: function(payload) {
         var ids = _.pluck(payload, 'id');
 
-        console.log("Filling trades " + ids.join(', '));
+        // console.log("Filling trades " + ids.join(', '));
 
         for (var i = ids.length - 1; i >= 0; i--) {
             var index = _.findIndex(
@@ -194,7 +194,7 @@ var TradeStore = Fluxxor.createStore({
         //     available -= filling[i].amount * filling[i].price;
         // };
 
-        console.log("===");
+        // console.log("===");
 
         for (var i = 0; i <= trades.length - 1; i++) {
 
@@ -243,7 +243,7 @@ var TradeStore = Fluxxor.createStore({
                   trades[i].status != "pending" &&
                   trades[i].status != "new") {
 
-                console.log("Would fill trade # " + i + " with total of " + trades_total);
+                // console.log("Would fill trade # " + i + " with total of " + trades_total);
 
                 (payload.type == 1) ? // if (available >= this_total)
                   this.trades.tradeSells[i].status = "filling" :
@@ -265,33 +265,33 @@ var TradeStore = Fluxxor.createStore({
             }
         };
 
-        // // DEBUG Partial filling adds a new trade for remaining available
-        // console.log("Available: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
-        // console.log("From balance of " + this.props.user.user.balance);
-        if (payload.price > 0) {
-            if (amountLeft * payload.price >= payload.market.minTotal &&
-                filling.length > 0 &&
-                available > 0) {
-                console.log("Would also add new trade for " + amountLeft + " " + payload.market.name +
-                            " for " + utils.formatBalance(bigRat(amountLeft)
-                                    .multiply(payload.price)
-                                    .multiply(fixtures.ether)));
-            }
-            else if (amountLeft * payload.price >= payload.market.minTotal &&
-                     filling.length > 0 &&
-                     amountLeft > 0 &&
-                     available > 0) {
-                console.log("Not enough left for a new trade, needs " +
-                    utils.formatBalance(bigRat(payload.market.minTotal).multiply(fixtures.ether)) +
-                    ", total left is " + utils.formatBalance(bigRat(amountLeft).multiply(payload.price).multiply(fixtures.ether)) +
-                    ", available left would be " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
-            }
-            else if (filling.length == 0) {
-                console.log("Would add new trade for " + payload.amount + " " + payload.market.name +
-                            " for " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
-            }
-        }
-        console.log("Filling " + filling.length + " trade(s): " + _.pluck(filling, 'id').join(', '));
+        // // // DEBUG Partial filling adds a new trade for remaining available
+        // // console.log("Available: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
+        // // console.log("From balance of " + this.props.user.user.balance);
+        // if (payload.price > 0) {
+        //     if (amountLeft * payload.price >= payload.market.minTotal &&
+        //         filling.length > 0 &&
+        //         available > 0) {
+        //         console.log("Would also add new trade for " + amountLeft + " " + payload.market.name +
+        //                     " for " + utils.formatBalance(bigRat(amountLeft)
+        //                             .multiply(payload.price)
+        //                             .multiply(fixtures.ether)));
+        //     }
+        //     else if (amountLeft * payload.price >= payload.market.minTotal &&
+        //              filling.length > 0 &&
+        //              amountLeft > 0 &&
+        //              available > 0) {
+        //         console.log("Not enough left for a new trade, needs " +
+        //             utils.formatBalance(bigRat(payload.market.minTotal).multiply(fixtures.ether)) +
+        //             ", total left is " + utils.formatBalance(bigRat(amountLeft).multiply(payload.price).multiply(fixtures.ether)) +
+        //             ", available left would be " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
+        //     }
+        //     else if (filling.length == 0) {
+        //         console.log("Would add new trade for " + payload.amount + " " + payload.market.name +
+        //                     " for " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
+        //     }
+        // }
+        // console.log("Filling " + filling.length + " trade(s): " + _.pluck(filling, 'id').join(', '));
 
         // Set state for filling trades for fillTrades
         // this.type = payload.type;

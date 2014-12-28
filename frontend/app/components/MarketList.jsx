@@ -12,7 +12,7 @@ var ProgressBar = require('react-bootstrap/ProgressBar');
 
 var MarketTable = require('./MarketTable');
 
-var MarketList = React.createFactory(React.createClass({
+var MarketList = React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
@@ -37,6 +37,6 @@ var MarketList = React.createFactory(React.createClass({
             </div>
         );
     }
-}));
+});
 
 module.exports = MarketList;

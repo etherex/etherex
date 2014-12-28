@@ -8,7 +8,7 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 var GraphPrice = require('./GraphPriceRickshaw');
 var MarketList = require("./MarketList");
 
-var Markets = React.createFactory(React.createClass({
+var Markets = React.createClass({
   mixins: [FluxMixin],
 
   render: function() {
@@ -30,6 +30,6 @@ var Markets = React.createFactory(React.createClass({
     );
   }
 
-}));
+});
 
 module.exports = Markets;

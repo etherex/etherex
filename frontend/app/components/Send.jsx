@@ -16,7 +16,7 @@ var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 var bigRat = require("big-rational");
 
-var Send = React.createFactory(React.createClass({
+var Send = React.createClass({
     mixins: [FluxMixin],
 
     getInitialState: function() {
@@ -59,6 +59,6 @@ var Send = React.createFactory(React.createClass({
             </form>
         );
     }
-}));
+});
 
 module.exports = Send;

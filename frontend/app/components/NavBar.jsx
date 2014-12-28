@@ -10,7 +10,7 @@ var Link = Router.Link;
 var Tab = require("./Tab");
 var UserLink = require("./UserLink");
 
-var NavBar = React.createFactory(React.createClass({
+var NavBar = React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
@@ -46,6 +46,6 @@ var NavBar = React.createFactory(React.createClass({
             </nav>
         );
     }
-}));
+});
 
 module.exports = NavBar;

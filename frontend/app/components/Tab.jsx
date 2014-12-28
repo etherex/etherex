@@ -5,7 +5,7 @@ var Router = require("react-router");
 var Link = Router.Link;
 var ActiveState = Router.ActiveState;
 
-var Tab = React.createFactory(React.createClass({
+var Tab = React.createClass({
 
   mixins: [ ActiveState ],
 
@@ -21,10 +21,9 @@ var Tab = React.createFactory(React.createClass({
 
   render: function() {
     var className = this.state.isActive ? 'active' : '';
-    var link = Link(this.props);
-    return <li className={className}>{link}</li>;
+    return <li className={className}><Link {...this.props} /></li>;
   }
 
-}));
+});
 
 module.exports = Tab;

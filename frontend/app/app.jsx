@@ -67,11 +67,11 @@ var actions = {
 var flux = new Fluxxor.Flux(stores, actions);
 
 // DEBUG
-flux.on("dispatch", function(type, payload) {
-  if (console && console.log) {
-    console.log("[Dispatch]", type, payload);
-  }
-});
+// flux.on("dispatch", function(type, payload) {
+//   if (console && console.log) {
+//     console.log("[Dispatch]", type, payload);
+//   }
+// });
 
 var routes = (
     <Route name="app" handler={EtherExApp} flux={flux}>

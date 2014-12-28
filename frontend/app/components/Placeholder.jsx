@@ -2,7 +2,7 @@
 
 var React = require("react");
 
-var Placeholder = React.createFactory(React.createClass({
+var Placeholder = React.createClass({
   render: function() {
     return (
       <div>
@@ -10,6 +10,6 @@ var Placeholder = React.createFactory(React.createClass({
       </div>
     );
   }
-}));
+});
 
 module.exports = Placeholder;

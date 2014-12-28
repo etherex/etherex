@@ -7,7 +7,7 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 var utils = require("../js/utils");
 var constants = require("../js/constants");
 
-var Balance = React.createFactory(React.createClass({
+var Balance = React.createClass({
   mixins: [FluxMixin],
 
   render: function() {
@@ -19,6 +19,6 @@ var Balance = React.createFactory(React.createClass({
       </div>
     );
   }
-}));
+});
 
 module.exports = Balance;

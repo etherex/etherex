@@ -64,7 +64,7 @@ var EthereumClient = function() {
                     var marketPromise = new Promise(function (resolve, reject) {
                         contract.get_market(String(id)).call().then(function (market) {
                             try {
-                                console.log("Market from ABI:", market);
+                                // console.log("Market from ABI:", market);
 
                                 var id = _.parseInt(market[0]);
                                 var name = web3.toAscii(market[1]);
@@ -160,7 +160,7 @@ var EthereumClient = function() {
                         var p = i;
                         contract.get_trade("0x" + id).call().then(function (trade) {
                             try {
-                                console.log("Trade from ABI:", trade);
+                                // console.log("Trade from ABI:", trade);
 
                                 var id = trade[0];
                                 var type = _.parseInt(trade[1]);
@@ -168,7 +168,7 @@ var EthereumClient = function() {
                                 var amountPrecision = Math.pow(10, market.decimals);
                                 var precision = market.precision;
 
-                                console.log("Loading trade " + id + " for market " + market.name);
+                                // console.log("Loading trade " + id + " for market " + market.name);
 
                                 var amount = bigRat(_.parseInt(trade[3])).divide(amountPrecision).valueOf();
                                 var price = bigRat(_.parseInt(trade[4])).divide(precision).valueOf();
@@ -392,29 +392,20 @@ var EthereumClient = function() {
         var amounts = this.getAmounts(trade.amount, trade.price, market.decimals, market.precision);
 
         if (trade.type == 1)
-            var funid = "0x01";
+            var addTrade = contract.buy;
         else if (trade.type == 2)
-            var funid = "0x02";
+            var addTrade = contract.sell;
         else {
             failure("Invalid trade type.");
             return;
         }
 
-        var calldata =
-            funid +
-            web3.padDecimal(amounts.amount, 64) +
-            web3.padDecimal(amounts.price, 64) +
-            web3.padDecimal(trade.market, 64);
-        // console.log("CALLDATA", calldata);
-        // contract.buy(amounts.amount, amounts.price, trade.market).call();
-
         try {
             web3.eth.gasPrice.then(function (gasPrice) {
-                web3.eth.transact({
+                addTrade(amounts.amount, amounts.price, trade.market).transact({
                     from: user.addresses[0],
                     value: trade.type == 1 ? amounts.total : "0",
                     to: fixtures.addresses.etherex,
-                    data: calldata,
                     gas: "10000",
                     gasPrice: gasPrice
                 }).then(function (result) {
@@ -432,7 +423,6 @@ var EthereumClient = function() {
     };
 
     this.fillTrades = function(user, trades, market, success, failure) {
-        var funid = "0x03";
         var total = bigRat(0);
 
         for (var i = trades.length - 1; i >= 0; i--) {
@@ -441,24 +431,14 @@ var EthereumClient = function() {
         };
 
         var ids = _.pluck(trades, 'id');
-        var calldata = funid;
-
-        for (var i = ids.length - 1; i >= 0; i--)
-            calldata += ids[i].substr(2);
-        calldata += web3.padDecimal(ids.length, 64)
-
         var gas = ids.length * 10000;
-
-        // console.log("Posting " + eth.fromAscii(data));
-        // console.log("with value " + utils.formatBalance(total.toString()));
 
         try {
             web3.eth.gasPrice.then(function (gasPrice) {
-                web3.eth.transact({
+                contract.trade(ids, ids.length).transact({
                     from: user.addresses[0],
                     value: total > 0 ? total.toString() : "0",
                     to: fixtures.addresses.etherex,
-                    data: calldata,
                     gas: String(gas),
                     gasPrice: gasPrice
                 }).then(function (result) {
@@ -475,46 +455,13 @@ var EthereumClient = function() {
         }
     };
 
-    this.fillTrade = function(user, trade, market, success, failure) {
-        var amounts = this.getAmounts(trade.amount, trade.price, market.decimals, market.precision);
-
-        var calldata = "0x03" + trade.id.substr(2);
-
-        try {
-            web3.eth.gasPrice.then(function (gasPrice) {
-                web3.eth.transact({
-                    from: user.addresses[0],
-                    value: trade.type == "sell" ? amounts.total : "0",
-                    to: fixtures.addresses.etherex,
-                    data: calldata,
-                    gas: "10000",
-                    gasPrice: gasPrice
-                }).then(function (result) {
-                    success();
-                }, function(e) {
-                    failure(e);
-                });
-            }, function (e) {
-                failure(e);
-            });
-        }
-        catch(e) {
-            failure(e);
-        }
-    };
-
     this.cancelTrade = function(user, trade, success, failure) {
-        var calldata = "0x06" + trade.id.substr(2);
-        // console.log("CALLDATA", calldata);
-        // contract.cancel(String(trade.id)).call();
-
         try {
             web3.eth.gasPrice.then(function (gasPrice) {
-                web3.eth.transact({
+                contract.cancel(trade.id).transact({
                     from: user.addresses[0],
                     value: "0",
                     to: fixtures.addresses.etherex,
-                    data: calldata,
                     gas: "10000",
                     gasPrice: gasPrice
                 }).then(function (result) {
@@ -532,22 +479,18 @@ var EthereumClient = function() {
     };
 
     this.registerMarket = function(user, market, success, failure) {
-        var funid = "0x07";
-        var data =
-            funid +
-            web3.padDecimal(market.name, 64) +
-            web3.padDecimal(market.address, 64) +
-            web3.padDecimal(market.minimum, 64) +
-            web3.padDecimal(market.decimals, 64) +
-            web3.padDecimal(market.precision, 64);
-
         try {
             web3.eth.gasPrice.then(function (gasPrice) {
-                web3.eth.transact({
+                contract.add_market([
+                    market.name,
+                    market.address,
+                    market.minimum,
+                    market.decimals,
+                    market.precision
+                ]).transact({
                     from: user.addresses[0],
                     value: "0",
                     to: fixtures.addresses.etherex,
-                    data: calldata,
                     gas: "10000",
                     gasPrice: gasPrice
                 }).then(function (result) {
