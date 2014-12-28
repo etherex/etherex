@@ -32,6 +32,7 @@ MARKET_FIELDS = 11
 TRADE_FIELDS = 7
 
 extern any: [call]
+extern namereg: [register, unregister]
 
 macro refund():
     if msg.value > 0:
@@ -105,11 +106,8 @@ def shared():
 # Get price by market ID
 #
 def price(market_id):
-    if msg.value > 0: // "Refunding"
-        send(msg.sender, msg.value)
-
+    refund()
     price = self.markets[market_id].last_price
-
     return(price)
 
 
@@ -166,9 +164,9 @@ def sell(amount, price, market_id):
 #
 # Trade
 #
-def trade(trade_ids, size):
+def trade(trade_ids:a, size):
     # Try to fulfill each trade passed
-    t = 1
+    t = 0
     while t < size:
         trade_id = trade_ids[t]
 
@@ -193,7 +191,6 @@ def trade(trade_ids, size):
         if type == 1:
             # Transfer sub / asset
             balance = self.balances[msg.sender][market_id]
-
             if balance >= amount:
                 self.balances[msg.sender][market_id] -= amount
                 self.balances[owner][market_id] += amount
@@ -203,22 +200,21 @@ def trade(trade_ids, size):
 
                 # Clear trade
                 remove_trade(trade_id)
-
-            return(12)
+            else:
+                return(12)
 
         elif type == 2:
             # Check sell amount
             if msg.value < value:
-                if msg.value > 0: // "Refunding"
-                    send(msg.sender, msg.value)
-                return(12) // "Minimum trade amount not met, minimum is %s, got %d" % (price, msg.value)
+                refund()
+                return(13) // "Minimum trade amount not met, minimum is %s, got %d" % (value, msg.value)
 
             # Refund excess value
             if msg.value > value:
                 send(msg.sender, msg.value - value)
 
             # Transfer ETH
-            send(self.trades[trade_id].price, value)
+            send(owner, value)
 
             # Transfer sub / asset
             self.balances[self][market_id] -= amount
@@ -233,10 +229,9 @@ def trade(trade_ids, size):
         # Next trade
         t = t + 1
 
-    if ret != 1:
-        return(0) // "Error"
-    else:
-        return(ret) // "Trade(s) fulfilled"
+    if t == size:
+        return(1)
+    return(0)
 
 #
 # Deposit - from subcurrency contracts only
@@ -294,10 +289,9 @@ def cancel(trade_id):
             self.balances[msg.sender][market_id] += amount
             # ret = contract.call(data=[self, msg.sender, price / 10 ^ decimals], datasz=3, outsz=1)
 
-    if !ret:
-        return(0) // "Error"
-    else:
-        return(ret) // "Trade canceled"
+        return(1)
+
+    return(0)
 
 #
 # Add market
@@ -397,10 +391,10 @@ def get_trade(id):
 def get_sub_balance(address, market_id):
     return(self.balances[address][market_id])
 
-# def register(namereg):
-#     if msg.sender == self.owner:
-#         namereg.call(funid=0, data=[text("EtherEx")], datasz=1)
+def register(namereg):
+    if msg.sender == self.owner:
+        namereg.register([text("EtherEx")], datasz=1, as=namereg)
 
-# def unregister(namereg):
-#     if msg.sender == self.owner:
-#         namereg.call(funid=1)
+def unregister(namereg):
+    if msg.sender == self.owner:
+        namereg.unregister([], as=namereg)

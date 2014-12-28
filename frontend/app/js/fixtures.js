@@ -32,7 +32,15 @@ var fixtures = {
             "name": "buy",
             "inputs": [
                 {
-                    "name": "a",
+                    "name": "amount",
+                    "type": "uint256"
+                },
+                {
+                    "name": "price",
+                    "type": "uint256"
+                },
+                {
+                    "name": "market_id",
                     "type": "uint256"
                 }
             ],
@@ -47,7 +55,15 @@ var fixtures = {
             "name": "sell",
             "inputs": [
                 {
-                    "name": "a",
+                    "name": "amount",
+                    "type": "uint256"
+                },
+                {
+                    "name": "price",
+                    "type": "uint256"
+                },
+                {
+                    "name": "market_id",
                     "type": "uint256"
                 }
             ],
@@ -62,7 +78,11 @@ var fixtures = {
             "name": "trade",
             "inputs": [
                 {
-                    "name": "a",
+                    "name": "trade_ids",
+                    "type": "uint256"
+                },
+                {
+                    "name": "size",
                     "type": "uint256"
                 }
             ],
@@ -77,7 +97,19 @@ var fixtures = {
             "name": "deposit",
             "inputs": [
                 {
-                    "name": "a",
+                    "name": "serpentbug",
+                    "type": "uint256"
+                },
+                {
+                    "name": "address",
+                    "type": "hash256"
+                },
+                {
+                    "name": "amount",
+                    "type": "uint256"
+                },
+                {
+                    "name": "market_id",
                     "type": "uint256"
                 }
             ],
@@ -92,7 +124,15 @@ var fixtures = {
             "name": "withdraw",
             "inputs": [
                 {
-                    "name": "a",
+                    "name": "address",
+                    "type": "hash256"
+                },
+                {
+                    "name": "amount",
+                    "type": "uint256"
+                },
+                {
+                    "name": "market_id",
                     "type": "uint256"
                 }
             ],
@@ -122,7 +162,23 @@ var fixtures = {
             "name": "add_market",
             "inputs": [
                 {
-                    "name": "a",
+                    "name": "name",
+                    "type": "uint256"
+                },
+                {
+                    "name": "contract",
+                    "type": "hash256"
+                },
+                {
+                    "name": "decimals",
+                    "type": "uint256"
+                },
+                {
+                    "name": "precision",
+                    "type": "uint256"
+                },
+                {
+                    "name": "minimum",
                     "type": "uint256"
                 }
             ],
@@ -137,8 +193,8 @@ var fixtures = {
             "name": "change_ownership",
             "inputs": [
                 {
-                    "name": "a",
-                    "type": "uint256"
+                    "name": "new_owner",
+                    "type": "hash256"
                 }
             ],
             "outputs": [
@@ -244,6 +300,25 @@ var fixtures = {
                 },
                 {
                     "name": "block",
+                    "type": "uint256"
+                }
+            ]
+        },
+        {
+            "name": "get_sub_balance",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "hash256"
+                },
+                {
+                    "name": "market_id",
+                    "type": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "balance",
                     "type": "uint256"
                 }
             ]

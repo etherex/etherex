@@ -325,12 +325,11 @@ var EthereumClient = function() {
         var error = "Failed to update subcurrency balance: ";
 
         try {
-            web3.eth.stateAt(market.address, address).then(function (hexbalance) {
-                if (!hexbalance || hexbalance == "0x") {
+            contract.get_sub_balance(address, String(market.id)).call().then(function (balance) {
+                if (!balance || balance == "0") {
                     success(0, false);
                     return;
                 }
-                balance = web3.toDecimal(hexbalance);
                 success(balance, false);
             }, function(e) {
                 failure(error + e);
@@ -446,6 +445,7 @@ var EthereumClient = function() {
 
         for (var i = ids.length - 1; i >= 0; i--)
             calldata += ids[i].substr(2);
+        calldata += web3.padDecimal(ids.length, 64)
 
         var gas = ids.length * 10000;
 

@@ -132,7 +132,7 @@
   transact:
     CAK:
       to: $caktux
-      value: 1000000000000000000
+      value: 50000000000000000000
 
 # # Contract calls with return values
 # -
