@@ -39,6 +39,10 @@ var SplitTradeForm = React.createClass({
       };
   },
 
+  componentDidMount: function() {
+    this.componentWillReceiveProps(this.props);
+  },
+
   componentWillReceiveProps: function(nextProps) {
     if (nextProps.trades.newAmount && this.props.type == nextProps.trades.type) {
       this.setState({

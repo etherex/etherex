@@ -62,7 +62,7 @@ var MarketRow = React.createClass({
 
 var MarketTable = React.createClass({
     render: function() {
-        var marketListNodes = _.rest(this.props.market.markets).map(function (market) {
+        var marketListNodes = this.props.market.markets.map(function (market) {
             return (
                 <MarketRow key={market.id} market={market} /> //user={this.props.user} review={this.props.review} />
             );

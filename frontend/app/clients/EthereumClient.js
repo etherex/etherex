@@ -75,12 +75,12 @@ var EthereumClient = function() {
                                 if (market[6] == 1)
                                     var lastPrice = null;
                                 else
-                                    var lastPrice = _.parseInt(_.parseInt(market[6])) / Math.pow(10, precision.length - 1);
+                                    var lastPrice = parseFloat(bigRat(market[6]).divide(bigRat(Math.pow(10, market[4].length - 1))).toDecimal());
                                 var owner = market[7].replace("0x000000000000000000000000", "0x");
                                 var block = _.parseInt(market[8]);
                                 var total_trades = _.parseInt(market[9]);
 
-                                console.log(id, name, address, decimals, precision, minimum, lastPrice, owner, block);
+                                // console.log(id, name, address, decimals, precision, minimum, lastPrice, owner, block);
 
                                 web3.eth.stateAt(address, user.addresses[0]).then(function (balance) {
                                     resolve({
@@ -491,21 +491,19 @@ var EthereumClient = function() {
     // Watches
 
     this.setUserWatches = function(flux, addresses, markets) {
-        // FIXME
         // ETH balance
-        console.log("Setting watchers for", addresses);
+        // console.log("Setting watchers for", addresses);
         web3.eth.watch({altered: addresses}).changed(flux.actions.user.updateBalance);
 
-        // FIXME
         // Sub balances
-        var market_addresses = _.rest(_.pluck(markets, 'address'));
-        console.log("Setting sub watchers for markets", market_addresses);
+        var market_addresses = _.pluck(markets, 'address');
+        // console.log("Setting sub watchers for markets", market_addresses);
         web3.eth.watch({altered: market_addresses[i]}).changed(flux.actions.user.updateBalanceSub);
     };
 
     this.setMarketWatches = function(flux, markets) {
         flux.actions.trade.loadTrades();
-        web3.eth.watch({altered: fixtures.addresses.etherex}).changed(flux.actions.trade.updateTrades);
+        web3.eth.watch({altered: fixtures.addresses.etherex}).changed(flux.actions.market.loadMarkets);
     };
 
 

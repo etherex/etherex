@@ -13,6 +13,7 @@ var NavBar = require("./NavBar");
 var SubNavBar = require("./SubNavBar");
 var Balance = require("./Balance");
 var BalanceSub = require("./BalanceSub");
+var LastPrice = require("./LastPrice");
 var AlertDismissable = require('./AlertDismissable');
 
 var EtherExApp = React.createClass({
@@ -58,6 +59,8 @@ var EtherExApp = React.createClass({
             }
           </div>
         </div>}
+        {(!this.state.market.error && !this.state.user.error) &&
+          <LastPrice market={this.state.market.market} />}
         {(!this.state.market.error && !this.state.user.error) &&
           <RouteHandler
             market={this.state.market}

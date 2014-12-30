@@ -197,7 +197,7 @@ def trade(trade_id):
         # Transfer sub / asset
         balance = self.balances[msg.sender][market_id].available
         if balance >= amount:
-            self.balances[msg.sender][market_id].trading -= amount
+            self.balances[msg.sender][market_id].available -= amount
             self.balances[owner][market_id].available += amount
 
             # Transfer ETH
