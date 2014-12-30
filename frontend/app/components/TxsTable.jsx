@@ -150,9 +150,11 @@ var TxsTable = React.createClass({
                         </tr>
                     </thead>
                     <tbody>
-                        {ethBrowser ?
-                            txsListNodes :
-                            <div className="bg-warning panel-body">No eth.messages with JSON-RPC interface.</div>
+                        {txsListNodes}
+                        {
+                        // ethBrowser ?
+                        //     txsListNodes :
+                        //     <div className="bg-warning panel-body">No eth.messages with JSON-RPC interface.</div>
                         }
                     </tbody>
                 </Table>

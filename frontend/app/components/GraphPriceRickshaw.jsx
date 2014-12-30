@@ -43,16 +43,16 @@ var Chart = React.createClass({
     },
 
     componentDidMount: function() {
-        var seriesData = [ [], [] ];
-        var random = new Rickshaw.Fixtures.RandomData(50);
+        // var seriesData = [ [], [] ];
+        // var random = new Rickshaw.Fixtures.RandomData(50);
 
-        if (!ethBrowser) {
-            for (var i = 0; i < 75; i++) {
-              random.addData(seriesData);
-            }
-            this.props.data.price = seriesData.shift().map(function(d) { return { x: d.x, y: d.y} });
-            this.props.data.volume = seriesData.shift().map(function(d) { return { x: d.x, y: d.y / 4 } });
-        }
+        // if (!ethBrowser) {
+        //     for (var i = 0; i < 75; i++) {
+        //       random.addData(seriesData);
+        //     }
+        //     this.props.data.price = seriesData.shift().map(function(d) { return { x: d.x, y: d.y} });
+        //     this.props.data.volume = seriesData.shift().map(function(d) { return { x: d.x, y: d.y / 4 } });
+        // }
 
         if (!this.props.data.price || !this.props.data.volume || this.props.market.error)
             return;
@@ -220,8 +220,10 @@ var GraphPrice = React.createClass({
             <div>
                 <h4>{this.props.title}</h4>
                 <Chart data={this.props.market.market.data} market={this.props.market.market} />
-                {!ethBrowser &&
-                    <div className="bg-warning panel-body">No eth.messages with JSON-RPC interface, feeding random data.</div>}
+                {
+                // !ethBrowser &&
+                //    <div className="bg-warning panel-body">No eth.messages with JSON-RPC interface, feeding random data.</div>
+                }
             </div>
         );
     }

@@ -120,10 +120,6 @@ var fixtures = {
             "name": "withdraw",
             "inputs": [
                 {
-                    "name": "address",
-                    "type": "hash256"
-                },
-                {
                     "name": "amount",
                     "type": "uint256"
                 },
@@ -163,7 +159,7 @@ var fixtures = {
                 },
                 {
                     "name": "contract",
-                    "type": "hash256"
+                    "type": "uint256"
                 },
                 {
                     "name": "decimals",
@@ -323,6 +319,27 @@ var fixtures = {
                 }
             ]
         },
+    ],
+    sub_contract_desc: [
+        {
+            "name": "send",
+            "inputs": [
+                {
+                    "name": "recipient",
+                    "type": "uint256"
+                },
+                {
+                    "name": "amount",
+                    "type": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "result",
+                    "type": "uint256"
+                }
+            ]
+        }
     ]
 };
 

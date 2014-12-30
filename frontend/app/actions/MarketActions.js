@@ -68,6 +68,7 @@ var MarketActions = function(client) {
     this.registerMarket = function(market) {
         var user = this.flux.store("UserStore").getState().user;
 
+        console.log("REGISTER_MARKET", market);
         _client.registerMarket(market, function(id) {
             this.dispatch(constants.market.REGISTER_MARKET, id);
         }.bind(this), function(error) {

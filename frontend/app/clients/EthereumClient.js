@@ -234,54 +234,59 @@ var EthereumClient = function() {
 
         console.log("Loading transactions...");
 
-        var slot = ((market.id - 1) * fixtures.market_fields + 20).toString(16);
-        web3.eth.logs({
-            max: 100,
-            latest: -1,
-            // from: fixtures.addresses.etherex,
-            // to: fixtures.addresses.etherex,
-            altered: {
-                id: fixtures.addresses.etherex,
-                at: "0x" + slot // "0x69" // TODO get market price slot
-            }
-        }).then(function (prices) {
-            console.log("PRICE CHANGES: " + prices.length);
-            if (prices.length)
-                console.log("PRICE DATA: " + prices[0].input);
+        try {
+            var slot = ((market.id - 1) * fixtures.market_fields + 20).toString(16);
+            web3.eth.logs({
+                // max: 100,
+                // latest: -1,
+                // from: fixtures.addresses.etherex,
+                // to: fixtures.addresses.etherex,
+                // altered: {
+                //     id: fixtures.addresses.etherex,
+                //     at: "0x" + slot // "0x69" // TODO get market price slot
+                // }
+            }).then(function (prices) {
+                console.log("PRICE CHANGES: ", prices.length);
+                if (prices.length)
+                    console.log("PRICE DATA: " + prices[0].input);
 
-            var from = eth.messages({max: 100, latest: -1, altered: addresses[0], from: fixtures.addresses.etherex});
-            // console.log(from.length);
-            // var to = eth.messages({latest: -1, altered: addresses[0], to: addresses[1]});
-            // console.log(to.length);
-            var origin = eth.messages({max: 100, latest: -1, altered: addresses[0], to: fixtures.addresses.etherex});
-            // console.log(origin.length);
-            // var to = eth.messages({latest: -1, altered: addresses[0], from: fixtures.addresses.etherex, to: addresses[0]});
-            var latest = _.merge(from, origin);
-            // console.log(latest.length);
+                var from = web3.eth.logs({max: 100, latest: -1, altered: addresses[0], from: fixtures.addresses.etherex});
+                // console.log(from.length);
+                // var to = eth.messages({latest: -1, altered: addresses[0], to: addresses[1]});
+                // console.log(to.length);
+                var origin = web3.eth.logs({max: 100, latest: -1, altered: addresses[0], to: fixtures.addresses.etherex});
+                // console.log(origin.length);
+                // var to = eth.messages({latest: -1, altered: addresses[0], from: fixtures.addresses.etherex, to: addresses[0]});
+                var latest = _.merge(from, origin);
+                // console.log(latest.length);
 
-            // if (typeof(addresses) == 'array' && addresses.length == 2)
-            //     latest = _.filter(latest, {'to': addresses[1]});
-            // for (var i = 0; i < addresses.length; i++) {
-                // txs.push(_.filter(latest, {'to': addresses[1]}));
-                // txs.push(_.filter(latest, {'from': addresses[1]}));
-                // txs.push(_.filter(latest, {'origin': addresses[i]}));
-            // };
-            // latest.push(_.where(eth.messages({altered: addresses[0]}), {'from': addresses[1]}));
-            // latest.push(eth.messages({latest: -1, from: addresses[1], to: addresses[0]}));
+                // if (typeof(addresses) == 'array' && addresses.length == 2)
+                //     latest = _.filter(latest, {'to': addresses[1]});
+                // for (var i = 0; i < addresses.length; i++) {
+                    // txs.push(_.filter(latest, {'to': addresses[1]}));
+                    // txs.push(_.filter(latest, {'from': addresses[1]}));
+                    // txs.push(_.filter(latest, {'origin': addresses[i]}));
+                // };
+                // latest.push(_.where(eth.messages({altered: addresses[0]}), {'from': addresses[1]}));
+                // latest.push(eth.messages({latest: -1, from: addresses[1], to: addresses[0]}));
 
-            var payload = {
-                latest: latest,
-                prices: prices
-            };
+                var payload = {
+                    latest: latest,
+                    prices: prices
+                };
 
-            // if (latest.length <=0)
-            //     var latest = [{}];
+                // if (latest.length <=0)
+                //     var latest = [{}];
 
-            if (latest || prices) // && latest.length > 0)
-                success(payload);
-        }, function(e) {
-            failure("Could not get transactions: " + String(e));
-        });
+                if (latest || prices) // && latest.length > 0)
+                    success(payload);
+            }, function(e) {
+                failure("Could not get transactions: " + String(e));
+            });
+        }
+        catch (e) {
+            failure("Unable to load transactions: " + String(e));
+        }
     };
 
 
@@ -330,26 +335,37 @@ var EthereumClient = function() {
         var error = "Failed to update subcurrency balance: ";
 
         try {
-            contract.get_sub_balance(address, String(market.id)).call().then(function (balances) {
-                var available = balances[0];
-                var trading = balances[1];
-
-                if (!available || available == "0")
-                    available = 0;
-                if (!trading || trading == "0")
-                    trading = 0;
-                if (available == 0 && trading == 0) {
-                    success(0, false);
-                    return;
+            var sub_balance = 0;
+            web3.eth.stateAt(market.address, address).then(function (hexbalance) {
+                if (hexbalance && hexbalance != "0x") {
+                    sub_balance = " / " + utils.format(bigRat(web3.toDecimal(hexbalance)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf());
                 }
-                if (available)
-                    available = bigRat(String(available)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
-                if (trading)
-                    trading = bigRat(String(trading)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
-                success(available, "(" + String(trading) + " in trades)");
-            }, function(e) {
-                failure(error + e);
-                return;
+                else {
+                    sub_balance = "";
+                }
+
+                contract.get_sub_balance(address, String(market.id)).call().then(function (balances) {
+                    var available = balances[0];
+                    var trading = balances[1];
+
+                    if (!available || available == "0")
+                        available = 0;
+                    if (!trading || trading == "0")
+                        trading = 0;
+                    if (available == 0 && trading == 0 && !sub_balance) {
+                        success(0, false);
+                        return;
+                    }
+                    if (available)
+                        available = bigRat(String(available)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
+                    if (trading)
+                        trading = utils.format(bigRat(String(trading)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf());
+
+                    success(available, " / " + String(trading) + " in trades" + (sub_balance ? sub_balance : ""));
+                }, function(e) {
+                    failure(error + e);
+                    return;
+                });
             });
         }
         catch(e) {
@@ -381,6 +397,96 @@ var EthereumClient = function() {
         // }
     };
 
+    this.sendSub = function(amount, recipient, market, success, failure) {
+        var subcontract = web3.contract(market.address, fixtures.sub_contract_desc);
+
+        try {
+            web3.eth.gasPrice.then(function (gasPrice) {
+                subcontract.send(recipient, amount).transact({
+                    gas: "10000",
+                    gasPrice: gasPrice
+                }).then(function (result) {
+                    success(result);
+                }, function(e) {
+                    failure(e);
+                });
+            }, function (e) {
+                failure(e);
+            });
+        }
+        catch(e) {
+            failure(e);
+        }
+    };
+
+    this.depositSub = function(user, amount, market, success, failure) {
+        var subcontract = web3.contract(market.address, fixtures.sub_contract_desc);
+
+        try {
+            web3.eth.gasPrice.then(function (gasPrice) {
+                subcontract.send(fixtures.addresses.etherex, amount).transact({
+                    gas: "10000",
+                    gasPrice: gasPrice
+                }).then(function (result) {
+                    success(result);
+                }, function(e) {
+                    failure(e);
+                });
+            }, function (e) {
+                failure(e);
+            });
+        }
+        catch(e) {
+            failure(e);
+        }
+    };
+
+    this.withdrawSub = function(amount, market, success, failure) {
+        try {
+            web3.eth.gasPrice.then(function (gasPrice) {
+                contract.withdraw(amount, market.id).transact({
+                    gas: "10000",
+                    gasPrice: gasPrice
+                }).then(function (result) {
+                    success();
+                }, function(e) {
+                    failure(e);
+                });
+            }, function (e) {
+                failure(e);
+            });
+        }
+        catch(e) {
+            failure(e);
+        }
+    };
+
+    this.registerMarket = function(market, success, failure) {
+        try {
+            web3.eth.gasPrice.then(function (gasPrice) {
+                contract.add_market(
+                    web3.fromAscii(market.name, 32),
+                    market.address,
+                    market.decimals,
+                    market.precision,
+                    market.minimum
+                ).transact({
+                    gas: "10000",
+                    gasPrice: gasPrice
+                }).then(function (result) {
+                    success();
+                }, function(e) {
+                    failure(e);
+                });
+            }, function (e) {
+                failure(e);
+            });
+        }
+        catch(e) {
+            failure(e);
+        }
+    };
+
 
     // Watches
 
@@ -403,7 +509,7 @@ var EthereumClient = function() {
     };
 
 
-    // User action methods
+    // Trade actions
 
     this.addTrade = function(user, trade, market, success, failure) {
         var amounts = this.getAmounts(trade.amount, trade.price, market.decimals, market.precision);
@@ -513,35 +619,6 @@ var EthereumClient = function() {
         try {
             web3.eth.gasPrice.then(function (gasPrice) {
                 contract.cancel(trade.id).transact({
-                    from: user.addresses[0],
-                    value: "0",
-                    to: fixtures.addresses.etherex,
-                    gas: "10000",
-                    gasPrice: gasPrice
-                }).then(function (result) {
-                    success();
-                }, function(e) {
-                    failure(e);
-                });
-            }, function (e) {
-                failure(e);
-            });
-        }
-        catch(e) {
-            failure(e);
-        }
-    };
-
-    this.registerMarket = function(user, market, success, failure) {
-        try {
-            web3.eth.gasPrice.then(function (gasPrice) {
-                contract.add_market(
-                    market.name,
-                    market.address,
-                    market.minimum,
-                    market.decimals,
-                    market.precision
-                ).transact({
                     from: user.addresses[0],
                     value: "0",
                     to: fixtures.addresses.etherex,

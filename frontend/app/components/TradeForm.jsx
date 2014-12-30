@@ -87,7 +87,8 @@ var SplitTradeForm = React.createClass({
           (this.state.totalLeft < this.props.market.market.minTotal &&
            this.props.trades.filling.length > 0 &&
            this.props.trades.amountLeft &&
-           this.props.trades.available ?
+           this.props.trades.available &&
+           this.state.totalLeft ?
             " Not enough left for a new trade with " +
               utils.numeral(this.props.trades.amountLeft, 4) + " " + this.props.market.market.name + " for " +
               utils.formatBalance(bigRat(this.state.totalLeft).multiply(fixtures.ether)) +
@@ -229,12 +230,7 @@ var SplitTradeForm = React.createClass({
       var decimals = this.props.market.market.decimals;
 
       if (price && total)
-        amount = parseFloat(total) / parseFloat(price); // .toFixed(decimals);
-        // amount = bigRat(parseFloat(total) / parseFloat(price))
-        //         .multiply(bigRat(Math.pow(10, decimals)))
-        //         .ceil()
-        //         .divide(bigRat(Math.pow(10, decimals)))
-        //         .valueOf();
+        amount = parseFloat(total) / parseFloat(price);
 
       this.setState({
         price: price,

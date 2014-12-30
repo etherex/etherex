@@ -25,7 +25,9 @@ var UserStore = Fluxxor.createStore({
             constants.user.DEPOSIT, this.onDeposit,
             constants.user.DEPOSIT_FAIL, this.onUserFail,
             constants.user.WITHDRAW, this.onWithdraw,
-            constants.user.WITHDRAW_FAIL, this.onUserFail
+            constants.user.WITHDRAW_FAIL, this.onUserFail,
+            constants.user.SEND_SUB, this.onSendSub,
+            constants.user.SEND_SUB_FAIL, this.onUserFail
         );
 
         this.setMaxListeners(1024); // prevent "possible EventEmitter memory leak detected"
@@ -57,7 +59,7 @@ var UserStore = Fluxxor.createStore({
     },
 
     onLoadAddressesSuccess: function(payload) {
-        console.log("ADDRESSES: " + String(payload));
+        console.log("ADDRESSES", payload);
         this.user.id = payload[0];
         this.user.addresses = payload;
         this.loading = false;
@@ -66,23 +68,17 @@ var UserStore = Fluxxor.createStore({
     },
 
     onDeposit: function(payload) {
-        console.log("DEPOSIT: " + payload.amount);
-        if (payload.amount > 0) {
-            this.user.deposit += payload.amount;
-        }
+        console.log("DEPOSIT", payload.amount);
         this.emit(constants.CHANGE_EVENT);
     },
 
     onWithdraw: function(payload) {
-        console.log("WITHDRAW: " + payload.amount);
-        if (payload.amount <= this.user.deposit) {
-            this.user.deposit -= payload.amount;
-        }
+        console.log("WITHDRAW", payload.amount);
         this.emit(constants.CHANGE_EVENT);
     },
 
     onUpdateBalance: function(payload) {
-        console.log("BALANCE: " + payload.balance);
+        console.log("BALANCE", payload.balance);
         this.user.balance = utils.formatBalance(payload.balance);
         this.user.balance_raw = payload.balance;
         this.user.balance_unconfirmed = payload.balance_unconfirmed;
@@ -90,11 +86,16 @@ var UserStore = Fluxxor.createStore({
     },
 
     onUpdateBalanceSub: function(payload) {
-        console.log("BALANCE_SUB: " + payload.balance);
-        this.user.balance_sub = payload.balance ? utils.format(payload.balance) : 0;
+        console.log("BALANCE_SUB", payload.balance);
+        this.user.balance_sub = payload.balance ? payload.balance : 0;
         this.user.balance_sub_raw = payload.balance;
         this.user.balance_sub_unconfirmed = payload.balance_unconfirmed;
         this.emit(constants.CHANGE_EVENT);
+    },
+
+    onSendSub: function(payload) {
+        console.log("SEND_SUB", payload);
+        this.emit(constants.SEND_SUB);
     },
 
     onUserFail: function(payload) {

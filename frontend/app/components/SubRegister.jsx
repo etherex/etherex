@@ -16,17 +16,17 @@ var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 var bigRat = require("big-rational");
 
-var RegisterSub = React.createClass({
+var SubRegister = React.createClass({
   mixins: [FluxMixin],
 
   getInitialState: function() {
     return {
-        code: null,
-        address: null,
-        minimum: null,
-        decimals: null,
-        precision: null,
-        newReg: false
+      code: null,
+      address: null,
+      minimum: null,
+      decimals: null,
+      precision: null,
+      newReg: false
     };
   },
 
@@ -34,34 +34,24 @@ var RegisterSub = React.createClass({
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
         <div className="form-group">
-          <div className="input-group">
-            <label forHtml="code">Subcurrency code</label>
-            <input type="text" className="form-control" pattern="[A-Z]{3,4}" placeholder="ETX" ref="code" onChange={this.handleValidation}/>
-          </div>
+          <label forHtml="code">Subcurrency code</label>
+          <input type="text" className="form-control" pattern="[A-Z]{3,4}" placeholder="ETX" ref="code" onChange={this.handleValidation}/>
         </div>
         <div className="form-group">
-          <div className="input-group">
-            <label forHtml="address">Contract address</label>
-            <input type="text" className="form-control" pattern="\w{40}" placeholder="Address" ref="address" onChange={this.handleValidation}/>
-          </div>
+          <label forHtml="address">Contract address</label>
+          <input type="text" className="form-control" pattern="\w{40}" placeholder="Address" ref="address" onChange={this.handleValidation}/>
         </div>
         <div className="form-group">
-          <div className="input-group">
-            <label forHtml="minimum">Minimum ETH amount</label>
-            <input type="number" min="1" step="1" className="form-control medium" placeholder="10" ref="minimum" onChange={this.handleValidation}/>
-          </div>
+          <label forHtml="minimum">Minimum ETH amount</label>
+          <input type="number" min="1" step="1" className="form-control medium" placeholder="10" ref="minimum" onChange={this.handleValidation}/>
         </div>
         <div className="form-group">
-          <div className="input-group">
-            <label forHtml="decimals">Decimals</label>
-            <input type="number" min="0" step="1" className="form-control medium" placeholder="4" ref="decimals" onChange={this.handleValidation}/>
-          </div>
+          <label forHtml="decimals">Decimals</label>
+          <input type="number" min="0" step="1" className="form-control medium" placeholder="4" ref="decimals" onChange={this.handleValidation}/>
         </div>
         <div className="form-group">
-          <div className="input-group">
-            <label forHtml="precision">Price precision</label>
-            <input type="number" min="0.00000001" step="0.00000001" className="form-control medium" placeholder="0.00000001" ref="precision" onChange={this.handleValidation} />
-          </div>
+          <label forHtml="precision">Price precision</label>
+          <input type="number" min="0.00000001" step="0.00000001" className="form-control medium" placeholder="0.00000001" ref="precision" onChange={this.handleValidation} />
         </div>
         <div className="form-group">
           {this.state.newReg ?
@@ -161,40 +151,38 @@ var RegisterSub = React.createClass({
     if (showAlerts)
       this._owner.refs.alerts.setState({alertVisible: true});
 
-    return false;
+    e.stopPropagation();
   },
 
   onSubmitForm: function(e, el) {
-      e.preventDefault();
+    e.preventDefault();
 
-      if (!this.handleValidation(e, el)) {
-        return false;
-      }
+    if (!this.handleValidation(e, el))
+      e.stopPropagation();
 
-      this.getFlux().actions.market.registerMarket({
-          name: this.state.code,
-          address: "0x" + this.state.address,
-          minimum: bigRat(this.state.minimum).multiply(fixtures.ether).valueOf(),
-          decimals: this.state.decimals,
-          precision: bigRat(this.state.precision).multiply(fixtures.precision).valueOf()
-      });
+    this.getFlux().actions.market.registerMarket({
+        name: this.state.code,
+        address: "0x" + this.state.address,
+        minimum: bigRat(this.state.minimum).multiply(fixtures.ether).toDecimal(),
+        decimals: String(this.state.decimals),
+        precision: bigRat(this.state.precision).multiply(fixtures.precision).toDecimal()
+    });
 
-      this.refs.code.getDOMNode().value = '';
-      this.refs.address.getDOMNode().value = '';
-      this.refs.minimum.getDOMNode().value = '';
-      this.refs.decimals.getDOMNode().value = '';
-      this.refs.precision.getDOMNode().value = '';
+    this.refs.code.getDOMNode().value = '';
+    this.refs.address.getDOMNode().value = '';
+    this.refs.minimum.getDOMNode().value = '';
+    this.refs.decimals.getDOMNode().value = '';
+    this.refs.precision.getDOMNode().value = '';
 
-      this.setState({
-          code: null,
-          address: null,
-          minimum: null,
-          decimals: null,
-          precision: null,
-          newReg: false
-      });
-
+    this.setState({
+        code: null,
+        address: null,
+        minimum: null,
+        decimals: null,
+        precision: null,
+        newReg: false
+    });
   }
 });
 
-module.exports = RegisterSub;
+module.exports = SubRegister;

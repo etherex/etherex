@@ -1,7 +1,7 @@
 data owner
 data exchange
 
-extern exchange: [price, buy, sell, trade, deposit:a, withdraw]
+extern exchange: [price, buy, sell, trade, deposit, withdraw]
 
 def init():
     self.owner = msg.sender
@@ -16,26 +16,33 @@ def send(to, value):
 
         # Update balances
         self.storage[msg.sender] = balance - value
-        self.storage[to] += value
+        recipient_balance = self.storage[to]
+        self.storage[to] = recipient_balance + value
 
         # Notify exchange of deposit
         if to == self.exchange:
-            ret = self.exchange.deposit([msg.sender, value, 1], datasz=3)
+            ret = self.exchange.deposit(msg.sender, value, 1, datasz=3)
             # Exchange returns the amount as confirmation
             if ret == value:
                 return(1)
             # We return 2 as error code for notification failure
             else:
                 return(2)
-
-        return(1)
+        else:
+            return(1)
     return(0)
 
-def balance_query(addr):
+def balance(addr):
     return(self.storage[addr])
 
 def set_exchange(addr):
     if msg.sender == self.owner:
         self.exchange = addr
+        return(1)
+    return(0)
+
+def change_ownership(new_owner):
+    if msg.sender == self.owner:
+        self.owner = new_owner // "Set owner to %s" % new_owner
         return(1)
     return(0)

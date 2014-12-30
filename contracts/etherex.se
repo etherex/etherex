@@ -242,8 +242,7 @@ def trade(trade_id):
 #
 # Deposit - from subcurrency contracts only
 #
-def deposit(serpentbug, address, amount, market_id):
-    # Serpent 2 bug requires an extra arg...
+def deposit(address, amount, market_id):
     if msg.sender == self.markets[market_id].contract:
         balance = self.balances[address][market_id].available
         newbalance = balance + amount
@@ -254,11 +253,11 @@ def deposit(serpentbug, address, amount, market_id):
 #
 # Withdrawal - to subcurrency contracts only
 #
-def withdraw(address, amount, market_id):
-    balance = self.balances[address][market_id].available
+def withdraw(amount, market_id):
+    balance = self.balances[msg.sender][market_id].available
     if balance >= amount:
-        self.balances[address][market_id].available = balance - amount
-        ret = self.markets[market_id].contract.call([address, amount])
+        self.balances[msg.sender][market_id].available = balance - amount
+        ret = self.markets[market_id].contract.call(msg.sender, amount, datasz=2)
         return(ret)
     return(0)
 
