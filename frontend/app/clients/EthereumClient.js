@@ -498,12 +498,12 @@ var EthereumClient = function() {
         // Sub balances
         var market_addresses = _.pluck(markets, 'address');
         // console.log("Setting sub watchers for markets", market_addresses);
-        web3.eth.watch({altered: market_addresses[i]}).changed(flux.actions.user.updateBalanceSub);
+        web3.eth.watch({altered: market_addresses}).changed(flux.actions.user.updateBalanceSub);
     };
 
     this.setMarketWatches = function(flux, markets) {
         flux.actions.trade.loadTrades();
-        web3.eth.watch({altered: fixtures.addresses.etherex}).changed(flux.actions.market.loadMarkets);
+        web3.eth.watch({altered: fixtures.addresses.etherex}).changed(flux.actions.market.updateMarket);
     };
 
 

@@ -33,7 +33,22 @@ var MarketActions = function(client) {
         }.bind(this));
     };
 
-    this.updateMarket = function(market) {
+    this.updateMarket = function() {
+        this.dispatch(constants.market.UPDATE_MARKET);
+
+        var user = this.flux.store("UserStore").getState().user;
+
+        _client.loadMarkets(user, function(markets) {
+            this.dispatch(constants.market.LOAD_MARKETS_SUCCESS, markets);
+
+            // Update sub balances after loading addresses
+            this.flux.actions.user.updateBalanceSub();
+        }.bind(this), function(error) {
+            this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
+        }.bind(this));
+    };
+
+    this.switchMarket = function(market) {
         this.dispatch(constants.market.CHANGE_MARKET, market);
 
         var user = this.flux.store("UserStore").getState().user;

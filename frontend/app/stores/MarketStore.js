@@ -18,6 +18,7 @@ var MarketStore = Fluxxor.createStore({
             constants.market.LOAD_MARKETS_FAIL, this.onLoadMarketsFail,
             constants.market.LOAD_MARKETS_SUCCESS, this.onLoadMarketsSuccess,
             constants.market.CHANGE_MARKET, this.onChangeMarket,
+            constants.market.UPDATE_MARKET, this.onUpdateMarket,
             constants.market.UPDATE_MARKET_BALANCE, this.onUpdateMarketBalance,
             constants.market.LOAD_TRANSACTIONS, this.onLoadTransactions
         );
@@ -50,6 +51,10 @@ var MarketStore = Fluxxor.createStore({
         this.markets = payload;
         this.loading = false;
         this.error = null;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onUpdateMarket: function() {
         this.emit(constants.CHANGE_EVENT);
     },
 
