@@ -40,10 +40,11 @@ var UserActions = function(client) {
         var market = this.flux.store("MarketStore").getState().market;
 
         for (var i = user.addresses.length - 1; i >= 0; i--) {
-            _client.updateBalanceSub(market, user.addresses[i], function(confirmed, unconfirmed) {
+            _client.updateBalanceSub(market, user.addresses[i], function(available, trading, balance) {
                 this.dispatch(constants.user.UPDATE_BALANCE_SUB, {
-                    balance: confirmed,
-                    balance_unconfirmed: unconfirmed
+                    available: available,
+                    trading: trading,
+                    balance: balance
                 });
                 this.flux.actions.market.updateMarketBalance(market, confirmed, unconfirmed);
             }.bind(this), function(error) {

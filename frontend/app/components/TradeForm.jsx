@@ -58,7 +58,7 @@ var SplitTradeForm = React.createClass({
         this.state.amount > 0 &&
         this.state.total > nextProps.market.market.minTotal &&
         ((nextProps.type == 1 && bigRat(nextProps.user.user.balance_raw).greaterOrEquals(bigRat(this.state.total).multiply(fixtures.ether))) ||
-         (nextProps.type == 2 && nextProps.user.user.balance_sub_raw >= this.state.amount)
+         (nextProps.type == 2 && nextProps.user.user.balance_sub_available >= this.state.amount)
         )) {
 
       // Dialog messages and notes
@@ -227,6 +227,7 @@ var SplitTradeForm = React.createClass({
 
   handleChangeTotal: function(e) {
       e.preventDefault();
+
       var type = this.props.type;
       var market = this.refs.market.getDOMNode().value;
       var price = this.refs.price.getDOMNode().value.trim();
@@ -294,7 +295,7 @@ var SplitTradeForm = React.createClass({
           alertMessage: "Not enough ETH for this trade, " + utils.formatBalance(bigRat(total).multiply(fixtures.ether)) + " required."
         });
     }
-    else if (this.props.type == 2 && this.props.user.user.balance_sub_raw < amount) {
+    else if (this.props.type == 2 && this.props.user.user.balance_sub_available < amount) {
         this._owner.setState({
           alertLevel: 'warning',
           alertMessage: "Not enough " + this.props.market.market.name + " for this trade, " + amount + " " + this.props.market.market.name + " required."
