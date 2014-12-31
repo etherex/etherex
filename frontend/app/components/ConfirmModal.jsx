@@ -24,7 +24,7 @@ var ConfirmModal = React.createClass({
                         {(this.props.note) ?
                             this.props.note : ""}
                         {(this.props.tradeList && this.props.tradeList.length > 0) &&
-                            <TradeTable tradeList={this.props.tradeList} user={this.props.user} review={true} />}
+                            <TradeTable tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={true} />}
                     </div>
                     <div className="modal-footer">
                         <Button onClick={this.onRequestHide}>No</Button>

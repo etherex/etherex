@@ -177,6 +177,7 @@ var SplitTradeForm = React.createClass({
                     note={this.state.note}
                     tradeList={this.props.trades.filling}
                     user={this.props.user}
+                    market={this.props.market}
                     flux={this.getFlux()}
                     onSubmit={this.onSubmitForm}
                   />
