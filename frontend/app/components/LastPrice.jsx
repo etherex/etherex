@@ -18,19 +18,27 @@ var LastPrice = React.createClass({
   },
 
   componentWillReceiveProps: function(nextProps) {
-    if (nextProps.market.lastPrice > this.state.lastPrice)
+    if (nextProps.market.name == this.state.lastMarket) {
+      if (nextProps.market.lastPrice > this.state.lastPrice)
+        this.setState({
+          priceChange: 'success'
+        });
+      else if (nextProps.market.lastPrice < this.state.lastPrice)
+        this.setState({
+          priceChange: 'danger'
+        });
+    }
+    else
       this.setState({
-        priceChange: 'success'
-      });
-    else if (nextProps.market.lastPrice < this.state.lastPrice)
-      this.setState({
-        priceChange: 'danger'
+        lastMarket: nextProps.market.name,
+        lastPrice: "N/A",
+        priceChange: 'info'
       });
 
     if (nextProps.market.lastPrice && nextProps.market.name) {
       this.setState({
         lastMarket: nextProps.market.name,
-        lastPrice: nextProps.market.lastPrice
+        lastPrice: utils.numeral(nextProps.market.lastPrice, String(nextProps.market.precision).length - 1)
       });
     }
   },
@@ -40,7 +48,7 @@ var LastPrice = React.createClass({
       <div className="container-fluid navbar">
         <div className="col-md-12">
           <div className={"btn-lg btn-" + this.state.priceChange + " text-overflow text-center"} title={this.state.lastPrice}>
-            {this.state.lastPrice ? this.state.lastPrice + " " + this.state.lastMarket + "/ETH" : "N/A"}
+            Last price: {this.state.lastPrice ? this.state.lastPrice + " " + (this.state.lastMarket ? this.state.lastMarket : "") + "/ETH" : "N/A"}
           </div>
         </div>
       </div>

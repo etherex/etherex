@@ -253,9 +253,12 @@ var SplitTradeForm = React.createClass({
       });
   },
 
-  handleValidation: function(e, showAlerts) {
+  handleValidation: function(e) {
     e.preventDefault();
+    this.validate(e, true);
+  },
 
+  validate: function(e, showAlerts) {
     this.handleChange(e);
 
     var amount = parseFloat(this.state.amount);
@@ -313,6 +316,8 @@ var SplitTradeForm = React.createClass({
 
     if (showAlerts)
       this._owner.refs.alerts.setState({alertVisible: true});
+
+    return false;
   },
 
   onSubmitForm: function(e) {
@@ -321,7 +326,7 @@ var SplitTradeForm = React.createClass({
 
     // console.log([this.props.market.market.id, this.state.amount, this.state.price, this.state.total].join(", "));
 
-    if (!this.handleValidation(e, true)) {
+    if (!this.validate(e, true)) {
       return;
     }
 

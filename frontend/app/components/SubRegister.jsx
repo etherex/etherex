@@ -35,23 +35,23 @@ var SubRegister = React.createClass({
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
         <div className="form-group">
           <label forHtml="code">Subcurrency code</label>
-          <input type="text" className="form-control" pattern="[A-Z]{3,4}" placeholder="ETX" ref="code" onChange={this.handleValidation}/>
+          <input type="text" className="form-control" pattern="[A-Z]{3,4}" placeholder="ETX" ref="code" onChange={this.handleChange}/>
         </div>
         <div className="form-group">
           <label forHtml="address">Contract address</label>
-          <input type="text" className="form-control" pattern="\w{40}" placeholder="Address" ref="address" onChange={this.handleValidation}/>
+          <input type="text" className="form-control" pattern="\w{40}" placeholder="Address" ref="address" onChange={this.handleChange}/>
         </div>
         <div className="form-group">
           <label forHtml="minimum">Minimum ETH amount</label>
-          <input type="number" min="1" step="1" className="form-control medium" placeholder="10" ref="minimum" onChange={this.handleValidation}/>
+          <input type="number" min="1" step="1" className="form-control medium" placeholder="10" ref="minimum" onChange={this.handleChange}/>
         </div>
         <div className="form-group">
           <label forHtml="decimals">Decimals</label>
-          <input type="number" min="0" step="1" className="form-control medium" placeholder="4" ref="decimals" onChange={this.handleValidation}/>
+          <input type="number" min="0" step="1" className="form-control medium" placeholder="4" ref="decimals" onChange={this.handleChange}/>
         </div>
         <div className="form-group">
           <label forHtml="precision">Price precision</label>
-          <input type="number" min="0.00000001" step="0.00000001" className="form-control medium" placeholder="0.00000001" ref="precision" onChange={this.handleValidation} />
+          <input type="number" min="0.00000001" step="0.00000001" className="form-control medium" placeholder="0.00000001" ref="precision" onChange={this.handleChange} />
         </div>
         <div className="form-group">
           {this.state.newReg ?
@@ -76,7 +76,17 @@ var SubRegister = React.createClass({
     );
   },
 
+  handleChange: function(e, showAlerts) {
+    e.preventDefault();
+    this.validate(e);
+  },
+
   handleValidation: function(e, showAlerts) {
+    e.preventDefault();
+    this.validate(e, true);
+  },
+
+  validate: function(e, showAlerts) {
     e.preventDefault();
 
     var code = this.refs.code.getDOMNode().value.trim();
@@ -151,14 +161,14 @@ var SubRegister = React.createClass({
     if (showAlerts)
       this._owner.refs.alerts.setState({alertVisible: true});
 
-    e.stopPropagation();
+    return false;
   },
 
   onSubmitForm: function(e, el) {
     e.preventDefault();
 
-    if (!this.handleValidation(e, el))
-      e.stopPropagation();
+    if (!this.validate(e, el))
+      return false;
 
     this.getFlux().actions.market.registerMarket({
         name: this.state.code,

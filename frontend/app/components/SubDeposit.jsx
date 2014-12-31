@@ -31,7 +31,7 @@ var SubDeposit = React.createClass({
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
         <div className="form-group">
           <label className="sr-only" forHtml="amount">Amount</label>
-          <input type="number" min="0.0001" step="0.00000001" className="form-control" placeholder="10.0000" ref="amount" onChange={this.handleValidation} />
+          <input type="number" min="0.0001" step="0.00000001" className="form-control" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
         </div>
         <div className="form-group">
           {this.state.newDeposit ?
@@ -52,7 +52,17 @@ var SubDeposit = React.createClass({
     );
   },
 
+  handleChange: function(e, showAlerts) {
+    e.preventDefault();
+    this.validate(e);
+  },
+
   handleValidation: function(e, showAlerts) {
+    e.preventDefault();
+    this.validate(e, true);
+  },
+
+  validate: function(e, showAlerts) {
     e.preventDefault();
 
     var amount = parseFloat(this.refs.amount.getDOMNode().value.trim());
@@ -90,8 +100,8 @@ var SubDeposit = React.createClass({
   onSubmitForm: function(e, el) {
     e.preventDefault();
 
-    if (!this.handleValidation(e, el))
-      e.stopPropagation()
+    if (!this.validate(e, el))
+      return false
 
     this.getFlux().actions.user.depositSub({
       amount: bigRat(this.state.amount).multiply(Math.pow(10, this.props.market.decimals)).toDecimal()

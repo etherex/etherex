@@ -34,13 +34,13 @@ var SubSend = React.createClass({
           <div className="col-md-10 col-md-offset-1">
             <div className="form-group">
               <label className="sr-only" forHtml="address">Address</label>
-              <input type="text" className="form-control" pattern="\w{1,40}" placeholder="Address" ref="address" size="40" onChange={this.handleValidation} />
+              <input type="text" className="form-control" pattern="\w{1,40}" placeholder="Address" ref="address" size="40" onChange={this.handleChange} />
             </div>
           </div>
           <div className="col-md-8 col-md-offset-2">
             <div className="form-group">
               <label className="sr-only" forHtml="amount">Amount</label>
-              <input type="number" min="0.0001" step="0.00000001" className="form-control" placeholder="10.0000" ref="amount" onChange={this.handleValidation} />
+              <input type="number" min="0.0001" step="0.00000001" className="form-control" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
             </div>
           </div>
           <div className="col-md-8 col-md-offset-2">
@@ -66,7 +66,17 @@ var SubSend = React.createClass({
     );
   },
 
-  handleValidation: function(e, showAlerts) {
+  handleChange: function(e) {
+    e.preventDefault();
+    this.validate(e);
+  },
+
+  handleValidation: function(e) {
+    e.preventDefault();
+    this.validate(e, true);
+  },
+
+  validate: function(e, showAlerts) {
     e.preventDefault();
 
     var address = this.refs.address.getDOMNode().value.trim();
@@ -112,14 +122,14 @@ var SubSend = React.createClass({
     if (showAlerts)
       this._owner.refs.alerts.setState({alertVisible: true});
 
-    e.stopPropagation();
+    return false;
   },
 
   onSubmitForm: function(e, el) {
     e.preventDefault();
 
-    if (!this.handleValidation(e, el))
-      e.stopPropagation()
+    if (!this.validate(e, el))
+      return false;
 
     var payload = {
         recipient: "0x" + this.state.recipient,
