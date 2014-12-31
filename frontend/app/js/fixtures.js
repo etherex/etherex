@@ -182,21 +182,6 @@ var fixtures = {
             ]
         },
         {
-            "name": "change_ownership",
-            "inputs": [
-                {
-                    "name": "new_owner",
-                    "type": "hash256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "result",
-                    "type": "uint256"
-                }
-            ]
-        },
-        {
             "name": "get_market",
             "inputs": [
                 {
@@ -318,7 +303,7 @@ var fixtures = {
                     "type": "uint256"
                 }
             ]
-        },
+        }
     ],
     sub_contract_desc: [
         {

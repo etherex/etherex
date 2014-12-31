@@ -14,7 +14,7 @@ else
 // web3.setProvider(new web3.providers.WebSocketProvider('ws://localhost:40404/eth'));
 
 var contract = web3.contract(fixtures.addresses.etherex, fixtures.contract_desc);
-console.log("CONTRACT", contract);
+// console.log("CONTRACT", contract);
 
 web3.padDecimal = function (string, chars) {
     string = web3.fromDecimal(string).substr(2);
@@ -51,7 +51,7 @@ var EthereumClient = function() {
             web3.eth.stateAt(fixtures.addresses.etherex, "0x5").then(function (hextotal) {
                 var total = _.parseInt(web3.toDecimal(hextotal));
 
-                console.log("TOTAL MARKETS: ", total, hextotal);
+                // console.log("TOTAL MARKETS: ", total, hextotal);
 
                 if (!total || hextotal == "0x") {
                     failure("No market found, seems like contracts are missing.");
@@ -127,8 +127,7 @@ var EthereumClient = function() {
 
     this.loadTrades = function(flux, market, progress, success, failure) {
         try {
-            // funid=11 -> 0x0a...
-            var calldata = "0x0a" + web3.padDecimal(String(market.id), 64);
+            var calldata = "0x09" + web3.padDecimal(String(market.id), 64);
             // console.log("CALLDATA", calldata);
 
             // contract.get_trade_ids(String(market.id)).call().then(function (trade_ids) {
@@ -150,7 +149,7 @@ var EthereumClient = function() {
                 }
 
                 var total = trade_ids.length;
-                console.log("TOTAL TRADES: ", total);
+                // console.log("TOTAL TRADES: ", total);
 
                 var tradePromises = [];
 
@@ -182,6 +181,9 @@ var EthereumClient = function() {
                                 // console.log("Pending: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr), 0)));
                                 // console.log("Mined: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr), -1)));
 
+                                // Update progress
+                                progress({percent: (p + 1) / total * 100 });
+
                                 resolve({
                                     id: trade[0],
                                     type: type == 1 ? 'buys' : 'sells',
@@ -199,9 +201,6 @@ var EthereumClient = function() {
                                             // "pending" : "mined"
                                     block: _.parseInt(trade[6])
                                 });
-
-                                // Update progress
-                                progress({percent: (p + 1) / total * 100 });
                             }
                             catch(e) {
                                 reject(e);
@@ -502,8 +501,7 @@ var EthereumClient = function() {
     };
 
     this.setMarketWatches = function(flux, markets) {
-        flux.actions.trade.loadTrades();
-        web3.eth.watch({altered: fixtures.addresses.etherex}).changed(flux.actions.market.updateMarket);
+        web3.eth.watch({altered: fixtures.addresses.etherex}).changed(flux.actions.market.updateMarkets);
     };
 
 

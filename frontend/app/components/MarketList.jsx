@@ -30,7 +30,7 @@ var MarketList = React.createClass({
                     </div>
                 </div>
                 {this.props.market.error &&
-                    <AlertDismissable ref="alerts" level={"alert"} message={this.props.market.error} show={true} />}
+                    <AlertDismissable ref="alerts" level={"warning"} message={this.props.market.error} show={true} />}
                 <div className="container-fluid">
                     <MarketTable market={this.props.market} />
                 </div>

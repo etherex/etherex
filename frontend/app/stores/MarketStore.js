@@ -27,7 +27,6 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onLoadMarkets: function() {
-        console.log("MARKETS LOADING...");
         this.market = {txs: [], data: {}};
         this.markets = [];
         this.loading = true;
@@ -36,18 +35,23 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onLoadMarketsFail: function(payload) {
-        console.log("MARKETS ERROR: " + payload.error);
         this.loading = false;
         this.error = payload.error;
         this.emit(constants.CHANGE_EVENT);
     },
 
     onLoadMarketsSuccess: function(payload) {
-        console.log("MARKETS LOADED: ", payload);
-        this.market = payload[0]; // Load ETX as default (TODO favorites / custom menu)
+        // console.log("MARKETS LOADED: ", payload);
+        if (!this.market.id) {
+            this.market = payload[0]; // Load ETX as default (TODO favorites / custom menu)
+            this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
+        }
+        else if (this.market.id) {
+            this.market = payload[this.market.id - 1];
+            this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
+        }
         this.market.txs = [];
         this.market.data = {};
-        this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
         this.markets = payload;
         this.loading = false;
         this.error = null;
@@ -59,7 +63,7 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onChangeMarket: function(payload) {
-        console.log("MARKET: ", payload.name);
+        console.log("MARKET: ", payload);
         this.market = payload;
         this.market.txs = [];
         this.market.data = {};
@@ -68,7 +72,7 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onUpdateMarketBalance: function(payload) {
-        console.log("UPDATING MARKET " + payload.market.name + " WITH " + payload.balance.confirmed);
+        // console.log("UPDATING MARKET " + payload.market.name + " WITH " + payload.balance.confirmed);
         var index = _.findIndex(this.markets, {'id': payload.market.id});
         this.markets[index].balance = payload.balance.confirmed;
         this.markets[index].balance_unconfirmed = payload.balance.unconfirmed;

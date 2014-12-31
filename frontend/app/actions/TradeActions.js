@@ -8,8 +8,8 @@ var TradeActions = function(client) {
 
         var market = this.flux.store("MarketStore").getState().market;
 
-        _client.loadTrades(this.flux, market, function(trades) {
-            this.dispatch(constants.trade.LOAD_TRADES_PROGRESS, trades);
+        _client.loadTrades(this.flux, market, function(progress) {
+            this.dispatch(constants.trade.LOAD_TRADES_PROGRESS, progress);
         }.bind(this), function(trades) {
             this.dispatch(constants.trade.LOAD_TRADES_SUCCESS, trades);
         }.bind(this), function(error) {
@@ -22,8 +22,8 @@ var TradeActions = function(client) {
 
         var market = this.flux.store("MarketStore").getState().market;
 
-        _client.loadTrades(this.flux, market, function(trades) {
-            this.dispatch(constants.trade.UPDATE_TRADES_PROGRESS, trades);
+        _client.loadTrades(this.flux, market, function(progress) {
+            this.dispatch(constants.trade.UPDATE_TRADES_PROGRESS, progress);
         }.bind(this), function(trades) {
             this.dispatch(constants.trade.UPDATE_TRADES_SUCCESS, trades);
 
@@ -31,6 +31,8 @@ var TradeActions = function(client) {
             var trade = this.flux.store("TradeStore").getState();
             var market = this.flux.store("MarketStore").getState().market;
             var user = this.flux.store("UserStore").getState().user;
+
+            // console.log("UPDATED_TRADES", market, trades);
 
             if (trade.type && trade.price && trade.amount && trade.total && market && user)
                 this.flux.actions.trade.highlightFilling({
@@ -53,13 +55,12 @@ var TradeActions = function(client) {
 
         var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
-        console.log("ON MARKET: " + market.name);
+
+        // console.log("ON MARKET: " + market.name, "ADD_TRADE", trade);
 
         _client.addTrade(user, trade, market, function(result) {
             this.dispatch(constants.trade.ADD_TRADE, trade);
-
-            if (!ethBrowser)
-                this.flux.actions.trade.updateTrades();
+            this.flux.actions.market.updateMarkets();
         }.bind(this), function(error) {
             this.dispatch(constants.trade.ADD_TRADE_FAIL, {error: error});
         }.bind(this));
@@ -151,6 +152,7 @@ var TradeActions = function(client) {
 
     this.switchMarket = function(market) {
         this.dispatch(constants.trade.SWITCH_MARKET, market);
+        this.flux.actions.trade.updateTrades();
     };
 
     var _client = client;

@@ -51,7 +51,6 @@ var UserStore = Fluxxor.createStore({
     },
 
     onLoadAddresses: function(payload) {
-        console.log("LOADING ADDRESSES");
         this.user = {id: 'loading', name: 'loading'};
         this.loading = true;
         this.error = null;
@@ -59,7 +58,7 @@ var UserStore = Fluxxor.createStore({
     },
 
     onLoadAddressesSuccess: function(payload) {
-        console.log("ADDRESSES", payload);
+        // console.log("ADDRESSES", payload);
         this.user.id = payload[0];
         this.user.addresses = payload;
         this.loading = false;
@@ -68,17 +67,17 @@ var UserStore = Fluxxor.createStore({
     },
 
     onDeposit: function(payload) {
-        console.log("DEPOSIT", payload.amount);
+        // console.log("DEPOSIT", payload.amount);
         this.emit(constants.CHANGE_EVENT);
     },
 
     onWithdraw: function(payload) {
-        console.log("WITHDRAW", payload.amount);
+        // console.log("WITHDRAW", payload.amount);
         this.emit(constants.CHANGE_EVENT);
     },
 
     onUpdateBalance: function(payload) {
-        console.log("BALANCE", payload.balance);
+        // console.log("BALANCE", payload.balance);
         this.user.balance = utils.formatBalance(payload.balance);
         this.user.balance_raw = payload.balance;
         this.user.balance_unconfirmed = payload.balance_unconfirmed;
@@ -86,7 +85,7 @@ var UserStore = Fluxxor.createStore({
     },
 
     onUpdateBalanceSub: function(payload) {
-        console.log("BALANCE_SUB", payload.balance);
+        // console.log("BALANCE_SUB", payload.balance);
         this.user.balance_sub = payload.balance ? payload.balance : 0;
         this.user.balance_sub_raw = payload.balance;
         this.user.balance_sub_unconfirmed = payload.balance_unconfirmed;

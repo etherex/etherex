@@ -56,7 +56,7 @@ var MarketRow = React.createClass({
 
     handleClick: function(e) {
         if (this.props.market)
-            this.getFlux().actions.market.updateMarket(this.props.market);
+            this.getFlux().actions.market.switchMarket(this.props.market);
     }
 });
 

@@ -78,7 +78,6 @@ var TradeStore = Fluxxor.createStore({
     onLoadTradesSuccess: function(payload) {
         // Split in buys/sells
         var trades = _.groupBy(payload, 'type');
-        var market = this.flux.store("MarketStore").getState().market;
 
         // Sort
         this.trades.buys = _.sortBy(trades.buys, 'price').reverse();
@@ -89,6 +88,7 @@ var TradeStore = Fluxxor.createStore({
         this.trades.tradeSells = this.trades.sells;
 
         // Filter by market
+        var market = this.flux.store("MarketStore").getState().market;
         this.filterMarket(market, this.trades);
 
         this.loading = false;
@@ -99,14 +99,17 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onAddTrade: function(payload) {
+        var markets = this.flux.store("MarketStore").getState().markets;
+        var user = this.flux.store("UserStore").getState().user;
+
         var trade = {
             id: payload.id,
             type: (payload.type == 1) ? 'buy' : 'sell',
             price: payload.price,
             amount: payload.amount,
             total: payload.amount * payload.price,
-            market: this.flux.store("MarketStore").getState().markets[payload.market],
-            owner: this.flux.store("UserStore").getState().user.id,
+            market: markets[payload.market - 1],
+            owner: user.id,
             status: payload.status
         };
 
@@ -156,7 +159,7 @@ var TradeStore = Fluxxor.createStore({
     onCancelTrade: function(payload) {
         var index = _.findIndex((payload.type == "buys") ? this.trades.buys : this.trades.sells, {'id': payload.id});
 
-        console.log("Cancelling trade ", payload, " at index " + index);
+        // console.log("Cancelling trade ", payload, " at index " + index);
 
         (payload.type == "buys") ? this.trades.buys[index].status = "new" : this.trades.sells[index].status = "new";
 
@@ -164,7 +167,6 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onHighlightFilling: function(payload) { // type, price, amount, total, market, user
-
         // console.log(payload.type, arguments.callee.caller.toString());
         var trades = (payload.type == 1) ? this.trades.tradeSells : this.trades.tradeBuys;
         var siblings = (payload.type == 1) ? this.trades.tradeBuys : this.trades.tradeSells;
@@ -197,74 +199,75 @@ var TradeStore = Fluxxor.createStore({
 
         // console.log("===");
 
-        for (var i = 0; i <= trades.length - 1; i++) {
+        if (trades)
+            for (var i = 0; i <= trades.length - 1; i++) {
 
-            // Add totals and amounts
-            if (trades[i].owner != payload.user.id) {
-                var this_total = trades[i].amount * trades[i].price;
-                // console.log("against total of " + this_total);
-                total_amount += trades[i].amount;
-                trades_total += this_total;
-            }
-
-            // Reset to normal first if we no longer have enough
-            if ((((payload.type == 1 && payload.price < trades[i].price) ||
-                  (payload.type == 2 && payload.price > trades[i].price)) ||
-                   payload.price <= 0 ||
-                   available < this_total ||
-                   amountLeft < trades[i].amount) &&
-                   trades[i].owner != payload.user.id &&
-                   trades[i].status != "pending" &&
-                   trades[i].status != "new") {
-
-                (payload.type == 1) ?
-                    this.trades.tradeSells[i].status = "mined" :
-                    this.trades.tradeBuys[i].status = "mined"
-
-                if (_.find(filling, {'id': trades[i].id})) {
-                    // Remove from state for filling trades for fillTrades
-                    _.remove(filling, {'id': trades[i].id});
-
-                    // Add back to available and amountLeft
-                    amountLeft += trades[i].amount;
-                    available += this_total;
+                // Add totals and amounts
+                if (trades[i].owner != payload.user.id) {
+                    var this_total = trades[i].amount * trades[i].price;
+                    // console.log("against total of " + this_total);
+                    total_amount += trades[i].amount;
+                    trades_total += this_total;
                 }
 
-                // console.log("Unfilling, available: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
-            }
+                // Reset to normal first if we no longer have enough
+                if ((((payload.type == 1 && payload.price < trades[i].price) ||
+                      (payload.type == 2 && payload.price > trades[i].price)) ||
+                       payload.price <= 0 ||
+                       available < this_total ||
+                       amountLeft < trades[i].amount) &&
+                       trades[i].owner != payload.user.id &&
+                       trades[i].status != "pending" &&
+                       trades[i].status != "new") {
 
-            // Highlight trades that would get filled, or partially (TODO)
-            if (((payload.type == 1 && payload.price >= trades[i].price) ||
-                 (payload.type == 2 && payload.price <= trades[i].price)) &&
-                  payload.price > 0 &&
-                  amountLeft >= trades[i].amount &&
-                  available >= this_total &&
-                  trades[i].owner != payload.user.id &&
-                  trades[i].market.id == payload.market.id &&
-                  trades[i].status != "pending" &&
-                  trades[i].status != "new") {
+                    (payload.type == 1) ?
+                        this.trades.tradeSells[i].status = "mined" :
+                        this.trades.tradeBuys[i].status = "mined"
 
-                // console.log("Would fill trade # " + i + " with total of " + trades_total);
+                    if (_.find(filling, {'id': trades[i].id})) {
+                        // Remove from state for filling trades for fillTrades
+                        _.remove(filling, {'id': trades[i].id});
 
-                (payload.type == 1) ? // if (available >= this_total)
-                  this.trades.tradeSells[i].status = "filling" :
-                  this.trades.tradeBuys[i].status = "filling"
+                        // Add back to available and amountLeft
+                        amountLeft += trades[i].amount;
+                        available += this_total;
+                    }
 
-                if (!_.find(filling, {'id': trades[i].id})) {
-                    filling.push(trades[i]);
-
-                    // Remove total from available total
-                    // if (available - this_total > 0)
-                        available -= this_total;
-                    // else
-                    //     available = 0;
-                    // if (amountLeft - trades[i].amount > 0)
-                        amountLeft -= trades[i].amount;
-                    // else
-                    //     amountLeft = 0;
+                    // console.log("Unfilling, available: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
                 }
-            }
-        };
+
+                // Highlight trades that would get filled, or partially (TODO)
+                if (((payload.type == 1 && payload.price >= trades[i].price) ||
+                     (payload.type == 2 && payload.price <= trades[i].price)) &&
+                      payload.price > 0 &&
+                      amountLeft >= trades[i].amount &&
+                      available >= this_total &&
+                      trades[i].owner != payload.user.id &&
+                      trades[i].market.id == payload.market.id &&
+                      trades[i].status != "pending" &&
+                      trades[i].status != "new") {
+
+                    // console.log("Would fill trade # " + i + " with total of " + trades_total);
+
+                    (payload.type == 1) ? // if (available >= this_total)
+                      this.trades.tradeSells[i].status = "filling" :
+                      this.trades.tradeBuys[i].status = "filling"
+
+                    if (!_.find(filling, {'id': trades[i].id})) {
+                        filling.push(trades[i]);
+
+                        // Remove total from available total
+                        // if (available - this_total > 0)
+                            available -= this_total;
+                        // else
+                        //     available = 0;
+                        // if (amountLeft - trades[i].amount > 0)
+                            amountLeft -= trades[i].amount;
+                        // else
+                        //     amountLeft = 0;
+                    }
+                }
+            };
 
         // // // DEBUG Partial filling adds a new trade for remaining available
         // // console.log("Available: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
@@ -345,7 +348,7 @@ var TradeStore = Fluxxor.createStore({
     filterMarket: function(market, trades) {
         // Filter by market
         var market_filter = {
-            id: _.parseInt(market.id),
+            id: market.id,
             name: market.name
         };
         // console.log("Filtering for market " + market.name, "with", market_filter, "on", trades);
@@ -355,7 +358,6 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onTradesFail: function(payload) {
-        console.log("TRADES ERROR: ", payload.error);
         this.trades = payload || {};
         this.loading = false;
         this.percent = 0;

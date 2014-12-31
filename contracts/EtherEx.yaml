@@ -42,32 +42,17 @@
 #       contract: update.se
 
 # Initialize
+# -
+#   transact:
+#     NameReg:
+#       to: $EtherEx
+#       funid: 12
+#       data:
+#         - "0x72ba7d8e73fe8eb666ea66babc8116a41bfb10e2"
+
+# Register names to our own NameReg
 -
   transact:
-    # NameReg:
-    #   to: $EtherEx
-    #   funid: 12
-    #   data:
-    #     - "0x72ba7d8e73fe8eb666ea66babc8116a41bfb10e2"
-
-    # Set exchange address in subcurrency contracts
-    SetExchangeETX:
-      to: $ETX
-      funid: 2
-      data:
-        - $EtherEx
-    SetExchangeCAK:
-      to: $CAK
-      funid: 2
-      data:
-        - $EtherEx
-    SetExchangeFAB:
-      to: $FAB
-      funid: 2
-      data:
-        - $EtherEx
-
-    # Register names to our own NameReg
     OwnNameRegEtherEx:
       to: $OwnNameReg
       funid: 0
@@ -93,7 +78,9 @@
         - $FAB
         - FAB
 
-    # Register subcurrencies on the exchange
+# Register subcurrencies on the exchange
+-
+  transact:
     RegisterETX:
       to: $EtherEx
       funid: 7
@@ -103,6 +90,8 @@
         - 5
         - 100000000
         - 1000000000000000000
+-
+  transact:
     RegisterCAK:
       to: $EtherEx
       funid: 7
@@ -112,6 +101,8 @@
         - 4
         - 1000
         - 1000000000000000000
+-
+  transact:
     RegisterFAB:
       to: $EtherEx
       funid: 7
@@ -122,12 +113,40 @@
         - 10000
         - 1000000000000000000
 
-    # Update:
-    #   to: $Update
-    #   funid: 0
-    #   data:
-    #     - $Owner
-    #     - $EtherEx
+# Set exchange address in subcurrency contracts
+-
+  transact:
+    SetExchangeETX:
+      to: $ETX
+      funid: 2
+      data:
+        - $EtherEx
+        - 1
+-
+  transact:
+    SetExchangeCAK:
+      to: $CAK
+      funid: 2
+      data:
+        - $EtherEx
+        - 2
+-
+  transact:
+    SetExchangeFAB:
+      to: $FAB
+      funid: 2
+      data:
+        - $EtherEx
+        - 3
+
+# -
+#   transact:
+#     Update:
+#       to: $Update
+#       funid: 0
+#       data:
+#         - $Owner
+#         - $EtherEx
 
 # Change ownership
 -
