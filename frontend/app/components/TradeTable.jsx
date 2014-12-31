@@ -32,11 +32,13 @@ var TradeRow = React.createClass({
 
     render: function() {
         var isOwn = (this.props.trade.owner == this.props.user.id);
+        var market = this.props.market.markets[this.props.trade.market.id - 1];
+        var precision = String(market.precision).length - 1;
         return (
             <tr className={"trade-" + (!this.props.review ? this.props.trade.status : "review") + ((isOwn && !this.props.user.own) ? " disabled" : "")} onMouseEnter={this.handleHover} onMouseLeave={this.handleHoverOut} onClick={this.handleClick}>
                 <td>
                     <div className="text-right">
-                        {utils.numeral(this.props.trade.amount, 2)}
+                        {utils.numeral(this.props.trade.amount, market.decimals)}
                     </div>
                 </td>
                 <td>
@@ -46,12 +48,12 @@ var TradeRow = React.createClass({
                 </td>
                 <td>
                     <div className="text-right">
-                        {utils.numeral(this.props.trade.price, 4)}
+                        {utils.numeral(this.props.trade.price, precision)}
                     </div>
                 </td>
                 <td>
                     <div className="text-right">
-                        {utils.numeral(this.props.trade.total, 2)} ETH
+                        {utils.numeral(this.props.trade.total, 4)} ETH
                     </div>
                 </td>
                 <td>
@@ -192,7 +194,7 @@ var TradeTable = React.createClass({
     render: function() {
         var tradeListNodes = this.props.tradeList.map(function (trade, i) {
             return (
-                <TradeRow key={trade.id} count={i} trade={trade} user={this.props.user} review={this.props.review} />
+                <TradeRow key={trade.id} count={i} trade={trade} market={this.props.market} user={this.props.user} review={this.props.review} />
             );
         }.bind(this));
         return (

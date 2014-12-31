@@ -18,7 +18,7 @@ var TradeBuys = React.createClass({
     render: function() {
         return (
             <div className="col-md-6">
-                <TradeTable title="Bids" tradeList={this.props.trades.tradeBuys} user={this.props.user.user} />
+                <TradeTable title="Bids" tradeList={this.props.trades.tradeBuys} market={this.props.market} user={this.props.user.user} />
             </div>
         );
     }
@@ -30,7 +30,7 @@ var TradeSells = React.createClass({
     render: function() {
         return (
             <div className="col-md-6">
-                <TradeTable title="Asks" tradeList={this.props.trades.tradeSells} user={this.props.user.user} />
+                <TradeTable title="Asks" tradeList={this.props.trades.tradeSells} market={this.props.market} user={this.props.user.user} />
             </div>
         );
     }
@@ -58,19 +58,19 @@ var TradeList = React.createClass({
                 <div className="visible-xs visible-sm">
                     {(this.props.trades.type == 1) ?
                     <div>
-                        <TradeSells trades={this.props.trades} user={this.props.user} />
-                        <TradeBuys trades={this.props.trades} user={this.props.user} />
+                        <TradeSells trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                        <TradeBuys trades={this.props.trades} market={this.props.market} user={this.props.user} />
                     </div> :
                     <div>
-                        <TradeBuys trades={this.props.trades} user={this.props.user} />
-                        <TradeSells trades={this.props.trades} user={this.props.user} />
+                        <TradeBuys trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                        <TradeSells trades={this.props.trades} market={this.props.market} user={this.props.user} />
                     </div>
                     }
                 </div>
                 <div className="hidden-xs hidden-sm">
                     <div>
-                        <TradeSells trades={this.props.trades} user={this.props.user} />
-                        <TradeBuys trades={this.props.trades} user={this.props.user} />
+                        <TradeSells trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                        <TradeBuys trades={this.props.trades} market={this.props.market} user={this.props.user} />
                     </div>
                 </div>
             </div>
