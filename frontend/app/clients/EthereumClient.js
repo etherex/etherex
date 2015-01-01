@@ -336,12 +336,10 @@ var EthereumClient = function() {
         try {
             var sub_balance = 0;
             web3.eth.stateAt(market.address, address).then(function (hexbalance) {
-                if (hexbalance && hexbalance != "0x") {
+                if (hexbalance && hexbalance != "0x")
                     sub_balance = bigRat(web3.toDecimal(hexbalance)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
-                }
-                else {
+                else
                     sub_balance = 0;
-                }
 
                 contract.get_sub_balance(address, String(market.id)).call().then(function (balances) {
                     var available = balances[0];
@@ -360,9 +358,9 @@ var EthereumClient = function() {
                     if (available)
                         available = bigRat(String(available)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
                     if (trading)
-                        trading = utils.format(bigRat(String(trading)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf());
+                        trading = bigRat(String(trading)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
 
-                    success(available, trading, sub_balance);
+                    success(market, available, trading, sub_balance);
                 }, function(e) {
                     failure(error + e);
                     return;

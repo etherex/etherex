@@ -85,7 +85,7 @@ var UserStore = Fluxxor.createStore({
     },
 
     onUpdateBalanceSub: function(payload) {
-        // console.log("BALANCE_SUB", payload.balance);
+        // console.log("BALANCE_SUB", payload);
         this.user.balance_sub_available = payload.available;
         this.user.balance_sub_trading = payload.trading;
         this.user.balance_sub = payload.balance;

@@ -18,7 +18,7 @@ var BalanceSub = React.createClass({
         <div className="col-lg-10 col-md-9 col-sm-10 col-xs-9">
           <div className="btn-group text-overflow pull-right">
             <div className="btn-lg text-overflow text-right" title={this.props.user.user.balance_sub_available + " available, " + this.props.user.user.balance_sub}>
-              {this.props.user.user.balance_sub_available ? utils.format(this.props.user.user.balance_sub_available) : 0} available  /  {this.props.user.user.balance_sub_trading ? utils.format(this.props.user.user.balance_sub_trading) : "0"} in trades / {utils.format(this.props.user.user.balance_sub)}&nbsp;&nbsp;
+              {this.props.user.user.balance_sub_available ? utils.format(this.props.user.user.balance_sub_available) : 0} available  /  {this.props.user.user.balance_sub_trading ? utils.format(this.props.user.user.balance_sub_trading) : "0"} in trades / {this.props.user.user.balance_sub ? utils.format(this.props.user.user.balance_sub) : "0"}&nbsp;&nbsp;
             </div>
           </div>
         </div>

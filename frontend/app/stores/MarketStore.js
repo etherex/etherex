@@ -74,8 +74,9 @@ var MarketStore = Fluxxor.createStore({
     onUpdateMarketBalance: function(payload) {
         // console.log("UPDATING MARKET " + payload.market.name + " WITH " + payload.balance.confirmed);
         var index = _.findIndex(this.markets, {'id': payload.market.id});
-        this.markets[index].balance = payload.balance.confirmed;
-        this.markets[index].balance_unconfirmed = payload.balance.unconfirmed;
+        this.markets[index].available = payload.balance.available;
+        this.markets[index].trading = payload.balance.trading;
+        this.markets[index].balance = payload.balance.balance;
         this.emit(constants.CHANGE_EVENT);
     },
 

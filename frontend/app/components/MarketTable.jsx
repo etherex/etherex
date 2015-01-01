@@ -47,7 +47,7 @@ var MarketRow = React.createClass({
                 </td>
                 <td>
                     <div className="text-right">
-                        {this.props.market.balance > 0 ? utils.format(this.props.market.balance) : 0} {this.props.market.balance_unconfirmed ? this.props.market.balance_unconfirmed : ""}
+                        {this.props.market.available ? utils.format(this.props.market.available) : ""} available / {this.props.market.trading ? utils.format(this.props.market.trading) : ""} in trades / {this.props.market.balance > 0 ? utils.format(this.props.market.balance) : 0}
                     </div>
                 </td>
             </tr>

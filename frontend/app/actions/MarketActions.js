@@ -9,20 +9,30 @@ var MarketActions = function(client) {
         var user = this.flux.store("UserStore").getState().user;
 
         _client.loadMarkets(user, function(markets) {
+            var user = this.flux.store("UserStore").getState().user;
+            // Load per market balances
+            for (var i = 0; i < markets.length; i++) {
+                _client.updateBalanceSub(markets[i], user.addresses[0], function(market, available, trading, balance) {
+                    this.flux.actions.market.updateMarketBalance(market, available, trading, balance);
+                }.bind(this), function(error) {
+                    this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
+                }.bind(this));
+            };
+
             this.dispatch(constants.market.LOAD_MARKETS_SUCCESS, markets);
 
-            // Update sub balances after loading addresses
+            // Load user sub balances
             this.flux.actions.user.updateBalanceSub();
 
-            // Update balances after loading markets (watches)
+            // Set user sub watchers
             var user = this.flux.store("UserStore").getState().user;
             _client.setUserWatches(this.flux, user.addresses, markets);
 
-            // Load trades
-            this.flux.actions.trade.loadTrades();
-
             // Set market watchers
             _client.setMarketWatches(this.flux, markets);
+
+            // Load trades
+            this.flux.actions.trade.loadTrades();
 
             // Load ETX txs
             // _client.loadTransactions([markets[0].address, user.id], markets[0], function(txs) {
@@ -30,7 +40,6 @@ var MarketActions = function(client) {
             // }.bind(this), function(error) {
             //     this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
             // }.bind(this));
-
         }.bind(this), function(error) {
             this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
         }.bind(this));
@@ -68,12 +77,13 @@ var MarketActions = function(client) {
 
     };
 
-    this.updateMarketBalance = function(market, confirmed, unconfirmed) {
+    this.updateMarketBalance = function(market, available, trading, balance) {
         this.dispatch(constants.market.UPDATE_MARKET_BALANCE, {
             market: market,
             balance: {
-                confirmed: confirmed,
-                unconfirmed: unconfirmed
+                available: available,
+                trading: trading,
+                balance: balance
             }
         });
     };

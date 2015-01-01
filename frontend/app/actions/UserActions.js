@@ -40,13 +40,13 @@ var UserActions = function(client) {
         var market = this.flux.store("MarketStore").getState().market;
 
         for (var i = user.addresses.length - 1; i >= 0; i--) {
-            _client.updateBalanceSub(market, user.addresses[i], function(available, trading, balance) {
+            _client.updateBalanceSub(market, user.addresses[i], function(market, available, trading, balance) {
                 this.dispatch(constants.user.UPDATE_BALANCE_SUB, {
                     available: available,
                     trading: trading,
                     balance: balance
                 });
-                this.flux.actions.market.updateMarketBalance(market, confirmed, unconfirmed);
+                this.flux.actions.market.updateMarketBalance(market, available, trading, balance);
             }.bind(this), function(error) {
                 this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
             }.bind(this));
@@ -59,14 +59,14 @@ var UserActions = function(client) {
         this.dispatch(constants.user.SEND_SUB, payload);
 
         _client.sendSub(payload.amount, payload.recipient, market, function(result) {
-            console.log("SEND_SUB_RESULT", result);
             var user = this.flux.store("UserStore").getState().user;
-            _client.updateBalanceSub(market, user.addresses[i], function(confirmed, unconfirmed) {
+            _client.updateBalanceSub(market, user.addresses[i], function(market, available, trading, balance) {
                 this.dispatch(constants.user.UPDATE_BALANCE_SUB, {
-                    balance: confirmed,
-                    balance_unconfirmed: unconfirmed
+                    available: available,
+                    trading: trading,
+                    balance: balance
                 });
-                this.flux.actions.market.updateMarketBalance(market, confirmed, unconfirmed);
+                this.flux.actions.market.updateMarketBalance(market, available, trading, balance);
             }.bind(this), function(error) {
                 this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
             }.bind(this));
@@ -82,13 +82,13 @@ var UserActions = function(client) {
         this.dispatch(constants.user.DEPOSIT, payload);
 
         _client.depositSub(user, payload.amount, market, function(result) {
-            console.log("DEPOSIT_RESULT", result);
-            _client.updateBalanceSub(market, user.addresses[i], function(confirmed, unconfirmed) {
+            _client.updateBalanceSub(market, user.addresses[i], function(market, available, trading, balance) {
                 this.dispatch(constants.user.UPDATE_BALANCE_SUB, {
-                    balance: confirmed,
-                    balance_unconfirmed: unconfirmed
+                    available: available,
+                    trading: trading,
+                    balance: balance
                 });
-                this.flux.actions.market.updateMarketBalance(market, confirmed, unconfirmed);
+                this.flux.actions.market.updateMarketBalance(market, available, trading, balance);
             }.bind(this), function(error) {
                 this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
             }.bind(this));
@@ -103,14 +103,14 @@ var UserActions = function(client) {
         this.dispatch(constants.user.WITHDRAW, payload);
 
         _client.withdrawSub(payload.amount, market, function(result) {
-            console.log("WITHDRAW_RESULT", result);
             var user = this.flux.store("UserStore").getState().user;
-            _client.updateBalanceSub(market, user.addresses[i], function(confirmed, unconfirmed) {
+            _client.updateBalanceSub(market, user.addresses[i], function(market, available, trading, balance) {
                 this.dispatch(constants.user.UPDATE_BALANCE_SUB, {
-                    balance: confirmed,
-                    balance_unconfirmed: unconfirmed
+                    available: available,
+                    trading: trading,
+                    balance: balance
                 });
-                this.flux.actions.market.updateMarketBalance(market, confirmed, unconfirmed);
+                this.flux.actions.market.updateMarketBalance(market, available, trading, balance);
             }.bind(this), function(error) {
                 this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
             }.bind(this));
