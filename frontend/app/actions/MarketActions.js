@@ -50,6 +50,15 @@ var MarketActions = function(client) {
 
         _client.loadMarkets(user, function(markets) {
             this.dispatch(constants.market.UPDATE_MARKET);
+            var user = this.flux.store("UserStore").getState().user;
+            // Load per market balances
+            for (var i = 0; i < markets.length; i++) {
+                _client.updateBalanceSub(markets[i], user.addresses[0], function(market, available, trading, balance) {
+                    this.flux.actions.market.updateMarketBalance(market, available, trading, balance);
+                }.bind(this), function(error) {
+                    this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
+                }.bind(this));
+            };
             this.dispatch(constants.market.LOAD_MARKETS_SUCCESS, markets);
 
             // Update sub balances after loading addresses
