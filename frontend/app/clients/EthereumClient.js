@@ -130,6 +130,9 @@ var EthereumClient = function() {
             var calldata = "0x09" + web3.padDecimal(String(market.id), 64);
             // console.log("CALLDATA", calldata);
 
+            // Set defaultBlock to 0 to get pending trade IDs
+            web3.eth.defaultBlock = 0;
+
             // contract.get_trade_ids(String(market.id)).call().then(function (trade_ids) {
             web3.eth.call({to: fixtures.addresses.etherex, data: calldata}).then( function(raw_trade_ids) {
                 // console.log("RAW TRADE IDS", raw_trade_ids);
@@ -157,49 +160,55 @@ var EthereumClient = function() {
                     var tradePromise = new Promise(function (resolve, reject) {
                         var id = trade_ids[i];
                         var p = i;
+
                         contract.get_trade("0x" + id).call().then(function (trade) {
                             try {
-                                // console.log("Trade from ABI:", trade);
+                                var minedStatus = 'mined';
 
-                                var id = trade[0];
+                                // Set defaultBlock to -1 to check mined status
+                                web3.eth.defaultBlock = -1;
 
-                                // Resolve on filled trades
-                                if (id == "0x" + web3.padDecimal("0", 64))
-                                    resolve({});
+                                web3.eth.stateAt(fixtures.addresses.etherex, trade[7]).then( function (tradeExists) {
+                                    if (tradeExists == "0x")
+                                        minedStatus = 'pending';
+                                    else
+                                        minedStatus = 'mined';
 
-                                var type = _.parseInt(trade[1]);
-                                var marketid = _.parseInt(trade[2]);
-                                var amountPrecision = Math.pow(10, market.decimals);
-                                var precision = market.precision;
+                                    // console.log("Trade from ABI:", trade);
 
-                                // console.log("Loading trade " + id + " for market " + market.name);
+                                    var id = trade[0];
 
-                                var amount = bigRat(_.parseInt(trade[3])).divide(amountPrecision).valueOf();
-                                var price = bigRat(_.parseInt(trade[4])).divide(precision).valueOf();
+                                    // Resolve on filled trades
+                                    if (id == "0x" + web3.padDecimal("0", 64))
+                                        resolve({});
 
-                                // console.log("Filling: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr))));
-                                // console.log("Pending: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr), 0)));
-                                // console.log("Mined: " + eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr), -1)));
+                                    var type = _.parseInt(trade[1]);
+                                    var marketid = _.parseInt(trade[2]);
+                                    var amountPrecision = Math.pow(10, market.decimals);
+                                    var precision = market.precision;
 
-                                // Update progress
-                                progress({percent: (p + 1) / total * 100 });
+                                    // console.log("Loading trade " + id + " for market " + market.name);
 
-                                resolve({
-                                    id: trade[0],
-                                    type: type == 1 ? 'buys' : 'sells',
-                                    price: price,
-                                    amount: amount,
-                                    total: amount * price,
-                                    owner: trade[5].replace("0x000000000000000000000000", "0x"),
-                                    market: {
-                                        id: market.id,
-                                        name: market.name
-                                    },
-                                    status: 'mined',
-                                    // status: (eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+1), 0)) == 0 ||
-                                             // eth.toDecimal(eth.stateAt(fixtures.addresses.trades, String(ptr+1), -1)) == 0) ?
-                                            // "pending" : "mined"
-                                    block: _.parseInt(trade[6])
+                                    var amount = bigRat(_.parseInt(trade[3])).divide(amountPrecision).valueOf();
+                                    var price = bigRat(_.parseInt(trade[4])).divide(precision).valueOf();
+
+                                    // Update progress
+                                    progress({percent: (p + 1) / total * 100 });
+
+                                    resolve({
+                                        id: trade[0],
+                                        type: type == 1 ? 'buys' : 'sells',
+                                        price: price,
+                                        amount: amount,
+                                        total: amount * price,
+                                        owner: trade[5].replace("0x000000000000000000000000", "0x"),
+                                        market: {
+                                            id: market.id,
+                                            name: market.name
+                                        },
+                                        status: minedStatus,
+                                        block: _.parseInt(trade[6])
+                                    });
                                 });
                             }
                             catch(e) {

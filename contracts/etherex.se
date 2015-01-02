@@ -25,11 +25,11 @@ data log_last_trade # 0xa
 data log_timestamp # 0xb
 
 data markets[2^160](id, name, contract, decimals, precision, minimum, last_price, owner, block, total_trades, trade_ids[](id))
-data trades[2^160](id, type, market, amount, price, owner, block)
+data trades[2^160](id, type, market, amount, price, owner, block, ref)
 data balances[][](available, trading)
 
 MARKET_FIELDS = 11
-TRADE_FIELDS = 7
+TRADE_FIELDS = 8
 
 extern any: [call]
 extern namereg: [register, unregister]
@@ -53,12 +53,13 @@ macro save_trade($type, $amount, $price, $market_id):
     # Save trade
     if !self.trades[trade_id].id:
         self.trades[trade_id].id = trade_id
-        self.trades[trade_id].type = trade[0]
-        self.trades[trade_id].market = trade[1]
-        self.trades[trade_id].amount = trade[2]
-        self.trades[trade_id].price = trade[3]
-        self.trades[trade_id].owner = trade[4]
-        self.trades[trade_id].block = trade[5]
+        self.trades[trade_id].type = $type
+        self.trades[trade_id].market = $market_id
+        self.trades[trade_id].amount = $amount
+        self.trades[trade_id].price = $price
+        self.trades[trade_id].owner = msg.sender
+        self.trades[trade_id].block = block.number
+        self.trades[trade_id].ref = ref(self.trades[trade_id].id)
 
         # Update available and trading amounts for sells
         if $type == 2:
@@ -88,6 +89,7 @@ macro remove_trade($trade_id):
     self.trades[$trade_id].price = 0
     self.trades[$trade_id].owner = 0
     self.trades[$trade_id].block = 0
+    self.trades[$trade_id].ref = 0
 
 
 def init():
@@ -381,6 +383,7 @@ def get_trade(id):
     trade[4] = self.trades[id].price
     trade[5] = self.trades[id].owner
     trade[6] = self.trades[id].block
+    trade[7] = self.trades[id].ref
 
     if trade:
         return(trade, TRADE_FIELDS)

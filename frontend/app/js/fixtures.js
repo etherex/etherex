@@ -278,6 +278,10 @@ var fixtures = {
                 {
                     "name": "block",
                     "type": "uint256"
+                },
+                {
+                    "name": "ref",
+                    "type": "hash256"
                 }
             ]
         },
