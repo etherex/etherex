@@ -50,25 +50,18 @@ var scale = new si.Scale({
 var unit = new si.Unit(scale, '');
 
 var utils = {
-  formatBalance: function(_b) {
+  formatBalance: function(_b, _p) {
     var b = bigRat(_b);
+    if (!_p)
+      var _p = 4;
     if (b.compare(units["Uether"].multiply(1000)) > 0)
-      return numeral(b.divide(units["Uether"])).format('0,0.0000') + " " + Object.keys(units)[0];
+      return this.numeral(b.divide(units["Uether"]), _p) + " " + Object.keys(units)[0];
     for (i in units) {
       if (units[i].valueOf() != 1 && b.compare(units[i].multiply(100)) >= 0) {
-        return numeral(b.divide(units[i].divide(1000)).divide(1000)).format('0,0.0000') + " " + i
+        return this.numeral(b.divide(units[i].divide(1000)).divide(1000), _p) + " " + i
       }
     }
-    return numeral(_b).format('0,0.0000') + " wei";
-
-    // if (_b > units[0] * 1000)
-    //   return (_b / units[0]).toFixed(2) + " " + Object.keys(units)[0];
-    // for (i in units) {
-    //   if (units[i] != 1 && _b >= units[i] * 100) {
-    //     return ((_b / (units[i] / 1000)) / 1000).toFixed(2) + " " + i
-    //   }
-    // }
-    // return parseFloat(_b) + " wei";
+    return this.numeral(_b, 0) + " wei";
   },
 
   randomId: function() {

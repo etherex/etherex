@@ -53,6 +53,20 @@ var SplitTradeForm = React.createClass({
       });
     }
 
+    // Price precision
+    var marketPrecision = nextProps.market.market.precision;
+    var priceDecimals = marketPrecision ? String(marketPrecision).length - 1 : 5;
+    var precision = (1 / (nextProps.market.market.precision ?
+                          _.parseInt(nextProps.market.market.precision) : 1000)).toFixed(priceDecimals);
+
+    // Amount decimals
+    var decimals = nextProps.market.market.decimals ? nextProps.market.market.decimals : 5;
+    var amountPrecision = (1 / Math.pow(10, decimals)).toFixed(decimals);
+
+    // Minimum total
+    var minimum = bigRat(nextProps.market.market.minimum).divide(fixtures.ether).valueOf().toFixed(priceDecimals);
+
+
     // Pre-check if trade will be valid
     if (this.state.price > 0 &&
         this.state.amount > 0 &&
@@ -64,16 +78,16 @@ var SplitTradeForm = React.createClass({
       // Dialog messages and notes
       if (this.state.amount && this.state.price && this.state.total) {
         var message = "Are you sure you want to " + (nextProps.type == 1 ? "buy" : "sell") +
-          " " + utils.numeral(this.state.amount, 4) + " " + nextProps.market.market.name +
-          " at " + utils.numeral(this.state.price, 4) + " " + nextProps.market.market.name + "/ETH" +
-          " for " + utils.formatBalance(bigRat(this.state.total).multiply(fixtures.ether)) + " ?";
+          " " + utils.numeral(this.state.amount, decimals) + " " + nextProps.market.market.name +
+          " at " + utils.numeral(this.state.price, priceDecimals) + " " + nextProps.market.market.name + "/ETH" +
+          " for " + utils.formatBalance(bigRat(this.state.total).multiply(fixtures.ether), decimals) + " ?";
         var note = (this.props.trades.filling.length > 0 ?
             "You will be filling " + this.props.trades.filling.length + " trade" +
             (this.props.trades.filling.length > 1 ? "s" : "") +
             " for a total of " +
-            utils.formatBalance(bigRat(this.state.total - this.props.trades.available).multiply(fixtures.ether)) +
+            utils.formatBalance(bigRat(this.state.total - this.props.trades.available).multiply(fixtures.ether), decimals) +
             (this.props.trades.available > 0 ? " (" +
-              utils.formatBalance(bigRat(this.props.trades.available).multiply(fixtures.ether)) + " left)" : "") +
+              utils.formatBalance(bigRat(this.props.trades.available).multiply(fixtures.ether), decimals) + " left)" : "") +
             "."
             : "") +
           (this.state.totalLeft >= this.props.market.market.minTotal &&
@@ -82,10 +96,10 @@ var SplitTradeForm = React.createClass({
             " You will also be adding a new trade of " +
               utils.numeral(this.props.trades.amountLeft, this.props.market.market.decimals) + " " +
               this.props.market.market.name +
-            " at " + utils.numeral(this.state.price, 4) + " " + this.props.market.market.name + "/ETH" +
+            " at " + utils.numeral(this.state.price, priceDecimals) + " " + this.props.market.market.name + "/ETH" +
             " for " + utils.formatBalance(bigRat(this.props.trades.amountLeft)
                         .multiply(this.state.price)
-                        .multiply(fixtures.ether)) +
+                        .multiply(fixtures.ether), decimals) +
             "."
             : "") +
           (this.state.totalLeft < this.props.market.market.minTotal &&
@@ -94,8 +108,8 @@ var SplitTradeForm = React.createClass({
            this.props.trades.available &&
            this.state.totalLeft ?
             " Not enough left for a new trade with " +
-              utils.numeral(this.props.trades.amountLeft, 4) + " " + this.props.market.market.name + " for " +
-              utils.formatBalance(bigRat(this.state.totalLeft).multiply(fixtures.ether)) +
+              utils.numeral(this.props.trades.amountLeft, decimals) + " " + this.props.market.market.name + " for " +
+              utils.formatBalance(bigRat(this.state.totalLeft).multiply(fixtures.ether), decimals) +
               "."
               : "")
       }
@@ -116,19 +130,6 @@ var SplitTradeForm = React.createClass({
       });
 
     }
-
-    // Price precision
-    var marketPrecision = nextProps.market.market.precision;
-    var priceDecimals = marketPrecision ? String(marketPrecision).length - 1 : 0;
-    var precision = (1 / (nextProps.market.market.precision ?
-                          _.parseInt(nextProps.market.market.precision) : 1000)).toFixed(priceDecimals);
-
-    // Amount decimals
-    var decimals = nextProps.market.market.decimals ? nextProps.market.market.decimals : 5;
-    var amountPrecision = (1 / Math.pow(10, decimals)).toFixed(decimals);
-
-    // Minimum total
-    var minimum = bigRat(nextProps.market.market.minimum).divide(fixtures.ether).valueOf().toFixed(priceDecimals);
 
     this.setState({
       amountPrecision: amountPrecision,
@@ -199,7 +200,7 @@ var SplitTradeForm = React.createClass({
       var price = this.refs.price.getDOMNode().value.trim();
       var amount = this.refs.amount.getDOMNode().value.trim();
       var total = parseFloat(this.refs.total.getDOMNode().value.trim());
-      var precision = this.props.market.market.precision.length - 1;
+      var precision = String(this.props.market.market.precision).length - 1;
 
       if (price && amount)
         total = parseFloat(amount) * parseFloat(price);
