@@ -1,6 +1,6 @@
 {
   "name": "EtherEx",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "EtherEx frontend",
   "main": "app/app.jsx",
   "scripts": {

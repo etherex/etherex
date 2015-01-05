@@ -7,7 +7,7 @@ var fixtures = {
     tenEther: tenEther,
     precision: precision,
     addresses: {
-        nameregs: ["0x72ba7d8e73fe8eb666ea66babc8116a41bfb10e2", "0xda7ce79725418f4f6e13bf5f520c89cec5f6a974"],
+        nameregs: ["0xb46312830127306cd3de3b84dbdb51899613719d", "0xda7ce79725418f4f6e13bf5f520c89cec5f6a974"],
         etherex: "0x77045e71a7a2c50903d88e564cd72fab11e82051"
     },
     trade_fields: 7,
