@@ -240,32 +240,45 @@ var TradeStore = Fluxxor.createStore({
                 if (((payload.type == 1 && payload.price >= trades[i].price) ||
                      (payload.type == 2 && payload.price <= trades[i].price)) &&
                       payload.price > 0 &&
-                      amountLeft >= trades[i].amount &&
-                      available >= this_total &&
+                      available > 0 &&
+                      amountLeft > 0 &&
                       trades[i].owner != payload.user.id &&
                       trades[i].market.id == payload.market.id &&
                       trades[i].status != "pending" &&
                       trades[i].status != "new") {
 
+                    if (amountLeft < trades[i].amount || available < this_total) {
+                        if (!_.find(filling, {'id': trades[i].id})) {
+                            var partialtrade = {
+                                id: trades[i].id,
+                                block: trades[i].block,
+                                amount: amountLeft,
+                                price: trades[i].price,
+                                status: "mined",
+                                market: trades[i].market,
+                                owner: trades[i].owner,
+                                total: amountLeft * trades[i].price,
+                                type: trades[i].type
+                            };
+                            // console.log("Partial fill", partialtrade);
+                            filling.push(partialtrade);
+                            available = 0;
+                            amountLeft = 0;
+                        }
+                    }
+                    else {
+                        if (!_.find(filling, {'id': trades[i].id})) {
+                            filling.push(trades[i]);
+                            available -= this_total;
+                            amountLeft -= trades[i].amount;
+                        }
+                    }
                     // console.log("Would fill trade # " + i + " with total of " + trades_total);
 
-                    (payload.type == 1) ? // if (available >= this_total)
+                    // Show filling status on trade
+                    (payload.type == 1) ?
                       this.trades.tradeSells[i].status = "filling" :
                       this.trades.tradeBuys[i].status = "filling"
-
-                    if (!_.find(filling, {'id': trades[i].id})) {
-                        filling.push(trades[i]);
-
-                        // Remove total from available total
-                        // if (available - this_total > 0)
-                            available -= this_total;
-                        // else
-                        //     available = 0;
-                        // if (amountLeft - trades[i].amount > 0)
-                            amountLeft -= trades[i].amount;
-                        // else
-                        //     amountLeft = 0;
-                    }
                 }
             };
 
@@ -298,10 +311,10 @@ var TradeStore = Fluxxor.createStore({
         // console.log("Filling " + filling.length + " trade(s): " + _.pluck(filling, 'id').join(', '));
 
         // Set state for filling trades for fillTrades
-        // this.type = payload.type;
-        // this.price = payload.price;
-        // this.amount = payload.amount;
-        // this.total = payload.total;
+        this.type = payload.type;
+        this.price = payload.price;
+        this.amount = payload.amount;
+        this.total = payload.total;
         this.filling = filling;
         this.amountLeft = amountLeft;
         this.available = available;
@@ -315,7 +328,7 @@ var TradeStore = Fluxxor.createStore({
             return;
         var market = this.flux.store("MarketStore").getState().markets[payload.market.id - 1];
         var decimals = market.decimals;
-        var precision = market.precision.length - 1;
+        var precision = String(market.precision).length - 1;
         var amount = (payload.type == 2 || !payload.fills || payload.fills <= 1) ?
             payload.amount.toFixed(decimals) :
             (parseFloat(payload.amount) + 1 / Math.pow(10, decimals)).toFixed(decimals)

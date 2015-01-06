@@ -288,7 +288,6 @@ TODO
 ### Architecture
 
 * Link price indexes to orderbook and check for lower/higher bids (use heap.se?)
-* Support partial fills (done in UI, TBD in contracts)
 * Document error codes of return values
 * Implement Wallet section (transactions, balances, etc.) (in progress)
 * Re-implement NameReg support and integration

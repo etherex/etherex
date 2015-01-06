@@ -187,6 +187,7 @@ def trade(trade_id):
     contract = self.markets[market_id].contract
     decimals = self.markets[market_id].decimals
     precision = self.markets[market_id].precision
+    minimum = self.markets[market_id].minimum
 
     # Get trade
     type = self.trades[trade_id].type
@@ -194,42 +195,71 @@ def trade(trade_id):
     price = self.trades[trade_id].price
     owner = self.trades[trade_id].owner
 
-    value = ((amount * price) / (precision * 10 ^ decimals)) * 10 ^ 18
-
+    # Fill buy order
     if type == 1:
-        # Transfer sub / asset
+        # Get available balance
         balance = self.balances[msg.sender][market_id].available
-        if balance >= amount:
-            self.balances[msg.sender][market_id].available -= amount
-            self.balances[owner][market_id].available += amount
+        if balance > 0:
+            # Determine fill amount
+            fill = min(balance, amount)
+
+            # Calculate value
+            value = ((fill * price) / (precision * 10 ^ decimals)) * 10 ^ 18
+
+            # Check buy value
+            if value < minimum:
+                refund()
+                return(13)
+
+            # Update trade amount or remove
+            if fill < amount:
+                self.trades[trade_id].amount -= fill
+            else:
+                remove_trade(trade_id)
+
+            # Update balances
+            self.balances[msg.sender][market_id].available -= fill
+            self.balances[owner][market_id].available += fill
 
             # Transfer ETH
             send(msg.sender, value)
-
-            # Clear trade
-            remove_trade(trade_id)
         else:
             return(12)
 
     elif type == 2:
-        # Check sell amount
-        if msg.value < value:
+        # Calculate value of trade
+        value = ((amount * price) / (precision * 10 ^ decimals)) * 10 ^ 18
+
+        # Determine fill value
+        fillvalue = min(msg.value, value)
+
+        # Calculate fill amount
+        if fillvalue < value:
+            fill = ((fillvalue * (precision * 10 ^ decimals)) / 10 ^ 18) / price
+        else:
+            fill = amount
+
+        # Check sell value
+        if msg.value < minimum:
             refund()
-            return(13) // "Minimum trade amount not met, minimum is %s, got %d" % (value, msg.value)
+            return(13)
 
         # Refund excess value
-        if msg.value > value:
-            send(msg.sender, msg.value - value)
+        if msg.value > fillvalue:
+            send(msg.sender, msg.value - fillvalue)
+
+        # Update trade amount or remove
+        if fillvalue < value:
+            self.trades[trade_id].amount -= fill
+        else:
+            remove_trade(trade_id)
+
+        # Update balances
+        self.balances[self][market_id].trading -= fill
+        self.balances[msg.sender][market_id].available += fill
 
         # Transfer ETH
-        send(owner, value)
-
-        # Transfer sub / asset
-        self.balances[self][market_id].trading -= amount
-        self.balances[msg.sender][market_id].available += amount
-
-        # Clear trade
-        remove_trade(trade_id)
+        send(owner, fillvalue)
 
     # Update market last price
     self.markets[market_id].last_price = price

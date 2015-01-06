@@ -32,8 +32,6 @@ var TradeActions = function(client) {
             var market = this.flux.store("MarketStore").getState().market;
             var user = this.flux.store("UserStore").getState().user;
 
-            // console.log("UPDATED_TRADES", market, trades);
-
             if (trade.type && trade.price && trade.amount && trade.total && market && user)
                 this.flux.actions.trade.highlightFilling({
                     type: trade.type,
