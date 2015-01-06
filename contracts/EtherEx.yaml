@@ -113,7 +113,7 @@
         - 10000
         - 1000000000000000000
 
-# Set exchange address in subcurrency contracts
+# Set exchange address and market ID in subcurrency contracts
 -
   transact:
     SetExchangeETX:
@@ -255,8 +255,20 @@
       data:
         - $EtherEx
         - 1000000000
+    depositCAK:
+      to: $CAK
+      funid: 0
+      data:
+        - $EtherEx
+        - 10000000000
+    depositFAB:
+      to: $FAB
+      funid: 0
+      data:
+        - $EtherEx
+        - 10000000000
 
-# Test trades
+# ETX test trades
 -
   transact:
     # Sells
@@ -345,35 +357,191 @@
       funid: 1
       data:
         - 5000000
-        - 25000000
+        - 23000000
         - 1
-      value: 12500000000000000000
+      value: 11500000000000000000
     trade13:
       to: $EtherEx
       funid: 1
       data:
         - 5000000
-        - 26000000
+        - 22000000
         - 1
-      value: 13000000000000000000
+      value: 11000000000000000000
     trade14:
       to: $EtherEx
       funid: 1
       data:
         - 5000000
-        - 27000000
+        - 21000000
         - 1
-      value: 13500000000000000000
+      value: 10500000000000000000
 
-    # Minimum not met
-    trade15:
+
+
+# CAK test trades
+-
+  transact:
+    # Sells
+    trade1:
+      to: $EtherEx
+      funid: 2
+      data:
+        - 50000000
+        - 25
+        - 2
+    trade2:
+      to: $EtherEx
+      funid: 2
+      data:
+        - 150000000
+        - 26
+        - 2
+    trade3:
+      to: $EtherEx
+      funid: 2
+      data:
+        - 250000000
+        - 27
+        - 2
+    trade4:
+      to: $EtherEx
+      funid: 2
+      data:
+        - 350000000
+        - 28
+        - 2
+    trade5:
+      to: $EtherEx
+      funid: 2
+      data:
+        - 450000000
+        - 29
+        - 2
+    trade6:
+      to: $EtherEx
+      funid: 2
+      data:
+        - 550000000
+        - 30
+        - 2
+
+    # Buys
+    trade11:
       to: $EtherEx
       funid: 1
       data:
-        - 500000
-        - 25000000
-        - 1
-      value: 1250000000000000000
+        - 5000000
+        - 24
+        - 2
+      value: 12000000000000000000
+    trade12:
+      to: $EtherEx
+      funid: 1
+      data:
+        - 5000000
+        - 23
+        - 2
+      value: 11500000000000000000
+    trade13:
+      to: $EtherEx
+      funid: 1
+      data:
+        - 5000000
+        - 22
+        - 2
+      value: 11000000000000000000
+    trade14:
+      to: $EtherEx
+      funid: 1
+      data:
+        - 5000000
+        - 21
+        - 2
+      value: 10500000000000000000
+
+
+# FAB test trades
+-
+  transact:
+    # Sells
+    trade1:
+      to: $EtherEx
+      funid: 2
+      data:
+        - 50000000
+        - 25
+        - 3
+    trade2:
+      to: $EtherEx
+      funid: 2
+      data:
+        - 150000000
+        - 26
+        - 3
+    trade3:
+      to: $EtherEx
+      funid: 2
+      data:
+        - 250000000
+        - 27
+        - 3
+    trade4:
+      to: $EtherEx
+      funid: 2
+      data:
+        - 350000000
+        - 28
+        - 3
+    trade5:
+      to: $EtherEx
+      funid: 2
+      data:
+        - 450000000
+        - 29
+        - 3
+    trade6:
+      to: $EtherEx
+      funid: 2
+      data:
+        - 550000000
+        - 30
+        - 3
+
+    # Buys
+    trade11:
+      to: $EtherEx
+      funid: 1
+      data:
+        - 5000000
+        - 24
+        - 3
+      value: 12000000000000000000
+    trade12:
+      to: $EtherEx
+      funid: 1
+      data:
+        - 5000000
+        - 23
+        - 3
+      value: 11500000000000000000
+    trade13:
+      to: $EtherEx
+      funid: 1
+      data:
+        - 5000000
+        - 22
+        - 3
+      value: 11000000000000000000
+    trade14:
+      to: $EtherEx
+      funid: 1
+      data:
+        - 5000000
+        - 21
+        - 3
+      value: 10500000000000000000
+
 
 # # Contract calls with return values
 # -

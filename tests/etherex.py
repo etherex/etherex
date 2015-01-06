@@ -114,7 +114,7 @@ class TestEtherEx(object):
         ans = self.state.send(
             self.ALICE['key'],
             self.contract,
-            10 ** 18,
+            0,
             funid=self.ADD_MARKET,
             abi=["0x" + "ETX".encode('hex'), self.etx_contract, 5, 10 ** 8, 10 ** 18])
         assert ans == [1]
@@ -125,7 +125,7 @@ class TestEtherEx(object):
             self.etx_contract,
             0,
             funid=2,
-            abi=[self.contract])
+            abi=[self.contract, 1])
         assert ans == [1]
         assert self._storage(self.etx_contract, self.xhex(1)) == "0x" + self.contract
 
@@ -211,7 +211,7 @@ class TestEtherEx(object):
         # assert self._storage(self.etx_contract, int(self.ALICE['address'], 16)) == self.xhex(1000000 - 1000)
         # assert self._storage(self.etx_contract, int(self.BOB['address'], 16)) == self.xhex(1000)
 
-    def test_bob_to_charlie_invalid(self):
+    def test_bob_to_charlie_fail(self):
         self.test_initialize()
 
         ans = self.state.send(
@@ -222,7 +222,7 @@ class TestEtherEx(object):
             abi=[self.CHARLIE['address'], 1000 * 10 ** 5])
         assert ans == [0]
 
-    def test_alice_to_bob_to_charlie_valid(self):
+    def test_alice_to_bob_to_charlie(self):
         self.test_initialize()
 
         # Send 1000 to Bob
@@ -256,6 +256,16 @@ class TestEtherEx(object):
     #
     # Balances
     #
+    def test_sub_balance(self):
+        self.test_initialize()
+
+        ans = self.state.send(
+            self.ALICE['key'],
+            self.etx_contract,
+            0,
+            funid=1,
+            abi=[self.ALICE['address']])
+        assert ans == [1000000 * 10 ** 5]
 
     def test_deposit_to_exchange(self, init=True):
         if init:
@@ -297,19 +307,27 @@ class TestEtherEx(object):
             abi=[self.ALICE['address'], 1])
         assert ans == [1000 * 10 ** 5, 0]
 
-    # def test_withdraw_eth(self):
-    #     self.test_deposit_eth()
+    def test_withdraw_sub_fail(self):
+        self.test_initialize()
 
-    #     ans = self.state.send(self.ALICE['key'], self.contract, 0, [5, 1 * 10 ** 17])
-    #     assert ans == [1]
-    #     assert self._storage(self.bcontract, int(self.ALICE['address'], 16)) == self.xhex(10 ** 18)
+        ans = self.state.send(
+            self.ALICE['key'],
+            self.contract,
+            0,
+            funid=self.WITHDRAW,
+            abi=[1000 * 10 ** 5, 1])
+        assert ans == [0]
 
-    # def test_withdraw_eth_invalid(self):
-    #     self.test_initialize()
+    def test_withdraw_sub(self):
+        self.test_deposit_to_exchange()
 
-    #     ans = self.state.send(self.ALICE['key'], self.contract, 0, [5, 10 ** 19])
-    #     assert ans == [0]
-
+        ans = self.state.send(
+            self.ALICE['key'],
+            self.contract,
+            0,
+            funid=self.WITHDRAW,
+            abi=[1000 * 10 ** 5, 1])
+        assert ans == [1]
 
     #
     # EtherEx
@@ -388,7 +406,7 @@ class TestEtherEx(object):
             self.bob_contract,
             0,
             funid=2,
-            abi=[self.contract])
+            abi=[self.contract, 2])
         assert ans == [1]
         assert self._storage(self.bob_contract, self.xhex(1)) == "0x" + self.contract
 
@@ -498,7 +516,7 @@ class TestEtherEx(object):
             -35168633768494065610302920664120686116555617894816459733689825088489895266148L,
             49800558551364658298467690253710486242473574128865389798518930174170604985043L]
 
-    def test_cancel_trade_invalid(self):
+    def test_cancel_trade_fail(self):
         self.test_add_buy_trades()
 
         ans = self.state.send(
@@ -539,6 +557,7 @@ class TestEtherEx(object):
 
     def test_fulfill_first_buy_fail(self):
         self.test_add_buy_trades()
+        snapshot = self.state.snapshot()
         self.state.mine(1)
 
         ans = self.state.send(
@@ -548,8 +567,25 @@ class TestEtherEx(object):
             funid=self.TRADE,
             abi=[23490291715255176443338864873375620519154876621682055163056454432194948412040L])
         assert ans == [12]
+        self.state.revert(snapshot)
         # for x in xrange(100,109):
         #     assert self._storage(self.tcontract, x) == None
+
+
+    def test_fulfill_first_sell_fail(self):
+        self.test_add_sell_trades()
+        snapshot = self.state.snapshot()
+        self.state.mine(1)
+
+        ans = self.state.send(
+            self.ALICE['key'],
+            self.contract,
+            0,
+            funid=self.TRADE,
+            abi=[49800558551364658298467690253710486242473574128865389798518930174170604985043L])
+        assert ans == [12]
+        self.state.revert(snapshot)
+
 
     def test_transfer_to_bob_and_deposit(self):
         # Load BOB with ETX from ALICE
@@ -570,9 +606,10 @@ class TestEtherEx(object):
             abi=[self.contract, 10000 * 10 ** 5])
         assert ans == [1]
 
-    def test_fulfill_first_buy(self):
+    def test_fulfill_first_buy(self, revert=True):
         self.test_add_buy_trades()
         self.test_transfer_to_bob_and_deposit()
+        snapshot = self.state.snapshot()
         self.state.mine(1)
 
         # Fill first trade
@@ -583,12 +620,16 @@ class TestEtherEx(object):
             funid=self.TRADE,
             abi=[23490291715255176443338864873375620519154876621682055163056454432194948412040L])
         assert ans == [1]
+
+        if revert:
+            self.state.revert(snapshot)
         # for x in xrange(100,109):
         #     assert self._storage(self.tcontract, x) == None
         # TODO - proper balance assertions
 
     def test_get_last_price(self):
-        self.test_fulfill_first_buy()
+        self.test_fulfill_first_buy(False)
+        snapshot = self.state.snapshot()
         self.state.mine(1)
 
         # assert self._storage(self.contract, 105) == self.xhex(int(0.25 * 10 ** 8))
@@ -600,9 +641,11 @@ class TestEtherEx(object):
             funid=self.PRICE,
             abi=[1])
         assert ans == [int(0.25 * 10 ** 8)]
+        self.state.revert(snapshot)
 
     def test_fulfill_first_sell(self):
         self.test_add_sell_trades()
+        snapshot = self.state.snapshot()
         self.state.mine(1)
 
         ans = self.state.send(
@@ -612,23 +655,42 @@ class TestEtherEx(object):
             funid=self.TRADE,
             abi=[49800558551364658298467690253710486242473574128865389798518930174170604985043L])
         assert ans == [1]
+        self.state.revert(snapshot)
         # for x in xrange(120,129):
         #     assert self._storage(self.tcontract, x) == None
 
-    def test_fulfill_multiple_trades_fail(self):
+    def test_fulfill_multiple_trades(self):
         self.test_add_buy_trades()
         self.test_add_sell_trades(False)
         self.test_transfer_to_bob_and_deposit()
+        snapshot = self.state.snapshot()
         self.state.mine(1)
 
         # Fill first and second trade
+        # ans = self.state.send(
+        #     self.BOB['key'],
+        #     self.contract,
+        #     0,
+        #     funid=self.TRADE,
+        #     abi=[[23490291715255176443338864873375620519154876621682055163056454432194948412040L, -35168633768494065610302920664120686116555617894816459733689825088489895266148L]])
         ans = self.state.send(
             self.BOB['key'],
             self.contract,
             0,
             funid=self.TRADE,
-            abi=[[23490291715255176443338864873375620519154876621682055163056454432194948412040L, -35168633768494065610302920664120686116555617894816459733689825088489895266148L]])
-        assert ans == [0]
+            abi=[23490291715255176443338864873375620519154876621682055163056454432194948412040L])
+        assert ans == [1]
+        ans = self.state.send(
+            self.BOB['key'],
+            self.contract,
+            0,
+            funid=self.TRADE,
+            abi=[-35168633768494065610302920664120686116555617894816459733689825088489895266148L])
+        assert ans == [1]
+
+        self.state.revert(snapshot)
+
+
 
     # def test_second_buy_with_leftover(self):
     #     tx = Tx(sender='alice', value=0, data=[1, 1500 * 10 ** 18, 1000 * 10 ** 8, 1])

@@ -22,12 +22,11 @@ def send(recipient, amount):
         # Notify exchange of deposit
         if recipient == self.exchange:
             ret = self.exchange.deposit(msg.sender, amount, self.market_id, datasz=3, as=exchange)
-            # Exchange returns the amount as confirmation
-            if ret == amount:
+            # Exchange returns our new balance as confirmation
+            if ret >= amount:
                 return(1)
             # We return 2 as error code for notification failure
-            else:
-                return(2)
+            return(2)
 
         return(1)
     return(0)
