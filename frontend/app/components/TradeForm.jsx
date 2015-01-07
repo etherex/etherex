@@ -24,19 +24,19 @@ var SplitTradeForm = React.createClass({
   mixins: [FluxMixin],
 
   getInitialState: function() {
-      return {
-          amount: null,
-          price: null,
-          total: null,
-          newTrade: false,
-          amountPrecision: null,
-          precision: null,
-          minimum: null,
-          totalLeft: null,
-          isValid: false,
-          message: null,
-          note: null
-      };
+    return {
+      amount: null,
+      price: null,
+      total: null,
+      newTrade: false,
+      amountPrecision: null,
+      precision: null,
+      minimum: null,
+      totalLeft: null,
+      isValid: false,
+      message: null,
+      note: null
+    };
   },
 
   componentDidMount: function() {
@@ -68,47 +68,47 @@ var SplitTradeForm = React.createClass({
 
 
     // Pre-check if trade will be valid
-    if (this.state.price > 0 &&
-        this.state.amount > 0 &&
-        this.state.total > nextProps.market.market.minTotal &&
-        ((nextProps.type == 1 && bigRat(nextProps.user.user.balance_raw).greaterOrEquals(bigRat(this.state.total).multiply(fixtures.ether))) ||
-         (nextProps.type == 2 && nextProps.user.user.balance_sub_available >= this.state.amount)
+    if (nextProps.trades.price > 0 &&
+        nextProps.trades.amount > 0 &&
+        nextProps.trades.total >= nextProps.market.market.minTotal &&
+        ((nextProps.type == 1 && bigRat(nextProps.user.user.balance_raw).greaterOrEquals(bigRat(nextProps.trades.total).multiply(fixtures.ether))) ||
+         (nextProps.type == 2 && nextProps.user.user.balance_sub_available >= nextProps.trades.amount)
         )) {
 
       // Dialog messages and notes
-      if (this.state.amount && this.state.price && this.state.total) {
+      if (nextProps.trades.amount && nextProps.trades.price && nextProps.trades.total) {
         var message = "Are you sure you want to " + (nextProps.type == 1 ? "buy" : "sell") +
-          " " + utils.numeral(this.state.amount, decimals) + " " + nextProps.market.market.name +
-          " at " + utils.numeral(this.state.price, priceDecimals) + " " + nextProps.market.market.name + "/ETH" +
-          " for " + utils.formatBalance(bigRat(this.state.total).multiply(fixtures.ether), decimals) + " ?";
-        var note = (this.props.trades.filling.length > 0 ?
-            "You will be filling " + this.props.trades.filling.length + " trade" +
-            (this.props.trades.filling.length > 1 ? "s" : "") +
+          " " + utils.numeral(nextProps.trades.amount, decimals) + " " + nextProps.market.market.name +
+          " at " + utils.numeral(nextProps.trades.price, priceDecimals) + " " + nextProps.market.market.name + "/ETH" +
+          " for " + utils.formatBalance(bigRat(nextProps.trades.total).multiply(fixtures.ether), decimals) + " ?";
+        var note = (nextProps.trades.filling.length > 0 ?
+            "You will be filling " + nextProps.trades.filling.length + " trade" +
+            (nextProps.trades.filling.length > 1 ? "s" : "") +
             " for a total of " +
-            utils.formatBalance(bigRat(this.state.total - this.props.trades.available).multiply(fixtures.ether), decimals) +
-            (this.props.trades.available > 0 ? " (" +
-              utils.formatBalance(bigRat(this.props.trades.available).multiply(fixtures.ether), decimals) + " left)" : "") +
+            utils.formatBalance(bigRat(nextProps.trades.total - nextProps.trades.available).multiply(fixtures.ether), decimals) +
+            (nextProps.trades.available > 0 ? " (" +
+              utils.formatBalance(bigRat(nextProps.trades.available).multiply(fixtures.ether), decimals) + " left)" : "") +
             "."
             : "") +
-          (this.state.totalLeft >= this.props.market.market.minTotal &&
-           this.props.trades.filling.length > 0 &&
-           this.props.trades.available ?
+          (this.state.totalLeft >= nextProps.market.market.minTotal &&
+           nextProps.trades.filling.length > 0 &&
+           nextProps.trades.available ?
             " You will also be adding a new trade of " +
-              utils.numeral(this.props.trades.amountLeft, this.props.market.market.decimals) + " " +
-              this.props.market.market.name +
-            " at " + utils.numeral(this.state.price, priceDecimals) + " " + this.props.market.market.name + "/ETH" +
-            " for " + utils.formatBalance(bigRat(this.props.trades.amountLeft)
-                        .multiply(this.state.price)
+              utils.numeral(nextProps.trades.amountLeft, this.props.market.market.decimals) + " " +
+              nextProps.market.market.name +
+            " at " + utils.numeral(nextProps.trades.price, priceDecimals) + " " + nextProps.market.market.name + "/ETH" +
+            " for " + utils.formatBalance(bigRat(nextProps.trades.amountLeft)
+                        .multiply(nextProps.trades.price)
                         .multiply(fixtures.ether), decimals) +
             "."
             : "") +
-          (this.state.totalLeft < this.props.market.market.minTotal &&
-           this.props.trades.filling.length > 0 &&
-           this.props.trades.amountLeft &&
-           this.props.trades.available &&
-           this.state.totalLeft ?
+          (this.state.totalLeft &&
+           this.state.totalLeft < nextProps.market.market.minTotal &&
+           nextProps.trades.filling.length > 0 &&
+           nextProps.trades.amountLeft &&
+           nextProps.trades.available ?
             " Not enough left for a new trade with " +
-              utils.numeral(this.props.trades.amountLeft, decimals) + " " + this.props.market.market.name + " for " +
+              utils.numeral(nextProps.trades.amountLeft, decimals) + " " + nextProps.market.market.name + " for " +
               utils.formatBalance(bigRat(this.state.totalLeft).multiply(fixtures.ether), decimals) +
               "."
               : "")
@@ -128,7 +128,6 @@ var SplitTradeForm = React.createClass({
       this.setState({
         isValid: false
       });
-
     }
 
     this.setState({
@@ -137,7 +136,7 @@ var SplitTradeForm = React.createClass({
       minimum: minimum,
       message: message,
       note: note,
-      totalLeft: nextProps.trades.amountLeft ? nextProps.trades.amountLeft * this.state.price : 0
+      totalLeft: nextProps.trades.amountLeft ? nextProps.trades.amountLeft * nextProps.trades.price : 0
     });
   },
 
@@ -193,66 +192,67 @@ var SplitTradeForm = React.createClass({
   },
 
   handleChange: function(e) {
-      e.preventDefault();
-      // TODO - proper back/forth handling
-      var type = this.props.type;
-      var market = this.refs.market.getDOMNode().value.trim();
-      var price = this.refs.price.getDOMNode().value.trim();
-      var amount = this.refs.amount.getDOMNode().value.trim();
-      var total = parseFloat(this.refs.total.getDOMNode().value.trim());
-      var precision = String(this.props.market.market.precision).length - 1;
+    e.preventDefault();
 
-      if (price && amount)
-        total = parseFloat(amount) * parseFloat(price);
-        // total = bigRat(parseFloat(amount) * parseFloat(price))
-        //         .multiply(bigRat(Math.pow(10, precision)))
-        //         .ceil()
-        //         .divide(bigRat(Math.pow(10, decimals)))
-        //         .valueOf();
+    // TODO - proper back/forth handling
+    var type = this.props.type;
+    var market = this.refs.market.getDOMNode().value.trim();
+    var price = this.refs.price.getDOMNode().value.trim();
+    var amount = this.refs.amount.getDOMNode().value.trim();
+    var total = parseFloat(this.refs.total.getDOMNode().value.trim());
+    var precision = String(this.props.market.market.precision).length - 1;
 
-      this.setState({
-        price: price,
-        amount: amount,
-        total: total.toFixed(precision)
-      });
+    if (price && amount)
+      total = parseFloat(amount) * parseFloat(price);
+      // total = bigRat(parseFloat(amount) * parseFloat(price))
+      //         .multiply(bigRat(Math.pow(10, precision)))
+      //         .ceil()
+      //         .divide(bigRat(Math.pow(10, decimals)))
+      //         .valueOf();
 
-      this.getFlux().actions.trade.highlightFilling({
-        type: type,
-        price: parseFloat(price),
-        amount: parseFloat(amount),
-        total: parseFloat(total),
-        market: this.props.market.market,
-        user: this.props.user.user
-      });
+    this.setState({
+      price: price,
+      amount: amount,
+      total: total.toFixed(precision)
+    });
+
+    this.getFlux().actions.trade.highlightFilling({
+      type: type,
+      price: parseFloat(price),
+      amount: parseFloat(amount),
+      total: parseFloat(total),
+      market: this.props.market.market,
+      user: this.props.user.user
+    });
   },
 
   handleChangeTotal: function(e) {
-      e.preventDefault();
+    e.preventDefault();
 
-      var type = this.props.type;
-      var market = this.refs.market.getDOMNode().value;
-      var price = this.refs.price.getDOMNode().value.trim();
-      var total = this.refs.total.getDOMNode().value.trim();
-      var amount = 0;
-      var decimals = this.props.market.market.decimals;
+    var type = this.props.type;
+    var market = this.refs.market.getDOMNode().value;
+    var price = this.refs.price.getDOMNode().value.trim();
+    var total = this.refs.total.getDOMNode().value.trim();
+    var amount = 0;
+    var decimals = this.props.market.market.decimals;
 
-      if (price && total)
-        amount = parseFloat(total) / parseFloat(price);
+    if (price && total)
+      amount = parseFloat(total) / parseFloat(price) + 1 / Math.pow(10, decimals);
 
-      this.setState({
-        price: price,
-        amount: amount.toFixed(decimals),
-        total: total
-      });
+    this.setState({
+      price: price,
+      amount: amount.toFixed(decimals),
+      total: total
+    });
 
-      this.getFlux().actions.trade.highlightFilling({
-        type: type,
-        price: parseFloat(price),
-        amount: parseFloat(amount),
-        total: parseFloat(total),
-        market: this.props.market.market,
-        user: this.props.user.user
-      });
+    this.getFlux().actions.trade.highlightFilling({
+      type: type,
+      price: parseFloat(price),
+      amount: parseFloat(amount),
+      total: parseFloat(total),
+      market: this.props.market.market,
+      user: this.props.user.user
+    });
   },
 
   handleValidation: function(e) {
@@ -328,9 +328,8 @@ var SplitTradeForm = React.createClass({
 
     // console.log([this.props.market.market.id, this.state.amount, this.state.price, this.state.total].join(", "));
 
-    if (!this.validate(e, true)) {
+    if (!this.validate(e, true))
       return;
-    }
 
     // Fill existing trades
     // console.log("Filling " + _.pluck(this.props.trades.filling, 'id').join(', '));
@@ -360,78 +359,78 @@ var SplitTradeForm = React.createClass({
 });
 
 var TradeForm = React.createClass({
-    mixins: [FluxMixin],
+  mixins: [FluxMixin],
 
-    getInitialState: function() {
-        return {
-            type: 1,
-            typename: "Buy",
-            alertLevel: 'info',
-            alertMessage: ''
-        };
-    },
+  getInitialState: function() {
+    return {
+      type: 1,
+      typename: "Buy",
+      alertLevel: 'info',
+      alertMessage: ''
+    };
+  },
 
-    componentWillReceiveProps: function(nextProps) {
-        if (nextProps.trades.newAmount && this.props.type != nextProps.trades.type)
-            this.setState({
-                type: nextProps.trades.type,
-                typename: nextProps.trades.type == 1 ? "Buy" : "Sell"
-            });
-    },
+  componentWillReceiveProps: function(nextProps) {
+    if (nextProps.trades.newAmount && this.props.type != nextProps.trades.type)
+      this.setState({
+        type: nextProps.trades.type,
+        typename: nextProps.trades.type == 1 ? "Buy" : "Sell"
+      });
+  },
 
-    render: function() {
-      return (
-        <div className="panel panel-default">
-          <div className="panel-heading">
-            <div className="visible-md visible-lg">
-              <h3 className="panel-title">New Trade</h3>
-            </div>
-            <div className="visible-xs visible-sm text-center">
-              <div className="pull-left h4">New Trade</div>
-              <span className="panel-title">
-              <label className="sr-only" forHtml="type">Buy or sell</label>
-              <DropdownButton bsStyle="primary" bsSize="medium" ref="type" onSelect={this.handleType} key={this.state.type} title={this.state.typename}>
-                <MenuItem key={1} eventKey={1}>Buy</MenuItem>
-                <MenuItem key={2} eventKey={2}>Sell</MenuItem>
-              </DropdownButton>
-              </span>
-            </div>
+  render: function() {
+    return (
+      <div className="panel panel-default">
+        <div className="panel-heading">
+          <div className="visible-md visible-lg">
+            <h3 className="panel-title">New Trade</h3>
           </div>
-          <div className="panel-body">
-              <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
-              <div className="visible-xs visible-sm">
-                <div>
-                  <div className="container-fluid">
-                    <SplitTradeForm type={this.state.type} market={this.props.market} trades={this.props.trades} user={this.props.user} />
-                  </div>
-                </div>
-              </div>
-              <div className="visible-md visible-lg">
-                <div className="col-md-6">
-                  <div className="container-fluid">
-                    <h4 className="text-center">Buy</h4>
-                    <SplitTradeForm type={1} market={this.props.market} trades={this.props.trades} user={this.props.user} />
-                  </div>
-                </div>
-                <div className="col-md-6">
-                  <h4 className="text-center">Sell</h4>
-                  <div className="container-fluid">
-                    <SplitTradeForm type={2} market={this.props.market} trades={this.props.trades} user={this.props.user} />
-                  </div>
-                </div>
-              </div>
+          <div className="visible-xs visible-sm text-center">
+            <div className="pull-left h4">New Trade</div>
+            <span className="panel-title">
+            <label className="sr-only" forHtml="type">Buy or sell</label>
+            <DropdownButton bsStyle="primary" bsSize="medium" ref="type" onSelect={this.handleType} key={this.state.type} title={this.state.typename}>
+              <MenuItem key={1} eventKey={1}>Buy</MenuItem>
+              <MenuItem key={2} eventKey={2}>Sell</MenuItem>
+            </DropdownButton>
+            </span>
           </div>
         </div>
-      );
-    },
+        <div className="panel-body">
+            <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
+            <div className="visible-xs visible-sm">
+              <div>
+                <div className="container-fluid">
+                  <SplitTradeForm type={this.state.type} market={this.props.market} trades={this.props.trades} user={this.props.user} />
+                </div>
+              </div>
+            </div>
+            <div className="visible-md visible-lg">
+              <div className="col-md-6">
+                <div className="container-fluid">
+                  <h4 className="text-center">Buy</h4>
+                  <SplitTradeForm type={1} market={this.props.market} trades={this.props.trades} user={this.props.user} />
+                </div>
+              </div>
+              <div className="col-md-6">
+                <h4 className="text-center">Sell</h4>
+                <div className="container-fluid">
+                  <SplitTradeForm type={2} market={this.props.market} trades={this.props.trades} user={this.props.user} />
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    );
+  },
 
-    handleType: function(key) {
-      this.setState({
-        type: key,
-        typename: this.refs.type.props.children[key - 1].props.children
-      });
-      this.getFlux().actions.trade.switchType(key);
-    }
+  handleType: function(key) {
+    this.setState({
+      type: key,
+      typename: this.refs.type.props.children[key - 1].props.children
+    });
+    this.getFlux().actions.trade.switchType(key);
+  }
 });
 
 module.exports = TradeForm;
