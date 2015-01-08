@@ -3,6 +3,8 @@ var fixtures = require("../js/fixtures");
 
 var bigRat = require('big-rational');
 
+require('es6-promise').polyfill();
+
 var web3 = require('ethereum.js');
 window.web3 = web3;
 

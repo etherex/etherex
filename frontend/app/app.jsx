@@ -90,5 +90,5 @@ var routes = (
 );
 
 Router.run(routes, function (Handler) {
-  React.render(<Handler flux={flux}/>, document.getElementById('app'));
+  React.render(<Handler flux={flux}/>, document.body);
 });
