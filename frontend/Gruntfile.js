@@ -75,7 +75,7 @@ module.exports = function(grunt) {
     watch: {
       app: {
         files: ["app/**/*"],
-        tasks: ["jshint", "jest", "webpack:build-dev"],
+        tasks: ["jshint", "webpack:build-dev"],
         options: {
           spawn: false,
         }
@@ -99,7 +99,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-gh-pages');
 
   grunt.registerTask("default", ["webpack-dev-server:start"]);
-  grunt.registerTask("dev", ["jshint", "jest", "webpack:build-dev", "watch:app"]);
+  grunt.registerTask("dev", ["jshint", "webpack:build-dev", "watch:app"]);
   grunt.registerTask("build", ["jshint", "webpack:build"]);
   grunt.registerTask("publish", ["clean", "build", "gh-pages"]);
 };
