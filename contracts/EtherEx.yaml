@@ -18,12 +18,13 @@
     EtherEx:
       contract: etherex.se
       gas: 100000
+      wait: True
       # endowment: 1000000000000000000
-      # wait: True
 -
   deploy:
     OwnNameReg:
       contract: namereg.se
+      wait: True
 -
   deploy:
     ETX:
@@ -36,6 +37,7 @@
   deploy:
     FAB:
       contract: etx.se
+      wait: True
 # -
 #   deploy:
 #     Update:
@@ -77,6 +79,7 @@
       data:
         - $FAB
         - FAB
+      wait: True
 
 # Register subcurrencies on the exchange
 -
@@ -112,6 +115,7 @@
         - 3
         - 10000
         - 1000000000000000000
+      wait: True
 
 # Set exchange address and market ID in subcurrency contracts
 -
@@ -138,6 +142,7 @@
       data:
         - $EtherEx
         - 3
+      wait: True
 
 # -
 #   transact:
@@ -171,6 +176,7 @@
       funid: 3
       data:
         - $zg
+      wait: True
 
 # Fill up
 -
@@ -244,6 +250,7 @@
       data:
         - $fabrezio
         - 50000000000
+      wait: True
 
 
 # Deposit into exchange
@@ -267,6 +274,7 @@
       data:
         - $EtherEx
         - 10000000000
+      wait: True
 
 # ETX test trades
 -
@@ -376,6 +384,7 @@
         - 21000000
         - 1
       value: 10500000000000000000
+      wait: True
 
 
 
@@ -459,6 +468,7 @@
         - 21
         - 2
       value: 10500000000000000000
+      wait: True
 
 
 # FAB test trades
@@ -541,6 +551,7 @@
         - 21
         - 3
       value: 10500000000000000000
+      wait: True
 
 
 # # Contract calls with return values
