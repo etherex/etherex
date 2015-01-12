@@ -47,16 +47,18 @@ var EtherExApp = React.createClass({
             </div> :
         <div className="navbar">
           <div className="row">
-            <Balance user={this.state.user} />
-            {(this.state.market.error) ?
-                <div className="col-md-6">
-                  <div className="alert alert-danger" role="alert">
-                    <h4>Error!</h4>
-                    {this.state.market.error}
-                  </div>
+            <div className="col-md-6">
+              <Balance user={this.state.user} />
+            </div>
+            <div className="col-md-6">
+              {(this.state.market.error) ?
+                <div className="alert alert-danger" role="alert">
+                  <h4>Error!</h4>
+                  {this.state.market.error}
                 </div> :
                 <BalanceSub user={this.state.user} market={this.state.market} />
-            }
+              }
+            </div>
           </div>
         </div>}
         {(!this.state.market.error && !this.state.user.error) &&

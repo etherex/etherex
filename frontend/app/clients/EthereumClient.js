@@ -69,7 +69,7 @@ var EthereumClient = function() {
                                 // console.log("Market from ABI:", market);
 
                                 var id = _.parseInt(market[0]);
-                                var name = web3.toAscii(market[1]);
+                                var name = web3.toAscii(market[1]).replace(/[^a-zA-Z0-9]/g,'');
                                 var address = market[2].replace("0x000000000000000000000000", "0x");
                                 var decimals = _.parseInt(market[3]);
                                 var precision = _.parseInt(market[4]);
