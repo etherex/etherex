@@ -78,7 +78,11 @@ var fixtures = {
             "name": "trade",
             "inputs": [
                 {
-                    "name": "trade_ids",
+                    "name": "trade_id",
+                    "type": "uint256"
+                },
+                {
+                    "name": "amount",
                     "type": "uint256"
                 }
             ],

@@ -639,7 +639,7 @@ var EthereumClient = function() {
         try {
             web3.eth.gasPrice.then(function (gasPrice) {
                 // web3.eth.transact({
-                contract.trade(trade.id).transact({
+                contract.trade(trade.id, amounts.amount).transact({
                     from: user.addresses[0],
                     value: trade.type == "sells" ? amounts.total : "0",
                     to: fixtures.addresses.etherex,

@@ -122,7 +122,7 @@ Function IDs:
 
 ### Trade
 ```
-<operation> <trade ID>
+<operation> <trade ID> <max amount>
 ```
 
 ### Deposit (subcurrency contracts only, [see below](#subcurrency-api))

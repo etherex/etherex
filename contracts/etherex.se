@@ -171,7 +171,7 @@ def sell(amount, price, market_id):
 #
 # Trade
 #
-def trade(trade_id):
+def trade(trade_id, max_amount):
     # Try to fulfill each trade passed
     # size = len(trade_ids)
     # t = 0
@@ -204,7 +204,7 @@ def trade(trade_id):
         if balance > 0:
 
             # Determine fill amount
-            fill = min(balance, amount)
+            fill = min(amount, min(balance, max_amount))
 
             # Calculate value
             value = ((fill * price) / (precision * 10 ^ decimals)) * 10 ^ 18
