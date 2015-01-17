@@ -73,6 +73,14 @@ var MarketActions = function(client) {
 
             // Update trades
             this.flux.actions.trade.updateTrades();
+
+            // Update price changes
+            var market = this.flux.store("MarketStore").getState().market;
+            _client.loadPrices(market, function(prices) {
+                this.dispatch(constants.market.LOAD_PRICES, prices);
+            }.bind(this), function(error) {
+                this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
+            }.bind(this));
         }.bind(this), function(error) {
             this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
         }.bind(this));
