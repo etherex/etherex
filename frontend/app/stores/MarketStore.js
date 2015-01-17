@@ -20,6 +20,7 @@ var MarketStore = Fluxxor.createStore({
             constants.market.CHANGE_MARKET, this.onChangeMarket,
             constants.market.UPDATE_MARKET, this.onUpdateMarket,
             constants.market.UPDATE_MARKET_BALANCE, this.onUpdateMarketBalance,
+            constants.market.LOAD_PRICES, this.onLoadPrices,
             constants.market.LOAD_TRANSACTIONS, this.onLoadTransactions
         );
 
@@ -80,42 +81,45 @@ var MarketStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onLoadTransactions: function(payload) {
-        var market = this.market;
-        this.market.txs = payload.latest;
-        if (ethBrowser && payload.prices.length) {
+    onLoadPrices: function(payload) {
+        // console.log("PRICES", payload);
+        if (payload.length) {
             this.market.data = {
-                // sum = _.reduce(_.pluck(payload, 'amount'), function(sum, num) { return parseFloat(sum) + parseFloat(num) });
-                price: _.map(payload.prices.reverse(), function(tx, i) {
-                    // var sum = _.reduce(_.pluck(payload, 'input'), function(sum, num) { return parseFloat(sum) + parseFloat(eth.toDecimal("0x" + tx.input.substr(130,64))) });
-                    // console.log(price);
+                price: _.map(payload.reverse(), function(log, i) {
                     var price = 0;
+                    if (log.price)
+                        price = log.price;
 
-                    if (tx.input)
-                        price = eth.toDecimal("0x" + tx.input.substr(66, 64)) / Math.pow(10, market.precision.length - 1);
-
-                    if (tx.timestamp && typeof(price) != 'undefined')
+                    if (log.timestamp && typeof(price) != 'undefined')
                         return {
-                            x: tx.timestamp,
+                            x: log.timestamp,
                             y: price
                         };
                 }),
-                volume: _.map(payload.latest.reverse(), function(tx, i) {
-                    var value = parseFloat(eth.toDecimal("0x" + tx.input.substr(130,64)));
-                    if (tx.timestamp && typeof(value) != 'undefined')
+                volume: _.map(payload.reverse(), function(log, i) {
+                    var volume = 0;
+                    if (log.amount)
+                        volume = log.amount;
+
+                    if (log.timestamp && typeof(volume) != 'undefined')
                         return {
-                            x: tx.timestamp,
-                            y: value
+                            x: log.timestamp,
+                            y: volume
                         };
                 })
             };
-            // for (var i = 0; i < this.market.data.price.length; i++)
-            //     console.log("Price: " + this.market.data.price[i].y + ", block: " + this.market.data.price[i].x + ", loop: " + i);
         }
-        else if (!ethBrowser)
-            this.market.data = {};
         else
-            this.market.data = {price: [{x: 0, y: 0}], volume: [{x: 0, y: 0}]};
+            this.market.data = {volume: [], price: []};
+
+        // console.log("MARKET DATA", this.market.data);
+
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onLoadTransactions: function(payload) {
+        this.market.txs = payload;
+
         this.emit(constants.CHANGE_EVENT);
     },
 

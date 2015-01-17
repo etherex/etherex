@@ -82,7 +82,7 @@ tr.disabled td {
   /*background: rgba(255,255,255,0.25);*/
   /*display: inline-block;*/
   position: absolute;
-  right: 0;
+  left: 0;
   bottom: 35%;
 }
 .rickshaw_graph.y_axis {

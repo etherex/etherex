@@ -240,23 +240,23 @@ def trade(trade_id):
                 return(13)
 
             # Calculate value of trade
-            value = ((amount * price) / (precision * 10 ^ decimals)) * 10 ^ 18
+            tradevalue = ((amount * price) / (precision * 10 ^ decimals)) * 10 ^ 18
 
             # Determine fill value
-            fillvalue = min(msg.value, value)
+            value = min(msg.value, tradevalue)
 
             # Calculate fill amount
-            if fillvalue < value:
-                fill = ((fillvalue * (precision * 10 ^ decimals)) / 10 ^ 18) / price
+            if value < tradevalue:
+                fill = ((value * (precision * 10 ^ decimals)) / 10 ^ 18) / price
             else:
                 fill = amount
 
             # Refund excess value
-            if msg.value > fillvalue:
-                send(msg.sender, msg.value - fillvalue)
+            if msg.value > value:
+                send(msg.sender, msg.value - value)
 
             # Update trade amount or remove
-            if fillvalue < value:
+            if value < tradevalue:
                 self.trades[trade_id].amount -= fill
             else:
                 remove_trade(trade_id)
@@ -266,13 +266,16 @@ def trade(trade_id):
             self.balances[msg.sender][market_id].available += fill
 
             # Transfer ETH
-            send(owner, fillvalue)
+            send(owner, value)
 
         else:
             return(12)
 
     # Update market last price
     self.markets[market_id].last_price = price
+
+    # Log
+    log(contract, type, price, fill, data=[block.timestamp])
 
     #     # Next trade
     #     t = t + 1

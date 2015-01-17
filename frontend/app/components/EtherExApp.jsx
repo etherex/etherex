@@ -30,12 +30,15 @@ var EtherExApp = React.createClass({
   },
 
   componentDidMount: function() {
+    if (ethBrowser)
+      this.refs.container.getDOMNode().className = "container-fluid";
+
     this.getFlux().actions.user.loadAddresses();
   },
 
   render: function() {
     return (
-      <div className="container">
+      <div className="container" ref="container">
         <NavBar user={this.state.user} />
         <SubNavBar />
         {(this.state.user.error) ?

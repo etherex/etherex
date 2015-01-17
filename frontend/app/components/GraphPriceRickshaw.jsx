@@ -43,21 +43,15 @@ var Chart = React.createClass({
     },
 
     componentDidMount: function() {
-        // var seriesData = [ [], [] ];
-        // var random = new Rickshaw.Fixtures.RandomData(50);
-
-        // if (!ethBrowser) {
-        //     for (var i = 0; i < 75; i++) {
-        //       random.addData(seriesData);
-        //     }
-        //     this.props.data.price = seriesData.shift().map(function(d) { return { x: d.x, y: d.y} });
-        //     this.props.data.volume = seriesData.shift().map(function(d) { return { x: d.x, y: d.y / 4 } });
-        // }
-
-        if (!this.props.data.price || !this.props.data.volume || this.props.market.error)
+        if (this.props.market.error)
             return;
 
-        chart = this.refs.chart.getDOMNode();
+        if (!this.props.data.price || !this.props.data.volume) {
+            this.props.data.price = [{x: 0, y: 0}];
+            this.props.data.volume = [{x: 0, y: 0}];
+        }
+
+        var chart = this.refs.chart.getDOMNode();
 
         // TODO - proper scaling
         var priceScale = d3.scale.linear().domain([0, 10]).nice();
@@ -89,8 +83,8 @@ var Chart = React.createClass({
                     renderer: 'bar',
                     scale: volumeScale,
                     stack: false,
-                    // fill: true,
-                    // unstack: true,
+                    fill: true,
+                    unstack: true
                 },
                 {
                     name: 'Price',
@@ -99,8 +93,8 @@ var Chart = React.createClass({
                     renderer: 'line',
                     scale: priceScale,
                     stack: false,
-                    // fill: true,
-                    // unstack: true
+                    fill: true,
+                    unstack: true
                 },
             ]
         });
@@ -156,34 +150,30 @@ var Chart = React.createClass({
             legend: legend
         });
 
-        graph.render();
-
         this.setState({
             graph: graph,
             priceScale: priceScale,
             volumeScale: volumeScale
         });
+
+        graph.render();
     },
 
     shouldComponentUpdate: function(props) {
-        if (this.state.graph && props.data.volume && props.data.price) {
-            var graph = this.state.graph;
-            graph.series[0].data = this.reducedVolumes(props.data.volume);
-            graph.series[1].data = props.data.price;
+        if (!this.state.graph)
+            return false;
 
-            graph.render();
+        if (!props.data.price || !props.data.volume) {
+            props.data.price = [{x: 0, y: 0}];
+            props.data.volume = [{x: 0, y: 0}];
         }
-        else if (this.state.graph && !props.data.length) {
-            var seriesData = [ [], [] ];
-            var random = new Rickshaw.Fixtures.RandomData(50);
-            var graph = this.state.graph;
-            for (var i = 0; i < 75; i++) {
-              random.addData(seriesData);
-            }
-            graph.series[0].data = seriesData.shift().map(function(d) { return { x: d.x, y: d.y} });
-            graph.series[1].data = seriesData.shift().map(function(d) { return { x: d.x, y: d.y / 4 } });
-            graph.render();
-        }
+
+        var graph = this.state.graph;
+        graph.series[0].data = this.reducedVolumes(props.data.volume);
+        graph.series[1].data = props.data.price;
+
+        graph.render();
+
         return false;
     },
 
@@ -220,10 +210,6 @@ var GraphPrice = React.createClass({
             <div>
                 <h4>{this.props.title}</h4>
                 <Chart data={this.props.market.market.data} market={this.props.market.market} />
-                {
-                // !ethBrowser &&
-                //    <div className="bg-warning panel-body">No eth.messages with JSON-RPC interface, feeding random data.</div>
-                }
             </div>
         );
     }

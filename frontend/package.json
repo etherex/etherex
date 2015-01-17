@@ -59,7 +59,7 @@
     "d3": "^3.5.3",
     "dc": "^2.0.0-alpha.5",
     "es6-promise": "*",
-    "ethereum.js": "git://github.com/ethereum/ethereum.js#1954b87",
+    "ethereum.js": "git://github.com/etherex/ethereum.js#serpent_abi",
     "file-loader": "^0.8.1",
     "fluxxor": "^1.5.1",
     "jquery": "^2.1.3",

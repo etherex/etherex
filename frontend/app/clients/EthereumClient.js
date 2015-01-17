@@ -15,7 +15,7 @@ else
 // web3.setProvider(new web3.providers.AutoProvider());
 // web3.setProvider(new web3.providers.WebSocketProvider('ws://localhost:40404/eth'));
 
-var contract = web3.contract(fixtures.addresses.etherex, fixtures.contract_desc);
+var contract = web3.eth.contract(fixtures.addresses.etherex, fixtures.contract_desc);
 // console.log("CONTRACT", contract);
 
 web3.padDecimal = function (string, chars) {
@@ -44,7 +44,7 @@ var EthereumClient = function() {
         loadPromise.then(function (accounts) {
             success(accounts);
         }, function (e) {
-            failure(e);
+            failure(String(e));
         });
     };
 
@@ -69,7 +69,7 @@ var EthereumClient = function() {
                                 // console.log("Market from ABI:", market);
 
                                 var id = _.parseInt(market[0]);
-                                var name = web3.toAscii(market[1]).replace(/[^a-zA-Z0-9]/g,'');
+                                var name = web3.toAscii(market[1]); // .replace(/[^a-zA-Z0-9]/g,'');
                                 var address = market[2].replace("0x000000000000000000000000", "0x");
                                 var decimals = _.parseInt(market[3]);
                                 var precision = _.parseInt(market[4]);
@@ -191,8 +191,8 @@ var EthereumClient = function() {
 
                                     // console.log("Loading trade " + id + " for market " + market.name);
 
-                                    var amount = bigRat(_.parseInt(trade[3])).divide(amountPrecision).valueOf();
-                                    var price = bigRat(_.parseInt(trade[4])).divide(precision).valueOf();
+                                    var amount = bigRat(trade[3]).divide(amountPrecision).valueOf();
+                                    var price = bigRat(trade[4]).divide(precision).valueOf();
 
                                     // Update progress
                                     progress({percent: (p + 1) / total * 100 });
@@ -238,8 +238,49 @@ var EthereumClient = function() {
         };
     };
 
+    this.loadPrices = function(market, success, failure) {
+        var prices = [];
+
+        // console.log("Loading prices...");
+
+        try {
+            web3.eth.logs({
+                max: 100,
+                // latest: -1,
+                address: fixtures.addresses.etherex,
+                topics: market.address,
+            }).then(function (pricelogs) {
+                // console.log("PRICE CHANGES: ", pricelogs);
+
+                var prices = [];
+                var amountPrecision = Math.pow(10, market.decimals);
+                var precision = market.precision;
+
+                for (var i = pricelogs.length - 1; i >= 0; i--) {
+                    var pricelog = {
+                        timestamp: _.parseInt(web3.toDecimal(pricelogs[i].data)),
+                        type: _.parseInt(web3.toDecimal(pricelogs[i].topics[1])),
+                        price: bigRat(web3.toDecimal(pricelogs[i].topics[2])).divide(precision).valueOf(),
+                        amount: bigRat(web3.toDecimal(pricelogs[i].topics[3])).divide(amountPrecision).valueOf(),
+                        // owner: pricelogs[i].topics[3].replace("0x000000000000000000000000", "0x")
+                    };
+                    prices.push(pricelog);
+                };
+
+                // console.log("PRICES", prices);
+
+                success(prices);
+            }, function(e) {
+                failure("Could not get prices: " + String(e));
+            });
+        }
+        catch (e) {
+            failure("Unable to load prices: " + String(e));
+        }
+    };
+
     this.loadTransactions = function(addresses, market, success, failure) {
-        var latest = []; // no eth.messages in eth.js...
+        var latest = [];
         var prices = [];
 
         console.log("Loading transactions...");
@@ -255,10 +296,8 @@ var EthereumClient = function() {
                 //     id: fixtures.addresses.etherex,
                 //     at: "0x" + slot // "0x69" // TODO get market price slot
                 // }
-            }).then(function (prices) {
-                console.log("PRICE CHANGES: ", prices.length);
-                if (prices.length)
-                    console.log("PRICE DATA: " + prices[0].input);
+            }).then(function (txs) {
+                console.log("TRANSACTIONS: ", txs);
 
                 var from = web3.eth.logs({max: 100, latest: -1, altered: addresses[0], from: fixtures.addresses.etherex});
                 // console.log(from.length);
@@ -314,11 +353,11 @@ var EthereumClient = function() {
                 balance = web3.toDecimal(hexbalance);
                 success(balance, false);
             }, function(e) {
-                failure(error + e);
+                failure(error + String(e));
             });
         }
         catch(e) {
-            failure(error + e);
+            failure(error + String(e));
         }
 
         // var confirmed = web3.toDecimal(web3.eth.balanceAt(address, -1));
@@ -373,13 +412,13 @@ var EthereumClient = function() {
 
                     success(market, available, trading, sub_balance);
                 }, function(e) {
-                    failure(error + e);
+                    failure(error + String(e));
                     return;
                 });
             });
         }
         catch(e) {
-            failure(error + e);
+            failure(error + String(e));
         }
 
         // var confirmed = web3.toDecimal(web3.eth.stateAt(market.address, address, -1));
@@ -408,7 +447,7 @@ var EthereumClient = function() {
     };
 
     this.sendSub = function(amount, recipient, market, success, failure) {
-        var subcontract = web3.contract(market.address, fixtures.sub_contract_desc);
+        var subcontract = web3.eth.contract(market.address, fixtures.sub_contract_desc);
 
         try {
             web3.eth.gasPrice.then(function (gasPrice) {
@@ -418,19 +457,19 @@ var EthereumClient = function() {
                 }).then(function (result) {
                     success(result);
                 }, function(e) {
-                    failure(e);
+                    failure(String(e));
                 });
             }, function (e) {
-                failure(e);
+                failure(String(e));
             });
         }
         catch(e) {
-            failure(e);
+            failure(String(e));
         }
     };
 
     this.depositSub = function(user, amount, market, success, failure) {
-        var subcontract = web3.contract(market.address, fixtures.sub_contract_desc);
+        var subcontract = web3.eth.contract(market.address, fixtures.sub_contract_desc);
 
         try {
             web3.eth.gasPrice.then(function (gasPrice) {
@@ -440,14 +479,14 @@ var EthereumClient = function() {
                 }).then(function (result) {
                     success(result);
                 }, function(e) {
-                    failure(e);
+                    failure(String(e));
                 });
             }, function (e) {
-                failure(e);
+                failure(String(e));
             });
         }
         catch(e) {
-            failure(e);
+            failure(String(e));
         }
     };
 
@@ -460,14 +499,14 @@ var EthereumClient = function() {
                 }).then(function (result) {
                     success();
                 }, function(e) {
-                    failure(e);
+                    failure(String(e));
                 });
             }, function (e) {
-                failure(e);
+                failure(String(e));
             });
         }
         catch(e) {
-            failure(e);
+            failure(String(e));
         }
     };
 
@@ -486,14 +525,14 @@ var EthereumClient = function() {
                 }).then(function (result) {
                     success();
                 }, function(e) {
-                    failure(e);
+                    failure(String(e));
                 });
             }, function (e) {
-                failure(e);
+                failure(String(e));
             });
         }
         catch(e) {
-            failure(e);
+            failure(String(e));
         }
     };
 
@@ -541,22 +580,21 @@ var EthereumClient = function() {
                 }).then(function (result) {
                     success();
                 }, function(e) {
-                    failure(e);
+                    failure(String(e));
                 });
             }, function (e) {
-                failure(e);
+                failure(String(e));
             });
         }
         catch(e) {
-            failure(e);
+            failure(String(e));
         }
     };
 
     this.fillTrades = function(user, trades, market, success, failure) {
         // Workaround for lack of array support
-        for (var i = trades.length - 1; i >= 0; i--) {
+        for (var i = 0; i < trades.length; i++)
             this.fillTrade(user, trades[i], market, success, failure);
-        }
 
         // var total = bigRat(0);
 
@@ -611,14 +649,14 @@ var EthereumClient = function() {
                 }).then(function (result) {
                     success();
                 }, function(e) {
-                    failure(e);
+                    failure(String(e));
                 });
             }, function (e) {
-                failure(e);
+                failure(String(e));
             });
         }
         catch(e) {
-            failure(e);
+            failure(String(e));
         }
     };
 
@@ -634,14 +672,14 @@ var EthereumClient = function() {
                 }).then(function (result) {
                     success();
                 }, function(e) {
-                    failure(e);
+                    failure(String(e));
                 });
             }, function (e) {
-                failure(e);
+                failure(String(e));
             });
         }
         catch(e) {
-            failure(e);
+            failure(String(e));
         }
     };
 

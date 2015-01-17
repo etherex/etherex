@@ -34,6 +34,13 @@ var MarketActions = function(client) {
             // Load trades
             this.flux.actions.trade.loadTrades();
 
+            // Load price changes
+            _client.loadPrices(markets[0], function(prices) {
+                this.dispatch(constants.market.LOAD_PRICES, prices);
+            }.bind(this), function(error) {
+                this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
+            }.bind(this));
+
             // Load ETX txs
             // _client.loadTransactions([markets[0].address, user.id], markets[0], function(txs) {
             //     this.dispatch(constants.market.LOAD_TRANSACTIONS, txs);
@@ -76,6 +83,13 @@ var MarketActions = function(client) {
 
         this.flux.actions.trade.switchMarket(market);
         this.flux.actions.user.updateBalanceSub();
+
+        // Load price changes
+        _client.loadPrices(market, function(prices) {
+            this.dispatch(constants.market.LOAD_PRICES, prices);
+        }.bind(this), function(error) {
+            this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
+        }.bind(this));
 
         // var user = this.flux.store("UserStore").getState().user;
         // _client.loadTransactions([market.address, user.id], market, function(txs) {
