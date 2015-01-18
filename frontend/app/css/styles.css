@@ -60,51 +60,171 @@ tr.disabled td {
 
 
 /* Chart */
-#chart {
-  height: 300px;
-}
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
 
-.rickshaw-container,
-.highcharts-container {
-  margin-bottom: 3em;
-  position: relative;
-}
+    text.symbol,
+    g.symbol {
+        fill: #BBBBBB;
+    }
 
-/*
-.rickshaw_graph {
-  display: inline-block;
-  margin: 3em 5% 1em;
-  height: 300px;
-  width: 90%;
-}
-*/
-.rickshaw-container .rickshaw_legend {
-  /*background: rgba(255,255,255,0.25);*/
-  /*display: inline-block;*/
-  position: absolute;
-  left: 0;
-  bottom: 35%;
-}
-.rickshaw_graph.y_axis {
-  position: absolute !important;
-  top: 0;
-}
-/*
-.rickshaw_graph svg {
-  margin: 0 auto;
-}
+    path {
+        fill: none;
+        stroke-width: 1;
+    }
 
-.rickshaw_slider {
-  margin: 0 auto 3em;
-  width: 90%;
-}
+    path.candle {
+        stroke: #000000;
+    }
 
-.rickshaw_slider svg {
-  left: 0;
-}
-*/
-.rickshaw_legend .line { color: #eee }
-.rickshaw_graph .detail .x_label { color: #333; }
+    path.candle.body {
+        stroke-width: 0;
+    }
+
+    path.candle.up {
+        fill: #005500;
+        stroke: #005500;
+    }
+
+    path.candle.down {
+        fill: #550000;
+        stroke: #550000;
+    }
+
+    .close.annotation {
+      opacity: 0.75;
+    }
+
+    .close.annotation.up path {
+        fill: #00AA00;
+    }
+
+    .close.annotation.down path {
+        fill: #550000;
+    }
+
+    path.volume {
+        fill: #DDDDDD;
+    }
+
+    .indicator-plot path.line {
+        fill: none;
+        stroke-width: 1;
+    }
+
+    .ma-0 path.line {
+        stroke: #1f77b4;
+    }
+
+    .ma-1 path.line {
+        stroke: #aec7e8;
+    }
+
+    .ma-2 path.line {
+        stroke: #ff7f0e;
+    }
+
+    path.macd {
+        stroke: #0000AA;
+    }
+
+    path.signal {
+        stroke: #FF9999;
+    }
+
+    path.zero {
+        stroke: #BBBBBB;
+        stroke-dasharray: 0;
+        stroke-opacity: 0.5;
+    }
+
+    path.difference {
+        fill: #BBBBBB;
+        opacity: 0.5;
+    }
+
+    path.rsi {
+        stroke: #000000;
+    }
+
+    path.overbought, path.oversold {
+        stroke: #FF9999;
+        stroke-dasharray: 5, 5;
+    }
+
+    path.middle, path.zero {
+        stroke: #BBBBBB;
+        stroke-dasharray: 5, 5;
+    }
+
+    .analysis path, .analysis circle {
+        stroke: blue;
+        stroke-width: 0.8;
+    }
+
+    .trendline circle {
+        stroke-width: 0;
+        display: none;
+    }
+
+    .mouseover .trendline path {
+        stroke-width: 1.2;
+    }
+
+    .mouseover .trendline circle {
+        stroke-width: 1;
+        display: inline;
+    }
+
+    .dragging .trendline path, .dragging .trendline circle {
+        stroke: darkblue;
+    }
+
+    .interaction path, .interaction circle {
+        pointer-events: all;
+    }
+
+    .interaction .body {
+        cursor: move;
+    }
+
+    .trendlines .interaction .start, .trendlines .interaction .end {
+        cursor: nwse-resize;
+    }
+
+    .supstance path {
+        stroke-dasharray: 2, 2;
+    }
+
+    .supstances .interaction path {
+        pointer-events: all;
+        cursor: ns-resize;
+    }
+
+    .mouseover .supstance path {
+        stroke-width: 1.5;
+    }
+
+    .dragging .supstance path {
+        stroke: darkblue;
+    }
+
+    .crosshair {
+        cursor: crosshair;
+    }
+
+    .crosshair path.wire {
+        stroke: #DDDDDD;
+        stroke-dasharray: 1, 1;
+    }
+
+    .crosshair .axisannotation path {
+        fill: #DDDDDD;
+    }
 
 
 /* Icons */

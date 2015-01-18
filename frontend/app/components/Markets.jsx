@@ -5,7 +5,7 @@ var Fluxxor = require("fluxxor");
 var FluxMixin = Fluxxor.FluxMixin(React);
 
 // var MarketFilter = require("./MarketFilter"); TODO
-var GraphPrice = require('./GraphPriceRickshaw');
+var GraphPrice = require('./GraphPriceTechan');
 var MarketList = require("./MarketList");
 
 var Markets = React.createClass({

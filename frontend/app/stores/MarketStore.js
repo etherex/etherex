@@ -84,33 +84,34 @@ var MarketStore = Fluxxor.createStore({
     onLoadPrices: function(payload) {
         // console.log("PRICES", payload);
         if (payload.length) {
-            this.market.data = {
-                price: _.map(payload.reverse(), function(log, i) {
-                    var price = 0;
-                    if (log.price)
-                        price = log.price;
+            var previous = {};
+            this.market.data = _.map(_.groupBy(payload.reverse(), 'timestamp'), function(logs, i) {
+                var prices = _.pluck(logs, 'price');
+                var volumes = _.pluck(logs, 'amount');
+                var high = _.max(prices);
+                var low = _.min(prices);
+                var volume = _.reduce(volumes, function(sum, volume) {
+                    return sum + volume;
+                });
+                // console.log(logs, prices, volumes, high, low, volume);
 
-                    if (log.timestamp && typeof(price) != 'undefined')
-                        return {
-                            x: log.timestamp,
-                            y: price
-                        };
-                }),
-                volume: _.map(payload.reverse(), function(log, i) {
-                    var volume = 0;
-                    if (log.amount)
-                        volume = log.amount;
+                // hack together open/close...
+                var open = previous ? (high > previous.High ? previous.Low : previous.High) : low;
+                var close = previous ? (low < previous.Low ? low : high) : high;
 
-                    if (log.timestamp && typeof(volume) != 'undefined')
-                        return {
-                            x: log.timestamp,
-                            y: volume
-                        };
-                })
-            };
+                previous = {
+                    Date: new Date(logs[0].timestamp * 1000),
+                    Open: open,
+                    High: high,
+                    Low: low,
+                    Close: close,
+                    Volume: volume
+                };
+                return previous;
+            });
         }
         else
-            this.market.data = {volume: [], price: []};
+            this.market.data = [{Date: new Date(), Open: 0, High: 0, Low: 0, Close: 0, Volume: 0}];
 
         // console.log("MARKET DATA", this.market.data);
 
