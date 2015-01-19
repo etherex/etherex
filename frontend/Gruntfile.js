@@ -106,6 +106,6 @@ module.exports = function(grunt) {
 
   grunt.registerTask("default", ["subgrunt", "webpack-dev-server:start"]);
   grunt.registerTask("dev", ["jshint", "subgrunt", "webpack:build-dev", "watch:app"]);
-  grunt.registerTask("build", ["jshint", "subgrunt", "webpack:build"]);
-  grunt.registerTask("publish", ["clean", "subgrunt", "build", "gh-pages"]);
+  grunt.registerTask("build", ["clean", "subgrunt", "jshint", "webpack:build"]);
+  grunt.registerTask("publish", ["build", "gh-pages"]);
 };
