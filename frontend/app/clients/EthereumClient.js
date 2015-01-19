@@ -350,7 +350,7 @@ var EthereumClient = function() {
                     success(0, false);
                     return;
                 }
-                balance = web3.toDecimal(hexbalance);
+                var balance = web3.toDecimal(hexbalance);
                 success(balance, false);
             }, function(e) {
                 failure(error + String(e));
