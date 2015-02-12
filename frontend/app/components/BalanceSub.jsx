@@ -20,7 +20,7 @@ var BalanceSub = React.createClass({
     return (
       <div className="container-fluid row">
         <div className="row col-lg-10 col-md-9 col-sm-10 col-xs-9">
-          <div className="btn-lg text-right" title={available + " available, " + trading + " in trades, " + wallet + " in your wallet"}>
+          <div className="btn-lg text-overflow text-right" title={available + " available, " + trading + " in trades, " + wallet + " in your wallet"}>
               {utils.format(available)} available / {utils.format(trading)} in trades / {utils.format(wallet)} in your wallet
           </div>
         </div>
