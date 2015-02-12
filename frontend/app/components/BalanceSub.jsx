@@ -13,11 +13,15 @@ var BalanceSub = React.createClass({
   mixins: [FluxMixin],
 
   render: function() {
+    var available = this.props.user.user.balance_sub_available;
+    var trading = this.props.user.user.balance_sub_trading;
+    var wallet = this.props.user.user.balance_sub;
+
     return (
       <div className="container-fluid row">
         <div className="row col-lg-10 col-md-9 col-sm-10 col-xs-9">
-          <div className="btn-lg text-overflow text-right" title={this.props.user.user.balance_sub_available + " available, " + this.props.user.user.balance_sub}>
-              {this.props.user.user.balance_sub_available ? utils.format(this.props.user.user.balance_sub_available) : 0} available  /  {this.props.user.user.balance_sub_trading ? utils.format(this.props.user.user.balance_sub_trading) : "0"} in trades / {this.props.user.user.balance_sub ? utils.format(this.props.user.user.balance_sub) : "0"}&nbsp;&nbsp;
+          <div className="btn-lg text-overflow text-right" title={available + " available, " + trading + " in trades, " + wallet + " in your wallet"}>
+              {utils.format(available)} available / {utils.format(trading)} in trades / {utils.format(wallet)} in your wallet
           </div>
         </div>
         <div className="col-lg-2 col-md-3 col-sm-2 col-xs-3">

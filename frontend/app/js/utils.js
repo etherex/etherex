@@ -69,7 +69,7 @@ var utils = {
   },
 
   format: function(n) {
-    return unit.format(n, ' ');
+    return n ? unit.format(n, ' ') : '0';
   },
 
   numeral: function(n, p) {
