@@ -10,305 +10,250 @@ var fixtures = {
         nameregs: ["0xb46312830127306cd3de3b84dbdb51899613719d", "0xda7ce79725418f4f6e13bf5f520c89cec5f6a974"],
         etherex: "0x77045e71a7a2c50903d88e564cd72fab11e82051"
     },
-    trade_fields: 7,
-    market_fields: 9,
+    trade_fields: 8,
+    market_fields: 11,
     contract_desc: [
         {
             "name": "price",
+            "type": "function",
             "inputs": [
                 {
                     "name": "id",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ],
             "outputs": [
                 {
                     "name": "price",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ]
         },
         {
             "name": "buy",
+            "type": "function",
             "inputs": [
                 {
                     "name": "amount",
-                    "type": "uint256"
+                    "type": "int256"
                 },
                 {
                     "name": "price",
-                    "type": "uint256"
+                    "type": "int256"
                 },
                 {
                     "name": "market_id",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ],
             "outputs": [
                 {
                     "name": "result",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ]
         },
         {
             "name": "sell",
+            "type": "function",
             "inputs": [
                 {
                     "name": "amount",
-                    "type": "uint256"
+                    "type": "int256"
                 },
                 {
                     "name": "price",
-                    "type": "uint256"
+                    "type": "int256"
                 },
                 {
                     "name": "market_id",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ],
             "outputs": [
                 {
                     "name": "result",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ]
         },
         {
             "name": "trade",
+            "type": "function",
             "inputs": [
                 {
-                    "name": "trade_id",
-                    "type": "uint256"
+                    "name": "max_amount",
+                    "type": "int256"
                 },
                 {
-                    "name": "amount",
-                    "type": "uint256"
+                    "name": "trade_ids",
+                    "type": "int256[]"
                 }
             ],
             "outputs": [
                 {
                     "name": "result",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ]
         },
         {
             "name": "deposit",
+            "type": "function",
             "inputs": [
-                {
-                    "name": "serpentbug",
-                    "type": "uint256"
-                },
                 {
                     "name": "address",
                     "type": "hash256"
                 },
                 {
                     "name": "amount",
-                    "type": "uint256"
+                    "type": "int256"
                 },
                 {
                     "name": "market_id",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ],
             "outputs": [
                 {
                     "name": "result",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ]
         },
         {
             "name": "withdraw",
+            "type": "function",
             "inputs": [
                 {
                     "name": "amount",
-                    "type": "uint256"
+                    "type": "int256"
                 },
                 {
                     "name": "market_id",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ],
             "outputs": [
                 {
                     "name": "result",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ]
         },
         {
             "name": "cancel",
+            "type": "function",
             "inputs": [
                 {
                     "name": "id",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ],
             "outputs": [
                 {
                     "name": "result",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ]
         },
         {
             "name": "add_market",
+            "type": "function",
             "inputs": [
                 {
                     "name": "name",
-                    "type": "uint256"
+                    "type": "int256"
                 },
                 {
                     "name": "contract",
-                    "type": "uint256"
+                    "type": "int256"
                 },
                 {
                     "name": "decimals",
-                    "type": "uint256"
+                    "type": "int256"
                 },
                 {
                     "name": "precision",
-                    "type": "uint256"
+                    "type": "int256"
                 },
                 {
                     "name": "minimum",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ],
             "outputs": [
                 {
                     "name": "result",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ]
         },
         {
             "name": "get_market",
+            "type": "function",
             "inputs": [
                 {
                     "name": "id",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ],
             "outputs": [
                 {
-                    "name": "id",
-                    "type": "uint256"
-                },
-                {
-                    "name": "name",
-                    "type": "hash256"
-                },
-                {
-                    "name": "contract",
-                    "type": "hash256"
-                },
-                {
-                    "name": "decimals",
-                    "type": "uint256"
-                },
-                {
-                    "name": "precision",
-                    "type": "uint256"
-                },
-                {
-                    "name": "minimum",
-                    "type": "uint256"
-                },
-                {
-                    "name": "last_price",
-                    "type": "uint256"
-                },
-                {
-                    "name": "owner",
-                    "type": "hash256"
-                },
-                {
-                    "name": "block",
-                    "type": "uint256"
-                },
-                {
-                    "name": "total_trades",
-                    "type": "uint256"
+                    "name": "out",
+                    "type": "uint256[]"
                 }
             ]
         },
         {
             "name": "get_trade_ids",
+            "type": "function",
             "inputs": [
                 {
                     "name": "market_id",
-                    "type": "uint256"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "get_trade",
-            "inputs": [
-                {
-                    "name": "id",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ],
             "outputs": [
                 {
+                    "name": "trade_id",
+                    "type": "hash256[]"
+                }
+            ]
+        },
+        {
+            "name": "get_trade",
+            "type": "function",
+            "inputs": [
+                {
                     "name": "id",
-                    "type": "hash256"
-                },
+                    "type": "int256"
+                }
+            ],
+            "outputs": [
                 {
-                    "name": "type",
-                    "type": "uint256"
-                },
-                {
-                    "name": "market",
-                    "type": "uint256"
-                },
-                {
-                    "name": "amount",
-                    "type": "uint256"
-                },
-                {
-                    "name": "price",
-                    "type": "uint256"
-                },
-                {
-                    "name": "owner",
-                    "type": "hash256"
-                },
-                {
-                    "name": "block",
-                    "type": "uint256"
-                },
-                {
-                    "name": "ref",
-                    "type": "hash256"
+                    "name": "out",
+                    "type": "uint256[]"
                 }
             ]
         },
         {
             "name": "get_sub_balance",
+            "type": "function",
             "inputs": [
                 {
                     "name": "address",
-                    "type": "hash256"
+                    "type": "int256"
                 },
                 {
                     "name": "market_id",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ],
             "outputs": [
                 {
-                    "name": "available",
-                    "type": "uint256"
-                },
-                {
-                    "name": "trading",
-                    "type": "uint256"
+                    "name": "out",
+                    "type": "uint256[]"
                 }
             ]
         }
@@ -316,20 +261,21 @@ var fixtures = {
     sub_contract_desc: [
         {
             "name": "send",
+            "type": "function",
             "inputs": [
                 {
                     "name": "recipient",
-                    "type": "uint256"
+                    "type": "int256"
                 },
                 {
                     "name": "amount",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ],
             "outputs": [
                 {
                     "name": "result",
-                    "type": "uint256"
+                    "type": "int256"
                 }
             ]
         }

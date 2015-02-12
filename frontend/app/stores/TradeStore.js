@@ -166,17 +166,14 @@ var TradeStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onHighlightFilling: function(payload) { // type, price, amount, total, market, user
-        // console.log(payload.type, arguments.callee.caller.toString());
+    onHighlightFilling: function(payload) {
         var trades = (payload.type == 1) ? this.trades.tradeSells : this.trades.tradeBuys;
         var siblings = (payload.type == 1) ? this.trades.tradeBuys : this.trades.tradeSells;
         var total_amount = 0;
         var trades_total = 0;
-        var filling = []; //this.filling;
+        var filling = [];
         var amountLeft = payload.amount;
         var available = payload.total;
-
-        // console.log(filling);
 
         // Reset same type trades
         if (siblings)
@@ -185,19 +182,8 @@ var TradeStore = Fluxxor.createStore({
                     _.remove(this.filling, {'id': siblings[i].id})
                     if (siblings[i].status == "filling")
                         siblings[i].status = "mined";
-                    // Add back to available and amountLeft
-                    // amountLeft += siblings[i].amount;
-                    // available += siblings[i].amount * siblings[i].price;
                 }
             }
-
-        // Remove currently filling amounts and totals
-        // for (var i = filling.length - 1; i >= 0; i--) {
-        //     amountLeft -= filling[i].amount;
-        //     available -= filling[i].amount * filling[i].price;
-        // };
-
-        // console.log("===");
 
         if (trades)
             for (var i = 0; i <= trades.length - 1; i++) {
@@ -236,7 +222,7 @@ var TradeStore = Fluxxor.createStore({
                     // console.log("Unfilling, available: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
                 }
 
-                // Highlight trades that would get filled, or partially (TODO)
+                // Highlight trades that would get filled, or partially
                 if (((payload.type == 1 && payload.price >= trades[i].price) ||
                      (payload.type == 2 && payload.price <= trades[i].price)) &&
                       payload.price > 0 &&
@@ -247,7 +233,7 @@ var TradeStore = Fluxxor.createStore({
                       trades[i].status != "pending" &&
                       trades[i].status != "new") {
 
-                    if (amountLeft < trades[i].amount || available < this_total) {
+                    if (amountLeft < trades[i].amount) {
                         if (!_.find(filling, {'id': trades[i].id})) {
                             var partialtrade = {
                                 id: trades[i].id,
@@ -318,7 +304,6 @@ var TradeStore = Fluxxor.createStore({
         this.filling = filling;
         this.amountLeft = amountLeft;
         this.available = available;
-        // console.log(this);
 
         this.emit(constants.CHANGE_EVENT);
     },
@@ -329,10 +314,8 @@ var TradeStore = Fluxxor.createStore({
         var market = this.flux.store("MarketStore").getState().markets[payload.market.id - 1];
         var decimals = market.decimals;
         var precision = String(market.precision).length - 1;
-        var amount = (payload.type == 2 || !payload.fills || payload.fills <= 1) ?
-            payload.amount.toFixed(decimals) :
-            (parseFloat(payload.amount) + 1 / Math.pow(10, decimals)).toFixed(decimals)
-        this.amount = amount;
+        var amount = payload.amount.toFixed(decimals);
+        this.amount = parseFloat(amount);
         this.price = payload.price;
         this.total = (amount * payload.price).toFixed(precision) || payload.total;
         this.newAmount = true;

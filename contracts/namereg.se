@@ -5,5 +5,13 @@ def register(key, value):
         return(1)
     return(0)
 
-def get_nameoraddress(key):
+def unregister(key):
+    if key == msg.sender:
+        value = self.storage[key]
+        self.storage[key] = 0
+        self.storage[value] = 0
+        return(1)
+    return(0)
+
+def get(key):
     return(self.storage[key])

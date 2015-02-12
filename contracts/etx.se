@@ -2,7 +2,7 @@ data owner
 data exchange
 data market_id
 
-extern exchange: [price, buy, sell, trade, deposit, withdraw]
+extern exchange: [add_market:iiiii:i, buy:iii:i, cancel:i:i, deposit:iii:i, get_market:i:a, get_sub_balance:ii:a, get_trade:i:a, get_trade_ids:i:a, price:i:i, sell:iii:i, trade:ii:i, withdraw:ii:i]
 
 def init():
     self.owner = msg.sender
@@ -21,7 +21,7 @@ def send(recipient, amount):
 
         # Notify exchange of deposit
         if recipient == self.exchange:
-            ret = self.exchange.deposit(msg.sender, amount, self.market_id, datasz=3, as=exchange)
+            ret = self.exchange.deposit(msg.sender, amount, self.market_id, datasz=3)
             # Exchange returns our new balance as confirmation
             if ret >= amount:
                 return(1)

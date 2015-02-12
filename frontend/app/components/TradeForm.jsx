@@ -145,8 +145,9 @@ var SplitTradeForm = React.createClass({
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
         <input type="hidden" ref="market" value={this.props.market.market.id} />
         <div className="form-group">
+          <label className="sr-only" forHtml="amount">Amount</label>
           <div className="input-group">
-            <label className="sr-only" forHtml="amount">Amount</label>
+            <div className="input-group-addon">Amount</div>
             <input type="number" min={this.state.amountPrecision} step={this.state.amountPrecision} className="form-control medium" placeholder={this.state.amountPrecision} ref="amount" onChange={this.handleChange} value={this.state.amount} />
             <div className="input-group-addon">{this.props.market.market.name}</div>
           </div>
@@ -154,7 +155,7 @@ var SplitTradeForm = React.createClass({
         <div className="form-group">
           <label className="sr-only" forHtml="price">Price</label>
           <div className="input-group">
-            <div className="input-group-addon">@</div>
+            <div className="input-group-addon">Price</div>
             <input type="number" min={this.state.precision} step={this.state.precision} className="form-control medium" placeholder={this.state.precision} ref="price" onChange={this.handleChange} value={this.state.price} />
             <div className="input-group-addon">
               {this.props.market.market.name}/ETH
@@ -163,7 +164,7 @@ var SplitTradeForm = React.createClass({
         </div>
         <div className="form-group">
           <div className="input-group">
-            <div className="input-group-addon">{"="}</div>
+            <div className="input-group-addon">Total</div>
             <input type="number" min={this.state.minimum} step={this.state.precision} className="form-control medium" placeholder={this.state.minimum} ref="total" onChange={this.handleChangeTotal} value={this.state.total} />
             <div className="input-group-addon">
               ETH
@@ -378,12 +379,16 @@ var TradeForm = React.createClass({
       });
   },
 
+  toggleGraph: function() {
+    this._owner.onToggleGraph();
+  },
+
   render: function() {
     return (
       <div className="panel panel-default">
         <div className="panel-heading">
           <div className="visible-md visible-lg">
-            <h3 className="panel-title">New Trade</h3>
+            <h3 className="panel-title">New Trade <span onClick={this.toggleGraph} className="pull-right btn btn-primary btn-xs icon-chart-line"></span></h3>
           </div>
           <div className="visible-xs visible-sm text-center">
             <div className="pull-left h4">New Trade</div>

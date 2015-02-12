@@ -20,7 +20,7 @@ var Markets = React.createClass({
           <div className="row">
             {!this.props.market.error && (
               <div>
-                <GraphPrice market={this.props.market} />
+                <GraphPrice market={this.props.market} height={500} full={true} />
                 <MarketList title={this.props.title} market={this.props.market} trades={this.props.trades} user={this.props.user} />
               </div>
             )}

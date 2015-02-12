@@ -63,8 +63,12 @@ tr.disabled td {
     .axis path,
     .axis line {
         fill: none;
-        stroke: #000;
+        stroke: #ccc;
         shape-rendering: crispEdges;
+    }
+
+    .axis text {
+        fill: #888;
     }
 
     text.symbol,
@@ -129,7 +133,7 @@ tr.disabled td {
     }
 
     path.macd {
-        stroke: #0000AA;
+        stroke: #DDAA44;
     }
 
     path.signal {
@@ -148,7 +152,7 @@ tr.disabled td {
     }
 
     path.rsi {
-        stroke: #000000;
+        stroke: lightblue;
     }
 
     path.overbought, path.oversold {
@@ -162,7 +166,7 @@ tr.disabled td {
     }
 
     .analysis path, .analysis circle {
-        stroke: blue;
+        stroke: #ddd;
         stroke-width: 0.8;
     }
 
@@ -181,7 +185,7 @@ tr.disabled td {
     }
 
     .dragging .trendline path, .dragging .trendline circle {
-        stroke: darkblue;
+        stroke: #888;
     }
 
     .interaction path, .interaction circle {
@@ -210,7 +214,7 @@ tr.disabled td {
     }
 
     .dragging .supstance path {
-        stroke: darkblue;
+        stroke: #888;
     }
 
     .crosshair {

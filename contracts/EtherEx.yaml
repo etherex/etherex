@@ -48,7 +48,7 @@
 #   transact:
 #     NameReg:
 #       to: $EtherEx
-#       funid: 12
+#       fun_name: register
 #       data:
 #         - "0x72ba7d8e73fe8eb666ea66babc8116a41bfb10e2"
 
@@ -57,25 +57,29 @@
   transact:
     OwnNameRegEtherEx:
       to: $OwnNameReg
-      funid: 0
+      fun_name: register
+      sig: ii
       data:
         - $EtherEx
         - EtherEx
     OwnNameRegETX:
       to: $OwnNameReg
-      funid: 0
+      fun_name: register
+      sig: ii
       data:
         - $ETX
         - ETX
     OwnNameRegCAK:
       to: $OwnNameReg
-      funid: 0
+      fun_name: register
+      sig: ii
       data:
         - $CAK
         - CAK
     OwnNameRegFAB:
       to: $OwnNameReg
-      funid: 0
+      fun_name: register
+      sig: ii
       data:
         - $FAB
         - FAB
@@ -86,7 +90,8 @@
   transact:
     RegisterETX:
       to: $EtherEx
-      funid: 7
+      fun_name: add_market
+      sig: iiiii
       data:
         - ETX
         - $ETX
@@ -97,7 +102,8 @@
   transact:
     RegisterCAK:
       to: $EtherEx
-      funid: 7
+      fun_name: add_market
+      sig: iiiii
       data:
         - CAK
         - $CAK
@@ -108,7 +114,8 @@
   transact:
     RegisterFAB:
       to: $EtherEx
-      funid: 7
+      fun_name: add_market
+      sig: iiiii
       data:
         - FAB
         - $FAB
@@ -122,7 +129,8 @@
   transact:
     SetExchangeETX:
       to: $ETX
-      funid: 2
+      fun_name: set_exchange
+      sig: ii
       data:
         - $EtherEx
         - 1
@@ -130,7 +138,8 @@
   transact:
     SetExchangeCAK:
       to: $CAK
-      funid: 2
+      fun_name: set_exchange
+      sig: ii
       data:
         - $EtherEx
         - 2
@@ -138,7 +147,8 @@
   transact:
     SetExchangeFAB:
       to: $FAB
-      funid: 2
+      fun_name: set_exchange
+      sig: ii
       data:
         - $EtherEx
         - 3
@@ -158,22 +168,26 @@
   transact:
     SetExchangeOwner:
       to: $EtherEx
-      funid: 8
+      fun_name: change_ownership
+      sig: i
       data:
         - $zg
     SetETXOwner:
       to: $ETX
-      funid: 3
+      fun_name: change_ownership
+      sig: i
       data:
         - $zg
     SetCAKOwner:
       to: $CAK
-      funid: 3
+      fun_name: change_ownership
+      sig: i
       data:
         - $zg
     SetFABOwner:
       to: $FAB
-      funid: 3
+      fun_name: change_ownership
+      sig: i
       data:
         - $zg
       wait: True
@@ -194,19 +208,22 @@
   transact:
     ZGetx:
       to: $ETX
-      funid: 0
+      fun_name: send
+      sig: ii
       data:
         - $zg
         - 10000000000
     CAKetx:
       to: $ETX
-      funid: 0
+      fun_name: send
+      sig: ii
       data:
         - $caktux
         - 10000000000
     FABetx:
       to: $ETX
-      funid: 0
+      fun_name: send
+      sig: ii
       data:
         - $fabrezio
         - 10000000000
@@ -214,19 +231,22 @@
   transact:
     ZGcak:
       to: $CAK
-      funid: 0
+      fun_name: send
+      sig: ii
       data:
         - $zg
         - 5000000000
     CAKcak:
       to: $CAK
-      funid: 0
+      fun_name: send
+      sig: ii
       data:
         - $caktux
         - 50000000000
     FABcak:
       to: $CAK
-      funid: 0
+      fun_name: send
+      sig: ii
       data:
         - $fabrezio
         - 5000000000
@@ -234,19 +254,22 @@
   transact:
     ZGetx:
       to: $FAB
-      funid: 0
+      fun_name: send
+      sig: ii
       data:
         - $zg
         - 5000000000
     CAKetx:
       to: $FAB
-      funid: 0
+      fun_name: send
+      sig: ii
       data:
         - $caktux
         - 5000000000
     FABetx:
       to: $FAB
-      funid: 0
+      fun_name: send
+      sig: ii
       data:
         - $fabrezio
         - 50000000000
@@ -258,19 +281,22 @@
   transact:
     deposit:
       to: $ETX
-      funid: 0
+      fun_name: send
+      sig: ii
       data:
         - $EtherEx
         - 1000000000
     depositCAK:
       to: $CAK
-      funid: 0
+      fun_name: send
+      sig: ii
       data:
         - $EtherEx
         - 10000000000
     depositFAB:
       to: $FAB
-      funid: 0
+      fun_name: send
+      sig: ii
       data:
         - $EtherEx
         - 10000000000
@@ -282,70 +308,80 @@
     # Sells
     trade1:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 5000000
         - 25000000
         - 1
     trade2:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 15000000
         - 25000000
         - 1
     trade3:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 25000000
         - 25000000
         - 1
     trade4:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 35000000
         - 26000000
         - 1
     trade5:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 45000000
         - 27000000
         - 1
     trade6:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 55000000
         - 28000000
         - 1
     trade7:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 1500000
         - 29000000
         - 1
     trade8:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 25000000
         - 30000000
         - 1
     trade9:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 25000000
         - 31000000
         - 1
     trade10:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 25000000
         - 32000000
@@ -354,7 +390,8 @@
     # Buys
     trade11:
       to: $EtherEx
-      funid: 1
+      fun_name: buy
+      sig: iii
       data:
         - 5000000
         - 24000000
@@ -362,7 +399,8 @@
       value: 12000000000000000000
     trade12:
       to: $EtherEx
-      funid: 1
+      fun_name: buy
+      sig: iii
       data:
         - 5000000
         - 23000000
@@ -370,7 +408,8 @@
       value: 11500000000000000000
     trade13:
       to: $EtherEx
-      funid: 1
+      fun_name: buy
+      sig: iii
       data:
         - 5000000
         - 22000000
@@ -378,7 +417,8 @@
       value: 11000000000000000000
     trade14:
       to: $EtherEx
-      funid: 1
+      fun_name: buy
+      sig: iii
       data:
         - 5000000
         - 21000000
@@ -394,42 +434,48 @@
     # Sells
     trade1:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 50000000
         - 25
         - 2
     trade2:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 150000000
         - 26
         - 2
     trade3:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 250000000
         - 27
         - 2
     trade4:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 350000000
         - 28
         - 2
     trade5:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 450000000
         - 29
         - 2
     trade6:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 550000000
         - 30
@@ -438,7 +484,8 @@
     # Buys
     trade11:
       to: $EtherEx
-      funid: 1
+      fun_name: buy
+      sig: iii
       data:
         - 5000000
         - 24
@@ -446,7 +493,8 @@
       value: 12000000000000000000
     trade12:
       to: $EtherEx
-      funid: 1
+      fun_name: buy
+      sig: iii
       data:
         - 5000000
         - 23
@@ -454,7 +502,8 @@
       value: 11500000000000000000
     trade13:
       to: $EtherEx
-      funid: 1
+      fun_name: buy
+      sig: iii
       data:
         - 5000000
         - 22
@@ -462,7 +511,8 @@
       value: 11000000000000000000
     trade14:
       to: $EtherEx
-      funid: 1
+      fun_name: buy
+      sig: iii
       data:
         - 5000000
         - 21
@@ -477,42 +527,48 @@
     # Sells
     trade1:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 50000000
         - 25
         - 3
     trade2:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 150000000
         - 26
         - 3
     trade3:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 250000000
         - 27
         - 3
     trade4:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 350000000
         - 28
         - 3
     trade5:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 450000000
         - 29
         - 3
     trade6:
       to: $EtherEx
-      funid: 2
+      fun_name: sell
+      sig: iii
       data:
         - 550000000
         - 30
@@ -521,7 +577,8 @@
     # Buys
     trade11:
       to: $EtherEx
-      funid: 1
+      fun_name: buy
+      sig: iii
       data:
         - 5000000
         - 24
@@ -529,7 +586,8 @@
       value: 12000000000000000000
     trade12:
       to: $EtherEx
-      funid: 1
+      fun_name: buy
+      sig: iii
       data:
         - 5000000
         - 23
@@ -537,7 +595,8 @@
       value: 11500000000000000000
     trade13:
       to: $EtherEx
-      funid: 1
+      fun_name: buy
+      sig: iii
       data:
         - 5000000
         - 22
@@ -545,7 +604,8 @@
       value: 11000000000000000000
     trade14:
       to: $EtherEx
-      funid: 1
+      fun_name: buy
+      sig: iii
       data:
         - 5000000
         - 21
@@ -560,7 +620,7 @@
 #     MyContract:
 #       to: $NameReg
 #       value: 0
-#       funid: 2
+#       fun_name: register
 #       data: 0x12345
 
 # More deploy

@@ -142,14 +142,11 @@ var TradeRow = React.createClass({
         if (!totalAmount || !totalValue)
             return;
 
-        var total = totalAmount * this.props.trade.price;
-
-        var isBuy = (this.props.trade.type == "buys" ? true : false);
         var payload = {
-            type: (isBuy ? 1 : 2),
+            type: (this.props.trade.type == "buys" ? 1 : 2),
             price: this.props.trade.price,
-            amount: isBuy ? totalValue / this.props.trade.price : totalAmount,
-            total: isBuy ? totalValue : total,
+            amount: totalAmount,
+            total: totalValue,
             market: this.props.trade.market,
             user: this.props.user
         };

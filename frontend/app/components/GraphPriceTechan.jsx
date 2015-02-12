@@ -11,7 +11,7 @@ var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 
 var d3 = require("d3");
-var techan = require("techanjs/src/techan");
+var techan = require("techan");
 
 var Chart = React.createClass({
     mixins: [FluxMixin],
@@ -46,10 +46,10 @@ var Chart = React.createClass({
         var width = $(chart).parent().width();
 
         var dim = {
-            width: width, height: 500,
+            width: width, height: this.props.height,
             margin: { top: 20, right: 70, bottom: 30, left: 70 },
-            ohlc: { height: 305 },
-            indicator: { height: 80, padding: 5 }
+            ohlc: { height: this.props.full ? this.props.height * 0.62 : this.props.height - 40 },
+            indicator: { height: this.props.height * 0.15, padding: 5 }
         };
         dim.plot = {
             width: dim.width - dim.margin.left - dim.margin.right,
@@ -153,57 +153,59 @@ var Chart = React.createClass({
                 .axis(volumeAxis)
                 .width(35);
 
-        var macdScale = d3.scale.linear()
-                .range([indicatorTop(0)+dim.indicator.height, indicatorTop(0)]);
+        if (this.props.full) {
+            var macdScale = d3.scale.linear()
+                    .range([indicatorTop(0)+dim.indicator.height, indicatorTop(0)]);
 
-        var rsiScale = macdScale.copy()
-                .range([indicatorTop(1)+dim.indicator.height, indicatorTop(1)]);
+            var rsiScale = macdScale.copy()
+                    .range([indicatorTop(1)+dim.indicator.height, indicatorTop(1)]);
 
-        var macd = techan.plot.macd()
-                .xScale(x)
-                .yScale(macdScale);
+            var macd = techan.plot.macd()
+                    .xScale(x)
+                    .yScale(macdScale);
 
-        var macdAxis = d3.svg.axis()
-                .scale(macdScale)
-                .ticks(3)
-                .orient("right");
+            var macdAxis = d3.svg.axis()
+                    .scale(macdScale)
+                    .ticks(3)
+                    .orient("right");
 
-        var macdAnnotation = techan.plot.axisannotation()
-                .axis(macdAxis)
-                .format(d3.format(',.2fs'))
-                .translate([x(1), 0]);
+            var macdAnnotation = techan.plot.axisannotation()
+                    .axis(macdAxis)
+                    .format(d3.format(',.2fs'))
+                    .translate([x(1), 0]);
 
-        var macdAxisLeft = d3.svg.axis()
-                .scale(macdScale)
-                .ticks(3)
-                .orient("left");
+            var macdAxisLeft = d3.svg.axis()
+                    .scale(macdScale)
+                    .ticks(3)
+                    .orient("left");
 
-        var macdAnnotationLeft = techan.plot.axisannotation()
-                .axis(macdAxisLeft)
-                .format(d3.format(',.2fs'));
+            var macdAnnotationLeft = techan.plot.axisannotation()
+                    .axis(macdAxisLeft)
+                    .format(d3.format(',.2fs'));
 
-        var rsi = techan.plot.rsi()
-                .xScale(x)
-                .yScale(rsiScale);
+            var rsi = techan.plot.rsi()
+                    .xScale(x)
+                    .yScale(rsiScale);
 
-        var rsiAxis = d3.svg.axis()
-                .scale(rsiScale)
-                .ticks(3)
-                .orient("right");
+            var rsiAxis = d3.svg.axis()
+                    .scale(rsiScale)
+                    .ticks(3)
+                    .orient("right");
 
-        var rsiAnnotation = techan.plot.axisannotation()
-                .axis(rsiAxis)
-                .format(d3.format(',.2fs'))
-                .translate([x(1), 0]);
+            var rsiAnnotation = techan.plot.axisannotation()
+                    .axis(rsiAxis)
+                    .format(d3.format(',.2fs'))
+                    .translate([x(1), 0]);
 
-        var rsiAxisLeft = d3.svg.axis()
-                .scale(rsiScale)
-                .ticks(3)
-                .orient("left");
+            var rsiAxisLeft = d3.svg.axis()
+                    .scale(rsiScale)
+                    .ticks(3)
+                    .orient("left");
 
-        var rsiAnnotationLeft = techan.plot.axisannotation()
-                .axis(rsiAxisLeft)
-                .format(d3.format(',.2fs'));
+            var rsiAnnotationLeft = techan.plot.axisannotation()
+                    .axis(rsiAxisLeft)
+                    .format(d3.format(',.2fs'));
+        }
 
         var ohlcCrosshair = techan.plot.crosshair()
                 .xScale(timeAnnotation.axis().scale())
@@ -212,19 +214,21 @@ var Chart = React.createClass({
                 .yAnnotation([ohlcAnnotation, percentAnnotation, volumeAnnotation])
                 .verticalWireRange([0, dim.plot.height]);
 
-        var macdCrosshair = techan.plot.crosshair()
-                .xScale(timeAnnotation.axis().scale())
-                .yScale(macdAnnotation.axis().scale())
-                .xAnnotation(timeAnnotation)
-                .yAnnotation([macdAnnotation, macdAnnotationLeft])
-                .verticalWireRange([0, dim.plot.height]);
+        if (this.props.full) {
+            var macdCrosshair = techan.plot.crosshair()
+                    .xScale(timeAnnotation.axis().scale())
+                    .yScale(macdAnnotation.axis().scale())
+                    .xAnnotation(timeAnnotation)
+                    .yAnnotation([macdAnnotation, macdAnnotationLeft])
+                    .verticalWireRange([0, dim.plot.height]);
 
-        var rsiCrosshair = techan.plot.crosshair()
-                .xScale(timeAnnotation.axis().scale())
-                .yScale(rsiAnnotation.axis().scale())
-                .xAnnotation(timeAnnotation)
-                .yAnnotation([rsiAnnotation, rsiAnnotationLeft])
-                .verticalWireRange([0, dim.plot.height]);
+            var rsiCrosshair = techan.plot.crosshair()
+                    .xScale(timeAnnotation.axis().scale())
+                    .yScale(rsiAnnotation.axis().scale())
+                    .xAnnotation(timeAnnotation)
+                    .yAnnotation([rsiAnnotation, rsiAnnotationLeft])
+                    .verticalWireRange([0, dim.plot.height]);
+        }
 
         var svg = d3.select(chart).append("svg")
                 .attr("width", dim.width)
@@ -256,11 +260,11 @@ var Chart = React.createClass({
         svg.append('text')
                 .attr("class", "symbol")
                 .attr("x", 20)
-                .text("loading...");
+                .text(this.props.market.name ? this.props.market.name + "/ETH" : "loading...");
 
         svg.append("g")
                 .attr("class", "x axis")
-                .attr("transform", "translate(0," + dim.plot.height + ")");
+                .attr("transform", "translate(0," + (dim.plot.height + 10) + ")");
 
         var ohlcSelection = svg.append("g")
                 .attr("class", "ohlc")
@@ -274,7 +278,7 @@ var Chart = React.createClass({
                 .attr("y", -12)
                 .attr("dy", ".71em")
                 .style("text-anchor", "end")
-                .text("Price (...)");
+                .text("Price");
 
         ohlcSelection.append("g")
                 .attr("class", "close annotation up");
@@ -325,11 +329,13 @@ var Chart = React.createClass({
         svg.append('g')
                 .attr("class", "crosshair ohlc");
 
-        svg.append('g')
-                .attr("class", "crosshair macd");
+        if (this.props.full) {
+            svg.append('g')
+                    .attr("class", "crosshair macd");
 
-        svg.append('g')
-                .attr("class", "crosshair rsi");
+            svg.append('g')
+                    .attr("class", "crosshair rsi");
+        }
 
         svg.append("g")
                 .attr("class", "trendlines analysis")
@@ -364,10 +370,15 @@ var Chart = React.createClass({
             yPercent.domain(techan.scale.plot.percent(y, accessor(data[indicatorPreRoll])).domain());
             yVolume.domain(techan.scale.plot.volume(data).domain());
 
-            var macdData = techan.indicator.macd()(data);
-            macdScale.domain(techan.scale.plot.macd(macdData).domain());
-            var rsiData = techan.indicator.rsi()(data);
-            rsiScale.domain(techan.scale.plot.rsi(rsiData).domain());
+            if (this.props.full) {
+                var macdData = techan.indicator.macd()(data);
+                macdScale.domain(techan.scale.plot.macd(macdData).domain());
+                var rsiData = techan.indicator.rsi()(data);
+                rsiScale.domain(techan.scale.plot.rsi(rsiData).domain());
+            }
+
+            var zoomable = x.zoomable();
+            zoomable.domain([indicatorPreRoll, data.length]); // Zoom in a little to hide indicator preroll
 
             svg.select("g.candlestick").datum(data).call(candlestick);
             svg.select("g.close.annotation").datum([data[data.length-1]]).call(closeAnnotation);
@@ -376,14 +387,16 @@ var Chart = React.createClass({
             svg.select("g.sma.ma-1").datum(techan.indicator.sma().period(20)(data)).call(sma1);
             svg.select("g.ema.ma-2").datum(techan.indicator.ema().period(50)(data)).call(ema2);
 
-            if (data.length > 33) {
+            if (data.length > 33 && this.props.full) {
                 svg.select("g.macd .indicator-plot").datum(macdData).call(macd);
                 svg.select("g.rsi .indicator-plot").datum(rsiData).call(rsi);
             }
 
             svg.select("g.crosshair.ohlc").call(ohlcCrosshair).call(zoom);
-            svg.select("g.crosshair.macd").call(macdCrosshair).call(zoom);
-            svg.select("g.crosshair.rsi").call(rsiCrosshair).call(zoom);
+            if (this.props.full) {
+                svg.select("g.crosshair.macd").call(macdCrosshair).call(zoom);
+                svg.select("g.crosshair.rsi").call(rsiCrosshair).call(zoom);
+            }
 
             svg.select("g.trendlines").datum(trendlineData).call(trendline).call(trendline.drag);
             svg.select("g.supstances").datum(supstanceData).call(supstance).call(supstance.drag);
@@ -395,14 +408,14 @@ var Chart = React.createClass({
             svg.select("g.ohlc .axis").call(yAxis);
             svg.select("g.volume.axis").call(volumeAxis);
             svg.select("g.percent.axis").call(percentAxis);
-            svg.select("g.macd .axis.right").call(macdAxis);
-            svg.select("g.rsi .axis.right").call(rsiAxis);
 
-            svg.select("g.macd .axis.left").call(macdAxisLeft);
-            svg.select("g.rsi .axis.left").call(rsiAxisLeft);
+            if (this.props.full) {
+                svg.select("g.macd .axis.right").call(macdAxis);
+                svg.select("g.rsi .axis.right").call(rsiAxis);
 
-            var zoomable = x.zoomable();
-            zoomable.domain([indicatorPreRoll, data.length]); // Zoom in a little to hide indicator preroll
+                svg.select("g.macd .axis.left").call(macdAxisLeft);
+                svg.select("g.rsi .axis.left").call(rsiAxisLeft);
+            }
 
             // Associate the zoom with the scale after a domain has been applied
             zoom.x(zoomable).y(y);
@@ -447,14 +460,14 @@ var Chart = React.createClass({
 
         // TODO
         var trendlineData = [
-            { start: { date: new Date(2014, 2, 1), value: 0.22 }, end: { date: new Date(2015, 1, 17), value: 0.28 } },
-            { start: { date: new Date(2014, 2, 1), value: 0.3 }, end: { date: new Date(2015, 1, 17), value: 0.33 } }
+            { start: { date: new Date(2014, 12, 1), value: 0.245 }, end: { date: new Date(2015, 1, 20), value: 0.2475 } },
+            { start: { date: new Date(2014, 12, 1), value: 0.255 }, end: { date: new Date(2015, 1, 20), value: 0.25 } }
         ];
 
         // TODO
         var supstanceData = [
-            { start: new Date(2015, 1, 11), end: new Date(2015, 1, 17), value: 0.265 },
-            { start: new Date(2015, 1, 11), end: new Date(2015, 1, 17), value: 0.24 }
+            { start: new Date(2015, 1, 1), end: new Date(2015, 2, 1), value: 0.25 },
+            { start: new Date(2015, 1, 1), end: new Date(2015, 2, 1), value: 0.24 }
         ];
 
         if (this.props.data.length > 3) {
@@ -471,7 +484,7 @@ var Chart = React.createClass({
             return;
             // props.data = [{Date: new Date(), Open: 0, High: 0, Low: 0, Close: 0, Volume: 0}];
 
-        if (props.market)
+        if (props.market.name)
             $('text.symbol').text(props.market.name + "/ETH")
 
         var data = this.mapData(props.data);
@@ -488,7 +501,7 @@ var GraphPrice = React.createClass({
         return (
             <div>
                 <h4>{this.props.title}</h4>
-                <Chart data={this.props.market.market.data} market={this.props.market.market} />
+                <Chart height={this.props.height} full={this.props.full} data={this.props.market.market.data} market={this.props.market.market} />
             </div>
         );
     }

@@ -50,7 +50,7 @@ print '\n'
 # f = 'contracts/etherex.se'
 # compile(f)
 
-subprocess.call(["py.test", "tests/etherex.py", "-v", "-x"])
+subprocess.call(["py.test", "tests/etherex.py", "-vv", "-x"])
 
 print '==================='
 print 'WARNING: Experimental code, use at your own risks.'

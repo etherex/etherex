@@ -46,11 +46,6 @@ module.exports = function(grunt) {
         }
       }
     },
-    subgrunt: {
-      techanjs: {
-        'node_modules/techanjs': 'filegen'
-      }
-    },
     jshint: {
       // define the files to lint
       files: ['Gruntfile.js', 'webpack.config.js', 'app/**/*.js', 'app/**/*.jsx'],
@@ -79,7 +74,7 @@ module.exports = function(grunt) {
     },
     watch: {
       app: {
-        files: ["app/**/*"],
+        files: ["app/**/*.js", "app/**/*.jsx", "app/**/*.css"],
         tasks: ["jshint", "webpack:build-dev"],
         options: {
           spawn: false,
@@ -102,10 +97,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-webpack');
   grunt.loadNpmTasks('grunt-gh-pages');
-  grunt.loadNpmTasks('grunt-subgrunt');
 
-  grunt.registerTask("default", ["subgrunt", "webpack-dev-server:start"]);
-  grunt.registerTask("dev", ["jshint", "subgrunt", "webpack:build-dev", "watch:app"]);
-  grunt.registerTask("build", ["clean", "subgrunt", "jshint", "webpack:build"]);
+  grunt.registerTask("default", ["webpack-dev-server:start"]);
+  grunt.registerTask("dev", ["jshint", "webpack:build-dev", "watch:app"]);
+  grunt.registerTask("build", ["clean", "jshint", "webpack:build"]);
   grunt.registerTask("publish", ["build", "gh-pages"]);
 };
