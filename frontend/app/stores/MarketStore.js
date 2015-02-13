@@ -109,6 +109,69 @@ var MarketStore = Fluxxor.createStore({
                 };
                 return previous;
             });
+
+            // Calculate and store % changes
+            var data = this.market.data;
+            var last = data[data.length - 1];
+
+            var lastday = new Date().setDate(new Date().getDate() - 1);
+            var lastweek = new Date().setDate(new Date().getDate() - 7);
+            var lastmonth = new Date().setDate(new Date().getDate() - 30);
+
+            var day = _.find(data, function(d) {
+                return d.Date < lastday;
+            });
+            var week = _.find(data, function(d) {
+                return d.Date < lastweek;
+            });
+            var month = _.find(data, function(d) {
+                return d.Date < lastmonth;
+            });
+
+            if (day) {
+                var change = ((last.Close - day.Close) / last.Close * 100).toFixed(2);
+                if (change >= 0) {
+                    this.market.dayClass = 'text-success';
+                    this.market.daySign = '+';
+                }
+                else {
+                    this.market.dayClass = 'text-danger';
+                    this.market.daySign = '-';
+                }
+                this.market.dayChange = String(change) + ' %';
+            }
+            else
+                this.market.dayChange = '-';
+
+            if (week) {
+                var change = ((last.Close - month.Close) / last.Close * 100).toFixed(2);
+                if (change >= 0) {
+                    this.market.weekClass = 'text-success';
+                    this.market.weekSign = '+';
+                }
+                else {
+                    this.market.weekClass = 'text-danger';
+                    this.market.weekSign = '-';
+                }
+                this.market.weekChange = String(change) + ' %';
+            }
+            else
+                this.market.weekChange = '-';
+
+            if (month) {
+                var change = ((last.Close - month.Close) / last.Close * 100).toFixed(2);
+                if (this.market.monthChange >= 0) {
+                    this.market.monthClass = 'text-success';
+                    this.market.monthSign = '+';
+                }
+                else {
+                    this.market.monthClass = 'text-danger';
+                    this.market.monthSign = '-';
+                }
+                this.market.monthChange = String(change) + ' %';
+            }
+            else
+                this.market.monthChange = '-';
         }
         else
             this.market.data = [{Date: new Date(), Open: 0, High: 0, Low: 0, Close: 0, Volume: 0}];

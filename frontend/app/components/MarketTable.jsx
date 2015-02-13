@@ -34,10 +34,12 @@ var MarketRow = React.createClass({
                 </td>
                 <td>
                     <div className="text-center">
-                        <span className="text-danger">-</span>0.54 /
-                        <span className="text-success">+</span>5.9 /
-                        <span className="text-danger">-</span>2.2
-                        {this.props.market.change}
+                        <span className={this.props.market.dayClass}>{this.props.market.daySign}</span>
+                            {this.props.market.dayChange} /{' '}
+                        <span className={this.props.market.weekClass}>{this.props.market.weekSign}</span>
+                            {this.props.market.weekChange} /{' '}
+                        <span className={this.props.market.monthClass}>{this.props.market.monthSign}</span>
+                            {this.props.market.monthChange}
                     </div>
                 </td>
                 <td>
