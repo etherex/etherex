@@ -87,29 +87,26 @@ API
 
 ## Operations
 
-Function IDs:
+Methods (with serpent type definitions):
 ```
-0x00 = PRICE
-0x01 = BUY
-0x02 = SELL
-0x03 = TRADE
-0x04 = DEPOSIT
-0x05 = WITHDRAW
-0x06 = CANCEL
-0x07 = ADD_MARKET
-0x08 = GET_MARKET
-0x09 = GET_TRADE_IDS
-0x0a = GET_TRADE
-0x0b = GET_SUB_BALANCE
-0x0c = CHANGE_OWNERSHIP
-0x0d = NAME_REGISTER
-0x0e = NAME_UNREGISTER
+price:i:i
+buy:iii:i
+sell:iii:i
+trade:ia:i
+deposit:iii:i
+withdraw:ii:i
+cancel:i:i
+add_market:iiiii:i
+get_market:i:a
+get_trade_ids:i:a
+get_trade:i:a
+get_sub_balance:ii:a
 ```
 
 
 ## Price API
 ```
-<operation> <market_id>
+<method> <market_id>
 ```
 
 
@@ -117,33 +114,33 @@ Function IDs:
 
 ### Add buy / sell trade
 ```
-<operation> <amount> <price> <market ID>
+<method> <amount> <price> <market ID>
 ```
 
 ### Trade
 ```
-<operation> <trade ID> <max amount>
+<method> <max amount> <trade IDs>
 ```
 
 ### Deposit (subcurrency contracts only, [see below](#subcurrency-api))
 ```
-<operation> <address> <amount> <market ID>
+<method> <address> <amount> <market ID>
 ```
 
 ### Withdraw
 ```
-<operation> <amount> <market ID>
+<method> <amount> <market ID>
 ```
 
-### Cancellations
+### Cancel trade
 ```
-<operation> <trade ID>
+<method> <trade ID>
 ```
 
 
 ### Adding a market
 ```
-<operation> <currency name> <contract address> <decimal precision> <price denominator> <minimum total>
+<method> <currency name> <contract address> <decimal precision> <price denominator> <minimum total>
 ```
 
 #### Market names
@@ -171,44 +168,6 @@ When adding a subcurrency, set the minimum trade total high enough to make econo
 1 = ETX/ETH
 ```
 New market IDs will be created as DAO creators add their subcurrency to the exchange.
-
-
-### Examples
-
-Buy 1000 ETX at 1200 ETX/ETH
-```
-0x01 1000000000000000000000 120000000000 1
-```
-
-Sell 1000 ETX at 1500 ETX/ETH
-```
-0x02 1000000000000000000000 150000000000 1
-```
-
-Fulfill trade
-```
-0x03 0x3039...
-```
-
-Deposit 1 ETX (from subcurrency contracts only, [see below](#subcurrency-api))
-```
-0x04 0xe559de5527492bcb42ec68d07df0742a98ec3f1e 100000000 1
-```
-
-Withdraw 1 ETX
-```
-0x05 100000000 1
-```
-
-Cancel operation
-```
-0x06 0x3039...
-```
-
-Add your subcurrency
-```
-7 "BOB" 0xe559de5527492bcb42ec68d07df0742a98ec3f1e 4 100000000 1000000000000000000000
-```
 
 
 ### Subcurrency API
@@ -240,14 +199,14 @@ def set_exchange(addr, market_id):
     return(0)
 ```
 
-After registering the subcurrency using the `ADD_MARKET` ABI call, the subcurrency will receive a `market_id`. Since there are currently no return values to actual transactions, this `market_id` will need to be inspected from the exchange's contract storage or from the UI.
+After registering the subcurrency using the `add_market` ABI call, the subcurrency will receive a `market_id`. Since there are currently no return values to actual transactions, this `market_id` will need to be inspected from the exchange's contract storage or from the UI.
 
 #### Notifying the exchange of deposits
 
-The second step has to be executed on each asset transfer. The gas costs of comparing the recipient to the exchange's address are minimal but a separate ABI call might be used later on, depending on how this approach will play out on the testnet. The relevant part below is the one under `Notify exchange of deposit`, the top part being what can be considered standard subcurrency functionality. Notice the `extern` definition that will be used to determine the `deposit` function ID.
+The second step has to be executed on each asset transfer. The gas costs of comparing the recipient to the exchange's address are minimal but a separate ABI call might be used later on, depending on how this approach will play out on the testnet. The relevant part below is the one under `Notify exchange of deposit`, the top part being what can be considered standard subcurrency functionality. Notice the `extern` definition that will be used for the `deposit` method.
 
 ```
-extern exchange: [price, buy, sell, trade, deposit, withdraw]
+extern exchange: [deposit:iii:i]
 
 def send(recipient, amount):
     # Get user balance
@@ -262,13 +221,12 @@ def send(recipient, amount):
 
         # Notify exchange of deposit
         if recipient == self.exchange:
-            ret = self.exchange.deposit(msg.sender, amount, self.market_id, datasz=3, as=exchange)
-            # Exchange returns the amount as confirmation
-            if ret == amount:
+            ret = self.exchange.deposit(msg.sender, amount, self.market_id, datasz=3)
+            # Exchange returns our new balance as confirmation
+            if ret >= amount:
                 return(1)
             # We return 2 as error code for notification failure
-            else:
-                return(2)
+            return(2)
 
         return(1)
     return(0)
@@ -287,7 +245,6 @@ TODO
 
 ### Architecture
 
-* Link price indexes to orderbook and check for lower/higher bids (use heap.se?)
 * Document error codes of return values
 * Implement Wallet section (transactions, balances, etc.) (in progress)
 * Re-implement NameReg support and integration
@@ -307,9 +264,8 @@ TODO
 
 ### UX/UI
 
-* Handle and color code new/pending/mined trades
 * Graphs, beautiful graphs
-* Advanced trading features (limit vs market orders, stoploss, etc.)
+* Advanced trading features (stoploss, etc.)
 * Animations/transitions
 * Check/clear buttons
 * Wallet design and theming
