@@ -5,14 +5,16 @@ var bigRat = require('big-rational');
 
 require('es6-promise').polyfill();
 
-var web3 = require('ethereum.js');
-window.web3 = web3;
+if (typeof web3 === 'undefined') {
+    var web3 = require('ethereum.js');
+    window.web3 = web3;
+}
 
 try {
-    if (ethBrowser)
-        web3.setProvider(new web3.providers.QtSyncProvider());
-    else
-        web3.setProvider(new web3.providers.HttpSyncProvider('http://localhost:8080'));
+    // if (ethBrowser)
+        web3.setProvider(new web3.providers.HttpSyncProvider());
+    // else
+    //     web3.setProvider(new web3.providers.HttpSyncProvider('http://localhost:8081'));
 
     var contract = web3.eth.contract(fixtures.addresses.etherex, fixtures.contract_desc);
     // console.log("CONTRACT", contract);
