@@ -289,6 +289,22 @@ var fixtures = {
                     "type": "int256"
                 }
             ]
+        },
+        {
+            "name": "balance",
+            "type": "function",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "int256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "result",
+                    "type": "int256"
+                }
+            ]
         }
     ]
 };

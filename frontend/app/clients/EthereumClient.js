@@ -3,6 +3,8 @@ var fixtures = require("../js/fixtures");
 
 var bigRat = require('big-rational');
 
+var isMist = false;
+
 require('es6-promise').polyfill();
 
 if (typeof web3 === 'undefined') {
@@ -18,6 +20,7 @@ try {
     }
     catch (e) {
         web3.setProvider(new web3.providers.HttpSyncProvider('http://localhost:8545'));
+        isMist = true;
     }
 
     var contract = web3.eth.contract(fixtures.addresses.etherex, fixtures.contract_desc);
@@ -65,7 +68,7 @@ var EthereumClient = function() {
 
             // console.log("LAST MARKET ID: ", last);
 
-            if (!last) {
+            if (!last && !isMist) {
                 failure("No market found, seems like contracts are missing.");
                 return;
             }
@@ -93,7 +96,9 @@ var EthereumClient = function() {
 
                     // console.log(id, name, address, decimals, precision, minimum, lastPrice, owner, block, total_trades);
 
-                    var balance = web3.eth.stateAt(address, user.addresses[0]);
+                    var subcontract = web3.eth.contract(address, fixtures.sub_contract_desc);
+                    var balance = subcontract.call().balance(user.addresses[0]).toString();
+
                     markets.push({
                         id: id,
                         name: name,
@@ -119,6 +124,8 @@ var EthereumClient = function() {
                 failure("No market to load.")
         }
         catch (e) {
+            if (isMist)
+                success("Skipping...");
             failure("Unable to load markets: " + String(e));
         }
     };
@@ -338,13 +345,8 @@ var EthereumClient = function() {
             return;
 
         try {
-            var sub_balance = 0;
-            var hexbalance = web3.eth.stateAt(market.address, address);
-
-            if (hexbalance && hexbalance != "0x")
-                sub_balance = bigRat(web3.toDecimal(hexbalance)).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
-            else
-                sub_balance = 0;
+            var subcontract = web3.eth.contract(market.address, fixtures.sub_contract_desc);
+            var sub_balance = _.parseInt(subcontract.call().balance(address).toString());
 
             var balances = contract.call().get_sub_balance(address, market.id);
 
@@ -369,6 +371,8 @@ var EthereumClient = function() {
             success(market, available, trading, sub_balance);
         }
         catch(e) {
+            if (isMist)
+                success("Skipping...");
             failure(error + String(e));
         }
     };
@@ -419,8 +423,7 @@ var EthereumClient = function() {
     this.registerMarket = function(market, success, failure) {
         try {
             var result = contract.transact({
-                gas: "10000",
-                gasPrice: gasPrice
+                gas: "10000"
             }).add_market(
                 web3.fromAscii(market.name, 32),
                 market.address,
