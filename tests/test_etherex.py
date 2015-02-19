@@ -7,7 +7,6 @@
 
 import pytest
 from pyethereum import tester
-from pyethereum.utils import sha3
 import logging as logger
 
 # DEBUG
@@ -16,9 +15,9 @@ import logging as logger
 
 class TestEtherEx(object):
 
-    ALICE = { 'address': tester.a0, 'key': tester.k0 }
-    BOB = { 'address': tester.a1, 'key': tester.k1 }
-    CHARLIE = { 'address': tester.a2, 'key': tester.k2 }
+    ALICE = {'address': tester.a0, 'key': tester.k0}
+    BOB = {'address': tester.a1, 'key': tester.k1}
+    CHARLIE = {'address': tester.a2, 'key': tester.k2}
 
     # NameReg
     namereg = 'contracts/namereg.se'
@@ -58,7 +57,7 @@ class TestEtherEx(object):
 
     def setup_method(self, method):
         self.state.revert(self.snapshot)
-        tester.seed = 3 ** 160 # use fixed testing seed
+        tester.seed = 3 ** 160  # use fixed testing seed
 
     # Tests
     def test_creation(self):
@@ -86,7 +85,6 @@ class TestEtherEx(object):
         assert ans == 1
         assert self._storage(self.namereg, "0x" + self.etx_contract.address) == "0x" + "ETX".encode('hex')
 
-
         # Register ETX
         ans = self.contract.add_market(
             "ETX", self.etx_contract.address, 5, 10 ** 8, 10 ** 18,
@@ -100,23 +98,21 @@ class TestEtherEx(object):
         assert ans == 1
         assert self._storage(self.etx_contract, self.xhex(1)) == "0x" + self.contract.address
 
-
         # Get markets pointer...
         self.ptr = self._storage(self.contract, "0x07")
         logger.info("Markets start at %s, then %s ..." % (self.ptr, self.ptr_add(self.ptr, 1)))
         logger.info(self.state.block.account_to_dict(self.contract.address)['storage'])
         logger.info("===")
 
-        assert self._storage(self.contract, self.ptr_add(self.ptr, 0)) == self.xhex(1) # Market ID
-        assert self._storage(self.contract, self.ptr_add(self.ptr, 1)) == "0x" + "ETX".encode('hex') # Name
-        assert self._storage(self.contract, self.ptr_add(self.ptr, 2)) == "0x" + self.etx_contract.address # Contract address
-        assert self._storage(self.contract, self.ptr_add(self.ptr, 3)) == self.xhex(5) # Decimal precision
-        assert self._storage(self.contract, self.ptr_add(self.ptr, 4)) == self.xhex(10 ** 8) # Price precision
-        assert self._storage(self.contract, self.ptr_add(self.ptr, 5)) == self.xhex(10 ** 18) # Minimum amount
-        assert self._storage(self.contract, self.ptr_add(self.ptr, 6)) == self.xhex(1) # Last price
-        assert self._storage(self.contract, self.ptr_add(self.ptr, 7)) == "0x" + self.ALICE['address'] # Owner
-        assert self._storage(self.contract, self.ptr_add(self.ptr, 8)) == block # Block #
-
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 0)) == self.xhex(1)  # Market ID
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 1)) == "0x" + "ETX".encode('hex')  # Name
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 2)) == "0x" + self.etx_contract.address  # Contract address
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 3)) == self.xhex(5)  # Decimal precision
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 4)) == self.xhex(10 ** 8)  # Price precision
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 5)) == self.xhex(10 ** 18)  # Minimum amount
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 6)) == self.xhex(1)  # Last price
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 7)) == "0x" + self.ALICE['address']  # Owner
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 8)) == block  # Block
 
     def test_change_ownership(self):
         self.test_initialize()
@@ -139,8 +135,17 @@ class TestEtherEx(object):
         ans = self.contract.get_market(1)
         self.state.mine(3)
 
-        assert ans == [1, 4543576, 584202455294917676171628316407181071088652546483L, 5, 100000000, 1000000000000000000, 1, 745948140856946866108753121277737810491401257713L, 0, 0]
-
+        assert ans == [
+            1,
+            4543576,
+            584202455294917676171628316407181071088652546483L,
+            5,
+            100000000,
+            1000000000000000000,
+            1,
+            745948140856946866108753121277737810491401257713L,
+            0,
+            0]
 
     #
     # ETX
@@ -183,7 +188,6 @@ class TestEtherEx(object):
         # Charlie now has 250
         ans = self.etx_contract.balance(self.CHARLIE['address'])
         assert ans == 250 * 10 ** 5
-
 
     #
     # Balances
@@ -321,7 +325,6 @@ class TestEtherEx(object):
         ans = self.contract.buy(500 * 10 ** 5, int(0.25 * 10 ** 8), 1, sender=self.BOB['key'], value=124 * 10 ** 18)
         assert ans == 13
 
-
     #
     # Trades
     #
@@ -399,7 +402,8 @@ class TestEtherEx(object):
     def test_cancel_trade_fail(self):
         self.test_add_buy_trades()
 
-        ans = self.contract.cancel(23490291715255176443338864873375620519154876621682055163056454432194948412040L,
+        ans = self.contract.cancel(
+            23490291715255176443338864873375620519154876621682055163056454432194948412040L,
             sender=self.BOB['key'])
         assert ans == 0
 
@@ -411,7 +415,7 @@ class TestEtherEx(object):
         assert self.state.block.get_balance(self.ALICE['address']) > self.after_buy_balance
 
         ans = self.contract.get_trade(23490291715255176443338864873375620519154876621682055163056454432194948412040L)
-        assert ans == [0,0,0,0,0,0,0,0]
+        assert ans == [0, 0, 0, 0, 0, 0, 0, 0]
 
     def test_basic_hft_prevention_using_block_number_fail(self):
         self.test_add_buy_trades()
@@ -456,7 +460,9 @@ class TestEtherEx(object):
         assert balance == 10 ** 24
 
         # Deposit 1000 into exchange
-        ans = self.etx_contract.send(self.contract.address, 10000 * 10 ** 5,
+        ans = self.etx_contract.send(
+            self.contract.address,
+            10000 * 10 ** 5,
             sender=self.BOB['key'])
         assert ans == 1
 
@@ -477,7 +483,7 @@ class TestEtherEx(object):
         assert ans == 1
 
         ans = self.contract.get_trade(23490291715255176443338864873375620519154876621682055163056454432194948412040L)
-        assert ans == [0,0,0,0,0,0,0,0]
+        assert ans == [0, 0, 0, 0, 0, 0, 0, 0]
 
         if revert:
             self.state.revert(snapshot)
@@ -507,7 +513,7 @@ class TestEtherEx(object):
         assert ans == 1
 
         ans = self.contract.get_trade(49800558551364658298467690253710486242473574128865389798518930174170604985043L)
-        assert ans == [0,0,0,0,0,0,0,0]
+        assert ans == [0, 0, 0, 0, 0, 0, 0, 0]
 
         self.state.revert(snapshot)
 
@@ -526,21 +532,12 @@ class TestEtherEx(object):
 
         # Fill first and second trade
         ans = self.contract.trade(
-            fill_amount,
-            [23490291715255176443338864873375620519154876621682055163056454432194948412040L,
-            -35168633768494065610302920664120686116555617894816459733689825088489895266148L,
-            38936224262371094519907212029104196662516973526369593745812124922634258039407L],
+            fill_amount, [
+                23490291715255176443338864873375620519154876621682055163056454432194948412040L,
+                -35168633768494065610302920664120686116555617894816459733689825088489895266148L,
+                38936224262371094519907212029104196662516973526369593745812124922634258039407L],
             sender=self.BOB['key'])
         assert ans == 1
-
-        # ans = self.contract.trade(23490291715255176443338864873375620519154876621682055163056454432194948412040L,
-        #     500 * 10 ** 5,
-        #     sender=self.BOB['key'])
-        # assert ans == 1
-        # ans = self.contract.trade(-35168633768494065610302920664120686116555617894816459733689825088489895266148L,
-        #     600 * 10 ** 5,
-        #     sender=self.BOB['key'])
-        # assert ans == 1
 
         ans = self.contract.get_sub_balance(self.BOB['address'], 1)
         assert ans == [balance_from_transfer - fill_amount, 0]
@@ -563,21 +560,12 @@ class TestEtherEx(object):
 
         # Fill first and part of second trade
         ans = self.contract.trade(
-            fill_amount,
-            [23490291715255176443338864873375620519154876621682055163056454432194948412040L,
-            -35168633768494065610302920664120686116555617894816459733689825088489895266148L,
-            38936224262371094519907212029104196662516973526369593745812124922634258039407L],
+            fill_amount, [
+                23490291715255176443338864873375620519154876621682055163056454432194948412040L,
+                -35168633768494065610302920664120686116555617894816459733689825088489895266148L,
+                38936224262371094519907212029104196662516973526369593745812124922634258039407L],
             sender=self.BOB['key'])
         assert ans == 1
-
-        # ans = self.contract.trade(23490291715255176443338864873375620519154876621682055163056454432194948412040L,
-        #     500 * 10 ** 5,
-        #     sender=self.BOB['key'])
-        # assert ans == 1
-        # ans = self.contract.trade(-35168633768494065610302920664120686116555617894816459733689825088489895266148L,
-        #     300 * 10 ** 5,
-        #     sender=self.BOB['key'])
-        # assert ans == 1
 
         ans = self.contract.get_sub_balance(self.BOB['address'], 1)
         assert ans == [balance_from_transfer - fill_amount, 0]

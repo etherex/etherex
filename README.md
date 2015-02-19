@@ -51,7 +51,7 @@ pip install --upgrade -r requirements.txt
 #### Running tests
 
 ```
-./runtests.py
+./py.test -vvrs
 ```
 
 Refer to [Serpent](https://github.com/ethereum/serpent) and [pyethereum](https://github.com/ethereum/pyethereum) for their respective usage.
