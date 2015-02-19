@@ -17,8 +17,11 @@ var MenuItem = require('react-bootstrap/MenuItem');
 var Button = require('react-bootstrap/Button');
 var ModalTrigger = require('react-bootstrap/ModalTrigger');
 var ConfirmModal = require('./ConfirmModal');
+var SubDepositModal = require('./SubDepositModal');
+var OverlayMixin = require('react-bootstrap/OverlayMixin');
 
 var AlertDismissable = require('./AlertDismissable');
+
 
 var SplitTradeForm = React.createClass({
   mixins: [FluxMixin],
@@ -187,6 +190,7 @@ var SplitTradeForm = React.createClass({
               </ModalTrigger>
             : <Button className="btn-block" type="submit" key="newtrade_fail">Place trade</Button>
           }
+          <CustomModalTrigger ref="triggerSubDeposit" owner={this._owner} flux={this.getFlux()} market={this.props.market.market} />
         </div>
       </form>
     );
@@ -280,28 +284,31 @@ var SplitTradeForm = React.createClass({
         !price ||
         !total) {
 
-        this._owner.setState({
-          alertLevel: 'warning',
-          alertMessage: "Fill it up mate!"
-        });
+      this._owner.setState({
+        alertLevel: 'warning',
+        alertMessage: "Fill it up mate!"
+      });
     }
     else if (total < this.props.market.market.minTotal) {
-        this._owner.setState({
-          alertLevel: 'warning',
-          alertMessage: "Minimum total is " + this.props.market.market.minTotal + " ETH"
-        });
+      this._owner.setState({
+        alertLevel: 'warning',
+        alertMessage: "Minimum total is " + this.props.market.market.minTotal + " ETH"
+      });
     }
-    else if (this.props.type == 1 && bigRat(this.props.user.user.balance_raw).lesser(bigRat(total).multiply(fixtures.ether))) {
-        this._owner.setState({
-          alertLevel: 'warning',
-          alertMessage: "Not enough ETH for this trade, " + utils.formatBalance(bigRat(total).multiply(fixtures.ether)) + " required."
-        });
+    else if (this.props.type == 1 &&
+        bigRat(this.props.user.user.balance_raw).lesser(bigRat(total).multiply(fixtures.ether))) {
+      this._owner.setState({
+        alertLevel: 'warning',
+        alertMessage: "Not enough ETH for this trade, " + utils.formatBalance(bigRat(total).multiply(fixtures.ether)) + " required."
+      });
     }
     else if (this.props.type == 2 && this.props.user.user.balance_sub_available < amount) {
-        this._owner.setState({
-          alertLevel: 'warning',
-          alertMessage: "Not enough " + this.props.market.market.name + " for this trade, " + amount + " " + this.props.market.market.name + " required."
-        });
+      this.refs.triggerSubDeposit.handleToggle();
+
+      this._owner.setState({
+        alertLevel: 'warning',
+        alertMessage: "Not enough " + this.props.market.market.name + " for this trade, " + amount + " " + this.props.market.market.name + " required."
+      });
     }
     else {
       this.setState({
@@ -356,6 +363,38 @@ var SplitTradeForm = React.createClass({
       total: null,
       newTrade: false
     });
+  }
+});
+
+var CustomModalTrigger = React.createClass({
+  mixins: [OverlayMixin],
+
+  getInitialState: function () {
+    return {
+      isModalOpen: false
+    };
+  },
+
+  handleToggle: function () {
+    this.setState({
+      isModalOpen: !this.state.isModalOpen
+    });
+  },
+
+  render: function () {
+    return <span />;
+  },
+
+  // This is called by the `OverlayMixin` when this component
+  // is mounted or updated and the return value is appended to the body.
+  renderOverlay: function () {
+    if (!this.state.isModalOpen) {
+      return <span/>;
+    }
+
+    return (
+        <SubDepositModal {...this.props} onRequestHide={this.handleToggle} title={"Deposit " + this.props.market.name} animation={true} />
+      );
   }
 });
 

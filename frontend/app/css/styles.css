@@ -6,6 +6,20 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
+#wrap {
+  padding-bottom: 30px;
+}
+
+.navbar-fixed-bottom {
+  height: 40px;
+  min-height: 40px;
+}
+
+.navbar-fixed-bottom .navbar-text {
+  color: #fff;
+  margin-bottom: 10.5px;
+  margin-top: 10.5px;
+}
 
 .ellipsis {
   overflow: hidden;

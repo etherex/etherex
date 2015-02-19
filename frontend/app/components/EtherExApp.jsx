@@ -38,40 +38,48 @@ var EtherExApp = React.createClass({
 
   render: function() {
     return (
-      <div className="container" ref="container">
-        <NavBar user={this.state.user} />
-        <SubNavBar />
-        {(this.state.user.error) ?
-            <div className="container-fluid">
-              <div className="alert alert-danger" role="alert">
-                <h4>Error!</h4>
-                {this.state.user.error}
-              </div>
-            </div> :
-        <div className="navbar">
-          <div className="row">
-            <div className="col-md-6">
-              <Balance user={this.state.user} />
-            </div>
-            <div className="col-md-6">
-              {(this.state.market.error) ?
+      <div id="wrap">
+        <div className="container" ref="container">
+          <NavBar user={this.state.user} />
+          <SubNavBar />
+          {(this.state.user.error) ?
+              <div className="container-fluid">
                 <div className="alert alert-danger" role="alert">
                   <h4>Error!</h4>
-                  {this.state.market.error}
-                </div> :
-                <BalanceSub user={this.state.user} market={this.state.market} />
-              }
+                  {this.state.user.error}
+                </div>
+              </div> :
+          <div className="navbar">
+            <div className="row">
+              <div className="col-md-6">
+                <Balance user={this.state.user} />
+              </div>
+              <div className="col-md-6">
+                {(this.state.market.error) ?
+                  <div className="alert alert-danger" role="alert">
+                    <h4>Error!</h4>
+                    {this.state.market.error}
+                  </div> :
+                  <BalanceSub user={this.state.user} market={this.state.market} />
+                }
+              </div>
             </div>
+          </div>}
+          {(!this.state.market.error && !this.state.user.error) &&
+            <LastPrice market={this.state.market.market} />}
+          {(!this.state.market.error && !this.state.user.error) &&
+            <RouteHandler
+              market={this.state.market}
+              trades={this.state.trades}
+              user={this.state.user}
+            />}
+        </div>
+        <footer className="navbar navbar-default navbar-fixed-bottom">
+          <div className="container navbar">
+            <p className="navbar-text">&copy; <a href="http://etherex.org" target="_blank">EtherEx</a></p>
+            <p className="navbar-text navbar-right">A Decentralized Future Calls For A Decentralized Exchange.</p>
           </div>
-        </div>}
-        {(!this.state.market.error && !this.state.user.error) &&
-          <LastPrice market={this.state.market.market} />}
-        {(!this.state.market.error && !this.state.user.error) &&
-          <RouteHandler
-            market={this.state.market}
-            trades={this.state.trades}
-            user={this.state.user}
-          />}
+        </footer>
       </div>
     );
   }

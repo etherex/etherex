@@ -4,6 +4,8 @@ var React = require("react");
 var Fluxxor = require("fluxxor");
 var FluxMixin = Fluxxor.FluxMixin(React);
 
+var AlertDismissable = require('./AlertDismissable');
+
 var SubSend = require('./SubSend');
 var SubDeposit = require('./SubDeposit');
 var SubWithdraw = require('./SubWithdraw');
@@ -14,11 +16,19 @@ var TxsList = require("./TxsList");
 var Markets = React.createClass({
   mixins: [FluxMixin],
 
+  getInitialState: function() {
+    return {
+      alertLevel: 'info',
+      alertMessage: ''
+    };
+  },
+
   render: function() {
     // console.log(this.props);
     // <MarketFilter market={this.props.market} trades={this.props.trades} user={this.props.user} />
     return (
       <div>
+        <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
 
         <div className="container-fluid">
           <div className="col-md-6">
