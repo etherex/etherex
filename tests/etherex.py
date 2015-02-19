@@ -127,6 +127,12 @@ class TestEtherEx(object):
         assert ans == 1
         assert self._storage(self.contract, "0x01") == "0x" + new_owner
 
+    def test_get_last_market_id(self):
+        self.test_initialize()
+
+        ans = self.contract.get_last_market_id()
+        assert ans == 1
+
     def test_get_market(self):
         self.test_initialize()
 
@@ -263,21 +269,21 @@ class TestEtherEx(object):
 
         with pytest.raises(Exception) as excinfo:
             self.contract.buy(1000 * 10 ** 5, int(0.25 * 10 ** 8), 1, 1)
-        assert excinfo.value.message == "Wrong number of arguments!"
+        assert "Wrong number of arguments" in excinfo.value.message
 
     def test_amount_out_of_range(self):
         self.test_initialize()
 
-        with pytest.raises(AssertionError) as excinfo:
-            self.contract.buy(2 ** 255, int(0.25 * 10 ** 8), 1)
-        assert 'Value out of bounds' in excinfo.value.message
+        with pytest.raises(Exception) as excinfo:
+            self.contract.buy(2 ** 256, int(0.25 * 10 ** 8), 1)
+        assert 'Number out of range' in excinfo.value.message
 
     def test_price_out_of_range(self):
         self.test_initialize()
 
-        with pytest.raises(AssertionError) as excinfo:
-            self.contract.buy(1000 * 10 ** 5, 2 ** 255, 1)
-        assert 'Value out of bounds' in excinfo.value.message
+        with pytest.raises(Exception) as excinfo:
+            self.contract.buy(1000 * 10 ** 5, 2 ** 256, 1)
+        assert 'Number out of range' in excinfo.value.message
 
     def test_add_bob_coin(self):
         self.test_initialize()
@@ -290,6 +296,12 @@ class TestEtherEx(object):
         ans = self.bob_contract.set_exchange(self.contract.address, 2)
         assert ans == 1
         assert self._storage(self.bob_contract, self.xhex(1)) == "0x" + self.contract.address
+
+    def test_get_new_last_market_id(self):
+        self.test_add_bob_coin()
+
+        ans = self.contract.get_last_market_id()
+        assert ans == 2
 
     def test_insufficient_buy_trade(self):
         self.test_initialize()

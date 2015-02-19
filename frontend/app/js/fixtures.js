@@ -190,6 +190,17 @@ var fixtures = {
             ]
         },
         {
+            "name": "get_last_market_id",
+            "type": "function",
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "out",
+                    "type": "uint256"
+                }
+            ]
+        },
+        {
             "name": "get_market",
             "type": "function",
             "inputs": [

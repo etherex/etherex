@@ -387,6 +387,10 @@ def add_market(name, contract, decimals, precision, minimum):
 #
 # Getters
 #
+def get_last_market_id():
+    t = self.last_market
+    return(t)
+
 def get_market(id):
     market = array(MARKET_FIELDS - 1)
 

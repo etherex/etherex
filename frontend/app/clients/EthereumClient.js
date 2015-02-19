@@ -11,10 +11,14 @@ if (typeof web3 === 'undefined') {
 }
 
 try {
-    // if (ethBrowser)
-        web3.setProvider(new web3.providers.HttpSyncProvider());
-    // else
-    //     web3.setProvider(new web3.providers.HttpSyncProvider('http://localhost:8081'));
+    web3.setProvider(new web3.providers.HttpSyncProvider());
+
+    try {
+        var m = web3.eth.stateAt(fixtures.addresses.etherex, "0x5");
+    }
+    catch (e) {
+        web3.setProvider(new web3.providers.HttpSyncProvider('http://localhost:8545'));
+    }
 
     var contract = web3.eth.contract(fixtures.addresses.etherex, fixtures.contract_desc);
     // console.log("CONTRACT", contract);
@@ -57,19 +61,18 @@ var EthereumClient = function() {
 
     this.loadMarkets = function(user, success, failure) {
         try {
-            var hextotal = web3.eth.stateAt(fixtures.addresses.etherex, "0x5");
-            var total = _.parseInt(web3.toDecimal(hextotal));
+            var last = _.parseInt(contract.call().get_last_market_id().toString());
 
-            // console.log("TOTAL MARKETS: ", total, hextotal);
+            // console.log("LAST MARKET ID: ", last);
 
-            if (!total || hextotal == "0x") {
+            if (!last) {
                 failure("No market found, seems like contracts are missing.");
                 return;
             }
 
             var markets = [];
 
-            for (var i = 1; i < total + 1; i++) {
+            for (var i = 1; i < last + 1; i++) {
                 try {
                     var market = contract.call().get_market(i);
                     // console.log("Market from ABI:", market);
