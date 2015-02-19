@@ -99,6 +99,12 @@ var SubSend = React.createClass({
         alertMessage: "Dont' be cheap..."
       });
     }
+    else if (amount > this.props.user.balance_sub_available) {
+      this._owner.setState({
+        alertLevel: 'warning',
+        alertMessage: "Not enough " + this.props.market.name + " available to send, got " + utils.format(this.props.user.balance_sub_available) + ", needs " + utils.format(amount)
+      });
+    }
     else if (address.length != 40) {
         this._owner.setState({
           alertLevel: 'warning',

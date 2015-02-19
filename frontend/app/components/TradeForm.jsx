@@ -180,7 +180,7 @@ var SplitTradeForm = React.createClass({
                   <ConfirmModal message={this.state.message}
                     note={this.state.note}
                     tradeList={this.props.trades.filling}
-                    user={this.props.user}
+                    user={this.props.user.user}
                     market={this.props.market}
                     flux={this.getFlux()}
                     onSubmit={this.onSubmitForm}
@@ -190,7 +190,14 @@ var SplitTradeForm = React.createClass({
               </ModalTrigger>
             : <Button className="btn-block" type="submit" key="newtrade_fail">Place trade</Button>
           }
-          <CustomModalTrigger ref="triggerSubDeposit" owner={this._owner} flux={this.getFlux()} market={this.props.market.market} />
+          <CustomModalTrigger
+            ref="triggerSubDeposit"
+            owner={this._owner}
+            flux={this.getFlux()}
+            market={this.props.market.market}
+            user={this.props.user.user}
+            amount={this.state.amount}
+          />
         </div>
       </form>
     );

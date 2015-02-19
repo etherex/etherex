@@ -24,9 +24,13 @@ var SubDepositModal = React.createClass({
 
   getInitialState: function() {
     return {
-      amount: null,
+      amount: this.props.amount,
       newDeposit: false
     };
+  },
+
+  componentDidMount: function() {
+    this.validate(new Event);
   },
 
   render: function() {
@@ -35,7 +39,7 @@ var SubDepositModal = React.createClass({
         <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
           <div className="modal-body">
             <label forHtml="amount">Amount</label>
-            <input type="number" min="0.0001" step="0.00000001" className="form-control" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
+            <input type="number" min="0.0001" step="0.00000001" className="form-control" placeholder="10.0000" ref="amount" onChange={this.handleChange} value={this.state.amount} />
           </div>
           <div className="modal-footer">
             {this.state.newDeposit ?
@@ -72,8 +76,6 @@ var SubDepositModal = React.createClass({
 
     var amount = parseFloat(this.refs.amount.getDOMNode().value.trim());
 
-    console.log(this);
-
     this.setState({
       amount: amount
     });
@@ -82,6 +84,12 @@ var SubDepositModal = React.createClass({
       this.props.owner.setState({
         alertLevel: 'warning',
         alertMessage: "Dont' be cheap..."
+      });
+    }
+    else if (amount > this.props.user.balance_sub) {
+      this.props.owner.setState({
+        alertLevel: 'warning',
+        alertMessage: "Not enough " + this.props.market.name + " for deposit, got " + utils.format(this.props.user.balance_sub) + ", needs " + utils.format(amount)
       });
     }
     else {

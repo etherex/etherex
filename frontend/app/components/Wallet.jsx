@@ -50,7 +50,7 @@ var Markets = React.createClass({
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
-                  <SubDeposit market={this.props.market.market} />
+                  <SubDeposit market={this.props.market.market} user={this.props.user.user} />
                 </div>
               </div>
             </div>
@@ -64,7 +64,7 @@ var Markets = React.createClass({
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
-                  <SubSend market={this.props.market.market} />
+                  <SubSend market={this.props.market.market} user={this.props.user.user} />
                 </div>
               </div>
             </div>

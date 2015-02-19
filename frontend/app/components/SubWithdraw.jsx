@@ -78,6 +78,12 @@ var SubWithdraw = React.createClass({
         alertMessage: "Dont' be cheap to yourself..."
       });
     }
+    else if (amount > this.props.user.balance_sub_available) {
+      this._owner.setState({
+        alertLevel: 'warning',
+        alertMessage: "Not enough " + this.props.market.name + " available for withdraw, got " + utils.format(this.props.user.balance_sub_available) + ", needs " + utils.format(amount)
+      });
+    }
     else {
       this.setState({
         newWithdrawal: true
