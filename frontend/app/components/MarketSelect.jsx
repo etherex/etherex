@@ -6,8 +6,8 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 
 var constants = require("../js/constants");
 
-var DropdownButton = require('react-bootstrap/DropdownButton');
-var MenuItem = require('react-bootstrap/MenuItem');
+var DropdownButton = require('react-bootstrap/lib/DropdownButton');
+var MenuItem = require('react-bootstrap/lib/MenuItem');
 
 var MarketSelect = React.createClass({
   mixins: [FluxMixin],

@@ -6,8 +6,8 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 
 var Router = require("react-router");
 
-var Button = require('react-bootstrap/Button');
-var ModalTrigger = require('react-bootstrap/ModalTrigger');
+var Button = require('react-bootstrap/lib/Button');
+var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
 var ConfirmModal = require('./ConfirmModal');
 
 var AlertDismissable = require('./AlertDismissable');

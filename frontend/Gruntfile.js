@@ -88,7 +88,7 @@ module.exports = function(grunt) {
       },
       src: ['index.html', 'bundle.js', '*.svg', '*.woff', '*.eot', '*.ttf']
     },
-    clean: ["app/*.svg", "app/*.woff", "app/*.eot", "app/*.ttf"]
+    clean: ["app/*.svg", "app/*.woff", "app/*.eot", "app/*.ttf", "app/bundle.js", "app/*.js.map"]
   });
 
   // grunt.loadNpmTasks('grunt-jest');

@@ -8,7 +8,7 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 
 var AlertDismissable = require('./AlertDismissable');
 
-var ProgressBar = require('react-bootstrap/ProgressBar');
+var ProgressBar = require('react-bootstrap/lib/ProgressBar');
 
 var MarketTable = require('./MarketTable');
 

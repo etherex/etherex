@@ -2,7 +2,7 @@
 
 var React = require("react");
 
-var ModalTrigger = require('react-bootstrap/ModalTrigger');
+var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
 
 // var UserIdModal = require("./UserIdModal");
 

@@ -12,13 +12,13 @@ var utils = require("../js/utils");
 
 // var mq = require('react-responsive');
 
-var DropdownButton = require('react-bootstrap/DropdownButton');
-var MenuItem = require('react-bootstrap/MenuItem');
-var Button = require('react-bootstrap/Button');
-var ModalTrigger = require('react-bootstrap/ModalTrigger');
+var DropdownButton = require('react-bootstrap/lib/DropdownButton');
+var MenuItem = require('react-bootstrap/lib/MenuItem');
+var Button = require('react-bootstrap/lib/Button');
+var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
 var ConfirmModal = require('./ConfirmModal');
 var SubDepositModal = require('./SubDepositModal');
-var OverlayMixin = require('react-bootstrap/OverlayMixin');
+var OverlayMixin = require('react-bootstrap/lib/OverlayMixin');
 
 var AlertDismissable = require('./AlertDismissable');
 
@@ -196,7 +196,7 @@ var SplitTradeForm = React.createClass({
             flux={this.getFlux()}
             market={this.props.market.market}
             user={this.props.user.user}
-            amount={this.state.amount}
+            amount={this.state.amount - this.props.user.user.balance_sub_available}
           />
         </div>
       </form>
@@ -310,12 +310,11 @@ var SplitTradeForm = React.createClass({
       });
     }
     else if (this.props.type == 2 && this.props.user.user.balance_sub_available < amount) {
-      this.refs.triggerSubDeposit.handleToggle();
-
       this._owner.setState({
         alertLevel: 'warning',
         alertMessage: "Not enough " + this.props.market.market.name + " for this trade, " + amount + " " + this.props.market.market.name + " required."
       });
+      this.refs.triggerSubDeposit.handleToggle();
     }
     else {
       this.setState({
