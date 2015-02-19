@@ -1,5 +1,6 @@
 EtherEx
 =======
+[![Build Status](https://travis-ci.org/etherex/etherex.svg?branch=master)](https://travis-ci.org/etherex/etherex)
 
 Decentralized exchange built on Ethereum.
 
