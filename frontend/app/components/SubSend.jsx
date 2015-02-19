@@ -31,35 +31,29 @@ var SubSend = React.createClass({
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
         <div className="container-fluid row">
-          <div className="col-md-10 col-md-offset-1">
-            <div className="form-group">
-              <label className="sr-only" forHtml="address">Address</label>
-              <input type="text" className="form-control" pattern="\w{1,40}" placeholder="Address" ref="address" size="40" onChange={this.handleChange} />
-            </div>
+          <div className="form-group">
+            <label className="sr-only" forHtml="address">Address</label>
+            <input type="text" className="form-control" maxLength="40" pattern="[a-fA-F\d]+" placeholder="Address" ref="address" onChange={this.handleChange} />
           </div>
-          <div className="col-md-8 col-md-offset-2">
-            <div className="form-group">
-              <label className="sr-only" forHtml="amount">Amount</label>
-              <input type="number" min="0.0001" step="0.00000001" className="form-control" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
-            </div>
+          <div className="form-group">
+            <label className="sr-only" forHtml="amount">Amount</label>
+            <input type="number" min="0.0001" step="0.00000001" className="form-control" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
           </div>
-          <div className="col-md-8 col-md-offset-2">
-            <div className="form-group">
-              {this.state.newSend ?
-                <ModalTrigger modal={
-                    <ConfirmModal
-                      message={
-                        "Are you sure you want to send" +
-                          " " + utils.numeral(this.state.amount, 4) + " " + this.props.market.name +
-                          " to " + this.state.recipient + " ?"}
-                      flux={this.getFlux()}
-                      onSubmit={this.onSubmitForm}
-                    />
-                  }>
-                  <Button className="btn-block btn-primary" type="submit" key="send">Send</Button>
-                </ModalTrigger>
-              : <Button className="btn-block" type="submit" key="send_fail">Send</Button>}
-            </div>
+          <div className="form-group">
+            {this.state.newSend ?
+              <ModalTrigger modal={
+                  <ConfirmModal
+                    message={
+                      "Are you sure you want to send" +
+                        " " + utils.numeral(this.state.amount, 4) + " " + this.props.market.name +
+                        " to " + this.state.recipient + " ?"}
+                    flux={this.getFlux()}
+                    onSubmit={this.onSubmitForm}
+                  />
+                }>
+                <Button className="btn-block btn-primary" type="submit" key="send">Send</Button>
+              </ModalTrigger>
+            : <Button className="btn-block" type="submit" key="send_fail">Send</Button>}
           </div>
         </div>
       </form>
