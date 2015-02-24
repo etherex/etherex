@@ -45,13 +45,13 @@ git clone https://github.com/etherex/etherex.git
 This will install `pyethereum` and `ethereum-serpent` if you don't already have those installed.
 
 ```
-pip install --upgrade -r requirements.txt
+pip install -r dev_requirements.txt
 ```
 
 #### Running tests
 
 ```
-./py.test -vvrs
+py.test -vvrs
 ```
 
 Refer to [Serpent](https://github.com/ethereum/serpent) and [pyethereum](https://github.com/ethereum/pyethereum) for their respective usage.
