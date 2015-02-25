@@ -141,3 +141,5 @@ class Integration(unittest.TestCase):
             driver.save_screenshot('screenshot-fail.png')
 
         self.assertEqual([], self.verificationErrors)
+
+        driver.close()
