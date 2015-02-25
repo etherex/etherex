@@ -10,7 +10,7 @@
     Cow: "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826"
     zg: "0xe559de5527492bcb42ec68d07df0742a98ec3f1e"
     caktux: "0xb5b8c62dd5a20793b6c562e002e7e0aa68316d31"
-    fabrezio: "0x90004d8d1d3c85f87bc8b7152a69ef14235504cb"
+    mids: "0x2ad9e5d8960882c07b96e2a21d5a39ab082e7368"
 
 # Deploy contracts
 -
@@ -29,13 +29,15 @@
   deploy:
     ETX:
       contract: etx.se
+      wait: True
 -
   deploy:
     CAK:
       contract: etx.se
+      wait: True
 -
   deploy:
-    FAB:
+    MID:
       contract: etx.se
       wait: True
 # -
@@ -43,7 +45,7 @@
 #     Update:
 #       contract: update.se
 
-# Initialize
+# Register with global NameReg
 # -
 #   transact:
 #     NameReg:
@@ -76,13 +78,13 @@
       data:
         - $CAK
         - CAK
-    OwnNameRegFAB:
+    OwnNameRegMID:
       to: $OwnNameReg
       fun_name: register
       sig: ii
       data:
-        - $FAB
-        - FAB
+        - $MID
+        - MID
       wait: True
 
 # Register subcurrencies on the exchange
@@ -98,6 +100,7 @@
         - 5
         - 100000000
         - 1000000000000000000
+      wait: True
 -
   transact:
     RegisterCAK:
@@ -110,15 +113,16 @@
         - 4
         - 1000
         - 1000000000000000000
+      wait: True
 -
   transact:
-    RegisterFAB:
+    RegisterMID:
       to: $EtherEx
       fun_name: add_market
       sig: iiiii
       data:
-        - FAB
-        - $FAB
+        - MID
+        - $MID
         - 3
         - 10000
         - 1000000000000000000
@@ -134,6 +138,7 @@
       data:
         - $EtherEx
         - 1
+      wait: True
 -
   transact:
     SetExchangeCAK:
@@ -143,10 +148,11 @@
       data:
         - $EtherEx
         - 2
+      wait: True
 -
   transact:
-    SetExchangeFAB:
-      to: $FAB
+    SetExchangeMID:
+      to: $MID
       fun_name: set_exchange
       sig: ii
       data:
@@ -154,39 +160,33 @@
         - 3
       wait: True
 
-# -
-#   transact:
-#     Update:
-#       to: $Update
-#       funid: 0
-#       data:
-#         - $Owner
-#         - $EtherEx
-
-# Change ownership
+# Change creator
 -
   transact:
     SetExchangeOwner:
       to: $EtherEx
-      fun_name: change_ownership
+      fun_name: change_creator
       sig: i
       data:
         - $zg
+      wait: True
     SetETXOwner:
       to: $ETX
-      fun_name: change_ownership
+      fun_name: change_creator
       sig: i
       data:
         - $zg
+      wait: True
     SetCAKOwner:
       to: $CAK
-      fun_name: change_ownership
+      fun_name: change_creator
       sig: i
       data:
         - $zg
-    SetFABOwner:
-      to: $FAB
-      fun_name: change_ownership
+      wait: True
+    SetMIDOwner:
+      to: $MID
+      fun_name: change_creator
       sig: i
       data:
         - $zg
@@ -201,9 +201,10 @@
     CAK:
       to: $caktux
       value: 1000000000000000000000
-    FAB:
-      to: $fabrezio
+    MID:
+      to: $mids
       value: 1000000000000000000000
+      wait: True
 -
   transact:
     ZGetx:
@@ -220,13 +221,14 @@
       data:
         - $caktux
         - 10000000000
-    FABetx:
+    MIDetx:
       to: $ETX
       fun_name: send
       sig: ii
       data:
-        - $fabrezio
+        - $mids
         - 10000000000
+      wait: True
 -
   transact:
     ZGcak:
@@ -243,35 +245,36 @@
       data:
         - $caktux
         - 50000000000
-    FABcak:
+    MIDcak:
       to: $CAK
       fun_name: send
       sig: ii
       data:
-        - $fabrezio
+        - $mids
         - 5000000000
+      wait: True
 -
   transact:
     ZGetx:
-      to: $FAB
+      to: $MID
       fun_name: send
       sig: ii
       data:
         - $zg
         - 5000000000
     CAKetx:
-      to: $FAB
+      to: $MID
       fun_name: send
       sig: ii
       data:
         - $caktux
         - 5000000000
-    FABetx:
-      to: $FAB
+    MIDetx:
+      to: $MID
       fun_name: send
       sig: ii
       data:
-        - $fabrezio
+        - $mids
         - 50000000000
       wait: True
 
@@ -293,8 +296,8 @@
       data:
         - $EtherEx
         - 10000000000
-    depositFAB:
-      to: $FAB
+    depositMID:
+      to: $MID
       fun_name: send
       sig: ii
       data:
@@ -346,6 +349,7 @@
         - 45000000
         - 27000000
         - 1
+      wait: True
     trade6:
       to: $EtherEx
       fun_name: sell
@@ -386,6 +390,7 @@
         - 25000000
         - 32000000
         - 1
+      wait: True
 
     # Buys
     trade11:
@@ -480,6 +485,7 @@
         - 550000000
         - 30
         - 2
+      wait: True
 
     # Buys
     trade11:
@@ -521,7 +527,7 @@
       wait: True
 
 
-# FAB test trades
+# MID test trades
 -
   transact:
     # Sells
@@ -573,6 +579,7 @@
         - 550000000
         - 30
         - 3
+      wait: True
 
     # Buys
     trade11:
@@ -612,19 +619,3 @@
         - 3
       value: 10500000000000000000
       wait: True
-
-
-# # Contract calls with return values
-# -
-#   call:
-#     MyContract:
-#       to: $NameReg
-#       value: 0
-#       fun_name: register
-#       data: 0x12345
-
-# More deploy
-# -
-# deploy:
-#   extra:
-#     contract: short_namecoin.se

@@ -16,7 +16,7 @@ try {
     web3.setProvider(new web3.providers.HttpSyncProvider());
 
     try {
-        var m = web3.eth.stateAt(fixtures.addresses.etherex, "0x5");
+        var m = web3.eth.getState(fixtures.addresses.etherex, "0x5");
     }
     catch (e) {
         web3.setProvider(new web3.providers.HttpSyncProvider('http://localhost:8545'));
@@ -170,7 +170,7 @@ var EthereumClient = function() {
                         // Set defaultBlock to -1 to check mined status
                         web3.eth.defaultBlock = -1;
 
-                        var tradeExists = web3.eth.stateAt(fixtures.addresses.etherex, web3.fromDecimal(ref));
+                        var tradeExists = web3.eth.getState(fixtures.addresses.etherex, web3.fromDecimal(ref));
 
                         if (tradeExists == "0x")
                             status = 'pending';
@@ -325,7 +325,7 @@ var EthereumClient = function() {
         var error = "Failed to update balance: ";
 
         try {
-            var hexbalance = web3.eth.balanceAt(address);
+            var hexbalance = web3.eth.getBalance(address);
             if (!hexbalance || hexbalance == "0x") {
                 success(0, false);
                 return;
@@ -446,12 +446,12 @@ var EthereumClient = function() {
         // ETH balance
         // console.log("Setting watchers for", addresses);
         web3.eth.watch({address: addresses}).changed(flux.actions.user.updateBalance);
-        web3.eth.watch('chain').changed(flux.actions.user.updateBalance);
+        // web3.eth.watch('chain').changed(flux.actions.user.updateBalance);
 
         // Sub balances
         var market_addresses = _.pluck(markets, 'address');
-        // web3.eth.watch({address: market_addresses}).changed(flux.actions.user.updateBalanceSub);
-        web3.eth.watch('chain').changed(flux.actions.user.updateBalanceSub);
+        web3.eth.watch({address: market_addresses}).changed(flux.actions.user.updateBalanceSub);
+        // web3.eth.watch('chain').changed(flux.actions.user.updateBalanceSub);
     };
 
     this.setMarketWatches = function(flux, markets) {
