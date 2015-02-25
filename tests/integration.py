@@ -138,8 +138,8 @@ class Integration(unittest.TestCase):
             driver.save_screenshot('screenshot-final.png')
 
         except Exception as e:
-            self.fail(e)
             driver.save_screenshot('screenshot-fail.png')
+            self.fail(e)
 
         self.assertEqual([], self.verificationErrors)
 
