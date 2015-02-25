@@ -24,17 +24,14 @@
   deploy:
     OwnNameReg:
       contract: namereg.se
-      wait: True
 -
   deploy:
     ETX:
       contract: etx.se
-      wait: True
 -
   deploy:
     CAK:
       contract: etx.se
-      wait: True
 -
   deploy:
     MID:
@@ -100,7 +97,6 @@
         - 5
         - 100000000
         - 1000000000000000000
-      wait: True
 -
   transact:
     RegisterCAK:
@@ -113,7 +109,6 @@
         - 4
         - 1000
         - 1000000000000000000
-      wait: True
 -
   transact:
     RegisterMID:
@@ -138,7 +133,6 @@
       data:
         - $EtherEx
         - 1
-      wait: True
 -
   transact:
     SetExchangeCAK:
@@ -148,7 +142,6 @@
       data:
         - $EtherEx
         - 2
-      wait: True
 -
   transact:
     SetExchangeMID:
@@ -169,21 +162,18 @@
       sig: i
       data:
         - $zg
-      wait: True
     SetETXOwner:
       to: $ETX
       fun_name: change_creator
       sig: i
       data:
         - $zg
-      wait: True
     SetCAKOwner:
       to: $CAK
       fun_name: change_creator
       sig: i
       data:
         - $zg
-      wait: True
     SetMIDOwner:
       to: $MID
       fun_name: change_creator
@@ -618,4 +608,3 @@
         - 21
         - 3
       value: 10500000000000000000
-      wait: True
