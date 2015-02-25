@@ -84,7 +84,7 @@ module.exports = function(grunt) {
     "gh-pages": {
       options: {
         base: 'app',
-        repo: 'https://github.com/etherex/etherex.git'
+        repo: 'git@github.com:etherex/etherex.git'
       },
       src: ['index.html', 'bundle.js', '*.svg', '*.woff', '*.eot', '*.ttf']
     },
