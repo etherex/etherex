@@ -17,6 +17,12 @@ class Integration(unittest.TestCase):
         self.driver.set_window_position(0, 0)
         self.driver.set_window_size(1280, 1200)
 
+    def test_integration(self):
+        driver = self.driver
+        driver.get(self.base_url + "/etherex/#/trades")
+        time.sleep(5)
+        driver.save_screenshot('screenshot.png')
+
         try:
             error = driver.find_element_by_css_selector("div.alert.alert-danger > span").text
             if "Unable to load addresses" in error:
