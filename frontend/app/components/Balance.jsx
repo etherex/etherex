@@ -12,8 +12,8 @@ var Balance = React.createClass({
 
   render: function() {
     return (
-      <div className="btn-lg btn-primary text-overflow" title={this.props.user.user.balance + (this.props.user.user.balance_unconfirmed ? " " + this.props.user.user.balance_unconfirmed : "")}>
-        ETH Balance: {this.props.user.user.balance} {this.props.user.user.balance_unconfirmed}
+      <div className="btn-lg btn-primary text-overflow" title={"Ether balance: " + this.props.user.user.balance + (this.props.user.user.balance_unconfirmed ? " " + this.props.user.user.balance_unconfirmed : "")}>
+        {this.props.user.user.balance} {this.props.user.user.balance_unconfirmed}
       </div>
     );
   }

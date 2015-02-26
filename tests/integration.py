@@ -68,7 +68,7 @@ class Integration(unittest.TestCase):
             self.assertEqual("30 billion", driver.find_element_by_xpath("//div[@id='wrap']/div/div[2]/div/div[2]/div/div/div/span[5]").text)
 
             driver.find_element_by_xpath("(//button[@type='button'])[2]").click()
-            driver.find_element_by_link_text("FAB").click()
+            driver.find_element_by_link_text("MID").click()
             time.sleep(5)
             self.assertEqual("0.0025", driver.find_element_by_xpath("//div[@id='wrap']/div/div[4]/div[2]/div[3]/div/div/div/div/table/tbody/tr/td[3]/div").text)
             self.assertEqual("0.0026", driver.find_element_by_xpath("//div[@id='wrap']/div/div[4]/div[2]/div[3]/div/div/div/div/table/tbody/tr[2]/td[3]/div").text)

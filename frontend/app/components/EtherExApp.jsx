@@ -51,10 +51,10 @@ var EtherExApp = React.createClass({
               </div> :
           <div className="navbar">
             <div className="row">
-              <div className="col-md-6">
+              <div className="col-md-3">
                 <Balance user={this.state.user} />
               </div>
-              <div className="col-md-6">
+              <div className="col-md-9">
                 {(this.state.market.error) ?
                   <div className="alert alert-danger" role="alert">
                     <h4>Error!</h4>

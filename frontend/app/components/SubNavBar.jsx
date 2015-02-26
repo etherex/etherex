@@ -19,9 +19,6 @@ var SubNavBar = React.createClass({
                 <ul className="nav nav-pills nav-justified">
                     <SubTab to="trades" className="icon-chart-line">Subcurrencies</SubTab>
                     <SubTab to="trades/xchain" className="icon-bitcoin">X-Chain</SubTab>
-                    {{
-                    //<SubTab to="trades/marketplace" className="icon-wallet">Marketplace</SubTab>
-                    }}
                 </ul>
             </div>
         );
