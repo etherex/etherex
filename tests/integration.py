@@ -146,7 +146,7 @@ class Integration(unittest.TestCase):
             driver.find_element_by_xpath("//div[@id='navbar-collapse']/ul[2]/li/a/span[3]").click()
             self.assertEqual("16", driver.find_element_by_xpath("//div[@id='wrap']/div/div[4]/div/div[2]/table/tbody/tr[4]/td[2]").text)
 
-            driver.save_screenshot('screenshot-final.png')
+            driver.save_screenshot('screenshot-passed.png')
 
         except Exception as e:
             driver.save_screenshot('screenshot-fail.png')
