@@ -1,5 +1,5 @@
 https://github.com/ethereum/serpent/tarball/develop
-https://github.com/ethereum/pyethereum/tarball/develop
+pyethereum==0.7.522
 pyepm
 flake8
 pytest
