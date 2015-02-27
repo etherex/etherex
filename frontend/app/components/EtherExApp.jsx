@@ -14,6 +14,8 @@ var SubNavBar = require("./SubNavBar");
 var Balance = require("./Balance");
 var BalanceSub = require("./BalanceSub");
 var LastPrice = require("./LastPrice");
+var MarketSelect = require("./MarketSelect")
+
 var AlertDismissable = require('./AlertDismissable');
 
 var EtherExApp = React.createClass({
@@ -49,20 +51,21 @@ var EtherExApp = React.createClass({
                   {this.state.user.error}
                 </div>
               </div> :
-          <div className="navbar">
-            <div className="row">
-              <div className="col-md-3">
-                <Balance user={this.state.user} />
-              </div>
-              <div className="col-md-9">
-                {(this.state.market.error) ?
-                  <div className="alert alert-danger" role="alert">
-                    <h4>Error!</h4>
-                    {this.state.market.error}
-                  </div> :
-                  <BalanceSub user={this.state.user} market={this.state.market} />
-                }
-              </div>
+          <div className="navbar row">
+            <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+              <Balance user={this.state.user} />
+            </div>
+            <div className="col-lg-8 col-md-8 col-sm-10 col-xs-10">
+              {(this.state.market.error) ?
+                <div className="alert alert-danger" role="alert">
+                  <h4>Error!</h4>
+                  {this.state.market.error}
+                </div> :
+                <BalanceSub user={this.state.user} market={this.state.market} />
+              }
+            </div>
+            <div className="col-lg-1 col-md-1 col-sm-2 col-xs-2">
+              <MarketSelect market={this.state.market} user={this.state.user} />
             </div>
           </div>}
           {(!this.state.market.error && !this.state.user.error) &&
