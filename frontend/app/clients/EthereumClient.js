@@ -23,7 +23,9 @@ try {
         isMist = true;
     }
 
-    var contract = web3.eth.contract(fixtures.addresses.etherex, fixtures.contract_desc);
+    var ContractABI = web3.eth.contract(fixtures.contract_desc);
+    var contract = new ContractABI(fixtures.addresses.etherex);
+
     // console.log("CONTRACT", contract);
 }
 catch(e) {
@@ -96,7 +98,8 @@ var EthereumClient = function() {
 
                     // console.log(id, name, address, decimals, precision, minimum, lastPrice, owner, block, total_trades);
 
-                    var subcontract = web3.eth.contract(address, fixtures.sub_contract_desc);
+                    var SubContractABI = web3.eth.contract(fixtures.sub_contract_desc);
+                    var subcontract = new SubContractABI(address);
                     var balance = subcontract.call().balance(user.addresses[0]).toString();
 
                     markets.push({
@@ -325,7 +328,9 @@ var EthereumClient = function() {
         var error = "Failed to update balance: ";
 
         try {
-            var hexbalance = web3.eth.getBalance(address);
+            var hexbalance = web3.eth.balanceAt(address);
+            // console.log("BALANCE", hexbalance.toString());
+
             if (!hexbalance || hexbalance == "0x") {
                 success(0, false);
                 return;
@@ -345,7 +350,8 @@ var EthereumClient = function() {
             return;
 
         try {
-            var subcontract = web3.eth.contract(market.address, fixtures.sub_contract_desc);
+            var SubContractABI = web3.eth.contract(fixtures.sub_contract_desc);
+            var subcontract = new SubContractABI(market.address);
             var sub_balance = _.parseInt(subcontract.call().balance(address).toString());
 
             var balances = contract.call().get_sub_balance(address, market.id);
@@ -378,7 +384,8 @@ var EthereumClient = function() {
     };
 
     this.sendSub = function(amount, recipient, market, success, failure) {
-        var subcontract = web3.eth.contract(market.address, fixtures.sub_contract_desc);
+        var SubContractABI = web3.eth.contract(fixtures.sub_contract_desc);
+        var subcontract = new SubContractABI(market.address);
 
         try {
             var result = subcontract.transact({
@@ -393,7 +400,8 @@ var EthereumClient = function() {
     };
 
     this.depositSub = function(user, amount, market, success, failure) {
-        var subcontract = web3.eth.contract(market.address, fixtures.sub_contract_desc);
+        var SubContractABI = web3.eth.contract(fixtures.sub_contract_desc);
+        var subcontract = new SubContractABI(market.address);
 
         try {
             var result = subcontract.transact({
@@ -444,18 +452,17 @@ var EthereumClient = function() {
 
     this.setUserWatches = function(flux, addresses, markets) {
         // ETH balance
-        // console.log("Setting watchers for", addresses);
-        web3.eth.watch({address: addresses}).changed(flux.actions.user.updateBalance);
+        web3.eth.filter({address: addresses}).watch(flux.actions.user.updateBalance);
         // web3.eth.watch('chain').changed(flux.actions.user.updateBalance);
 
         // Sub balances
         var market_addresses = _.pluck(markets, 'address');
-        web3.eth.watch({address: market_addresses}).changed(flux.actions.user.updateBalanceSub);
+        web3.eth.filter({address: market_addresses}).watch(flux.actions.user.updateBalanceSub);
         // web3.eth.watch('chain').changed(flux.actions.user.updateBalanceSub);
     };
 
     this.setMarketWatches = function(flux, markets) {
-        web3.eth.watch(contract).changed(flux.actions.market.updateMarkets);
+        web3.eth.filter({address: fixtures.addresses.etherex}).watch(flux.actions.market.updateMarkets);
     };
 
 
