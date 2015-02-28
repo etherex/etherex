@@ -1,4 +1,4 @@
-https://github.com/ethereum/serpent/tarball/develop
+https://github.com/ethereum/serpent/tarball/67e2ff90d3a86817c0dba85c8aced2893530a27d
 pyethereum==0.7.522
 pyepm
 flake8
