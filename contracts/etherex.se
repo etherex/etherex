@@ -101,11 +101,11 @@ def init():
 
 def shared():
     # Basic gas check
-    if tx.gas < 1000:
+    if msg.gas < 1000:
         return(0) // "Insufficient gas"
 
     # Logging
-    self.log_gas = tx.gas
+    self.log_gas = msg.gas
     self.log_timestamp = block.timestamp
 
 
