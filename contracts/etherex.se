@@ -10,19 +10,18 @@
 #
 
 data type # 0x
-data owner # 0x1
-data creator # 0x2
-data created # 0x3
-data status # 0x4
-data last_market # 0x5
-data last_trade # 0x6
+data creator # 0x1
+data created # 0x2
+data status # 0x3
+data last_market # 0x4
+data last_trade # 0x5
 
-data markets_ptr # 0x7
-data trades_ptr # 0x8
+data markets_ptr # 0x6
+data trades_ptr # 0x7
 
-data log_gas # 0x9
-data log_last_trade # 0xa
-data log_timestamp # 0xb
+data log_gas # 0x8
+data log_last_trade # 0x9
+data log_timestamp # 0xa
 
 data markets[2^160](id, name, contract, decimals, precision, minimum, last_price, owner, block, total_trades, trade_ids[](id))
 data trades[2^160](id, type, market, amount, price, owner, block, ref)
@@ -95,7 +94,6 @@ macro remove_trade($trade_id):
 def init():
     # c3D definitions
     self.type = 0x88554646AA # c3D action contract
-    self.owner = msg.sender # Owner of this c3D contract
     self.creator = msg.sender # Creator of this c3D contract
     self.created = block.timestamp # TimeStamp this c3D contract was created
 
@@ -442,11 +440,11 @@ def get_sub_balance(address, market_id):
     return([self.balances[address][market_id].available, self.balances[address][market_id].trading], items=2)
 
 #
-# Change ownership
+# Change creator
 #
-def change_ownership(new_owner):
-    if msg.sender == self.owner:
-        self.owner = new_owner // "Set owner to %s" % new_owner
+def change_creator(new_creator):
+    if msg.sender == self.creator:
+        self.creator = new_creator // "Set creator to %s" % new_owner
         return(1)
     return(0)
 
@@ -454,9 +452,9 @@ def change_ownership(new_owner):
 # NameReg
 #
 def register(namereg):
-    if msg.sender == self.owner:
+    if msg.sender == self.creator:
         namereg.register(text("EtherEx"), datasz=1)
 
 def unregister(namereg):
-    if msg.sender == self.owner:
+    if msg.sender == self.creator:
         namereg.unregister()

@@ -156,27 +156,32 @@
 # Change creator
 -
   transact:
-    SetExchangeOwner:
+    SetExchangeCreator:
       to: $EtherEx
       fun_name: change_creator
       sig: i
       data:
         - $zg
+      wait: True
+
+# Change sub-currencies' ownership
+-
+  transact:
     SetETXOwner:
       to: $ETX
-      fun_name: change_creator
+      fun_name: change_ownership
       sig: i
       data:
         - $zg
     SetCAKOwner:
       to: $CAK
-      fun_name: change_creator
+      fun_name: change_ownership
       sig: i
       data:
         - $zg
     SetMIDOwner:
       to: $MID
-      fun_name: change_creator
+      fun_name: change_ownership
       sig: i
       data:
         - $zg
@@ -608,3 +613,4 @@
         - 21
         - 3
       value: 10500000000000000000
+      wait: True

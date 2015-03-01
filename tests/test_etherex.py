@@ -63,7 +63,6 @@ class TestEtherEx(object):
     def test_creation(self):
         assert self._storage(self.contract, "0x") == "0x88554646aa"
         assert self._storage(self.contract, "0x01") == "0x" + self.ALICE['address']
-        assert self._storage(self.contract, "0x02") == "0x" + self.ALICE['address']
 
         assert self._storage(self.etx_contract, "0x" + self.ALICE['address']) == self.xhex(1000000 * 10 ** 5)
         assert self._storage(self.bob_contract, "0x" + self.ALICE['address']) == self.xhex(1000000 * 10 ** 5)
@@ -99,7 +98,7 @@ class TestEtherEx(object):
         assert self._storage(self.etx_contract, self.xhex(1)) == "0x" + self.contract.address
 
         # Get markets pointer...
-        self.ptr = self._storage(self.contract, "0x07")
+        self.ptr = self._storage(self.contract, "0x06")
         logger.info("Markets start at %s, then %s ..." % (self.ptr, self.ptr_add(self.ptr, 1)))
         logger.info(self.state.block.account_to_dict(self.contract.address)['storage'])
         logger.info("===")
@@ -114,14 +113,14 @@ class TestEtherEx(object):
         assert self._storage(self.contract, self.ptr_add(self.ptr, 7)) == "0x" + self.ALICE['address']  # Owner
         assert self._storage(self.contract, self.ptr_add(self.ptr, 8)) == block  # Block
 
-    def test_change_ownership(self):
+    def test_change_creator(self):
         self.test_initialize()
 
-        new_owner = "f9e57456f18d90886263fedd9cc30b27cd959137"
+        new_creator = "f9e57456f18d90886263fedd9cc30b27cd959137"
 
-        ans = self.contract.change_ownership(new_owner)
+        ans = self.contract.change_creator(new_creator)
         assert ans == 1
-        assert self._storage(self.contract, "0x01") == "0x" + new_owner
+        assert self._storage(self.contract, "0x01") == "0x" + new_creator
 
     def test_get_last_market_id(self):
         self.test_initialize()
@@ -361,7 +360,7 @@ class TestEtherEx(object):
             25000000L,
             745948140856946866108753121277737810491401257713L,
             0L,
-            -43661844752590979300431051015755835179991927175787838447300702361707346553780L]
+            -43661844752590979300431051015755835179991927175787838447300702361707346553781L]
 
     def test_trade_already_exists(self):
         self.test_add_buy_trades()
