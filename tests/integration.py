@@ -45,8 +45,8 @@ class Integration(unittest.TestCase):
             self.assertEqual("N/A ETX/ETH", driver.find_element_by_xpath("//div[@id='wrap']/div/div[3]/div/div/span[2]").text)
 
             # Assert trade table headers
-            self.assertEqual("Trades", driver.find_element_by_css_selector("div.col-md-3.col-xs-6 > h3 > span").text)
-            self.assertEqual("Asks", driver.find_element_by_css_selector("div.hidden-xs.hidden-sm > div > div.col-md-6 > div > h4").text)
+            self.assertEqual("Trades", driver.find_element_by_xpath("//*[@id='wrap']/div/div[4]/div[2]/div[1]/div[1]/h3/span[1]").text)
+            self.assertEqual("Asks", driver.find_element_by_xpath("//*[@id='wrap']/div/div[4]/div[2]/div[3]/div/div[1]/div/h4").text)
             self.assertEqual("Bids", driver.find_element_by_xpath("//div[@id='wrap']/div/div[4]/div[2]/div[3]/div/div[2]/div/h4").text)
 
             # Assert added asks
