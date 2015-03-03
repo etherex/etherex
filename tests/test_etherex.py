@@ -49,7 +49,8 @@ class TestEtherEx(object):
 
         self.namereg = self.state.abi_contract(self.namereg)
 
-        self.contract = self.state.abi_contract(self.etherex)
+        self.contract = self.state.abi_contract(self.etherex, gas=2500000)
+
         self.etx_contract = self.state.abi_contract(self.etx)
         self.bob_contract = self.state.abi_contract(self.bob)
 
@@ -542,7 +543,7 @@ class TestEtherEx(object):
         assert ans == [balance_from_transfer - fill_amount, 0]
 
         ans = self.state.block.get_balance(self.BOB['address'])
-        assert ans > 1000449999999999999990000L
+        assert ans > 1000449999999999999000000L
         assert ans < 1000450000000000000000000L
 
         self.state.revert(snapshot)
