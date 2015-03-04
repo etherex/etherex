@@ -60,6 +60,7 @@ class EndUser(unittest.TestCase):
 
             # Click-fill first three trades
             driver.find_element_by_xpath("//*[@id='wrap']/div/div[4]/div[2]/div[3]/div/div[1]/div/div/table/tbody/tr[3]").click()
+            time.sleep(1)
 
             # Assert amount, price and total got filled
             self.assertEqual("450", driver.find_element_by_xpath("//div[@id='wrap']/div/div[4]/div[1]/div[2]/div[2]/div[1]/div/form/div[1]/div/input").get_attribute("value"))
@@ -72,6 +73,7 @@ class EndUser(unittest.TestCase):
 
             # Assert filling trades message
             self.assertEqual("You will be filling 3 trades for a total of 112.50000 ether.", driver.find_element_by_css_selector("div.modal.fade.in > div > div > form > div.modal-body > span").text)
+            time.sleep(1)
 
             # Click Yes
             driver.find_element_by_css_selector("div.modal-footer > button.btn.btn-primary").click()
