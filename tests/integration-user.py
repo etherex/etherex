@@ -83,6 +83,7 @@ class EndUser(unittest.TestCase):
             self.assertEqual("4.5 hundred", driver.find_element_by_xpath("//div[@id='wrap']/div/div[2]/div[2]/div/div[1]/div").text)
 
             # Assert new Last price
+            time.sleep(15)
             self.assertEqual("0.25000000 ETX/ETH", driver.find_element_by_xpath("//div[@id='wrap']/div/div[3]/div/div/span[2]").text)
 
             driver.save_screenshot('screenshot-user-passed.png')
