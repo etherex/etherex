@@ -77,6 +77,13 @@ var EthereumClient = function() {
 
             var markets = [];
 
+            var favs = localStorage.getItem('favorites');
+            var favorites = JSON.parse(favs);
+
+            if (!favorites || typeof(favorites) != 'object')
+                favorites = [];
+            // console.log('FAVORITES', favorites);
+
             for (var i = 1; i < last + 1; i++) {
                 try {
                     var market = contract.call().get_market(i);
@@ -102,6 +109,10 @@ var EthereumClient = function() {
                     var subcontract = new SubContractABI(address);
                     var balance = subcontract.call().balance(user.addresses[0]).toString();
 
+                    var favorite = false;
+                    if (favorites.length > 0 && _.indexOf(favorites, id) >= 0)
+                        var favorite = true;
+
                     markets.push({
                         id: id,
                         name: name,
@@ -114,6 +125,7 @@ var EthereumClient = function() {
                         block: block,
                         total_trades: total_trades,
                         balance: _.parseInt(balance),
+                        favorite: favorite
                     });
                 }
                 catch(e) {

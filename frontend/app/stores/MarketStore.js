@@ -21,7 +21,8 @@ var MarketStore = Fluxxor.createStore({
             constants.market.UPDATE_MARKET, this.onUpdateMarket,
             constants.market.UPDATE_MARKET_BALANCE, this.onUpdateMarketBalance,
             constants.market.LOAD_PRICES, this.onLoadPrices,
-            constants.market.LOAD_TRANSACTIONS, this.onLoadTransactions
+            constants.market.LOAD_TRANSACTIONS, this.onLoadTransactions,
+            constants.market.TOGGLE_FAVORITE, this.toggleFavorite
         );
 
         this.setMaxListeners(1024); // prevent "possible EventEmitter memory leak detected"
@@ -183,6 +184,27 @@ var MarketStore = Fluxxor.createStore({
 
     onLoadTransactions: function(payload) {
         this.market.txs = payload;
+
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    toggleFavorite: function(payload) {
+        this.markets[payload.id - 1].favorite = payload.favorite;
+
+        var favs = localStorage.getItem('favorites');
+        var favorites = JSON.parse(favs);
+
+        if (typeof(favorites) === 'undefined' || !favorites)
+            var favorites = [];
+
+        if (payload.favorite === true)
+            favorites.push(payload.id);
+        else if (payload.favorite === false)
+            _.pull(favorites, payload.id);
+
+        var new_favorites = JSON.stringify(favorites);
+
+        localStorage.setItem('favorites', new_favorites);
 
         this.emit(constants.CHANGE_EVENT);
     },

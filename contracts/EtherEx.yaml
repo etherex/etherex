@@ -17,7 +17,7 @@
   deploy:
     EtherEx:
       contract: etherex.se
-      gas: 100000
+      gas: 500000
       wait: True
       # endowment: 1000000000000000000
 -

@@ -55,6 +55,7 @@ module.exports = {
         UPDATE_MARKET: null,
         UPDATE_MARKET_BALANCE: null,
         LOAD_PRICES: null,
-        LOAD_TRANSACTIONS: null
+        LOAD_TRANSACTIONS: null,
+        TOGGLE_FAVORITE: null
     })
 };

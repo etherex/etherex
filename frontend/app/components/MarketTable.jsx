@@ -18,15 +18,24 @@ var bigRat = require("big-rational");
 var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 
-// var Link = Router.Link;
-// var UserLink = require("./UserLink");
 
 var MarketRow = React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
+        // draggable="true"
+        // onDragEnd={this.dragEnd}
+        // onDragStart={this.dragStart}
         return (
-            <tr className={"market-" + this.props.market.status ? this.props.market.status : "default"} onClick={this.handleClick}>
+            <tr data-id={this.props.market.id}
+                key={this.props.market.id}
+                className={"market-" + this.props.market.status ? this.props.market.status : "default"}
+                onClick={this.handleClick}>
+                <td>
+                    <div className="text-center">
+                        <button className={"btn btn-" + (this.props.market.favorite ? "success" : "default") } onClick={this.toggleFavorite} />
+                    </div>
+                </td>
                 <td>
                     <div className="text-right">
                         {this.props.market.name}/ETH
@@ -59,22 +68,122 @@ var MarketRow = React.createClass({
     handleClick: function(e) {
         if (this.props.market)
             this.getFlux().actions.market.switchMarket(this.props.market);
+    },
+
+    toggleFavorite: function(e) {
+        if (this.props.market.favorite === false)
+            var favorite = true;
+        else
+            var favorite = false;
+
+        this.getFlux().actions.market.toggleFavorite({id: this.props.market.id, favorite: favorite});
     }
 });
 
+// var Placeholder = React.createClass({
+//     render: function() {
+//         return (<tr key="placeholder" className="warning"><td colspan="5"></td></tr>);
+//     }
+// });
+
 var MarketTable = React.createClass({
+    // getInitialState: function() {
+    //     return {
+    //         markets: this.props.market.markets
+    //     };
+    // },
+
+    // getPlaceholder: function() {
+    //     if (!this.placeholder) {
+    //         var tr = document.createElement('tr');
+    //         tr.className = "warning";
+    //         tr.disabled = "disabled";
+    //         var td = document.createElement('td');
+    //         td.colSpan = 5;
+    //         td.appendChild(document.createTextNode("Drop here"));
+    //         tr.appendChild(td);
+    //         this.placeholder = tr;
+    //     }
+    //     return this.placeholder;
+    // },
+
+    // getTableRow: function(element) {
+    //     if (element.tagName !== 'tr' && element.className !== 'warning')
+    //         return $(element).closest('tr')[0];
+    //     else
+    //         return element;
+    // },
+
+    // dragStart: function(e) {
+    //     this.dragged = this.getTableRow(e.currentTarget);
+    //     e.dataTransfer.effectAllowed = 'move';
+
+    //     // Firefox requires calling dataTransfer.setData
+    //     // for the drag to properly work
+    //     e.dataTransfer.setData("text/html", e.currentTarget);
+    // },
+
+    // dragEnd: function(e) {
+    //     this.dragged.style.display = "table-row";
+    //     this.dragged.parentNode.removeChild(this.getPlaceholder());
+
+    //     // Update data
+    //     var markets = this.state.markets;
+    //     var from = Number(this.dragged.dataset.id);
+    //     var to = Number(this.over.dataset.id);
+    //     if (from < to) to--;
+    //     if (this.nodePlacement == "after") to++;
+    //     markets.splice(to, 0, markets.splice(from, 1)[0]);
+
+    //     this.setState({
+    //         markets: markets
+    //     });
+    // },
+
+    // dragOver: function(e) {
+    //     e.preventDefault();
+    //     var targetRow = this.getTableRow(e.target);
+
+    //     // if (!this.dragged.style)
+    //     //     return;
+    //     if (this.dragged && this.dragged.style)
+    //         this.dragged.style.display = "none";
+
+    //     if (targetRow.className == "warning") return;
+    //     this.over = targetRow;
+
+    //     // Inside the dragOver method
+    //     var relY = e.pageY - $(this.over).offset().top;
+    //     var height = this.over.offsetHeight / 2;
+    //     var parent = targetRow.parentNode;
+
+    //     if (relY >= height) {
+    //         this.nodePlacement = "after";
+    //         parent.insertBefore(this.getPlaceholder(), targetRow.nextElementSibling);
+    //     }
+    //     else if (relY < height) {
+    //         this.nodePlacement = "before"
+    //         parent.insertBefore(this.getPlaceholder(), targetRow);
+    //     }
+    // },
+
     render: function() {
+        // var markets = _.sortBy(this.props.market.markets.reverse(), 'favorite').reverse();
+
         var marketListNodes = this.props.market.markets.map(function (market) {
             return (
                 <MarketRow key={market.id} market={market} /> //user={this.props.user} review={this.props.review} />
             );
         }.bind(this));
+
+        // <tbody onDragOver={this.dragOver}>
         return (
             <div>
                 <h4>{this.props.title}</h4>
                 <Table condensed hover responsive striped>
                     <thead>
                         <tr>
+                            <th className="text-center">Favorite</th>
                             <th className="text-right">Currency pair</th>
                             <th className="text-center">% change in<br />24h/1w/1m</th>
                             <th className="text-right">Last Price</th>

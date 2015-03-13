@@ -130,6 +130,10 @@ var MarketActions = function(client) {
         }.bind(this));
     };
 
+    this.toggleFavorite = function(favorite) {
+        this.dispatch(constants.market.TOGGLE_FAVORITE, favorite);
+    };
+
     var _client = client;
 };
 
