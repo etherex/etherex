@@ -42,6 +42,7 @@
     "grunt-webpack": "^1.0.8",
     "jest": "^0.1.37",
     "jest-cli": "^0.4.0",
+    "json-loader": "^0.5.1",
     "jsx-loader": "^0.12.2",
     "less": "^2.4.0",
     "less-loader": "^2.0.0",
