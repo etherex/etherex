@@ -13,13 +13,13 @@ if (typeof web3 === 'undefined') {
 }
 
 try {
-    web3.setProvider(new web3.providers.HttpSyncProvider());
+    web3.setProvider(new web3.providers.HttpProvider());
 
     try {
-        var m = web3.eth.getState(fixtures.addresses.etherex, "0x5");
+        var m = web3.eth.getStorageAt(fixtures.addresses.etherex, "0x5");
     }
     catch (e) {
-        web3.setProvider(new web3.providers.HttpSyncProvider('http://localhost:8545'));
+        web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
         isMist = true;
     }
 
@@ -340,7 +340,7 @@ var EthereumClient = function() {
         var error = "Failed to update balance: ";
 
         try {
-            var hexbalance = web3.eth.balanceAt(address);
+            var hexbalance = web3.eth.getBalance(address);
             // console.log("BALANCE", hexbalance.toString());
 
             if (!hexbalance || hexbalance == "0x") {
