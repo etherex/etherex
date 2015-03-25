@@ -7,3 +7,9 @@ install:
 script:
   - py.test -vvrs
   - flake8
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#etherex-dev"
+    use_notice: true
+    skip_join: true
