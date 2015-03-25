@@ -97,6 +97,7 @@
     RegisterETX:
       to: $EtherEx
       fun_name: add_market
+      gas: 500000
       sig: iiiii
       data:
         - ETX
@@ -109,6 +110,7 @@
     RegisterCAK:
       to: $EtherEx
       fun_name: add_market
+      gas: 500000
       sig: iiiii
       data:
         - CAK
@@ -121,6 +123,7 @@
     RegisterMID:
       to: $EtherEx
       fun_name: add_market
+      gas: 500000
       sig: iiiii
       data:
         - MID
@@ -314,6 +317,7 @@
     trade1:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 5000000
@@ -322,6 +326,7 @@
     trade2:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 15000000
@@ -330,6 +335,7 @@
     trade3:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 25000000
@@ -338,6 +344,7 @@
     trade4:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 35000000
@@ -346,6 +353,7 @@
     trade5:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 45000000
@@ -355,6 +363,7 @@
     trade6:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 55000000
@@ -363,6 +372,7 @@
     trade7:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 1500000
@@ -371,6 +381,7 @@
     trade8:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 25000000
@@ -379,6 +390,7 @@
     trade9:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 25000000
@@ -387,6 +399,7 @@
     trade10:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 25000000
@@ -398,6 +411,7 @@
     trade11:
       to: $EtherEx
       fun_name: buy
+      gas: 275000
       sig: iii
       data:
         - 5000000
@@ -407,6 +421,7 @@
     trade12:
       to: $EtherEx
       fun_name: buy
+      gas: 275000
       sig: iii
       data:
         - 5000000
@@ -416,6 +431,7 @@
     trade13:
       to: $EtherEx
       fun_name: buy
+      gas: 275000
       sig: iii
       data:
         - 5000000
@@ -425,6 +441,7 @@
     trade14:
       to: $EtherEx
       fun_name: buy
+      gas: 275000
       sig: iii
       data:
         - 5000000
@@ -442,6 +459,7 @@
     trade1:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 50000000
@@ -450,6 +468,7 @@
     trade2:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 150000000
@@ -458,6 +477,7 @@
     trade3:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 250000000
@@ -466,6 +486,7 @@
     trade4:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 350000000
@@ -474,6 +495,7 @@
     trade5:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 450000000
@@ -482,6 +504,7 @@
     trade6:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 550000000
@@ -493,6 +516,7 @@
     trade11:
       to: $EtherEx
       fun_name: buy
+      gas: 275000
       sig: iii
       data:
         - 5000000
@@ -502,6 +526,7 @@
     trade12:
       to: $EtherEx
       fun_name: buy
+      gas: 275000
       sig: iii
       data:
         - 5000000
@@ -511,6 +536,7 @@
     trade13:
       to: $EtherEx
       fun_name: buy
+      gas: 275000
       sig: iii
       data:
         - 5000000
@@ -520,6 +546,7 @@
     trade14:
       to: $EtherEx
       fun_name: buy
+      gas: 275000
       sig: iii
       data:
         - 5000000
@@ -536,6 +563,7 @@
     trade1:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 50000000
@@ -544,6 +572,7 @@
     trade2:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 150000000
@@ -552,6 +581,7 @@
     trade3:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 250000000
@@ -560,6 +590,7 @@
     trade4:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 350000000
@@ -568,6 +599,7 @@
     trade5:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 450000000
@@ -576,6 +608,7 @@
     trade6:
       to: $EtherEx
       fun_name: sell
+      gas: 275000
       sig: iii
       data:
         - 550000000
@@ -587,6 +620,7 @@
     trade11:
       to: $EtherEx
       fun_name: buy
+      gas: 275000
       sig: iii
       data:
         - 5000000
@@ -596,6 +630,7 @@
     trade12:
       to: $EtherEx
       fun_name: buy
+      gas: 275000
       sig: iii
       data:
         - 5000000
@@ -605,6 +640,7 @@
     trade13:
       to: $EtherEx
       fun_name: buy
+      gas: 275000
       sig: iii
       data:
         - 5000000
@@ -614,6 +650,7 @@
     trade14:
       to: $EtherEx
       fun_name: buy
+      gas: 275000
       sig: iii
       data:
         - 5000000
