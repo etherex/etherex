@@ -183,12 +183,9 @@ var EthereumClient = function() {
 
                         var status = 'mined';
 
-                        // Set defaultBlock to -1 to check mined status
-                        web3.eth.defaultBlock = 'latest';
+                        var tradeExists = web3.eth.getStorageAt(fixtures.addresses.etherex, web3.fromDecimal(ref), 'latest');
 
-                        var tradeExists = web3.eth.getStorageAt(fixtures.addresses.etherex, web3.fromDecimal(ref));
-
-                        if (tradeExists == "0x")
+                        if (tradeExists == "0x00")
                             status = 'pending';
                         else
                             status = 'mined';
