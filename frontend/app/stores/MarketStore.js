@@ -10,6 +10,7 @@ var MarketStore = Fluxxor.createStore({
     initialize: function(options) {
         this.market = options.market || {txs: [], data: {}};
         this.markets = options.markets || [];
+        this.favorites = [];
         this.loading = true;
         this.error = null;
 
@@ -31,6 +32,7 @@ var MarketStore = Fluxxor.createStore({
     onLoadMarkets: function() {
         this.market = {txs: [], data: {}};
         this.markets = [];
+        this.favorites = [];
         this.loading = true;
         this.error = null;
         this.emit(constants.CHANGE_EVENT);
@@ -55,6 +57,13 @@ var MarketStore = Fluxxor.createStore({
         this.market.txs = [];
         this.market.data = {};
         this.markets = payload;
+
+        var favs = localStorage.getItem('favorites');
+        var favorites = JSON.parse(favs);
+        if (!favorites || typeof(favorites) != 'object')
+            favorites = [];
+        this.favorites = favorites;
+
         this.loading = false;
         this.error = null;
         this.emit(constants.CHANGE_EVENT);
@@ -202,8 +211,9 @@ var MarketStore = Fluxxor.createStore({
         else if (payload.favorite === false)
             _.pull(favorites, payload.id);
 
-        var new_favorites = JSON.stringify(favorites);
+        this.favorites = favorites;
 
+        var new_favorites = JSON.stringify(favorites);
         localStorage.setItem('favorites', new_favorites);
 
         this.emit(constants.CHANGE_EVENT);
@@ -213,6 +223,7 @@ var MarketStore = Fluxxor.createStore({
         return {
             market: this.market,
             markets: this.markets,
+            favorites: this.favorites,
             loading: this.loading,
             error: this.error
         };
