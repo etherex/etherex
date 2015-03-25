@@ -103,7 +103,7 @@ var fixtures = {
             "inputs": [
                 {
                     "name": "address",
-                    "type": "hash256"
+                    "type": "address"
                 },
                 {
                     "name": "amount",
@@ -228,7 +228,7 @@ var fixtures = {
             "outputs": [
                 {
                     "name": "trade_id",
-                    "type": "hash256[]"
+                    "type": "uint256[]"
                 }
             ]
         },

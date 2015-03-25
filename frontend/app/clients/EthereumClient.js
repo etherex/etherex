@@ -26,6 +26,7 @@ try {
     var ContractABI = web3.eth.contract(fixtures.contract_desc);
     var contract = new ContractABI(fixtures.addresses.etherex);
 
+    // console.log("CLIENT", web3.version.client);
     // console.log("CONTRACT", contract);
 }
 catch(e) {
@@ -147,8 +148,8 @@ var EthereumClient = function() {
 
     this.loadTrades = function(flux, market, progress, success, failure) {
         try {
-            // Set defaultBlock to 0 to get pending trade IDs
-            web3.eth.defaultBlock = 0;
+            // Set defaultBlock to 'pending' trade IDs
+            web3.eth.defaultBlock = 'pending';
 
             var trade_ids = contract.call().get_trade_ids(market.id);
 
@@ -183,9 +184,9 @@ var EthereumClient = function() {
                         var status = 'mined';
 
                         // Set defaultBlock to -1 to check mined status
-                        web3.eth.defaultBlock = -1;
+                        web3.eth.defaultBlock = 'latest';
 
-                        var tradeExists = web3.eth.getState(fixtures.addresses.etherex, web3.fromDecimal(ref));
+                        var tradeExists = web3.eth.getStorageAt(fixtures.addresses.etherex, web3.fromDecimal(ref));
 
                         if (tradeExists == "0x")
                             status = 'pending';
@@ -228,6 +229,7 @@ var EthereumClient = function() {
             }
 
             Promise.all(tradePromises).then(function (trades) {
+                // console.log("TRADES", trades);
                 success(trades);
             }, function(e) {
                 failure("Could not load all trades: " + String(e));
@@ -244,11 +246,12 @@ var EthereumClient = function() {
         // console.log("Loading prices...");
 
         try {
-            var pricelogs = web3.eth.logs({
-                max: 100,
+            var prices_filter = web3.eth.filter({
+                limit: 100,
                 address: fixtures.addresses.etherex,
                 topics: market.address
             });
+            var pricelogs = prices_filter.get();
             // console.log("PRICE CHANGES: ", pricelogs);
 
             var prices = [];

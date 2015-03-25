@@ -17,25 +17,32 @@
   deploy:
     EtherEx:
       contract: etherex.se
-      gas: 500000
+      gas: 2000000
       wait: True
       # endowment: 1000000000000000000
 -
   deploy:
     OwnNameReg:
       contract: namereg.se
+      gas: 1000000
+      wait: True
 -
   deploy:
     ETX:
       contract: etx.se
+      gas: 1000000
+      wait: True
 -
   deploy:
     CAK:
       contract: etx.se
+      gas: 1000000
+      wait: True
 -
   deploy:
     MID:
       contract: etx.se
+      gas: 1000000
       wait: True
 # -
 #   deploy:
