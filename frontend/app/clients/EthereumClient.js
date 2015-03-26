@@ -400,7 +400,7 @@ var EthereumClient = function() {
         var subcontract = new SubContractABI(market.address);
 
         try {
-            var result = subcontract.transact({
+            var result = subcontract.sendTransaction({
                 gas: "100000"
             }).send(recipient, amount);
 
@@ -416,7 +416,7 @@ var EthereumClient = function() {
         var subcontract = new SubContractABI(market.address);
 
         try {
-            var result = subcontract.transact({
+            var result = subcontract.sendTransaction({
                 gas: "100000"
             }).send(fixtures.addresses.etherex, amount);
 
@@ -429,7 +429,7 @@ var EthereumClient = function() {
 
     this.withdrawSub = function(amount, market, success, failure) {
         try {
-            var result = contract.transact({
+            var result = contract.sendTransaction({
                 gas: "100000"
             }).withdraw(amount, market.id);
 
@@ -442,7 +442,7 @@ var EthereumClient = function() {
 
     this.registerMarket = function(market, success, failure) {
         try {
-            var result = contract.transact({
+            var result = contract.sendTransaction({
                 gas: "100000"
             }).add_market(
                 web3.fromAscii(market.name, 32),
@@ -490,9 +490,9 @@ var EthereumClient = function() {
             };
 
             if (trade.type == 1)
-                var result = contract.transact(options).buy(amounts.amount, amounts.price, trade.market);
+                var result = contract.sendTransaction(options).buy(amounts.amount, amounts.price, trade.market);
             else if (trade.type == 2)
-                var result = contract.transact(options).sell(amounts.amount, amounts.price, trade.market);
+                var result = contract.sendTransaction(options).sell(amounts.amount, amounts.price, trade.market);
             else {
                 failure("Invalid trade type.");
                 return;
@@ -527,7 +527,7 @@ var EthereumClient = function() {
         var gas = ids.length * 100000;
 
         try {
-            var result = contract.transact({
+            var result = contract.sendTransaction({
                 from: user.addresses[0],
                 gas: String(gas),
                 to: fixtures.addresses.etherex,
@@ -545,7 +545,7 @@ var EthereumClient = function() {
         var amounts = this.getAmounts(trade.amount, trade.price, market.decimals, market.precision);
 
         try {
-            var result = contract.transact({
+            var result = contract.sendTransaction({
                 from: user.addresses[0],
                 gas: "100000",
                 to: fixtures.addresses.etherex,
@@ -561,7 +561,7 @@ var EthereumClient = function() {
 
     this.cancelTrade = function(user, trade, success, failure) {
         try {
-            var result = contract.transact({
+            var result = contract.sendTransaction({
                 from: user.addresses[0],
                 value: "0",
                 to: fixtures.addresses.etherex,
