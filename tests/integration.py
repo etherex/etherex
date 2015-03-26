@@ -168,7 +168,7 @@ class Integration(unittest.TestCase):
             driver.find_element_by_css_selector("div.modal-footer > button.btn.btn-primary").click()
 
             # Assert balance
-            self.assertEqual("69 billion", driver.find_element_by_xpath("//div[@id='wrap']/div/div[4]/div[3]/div/div/div[2]/div/div/table/tbody/tr/td[4]/div/span[5]").text)
+            self.assertEqual("69 billion", driver.find_element_by_xpath("//div[@id='wrap']/div/div[2]/div[2]/div/div[3]/div").text)
 
             # Switch to user section
             for i in range(5):

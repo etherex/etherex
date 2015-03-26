@@ -465,12 +465,10 @@ var EthereumClient = function() {
     this.setUserWatches = function(flux, addresses, markets) {
         // ETH balance
         web3.eth.filter({address: addresses}).watch(flux.actions.user.updateBalance);
-        // web3.eth.watch('chain').changed(flux.actions.user.updateBalance);
 
         // Sub balances
         var market_addresses = _.pluck(markets, 'address');
         web3.eth.filter({address: market_addresses}).watch(flux.actions.user.updateBalanceSub);
-        // web3.eth.watch('chain').changed(flux.actions.user.updateBalanceSub);
     };
 
     this.setMarketWatches = function(flux, markets) {
