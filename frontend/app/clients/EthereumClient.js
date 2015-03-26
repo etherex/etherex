@@ -524,7 +524,7 @@ var EthereumClient = function() {
 
         var ids = _.pluck(trades, 'id');
 
-        var gas = ids.length * 10000;
+        var gas = ids.length * 100000;
 
         try {
             var result = contract.transact({
