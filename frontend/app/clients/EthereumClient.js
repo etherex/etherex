@@ -246,7 +246,7 @@ var EthereumClient = function() {
             var prices_filter = web3.eth.filter({
                 limit: 100,
                 address: fixtures.addresses.etherex,
-                topics: market.address
+                topics: [market.address]
             });
             var pricelogs = prices_filter.get();
             // console.log("PRICE CHANGES: ", pricelogs);
