@@ -80,8 +80,6 @@ class EndUser(unittest.TestCase):
             time.sleep(1)
 
             # Assert new sub-balance
-            time.sleep(5)
-            driver.refresh()
             time.sleep(10)
             self.assertEqual("4.5 hundred", driver.find_element_by_xpath("//div[@id='wrap']/div/div[2]/div[2]/div/div[1]/div").text)
 
