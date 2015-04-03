@@ -133,7 +133,6 @@ class TestEtherEx(object):
         self.test_initialize()
 
         ans = self.contract.get_market(1)
-        self.state.mine(3)
 
         assert ans == [
             1,
