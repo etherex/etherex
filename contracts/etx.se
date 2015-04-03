@@ -10,10 +10,6 @@ def init():
     self.balances[msg.sender].balance = 1000000 * 10 ** 5
 
 def send(recipient, amount):
-    # Prevent invalid recipient overriding internal settings
-    if recipient < 1000:
-        return(0)
-
     # Prevent negative send from stealing funds
     if recipient <= 0 or amount <= 0:
         return(0)

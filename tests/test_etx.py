@@ -48,8 +48,6 @@ class TestEtxContract(object):
         assert self.c.send(0, 1) == 0
         assert self.s.block.get_storage_data(self.c.address, 0) == int(tester.a0, 16)
 
-        assert self.c.send(1, 1) == 0
+        assert self.c.send(-1000, 1) == 0
         assert self.s.block.get_storage_data(self.c.address, 1) == 0xdeadbeef
-
-        assert self.c.send(2, 1) == 0
         assert self.s.block.get_storage_data(self.c.address, 2) == 999
