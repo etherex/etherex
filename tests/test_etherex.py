@@ -65,8 +65,8 @@ class TestEtherEx(object):
         assert self._storage(self.contract, "0x") == "0x88554646aa"
         assert self._storage(self.contract, "0x01") == "0x" + self.ALICE['address']
 
-        assert self._storage(self.etx_contract, "0x" + self.ALICE['address']) == self.xhex(1000000 * 10 ** 5)
-        assert self._storage(self.bob_contract, "0x" + self.ALICE['address']) == self.xhex(1000000 * 10 ** 5)
+        assert self.etx_contract.balance(self.ALICE['address']) == 1000000 * 10 ** 5
+        assert self.bob_contract.balance(self.ALICE['address']) == 1000000 * 10 ** 5
 
     def test_initialize(self, block=None):
         # NameReg Alice

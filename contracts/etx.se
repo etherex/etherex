@@ -1,23 +1,32 @@
 data owner
 data exchange
 data market_id
+data balances[2^160](balance)
 
 extern exchange: [add_market:iiiii:i, buy:iii:i, cancel:i:i, deposit:iii:i, get_market:i:a, get_sub_balance:ii:a, get_trade:i:a, get_trade_ids:i:a, price:i:i, sell:iii:i, trade:ii:i, withdraw:ii:i]
 
 def init():
     self.owner = msg.sender
-    self.storage[msg.sender] = 1000000 * 10 ** 5
+    self.balances[msg.sender].balance = 1000000 * 10 ** 5
 
 def send(recipient, amount):
+    # Prevent invalid recipient overriding internal settings
+    if recipient < 1000:
+        return(0)
+
+    # Prevent negative send from stealing funds
+    if recipient <= 0 or amount <= 0:
+        return(0)
+
     # Get user balance
-    balance = self.storage[msg.sender]
+    balance = self.balances[msg.sender].balance
 
     # Make sure balance is above or equal to amount
     if balance >= amount:
 
         # Update balances
-        self.storage[msg.sender] = balance - amount
-        self.storage[recipient] += amount
+        self.balances[msg.sender].balance = balance - amount
+        self.balances[recipient].balance += amount
 
         # Notify exchange of deposit
         if recipient == self.exchange:
@@ -32,9 +41,12 @@ def send(recipient, amount):
     return(0)
 
 def balance(addr):
-    return(self.storage[addr])
+    return(self.balances[addr].balance)
 
 def set_exchange(addr, market_id):
+    if addr <= 0 or market_id <= 0:
+        return(0)
+
     if msg.sender == self.owner:
         self.exchange = addr
         self.market_id = market_id
@@ -42,6 +54,9 @@ def set_exchange(addr, market_id):
     return(0)
 
 def change_ownership(new_owner):
+    if new_owner <= 0:
+        return(0)
+
     if msg.sender == self.owner:
         self.owner = new_owner // "Set owner to %s" % new_owner
         return(1)
