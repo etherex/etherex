@@ -8,7 +8,7 @@ var isMist = false;
 require('es6-promise').polyfill();
 
 if (typeof web3 === 'undefined') {
-    var web3 = require('ethereum.js');
+    var web3 = require('web3');
     window.web3 = web3;
 }
 

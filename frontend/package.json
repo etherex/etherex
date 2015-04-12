@@ -60,7 +60,7 @@
     "d3": "^3.5.5",
     "dc": "^2.0.0-beta.3",
     "es6-promise": "^2.0.1",
-    "ethereum.js": "ethereum/ethereum.js#develop",
+    "web3": "ethereum/web3.js#develop",
     "file-loader": "^0.8.1",
     "fluxxor": "^1.5.2",
     "jquery": "^2.1.3",
