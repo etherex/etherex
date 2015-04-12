@@ -6,7 +6,8 @@
 # of the MIT license.  See the LICENSE file for details.
 
 import pytest
-from pyethereum import tester
+from ethereum import tester
+from ethereum import utils
 import logging as logger
 
 # DEBUG
@@ -15,9 +16,9 @@ import logging as logger
 
 class TestEtherEx(object):
 
-    ALICE = {'address': tester.a0, 'key': tester.k0}
-    BOB = {'address': tester.a1, 'key': tester.k1}
-    CHARLIE = {'address': tester.a2, 'key': tester.k2}
+    ALICE = {'address': tester.a0.encode('hex'), 'key': tester.k0}
+    BOB = {'address': tester.a1.encode('hex'), 'key': tester.k1}
+    CHARLIE = {'address': tester.a2.encode('hex'), 'key': tester.k2}
 
     # NameReg
     namereg = 'contracts/namereg.se'
@@ -73,17 +74,17 @@ class TestEtherEx(object):
         ans = self.namereg.register(self.ALICE['address'], "Alice")
         assert ans == 1
         assert self._storage(self.namereg, "0x" + self.ALICE['address']) == "0x" + "Alice".encode('hex')
-        assert self.namereg.get(self.ALICE['address']) == int("0x" + "Alice".encode('hex'), 16)
+        assert self.namereg.get(self.ALICE['address']) == utils.big_endian_to_int("Alice")
 
         # NameReg EtherEx
         ans = self.namereg.register(self.contract.address, "EtherEx")
         assert ans == 1
-        assert self._storage(self.namereg, "0x" + self.contract.address) == "0x" + "EtherEx".encode('hex')
+        assert self._storage(self.namereg, "0x" + self.contract.address.encode('hex')) == "0x" + "EtherEx".encode('hex')
 
         # NameReg ETX
         ans = self.namereg.register(self.etx_contract.address, "ETX")
         assert ans == 1
-        assert self._storage(self.namereg, "0x" + self.etx_contract.address) == "0x" + "ETX".encode('hex')
+        assert self._storage(self.namereg, "0x" + self.etx_contract.address.encode('hex')) == "0x" + "ETX".encode('hex')
 
         # Register ETX
         ans = self.contract.add_market(
@@ -96,17 +97,17 @@ class TestEtherEx(object):
             self.contract.address, 1,
             sender=self.ALICE['key'])
         assert ans == 1
-        assert self._storage(self.etx_contract, self.xhex(1)) == "0x" + self.contract.address
+        assert self._storage(self.etx_contract, self.xhex(1)) == "0x" + self.contract.address.encode('hex')
 
         # Get markets pointer...
         self.ptr = self._storage(self.contract, "0x06")
         logger.info("Markets start at %s, then %s ..." % (self.ptr, self.ptr_add(self.ptr, 1)))
-        logger.info(self.state.block.account_to_dict(self.contract.address)['storage'])
+        logger.info(self.state.block.account_to_dict(self.contract.address.encode('hex'))['storage'])
         logger.info("===")
 
         assert self._storage(self.contract, self.ptr_add(self.ptr, 0)) == self.xhex(1)  # Market ID
         assert self._storage(self.contract, self.ptr_add(self.ptr, 1)) == "0x" + "ETX".encode('hex')  # Name
-        assert self._storage(self.contract, self.ptr_add(self.ptr, 2)) == "0x" + self.etx_contract.address  # Contract address
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 2)) == "0x" + self.etx_contract.address.encode('hex')  # Contract address
         assert self._storage(self.contract, self.ptr_add(self.ptr, 3)) == self.xhex(5)  # Decimal precision
         assert self._storage(self.contract, self.ptr_add(self.ptr, 4)) == self.xhex(10 ** 8)  # Price precision
         assert self._storage(self.contract, self.ptr_add(self.ptr, 5)) == self.xhex(10 ** 18)  # Minimum amount
@@ -298,7 +299,7 @@ class TestEtherEx(object):
         # Set exchange address in BOB contract
         ans = self.bob_contract.set_exchange(self.contract.address, 2)
         assert ans == 1
-        assert self._storage(self.bob_contract, self.xhex(1)) == "0x" + self.contract.address
+        assert self._storage(self.bob_contract, self.xhex(1)) == "0x" + self.contract.address.encode('hex')
 
     def test_get_new_last_market_id(self):
         self.test_add_bob_coin()
@@ -486,12 +487,14 @@ class TestEtherEx(object):
 
         if revert:
             self.state.revert(snapshot)
+        else:
+            return snapshot
         # TODO - proper balance assertions
 
     def test_get_last_price(self):
-        self.test_fulfill_first_buy(False)
-        snapshot = self.state.snapshot()
-        self.state.mine(1)
+        snapshot = self.test_fulfill_first_buy(False)
+        # snapshot = self.state.snapshot()
+        # self.state.mine(1)
 
         # assert self._storage(self.contract, 105) == self.xhex(int(0.25 * 10 ** 8))
 
