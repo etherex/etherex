@@ -9,19 +9,19 @@
 # EtherEx
 #
 
-data type # 0x
-data creator # 0x1
-data created # 0x2
-data status # 0x3
-data last_market # 0x4
-data last_trade # 0x5
+data type  # 0x
+data creator  # 0x1
+data created  # 0x2
+data status  # 0x3
+data last_market  # 0x4
+data last_trade  # 0x5
 
-data markets_ptr # 0x6
-data trades_ptr # 0x7
+data markets_ptr  # 0x6
+data trades_ptr  # 0x7
 
-data log_gas # 0x8
-data log_last_trade # 0x9
-data log_timestamp # 0xa
+data log_gas  # 0x8
+data log_last_trade  # 0x9
+data log_timestamp  # 0xa
 
 data markets[2^160](id, name, contract, decimals, precision, minimum, last_price, owner, block, total_trades, trade_ids[](id))
 data trades[2^160](id, type, market, amount, price, owner, block, ref)
@@ -47,7 +47,7 @@ macro check_arguments($amount, $price, $market_id):
 
 macro save_trade($type, $amount, $price, $market_id):
     trade = [$type, $market_id, $amount, $price, msg.sender, block.number]
-    trade_id = sha3(trade, items=6)
+    trade_id = sha3(trade:arr)
 
     # Save trade
     if !self.trades[trade_id].id:
@@ -93,9 +93,9 @@ macro remove_trade($trade_id):
 
 def init():
     # c3D definitions
-    self.type = 0x88554646AA # c3D action contract
-    self.creator = msg.sender # Creator of this c3D contract
-    self.created = block.timestamp # TimeStamp this c3D contract was created
+    self.type = 0x88554646AA  # c3D action contract
+    self.creator = msg.sender  # Creator of this c3D contract
+    self.created = block.timestamp  # TimeStamp this c3D contract was created
 
 def shared():
     # Basic gas check
@@ -404,8 +404,8 @@ def get_market(id):
     market[9] = self.markets[id].total_trades
 
     if market:
-        return(market, items=MARKET_FIELDS - 1)
-    return(0, items=1)
+        return(market:arr)
+    return([0]:arr)
 
 def get_trade_ids(market_id):
     trades_count = self.markets[market_id].total_trades
@@ -417,8 +417,8 @@ def get_trade_ids(market_id):
         i = i + 1
 
     if trade_ids:
-        return(trade_ids, items=trades_count)
-    return(0, items=1)
+        return(trade_ids:arr)
+    return([0]:arr)
 
 def get_trade(id):
     trade = array(TRADE_FIELDS)
@@ -433,11 +433,11 @@ def get_trade(id):
     trade[7] = self.trades[id].ref
 
     if trade:
-        return(trade, items=TRADE_FIELDS)
-    return(0, items=1)
+        return(trade:arr)
+    return([0]:arr)
 
 def get_sub_balance(address, market_id):
-    return([self.balances[address][market_id].available, self.balances[address][market_id].trading], items=2)
+    return([self.balances[address][market_id].available, self.balances[address][market_id].trading]:arr)
 
 #
 # Change creator

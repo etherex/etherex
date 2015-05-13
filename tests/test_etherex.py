@@ -273,7 +273,7 @@ class TestEtherEx(object):
 
         with pytest.raises(Exception) as excinfo:
             self.contract.buy(1000 * 10 ** 5, int(0.25 * 10 ** 8), 1, 1)
-        assert "Wrong number of arguments" in excinfo.value.message
+        assert "list index out of range" in excinfo.value.message
 
     def test_amount_out_of_range(self):
         self.test_initialize()
