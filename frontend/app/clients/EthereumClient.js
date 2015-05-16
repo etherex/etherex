@@ -37,7 +37,7 @@ var EthereumClient = function() {
             try {
                 var accounts = web3.eth.accounts;
 
-                if (!accounts || accounts.length == 0)
+                if (!accounts || accounts.length === 0)
                     reject("No accounts were found on this Ethereum node.");
 
                 resolve(accounts);
@@ -86,10 +86,9 @@ var EthereumClient = function() {
                     var decimals = _.parseInt(market[3].toString());
                     var precision = _.parseInt(market[4].toString());
                     var minimum = _.parseInt(market[5].toString());
-                    if (market[6] == 1)
-                        var lastPrice = null;
-                    else
-                        var lastPrice = parseFloat(bigRat(market[6].toString()).divide(bigRat(Math.pow(10, market[4].toString().length - 1))).toDecimal());
+                    var lastPrice = null;
+                    if (market[6] != 1)
+                        lastPrice = parseFloat(bigRat(market[6].toString()).divide(bigRat(Math.pow(10, market[4].toString().length - 1))).toDecimal());
                     var owner = web3.fromDecimal(market[7]);
                     var block = _.parseInt(market[8].toString());
                     var total_trades = _.parseInt(market[9].toString());
@@ -102,7 +101,7 @@ var EthereumClient = function() {
 
                     var favorite = false;
                     if (favorites.length > 0 && _.indexOf(favorites, id) >= 0)
-                        var favorite = true;
+                        favorite = true;
 
                     markets.push({
                         id: id,
@@ -127,7 +126,7 @@ var EthereumClient = function() {
             if (markets)
                 success(markets);
             else
-                failure("No market to load.")
+                failure("No market to load.");
         }
         catch (e) {
             failure("Unable to load markets: " + String(e));
@@ -141,7 +140,7 @@ var EthereumClient = function() {
 
             var trade_ids = contract.get_trade_ids.call(market.id);
 
-            if (!trade_ids || trade_ids.length == 0) {
+            if (!trade_ids || trade_ids.length === 0) {
                 failure("No trades found");
                 return;
             }
@@ -156,15 +155,15 @@ var EthereumClient = function() {
                     var id = trade_ids[i];
                     var p = i;
 
-                    var trade = contract.get_trade.call(id);
+                    var trade = contract.get_trade.call(id, 'latest');
                     // console.log("Trade from ABI:", trade);
 
                     try {
-                        var id = web3.fromDecimal(trade[0]);
+                        tradeId = web3.fromDecimal(trade[0]);
                         var ref = trade[7];
 
                         // Resolve on filled trades
-                        if (id == "0x0" || ref == "0"){
+                        if (tradeId == "0x0" || ref == "0"){
                             resolve({});
                             return;
                         }
@@ -173,7 +172,7 @@ var EthereumClient = function() {
 
                         var tradeExists = web3.eth.getStorageAt(fixtures.addresses.etherex, web3.fromDecimal(ref), 'latest');
 
-                        if (tradeExists == "0x00")
+                        if (tradeExists == "0x0")
                             status = 'pending';
                         else
                             status = 'mined';
@@ -192,7 +191,7 @@ var EthereumClient = function() {
                         progress({percent: (p + 1) / total * 100 });
 
                         resolve({
-                            id: id,
+                            id: tradeId,
                             type: type == 1 ? 'buys' : 'sells',
                             price: price,
                             amount: amount,
@@ -222,12 +221,10 @@ var EthereumClient = function() {
         }
         catch (e) {
             failure("Unable to load trades: " + String(e));
-        };
+        }
     };
 
     this.loadPrices = function(market, success, failure) {
-        var prices = [];
-
         // console.log("Loading prices...");
 
         try {
@@ -251,7 +248,7 @@ var EthereumClient = function() {
                     amount: bigRat(web3.toDecimal(pricelogs[i].topic[3])).divide(amountPrecision).valueOf()
                 };
                 prices.push(pricelog);
-            };
+            }
 
             // console.log("PRICES", prices);
 
