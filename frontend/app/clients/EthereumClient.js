@@ -3,8 +3,6 @@ var fixtures = require("../js/fixtures");
 
 var bigRat = require('big-rational');
 
-var isMist = false;
-
 require('es6-promise').polyfill();
 
 if (typeof web3 === 'undefined') {
@@ -13,18 +11,10 @@ if (typeof web3 === 'undefined') {
 }
 
 try {
-    web3.setProvider(new web3.providers.HttpProvider());
-
-    try {
-        var m = web3.eth.getStorageAt(fixtures.addresses.etherex, "0x5");
-    }
-    catch (e) {
-        web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
-        isMist = true;
-    }
+    web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
 
     var ContractABI = web3.eth.contract(fixtures.contract_desc);
-    var contract = new ContractABI(fixtures.addresses.etherex);
+    var contract = ContractABI.at(fixtures.addresses.etherex);
 
     // console.log("CLIENT", web3.version.client);
     // console.log("CONTRACT", contract);
@@ -67,11 +57,11 @@ var EthereumClient = function() {
 
     this.loadMarkets = function(user, success, failure) {
         try {
-            var last = _.parseInt(contract.call().get_last_market_id().toString());
+            var last = _.parseInt(contract.get_last_market_id.call().toString());
 
             // console.log("LAST MARKET ID: ", last);
 
-            if (!last && !isMist) {
+            if (!last) {
                 failure("No market found, seems like contracts are missing.");
                 return;
             }
@@ -87,7 +77,7 @@ var EthereumClient = function() {
 
             for (var i = 1; i < last + 1; i++) {
                 try {
-                    var market = contract.call().get_market(i);
+                    var market = contract.get_market.call(i);
                     // console.log("Market from ABI:", market);
 
                     var id = _.parseInt(market[0].toString());
@@ -107,8 +97,8 @@ var EthereumClient = function() {
                     // console.log(id, name, address, decimals, precision, minimum, lastPrice, owner, block, total_trades);
 
                     var SubContractABI = web3.eth.contract(fixtures.sub_contract_desc);
-                    var subcontract = new SubContractABI(address);
-                    var balance = subcontract.call().balance(user.addresses[0]).toString();
+                    var subcontract = SubContractABI.at(address);
+                    var balance = subcontract.balance.call(user.addresses[0]).toString();
 
                     var favorite = false;
                     if (favorites.length > 0 && _.indexOf(favorites, id) >= 0)
@@ -140,8 +130,6 @@ var EthereumClient = function() {
                 failure("No market to load.")
         }
         catch (e) {
-            if (isMist)
-                success("Skipping...");
             failure("Unable to load markets: " + String(e));
         }
     };
@@ -151,7 +139,7 @@ var EthereumClient = function() {
             // Set defaultBlock to 'pending' trade IDs
             web3.eth.defaultBlock = 'pending';
 
-            var trade_ids = contract.call().get_trade_ids(market.id);
+            var trade_ids = contract.get_trade_ids.call(market.id);
 
             if (!trade_ids || trade_ids.length == 0) {
                 failure("No trades found");
@@ -168,7 +156,7 @@ var EthereumClient = function() {
                     var id = trade_ids[i];
                     var p = i;
 
-                    var trade = contract.call().get_trade(id);
+                    var trade = contract.get_trade.call(id);
                     // console.log("Trade from ABI:", trade);
 
                     try {
@@ -363,10 +351,10 @@ var EthereumClient = function() {
 
         try {
             var SubContractABI = web3.eth.contract(fixtures.sub_contract_desc);
-            var subcontract = new SubContractABI(market.address);
-            var sub_balance = _.parseInt(subcontract.call().balance(address).toString());
+            var subcontract = SubContractABI.at(market.address);
+            var sub_balance = _.parseInt(subcontract.balance.call(address).toString());
 
-            var balances = contract.call().get_sub_balance(address, market.id);
+            var balances = contract.get_sub_balance.call(address, market.id);
 
             var available = balances[0].toString();
             var trading = balances[1].toString();
@@ -389,15 +377,13 @@ var EthereumClient = function() {
             success(market, available, trading, sub_balance);
         }
         catch(e) {
-            if (isMist)
-                success("Skipping...");
             failure(error + String(e));
         }
     };
 
     this.sendSub = function(amount, recipient, market, success, failure) {
         var SubContractABI = web3.eth.contract(fixtures.sub_contract_desc);
-        var subcontract = new SubContractABI(market.address);
+        var subcontract = SubContractABI.at(market.address);
 
         try {
             var result = subcontract.sendTransaction({
@@ -413,7 +399,7 @@ var EthereumClient = function() {
 
     this.depositSub = function(user, amount, market, success, failure) {
         var SubContractABI = web3.eth.contract(fixtures.sub_contract_desc);
-        var subcontract = new SubContractABI(market.address);
+        var subcontract = SubContractABI.at(market.address);
 
         try {
             var result = subcontract.sendTransaction({
