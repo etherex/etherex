@@ -386,9 +386,9 @@ var EthereumClient = function() {
         var subcontract = SubContractABI.at(market.address);
 
         try {
-            var result = subcontract.sendTransaction({
+            var result = subcontract.transfer.sendTransaction(recipient, amount, {
                 gas: "100000"
-            }).send(recipient, amount);
+            });
 
             success(result);
         }
@@ -402,9 +402,9 @@ var EthereumClient = function() {
         var subcontract = SubContractABI.at(market.address);
 
         try {
-            var result = subcontract.sendTransaction({
+            var result = subcontract.transfer.sendTransaction(fixtures.addresses.etherex, amount, {
                 gas: "100000"
-            }).send(fixtures.addresses.etherex, amount);
+            });
 
             success(result);
         }
@@ -415,9 +415,9 @@ var EthereumClient = function() {
 
     this.withdrawSub = function(amount, market, success, failure) {
         try {
-            var result = contract.sendTransaction({
+            var result = contract.withdraw.sendTransaction(amount, market.id, {
                 gas: "100000"
-            }).withdraw(amount, market.id);
+            });
 
             success(result);
         }
@@ -428,14 +428,15 @@ var EthereumClient = function() {
 
     this.registerMarket = function(market, success, failure) {
         try {
-            var result = contract.sendTransaction({
-                gas: "100000"
-            }).add_market(
+            var result = contract.add_market.sendTransaction(
                 web3.fromAscii(market.name, 32),
                 market.address,
                 market.decimals,
                 market.precision,
-                market.minimum
+                market.minimum,
+                {
+                    gas: "250000"
+                }
             );
 
             success(result);
@@ -476,9 +477,9 @@ var EthereumClient = function() {
             };
 
             if (trade.type == 1)
-                var result = contract.sendTransaction(options).buy(amounts.amount, amounts.price, trade.market);
+                var result = contract.buy.sendTransaction(amounts.amount, amounts.price, trade.market, options);
             else if (trade.type == 2)
-                var result = contract.sendTransaction(options).sell(amounts.amount, amounts.price, trade.market);
+                var result = contract.sell.sendTransaction(amounts.amount, amounts.price, trade.market, options);
             else {
                 failure("Invalid trade type.");
                 return;
@@ -513,12 +514,12 @@ var EthereumClient = function() {
         var gas = ids.length * 100000;
 
         try {
-            var result = contract.sendTransaction({
+            var result = contract.trade.sendTransaction(total_amounts, ids, {
                 from: user.addresses[0],
                 gas: String(gas),
                 to: fixtures.addresses.etherex,
                 value: total > 0 ? total.toString() : "0"
-            }).trade(total_amounts, ids);
+            });
 
             success(result);
         }
@@ -531,12 +532,12 @@ var EthereumClient = function() {
         var amounts = this.getAmounts(trade.amount, trade.price, market.decimals, market.precision);
 
         try {
-            var result = contract.sendTransaction({
+            var result = contract.trade.sendTransaction(amounts.amount, [trade.id], {
                 from: user.addresses[0],
                 gas: "100000",
                 to: fixtures.addresses.etherex,
                 value: trade.type == "sells" ? amounts.total : "0"
-            }).trade(amounts.amount, [trade.id]);
+            });
 
             success(result);
         }
@@ -547,12 +548,12 @@ var EthereumClient = function() {
 
     this.cancelTrade = function(user, trade, success, failure) {
         try {
-            var result = contract.sendTransaction({
+            var result = contract.cancel.sendTransaction(trade.id, {
                 from: user.addresses[0],
                 value: "0",
                 to: fixtures.addresses.etherex,
                 gas: "100000"
-            }).cancel(trade.id);
+            });
 
             success(result);
         }

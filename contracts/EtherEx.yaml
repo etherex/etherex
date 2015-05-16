@@ -216,21 +216,21 @@
   transact:
     ZGetx:
       to: $ETX
-      fun_name: send
+      fun_name: transfer
       sig: ii
       data:
         - $zg
         - 10000000000
     CAKetx:
       to: $ETX
-      fun_name: send
+      fun_name: transfer
       sig: ii
       data:
         - $caktux
         - 10000000000
     MIDetx:
       to: $ETX
-      fun_name: send
+      fun_name: transfer
       sig: ii
       data:
         - $mids
@@ -240,21 +240,21 @@
   transact:
     ZGcak:
       to: $CAK
-      fun_name: send
+      fun_name: transfer
       sig: ii
       data:
         - $zg
         - 5000000000
     CAKcak:
       to: $CAK
-      fun_name: send
+      fun_name: transfer
       sig: ii
       data:
         - $caktux
         - 50000000000
     MIDcak:
       to: $CAK
-      fun_name: send
+      fun_name: transfer
       sig: ii
       data:
         - $mids
@@ -264,21 +264,21 @@
   transact:
     ZGetx:
       to: $MID
-      fun_name: send
+      fun_name: transfer
       sig: ii
       data:
         - $zg
         - 5000000000
     CAKetx:
       to: $MID
-      fun_name: send
+      fun_name: transfer
       sig: ii
       data:
         - $caktux
         - 5000000000
     MIDetx:
       to: $MID
-      fun_name: send
+      fun_name: transfer
       sig: ii
       data:
         - $mids
@@ -291,21 +291,21 @@
   transact:
     deposit:
       to: $ETX
-      fun_name: send
+      fun_name: transfer
       sig: ii
       data:
         - $EtherEx
         - 1000000000
     depositCAK:
       to: $CAK
-      fun_name: send
+      fun_name: transfer
       sig: ii
       data:
         - $EtherEx
         - 10000000000
     depositMID:
       to: $MID
-      fun_name: send
+      fun_name: transfer
       sig: ii
       data:
         - $EtherEx
