@@ -14,7 +14,7 @@ class TestEtxContract(object):
         self.s.revert(self.snapshot)
 
     def test_negative_send_should_fail(self):
-        assert self.c.send(tester.a0, -1000, sender=tester.k1) == 0
+        assert self.c.transfer(tester.a0, -1000, sender=tester.k1) == 0
         assert self.c.balance(tester.a0) == 100000000000
         assert self.c.balance(tester.a1) == 0
 
@@ -46,9 +46,9 @@ class TestEtxContract(object):
     def test_send_with_invalid_recipient_should_not_overwrite_internal_settings(self):
         assert self.c.set_exchange(0xdeadbeef, 999)
 
-        assert self.c.send(0, 1) == 0
+        assert self.c.transfer(0, 1) == 0
         assert self.s.block.get_storage_data(self.c.address, 0) == utils.big_endian_to_int(tester.a0)
 
-        assert self.c.send(-1000, 1) == 0
+        assert self.c.transfer(-1000, 1) == 0
         assert self.s.block.get_storage_data(self.c.address, 1) == 0xdeadbeef
         assert self.s.block.get_storage_data(self.c.address, 2) == 999
