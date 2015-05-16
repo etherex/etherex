@@ -23,6 +23,17 @@ var Markets = React.createClass({
     };
   },
 
+  setAlert: function(alertLevel, alertMessage) {
+    this.setState({
+      alertLevel: alertLevel,
+      alertMessage: alertMessage
+    });
+  },
+
+  showAlert: function(show) {
+    this.refs.alerts.setState({alertVisible: show});
+  },
+
   render: function() {
     // console.log(this.props);
     // <MarketFilter market={this.props.market} trades={this.props.trades} user={this.props.user} />
@@ -38,7 +49,7 @@ var Markets = React.createClass({
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
-                  <SubWithdraw market={this.props.market.market} user={this.props.user.user} />
+                  <SubWithdraw market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
                 </div>
               </div>
             </div>
@@ -50,7 +61,7 @@ var Markets = React.createClass({
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
-                  <SubDeposit market={this.props.market.market} user={this.props.user.user} />
+                  <SubDeposit market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
                 </div>
               </div>
             </div>
@@ -64,7 +75,7 @@ var Markets = React.createClass({
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
-                  <SubSend market={this.props.market.market} user={this.props.user.user} />
+                  <SubSend market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
                 </div>
               </div>
             </div>

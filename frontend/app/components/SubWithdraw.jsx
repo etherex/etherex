@@ -73,23 +73,17 @@ var SubWithdraw = React.createClass({
     });
 
     if (!amount) {
-      this._owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Dont' be cheap to yourself..."
-      });
+      this.props.setAlert('warning', "Dont' be cheap to yourself...");
     }
     else if (amount > this.props.user.balance_sub_available) {
-      this._owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Not enough " + this.props.market.name + " available for withdraw, got " + utils.format(this.props.user.balance_sub_available) + ", needs " + utils.format(amount)
-      });
+      this.props.setAlert('warning', "Not enough " + this.props.market.name + " available for withdraw, got " + utils.format(this.props.user.balance_sub_available) + ", needs " + utils.format(amount));
     }
     else {
       this.setState({
         newWithdrawal: true
       });
 
-      this._owner.refs.alerts.setState({alertVisible: false});
+      this.props.showAlert(false);
 
       return true;
     }
@@ -99,7 +93,7 @@ var SubWithdraw = React.createClass({
     });
 
     if (showAlerts)
-      this._owner.refs.alerts.setState({alertVisible: true});
+      this.props.showAlert(true);
 
     return false;
   },

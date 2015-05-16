@@ -192,7 +192,8 @@ var SplitTradeForm = React.createClass({
           }
           <CustomModalTrigger
             ref="triggerSubDeposit"
-            owner={this._owner}
+            setAlert={this.props.setAlert}
+            showAlert={this.props.showAlert}
             flux={this.getFlux()}
             market={this.props.market.market}
             user={this.props.user.user}
@@ -291,29 +292,17 @@ var SplitTradeForm = React.createClass({
         !price ||
         !total) {
 
-      this._owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Fill it up mate!"
-      });
+      this.props.setAlert('warning', "Fill it up mate!");
     }
     else if (total < this.props.market.market.minTotal) {
-      this._owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Minimum total is " + this.props.market.market.minTotal + " ETH"
-      });
+      this.props.setAlert('warning', "Minimum total is " + this.props.market.market.minTotal + " ETH");
     }
     else if (this.props.type == 1 &&
         bigRat(this.props.user.user.balance_raw).lesser(bigRat(total).multiply(fixtures.ether))) {
-      this._owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Not enough ETH for this trade, " + utils.formatBalance(bigRat(total).multiply(fixtures.ether)) + " required."
-      });
+      this.props.setAlert('warning', "Not enough ETH for this trade, " + utils.formatBalance(bigRat(total).multiply(fixtures.ether)) + " required.");
     }
     else if (this.props.type == 2 && this.props.user.user.balance_sub_available < amount) {
-      this._owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Not enough " + this.props.market.market.name + " for this trade, " + amount + " " + this.props.market.market.name + " required."
-      });
+      this.props.setAlert('warning', "Not enough " + this.props.market.market.name + " for this trade, " + amount + " " + this.props.market.market.name + " required.");
       this.refs.triggerSubDeposit.handleToggle();
     }
     else {
@@ -321,7 +310,7 @@ var SplitTradeForm = React.createClass({
         newTrade: true
       });
 
-      this._owner.refs.alerts.setState({alertVisible: false});
+      this.props.showAlert(false);
 
       return true;
     }
@@ -331,7 +320,7 @@ var SplitTradeForm = React.createClass({
     });
 
     if (showAlerts)
-      this._owner.refs.alerts.setState({alertVisible: true});
+      this.props.showAlert(true);
 
     return false;
   },
@@ -425,7 +414,18 @@ var TradeForm = React.createClass({
   },
 
   toggleGraph: function() {
-    this._owner.onToggleGraph();
+    this.props.toggleGraph();
+  },
+
+  setAlert: function(alertLevel, alertMessage) {
+    this.setState({
+      alertLevel: alertLevel,
+      alertMessage: alertMessage
+    });
+  },
+
+  showAlert: function(show) {
+    this.refs.alerts.setState({alertVisible: show});
   },
 
   render: function() {
@@ -451,7 +451,7 @@ var TradeForm = React.createClass({
             <div className="visible-xs visible-sm">
               <div>
                 <div className="container-fluid">
-                  <SplitTradeForm ref="tradeform" type={this.state.type} market={this.props.market} trades={this.props.trades} user={this.props.user} />
+                  <SplitTradeForm ref="tradeform" type={this.state.type} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
             </div>
@@ -459,13 +459,13 @@ var TradeForm = React.createClass({
               <div className="col-md-6">
                 <div className="container-fluid">
                   <h4 className="text-center">Buy</h4>
-                  <SplitTradeForm ref="buyform" type={1} market={this.props.market} trades={this.props.trades} user={this.props.user} />
+                  <SplitTradeForm ref="buyform" type={1} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
               <div className="col-md-6">
                 <h4 className="text-center">Sell</h4>
                 <div className="container-fluid">
-                  <SplitTradeForm ref="sellform" type={2} market={this.props.market} trades={this.props.trades} user={this.props.user} />
+                  <SplitTradeForm ref="sellform" type={2} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
             </div>

@@ -20,6 +20,17 @@ var TradeList = React.createClass({
     };
   },
 
+  setAlert: function(alertLevel, alertMessage) {
+    this.setState({
+      alertLevel: alertLevel,
+      alertMessage: alertMessage
+    });
+  },
+
+  showAlert: function(show) {
+    this.refs.alerts.setState({alertVisible: show});
+  },
+
   render: function() {
     return (
       <div>
@@ -32,7 +43,7 @@ var TradeList = React.createClass({
             </div>
             <div className="panel-body">
               <div className="container-fluid">
-                <SubRegister markets={this.props.market.markets} />
+                <SubRegister markets={this.props.market.markets} setAlert={this.setAlert} showAlert={this.showAlert} />
               </div>
             </div>
           </div>

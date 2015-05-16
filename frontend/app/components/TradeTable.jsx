@@ -118,7 +118,7 @@ var TradeRow = React.createClass({
         var thisUser = this.props.user;
         var thisTrade = this.props.trade;
         var count = this.props.count;
-        var trades = _.filter(this._owner.props.tradeList, function(trade, i) {
+        var trades = _.filter(this.props.tradeList, function(trade, i) {
             return (
                 thisUser.id != trade.owner &&
                 trade.status != "pending" &&
@@ -151,7 +151,7 @@ var TradeRow = React.createClass({
             user: this.props.user
         };
 
-        _.forEach(this._owner.props.tradeList, function(trade) {
+        _.forEach(this.props.tradeList, function(trade) {
             if (!_.find(trades, {'id': trade.id}) && trade.status == "filling")
                 trade.status = "mined";
             else if (_.find(trades, {'id': trade.id}) && trade.status == "mined")
@@ -166,14 +166,14 @@ var TradeRow = React.createClass({
     },
 
     handleHoverOut: function(e) {
-        if (!this._owner._owner.props.trades)
+        if (!this.props.trades)
             return;
 
         var payload = {
-            type: this._owner._owner.props.trades.type,
-            price: this._owner._owner.props.trades.price,
-            amount: this._owner._owner.props.trades.amount,
-            total: this._owner._owner.props.trades.total,
+            type: this.props.trades.type,
+            price: this.props.trades.price,
+            amount: this.props.trades.amount,
+            total: this.props.trades.total,
             market: this.props.trade.market,
             user: this.props.user
         };
@@ -191,7 +191,7 @@ var TradeTable = React.createClass({
     render: function() {
         var tradeListNodes = this.props.tradeList.map(function (trade, i) {
             return (
-                <TradeRow key={trade.id} count={i} trade={trade} market={this.props.market} user={this.props.user} review={this.props.review} />
+                <TradeRow key={trade.id} count={i} trade={trade} trades={this.props.trades} tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={this.props.review} />
             );
         }.bind(this));
         return (

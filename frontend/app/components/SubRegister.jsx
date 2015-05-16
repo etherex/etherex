@@ -109,47 +109,29 @@ var SubRegister = React.createClass({
         !decimals ||
         !precision) {
 
-      this._owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Fill it up mate!"
-      });
+      this.props.setAlert('warning', "Fill it up mate!");
     }
     else if (code == 'ETH') {
-        this._owner.setState({
-          alertLevel: 'warning',
-          alertMessage: "Nice try."
-        });
+        this.props.setAlert('warning', "Nice try.");
     }
     else if (code.length < 3 || code.length > 4) {
-        this._owner.setState({
-          alertLevel: 'warning',
-          alertMessage: "Subcurrency code too " + (code.length < 3 ? "short" : "long") + "."
-        });
+        this.props.setAlert('warning', "Subcurrency code too " + (code.length < 3 ? "short" : "long") + ".");
     }
     else if (address.length != 40) {
-        this._owner.setState({
-          alertLevel: 'warning',
-          alertMessage: "Address too " + (address.length < 40 ? "short" : "long") + "."
-        });
+        this.props.setAlert('warning', "Address too " + (address.length < 40 ? "short" : "long") + ".");
     }
     else if (_.find(this.props.markets, {name: code})) {
-        this._owner.setState({
-          alertLevel: 'warning',
-          alertMessage: "Subcurrency code " + code + " already taken."
-        });
+        this.props.setAlert('warning', "Subcurrency code " + code + " already taken.");
     }
     else if (_.find(this.props.markets, {address: "0x" + address})) {
-        this._owner.setState({
-          alertLevel: 'warning',
-          alertMessage: "Subcurrency address " + address + " already taken."
-        });
+        this.props.setAlert('warning', "Subcurrency address " + address + " already taken.");
     }
     else {
       this.setState({
         newReg: true
       });
 
-      this._owner.refs.alerts.setState({alertVisible: false});
+      this.props.showAlert(false);
 
       return true;
     }
@@ -159,7 +141,7 @@ var SubRegister = React.createClass({
     });
 
     if (showAlerts)
-      this._owner.refs.alerts.setState({alertVisible: true});
+      this.props.showAlert(true);
 
     return false;
   },

@@ -82,35 +82,23 @@ var SubSend = React.createClass({
     });
 
     if (!address || !amount) {
-      this._owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Fill it up mate!"
-      });
+      this.props.setAlert('warning', "Fill it up mate!");
     }
     else if (!amount) {
-      this._owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Dont' be cheap..."
-      });
+      this.props.setAlert('warning', "Dont' be cheap...");
     }
     else if (amount > this.props.user.balance_sub_available) {
-      this._owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Not enough " + this.props.market.name + " available to send, got " + utils.format(this.props.user.balance_sub_available) + ", needs " + utils.format(amount)
-      });
+      this.props.setAlert('warning', "Not enough " + this.props.market.name + " available to send, got " + utils.format(this.props.user.balance_sub_available) + ", needs " + utils.format(amount));
     }
     else if (address.length != 40) {
-        this._owner.setState({
-          alertLevel: 'warning',
-          alertMessage: "Address too " + (address.length < 40 ? "short" : "long") + "."
-        });
+        this.props.setAlert('warning', "Address too " + (address.length < 40 ? "short" : "long") + ".");
     }
     else {
       this.setState({
         newSend: true
       });
 
-      this._owner.refs.alerts.setState({alertVisible: false});
+      this.props.showAlert(false);
 
       return true;
     }
@@ -120,7 +108,7 @@ var SubSend = React.createClass({
     });
 
     if (showAlerts)
-      this._owner.refs.alerts.setState({alertVisible: true});
+      this.props.showAlert(true);
 
     return false;
   },

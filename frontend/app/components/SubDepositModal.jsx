@@ -30,7 +30,7 @@ var SubDepositModal = React.createClass({
   },
 
   componentDidMount: function() {
-    this.validate(new Event);
+    this.validate(new Event('validate'));
   },
 
   render: function() {
@@ -81,23 +81,17 @@ var SubDepositModal = React.createClass({
     });
 
     if (!amount) {
-      this.props.owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Dont' be cheap..."
-      });
+      this.props.setAlert('warning', "Dont' be cheap...");
     }
     else if (amount > this.props.user.balance_sub) {
-      this.props.owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Not enough " + this.props.market.name + " for deposit, got " + utils.format(this.props.user.balance_sub) + ", needs " + utils.format(amount)
-      });
+      this.props.setAlert('warning', "Not enough " + this.props.market.name + " for deposit, got " + utils.format(this.props.user.balance_sub) + ", needs " + utils.format(amount));
     }
     else {
       this.setState({
         newDeposit: true
       });
 
-      this.props.owner.refs.alerts.setState({alertVisible: false});
+      this.props.showAlert(false);
 
       return true;
     }
@@ -107,7 +101,7 @@ var SubDepositModal = React.createClass({
     });
 
     if (showAlerts)
-      this.props.owner.refs.alerts.setState({alertVisible: true});
+      this.props.showAlert(true);
 
     e.stopPropagation();
   },
@@ -116,7 +110,7 @@ var SubDepositModal = React.createClass({
     e.preventDefault();
 
     if (!this.validate(e, el))
-      return false
+      return false;
 
     this.getFlux().actions.user.depositSub({
       amount: bigRat(this.state.amount).multiply(Math.pow(10, this.props.market.decimals)).toDecimal()

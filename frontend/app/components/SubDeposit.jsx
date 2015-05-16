@@ -72,23 +72,17 @@ var SubDeposit = React.createClass({
     });
 
     if (!amount) {
-      this._owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Dont' be cheap..."
-      });
+      this.props.setAlert('warning', "Dont' be cheap...");
     }
     else if (amount > this.props.user.balance_sub) {
-      this._owner.setState({
-        alertLevel: 'warning',
-        alertMessage: "Not enough " + this.props.market.name + " for deposit, got " + utils.format(this.props.user.balance_sub) + ", needs " + utils.format(amount)
-      });
+      this.props.setAlert('warning', "Not enough " + this.props.market.name + " for deposit, got " + utils.format(this.props.user.balance_sub) + ", needs " + utils.format(amount));
     }
     else {
       this.setState({
         newDeposit: true
       });
 
-      this._owner.refs.alerts.setState({alertVisible: false});
+      this.props.showAlert(false);
 
       return true;
     }
@@ -98,7 +92,7 @@ var SubDeposit = React.createClass({
     });
 
     if (showAlerts)
-      this._owner.refs.alerts.setState({alertVisible: true});
+      this.props.showAlert(true);
 
     e.stopPropagation();
   },
