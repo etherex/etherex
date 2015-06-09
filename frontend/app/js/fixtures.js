@@ -267,11 +267,75 @@ var fixtures = {
                     "type": "uint256[]"
                 }
             ]
+        },
+        {
+            "name": "log_price(int256,int256,int256,int256,int256)",
+            "type": "event",
+            "inputs": [
+              { "name": "market", "type": "int256", "indexed": true },
+              { "name": "type", "type": "int256", "indexed": false },
+              { "name": "price", "type": "int256", "indexed": false },
+              { "name": "amount", "type": "int256", "indexed": false },
+              { "name": "timestamp", "type": "int256", "indexed": false }
+            ]
+        },
+        {
+            "name": "log_add_tx(int256,int256,int256,int256,int256)",
+            "type": "event",
+            "inputs": [
+              { "name": "sender", "type": "int256", "indexed": true },
+              { "name": "market", "type": "int256", "indexed": false },
+              { "name": "type", "type": "int256", "indexed": false },
+              { "name": "price", "type": "int256", "indexed": false },
+              { "name": "amount", "type": "int256", "indexed": false }
+            ]
+        },
+        {
+            "name": "log_fill_tx(int256,int256,int256,int256,int256,int256,int256)",
+            "type": "event",
+            "inputs": [
+              { "name": "sender", "type": "int256", "indexed": true },
+              { "name": "owner", "type": "int256", "indexed": false },
+              { "name": "market", "type": "int256", "indexed": false },
+              { "name": "type", "type": "int256", "indexed": false },
+              { "name": "trade", "type": "int256", "indexed": false },
+              { "name": "price", "type": "int256", "indexed": false },
+              { "name": "amount", "type": "int256", "indexed": false }
+            ]
+        },
+        {
+            "name": "log_deposit(int256,int256,int256)",
+            "type": "event",
+            "inputs": [
+              { "name": "sender", "type": "int256", "indexed": true },
+              { "name": "market", "type": "int256", "indexed": false },
+              { "name": "amount", "type": "int256", "indexed": false }
+            ]
+        },
+        {
+            "name": "log_withdraw(int256,int256,int256)",
+            "type": "event",
+            "inputs": [
+              { "name": "address", "type": "int256", "indexed": true },
+              { "name": "market", "type": "int256", "indexed": false },
+              { "name": "amount", "type": "int256", "indexed": false }
+            ]
+        },
+        {
+            "name": "log_cancel(int256,int256,int256,int256,int256)",
+            "type": "event",
+            "inputs": [
+              { "name": "sender", "type": "int256", "indexed": true },
+              { "name": "market", "type": "int256", "indexed": false },
+              { "name": "trade", "type": "int256", "indexed": false },
+              { "name": "price", "type": "int256", "indexed": false },
+              { "name": "amount", "type": "int256", "indexed": false },
+            ]
         }
     ],
     sub_contract_desc: [
         {
-            "name": "send",
+            "name": "transfer",
             "type": "function",
             "inputs": [
                 {

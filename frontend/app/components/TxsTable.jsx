@@ -25,67 +25,35 @@ var TxRow = React.createClass({
     mixins: [FluxMixin],
 
     render: function() {
-        var inout = this.props.user.id == this.props.tx.from ||
-                             eth.fromFixed(this.props.user.id) == eth.fromFixed("0x" + this.props.tx.input.substr(2,64)) ?
-                                "out" :
-                         this.props.user.id == this.props.tx.to ||
-                             eth.fromFixed(this.props.user.id) == eth.fromFixed("0x" + this.props.tx.input.substr(66,64)) ?
-                                "in" : "-";
-
-        var amount = eth.toDecimal("0x" + this.props.tx.input.substr(130,64));
-            // console.log(amount);
-        if (bigRat(amount).greater(bigRat(fixtures.ether)))
-            amount = "> " + utils.format(bigRat(fixtures.ether).valueOf());
-        else
-            amount = utils.numeral(amount, this.props.market.decimals);
+        var market = this.props.market.markets[this.props.tx.market - 1];
+        var amount = utils.format(bigRat(this.props.tx.amount).divide(Math.pow(10, market.decimals)));
 
         return (
-            <tr className={"tx-" + this.props.tx.in}>
+            <tr className={"tx-" + this.props.tx.inout}>
                 <td>
-                    <div className="text-center" title={this.props.tx.block}>
-                        {this.props.tx.number}
-                        <br />
-                        {
-                        //this.props.tx.path
-                        }
+                    <div className="text-center">
+                        {this.props.tx.block}
+                    </div>
+                </td>
+                <td className={(this.props.tx.inout == 'in' ? "text-success" : "text-danger")}>
+                    <div className="text-center">
+                        {this.props.tx.inout}
                     </div>
                 </td>
                 <td>
                     <div className="text-center">
-                        {
-                            // this.props.tx.input
-                        // }
-                        // <br />
-                        // {
-                        //     eth.fromFixed("0x" + this.props.tx.input.substr(2,64))
-                        // }
-                        // <br />
-                        // {
-                        //     eth.fromFixed(this.props.user.id)
-                        // }
-                        // <br />
-                        // {
-                        //     eth.pad(eth.fromAscii(this.props.user.id), 0, 64)
-                        // <br />
-                        }
-                        <br />
-                        {inout}
+                        {this.props.tx.type}
                     </div>
                 </td>
                 <td>
-                    <div className="text-center" title={this.props.tx.block}>
-                        <samp>{this.props.tx.origin}</samp>
-                        <br />
-                        <samp>{
-                            // inout == "out" ? this.props.tx.to : inout == "in" ? this.props.tx.from : this.props.tx.origin
-                            // this.props.user.id == this.props.tx.from ? this.props.tx.to : this.props.tx.from
-                            this.props.tx.from
-                        }</samp>
+                    <div className="text-center">
+                        <samp>
+                            {this.props.tx.from}
+                        </samp>
                             <br />
-                        <samp>{
-                            // this.props.user.id != this.props.tx.from ? this.props.tx.to : this.props.tx.from
-                            this.props.tx.to
-                        }</samp>
+                        <samp>
+                            {this.props.tx.to}
+                        </samp>
                     </div>
                 </td>
                 <td>
@@ -95,25 +63,22 @@ var TxRow = React.createClass({
                 </td>
                 <td>
                     <div className="text-right">
-                        {this.props.market.name}
+                        {market.name}
                     </div>
                 </td>
                 <td>
                     <div className="text-right">
-                        {
-                            // utils.numeral(this.props.tx.price, this.props.market.precision.length - 1)
-                        }
+                        {this.props.tx.price}
                     </div>
                 </td>
                 <td>
                     <div className="text-right">
-                        {utils.formatBalance(this.props.tx.value)// this.props.market.precision.length - 1)
-                        }
+                        {this.props.tx.total}
                     </div>
                 </td>
                 <td>
                     <div className="text-center">
-                        {eth.toDecimal(this.props.tx.output)}
+                        {this.props.tx.result}
                     </div>
                 </td>
             </tr>
@@ -128,19 +93,22 @@ var TxRow = React.createClass({
 
 var TxsTable = React.createClass({
     render: function() {
-        var txsListNodes = this.props.txs.reverse().map(function (tx) {
-            return (
-                <TxRow key={tx.number + "-" + tx.path} tx={tx} market={this.props.market} user={this.props.user} />
-            );
+        var txsListNodes = _.sortBy(this.props.txs, 'block').map(function (tx) {
+          return (
+              <TxRow key={tx.hash} tx={tx} market={this.props.market} user={this.props.user} />
+          );
         }.bind(this));
+        txsListNodes.reverse();
+
         return (
             <div>
                 <h4>{this.props.title}</h4>
                 <Table condensed hover responsive striped>
                     <thead>
                         <tr>
-                            <th className="text-right">Block #</th>
+                            <th className="text-center">Block #</th>
                             <th className="text-center">In/Out</th>
+                            <th className="text-center">Type</th>
                             <th className="text-center">Origin / From / To</th>
                             <th className="text-right">Amount</th>
                             <th className="text-center">Market</th>
@@ -151,11 +119,6 @@ var TxsTable = React.createClass({
                     </thead>
                     <tbody>
                         {txsListNodes}
-                        {
-                        // ethBrowser ?
-                        //     txsListNodes :
-                        //     <div className="bg-warning panel-body">No eth.messages with JSON-RPC interface.</div>
-                        }
                     </tbody>
                 </Table>
             </div>

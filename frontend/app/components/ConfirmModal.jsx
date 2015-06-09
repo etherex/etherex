@@ -2,16 +2,12 @@
 
 var React = require("react");
 
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
-
 var Button = require('react-bootstrap/lib/Button');
 var Modal = require('react-bootstrap/lib/Modal');
 
 // XXX should be FluxMixin, but then flux object doesn't get passed along somehow
 
 var ConfirmModal = React.createClass({
-    mixins: [FluxMixin],
 
     render: function() {
         if (this.props.tradeList)

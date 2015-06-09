@@ -2,8 +2,9 @@
 
 var React = require("react");
 var Router = require("react-router");
+var Button = require("react-bootstrap/lib/Button");
 var Link = Router.Link;
-var ActiveState = Router.ActiveState;
+var ActiveState = Router.State;
 
 var SubTab = React.createClass({
 
@@ -15,15 +16,17 @@ var SubTab = React.createClass({
 
   updateActiveState: function () {
     this.setState({
-      isActive: SubTab.isActive(this.props.to, this.props.params, this.props.query)
+      isActive: this.isActive(this.props.to, this.props.params, this.props.query)
     });
+    console.log(this.state.isActive);
   },
 
   render: function() {
-    var className = this.state.isActive ? ' active' : '';
+    var active = this.isActive(this.props.to, this.props.params, this.props.query);
+    var className = active ? 'active' : '';
     return (
       <li className={className}>
-        <Link {...this.props} />
+        <Link className="btn-lg" {...this.props} />
       </li>
     );
   }

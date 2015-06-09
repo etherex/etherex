@@ -69,6 +69,8 @@ var SplitTradeForm = React.createClass({
     // Minimum total
     var minimum = bigRat(nextProps.market.market.minimum).divide(fixtures.ether).valueOf().toFixed(priceDecimals);
 
+    var message = "";
+    var note = "";
 
     // Pre-check if trade will be valid
     if (nextProps.trades.price > 0 &&
@@ -80,11 +82,11 @@ var SplitTradeForm = React.createClass({
 
       // Dialog messages and notes
       if (nextProps.trades.amount && nextProps.trades.price && nextProps.trades.total) {
-        var message = "Are you sure you want to " + (nextProps.type == 1 ? "buy" : "sell") +
+        message = "Are you sure you want to " + (nextProps.type == 1 ? "buy" : "sell") +
           " " + utils.numeral(nextProps.trades.amount, decimals) + " " + nextProps.market.market.name +
           " at " + utils.numeral(nextProps.trades.price, priceDecimals) + " " + nextProps.market.market.name + "/ETH" +
           " for " + utils.formatBalance(bigRat(nextProps.trades.total).multiply(fixtures.ether), decimals) + " ?";
-        var note = (nextProps.trades.filling.length > 0 ?
+        note = (nextProps.trades.filling.length > 0 ?
             "You will be filling " + nextProps.trades.filling.length + " trade" +
             (nextProps.trades.filling.length > 1 ? "s" : "") +
             " for a total of " +
@@ -114,11 +116,11 @@ var SplitTradeForm = React.createClass({
               utils.numeral(nextProps.trades.amountLeft, decimals) + " " + nextProps.market.market.name + " for " +
               utils.formatBalance(bigRat(this.state.totalLeft).multiply(fixtures.ether), decimals) +
               "."
-              : "")
+              : "");
       }
       else {
-        var message = null;
-        var note = null;
+        message = null;
+        note = null;
       }
 
       this.setState({
@@ -430,6 +432,7 @@ var TradeForm = React.createClass({
 
   render: function() {
     return (
+    <div className="col-lg-10 col-lg-offset-1">
       <div className="panel panel-default">
         <div className="panel-heading">
           <div className="visible-md visible-lg">
@@ -471,6 +474,7 @@ var TradeForm = React.createClass({
             </div>
         </div>
       </div>
+    </div>
     );
   },
 

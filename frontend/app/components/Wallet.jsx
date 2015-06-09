@@ -6,9 +6,12 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 
 var AlertDismissable = require('./AlertDismissable');
 
+var SendEther = require('./SendEther');
+
 var SubSend = require('./SubSend');
 var SubDeposit = require('./SubDeposit');
 var SubWithdraw = require('./SubWithdraw');
+
 // var MarketFilter = require("./MarketFilter"); TODO
 var MarketList = require("./MarketList");
 var TxsList = require("./TxsList");
@@ -76,6 +79,20 @@ var Markets = React.createClass({
               <div className="panel-body">
                 <div className="container-fluid">
                   <SubSend market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="container-fluid">
+          <div className="col-md-6 col-md-offset-3">
+            <div className="panel panel-default">
+              <div className="panel-heading">
+                <h3 className="panel-title">Send ETH</h3>
+              </div>
+              <div className="panel-body">
+                <div className="container-fluid">
+                  <SendEther user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
                 </div>
               </div>
             </div>

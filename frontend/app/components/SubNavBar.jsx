@@ -11,18 +11,18 @@ var SubTab = require("./SubTab");
 var UserLink = require("./UserLink");
 
 var SubNavBar = React.createClass({
-    mixins: [FluxMixin],
+  mixins: [FluxMixin],
 
-    render: function() {
-        return (
-            <div className="panel-group" role="navigation" aria-label="Secondary">
-                <ul className="nav nav-pills nav-justified">
-                    <SubTab to="trades" className="icon-chart-line">Subcurrencies</SubTab>
-                    <SubTab to="trades/xchain" className="icon-bitcoin">X-Chain</SubTab>
-                </ul>
-            </div>
-        );
-    }
+  render: function() {
+    return (
+      <ul className="nav nav-pills nav-lg nav-justified" role="navigation" aria-label="Secondary">
+        <SubTab to="trades"><i className="icon-chart-pie"></i> Subcurrencies</SubTab>
+        <SubTab to="trades/xchain"><i className="icon-bitcoin"></i> X-Chain</SubTab>
+        <SubTab to="trades/assets"><i className="icon-diamond"></i> Assets</SubTab>
+        <SubTab to="trades/currencies"><i className="icon-money"></i> Currencies</SubTab>
+      </ul>
+    );
+  }
 });
 
 module.exports = SubNavBar;

@@ -32,7 +32,7 @@ var TxsList = React.createClass({
                 {this.props.market.market.error &&
                     <AlertDismissable ref="alerts" level={"warning"} message={this.props.market.market.error} show={true} />}
                 <div className="container-fluid">
-                    <TxsTable market={this.props.market.market} txs={this.props.txs} user={this.props.user.user} />
+                    <TxsTable txs={this.props.txs} market={this.props.market} user={this.props.user.user} />
                 </div>
             </div>
         );

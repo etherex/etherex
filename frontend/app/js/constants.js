@@ -45,7 +45,10 @@ module.exports = {
         WITHDRAW: null,
         WITHDRAW_FAIL: null,
         SEND_SUB: null,
-        SEND_SUB_FAIL: null
+        SEND_SUB_FAIL: null,
+        SEND_ETHER: null,
+        SEND_ETHER_FAIL: null,
+        SWITCH_ADDRESS: null
     }),
     market: keyMirror ({
         CHANGE_MARKET: null,

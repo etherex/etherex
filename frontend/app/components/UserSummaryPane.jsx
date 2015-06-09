@@ -1,14 +1,29 @@
 /** @jsx React.DOM */
 
 var React = require("react");
+var Fluxxor = require("fluxxor");
+
+var FluxMixin = Fluxxor.FluxMixin(React);
 
 var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
 
-// var UserIdModal = require("./UserIdModal");
+var DropdownButton = require('react-bootstrap/lib/DropdownButton');
+var MenuItem = require('react-bootstrap/lib/MenuItem');
+
+var utils = require("../js/utils");
 
 var UserSummaryPane = React.createClass({
+  mixins: [FluxMixin],
+
+  handleChange: function(address) {
+    this.getFlux().actions.user.switchAddress({
+      address: address
+    });
+    this.getFlux().actions.user.updateBalance();
+    this.getFlux().actions.market.updateMarkets();
+  },
+
   render: function() {
-    // console.log(this.props.user);
     return (
         <div className="panel panel-default">
           <div className="panel-heading">
@@ -18,8 +33,16 @@ var UserSummaryPane = React.createClass({
             <table className="table table-condensed table-striped">
                 <tbody>
                     <tr>
-                        <td>User ID</td>
-                        <td>{this.props.user.user.id}</td>
+                        <td><div className="btn row">Address</div></td>
+                        <td>
+                          <DropdownButton ref="switchaddress" onSelect={this.handleChange} key={'switchaddress'} title={this.props.user.user.id} pullLeft className="row">
+                            {this.props.user.user.addresses ?
+                              this.props.user.user.addresses.map(function(address) {
+                                return <MenuItem key={address} eventKey={address}>{address}</MenuItem>;
+                              }.bind(this)) :
+                            ""}
+                          </DropdownButton>
+                        </td>
                     </tr>
                     <tr>
                         <td>Balance</td>
@@ -27,7 +50,7 @@ var UserSummaryPane = React.createClass({
                     </tr>
                     <tr>
                         <td>Current sub balance</td>
-                        <td>{this.props.user.user.balance_sub + (this.props.user.user.balance_sub_unconfirmed ? " " + this.props.user.user.balance_sub_unconfirmed : "")}</td>
+                        <td>{utils.format(this.props.user.user.balance_sub) + (this.props.user.user.balance_sub_unconfirmed ? " " + utils.format(this.props.user.user.balance_sub_unconfirmed) : "")}</td>
                     </tr>
                     <tr>
                         <td>Trades</td>

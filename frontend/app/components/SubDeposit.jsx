@@ -101,7 +101,7 @@ var SubDeposit = React.createClass({
     e.preventDefault();
 
     if (!this.validate(e, el))
-      return false
+      return false;
 
     this.getFlux().actions.user.depositSub({
       amount: bigRat(this.state.amount).multiply(Math.pow(10, this.props.market.decimals)).toDecimal()

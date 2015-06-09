@@ -45,7 +45,7 @@ var SubSend = React.createClass({
                   <ConfirmModal
                     message={
                       "Are you sure you want to send" +
-                        " " + utils.numeral(this.state.amount, 4) + " " + this.props.market.name +
+                        " " + utils.numeral(this.state.amount, 4) + " ETH" +
                         " to " + this.state.recipient + " ?"}
                     flux={this.getFlux()}
                     onSubmit={this.onSubmitForm}
@@ -87,8 +87,8 @@ var SubSend = React.createClass({
     else if (!amount) {
       this.props.setAlert('warning', "Dont' be cheap...");
     }
-    else if (amount > this.props.user.balance_sub) {
-      this.props.setAlert('warning', "Not enough " + this.props.market.name + " available to send, got " + utils.format(this.props.user.balance_sub_available) + ", needs " + utils.format(amount));
+    else if (amount > this.props.user.balance) {
+      this.props.setAlert('warning', "Not enough ETH available to send, got " + utils.format(this.props.user.balance) + ", needs " + utils.format(amount));
     }
     else if (address.length != 40) {
         this.props.setAlert('warning', "Address too " + (address.length < 40 ? "short" : "long") + ".");
@@ -121,11 +121,10 @@ var SubSend = React.createClass({
 
     var payload = {
         recipient: "0x" + this.state.recipient,
-        amount: bigRat(this.state.amount).toDecimal()
-        // amount: bigRat(this.state.amount).multiply(Math.pow(10, this.props.market.decimals)).toDecimal()
+        amount: bigRat(this.state.amount).multiply(fixtures.ether).toDecimal()
     };
 
-    this.getFlux().actions.user.sendSub(payload);
+    this.getFlux().actions.user.sendEther(payload);
 
     this.refs.address.getDOMNode().value = '';
     this.refs.amount.getDOMNode().value = '';

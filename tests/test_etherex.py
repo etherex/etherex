@@ -8,11 +8,23 @@
 import pytest
 from ethereum import tester
 from ethereum import utils
-import logging as logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 # DEBUG
-# tester.enable_logging()
-# tester.pb.pblogger.log_op = True
+tester.disable_logging()
+logger.setLevel("INFO")
+logging.getLogger('eth.pb').setLevel('INFO')
+logging.getLogger('eth.pb.msg').setLevel('INFO')
+logging.getLogger('eth.pb.msg.state').setLevel('INFO')
+logging.getLogger('eth.pb.tx').setLevel('INFO')
+logging.getLogger('eth.vm').setLevel('INFO')
+logging.getLogger('eth.vm.op').setLevel('INFO')
+logging.getLogger('eth.vm.exit').setLevel('INFO')
+logging.getLogger('eth.chain.tx').setLevel('INFO')
+logging.getLogger('transactions.py').setLevel('INFO')
+logging.getLogger('eth.msg').setLevel('INFO')
 
 class TestEtherEx(object):
 
@@ -217,6 +229,21 @@ class TestEtherEx(object):
         # Alice has 10000 in the exchange
         ans = self.contract.get_sub_balance(self.ALICE['address'], 1)
         assert ans == [10000 * 10 ** 5, 0]
+
+    def test_log_deposit(self):
+        snapshot = self.state.snapshot()
+        o = []
+        self.state.block.log_listeners.append(lambda x: o.append(self.contract._translator.listen(x)))
+
+        self.test_deposit_to_exchange()
+
+        assert o == [{
+            "_event_type": "log_deposit",
+            "sender": int("0x" + self.ALICE['address'], 16),
+            "market": 1,
+            "amount": 10000 * 10 ** 5
+        }]
+        self.state.revert(snapshot)
 
     def test_withdraw_sub_fail(self):
         self.test_initialize()
@@ -500,6 +527,60 @@ class TestEtherEx(object):
 
         ans = self.contract.price(1)
         assert ans == int(0.25 * 10 ** 8)
+        self.state.revert(snapshot)
+
+    def test_log_add_deposit_fill_price(self):
+        snapshot = self.state.snapshot()
+        o = []
+        self.state.block.log_listeners.append(lambda x: o.append(self.contract._translator.listen(x)))
+
+        self.test_fulfill_first_buy(False)
+
+        last_timestamp = self.state.block.timestamp
+
+        assert o == [{
+            '_event_type': 'log_add_tx',
+            'sender': 745948140856946866108753121277737810491401257713L,
+            'amount': 50000000,
+            'market': 1,
+            'price': 25000000,
+            'type': 1
+        }, {
+            '_event_type': 'log_add_tx',
+            'amount': 60000000,
+            'market': 1,
+            'price': 25000000,
+            'sender': 745948140856946866108753121277737810491401257713L,
+            'type': 1
+        }, {
+            '_event_type': 'log_add_tx',
+            'amount': 70000000,
+            'market': 1,
+            'price': 25000000,
+            'sender': 745948140856946866108753121277737810491401257713L,
+            'type': 1
+        }, {
+            '_event_type': 'log_deposit',
+            'amount': 1000000000,
+            'market': 1,
+            'sender': 715574669332965331462488905126228088406116900462L
+        }, {
+            '_event_type': 'log_fill_tx',
+            'amount': 50000000,
+            'market': 1,
+            'owner': 745948140856946866108753121277737810491401257713L,
+            'price': 25000000,
+            'sender': 715574669332965331462488905126228088406116900462L,
+            'tradeid': 23490291715255176443338864873375620519154876621682055163056454432194948412040L,
+            'type': 2
+        }, {
+            '_event_type': 'log_price',
+            'amount': 50000000,
+            'market': 1,
+            'price': 25000000,
+            'timestamp': long(last_timestamp),
+            'type': 1
+        }]
         self.state.revert(snapshot)
 
     def test_fulfill_first_sell(self):

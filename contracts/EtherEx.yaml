@@ -292,6 +292,7 @@
     deposit:
       to: $ETX
       fun_name: transfer
+      gas: 250000
       sig: ii
       data:
         - $EtherEx
@@ -299,6 +300,7 @@
     depositCAK:
       to: $CAK
       fun_name: transfer
+      gas: 250000
       sig: ii
       data:
         - $EtherEx
@@ -306,6 +308,7 @@
     depositMID:
       to: $MID
       fun_name: transfer
+      gas: 250000
       sig: ii
       data:
         - $EtherEx

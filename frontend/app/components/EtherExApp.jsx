@@ -41,41 +41,54 @@ var EtherExApp = React.createClass({
   render: function() {
     return (
       <div id="wrap">
-        <div className="container" ref="container">
+        <div className="container-fluid" ref="container">
           <NavBar user={this.state.user} />
-          <SubNavBar />
-          {(this.state.user.error) ?
-              <div className="container-fluid">
-                <div className="alert alert-danger" role="alert">
-                  <h4>Error!</h4>
-                  {this.state.user.error}
+          <div className="container-fluid row">
+            <div className="col-lg-2">
+              <div className="row">
+                <div className="container-fluid row">
+                  <div className="row">
+                    <Balance user={this.state.user} />
+                    {(this.state.market.error) ?
+                      <div className="alert alert-danger" role="alert">
+                        <h4>Error!</h4>
+                        {this.state.market.error}
+                      </div> :
+                      <BalanceSub user={this.state.user} market={this.state.market} />
+                    }
+                  </div>
                 </div>
-              </div> :
-          <div className="navbar row">
-            <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-              <Balance user={this.state.user} />
+              </div>
             </div>
-            <div className="col-lg-8 col-md-8 col-sm-10 col-xs-10">
-              {(this.state.market.error) ?
-                <div className="alert alert-danger" role="alert">
-                  <h4>Error!</h4>
-                  {this.state.market.error}
-                </div> :
-                <BalanceSub user={this.state.user} market={this.state.market} />
-              }
+            <div className="col-lg-10">
+              <div className="navbar">
+                <SubNavBar />
+              </div>
+              <div className="navbar row">
+                {(this.state.user.error) ?
+                    <div className="container-fluid">
+                      <div className="alert alert-danger" role="alert">
+                        <h4>Error!</h4>
+                        {this.state.user.error}
+                      </div>
+                    </div> :
+                    <div className="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+                      <MarketSelect market={this.state.market} user={this.state.user} />
+                    </div>
+                }
+                {(!this.state.market.error && !this.state.user.error) &&
+                  <div className="col-lg-10 col-md-10 col-sm-10 col-xs-9">
+                    <LastPrice market={this.state.market.market} />
+                  </div>}
+              </div>
+              {(!this.state.market.error && !this.state.user.error) &&
+                <RouteHandler
+                  market={this.state.market}
+                  trades={this.state.trades}
+                  user={this.state.user}
+                />}
             </div>
-            <div className="col-lg-1 col-md-1 col-sm-2 col-xs-2">
-              <MarketSelect market={this.state.market} user={this.state.user} />
-            </div>
-          </div>}
-          {(!this.state.market.error && !this.state.user.error) &&
-            <LastPrice market={this.state.market.market} />}
-          {(!this.state.market.error && !this.state.user.error) &&
-            <RouteHandler
-              market={this.state.market}
-              trades={this.state.trades}
-              user={this.state.user}
-            />}
+          </div>
         </div>
         <footer className="navbar navbar-default navbar-fixed-bottom">
           <div className="container navbar">

@@ -45,12 +45,8 @@ var LastPrice = React.createClass({
 
   render: function() {
     return (
-      <div className="container-fluid navbar">
-        <div className="col-md-12">
-          <div className={"btn-lg btn-" + this.state.priceChange + " text-overflow text-center"} title={this.state.lastPrice}>
-            Last price: {this.state.lastPrice ? this.state.lastPrice + " " + (this.state.lastMarket ? this.state.lastMarket : "") + "/ETH" : "N/A"}
-          </div>
-        </div>
+      <div className={"btn-lg btn-" + this.state.priceChange + " text-overflow text-center"} title={this.state.lastPrice}>
+        Last price: {this.state.lastPrice ? this.state.lastPrice + " " + (this.state.lastMarket ? this.state.lastMarket : "") + "/ETH" : "N/A"}
       </div>
     );
   }

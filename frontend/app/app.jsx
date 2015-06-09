@@ -79,6 +79,8 @@ var routes = (
       <Route name="home" path="/" handler={Trades} flux={flux} title="Trades" />
       <Route name="trades" path="/trades" handler={Trades} flux={flux} title="Trades" />
       <Route name="trades/xchain" path="/trades/xchain" handler={Trades} flux={flux} title="X-Chain" />
+      <Route name="trades/assets" path="/trades/assets" handler={Trades} flux={flux} title="Assets" />
+      <Route name="trades/currencies" path="/trades/currencies" handler={Trades} flux={flux} title="Currencies" />
       <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
       <Route name="markets" path="/markets" handler={Markets} flux={flux} title="Markets" />
       <Route name="wallet" path="/wallet" handler={Wallet} flux={flux} title="Wallet" />

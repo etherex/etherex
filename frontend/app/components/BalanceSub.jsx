@@ -16,20 +16,20 @@ var BalanceSub = React.createClass({
     var wallet = this.props.user.user.balance_sub;
 
     return (
-      <div className="row">
-        <div className="col-md-4 col-sm-4 col-xs-4">
-          <div className="col-md-12 btn-lg btn-success text-overflow" title={"Available balance: " + utils.format(available)}>
+      <div>
+        <div className="navbar col-lg-12 col-md-6 col-sm-6">
+          <div className="btn-lg btn-primary text-overflow" title={"In " + this.props.market.market.name + " Wallet: " + utils.format(wallet)}>
+            {utils.format(wallet)}
+          </div>
+        </div>
+        <div className="navbar col-lg-12 col-md-6 col-sm-6">
+          <div className="btn-lg btn-success text-overflow" title={"Available balance: " + utils.format(available)}>
             {utils.format(available)}
           </div>
         </div>
-        <div className="col-md-4 col-sm-4 col-xs-4 row">
-          <div className="col-md-12 btn-lg btn-warning text-overflow" title={"In trades: " + utils.format(trading)}>
+        <div className="navbar col-lg-12 col-md-6 col-sm-6">
+          <div className="btn-lg btn-warning text-overflow" title={"In trades: " + utils.format(trading)}>
             {utils.format(trading)}
-          </div>
-        </div>
-        <div className="col-md-4 col-sm-4 col-xs-4">
-          <div className="col-md-12 btn-lg btn-primary text-overflow" title={"In " + this.props.market.market.name + " Wallet: " + utils.format(wallet)}>
-            {utils.format(wallet)}
           </div>
         </div>
       </div>

@@ -22,16 +22,16 @@ var NavBar = React.createClass({
                             <span className="sr-only">Toggle navigation</span>
                             <span className="btn-xs glyphicon glyphicon-th-list"></span>
                         </button>
-                        <Link className="navbar-brand" to="trades">EtherEx</Link>
+                        <Link className="navbar-brand" to="trades">#EtherEx</Link>
                     </div>
                     <div className="nav">
                         <div className="collapse navbar-collapse" id="navbar-collapse">
                             <ul className="nav navbar-nav">
-                                <Tab to="trades" className="icon-chart-line">Trades</Tab>
-                                <Tab to="markets" className="icon-bitcoin">Markets</Tab>
-                                <Tab to="wallet" className="icon-wallet">Wallet</Tab>
-                                <Tab to="tools" className="icon-cog-alt">Tools</Tab>
-                                <Tab to="help" className="icon-help">Help</Tab>
+                                <Tab to="trades" className="icon-chart-line"> &nbsp;Trades</Tab>
+                                <Tab to="markets" className="icon-bitcoin"> Markets</Tab>
+                                <Tab to="wallet" className="icon-wallet"> &nbsp;Wallet</Tab>
+                                <Tab to="tools" className="icon-cog-alt"> &nbsp;Tools</Tab>
+                                <Tab to="help" className="icon-help"> Help</Tab>
                             </ul>
                             <ul className="nav navbar-nav navbar-right">
                                 <li>

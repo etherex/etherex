@@ -27,6 +27,13 @@ data markets[2^160](id, name, contract, decimals, precision, minimum, last_price
 data trades[2^160](id, type, market, amount, price, owner, block, refhash)
 data balances[][](available, trading)
 
+event log_price(market:indexed, type, price, amount, timestamp)
+event log_add_tx(sender:indexed, market, type, price, amount)
+event log_fill_tx(sender:indexed, owner, market, type, tradeid, price, amount)
+event log_deposit(sender:indexed, market, amount)
+event log_withdraw(address:indexed, market, amount)
+event log_cancel(sender:indexed, market, tradeid, price, amount)
+
 extern subcurrency: [balance:i:i, transfer:ii:i]
 extern namereg: [getname:i:i, register:ii:i, unregister:i:i]
 
@@ -80,6 +87,10 @@ macro save_trade($type, $amount, $price, $market_id):
 
     # Record last added trade
     self.log_last_trade = trade_id
+
+    # Log transaction
+    log(type=log_add_tx, msg.sender, $market_id, $type, $price, $amount)
+    # log(msg.sender, $market_id, $type, $price, data=[$amount])
 
     return(trade_id)
 
@@ -231,6 +242,9 @@ def trade(max_amount, trade_ids:arr):
                 # Transfer ETH
                 send(msg.sender, value)
 
+                # Log transaction
+                log(type=log_fill_tx, msg.sender, owner, market_id, 2, trade_id, price, fill)
+                # log(msg.sender, owner, market_id, 2, data=[trade_id, price, fill])
             else:
                 return(12)
 
@@ -265,14 +279,18 @@ def trade(max_amount, trade_ids:arr):
                 # Transfer ETH
                 send(owner, value)
 
+                # Log transaction
+                log(type=log_fill_tx, msg.sender, owner, market_id, 1, trade_id, price, fill)
+                # log(msg.sender, owner, market_id, 1, data=[trade_id, price, fill])
             else:
                 return(12)
 
         # Update market last price
         self.markets[market_id].last_price = price
 
-        # Log
-        log(contract, type, price, fill, data=[block.timestamp])
+        # Log price, fill amount, type and timestamp
+        log(type=log_price, market_id, type, price, fill, block.timestamp)
+        # log(market_id, type, price, fill, data=[block.timestamp])
 
         # Update max_amount and max_value
         max_amount -= fill
@@ -295,6 +313,8 @@ def deposit(address, amount, market_id):
         balance = self.balances[address][market_id].available
         newbalance = balance + amount
         self.balances[address][market_id].available = newbalance
+        log(type=log_deposit, address, market_id, amount)
+        # log(address, market_id, amount)
         return(newbalance)
     return(0)
 
@@ -306,6 +326,8 @@ def withdraw(amount, market_id):
     if balance >= amount:
         self.balances[msg.sender][market_id].available = balance - amount
         ret = self.markets[market_id].contract.transfer(msg.sender, amount, datasz=2)
+        log(type=log_withdraw, msg.sender, market_id, amount)
+        # log(address, market_id, amount)
         return(ret)
     return(0)
 
@@ -342,6 +364,9 @@ def cancel(trade_id):
             self.balances[msg.sender][market_id].trading -= amount
             self.balances[msg.sender][market_id].available += amount
 
+        # Log cancellation
+        log(type=log_cancel, msg.sender, market_id, trade_id, price, amount)
+        # log(msg.sender, market_id, trade_id, price, data=[amount])
         return(1)
 
     return(0)

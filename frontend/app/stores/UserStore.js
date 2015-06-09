@@ -26,8 +26,11 @@ var UserStore = Fluxxor.createStore({
             constants.user.DEPOSIT_FAIL, this.onUserFail,
             constants.user.WITHDRAW, this.onWithdraw,
             constants.user.WITHDRAW_FAIL, this.onUserFail,
+            constants.user.SEND_ETHER, this.onSendEther,
+            constants.user.SEND_ETHER_FAIL, this.onUserFail,
             constants.user.SEND_SUB, this.onSendSub,
-            constants.user.SEND_SUB_FAIL, this.onUserFail
+            constants.user.SEND_SUB_FAIL, this.onUserFail,
+            constants.user.SWITCH_ADDRESS, this.onSwitchAddress
         );
 
         this.setMaxListeners(1024); // prevent "possible EventEmitter memory leak detected"
@@ -66,6 +69,11 @@ var UserStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
+    onSwitchAddress: function(payload) {
+        this.user.id = payload.address;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
     onDeposit: function(payload) {
         // console.log("DEPOSIT", payload.amount);
         this.emit(constants.CHANGE_EVENT);
@@ -92,8 +100,13 @@ var UserStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
+    onSendEther: function(payload) {
+        // console.log("SEND_SUB", payload);
+        this.emit(constants.SEND_ETHER);
+    },
+
     onSendSub: function(payload) {
-        console.log("SEND_SUB", payload);
+        // console.log("SEND_SUB", payload);
         this.emit(constants.SEND_SUB);
     },
 
