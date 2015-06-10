@@ -3,6 +3,7 @@ var tenEther = "10000000000000000000";
 var precision = "100000000";
 
 var fixtures = {
+    host: 'localhost:8545',
     ether: ether,
     tenEther: tenEther,
     precision: precision,

@@ -25,6 +25,7 @@ var LastPrice = require("./LastPrice");
 
 var Network = require('./Network');
 var constants = require('../js/constants');
+var moment = require('moment');
 
 var EtherExApp = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore")],
@@ -157,7 +158,8 @@ var ErrorModal = React.createClass({
     return {
       isModalOpen: false,
       isLoading: false,
-      isDemo: false
+      isDemo: false,
+      lastBlockAge: 0
     };
   },
 
@@ -166,8 +168,12 @@ var ErrorModal = React.createClass({
         nextProps.config.ethereumClientFailed === true) {
       this.setState({ isModalOpen: true });
     } else if (nextProps.network.blockChainAge > 80) {
-      utilities.warn('last block was '+ nextProps.network.blockChainAge + ' seconds old');
-      this.setState({ isModalOpen: true, isLoading: true });
+      // utilities.warn('last block was '+ nextProps.network.blockChainAge + ' seconds old');
+      this.setState({
+        isModalOpen: true,
+        isLoading: true,
+        lastBlockAge: moment().subtract(nextProps.network.blockChainAge, 'seconds').fromNow()
+      });
     } else {
       this.setState({ isModalOpen: false, isLoading: false });
     }
@@ -238,7 +244,8 @@ var ErrorModal = React.createClass({
         <Modal {...this.props} bsSize='small' onRequestHide={ this.handleToggle } backdrop='static'>
           <div className="modal-body clearfix">
               <h4>Ethereum loading</h4>
-              <p>The Ethereum block chain is not current and is fetching blocks from peers</p>
+              <p>The Ethereum block chain is not current and is fetching blocks from peers.</p>
+              <p>Last block was {this.state.lastBlockAge}.</p>
           </div>
         </Modal>
       );

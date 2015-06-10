@@ -17,8 +17,8 @@ var NetworkActions = function(client) {
     // var ethereumClient = _client;
     var networkState = this.flux.store('network').getState();
 
-    // var blockChainAge = ethereumClient.blockChainAge();
-    // this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, { blockChainAge: blockChainAge });
+    var blockChainAge = _client.blockChainAge();
+    this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, { blockChainAge: blockChainAge });
 
     var nowUp = _client.isAvailable();
 
@@ -45,7 +45,9 @@ var NetworkActions = function(client) {
   this.loadNetwork = function () {
     var ethereumClient = this.flux.store('config').getEthereumClient();
     var networkStats = ethereumClient.getStats();
-    var previousBlock = web3.eth.getBlock(web3.eth.blockNumber - 2).timestamp;
+    var previousBlock = 0;
+    if (web3.eth.blockNumber > 3)
+      previousBlock = web3.eth.getBlock(web3.eth.blockNumber - 2).timestamp;
     var currentBlock = web3.eth.getBlock('latest').timestamp;
     var diff = currentBlock - previousBlock;
 
@@ -68,7 +70,9 @@ var NetworkActions = function(client) {
     this.flux.actions.config.updateEthereumClient();
     this.flux.actions.network.loadNetwork();
 
-    this.flux.actions.user.loadAddresses();
+    var networkState = this.flux.store('network').getState();
+    if (networkState.blockChainAge < 80)
+      this.flux.actions.user.loadAddresses();
 
     // start monitoring for updates
     this.flux.actions.network.startMonitoring();
@@ -78,10 +82,13 @@ var NetworkActions = function(client) {
    * Update data that should change over time in the UI.
    */
   this.onNewBlock = function () {
-    this.flux.actions.network.loadNetwork();
-    this.flux.actions.user.updateBalance();
-    this.flux.actions.user.updateBalanceSub();
-    // this.flux.actions.market.updateMarkets();
+    var networkState = this.flux.store('network').getState();
+    if (networkState.blockChainAge < 80) {
+      this.flux.actions.network.loadNetwork();
+      this.flux.actions.user.updateBalance();
+      this.flux.actions.user.updateBalanceSub();
+      // this.flux.actions.market.updateMarkets();
+    }
   };
 
   this.startMonitoring = function () {

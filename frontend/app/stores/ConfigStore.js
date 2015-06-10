@@ -1,8 +1,9 @@
 var Fluxxor = require('fluxxor');
+var fixtures = require("../js/fixtures");
 var constants = require('../js/constants');
 
 var state = {
-  host: process.env.RPC_HOST || 'localhost:8545',
+  host: process.env.RPC_HOST || fixtures.host,
   debug: false,
   percentLoaded: null,
   ethereumClient: null,

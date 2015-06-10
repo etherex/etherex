@@ -11,7 +11,7 @@ if (typeof web3 === 'undefined') {
 }
 
 try {
-    web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
+    web3.setProvider(new web3.providers.HttpProvider('http://' + fixtures.host));
 
     var ContractABI = web3.eth.contract(fixtures.contract_desc);
     var contract = ContractABI.at(fixtures.addresses.etherex);
@@ -52,6 +52,16 @@ var EthereumClient = function() {
         return web3.net.listening;
       } catch(err) {
         return false;
+      }
+    };
+
+    this.blockChainAge = function() {
+      if (web3.net.listening) {
+        var blockNumber = web3.eth.blockNumber;
+        var blockTimeStamp = web3.eth.getBlock(blockNumber).timestamp;
+        var currentTimeStamp = new Date().getTime() / 1000;
+
+        return currentTimeStamp - blockTimeStamp;
       }
     };
 
