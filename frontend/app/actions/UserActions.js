@@ -1,8 +1,10 @@
 var constants = require("../js/constants");
 
-var UserActions = function(client) {
+var UserActions = function() {
 
     this.loadAddresses = function() {
+        var _client = this.flux.store('config').getEthereumClient();
+
         this.dispatch(constants.user.LOAD_ADDRESSES);
 
         _client.loadAddresses(function(addresses) {
@@ -25,6 +27,8 @@ var UserActions = function(client) {
     };
 
     this.updateBalance = function() {
+        var _client = this.flux.store('config').getEthereumClient();
+
         var user = this.flux.store("UserStore").getState().user;
 
         _client.updateBalance(user.id, function(confirmed, unconfirmed) {
@@ -38,6 +42,8 @@ var UserActions = function(client) {
     };
 
     this.updateBalanceSub = function() {
+        var _client = this.flux.store('config').getEthereumClient();
+
         var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
 
@@ -54,6 +60,8 @@ var UserActions = function(client) {
     };
 
     this.sendEther = function(payload) {
+        var _client = this.flux.store('config').getEthereumClient();
+
         var user = this.flux.store("UserStore").getState().user;
 
         this.dispatch(constants.user.SEND_ETHER, payload);
@@ -66,6 +74,8 @@ var UserActions = function(client) {
     };
 
     this.sendSub = function(payload) {
+        var _client = this.flux.store('config').getEthereumClient();
+
         var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
 
@@ -88,6 +98,8 @@ var UserActions = function(client) {
     };
 
     this.depositSub = function(payload) {
+        var _client = this.flux.store('config').getEthereumClient();
+
         var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
 
@@ -110,6 +122,8 @@ var UserActions = function(client) {
     };
 
     this.withdrawSub = function(payload) {
+        var _client = this.flux.store('config').getEthereumClient();
+
         var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
 
@@ -131,8 +145,6 @@ var UserActions = function(client) {
             this.dispatch(constants.user.WITHDRAW_FAIL, {error: error});
         }.bind(this));
     };
-
-    var _client = client;
 };
 
 module.exports = UserActions;

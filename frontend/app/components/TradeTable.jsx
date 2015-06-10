@@ -1,12 +1,9 @@
-/** @jsx React.DOM */
-
+var _ = require('lodash');
 var React = require("react");
-var Router = require("react-router");
 
 var Fluxxor = require("fluxxor");
 var FluxMixin = Fluxxor.FluxMixin(React);
 
-var ProgressBar = require('react-bootstrap/lib/ProgressBar');
 var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
 var ConfirmModal = require('./ConfirmModal');
 
@@ -14,8 +11,6 @@ var Table = require("react-bootstrap/lib/Table");
 var Button = require("react-bootstrap/lib/Button");
 var Glyphicon = require("react-bootstrap/lib/Glyphicon");
 
-var bigRat = require("big-rational");
-var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 
 // var Link = Router.Link;
@@ -99,14 +94,17 @@ var TradeRow = React.createClass({
     },
 
     handleFillTrade: function(e) {
+        e.preventDefault();
         this.getFlux().actions.trade.fillTrade(this.props.trade);
     },
 
     handleCancelTrade: function(e) {
+        e.preventDefault();
         this.getFlux().actions.trade.cancelTrade(this.props.trade);
     },
 
     handleHover: function(e) {
+        e.preventDefault();
         if (this.props.review)
             return;
 
@@ -115,6 +113,7 @@ var TradeRow = React.createClass({
 
         // Select previous trades
         var totalAmount = 0;
+        var totalValue = 0;
         var thisUser = this.props.user;
         var thisTrade = this.props.trade;
         var count = this.props.count;
@@ -166,6 +165,7 @@ var TradeRow = React.createClass({
     },
 
     handleHoverOut: function(e) {
+        e.preventDefault();
         if (!this.props.trades)
             return;
 
@@ -182,6 +182,7 @@ var TradeRow = React.createClass({
     },
 
     handleClick: function(e) {
+        e.preventDefault();
         if (this.state.payload)
             this.getFlux().actions.trade.clickFill(this.state.payload);
     }

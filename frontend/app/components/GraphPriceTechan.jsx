@@ -1,14 +1,9 @@
 /** @jsx React.DOM */
-
+var $ = require("jquery");
 var React = require("react");
-var Router = require("react-router");
 
 var Fluxxor = require("fluxxor");
 var FluxMixin = Fluxxor.FluxMixin(React);
-
-var bigRat = require("big-rational");
-var fixtures = require("../js/fixtures");
-var utils = require("../js/utils");
 
 var d3 = require("d3");
 var techan = require("techan");
@@ -153,6 +148,10 @@ var Chart = React.createClass({
                 .axis(volumeAxis)
                 .width(35);
 
+        var macdAnnotation = null;
+        var macdAnnotationLeft = null;
+        var rsiAnnotation = null;
+        var rsiAnnotationLeft = null;
         if (this.props.full) {
             var macdScale = d3.scale.linear()
                     .range([indicatorTop(0)+dim.indicator.height, indicatorTop(0)]);
@@ -169,7 +168,7 @@ var Chart = React.createClass({
                     .ticks(3)
                     .orient("right");
 
-            var macdAnnotation = techan.plot.axisannotation()
+            macdAnnotation = techan.plot.axisannotation()
                     .axis(macdAxis)
                     .format(d3.format(',.2fs'))
                     .translate([x(1), 0]);
@@ -179,7 +178,7 @@ var Chart = React.createClass({
                     .ticks(3)
                     .orient("left");
 
-            var macdAnnotationLeft = techan.plot.axisannotation()
+            macdAnnotationLeft = techan.plot.axisannotation()
                     .axis(macdAxisLeft)
                     .format(d3.format(',.2fs'));
 
@@ -192,7 +191,7 @@ var Chart = React.createClass({
                     .ticks(3)
                     .orient("right");
 
-            var rsiAnnotation = techan.plot.axisannotation()
+            rsiAnnotation = techan.plot.axisannotation()
                     .axis(rsiAxis)
                     .format(d3.format(',.2fs'))
                     .translate([x(1), 0]);
@@ -202,7 +201,7 @@ var Chart = React.createClass({
                     .ticks(3)
                     .orient("left");
 
-            var rsiAnnotationLeft = techan.plot.axisannotation()
+            rsiAnnotationLeft = techan.plot.axisannotation()
                     .axis(rsiAxisLeft)
                     .format(d3.format(',.2fs'));
         }
@@ -370,10 +369,12 @@ var Chart = React.createClass({
             yPercent.domain(techan.scale.plot.percent(y, accessor(data[indicatorPreRoll])).domain());
             yVolume.domain(techan.scale.plot.volume(data).domain());
 
+            var macdData = null;
+            var rsiData = null;
             if (this.props.full) {
-                var macdData = techan.indicator.macd()(data);
+                macdData = techan.indicator.macd()(data);
                 macdScale.domain(techan.scale.plot.macd(macdData).domain());
-                var rsiData = techan.indicator.rsi()(data);
+                rsiData = techan.indicator.rsi()(data);
                 rsiScale.domain(techan.scale.plot.rsi(rsiData).domain());
             }
 
@@ -485,7 +486,7 @@ var Chart = React.createClass({
             // props.data = [{Date: new Date(), Open: 0, High: 0, Low: 0, Close: 0, Volume: 0}];
 
         if (props.market.name)
-            $('text.symbol').text(props.market.name + "/ETH")
+            $('text.symbol').text(props.market.name + "/ETH");
 
         var data = this.mapData(props.data);
         this.redraw(data);

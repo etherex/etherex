@@ -4,9 +4,6 @@ var React = require("react");
 var Fluxxor = require("fluxxor");
 var FluxMixin = Fluxxor.FluxMixin(React);
 
-var utils = require("../js/utils");
-var constants = require("../js/constants");
-
 var Balance = React.createClass({
   mixins: [FluxMixin],
 

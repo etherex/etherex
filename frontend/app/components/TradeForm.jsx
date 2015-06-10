@@ -1,5 +1,4 @@
-/** @jsx React.DOM */
-
+var _ = require("lodash");
 var React = require("react");
 
 var Fluxxor = require("fluxxor");
@@ -7,7 +6,6 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 
 var bigRat = require("big-rational");
 var fixtures = require("../js/fixtures");
-var constants = require("../js/constants");
 var utils = require("../js/utils");
 
 // var mq = require('react-responsive');
@@ -211,7 +209,6 @@ var SplitTradeForm = React.createClass({
 
     // TODO - proper back/forth handling
     var type = this.props.type;
-    var market = this.refs.market.getDOMNode().value.trim();
     var price = this.refs.price.getDOMNode().value.trim();
     var amount = this.refs.amount.getDOMNode().value.trim();
     var total = parseFloat(this.refs.total.getDOMNode().value.trim());
@@ -245,7 +242,6 @@ var SplitTradeForm = React.createClass({
     e.preventDefault();
 
     var type = this.props.type;
-    var market = this.refs.market.getDOMNode().value;
     var price = this.refs.price.getDOMNode().value.trim();
     var total = this.refs.total.getDOMNode().value.trim();
     var amount = 0;

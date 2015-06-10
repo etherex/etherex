@@ -1,9 +1,11 @@
 var constants = require("../js/constants");
 var utils = require("../js/utils");
 
-var TradeActions = function(client) {
+var TradeActions = function() {
 
     this.loadTrades = function() {
+        var _client = this.flux.store('config').getEthereumClient();
+
         this.dispatch(constants.trade.LOAD_TRADES);
 
         var market = this.flux.store("MarketStore").getState().market;
@@ -18,6 +20,8 @@ var TradeActions = function(client) {
     };
 
     this.updateTrades = function() {
+        var _client = this.flux.store('config').getEthereumClient();
+
         this.dispatch(constants.trade.UPDATE_TRADES);
 
         var market = this.flux.store("MarketStore").getState().market;
@@ -47,6 +51,8 @@ var TradeActions = function(client) {
     };
 
     this.addTrade = function(trade) {
+        var _client = this.flux.store('config').getEthereumClient();
+
         var id = utils.randomId();
         trade.id = id;
         trade.status = "new";
@@ -65,6 +71,8 @@ var TradeActions = function(client) {
     };
 
     this.fillTrades = function(trades) {
+        var _client = this.flux.store('config').getEthereumClient();
+
         var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
 
@@ -83,35 +91,30 @@ var TradeActions = function(client) {
             }
 
             this.dispatch(constants.trade.FILL_TRADES, trades);
-
-            if (!ethBrowser)
-                this.flux.actions.trade.updateTrades();
         }.bind(this), function(error) {
             this.dispatch(constants.trade.FILL_TRADES_FAIL, {error: error});
         }.bind(this));
     };
 
     this.fillTrade = function(trade) {
+        var _client = this.flux.store('config').getEthereumClient();
+
         var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
 
         _client.fillTrade(user, trade, market, function(result) {
             this.dispatch(constants.trade.FILL_TRADE, trade);
-
-            if (!ethBrowser)
-                this.flux.actions.trade.updateTrades();
         }.bind(this), function(error) {
             this.dispatch(constants.trade.FILL_TRADE_FAIL, {error: error});
         }.bind(this));
     };
 
     this.cancelTrade = function(trade) {
+        var _client = this.flux.store('config').getEthereumClient();
+
         var user = this.flux.store("UserStore").getState().user;
         _client.cancelTrade(user, trade, function(result) {
             this.dispatch(constants.trade.CANCEL_TRADE, trade);
-
-            if (!ethBrowser)
-                this.flux.actions.trade.updateTrades();
         }.bind(this), function(error) {
             this.dispatch(constants.trade.CANCEL_TRADE_FAIL, {error: error});
         }.bind(this));
@@ -152,8 +155,6 @@ var TradeActions = function(client) {
         this.dispatch(constants.trade.SWITCH_MARKET, market);
         this.flux.actions.trade.updateTrades();
     };
-
-    var _client = client;
 };
 
 module.exports = TradeActions;

@@ -1,14 +1,13 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Router = require("react-router");
-
 var Fluxxor = require("fluxxor");
 var FluxMixin = Fluxxor.FluxMixin(React);
 
 var AlertDismissable = require('./AlertDismissable');
 
 var Network = require('./Network');
+var ConfigPane = require("./ConfigPane");
 var SubRegister = require('./SubRegister');
 
 var TradeList = React.createClass({
@@ -33,9 +32,13 @@ var TradeList = React.createClass({
   },
 
   render: function() {
+    var address = this.getFlux().stores.config.getState().address;
+
     return (
       <div>
         <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
+
+        <ConfigPane address={address} setAlert={this.setAlert} showAlert={this.showAlert} />
 
         <div className="container col-md-6 col-md-offset-3">
           <div className="panel panel-default">

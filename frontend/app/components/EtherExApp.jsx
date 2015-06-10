@@ -10,7 +10,6 @@ var FluxMixin = Fluxxor.FluxMixin(React),
     StoreWatchMixin = Fluxxor.StoreWatchMixin;
 
 var OverlayMixin = require('react-bootstrap/lib/OverlayMixin');
-var AlertDismissable = require('./AlertDismissable');
 var ReactBootstrap = require('react-bootstrap');
 var ProgressBar = ReactBootstrap.ProgressBar;
 var Modal = ReactBootstrap.Modal;
@@ -55,9 +54,6 @@ var EtherExApp = React.createClass({
   },
 
   componentDidMount: function() {
-    if (ethBrowser)
-      this.refs.container.getDOMNode().className = "container-fluid";
-
     this.getFlux().actions.config.initializeState();
     // this.getFlux().actions.network.loadEverything();
   },

@@ -1,9 +1,10 @@
 var constants = require("../js/constants");
-var utils = require("../js/utils");
 
-var MarketActions = function(client) {
+var MarketActions = function() {
 
     this.loadMarkets = function() {
+        var _client = this.flux.store('config').getEthereumClient();
+
         this.dispatch(constants.market.LOAD_MARKETS);
 
         var user = this.flux.store("UserStore").getState().user;
@@ -52,6 +53,8 @@ var MarketActions = function(client) {
     };
 
     this.updateMarkets = function() {
+        var _client = this.flux.store('config').getEthereumClient();
+
         var user = this.flux.store("UserStore").getState().user;
 
         _client.loadMarkets(user, function(markets) {
@@ -93,6 +96,8 @@ var MarketActions = function(client) {
     };
 
     this.switchMarket = function(market) {
+        var _client = this.flux.store('config').getEthereumClient();
+
         this.dispatch(constants.market.CHANGE_MARKET, market);
 
         this.flux.actions.trade.switchMarket(market);
@@ -127,6 +132,8 @@ var MarketActions = function(client) {
     };
 
     this.registerMarket = function(market) {
+        var _client = this.flux.store('config').getEthereumClient();
+
         // console.log("REGISTER_MARKET", market);
         _client.registerMarket(market, function(id) {
             this.dispatch(constants.market.REGISTER_MARKET, id);
@@ -138,8 +145,6 @@ var MarketActions = function(client) {
     this.toggleFavorite = function(favorite) {
         this.dispatch(constants.market.TOGGLE_FAVORITE, favorite);
     };
-
-    var _client = client;
 };
 
 module.exports = MarketActions;

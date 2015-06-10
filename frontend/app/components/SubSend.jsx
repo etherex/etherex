@@ -4,15 +4,10 @@ var React = require("react");
 var Fluxxor = require("fluxxor");
 var FluxMixin = Fluxxor.FluxMixin(React);
 
-var Router = require("react-router");
-
 var Button = require('react-bootstrap/lib/Button');
 var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
 var ConfirmModal = require('./ConfirmModal');
 
-var AlertDismissable = require('./AlertDismissable');
-
-var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 var bigRat = require("big-rational");
 
@@ -91,7 +86,7 @@ var SubSend = React.createClass({
       this.props.setAlert('warning', "Not enough " + this.props.market.name + " available to send, got " + utils.format(this.props.user.balance_sub_available) + ", needs " + utils.format(amount));
     }
     else if (address.length != 40) {
-        this.props.setAlert('warning', "Address too " + (address.length < 40 ? "short" : "long") + ".");
+      this.props.setAlert('warning', "Address too " + (address.length < 40 ? "short" : "long") + ".");
     }
     else {
       this.setState({

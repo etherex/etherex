@@ -4,15 +4,10 @@ var React = require("react");
 var Fluxxor = require("fluxxor");
 var FluxMixin = Fluxxor.FluxMixin(React);
 
-var Router = require("react-router");
-
 var Button = require('react-bootstrap/lib/Button');
 var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
 var ConfirmModal = require('./ConfirmModal');
 
-var AlertDismissable = require('./AlertDismissable');
-
-var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 var bigRat = require("big-rational");
 
@@ -52,12 +47,12 @@ var SubDeposit = React.createClass({
     );
   },
 
-  handleChange: function(e, showAlerts) {
+  handleChange: function(e) {
     e.preventDefault();
     this.validate(e);
   },
 
-  handleValidation: function(e, showAlerts) {
+  handleValidation: function(e) {
     e.preventDefault();
     this.validate(e, true);
   },

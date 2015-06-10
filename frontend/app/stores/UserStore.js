@@ -53,7 +53,7 @@ var UserStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onLoadAddresses: function(payload) {
+    onLoadAddresses: function() {
         this.user = {id: 'loading', name: 'loading'};
         this.loading = true;
         this.error = null;

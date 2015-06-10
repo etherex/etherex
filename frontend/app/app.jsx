@@ -6,7 +6,6 @@ var Router = require("react-router");
 var Route = Router.Route;
 var NotFoundRoute = Router.NotFoundRoute;
 var DefaultRoute = Router.DefaultRoute;
-var RouteHandler = Router.RouteHandler;
 
 var EtherExApp = require("./components/EtherExApp");
 
@@ -31,25 +30,11 @@ var UserDetails = require("./components/UserDetails");
 var Wallet = require("./components/Wallet");
 var Tools = require("./components/Tools");
 
-// TODO mock data
 var fixtures = require("./js/fixtures");
 
-var EthereumClient = require("./clients/EthereumClient");
-var client = new EthereumClient();
-
-// Load jQuery and bootstrap
-var jQuery = require("jquery");
-window.$ = window.jQuery = jQuery;
-
-var _ = require('lodash');
-window._ = _;
-
-require("bootstrap/dist/js/bootstrap.js");
-// require("bootstrap/dist/css/bootstrap.min.css");
-// require("bootstrap/dist/css/bootstrap-theme.min.css");
+// Load bootstrap
 require("./css/bootstrap-darkly.css");
 
-// require("./css/rickshaw.min.css");
 require("./css/styles.css");
 
 var Route = Router.Route;
@@ -64,11 +49,11 @@ var stores = {
 };
 
 var actions = {
-  config: new ConfigActions(client),
-  network: new NetworkActions(client),
-  market: new MarketActions(client),
-  trade: new TradeActions(client),
-  user: new UserActions(client)
+  config: new ConfigActions(),
+  network: new NetworkActions(),
+  market: new MarketActions(),
+  trade: new TradeActions(),
+  user: new UserActions()
 };
 
 var flux = new Fluxxor.Flux(stores, actions);

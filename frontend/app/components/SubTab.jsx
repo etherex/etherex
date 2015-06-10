@@ -2,7 +2,6 @@
 
 var React = require("react");
 var Router = require("react-router");
-var Button = require("react-bootstrap/lib/Button");
 var Link = Router.Link;
 var ActiveState = Router.State;
 

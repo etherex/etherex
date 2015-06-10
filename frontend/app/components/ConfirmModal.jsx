@@ -10,8 +10,9 @@ var Modal = require('react-bootstrap/lib/Modal');
 var ConfirmModal = React.createClass({
 
     render: function() {
-        if (this.props.tradeList)
-            var TradeTable = require("./TradeTable");
+        var TradeTable = false;
+        if (this.props.tradeList && this.props.tradeList.length > 0)
+            TradeTable = require("./TradeTable");
         return (
             <Modal {...this.props} title="Confirmation required" animation={true}>
                 <form onSubmit={this.confirmSubmit}>
@@ -19,7 +20,7 @@ var ConfirmModal = React.createClass({
                         <h4>{this.props.message}</h4>
                         {(this.props.note) ?
                             this.props.note : ""}
-                        {(this.props.tradeList && this.props.tradeList.length > 0) &&
+                        {(TradeTable) &&
                             <TradeTable tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={true} />}
                     </div>
                     <div className="modal-footer">

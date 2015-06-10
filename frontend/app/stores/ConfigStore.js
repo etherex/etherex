@@ -2,57 +2,69 @@ var Fluxxor = require('fluxxor');
 var fixtures = require("../js/fixtures");
 var constants = require('../js/constants');
 
-var state = {
-  host: process.env.RPC_HOST || fixtures.host,
-  debug: false,
-  percentLoaded: null,
-  ethereumClient: null,
-  demoMode: false
-};
-
 var ConfigStore = Fluxxor.createStore({
   initialize: function () {
+    this.host = process.env.RPC_HOST || fixtures.host;
+    this.address = fixtures.addresses.etherex;
+    this.debug = false;
+    this.percentLoaded = null;
+    this.ethereumClient = null;
+    this.demoMode = false;
+
     this.bindActions(
+      constants.config.UPDATE_ADDRESS, this.handleUpdateAddress,
+      constants.config.UPDATE_DEBUG, this.handleUpdateDebug,
+      constants.config.UPDATE_DEMO_MODE, this.handleDemoMode,
       constants.config.UPDATE_ETHEREUM_CLIENT_SUCCESS, this.handleUpdateEthereumClientSuccess,
       constants.config.UPDATE_ETHEREUM_CLIENT_FAILED, this.handleUpdateEthereumClientFailed,
-      constants.config.UPDATE_DEBUG, this.handleUpdateDebug,
-      constants.config.UPDATE_PERCENT_LOADED_SUCCESS, this.handleUpdatePercentLoadedSuccess,
-      constants.config.UPDATE_DEMO_MODE, this.handleDemoMode
+      constants.config.UPDATE_PERCENT_LOADED_SUCCESS, this.handleUpdatePercentLoadedSuccess
     );
   },
 
   getState: function () {
-    return state;
+    return {
+      host: this.host,
+      address: this.address,
+      debug: this.debug,
+      percentLoaded: this.percentLoaded,
+      ethereumClient: this.ethereumClient,
+      demoMode: this.demoMode
+    };
   },
 
   getEthereumClient: function () {
-    return state.ethereumClient;
+    return this.ethereumClient;
   },
 
   handleUpdatePercentLoadedSuccess: function (payload) {
-    state.percentLoaded = payload.percentLoaded;
+    this.percentLoaded = payload.percentLoaded;
     this.emit(constants.CHANGE_EVENT);
   },
 
   handleUpdateEthereumClientSuccess: function (payload) {
-    state.ethereumClient = payload.ethereumClient;
-    state.ethereumClientFailed = false;
+    this.ethereumClient = payload.ethereumClient;
+    this.ethereumClientFailed = false;
     this.emit(constants.CHANGE_EVENT);
   },
 
   handleUpdateEthereumClientFailed: function () {
-    state.ethereumClient = null;
-    state.ethereumClientFailed = true;
+    this.ethereumClient = null;
+    this.ethereumClientFailed = true;
+    this.emit(constants.CHANGE_EVENT);
+  },
+
+  handleUpdateAddress: function (payload) {
+    this.address = payload.address;
     this.emit(constants.CHANGE_EVENT);
   },
 
   handleUpdateDebug: function (payload) {
-    state.debug = payload.debug;
+    this.debug = payload.debug;
     this.emit(constants.CHANGE_EVENT);
   },
 
-  handleDemoMode: function(payload) {
-    state.demoMode = payload.enable;
+  handleDemoMode: function (payload) {
+    this.demoMode = payload.enable;
     // this.emit(constants.CHANGE_EVENT);
   }
 });

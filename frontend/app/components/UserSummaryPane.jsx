@@ -5,8 +5,6 @@ var Fluxxor = require("fluxxor");
 
 var FluxMixin = Fluxxor.FluxMixin(React);
 
-var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
-
 var DropdownButton = require('react-bootstrap/lib/DropdownButton');
 var MenuItem = require('react-bootstrap/lib/MenuItem');
 

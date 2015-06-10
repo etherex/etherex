@@ -12,8 +12,6 @@ var SubSend = require('./SubSend');
 var SubDeposit = require('./SubDeposit');
 var SubWithdraw = require('./SubWithdraw');
 
-// var MarketFilter = require("./MarketFilter"); TODO
-var MarketList = require("./MarketList");
 var TxsList = require("./TxsList");
 
 var Markets = React.createClass({

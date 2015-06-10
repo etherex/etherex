@@ -1,3 +1,4 @@
+var _ = require("lodash");
 var utils = require("../js/utils");
 var fixtures = require("../js/fixtures");
 
@@ -10,25 +11,21 @@ if (typeof web3 === 'undefined') {
     window.web3 = web3;
 }
 
-try {
-    web3.setProvider(new web3.providers.HttpProvider('http://' + fixtures.host));
-
-    var ContractABI = web3.eth.contract(fixtures.contract_desc);
-    var contract = ContractABI.at(fixtures.addresses.etherex);
-
-    // console.log("CLIENT", web3.version.client);
-    // console.log("CONTRACT", contract);
-}
-catch(e) {
-    console.log("Some web3.js error...", String(e));
-}
-
 web3.padDecimal = function (string, chars) {
     string = web3.fromDecimal(string).substr(2);
     return Array(chars - string.length + 1).join("0") + string;
 };
 
-var EthereumClient = function() {
+var EthereumClient = function(params) {
+    try {
+        web3.setProvider(new web3.providers.HttpProvider('http://' + params.host));
+
+        var ContractABI = web3.eth.contract(fixtures.contract_desc);
+        var contract = ContractABI.at(params.address);
+    }
+    catch(e) {
+        console.log("Some web3.js error...", String(e));
+    }
 
     this.filters = {};
 
@@ -215,7 +212,7 @@ var EthereumClient = function() {
                             status = 'mined';
 
                         var type = _.parseInt(trade[1].toString());
-                        var marketid = _.parseInt(trade[2].toString());
+                        // var marketid = _.parseInt(trade[2].toString());
                         var amountPrecision = Math.pow(10, market.decimals);
                         var precision = market.precision;
 
@@ -537,7 +534,7 @@ var EthereumClient = function() {
         catch(e) {
           failure(String(e));
         }
-    },
+    };
 
     // Sub actions
 
@@ -768,6 +765,7 @@ var EthereumClient = function() {
 
     this.getStats = function() {
       return {
+        client: web3.version.client,
         gasPrice: web3.eth.gasPrice,
         blockNumber: web3.eth.blockNumber,
         mining: web3.eth.mining,

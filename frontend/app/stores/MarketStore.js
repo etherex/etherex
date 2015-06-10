@@ -1,3 +1,4 @@
+var _ = require("lodash");
 var Fluxxor = require("fluxxor");
 
 var bigRat = require("big-rational");
@@ -95,7 +96,7 @@ var MarketStore = Fluxxor.createStore({
         // console.log("PRICES", payload);
         if (payload.length) {
             var previous = {};
-            this.market.data = _.map(_.groupBy(payload.reverse(), 'timestamp'), function(logs, i) {
+            this.market.data = _.map(_.groupBy(payload.reverse(), 'timestamp'), function(logs) {
                 var prices = _.pluck(logs, 'price');
                 var volumes = _.pluck(logs, 'amount');
                 var high = _.max(prices);

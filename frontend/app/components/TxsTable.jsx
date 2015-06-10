@@ -1,21 +1,12 @@
-/** @jsx React.DOM */
-
+var _ = require("lodash");
 var React = require("react");
-var Router = require("react-router");
 
 var Fluxxor = require("fluxxor");
 var FluxMixin = Fluxxor.FluxMixin(React);
 
-var ProgressBar = require('react-bootstrap/lib/ProgressBar');
-var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
-var ConfirmModal = require('./ConfirmModal');
-
 var Table = require("react-bootstrap/lib/Table");
-var Button = require("react-bootstrap/lib/Button");
-var Glyphicon = require("react-bootstrap/lib/Glyphicon");
 
 var bigRat = require("big-rational");
-var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 
 // var Link = Router.Link;

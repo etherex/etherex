@@ -2,8 +2,7 @@ var constants = require('../js/constants');
 if (typeof web3 === 'undefined')
     var web3 = require('web3');
 
-var NetworkActions = function(client) {
-
+var NetworkActions = function() {
   /**
    * Update the UI and stores depending on the state of the network.
    *
@@ -13,16 +12,12 @@ var NetworkActions = function(client) {
    * an error dialog can be display.
    */
   this.checkNetwork = function() {
-    // var ethereumClient = this.flux.store('config').getEthereumClient();
-    // var ethereumClient = _client;
+    var ethereumClient = this.flux.store('config').getEthereumClient();
     var networkState = this.flux.store('network').getState();
 
-    var blockChainAge = _client.blockChainAge();
-    this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, { blockChainAge: blockChainAge });
+    var nowUp = ethereumClient.isAvailable();
 
-    var nowUp = _client.isAvailable();
-
-    var wasUp = (networkState.ethereumStatus === constants.network.ETHEREUM_STATUS_CONNECTED);
+    // var wasUp = (networkState.ethereumStatus === constants.network.ETHEREUM_STATUS_CONNECTED);
     var wasDown = (!networkState.ethereumStatus || networkState.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED);
 
     if (!nowUp) {
@@ -51,9 +46,13 @@ var NetworkActions = function(client) {
     var currentBlock = web3.eth.getBlock('latest').timestamp;
     var diff = currentBlock - previousBlock;
 
+    var blockChainAge = ethereumClient.blockChainAge();
+    this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, { blockChainAge: blockChainAge });
+
     this.dispatch(constants.network.LOAD_NETWORK, {
-      // accounts: _client.loadAddresses(),
+      // accounts: ethereumClient.loadAddresses(),
       // primaryAccount: 0,
+      client: networkStats.client,
       peerCount: networkStats.peerCount,
       blockNumber: networkStats.blockNumber,
       gasPrice: networkStats.gasPrice,
@@ -94,12 +93,10 @@ var NetworkActions = function(client) {
   this.startMonitoring = function () {
     var networkState = this.flux.store('network').getState();
     if (!networkState.isMonitoringBlocks) {
-      // var ethereumClient = this.flux.store('config').getEthereumClient();
-      _client.startMonitoring(this.flux.actions.network.onNewBlock);
+      var ethereumClient = this.flux.store('config').getEthereumClient();
+      ethereumClient.startMonitoring(this.flux.actions.network.onNewBlock);
     }
   };
-
-  var _client = client;
 };
 
 module.exports = NetworkActions;

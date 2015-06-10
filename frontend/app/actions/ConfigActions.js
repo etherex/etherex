@@ -1,25 +1,31 @@
 var constants = require('../js/constants');
-var utilities = require('../js/utils');
 var EthereumClient = require('../clients/EthereumClient');
 
-var ConfigActions = function(client) {
+var ConfigActions = function() {
 
   this.updateEthereumClient = function () {
-    // var configState = this.flux.store('config').getState();
+    var configState = this.flux.store('config').getState();
 
-    // var clientParams = {
-    //   host: configState.host
-    // };
-    // var ethereumClient = new EthereumClient(clientParams);
+    var clientParams = {
+      address: configState.address,
+      host: configState.host
+    };
+    var ethereumClient = new EthereumClient(clientParams);
 
     this.dispatch(constants.config.UPDATE_ETHEREUM_CLIENT_SUCCESS, {
-      ethereumClient: _client
+      ethereumClient: ethereumClient
     });
   };
 
   this.updatePercentLoaded = function(percent) {
     this.dispatch(constants.config.UPDATE_PERCENT_LOADED_SUCCESS, {
       percentLoaded: percent
+    });
+  };
+
+  this.updateAddress = function(address) {
+    this.dispatch(constants.config.UPDATE_ADDRESS, {
+      address: address
     });
   };
 
@@ -33,8 +39,6 @@ var ConfigActions = function(client) {
     this.flux.actions.config.updateEthereumClient();
     this.flux.actions.network.checkNetwork();
   };
-
-  var _client = client;
 };
 
 module.exports = ConfigActions;
