@@ -7,6 +7,11 @@ install:
 script:
   - py.test -vvrs
   - flake8
+after_install:
+  - cd frontend && npm install
+  - npm install -g grunt-cli
+after_script:
+  - cd frontend && grunt jshint
 notifications:
   irc:
     channels:

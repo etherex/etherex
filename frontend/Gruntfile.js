@@ -51,6 +51,10 @@ module.exports = function(grunt) {
       files: ['Gruntfile.js', 'webpack.config.js', 'app/**/*.js', 'app/**/*.jsx'],
       // configure JSHint (documented at http://www.jshint.com/docs/)
       options: {
+        node: true,
+        esnext: true,
+        browser: true,
+        loopfunc: true,
         // more options here if you want to override JSHint defaults
         globals: {
           jQuery: true,

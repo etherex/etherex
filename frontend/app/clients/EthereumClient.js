@@ -32,8 +32,7 @@ var EthereumClient = function(params) {
     this.startMonitoring = function(callback) {
       this.filters.latest = web3.eth.filter('latest');
       this.filters.latest.watch(function (err, log) {
-        // if (err) utilities.error(err);
-        callback();
+        callback(err, log);
       });
     };
 
@@ -193,7 +192,7 @@ var EthereumClient = function(params) {
                     // console.log("Trade from ABI:", trade);
 
                     try {
-                        tradeId = web3.fromDecimal(trade[0]);
+                        var tradeId = web3.fromDecimal(trade[0]);
                         var ref = trade[7];
 
                         // Resolve on filled trades
@@ -260,8 +259,8 @@ var EthereumClient = function(params) {
 
     this.loadPrices = function(market, success, failure) {
         // console.log("Loading prices...");
-        lastBlock = web3.eth.blockNumber;
-        fromBlock = lastBlock - (lastBlock > 300 ? 300 : 0);
+        var lastBlock = web3.eth.blockNumber;
+        var fromBlock = lastBlock - (lastBlock > 300 ? 300 : 0);
 
         try {
             var prices_filter = contract.log_price({
@@ -298,8 +297,8 @@ var EthereumClient = function(params) {
 
     this.loadTransactions = function(user, market, success, failure) {
         // console.log("Loading transactions...");
-        lastBlock = web3.eth.blockNumber;
-        fromBlock = lastBlock - (lastBlock > 300 ? 300 : 0);
+        var lastBlock = web3.eth.blockNumber;
+        var fromBlock = lastBlock - (lastBlock > 300 ? 300 : 0);
 
         try {
             var txs = [];
@@ -632,7 +631,7 @@ var EthereumClient = function(params) {
         web3.eth.filter({address: market_addresses}).watch(flux.actions.user.updateBalanceSub);
     };
 
-    this.setMarketWatches = function(flux, markets) {
+    this.setMarketWatches = function(flux) {
         web3.eth.filter({address: fixtures.addresses.etherex}).watch(flux.actions.market.updateMarkets);
     };
 

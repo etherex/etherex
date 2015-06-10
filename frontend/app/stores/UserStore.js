@@ -75,12 +75,12 @@ var UserStore = Fluxxor.createStore({
     },
 
     onDeposit: function(payload) {
-        // console.log("DEPOSIT", payload.amount);
+        console.log("DEPOSIT", payload.amount);
         this.emit(constants.CHANGE_EVENT);
     },
 
     onWithdraw: function(payload) {
-        // console.log("WITHDRAW", payload.amount);
+        console.log("WITHDRAW", payload.amount);
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -101,12 +101,12 @@ var UserStore = Fluxxor.createStore({
     },
 
     onSendEther: function(payload) {
-        // console.log("SEND_SUB", payload);
+        console.log("SEND_ETHER", payload);
         this.emit(constants.SEND_ETHER);
     },
 
     onSendSub: function(payload) {
-        // console.log("SEND_SUB", payload);
+        console.log("SEND_SUB", payload);
         this.emit(constants.SEND_SUB);
     },
 

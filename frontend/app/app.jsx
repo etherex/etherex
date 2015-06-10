@@ -30,8 +30,6 @@ var UserDetails = require("./components/UserDetails");
 var Wallet = require("./components/Wallet");
 var Tools = require("./components/Tools");
 
-var fixtures = require("./js/fixtures");
-
 // Load bootstrap
 require("./css/bootstrap-darkly.css");
 

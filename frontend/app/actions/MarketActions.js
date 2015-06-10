@@ -29,7 +29,7 @@ var MarketActions = function() {
             _client.setUserWatches(this.flux, user.addresses, markets);
 
             // Set market watchers
-            _client.setMarketWatches(this.flux, markets);
+            _client.setMarketWatches(this.flux);
 
             // Load trades
             this.flux.actions.trade.loadTrades();

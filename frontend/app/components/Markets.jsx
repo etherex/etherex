@@ -22,9 +22,10 @@ var Markets = React.createClass({
   },
 
   componentWillReceiveProps: function(nextProps) {
-    this.setState({
-      category: this.context.router.getCurrentRoutes()[1].name
-    });
+    if (nextProps)
+      this.setState({
+        category: this.context.router.getCurrentRoutes()[1].name
+      });
   },
 
   render: function() {

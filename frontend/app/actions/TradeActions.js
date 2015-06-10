@@ -63,6 +63,7 @@ var TradeActions = function() {
         // console.log("ON MARKET: " + market.name, "ADD_TRADE", trade);
 
         _client.addTrade(user, trade, market, function(result) {
+            console.log("ADD_TRADE_RESULT", result);
             this.dispatch(constants.trade.ADD_TRADE, trade);
             this.flux.actions.market.updateMarkets();
         }.bind(this), function(error) {
@@ -77,6 +78,7 @@ var TradeActions = function() {
         var market = this.flux.store("MarketStore").getState().market;
 
         _client.fillTrades(user, trades, market, function(result) {
+            console.log("FILL_TRADES_RESULT", result);
             var trade = this.flux.store("TradeStore").getState();
 
             // Partial filling adds a new trade for remaining available
@@ -103,6 +105,7 @@ var TradeActions = function() {
         var market = this.flux.store("MarketStore").getState().market;
 
         _client.fillTrade(user, trade, market, function(result) {
+            console.log("FILL_TRADE_RESULT", result);
             this.dispatch(constants.trade.FILL_TRADE, trade);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.FILL_TRADE_FAIL, {error: error});
@@ -114,6 +117,7 @@ var TradeActions = function() {
 
         var user = this.flux.store("UserStore").getState().user;
         _client.cancelTrade(user, trade, function(result) {
+            console.log("CANCEL_RESULT", result);
             this.dispatch(constants.trade.CANCEL_TRADE, trade);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.CANCEL_TRADE_FAIL, {error: error});

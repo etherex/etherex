@@ -5,8 +5,6 @@ var Fluxxor = require("fluxxor");
 
 var FluxMixin = Fluxxor.FluxMixin(React);
 
-var utils = require("../js/utils");
-
 var Button = require('react-bootstrap/lib/Button');
 var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
 var ConfirmModal = require('./ConfirmModal');
