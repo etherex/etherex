@@ -19,20 +19,21 @@ var MarketList = React.createClass({
         return (
             <div>
                 <div className="container-fluid row">
+                  {this.props.title ?
                     <div className="col-md-3 col-xs-6">
                         <h3>{this.props.title} {this.props.market.loading && <span>loading...</span>}</h3>
-                    </div>
+                    </div> : "" }
+                  {this.props.market.loading ?
                     <div className="col-md-9 col-xs-6">
-                        <div style={{marginTop: 28}}>
-                            {this.props.market.loading &&
-                                <ProgressBar active now={this.props.market.percent} className="" />}
-                        </div>
-                    </div>
+                      <div style={{marginTop: 28}}>
+                        <ProgressBar active now={this.props.market.percent} className="" />
+                      </div>
+                    </div> : "" }
                 </div>
                 {this.props.market.error &&
                     <AlertDismissable ref="alerts" level={"warning"} message={this.props.market.error} show={true} />}
                 <div className="container-fluid">
-                    <MarketTable market={this.props.market} />
+                    <MarketTable category={this.props.category} market={this.props.market} />
                 </div>
             </div>
         );

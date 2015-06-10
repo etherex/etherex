@@ -100,7 +100,7 @@ class TestEtherEx(object):
 
         # Register ETX
         ans = self.contract.add_market(
-            "ETX", self.etx_contract.address, 5, 10 ** 8, 10 ** 18,
+            "ETX", self.etx_contract.address, 5, 10 ** 8, 10 ** 18, 1,
             sender=self.ALICE['key'])
         assert ans == 1
 
@@ -123,9 +123,10 @@ class TestEtherEx(object):
         assert self._storage(self.contract, self.ptr_add(self.ptr, 3)) == self.xhex(5)  # Decimal precision
         assert self._storage(self.contract, self.ptr_add(self.ptr, 4)) == self.xhex(10 ** 8)  # Price precision
         assert self._storage(self.contract, self.ptr_add(self.ptr, 5)) == self.xhex(10 ** 18)  # Minimum amount
-        assert self._storage(self.contract, self.ptr_add(self.ptr, 6)) == self.xhex(1)  # Last price
-        assert self._storage(self.contract, self.ptr_add(self.ptr, 7)) == "0x" + self.ALICE['address']  # Owner
-        assert self._storage(self.contract, self.ptr_add(self.ptr, 8)) == block  # Block
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 6)) == self.xhex(1)  # Category
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 7)) == self.xhex(1)  # Last price
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 8)) == "0x" + self.ALICE['address']  # Owner
+        assert self._storage(self.contract, self.ptr_add(self.ptr, 9)) == block  # Block
 
     def test_change_creator(self):
         self.test_initialize()
@@ -157,7 +158,8 @@ class TestEtherEx(object):
             1,
             745948140856946866108753121277737810491401257713L,
             0,
-            0]
+            0,
+            1]
 
     #
     # ETX
@@ -388,7 +390,7 @@ class TestEtherEx(object):
             25000000L,
             745948140856946866108753121277737810491401257713L,
             0L,
-            -43661844752590979300431051015755835179991927175787838447300702361707346553781L]
+            -43661844752590979300431051014294333542661024257584153614584419342051414010805L]
 
     def test_trade_already_exists(self):
         self.test_add_buy_trades()

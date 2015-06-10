@@ -27,9 +27,7 @@ var MarketRow = React.createClass({
         // onDragEnd={this.dragEnd}
         // onDragStart={this.dragStart}
         return (
-            <tr data-id={this.props.market.id}
-                key={this.props.market.id}
-                className={"market-" + this.props.market.status ? this.props.market.status : "default"}
+            <tr className={"market-" + this.props.market.status ? this.props.market.status : "default"}
                 onClick={this.handleClick}>
                 <td>
                     <div className="text-center">
@@ -71,10 +69,9 @@ var MarketRow = React.createClass({
     },
 
     toggleFavorite: function(e) {
+        var favorite = false;
         if (this.props.market.favorite === false)
-            var favorite = true;
-        else
-            var favorite = false;
+            favorite = true;
 
         this.getFlux().actions.market.toggleFavorite({id: this.props.market.id, favorite: favorite});
     }
@@ -169,10 +166,18 @@ var MarketTable = React.createClass({
 
     render: function() {
         // var markets = _.sortBy(this.props.market.markets.reverse(), 'favorite').reverse();
+        var markets = [];
 
-        var marketListNodes = this.props.market.markets.map(function (market) {
+        // Filter by category
+        var category = _.filter(fixtures.categories, {key: this.props.category})[0];
+        if (this.props.category != 'markets')
+            markets = _.filter(this.props.market.markets, {category: category.id});
+        else
+            markets = this.props.market.markets;
+
+        var marketListNodes = markets.map(function (market) {
             return (
-                <MarketRow key={market.id} market={market} /> //user={this.props.user} review={this.props.review} />
+                <MarketRow key={market.id} market={market} />
             );
         }.bind(this));
 

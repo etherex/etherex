@@ -23,7 +23,7 @@ data log_gas  # 0x8
 data log_last_trade  # 0x9
 data log_timestamp  # 0xa
 
-data markets[2^160](id, name, contract, decimals, precision, minimum, last_price, owner, block, total_trades, trade_ids[](id))
+data markets[2^160](id, name, contract, decimals, precision, minimum, category, last_price, owner, block, total_trades, trade_ids[](id))
 data trades[2^160](id, type, market, amount, price, owner, block, refhash)
 data balances[][](available, trading)
 
@@ -38,7 +38,7 @@ extern subcurrency: [balance:i:i, transfer:ii:i]
 extern namereg: [getname:i:i, register:ii:i, unregister:i:i]
 
 macro MARKET_FIELDS():
-    11
+    12
 
 macro TRADE_FIELDS():
     8
@@ -374,7 +374,7 @@ def cancel(trade_id):
 #
 # Add market
 #
-def add_market(name, contract, decimals, precision, minimum):
+def add_market(name, contract, decimals, precision, minimum, category):
     # if msg.value < 10 ^ 18: # TODO - Require fee to add market?
     #     if msg.value > 0: # "Refunding"
     #         ret = send(msg.sender, msg.value)
@@ -390,6 +390,7 @@ def add_market(name, contract, decimals, precision, minimum):
     self.markets[id].id = id
     self.markets[id].name = name
     self.markets[id].contract = contract
+    self.markets[id].category = category
     self.markets[id].decimals = decimals
     self.markets[id].precision = precision
     self.markets[id].minimum = minimum
@@ -428,6 +429,7 @@ def get_market(id):
     market[7] = self.markets[id].owner
     market[8] = self.markets[id].block
     market[9] = self.markets[id].total_trades
+    market[10] = self.markets[id].category
 
     if market:
         return(market:arr)

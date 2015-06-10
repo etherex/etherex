@@ -17,7 +17,7 @@ var MarketActions = function(client) {
                 }.bind(this), function(error) {
                     this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
                 }.bind(this));
-            };
+            }
 
             this.dispatch(constants.market.LOAD_MARKETS_SUCCESS, markets);
 
@@ -25,7 +25,6 @@ var MarketActions = function(client) {
             this.flux.actions.user.updateBalanceSub();
 
             // Set user sub watchers
-            var user = this.flux.store("UserStore").getState().user;
             _client.setUserWatches(this.flux, user.addresses, markets);
 
             // Set market watchers
@@ -65,7 +64,7 @@ var MarketActions = function(client) {
                 }.bind(this), function(error) {
                     this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
                 }.bind(this));
-            };
+            }
             this.dispatch(constants.market.LOAD_MARKETS_SUCCESS, markets);
 
             // Update sub balances after loading addresses
@@ -83,7 +82,7 @@ var MarketActions = function(client) {
             }.bind(this));
 
             // Load txs
-            _client.loadTransactions(user, markets[0], function(txs) {
+            _client.loadTransactions(user, market, function(txs) {
                 this.dispatch(constants.market.LOAD_TRANSACTIONS, txs);
             }.bind(this), function(error) {
                 this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
@@ -128,9 +127,7 @@ var MarketActions = function(client) {
     };
 
     this.registerMarket = function(market) {
-        var user = this.flux.store("UserStore").getState().user;
-
-        console.log("REGISTER_MARKET", market);
+        // console.log("REGISTER_MARKET", market);
         _client.registerMarket(market, function(id) {
             this.dispatch(constants.market.REGISTER_MARKET, id);
         }.bind(this), function(error) {

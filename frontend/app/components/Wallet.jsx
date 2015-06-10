@@ -101,10 +101,6 @@ var Markets = React.createClass({
 
         <div className="container-fluid">
           <div className="row">
-            {!this.props.market.error &&
-              <MarketList title="Currencies" market={this.props.market} trades={this.props.trades} user={this.props.user} />}
-          </div>
-          <div className="row">
             {(!this.props.market.market.txs.error) &&
               <TxsList title="Transactions" market={this.props.market} txs={this.props.market.market.txs} user={this.props.user} />}
           </div>

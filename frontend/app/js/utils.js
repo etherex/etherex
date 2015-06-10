@@ -6,7 +6,7 @@ var si = require("si-prefix");
 
 String.prototype.repeat = function(num) {
   return new Array(num + 1).join(this);
-}
+};
 
 var scale = new si.Scale({
   minor: true,
@@ -52,15 +52,13 @@ var unit = new si.Unit(scale, '');
 var utils = {
   formatBalance: function(_b, _p) {
     var b = bigRat(_b);
-    if (!_p)
-      var _p = 4;
-    if (b.compare(units["Uether"].multiply(1000)) > 0)
-      return this.numeral(b.divide(units["Uether"]), _p) + " " + Object.keys(units)[0];
-    for (i in units) {
-      if (units[i].valueOf() != 1 && b.compare(units[i].multiply(100)) >= 0) {
-        return this.numeral(b.divide(units[i].divide(1000)).divide(1000), _p) + " " + i
-      }
-    }
+    if (typeof _p === 'undefined')
+      _p = 4;
+    if (b.compare(units.Uether.multiply(1000)) > 0)
+      return this.numeral(b.divide(units.Uether), _p) + " " + Object.keys(units)[0];
+    for (var i in units)
+      if (units[i].valueOf() != 1 && b.compare(units[i]) >= 0)
+        return this.numeral(b.divide(units[i].divide(1000)).divide(1000), _p) + " " + i;
     return this.numeral(_b, 0) + " wei";
   },
 

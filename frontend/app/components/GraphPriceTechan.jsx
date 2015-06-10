@@ -460,14 +460,14 @@ var Chart = React.createClass({
 
         // TODO
         var trendlineData = [
-            { start: { date: new Date(2014, 12, 1), value: 0.245 }, end: { date: new Date(2015, 1, 20), value: 0.2475 } },
-            { start: { date: new Date(2014, 12, 1), value: 0.255 }, end: { date: new Date(2015, 1, 20), value: 0.25 } }
+            { start: { date: new Date(2015, 1, 1), value: 0.245 }, end: { date: new Date(2015, 6, 1), value: 0.2525 } },
+            { start: { date: new Date(2015, 1, 1), value: 0.265 }, end: { date: new Date(2015, 6, 1), value: 0.2575 } }
         ];
 
         // TODO
         var supstanceData = [
-            { start: new Date(2015, 1, 1), end: new Date(2015, 2, 1), value: 0.25 },
-            { start: new Date(2015, 1, 1), end: new Date(2015, 2, 1), value: 0.24 }
+            { start: new Date(2015, 1, 1), end: new Date(2015, 6, 1), value: 0.275 },
+            { start: new Date(2015, 1, 1), end: new Date(2015, 6, 1), value: 0.25 }
         ];
 
         if (this.props.data.length > 3) {
@@ -499,7 +499,7 @@ var Chart = React.createClass({
 var GraphPrice = React.createClass({
     render: function() {
         return (
-            <div>
+            <div className="navbar">
                 <h4>{this.props.title}</h4>
                 <Chart height={this.props.height} full={this.props.full} data={this.props.market.market.data} market={this.props.market.market} />
             </div>

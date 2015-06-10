@@ -29,7 +29,7 @@ var TxRow = React.createClass({
         var amount = utils.format(bigRat(this.props.tx.amount).divide(Math.pow(10, market.decimals)));
 
         return (
-            <tr className={"tx-" + this.props.tx.inout}>
+            <tr>
                 <td>
                     <div className="text-center">
                         {this.props.tx.block}
@@ -77,7 +77,7 @@ var TxRow = React.createClass({
                     </div>
                 </td>
                 <td>
-                    <div className="text-center">
+                    <div className="text-center" title={this.props.tx.hash}>
                         {this.props.tx.result}
                     </div>
                 </td>

@@ -16,6 +16,9 @@ var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 var bigRat = require("big-rational");
 
+var DropdownButton = require('react-bootstrap/lib/DropdownButton');
+var MenuItem = require('react-bootstrap/lib/MenuItem');
+
 var SubRegister = React.createClass({
   mixins: [FluxMixin],
 
@@ -26,6 +29,8 @@ var SubRegister = React.createClass({
       minimum: null,
       decimals: null,
       precision: null,
+      category: 1,
+      categoryName: fixtures.categories[0].name,
       newReg: false
     };
   },
@@ -33,6 +38,15 @@ var SubRegister = React.createClass({
   render: function() {
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
+        <div className="form-group">
+          <DropdownButton ref="category" key={1} onSelect={this.handleCategories} title={this.state.categoryName}>
+            {
+              fixtures.categories.map(function(category) {
+                return <MenuItem key={category.id} eventKey={category.id}>{category.name}</MenuItem>;
+              }.bind(this))
+            }
+          </DropdownButton>
+        </div>
         <div className="form-group">
           <label forHtml="code">Subcurrency code</label>
           <input type="text" className="form-control" pattern="[A-Z]{3,4}" placeholder="ETX" ref="code" onChange={this.handleChange}/>
@@ -76,6 +90,13 @@ var SubRegister = React.createClass({
     );
   },
 
+  handleCategories: function(key) {
+    this.setState({
+      category: key,
+      categoryName: this.refs.category.props.children[key - 1].props.children
+    });
+  },
+
   handleChange: function(e, showAlerts) {
     e.preventDefault();
     this.validate(e);
@@ -94,6 +115,7 @@ var SubRegister = React.createClass({
     var minimum = parseFloat(this.refs.minimum.getDOMNode().value.trim());
     var decimals = _.parseInt(this.refs.decimals.getDOMNode().value.trim());
     var precision = parseFloat(this.refs.precision.getDOMNode().value.trim());
+    var category = this.state.category;
 
     this.setState({
       code: code,
@@ -107,7 +129,8 @@ var SubRegister = React.createClass({
         !address ||
         !minimum ||
         !decimals ||
-        !precision) {
+        !precision ||
+        !category) {
 
       this.props.setAlert('warning', "Fill it up mate!");
     }
@@ -125,6 +148,9 @@ var SubRegister = React.createClass({
     }
     else if (_.find(this.props.markets, {address: "0x" + address})) {
         this.props.setAlert('warning', "Subcurrency address " + address + " already taken.");
+    }
+    else if (!_.find(fixtures.categories, {id: category})) {
+        this.props.setAlert('warning', "Invalid category, we must have screwed up something...");
     }
     else {
       this.setState({
@@ -157,7 +183,8 @@ var SubRegister = React.createClass({
         address: "0x" + this.state.address,
         minimum: bigRat(this.state.minimum).multiply(fixtures.ether).toDecimal(),
         decimals: String(this.state.decimals),
-        precision: bigRat(this.state.precision).multiply(fixtures.precision).toDecimal()
+        precision: bigRat(this.state.precision).multiply(fixtures.precision).toDecimal(),
+        category: String(this.state.category)
     });
 
     this.refs.code.getDOMNode().value = '';

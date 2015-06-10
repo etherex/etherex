@@ -138,8 +138,9 @@ var MarketStore = Fluxxor.createStore({
                 return d.Date < lastmonth;
             });
 
+            var change = 0;
             if (day) {
-                var change = ((last.Close - day.Close) / last.Close * 100).toFixed(2);
+                change = ((last.Close - day.Close) / last.Close * 100).toFixed(2);
                 if (change >= 0) {
                     this.market.dayClass = 'text-success';
                     this.market.daySign = '+';
@@ -154,7 +155,7 @@ var MarketStore = Fluxxor.createStore({
                 this.market.dayChange = '-';
 
             if (week) {
-                var change = ((last.Close - month.Close) / last.Close * 100).toFixed(2);
+                change = ((last.Close - month.Close) / last.Close * 100).toFixed(2);
                 if (change >= 0) {
                     this.market.weekClass = 'text-success';
                     this.market.weekSign = '+';
@@ -169,7 +170,7 @@ var MarketStore = Fluxxor.createStore({
                 this.market.weekChange = '-';
 
             if (month) {
-                var change = ((last.Close - month.Close) / last.Close * 100).toFixed(2);
+                change = ((last.Close - month.Close) / last.Close * 100).toFixed(2);
                 if (this.market.monthChange >= 0) {
                     this.market.monthClass = 'text-success';
                     this.market.monthSign = '+';
@@ -204,7 +205,7 @@ var MarketStore = Fluxxor.createStore({
         var favorites = JSON.parse(favs);
 
         if (typeof(favorites) === 'undefined' || !favorites)
-            var favorites = [];
+            favorites = [];
 
         if (payload.favorite === true)
             favorites.push(payload.id);

@@ -12,19 +12,22 @@ var EtherExApp = require("./components/EtherExApp");
 
 var Placeholder = require("./components/Placeholder");
 
-var Trades = require("./components/Trades");
-var TradeStore = require("./stores/TradeStore");
-var TradeActions = require("./actions/TradeActions");
-// var TradeDetails = require("./components/TradeDetails");
-
+var ConfigStore = require("./stores/ConfigStore");
+var NetworkStore = require("./stores/NetworkStore");
 var UserStore = require("./stores/UserStore");
-var UserActions = require("./actions/UserActions");
-var UserDetails = require("./components/UserDetails");
-
-var Markets = require("./components/Markets");
+var TradeStore = require("./stores/TradeStore");
 var MarketStore = require("./stores/MarketStore");
+
+var ConfigActions = require("./actions/ConfigActions");
+var NetworkActions = require("./actions/NetworkActions");
+var UserActions = require("./actions/UserActions");
+var TradeActions = require("./actions/TradeActions");
 var MarketActions = require("./actions/MarketActions");
 
+var Trades = require("./components/Trades");
+var Markets = require("./components/Markets");
+var UserDetails = require("./components/UserDetails");
+// var TradeDetails = require("./components/TradeDetails");
 var Wallet = require("./components/Wallet");
 var Tools = require("./components/Tools");
 
@@ -50,15 +53,19 @@ require("./css/bootstrap-darkly.css");
 require("./css/styles.css");
 
 var Route = Router.Route;
-var Redirect = Router.Redirect;
+// var Redirect = Router.Redirect;
 
 var stores = {
+  config: new ConfigStore(),
+  network: new NetworkStore(),
   MarketStore: new MarketStore(),
   TradeStore: new TradeStore(),
   UserStore: new UserStore()
 };
 
 var actions = {
+  config: new ConfigActions(client),
+  network: new NetworkActions(client),
   market: new MarketActions(client),
   trade: new TradeActions(client),
   user: new UserActions(client)
@@ -66,23 +73,21 @@ var actions = {
 
 var flux = new Fluxxor.Flux(stores, actions);
 
-// DEBUG
-// flux.on("dispatch", function(type, payload) {
-//   if (console && console.log) {
-//     console.log("[Dispatch]", type, payload);
-//   }
-// });
+if (flux.store('config').getState().debug)
+  flux.on("dispatch", function(type, payload) {
+    console.log("Dispatched", type, payload);
+  });
 
 var routes = (
     <Route name="app" handler={EtherExApp} flux={flux}>
-      <DefaultRoute handler={Trades} flux={flux} title="Trades" />
-      <Route name="home" path="/" handler={Trades} flux={flux} title="Trades" />
-      <Route name="trades" path="/trades" handler={Trades} flux={flux} title="Trades" />
-      <Route name="trades/xchain" path="/trades/xchain" handler={Trades} flux={flux} title="X-Chain" />
-      <Route name="trades/assets" path="/trades/assets" handler={Trades} flux={flux} title="Assets" />
-      <Route name="trades/currencies" path="/trades/currencies" handler={Trades} flux={flux} title="Currencies" />
+      <DefaultRoute handler={Trades} title="Home" />
+      <Route name="home" path="/" handler={Trades} title="Trades" />
       <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
       <Route name="markets" path="/markets" handler={Markets} flux={flux} title="Markets" />
+      <Route name="subs" path="/markets/subs" handler={Markets} flux={flux} title="Subs" />
+      <Route name="xchain" path="/markets/xchain" handler={Markets} flux={flux} title="X-Chain" />
+      <Route name="assets" path="/markets/assets" handler={Markets} flux={flux} title="Assets" />
+      <Route name="currencies" path="/markets/currencies" handler={Markets} flux={flux} title="Currencies" />
       <Route name="wallet" path="/wallet" handler={Wallet} flux={flux} title="Wallet" />
       <Route name="tools" path="/tools" handler={Tools} flux={flux} title="Tools" />
       <Route name="help" path="/help" handler={Placeholder} flux={flux} title="Help" />

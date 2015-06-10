@@ -20,7 +20,7 @@ try {
     // console.log("CONTRACT", contract);
 }
 catch(e) {
-    console.log("Some ethereum.js error", String(e));
+    console.log("Some web3.js error...", String(e));
 }
 
 web3.padDecimal = function (string, chars) {
@@ -29,6 +29,31 @@ web3.padDecimal = function (string, chars) {
 };
 
 var EthereumClient = function() {
+
+    this.filters = {};
+
+    this.startMonitoring = function(callback) {
+      this.filters.latest = web3.eth.filter('latest');
+      this.filters.latest.watch(function (err, log) {
+        // if (err) utilities.error(err);
+        callback();
+      });
+    };
+
+    this.stopMonitoring = function() {
+      _.each(this.filters, function(filter) {
+        filter.stopWatching();
+      });
+    };
+
+    this.isAvailable = function() {
+      // attempt an RPC call that should fail if the daemon is unreachable.
+      try {
+        return web3.net.listening;
+      } catch(err) {
+        return false;
+      }
+    };
 
     // Loading methods
 
@@ -43,7 +68,7 @@ var EthereumClient = function() {
                 resolve(accounts);
             }
             catch (e) {
-                reject("Unable to load addresses, are you running an Ethereum node? Please load this URL in Mist, AlethZero, or with an eth/geth node with JSONRPC enabled.");
+                reject("Unable to load addresses, are you running an Ethereum node? Please load this URL in Mist, AlethZero, or with a geth/eth node running with JSONRPC enabled.");
                 // reject("Error loading accounts: " + String(e));
             }
         });
@@ -92,8 +117,9 @@ var EthereumClient = function() {
                     var owner = web3.fromDecimal(market[7]);
                     var block = _.parseInt(market[8].toString());
                     var total_trades = _.parseInt(market[9].toString());
+                    var category = _.parseInt(market[10].toString());
 
-                    // console.log(id, name, address, decimals, precision, minimum, lastPrice, owner, block, total_trades);
+                    // console.log(id, name, address, decimals, precision, minimum, category, lastPrice, owner, block, total_trades);
 
                     var SubContractABI = web3.eth.contract(fixtures.sub_contract_desc);
                     var subcontract = SubContractABI.at(address);
@@ -107,6 +133,7 @@ var EthereumClient = function() {
                         id: id,
                         name: name,
                         address: address,
+                        category: category,
                         decimals: decimals,
                         minimum: minimum,
                         precision: precision,
@@ -271,8 +298,7 @@ var EthereumClient = function() {
 
             // Get deposits
             var tx_filter = contract.log_deposit({
-              sender: user.id,
-              market: market.id
+              sender: user.id
             }, {
               fromBlock: 'earliest',
               toBlock: 'latest'
@@ -297,8 +323,7 @@ var EthereumClient = function() {
 
             // Get withdrawals
             tx_filter = contract.log_withdraw({
-              address: user.id,
-              market: market.id
+              address: user.id
             }, {
               fromBlock: 'earliest',
               toBlock: 'latest'
@@ -323,8 +348,7 @@ var EthereumClient = function() {
 
             // Get cancelations
             tx_filter = contract.log_cancel({
-              sender: user.id,
-              market: market.id
+              sender: user.id
             }, {
               fromBlock: 'earliest',
               toBlock: 'latest'
@@ -332,9 +356,9 @@ var EthereumClient = function() {
             txlogs = tx_filter.get();
             // console.log("TRANSACTIONS: ", txlogs);
             for (i = txlogs.length - 1; i >= 0; i--) {
-                amount = bigRat(txlogs[i].args.amount.valueOf()).valueOf();
+                amount = txlogs[i].args.amount.valueOf();
                 price = bigRat(txlogs[i].args.price.valueOf()).divide(market.precision).valueOf();
-                total = bigRat(txlogs[i].args.amount.valueOf()).multiply(price);
+                total = bigRat(amount).divide(Math.pow(10, market.decimals)).multiply(price).multiply(fixtures.ether);
 
                 txs.push({
                   hash: txlogs[i].transactionHash || txlogs[i].hash,
@@ -347,15 +371,14 @@ var EthereumClient = function() {
                   amount: amount,
                   market: _.parseInt(txlogs[i].args.market.valueOf()),
                   price: price,
-                  total: total,
+                  total: utils.formatBalance(total),
                   result: 'OK'
                 });
             }
 
             // Get added trades
             tx_filter = contract.log_add_tx({
-              sender: user.id,
-              market: market.id
+              sender: user.id
             }, {
               fromBlock: 'earliest',
               toBlock: 'latest'
@@ -363,9 +386,9 @@ var EthereumClient = function() {
             txlogs = tx_filter.get();
             // console.log("TRANSACTIONS: ", txlogs);
             for (i = txlogs.length - 1; i >= 0; i--) {
-                amount = bigRat(txlogs[i].args.amount.valueOf()).valueOf();
+                amount = txlogs[i].args.amount.valueOf();
                 price = bigRat(txlogs[i].args.price.valueOf()).divide(market.precision).valueOf();
-                total = bigRat(txlogs[i].args.amount.valueOf()).multiply(price);
+                total = bigRat(amount).divide(Math.pow(10, market.decimals)).multiply(price).multiply(fixtures.ether);
 
                 txs.push({
                   hash: txlogs[i].transactionHash || txlogs[i].hash,
@@ -386,8 +409,7 @@ var EthereumClient = function() {
 
             // Get filled trades
             tx_filter = contract.log_fill_tx({
-              sender: user.id,
-              market: market.id
+              sender: user.id
             }, {
               fromBlock: 'earliest',
               toBlock: 'latest'
@@ -395,9 +417,9 @@ var EthereumClient = function() {
             txlogs = tx_filter.get();
             // console.log("TRANSACTIONS: ", txlogs);
             for (i = txlogs.length - 1; i >= 0; i--) {
-                amount = bigRat(txlogs[i].args.amount.valueOf()).valueOf();
+                amount = txlogs[i].args.amount.valueOf();
                 price = bigRat(txlogs[i].args.price.valueOf()).divide(market.precision).valueOf();
-                total = bigRat(txlogs[i].args.amount.valueOf()).multiply(price);
+                total = bigRat(amount).divide(Math.pow(10, market.decimals)).multiply(price).multiply(fixtures.ether);
 
                 txs.push({
                   hash: txlogs[i].transactionHash || txlogs[i].hash,
@@ -417,6 +439,9 @@ var EthereumClient = function() {
               }
 
             // console.log("TXS: ", txs);
+
+            // Refilter per market...
+            txs = _.filter(txs, {market: market.id});
 
             success(txs);
         }
@@ -573,6 +598,7 @@ var EthereumClient = function() {
                 market.decimals,
                 market.precision,
                 market.minimum,
+                market.category,
                 options
             );
 
@@ -728,6 +754,16 @@ var EthereumClient = function() {
             unconfirmed = fn(unconfirmed);
 
         return unconfirmed;
+    };
+
+    this.getStats = function() {
+      return {
+        gasPrice: web3.eth.gasPrice,
+        blockNumber: web3.eth.blockNumber,
+        mining: web3.eth.mining,
+        hashrate: web3.eth.hashrate,
+        peerCount: web3.net.peerCount
+      };
     };
 
 };

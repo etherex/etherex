@@ -141,7 +141,7 @@ get_sub_balance:ii:a
 
 ### Adding a market
 ```
-<method> <currency name> <contract address> <decimal precision> <price denominator> <minimum total>
+<method> <currency name> <contract address> <decimal precision> <price denominator> <minimum total> <category>
 ```
 
 #### Market names
@@ -163,6 +163,14 @@ The subcurrency's decimal precision as an integer.
 #### Minimum trade total
 When adding a subcurrency, set the minimum trade total high enough to make economic sense. A minimum of 10 ETH (1000000000000000000000 wei) is recommended.
 
+#### Categories
+```
+1 = Subcurrencies
+2 = Crypto-currencies
+3 = Real-world assets
+4 = Fiat currencies
+```
+EtherEx allows you to categorize your subcurrency into four main categories. Since everything is represented as subcurrencies, those categories are simply for convenience. If you have a DApp that has its own token, that would go in the regular subcurrency section `1`. If your token represents a fiat currency redeemable at a gateway, put it in `4`. If your token represents a real-world asset like gold or a car, put it in `3`. For other crypto-currencies like BTC, also redeemable at a gateway, put it in `2`.
 
 #### Market IDs
 ```
@@ -207,18 +215,23 @@ After registering the subcurrency using the `add_market` ABI call, the subcurren
 The second step has to be executed on each asset transfer. The gas costs of comparing the recipient to the exchange's address are minimal but a separate ABI call might be used later on, depending on how this approach will play out on the testnet. The relevant part below is the one under `Notify exchange of deposit`, the top part being what can be considered standard subcurrency functionality. Notice the `extern` definition that will be used for the `deposit` method.
 
 ```
+data balances[2^160](balance)
 extern exchange: [deposit:iii:i]
 
-def send(recipient, amount):
+def transfer(recipient, amount):
+    # Prevent negative send from stealing funds
+    if recipient <= 0 or amount <= 0:
+        return(0)
+
     # Get user balance
-    balance = self.storage[msg.sender]
+    balance = self.balances[msg.sender].balance
 
     # Make sure balance is above or equal to amount
     if balance >= amount:
 
         # Update balances
-        self.storage[msg.sender] = balance - amount
-        self.storage[recipient] += amount
+        self.balances[msg.sender].balance = balance - amount
+        self.balances[recipient].balance += amount
 
         # Notify exchange of deposit
         if recipient == self.exchange:
@@ -231,6 +244,7 @@ def send(recipient, amount):
 
         return(1)
     return(0)
+
 ```
 
 **TODO**: Solidity examples.

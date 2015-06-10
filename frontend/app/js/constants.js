@@ -2,6 +2,22 @@ var keyMirror = require('react/lib/keyMirror');
 
 module.exports = {
     CHANGE_EVENT: "change",
+    config: keyMirror({
+        UPDATE_ETHEREUM_CLIENT_SUCCESS: null,
+        UPDATE_ETHEREUM_CLIENT_FAILED: null,
+        UPDATE_DEBUG: null,
+        UPDATE_PERCENT_LOADED_SUCCESS: null,
+        UPDATE_DEMO_MODE: null
+    }),
+    network: keyMirror({
+        UPDATE_ETHEREUM_STATUS: null,
+        UPDATE_IS_MONITORING_BLOCKS: null,
+        UPDATE_BLOCK_CHAIN_AGE: null,
+        LOAD_NETWORK: null,
+        ETHEREUM_STATUS_CONNECTED: null,
+        ETHEREUM_STATUS_FAILED: null,
+        ETHEREUM_STATUS_LOADING: null
+    }),
     trade: keyMirror ({
         LOAD_TRADES: null,
         LOAD_TRADES_FAIL: null,

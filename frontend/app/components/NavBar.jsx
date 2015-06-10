@@ -22,13 +22,13 @@ var NavBar = React.createClass({
                             <span className="sr-only">Toggle navigation</span>
                             <span className="btn-xs glyphicon glyphicon-th-list"></span>
                         </button>
-                        <Link className="navbar-brand" to="trades">#EtherEx</Link>
+                        <Link className="navbar-brand" to="home">#EtherEx</Link>
                     </div>
                     <div className="nav">
                         <div className="collapse navbar-collapse" id="navbar-collapse">
                             <ul className="nav navbar-nav">
-                                <Tab to="trades" className="icon-chart-line"> &nbsp;Trades</Tab>
-                                <Tab to="markets" className="icon-bitcoin"> Markets</Tab>
+                                <Tab to="home"><i className="glyphicon glyphicon-stats"></i> &nbsp;Trades</Tab>
+                                <Tab to="markets" className="icon-chart-line"> &nbsp;Markets</Tab>
                                 <Tab to="wallet" className="icon-wallet"> &nbsp;Wallet</Tab>
                                 <Tab to="tools" className="icon-cog-alt"> &nbsp;Tools</Tab>
                                 <Tab to="help" className="icon-help"> Help</Tab>

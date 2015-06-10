@@ -110,6 +110,7 @@ var UserActions = function(client) {
     };
 
     this.withdrawSub = function(payload) {
+        var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
 
         this.dispatch(constants.user.WITHDRAW, payload);

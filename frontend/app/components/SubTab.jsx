@@ -10,17 +10,6 @@ var SubTab = React.createClass({
 
   mixins: [ ActiveState ],
 
-  getInitialState: function () {
-    return { isActive: false };
-  },
-
-  updateActiveState: function () {
-    this.setState({
-      isActive: this.isActive(this.props.to, this.props.params, this.props.query)
-    });
-    console.log(this.state.isActive);
-  },
-
   render: function() {
     var active = this.isActive(this.props.to, this.props.params, this.props.query);
     var className = active ? 'active' : '';

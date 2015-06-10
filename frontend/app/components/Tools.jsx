@@ -8,6 +8,7 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 
 var AlertDismissable = require('./AlertDismissable');
 
+var Network = require('./Network');
 var SubRegister = require('./SubRegister');
 
 var TradeList = React.createClass({
@@ -47,6 +48,9 @@ var TradeList = React.createClass({
               </div>
             </div>
           </div>
+        </div>
+        <div className="container col-md-12 visible-md visible-sm visible-xs">
+          <Network />
         </div>
       </div>
     );
