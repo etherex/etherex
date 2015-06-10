@@ -33,6 +33,9 @@ var Network = React.createClass({
           <span className="pull-left">Network</span>
         </div>
         <div className="panel-body">
+          <p className="client">
+            <span>{this.state.network.client}</span>
+          </p>
           <p className="host">
             HOST<span className="pull-right">{this.state.host}</span>
           </p>

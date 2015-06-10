@@ -261,12 +261,13 @@ var EthereumClient = function(params) {
     this.loadPrices = function(market, success, failure) {
         // console.log("Loading prices...");
         lastBlock = web3.eth.blockNumber;
+        fromBlock = lastBlock - (lastBlock > 300 ? 300 : 0);
 
         try {
             var prices_filter = contract.log_price({
               market: market.id
             }, {
-              fromBlock: lastBlock - 300,
+              fromBlock: fromBlock,
               toBlock: 'latest'
             });
             var pricelogs = prices_filter.get();
@@ -298,6 +299,7 @@ var EthereumClient = function(params) {
     this.loadTransactions = function(user, market, success, failure) {
         // console.log("Loading transactions...");
         lastBlock = web3.eth.blockNumber;
+        fromBlock = lastBlock - (lastBlock > 300 ? 300 : 0);
 
         try {
             var txs = [];
@@ -309,7 +311,7 @@ var EthereumClient = function(params) {
             var tx_filter = contract.log_deposit({
               sender: user.id
             }, {
-              fromBlock: lastBlock - 300,
+              fromBlock: fromBlock,
               toBlock: 'latest'
             });
             var txlogs = tx_filter.get();
@@ -334,7 +336,7 @@ var EthereumClient = function(params) {
             tx_filter = contract.log_withdraw({
               address: user.id
             }, {
-              fromBlock: lastBlock - 300,
+              fromBlock: fromBlock,
               toBlock: 'latest'
             });
             txlogs = tx_filter.get();
@@ -359,7 +361,7 @@ var EthereumClient = function(params) {
             tx_filter = contract.log_cancel({
               sender: user.id
             }, {
-              fromBlock: lastBlock - 300,
+              fromBlock: fromBlock,
               toBlock: 'latest'
             });
             txlogs = tx_filter.get();
@@ -389,7 +391,7 @@ var EthereumClient = function(params) {
             tx_filter = contract.log_add_tx({
               sender: user.id
             }, {
-              fromBlock: lastBlock - 300,
+              fromBlock: fromBlock,
               toBlock: 'latest'
             });
             txlogs = tx_filter.get();
@@ -420,7 +422,7 @@ var EthereumClient = function(params) {
             tx_filter = contract.log_fill_tx({
               sender: user.id
             }, {
-              fromBlock: lastBlock - 300,
+              fromBlock: fromBlock,
               toBlock: 'latest'
             });
             txlogs = tx_filter.get();

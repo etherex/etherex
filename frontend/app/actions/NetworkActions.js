@@ -24,12 +24,18 @@ var NetworkActions = function() {
       this.dispatch( constants.network.UPDATE_ETHEREUM_STATUS, {
         ethereumStatus: constants.network.ETHEREUM_STATUS_FAILED
       });
-    } else if (wasDown && nowUp) {
+    }
+    else if (wasDown && nowUp) {
+      this.flux.actions.network.loadEverything();
+
       this.dispatch( constants.network.UPDATE_ETHEREUM_STATUS, {
           ethereumStatus: constants.network.ETHEREUM_STATUS_CONNECTED
       });
+    }
 
-      this.flux.actions.network.loadEverything();
+    if (nowUp) {
+      var blockChainAge = ethereumClient.blockChainAge();
+      this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, { blockChainAge: blockChainAge });
     }
 
     // check yo self
@@ -70,7 +76,8 @@ var NetworkActions = function() {
     this.flux.actions.network.loadNetwork();
 
     var networkState = this.flux.store('network').getState();
-    if (networkState.blockChainAge < 80)
+
+    if (networkState.blockChainAge < 90)
       this.flux.actions.user.loadAddresses();
 
     // start monitoring for updates
@@ -82,10 +89,12 @@ var NetworkActions = function() {
    */
   this.onNewBlock = function () {
     var networkState = this.flux.store('network').getState();
-    if (networkState.blockChainAge < 80) {
-      this.flux.actions.network.loadNetwork();
+
+    this.flux.actions.network.loadNetwork();
+
+    if (networkState.blockChainAge < 90) {
       this.flux.actions.user.updateBalance();
-      this.flux.actions.user.updateBalanceSub();
+      // this.flux.actions.user.updateBalanceSub();
       // this.flux.actions.market.updateMarkets();
     }
   };
