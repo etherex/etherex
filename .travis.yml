@@ -5,12 +5,12 @@ before_install:
   - cd frontend && npm install
   - npm install -g grunt-cli
 install:
-  - pip install -r dev_requirements.txt
+  - cd .. && pip install -r dev_requirements.txt
   - pip install -e .
-before_script:
+script:
   - py.test -vvrs
   - flake8
-script:
+after_script:
   - cd frontend && grunt jshint
 notifications:
   irc:
