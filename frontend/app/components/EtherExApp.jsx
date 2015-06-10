@@ -171,7 +171,10 @@ var ErrorModal = React.createClass({
         lastBlockAge: moment().subtract(nextProps.network.blockChainAge, 'seconds').fromNow()
       });
     } else {
-      this.setState({ isModalOpen: false, isLoading: false });
+      this.setState({
+        isModalOpen: false,
+        isLoading: false
+      });
     }
   },
 
