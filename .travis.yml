@@ -1,16 +1,16 @@
 language: python
 python:
   - 2.7
+before_install:
+  - cd frontend && npm install
+  - npm install -g grunt-cli
 install:
   - pip install -r dev_requirements.txt
   - pip install -e .
-script:
+before_script:
   - py.test -vvrs
   - flake8
-after_install:
-  - cd frontend && npm install
-  - npm install -g grunt-cli
-after_script:
+script:
   - cd frontend && grunt jshint
 notifications:
   irc:
