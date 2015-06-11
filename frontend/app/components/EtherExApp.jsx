@@ -164,11 +164,18 @@ var ErrorModal = React.createClass({
         nextProps.config.ethereumClientFailed === true) {
       this.setState({ isModalOpen: true });
     } else if (nextProps.network.blockChainAge > 90) {
-      // utilities.warn('last block was '+ nextProps.network.blockChainAge + ' seconds old');
+      var lastBlockAge = nextProps.network.blockChainAge;
+      var now = (new Date().getTime() / 1000) - 1;
+
+      if (nextProps.network.blockChainAge >= now)
+        lastBlockAge = "not mined yet";
+      else
+        lastBlockAge = moment().subtract(nextProps.network.blockChainAge, 'seconds').fromNow();
+
       this.setState({
         isModalOpen: true,
         isLoading: true,
-        lastBlockAge: moment().subtract(nextProps.network.blockChainAge, 'seconds').fromNow()
+        lastBlockAge: lastBlockAge
       });
     } else {
       this.setState({

@@ -52,13 +52,19 @@ var EthereumClient = function(params) {
     };
 
     this.blockChainAge = function() {
+      var currentTimeStamp = new Date().getTime() / 1000;
+
       if (web3.net.listening) {
         var blockNumber = web3.eth.blockNumber;
-        var blockTimeStamp = web3.eth.getBlock(blockNumber).timestamp;
-        var currentTimeStamp = new Date().getTime() / 1000;
 
-        return currentTimeStamp - blockTimeStamp;
+        if (blockNumber) {
+          var blockTimeStamp = web3.eth.getBlock(blockNumber).timestamp;
+          return currentTimeStamp - blockTimeStamp;
+        }
+        else
+          return currentTimeStamp;
       }
+      return currentTimeStamp;
     };
 
     // Loading methods
