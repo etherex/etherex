@@ -497,13 +497,15 @@ var EthereumClient = function(params) {
         try {
             var SubContractABI = web3.eth.contract(fixtures.sub_contract_desc);
             var subcontract = SubContractABI.at(market.address);
-            var sub_balance = _.parseInt(subcontract.balance.call(address).toString());
+            var sub_balance = subcontract.balance.call(address).toString();
 
             var balances = contract.get_sub_balance.call(address, market.id);
 
             var available = balances[0].toString();
             var trading = balances[1].toString();
 
+            if (!sub_balance || sub_balance == "0")
+                sub_balance = 0;
             if (!available || available == "0")
                 available = 0;
             if (!trading || trading == "0")
@@ -514,6 +516,8 @@ var EthereumClient = function(params) {
                 return;
             }
 
+            if (sub_balance)
+                sub_balance = bigRat(sub_balance).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
             if (available)
                 available = bigRat(available).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
             if (trading)
