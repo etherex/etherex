@@ -116,8 +116,7 @@ var SubSend = React.createClass({
 
     var payload = {
         recipient: "0x" + this.state.recipient,
-        amount: bigRat(this.state.amount).toDecimal()
-        // amount: bigRat(this.state.amount).multiply(Math.pow(10, this.props.market.decimals)).toDecimal()
+        amount: bigRat(this.state.amount).multiply(Math.pow(10, this.props.market.decimals)).valueOf()
     };
 
     this.getFlux().actions.user.sendSub(payload);
