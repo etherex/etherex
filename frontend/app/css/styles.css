@@ -35,6 +35,10 @@
   white-space: nowrap !important;
 }
 
+table .btn-group a:not(.btn) {
+  text-decoration: none;
+}
+
 th.trade-op,
 td.trade-op {
   width: 1.5em;

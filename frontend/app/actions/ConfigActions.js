@@ -23,10 +23,12 @@ var ConfigActions = function() {
     });
   };
 
-  this.updateAddress = function(address) {
+  this.updateAddress = function(payload) {
     this.dispatch(constants.config.UPDATE_ADDRESS, {
-      address: address
+      address: payload.address
     });
+    this.flux.actions.config.updateEthereumClient();
+    this.flux.actions.market.updateMarkets();
   };
 
   this.updateDemoMode = function(value) {

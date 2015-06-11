@@ -5,9 +5,8 @@ var constants = require('../js/constants');
 var NetworkStore = Fluxxor.createStore({
 
   initialize: function () {
+    this.ready = null;
     this.client = null;
-    // this.accounts = null;
-    // this.primaryAccount = null;
     this.peerCount = null;
     this.blockNumber = null;
     this.blocktime = null;
@@ -18,10 +17,10 @@ var NetworkStore = Fluxxor.createStore({
     this.hashrate = null;
     this.blockChainAge = null;
     this.isMonitoringBlocks = false;
-    this.hasCheckedQuorum = false;
 
     this.bindActions(
       constants.network.LOAD_NETWORK, this.handleUpdateNetwork,
+      constants.network.UPDATE_READY, this.handleUpdateReady,
       constants.network.UPDATE_ETHEREUM_STATUS, this.handleUpdateEthereumStatus,
       constants.network.UPDATE_IS_MONITORING_BLOCKS, this.handleUpdateIsMonitoringBlocks,
       constants.network.UPDATE_BLOCK_CHAIN_AGE, this.handleUpdateBlockChainAge
@@ -30,9 +29,8 @@ var NetworkStore = Fluxxor.createStore({
 
   getState: function () {
     return {
+      ready: this.ready,
       client: this.client,
-      // accounts: this.accounts,
-      // primaryAccount: this.primaryAccount,
       peerCount: this.peerCount,
       blockNumber: this.blockNumber,
       blocktime: this.blocktime,
@@ -42,23 +40,14 @@ var NetworkStore = Fluxxor.createStore({
       mining: this.mining,
       hashrate: this.hashrate,
       blockChainAge: this.blockChainAge,
-      isMonitoringBlocks: this.isMonitoringBlocks,
-      hasCheckedQuorum: this.hasCheckedQuorum
+      isMonitoringBlocks: this.isMonitoringBlocks
     };
   },
 
-  // getAccount: function () {
-  //   if (_.isNull(this.primaryAccount)) {
-  //     return null;
-  //   }
-  //
-  //   var account = this.primaryAccount;
-  //   if (_.isUndefined(account)) {
-  //     return null;
-  //   }
-  //
-  //   return account;
-  // },
+  handleUpdateReady: function (payload) {
+    this.ready = payload.ready;
+    // this.emit(constants.CHANGE_EVENT);
+  },
 
   handleUpdateNetwork: function (payload) {
     _.merge(this, payload);

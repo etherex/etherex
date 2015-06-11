@@ -48,7 +48,7 @@ var ConfigPane = React.createClass({
                             <ModalTrigger modal={
                                 <ConfirmModal
                                   message={
-                                    "Are you sure you want change the exchange's address to " +
+                                    "Are you sure you want to change the exchange's address to " +
                                     this.state.address + " ?"}
                                   flux={this.getFlux()}
                                   onSubmit={this.onSubmitForm}

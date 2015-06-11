@@ -9,7 +9,10 @@ var MarketActions = function() {
 
         var user = this.flux.store("UserStore").getState().user;
 
-        _client.loadMarkets(user, function(markets) {
+        _client.loadMarkets(user, function(progress) {
+          var percent = parseFloat(((progress.current / progress.total) * 100).toFixed(2));
+          this.flux.actions.config.updatePercentLoaded(percent);
+        }.bind(this), function(markets) {
             var user = this.flux.store("UserStore").getState().user;
             // Load per market balances
             for (var i = 0; i < markets.length; i++) {
@@ -25,11 +28,8 @@ var MarketActions = function() {
             // Load user sub balances
             this.flux.actions.user.updateBalanceSub();
 
-            // Set user sub watchers
-            _client.setUserWatches(this.flux, user.addresses, markets);
-
-            // Set market watchers
-            _client.setMarketWatches(this.flux);
+            // Set market balances watch
+            _client.setMarketsWatch(this.flux, markets);
 
             // Load trades
             this.flux.actions.trade.loadTrades();
@@ -57,7 +57,7 @@ var MarketActions = function() {
 
         var user = this.flux.store("UserStore").getState().user;
 
-        _client.loadMarkets(user, function(markets) {
+        _client.loadMarkets(user, false, function(markets) {
             this.dispatch(constants.market.UPDATE_MARKET);
             var user = this.flux.store("UserStore").getState().user;
             // Load per market balances

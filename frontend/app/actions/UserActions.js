@@ -13,6 +13,10 @@ var UserActions = function() {
             // Update balance after loading addresses
             this.flux.actions.user.updateBalance();
 
+            // User balance watch
+            var user = this.flux.store("UserStore").getState().user;
+            _client.setAddressWatch(this.flux, user.id);
+
             // Load markets
             if (!this.flux.store("UserStore").getState().user.error)
               this.flux.actions.market.loadMarkets();

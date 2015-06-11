@@ -7,6 +7,7 @@ var UserStore = Fluxxor.createStore({
 
     initialize: function(options) {
         this.user = options.user || { id: 'loading' };
+        this.user.balance = 0;
         // this.createAccount = false;
         this.loading = false;
         this.error = null;

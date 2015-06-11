@@ -29,21 +29,8 @@ var moment = require('moment');
 var EtherExApp = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore")],
 
-  getInitialState: function () {
-    return {
-      status: 'stopped'
-    };
-  },
-
   getStateFromFlux: function() {
     var flux = this.getFlux();
-    var percentLoaded = flux.store('config').getState().percentLoaded;
-
-    // set app status (stopped, loading, running) from network & config state
-    if (parseInt(percentLoaded) === 100) {
-      this.setState({status: 'running'});
-    }
-
     return {
       config: flux.store('config').getState(),
       network: flux.store('network').getState(),
@@ -55,19 +42,6 @@ var EtherExApp = React.createClass({
 
   componentDidMount: function() {
     this.getFlux().actions.config.initializeState();
-    // this.getFlux().actions.network.loadEverything();
-  },
-
-  getLoadingProgress: function() {
-    var loadingProgress = <span />;
-
-    if (this.state.config.percentLoaded) {
-      loadingProgress = (
-        <ProgressBar now={ parseFloat(this.state.config.percentLoaded) } className='loading-progress' />
-      );
-    }
-
-    return loadingProgress;
   },
 
   render: function() {
@@ -118,7 +92,8 @@ var EtherExApp = React.createClass({
                     <LastPrice market={this.state.market.market} />
                   </div>}
               </div>
-              {(!this.state.market.error && !this.state.user.error) &&
+
+              {(!this.state.market.error && !this.state.user.error && !this.state.trades.error) &&
                 <RouteHandler
                   market={this.state.market}
                   trades={this.state.trades}
@@ -135,12 +110,6 @@ var EtherExApp = React.createClass({
         </footer>
 
         <ErrorModal network={ this.state.network } config={ this.state.config } />
-
-        <section id="loading" className="container">
-          <div className="logo">
-            { this.getLoadingProgress() }
-          </div>
-        </section>
       </div>
     );
   }
@@ -162,8 +131,10 @@ var ErrorModal = React.createClass({
   componentWillReceiveProps: function(nextProps) {
     if (nextProps.network.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED ||
         nextProps.config.ethereumClientFailed === true) {
-      this.setState({ isModalOpen: true });
-    } else if (nextProps.network.blockChainAge > 90) {
+      this.setState({
+        isModalOpen: true
+      });
+    } else if (!nextProps.network.ready) {
       var lastBlockAge = nextProps.network.blockChainAge;
       var now = (new Date().getTime() / 1000) - 1;
 
@@ -235,7 +206,8 @@ var ErrorModal = React.createClass({
               <h4>Failed to connect to Ethereum</h4>
               <p>EtherEx requires a local node of the Ethereum client running.</p>
               <p>Visit <a href="https://github.com/ethereum/go-ethereum/wiki">the Ethereum wiki on GitHub</a> for help installing the latest client.</p>
-              <p>If geth is installed:<br /><p><code>geth --rpc --rpccorsdomain { host } --unlock primary</code></p></p>
+              <p>If geth is installed:</p>
+              <p><small><pre>geth --rpc --rpccorsdomain { host } --unlock primary</pre></small></p>
           </div>
           <div className="modal-footer">
               <Button className="pull-right start-demo-mode" onClick={ this.startDemoMode }>Proceed in demo mode</Button>
@@ -251,6 +223,9 @@ var ErrorModal = React.createClass({
           <div className="modal-body clearfix">
               <h4>Ethereum loading</h4>
               <p>The Ethereum block chain is not current and is fetching blocks from peers.</p>
+              { this.props.config.percentLoaded ?
+                <ProgressBar active now={this.props.config.percentLoaded} /> :
+                <ProgressBar active now={100} /> }
               <p>Last block was {this.state.lastBlockAge}.</p>
           </div>
         </Modal>

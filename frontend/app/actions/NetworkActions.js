@@ -24,9 +24,15 @@ var NetworkActions = function() {
       this.dispatch( constants.network.UPDATE_ETHEREUM_STATUS, {
         ethereumStatus: constants.network.ETHEREUM_STATUS_FAILED
       });
+      this.dispatch(constants.network.UPDATE_READY, {
+        ready: false
+      });
+
+      // Put trades in loading state
+      this.dispatch(constants.trade.LOAD_TRADES);
     }
     else if (wasDown && nowUp) {
-      this.flux.actions.network.loadEverything();
+      this.flux.actions.network.loadNetwork();
 
       this.dispatch( constants.network.UPDATE_ETHEREUM_STATUS, {
           ethereumStatus: constants.network.ETHEREUM_STATUS_CONNECTED
@@ -36,6 +42,20 @@ var NetworkActions = function() {
     if (nowUp) {
       var blockChainAge = ethereumClient.blockChainAge();
       this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, { blockChainAge: blockChainAge });
+
+      if (blockChainAge > 90) {
+        this.dispatch(constants.network.UPDATE_READY, {
+          ready: false
+        });
+      }
+      else if (blockChainAge <= 90) {
+        if (!networkState.ready || wasDown) {
+          this.dispatch(constants.network.UPDATE_READY, {
+            ready: true
+          });
+          this.flux.actions.network.loadEverything();
+        }
+      }
     }
 
     // check yo self
@@ -45,6 +65,7 @@ var NetworkActions = function() {
 
   this.loadNetwork = function () {
     var ethereumClient = this.flux.store('config').getEthereumClient();
+
     var networkStats = ethereumClient.getStats();
     var previousBlock = 0;
     if (web3.eth.blockNumber > 3)
@@ -53,11 +74,11 @@ var NetworkActions = function() {
     var diff = currentBlock - previousBlock;
 
     var blockChainAge = ethereumClient.blockChainAge();
-    this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, { blockChainAge: blockChainAge });
+    this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, {
+      blockChainAge: blockChainAge
+    });
 
     this.dispatch(constants.network.LOAD_NETWORK, {
-      // accounts: ethereumClient.loadAddresses(),
-      // primaryAccount: 0,
       client: networkStats.client,
       peerCount: networkStats.peerCount,
       blockNumber: networkStats.blockNumber,
@@ -77,7 +98,8 @@ var NetworkActions = function() {
 
     var networkState = this.flux.store('network').getState();
 
-    if (networkState.blockChainAge < 90)
+    // Triggers loading addresses, which load markets, which load trades
+    if (networkState.ready)
       this.flux.actions.user.loadAddresses();
 
     // start monitoring for updates
@@ -88,22 +110,41 @@ var NetworkActions = function() {
    * Update data that should change over time in the UI.
    */
   this.onNewBlock = function () {
-    var networkState = this.flux.store('network').getState();
-
     this.flux.actions.network.loadNetwork();
 
-    if (networkState.blockChainAge < 90) {
+    // Already using watch in EthereumClient, but not reliable enough yet
+    var networkState = this.flux.store('network').getState();
+    if (networkState.ready) {
       this.flux.actions.user.updateBalance();
-      // this.flux.actions.user.updateBalanceSub();
-      // this.flux.actions.market.updateMarkets();
+      var market = this.flux.store("MarketStore").getState().market;
+      if (market.id)
+        this.flux.actions.user.updateBalanceSub();
     }
   };
 
   this.startMonitoring = function () {
     var networkState = this.flux.store('network').getState();
+
     if (!networkState.isMonitoringBlocks) {
       var ethereumClient = this.flux.store('config').getEthereumClient();
       ethereumClient.startMonitoring(this.flux.actions.network.onNewBlock);
+
+      this.dispatch(constants.network.UPDATE_IS_MONITORING_BLOCKS, {
+        isMonitoringBlocks: true
+      });
+    }
+  };
+
+  this.stopMonitoring = function () {
+    var networkState = this.flux.store('network').getState();
+
+    if (networkState.isMonitoringBlocks) {
+      var ethereumClient = this.flux.store('config').getEthereumClient();
+      ethereumClient.stopMonitoring();
+
+      this.dispatch(constants.network.UPDATE_IS_MONITORING_BLOCKS, {
+        isMonitoringBlocks: false
+      });
     }
   };
 };

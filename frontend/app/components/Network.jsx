@@ -43,7 +43,7 @@ var Network = React.createClass({
             PEERS<span className="pull-right">{this.state.network.peerCount || '-'}</span>
           </p>
           <p className="blocks">
-            BLOCKS<span className="pull-right">{this.state.network.blockNumber || '-'}</span>
+            BLOCKS<span className="pull-right">{utils.numeral(this.state.network.blockNumber, 0) || '-'}</span>
           </p>
           <p className="miner">
             MINER<span className="pull-right">{this.state.network.mining ? utils.format(this.state.network.hashrate) + " H/s" : 'off'}</span>

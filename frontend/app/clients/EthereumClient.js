@@ -29,6 +29,15 @@ var EthereumClient = function(params) {
 
     this.filters = {};
 
+    this.isAvailable = function() {
+      // attempt an RPC call that should fail if the daemon is unreachable.
+      try {
+        return web3.net.listening;
+      } catch(err) {
+        return false;
+      }
+    };
+
     this.startMonitoring = function(callback) {
       this.filters.latest = web3.eth.filter('latest');
       this.filters.latest.watch(function (err, log) {
@@ -42,13 +51,25 @@ var EthereumClient = function(params) {
       });
     };
 
-    this.isAvailable = function() {
-      // attempt an RPC call that should fail if the daemon is unreachable.
-      try {
-        return web3.net.listening;
-      } catch(err) {
-        return false;
-      }
+    this.setAddressWatch = function(flux, address) {
+      // ETH balance
+      this.filters.address = web3.eth.filter({
+        address: address
+      }).watch(flux.actions.user.updateBalance);
+    };
+
+    this.setMarketsWatch = function(flux, markets) {
+      // Watch exchange's address and update markets
+      this.filters.exchange = web3.eth.filter({
+        address: params.address
+      }).watch(flux.actions.market.updateMarkets);
+
+      // Watch market's contracts and update sub balances
+      var market_addresses = _.pluck(markets, 'address');
+      for (var i = 0; i < market_addresses.length; i++)
+        this.filters.markets = web3.eth.filter({
+          address: market_addresses[i]
+        }).watch(flux.actions.user.updateBalanceSub);
     };
 
     this.blockChainAge = function() {
@@ -92,7 +113,7 @@ var EthereumClient = function(params) {
         });
     };
 
-    this.loadMarkets = function(user, success, failure) {
+    this.loadMarkets = function(user, onProgress, success, failure) {
         try {
             var last = _.parseInt(contract.get_last_market_id.call().toString());
 
@@ -111,6 +132,10 @@ var EthereumClient = function(params) {
             if (!favorites || typeof(favorites) != 'object')
                 favorites = [];
             // console.log('FAVORITES', favorites);
+
+            var progress = {current: 0, total: last};
+            if (onProgress)
+              onProgress(progress);
 
             for (var i = 1; i < last + 1; i++) {
                 try {
@@ -156,6 +181,11 @@ var EthereumClient = function(params) {
                         balance: _.parseInt(balance),
                         favorite: favorite
                     });
+
+                    if (onProgress) {
+                      progress.current += 1;
+                      onProgress(progress);
+                    }
                 }
                 catch(e) {
                     failure("Unable to load market " + i + ": " + String(e));
@@ -209,7 +239,7 @@ var EthereumClient = function(params) {
 
                         var status = 'mined';
 
-                        var tradeExists = web3.eth.getStorageAt(fixtures.addresses.etherex, web3.fromDecimal(ref), 'latest');
+                        var tradeExists = web3.eth.getStorageAt(params.address, web3.fromDecimal(ref), 'latest');
 
                         if (tradeExists == "0x0")
                             status = 'pending';
@@ -329,7 +359,7 @@ var EthereumClient = function(params) {
                   block: txlogs[i].blockNumber,
                   inout: 'out',
                   from: web3.fromDecimal(txlogs[i].args.sender),
-                  to: fixtures.addresses.etherex,
+                  to: params.address,
                   amount: txlogs[i].args.amount.valueOf(),
                   market: _.parseInt(txlogs[i].args.market.valueOf()),
                   price: 'N/A',
@@ -353,7 +383,7 @@ var EthereumClient = function(params) {
                   number: txlogs[i].number,
                   block: txlogs[i].blockNumber,
                   inout: 'in',
-                  from: fixtures.addresses.etherex,
+                  from: params.address,
                   to: web3.fromDecimal(txlogs[i].args.address),
                   amount: txlogs[i].args.amount.valueOf(),
                   market: _.parseInt(txlogs[i].args.market.valueOf()),
@@ -383,7 +413,7 @@ var EthereumClient = function(params) {
                   block: txlogs[i].blockNumber,
                   inout: 'in',
                   from: web3.fromDecimal(txlogs[i].args.sender),
-                  to: fixtures.addresses.etherex,
+                  to: params.address,
                   amount: amount,
                   market: _.parseInt(txlogs[i].args.market.valueOf()),
                   price: price,
@@ -414,7 +444,7 @@ var EthereumClient = function(params) {
                   // inout: (_.parseInt(web3.toDecimal(txlogs[i].args.type)) == 1 ? 'in' : 'out'),
                   inout: 'out',
                   from: web3.fromDecimal(txlogs[i].args.sender),
-                  to: fixtures.addresses.etherex,
+                  to: params.address,
                   amount: amount,
                   market: _.parseInt(txlogs[i].args.market.valueOf()),
                   price: price,
@@ -445,7 +475,7 @@ var EthereumClient = function(params) {
                   // inout: (_.parseInt(web3.toDecimal(txlogs[i].args.type)) == 1 ? 'in' : 'out'),
                   inout: 'in',
                   from: web3.fromDecimal(txlogs[i].args.sender),
-                  to: fixtures.addresses.etherex,
+                  to: params.address,
                   amount: amount,
                   market: _.parseInt(txlogs[i].args.market.valueOf()),
                   price: price,
@@ -580,7 +610,7 @@ var EthereumClient = function(params) {
                 to: market.address,
                 gas: "250000"
             };
-            var result = subcontract.transfer.sendTransaction(fixtures.addresses.etherex, amount, options);
+            var result = subcontract.transfer.sendTransaction(params.address, amount, options);
 
             success(result);
         }
@@ -609,7 +639,7 @@ var EthereumClient = function(params) {
         try {
             var options = {
                 from: user.id,
-                to: fixtures.addresses.etherex,
+                to: params.address,
                 gas: "250000"
             };
             var result = contract.add_market.sendTransaction(
@@ -630,22 +660,6 @@ var EthereumClient = function(params) {
     };
 
 
-    // Watches
-
-    this.setUserWatches = function(flux, addresses, markets) {
-        // ETH balance
-        web3.eth.filter({address: addresses}).watch(flux.actions.user.updateBalance);
-
-        // Sub balances
-        var market_addresses = _.pluck(markets, 'address');
-        web3.eth.filter({address: market_addresses}).watch(flux.actions.user.updateBalanceSub);
-    };
-
-    this.setMarketWatches = function(flux) {
-        web3.eth.filter({address: fixtures.addresses.etherex}).watch(flux.actions.market.updateMarkets);
-    };
-
-
     // Trade actions
 
     this.addTrade = function(user, trade, market, success, failure) {
@@ -655,7 +669,7 @@ var EthereumClient = function(params) {
             var options = {
                 from: user.id,
                 value: trade.type == 1 ? amounts.total : "0",
-                to: fixtures.addresses.etherex,
+                to: params.address,
                 gas: "500000"
             };
 
@@ -701,7 +715,7 @@ var EthereumClient = function(params) {
             var result = contract.trade.sendTransaction(total_amounts, ids, {
                 from: user.id,
                 gas: String(gas),
-                to: fixtures.addresses.etherex,
+                to: params.address,
                 value: total > 0 ? total.toString() : "0"
             });
 
@@ -719,7 +733,7 @@ var EthereumClient = function(params) {
             var result = contract.trade.sendTransaction(amounts.amount, [trade.id], {
                 from: user.id,
                 gas: "100000",
-                to: fixtures.addresses.etherex,
+                to: params.address,
                 value: trade.type == "sells" ? amounts.total : "0"
             });
 
@@ -735,7 +749,7 @@ var EthereumClient = function(params) {
             var result = contract.cancel.sendTransaction(trade.id, {
                 from: user.id,
                 value: "0",
-                to: fixtures.addresses.etherex,
+                to: params.address,
                 gas: "100000"
             });
 
