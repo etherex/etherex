@@ -2,7 +2,7 @@
 
 var React = require("react");
 
-var Placeholder = React.createClass({
+var Help = React.createClass({
   render: function() {
     return (
       <div className="container-fluid">
@@ -17,4 +17,4 @@ var Placeholder = React.createClass({
   }
 });
 
-module.exports = Placeholder;
+module.exports = Help;

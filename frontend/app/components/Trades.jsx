@@ -6,6 +6,7 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 
 var TradeForm = require("./TradeForm");
 var TradeList = require("./TradeList");
+var RangeSelect = require("./RangeSelect");
 var GraphPrice = require('./GraphPriceTechan');
 
 var Trades = React.createClass({
@@ -26,7 +27,10 @@ var Trades = React.createClass({
     return (
       <div>
         {!this.props.market.error && this.state.showGraph &&
-          <GraphPrice market={this.props.market} height={320} full={false} />}
+          <div>
+            <RangeSelect block={this.getFlux().store("network").blockNumber} />
+            <GraphPrice market={this.props.market} height={320} full={false} />
+          </div>}
         {!this.props.market.error &&
           <TradeForm market={this.props.market} trades={this.props.trades} user={this.props.user} toggleGraph={this.onToggleGraph} />}
         {!this.props.market.error &&

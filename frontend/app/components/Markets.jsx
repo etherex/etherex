@@ -4,6 +4,7 @@ var React = require("react");
 var Fluxxor = require("fluxxor");
 var FluxMixin = Fluxxor.FluxMixin(React);
 
+var RangeSelect = require('./RangeSelect');
 var GraphPrice = require('./GraphPriceTechan');
 var MarketList = require("./MarketList");
 
@@ -35,6 +36,7 @@ var Markets = React.createClass({
           <div className="row">
             {!this.props.market.error && (
               <div>
+                <RangeSelect block={this.getFlux().store("network").blockNumber} />
                 <GraphPrice market={this.props.market} height={500} full={true} />
                 <MarketList category={this.state.category} market={this.props.market} trades={this.props.trades} user={this.props.user} />
               </div>

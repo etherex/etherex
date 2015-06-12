@@ -10,6 +10,8 @@ var ConfigStore = Fluxxor.createStore({
     this.percentLoaded = null;
     this.ethereumClient = null;
     this.demoMode = false;
+    this.range = 75; // max 300 blocks / ~ 1 hour
+    this.rangeEnd = false;
 
     this.bindActions(
       constants.config.UPDATE_ADDRESS, this.handleUpdateAddress,
@@ -17,7 +19,9 @@ var ConfigStore = Fluxxor.createStore({
       constants.config.UPDATE_DEMO_MODE, this.handleDemoMode,
       constants.config.UPDATE_ETHEREUM_CLIENT_SUCCESS, this.handleUpdateEthereumClientSuccess,
       constants.config.UPDATE_ETHEREUM_CLIENT_FAILED, this.handleUpdateEthereumClientFailed,
-      constants.config.UPDATE_PERCENT_LOADED_SUCCESS, this.handleUpdatePercentLoadedSuccess
+      constants.config.UPDATE_PERCENT_LOADED_SUCCESS, this.handleUpdatePercentLoadedSuccess,
+      constants.config.UPDATE_RANGE, this.onUpdateRange,
+      constants.config.UPDATE_RANGE_END, this.onUpdateRangeEnd
     );
   },
 
@@ -28,7 +32,9 @@ var ConfigStore = Fluxxor.createStore({
       debug: this.debug,
       percentLoaded: this.percentLoaded,
       ethereumClient: this.ethereumClient,
-      demoMode: this.demoMode
+      demoMode: this.demoMode,
+      range: this.range,
+      rangeEnd: this.rangeEnd
     };
   },
 
@@ -66,6 +72,16 @@ var ConfigStore = Fluxxor.createStore({
   handleDemoMode: function (payload) {
     this.demoMode = payload.enable;
     // this.emit(constants.CHANGE_EVENT);
+  },
+
+  onUpdateRange: function(payload) {
+    this.range = payload.range;
+    this.emit(constants.CHANGE_EVENT);
+  },
+
+  onUpdateRangeEnd: function(payload) {
+    this.rangeEnd = payload.rangeEnd;
+    this.emit(constants.CHANGE_EVENT);
   }
 });
 

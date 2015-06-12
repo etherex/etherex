@@ -8,7 +8,7 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 var AlertDismissable = require('./AlertDismissable');
 
 var ProgressBar = require('react-bootstrap/lib/ProgressBar');
-
+var RangeSelect = require('./RangeSelect');
 var TxsTable = require('./TxsTable');
 
 var TxsList = React.createClass({
@@ -22,9 +22,10 @@ var TxsList = React.createClass({
                         <h3>{this.props.title} {this.props.market.loading && <span>loading...</span>}</h3>
                     </div>
                     <div className="col-md-9 col-xs-6">
-                        <div style={{marginTop: 28}}>
-                            {this.props.market.loading &&
-                                <ProgressBar active now={this.props.market.percent} className="" />}
+                        <div>
+                          {this.props.market.loading ?
+                            <ProgressBar active now={this.props.market.percent} style={{marginTop: 28}} /> :
+                            <RangeSelect block={this.getFlux().store("network").blockNumber} />}
                         </div>
                     </div>
                 </div>

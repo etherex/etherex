@@ -8,7 +8,9 @@ var ConfigActions = function() {
 
     var clientParams = {
       address: configState.address,
-      host: configState.host
+      host: configState.host,
+      range: configState.range,
+      rangeEnd: configState.rangeEnd
     };
     var ethereumClient = new EthereumClient(clientParams);
 
@@ -35,6 +37,22 @@ var ConfigActions = function() {
     this.dispatch(constants.config.UPDATE_DEMO_MODE, {
       enable: value
     });
+  };
+
+  this.updateRange = function(range) {
+    this.dispatch(constants.config.UPDATE_RANGE, {
+      range: range
+    });
+    this.flux.actions.config.updateEthereumClient();
+    this.flux.actions.market.updateMarkets();
+  };
+
+  this.updateRangeEnd = function(rangeEnd) {
+    this.dispatch(constants.config.UPDATE_RANGE_END, {
+      rangeEnd: rangeEnd
+    });
+    this.flux.actions.config.updateEthereumClient();
+    this.flux.actions.market.updateMarkets();
   };
 
   this.initializeState = function() {
