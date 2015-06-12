@@ -29,6 +29,7 @@ var UserDetails = require("./components/UserDetails");
 // var TradeDetails = require("./components/TradeDetails");
 var Wallet = require("./components/Wallet");
 var Tools = require("./components/Tools");
+var Help = require("./components/Help");
 
 // Load bootstrap
 require("./css/bootstrap-darkly.css");
@@ -73,7 +74,7 @@ var routes = (
       <Route name="currencies" path="/markets/currencies" handler={Markets} flux={flux} title="Currencies" />
       <Route name="wallet" path="/wallet" handler={Wallet} flux={flux} title="Wallet" />
       <Route name="tools" path="/tools" handler={Tools} flux={flux} title="Tools" />
-      <Route name="help" path="/help" handler={Placeholder} flux={flux} title="Help" />
+      <Route name="help" path="/help" handler={Help} flux={flux} title="Help" />
       <Route name="userDetails" path="/user" handler={UserDetails} flux={flux} title="User details" />
       <NotFoundRoute name="notfound" handler={Placeholder} title="User or Trade ID not found" flux={flux} />
     </Route>
