@@ -30,7 +30,7 @@ var Trades = React.createClass({
         {!this.props.market.error &&
           <TradeForm market={this.props.market} trades={this.props.trades} user={this.props.user} toggleGraph={this.onToggleGraph} />}
         {!this.props.market.error &&
-          <TradeList market={this.props.market} trades={this.props.trades} user={this.props.user} toggleGraph={this.onToggleGraph} />}
+          <TradeList flux={this.getFlux()} market={this.props.market} trades={this.props.trades} user={this.props.user} toggleGraph={this.onToggleGraph} />}
       </div>
     );
   }

@@ -5,8 +5,6 @@ var React = require("react");
 var Button = require('react-bootstrap/lib/Button');
 var Modal = require('react-bootstrap/lib/Modal');
 
-// XXX should be FluxMixin, but then flux object doesn't get passed along somehow
-
 var ConfirmModal = React.createClass({
 
     render: function() {
@@ -21,7 +19,7 @@ var ConfirmModal = React.createClass({
                         {(this.props.note) ?
                             this.props.note : ""}
                         {(TradeTable) &&
-                            <TradeTable tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={true} />}
+                            <TradeTable flux={this.props.flux} tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={true} />}
                     </div>
                     <div className="modal-footer">
                         <Button onClick={this.onRequestHide}>No</Button>

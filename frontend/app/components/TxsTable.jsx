@@ -78,7 +78,7 @@ var TxRow = React.createClass({
 
     // handleClick: function(e) {
     //     if (this.props.market)
-    //         this.getFlux().actions.market.switchMarket(this.props.market);
+    //         this.props.flux.actions.market.switchMarket(this.props.market);
     // }
 });
 

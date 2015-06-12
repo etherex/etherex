@@ -281,34 +281,6 @@ var TradeStore = Fluxxor.createStore({
                 }
             }
 
-        // // // DEBUG Partial filling adds a new trade for remaining available
-        // // console.log("Available: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
-        // // console.log("From balance of " + this.props.user.user.balance);
-        // if (payload.price > 0) {
-        //     if (amountLeft * payload.price >= payload.market.minTotal &&
-        //         filling.length > 0 &&
-        //         available > 0) {
-        //         console.log("Would also add new trade for " + amountLeft + " " + payload.market.name +
-        //                     " for " + utils.formatBalance(bigRat(amountLeft)
-        //                             .multiply(payload.price)
-        //                             .multiply(fixtures.ether)));
-        //     }
-        //     else if (amountLeft * payload.price >= payload.market.minTotal &&
-        //              filling.length > 0 &&
-        //              amountLeft > 0 &&
-        //              available > 0) {
-        //         console.log("Not enough left for a new trade, needs " +
-        //             utils.formatBalance(bigRat(payload.market.minTotal).multiply(fixtures.ether)) +
-        //             ", total left is " + utils.formatBalance(bigRat(amountLeft).multiply(payload.price).multiply(fixtures.ether)) +
-        //             ", available left would be " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
-        //     }
-        //     else if (filling.length == 0) {
-        //         console.log("Would add new trade for " + payload.amount + " " + payload.market.name +
-        //                     " for " + utils.formatBalance(bigRat(available).multiply(fixtures.ether)));
-        //     }
-        // }
-        // console.log("Filling " + filling.length + " trade(s): " + _.pluck(filling, 'id').join(', '));
-
         // Set state for filling trades for fillTrades
         this.type = payload.type;
         this.price = payload.price;

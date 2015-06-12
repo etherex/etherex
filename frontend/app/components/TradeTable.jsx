@@ -1,9 +1,6 @@
 var _ = require('lodash');
 var React = require("react");
 
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
-
 var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
 var ConfirmModal = require('./ConfirmModal');
 
@@ -13,11 +10,7 @@ var Glyphicon = require("react-bootstrap/lib/Glyphicon");
 
 var utils = require("../js/utils");
 
-// var Link = Router.Link;
-// var UserLink = require("./UserLink");
-
 var TradeRow = React.createClass({
-    mixins: [FluxMixin],
 
     getInitialState: function() {
         return {
@@ -65,7 +58,6 @@ var TradeRow = React.createClass({
                                     type="cancel"
                                     message="Are you sure you want to cancel this trade?"
                                     trade={this.props.trade}
-                                    flux={this.getFlux()}
                                     onSubmit={this.handleCancelTrade}
                                 />
                             }>
@@ -81,7 +73,6 @@ var TradeRow = React.createClass({
                                         " at " + this.props.trade.price + " " + this.props.trade.market.name + "/ETH" +
                                         " for " + (this.props.trade.amount * this.props.trade.price) + " ETH"
                                     }
-                                    flux={this.getFlux()}
                                     onSubmit={this.handleFillTrade}
                                 />
                             }>
@@ -95,12 +86,12 @@ var TradeRow = React.createClass({
 
     handleFillTrade: function(e) {
         e.preventDefault();
-        this.getFlux().actions.trade.fillTrade(this.props.trade);
+        this.props.flux.actions.trade.fillTrade(this.props.trade);
     },
 
     handleCancelTrade: function(e) {
         e.preventDefault();
-        this.getFlux().actions.trade.cancelTrade(this.props.trade);
+        this.props.flux.actions.trade.cancelTrade(this.props.trade);
     },
 
     handleHover: function(e) {
@@ -178,13 +169,13 @@ var TradeRow = React.createClass({
             user: this.props.user
         };
 
-        this.getFlux().actions.trade.highlightFilling(payload);
+        this.props.flux.actions.trade.highlightFilling(payload);
     },
 
     handleClick: function(e) {
         e.preventDefault();
         if (this.state.payload)
-            this.getFlux().actions.trade.clickFill(this.state.payload);
+            this.props.flux.actions.trade.clickFill(this.state.payload);
     }
 });
 
@@ -192,9 +183,10 @@ var TradeTable = React.createClass({
     render: function() {
         var tradeListNodes = this.props.tradeList.map(function (trade, i) {
             return (
-                <TradeRow key={trade.id} count={i} trade={trade} trades={this.props.trades} tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={this.props.review} />
+                <TradeRow flux={this.props.flux} key={trade.id} count={i} trade={trade} trades={this.props.trades} tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={this.props.review} />
             );
         }.bind(this));
+
         return (
             <div>
                 <h4>{this.props.title}</h4>

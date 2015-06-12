@@ -2,42 +2,31 @@
 
 var React = require("react");
 
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
-
 var AlertDismissable = require('./AlertDismissable');
-
 var ProgressBar = require('react-bootstrap/lib/ProgressBar');
-
 var TradeTable = require('./TradeTable');
 
 var TradeBuys = React.createClass({
-    mixins: [FluxMixin],
-
     render: function() {
         return (
             <div className="col-md-6">
-                <TradeTable title="Bids" trades={this.props.trades} tradeList={this.props.trades.tradeBuys} market={this.props.market} user={this.props.user.user} />
+                <TradeTable flux={this.props.flux} title="Bids" trades={this.props.trades} tradeList={this.props.trades.tradeBuys} market={this.props.market} user={this.props.user.user} />
             </div>
         );
     }
 });
 
 var TradeSells = React.createClass({
-    mixins: [FluxMixin],
-
     render: function() {
         return (
             <div className="col-md-6">
-                <TradeTable title="Asks" trades={this.props.trades} tradeList={this.props.trades.tradeSells} market={this.props.market} user={this.props.user.user} />
+                <TradeTable flux={this.props.flux} title="Asks" trades={this.props.trades} tradeList={this.props.trades.tradeSells} market={this.props.market} user={this.props.user.user} />
             </div>
         );
     }
 });
 
 var TradeList = React.createClass({
-    mixins: [FluxMixin],
-
     render: function() {
         return (
             <div>
@@ -57,19 +46,19 @@ var TradeList = React.createClass({
                 <div className="visible-xs visible-sm">
                     {(this.props.trades.type == 1) ?
                     <div>
-                        <TradeSells trades={this.props.trades} market={this.props.market} user={this.props.user} />
-                        <TradeBuys trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                        <TradeSells flux={this.props.flux} trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                        <TradeBuys flux={this.props.flux} trades={this.props.trades} market={this.props.market} user={this.props.user} />
                     </div> :
                     <div>
-                        <TradeBuys trades={this.props.trades} market={this.props.market} user={this.props.user} />
-                        <TradeSells trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                        <TradeBuys flux={this.props.flux} trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                        <TradeSells flux={this.props.flux} trades={this.props.trades} market={this.props.market} user={this.props.user} />
                     </div>
                     }
                 </div>
                 <div className="hidden-xs hidden-sm">
                     <div>
-                        <TradeSells trades={this.props.trades} market={this.props.market} user={this.props.user} />
-                        <TradeBuys trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                        <TradeSells flux={this.props.flux} trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                        <TradeBuys flux={this.props.flux} trades={this.props.trades} market={this.props.market} user={this.props.user} />
                     </div>
                 </div>
             </div>

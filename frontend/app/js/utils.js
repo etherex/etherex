@@ -55,11 +55,11 @@ var utils = {
     if (typeof _p === 'undefined')
       _p = 4;
     if (b.compare(units.Uether.multiply(1000)) > 0)
-      return this.numeral(b.divide(units.Uether), _p) + " " + Object.keys(units)[0];
+      return this.numeral(b.divide(units.Uether).valueOf(), _p) + " " + Object.keys(units)[0];
     for (var i in units)
       if (units[i].valueOf() != 1 && b.compare(units[i]) >= 0)
-        return this.numeral(b.divide(units[i].divide(1000)).divide(1000), _p) + " " + i;
-    return this.numeral(_b, 0) + " wei";
+        return this.numeral(b.divide(units[i].divide(1000)).divide(1000).valueOf(), _p) + " " + i;
+    return this.numeral(_b.valueOf(), 0) + " wei";
   },
 
   randomId: function() {
