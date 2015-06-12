@@ -46,18 +46,6 @@ var Markets = React.createClass({
           <div className="col-md-6">
             <div className="panel panel-default">
               <div className="panel-heading">
-                <h3 className="panel-title">Withdraw {this.props.market.market.name}</h3>
-              </div>
-              <div className="panel-body">
-                <div className="container-fluid">
-                  <SubWithdraw market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="panel panel-default">
-              <div className="panel-heading">
                 <h3 className="panel-title">Deposit {this.props.market.market.name}</h3>
               </div>
               <div className="panel-body">
@@ -67,9 +55,21 @@ var Markets = React.createClass({
               </div>
             </div>
           </div>
+          <div className="col-md-6">
+            <div className="panel panel-default">
+              <div className="panel-heading">
+                <h3 className="panel-title">Withdraw {this.props.market.market.name}</h3>
+              </div>
+              <div className="panel-body">
+                <div className="container-fluid">
+                  <SubWithdraw market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="container-fluid">
-          <div className="col-md-6 col-md-offset-3">
+          <div className="col-md-6">
             <div className="panel panel-default">
               <div className="panel-heading">
                 <h3 className="panel-title">Send {this.props.market.market.name}</h3>
@@ -81,12 +81,10 @@ var Markets = React.createClass({
               </div>
             </div>
           </div>
-        </div>
-        <div className="container-fluid">
-          <div className="col-md-6 col-md-offset-3">
+          <div className="col-md-6">
             <div className="panel panel-default">
               <div className="panel-heading">
-                <h3 className="panel-title">Send ETH</h3>
+                <h3 className="panel-title">Send Ether</h3>
               </div>
               <div className="panel-body">
                 <div className="container-fluid">

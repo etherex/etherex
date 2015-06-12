@@ -295,15 +295,19 @@ var EthereumClient = function(params) {
 
     this.loadPrices = function(market, success, failure) {
         // console.log("Loading prices...");
-        var lastBlock = web3.eth.blockNumber;
-        var fromBlock = lastBlock - (lastBlock > params.range ? params.range : 0);
+        var toBlock = web3.eth.blockNumber;
+        if (params.rangeEnd)
+          toBlock = params.rangeEnd;
+        var fromBlock = toBlock - (toBlock >= params.range ? params.range : 0);
+        if (fromBlock == toBlock)
+          fromBlock = 0;
 
         try {
             var prices_filter = contract.log_price({
               market: market.id
             }, {
               fromBlock: fromBlock,
-              toBlock: params.rangeEnd ? params.rangeEnd : 'latest'
+              toBlock: toBlock
             });
             var pricelogs = prices_filter.get();
             // console.log("PRICE CHANGES: ", pricelogs);
@@ -333,8 +337,12 @@ var EthereumClient = function(params) {
 
     this.loadTransactions = function(user, market, success, failure) {
         // console.log("Loading transactions...");
-        var lastBlock = web3.eth.blockNumber;
-        var fromBlock = lastBlock - (lastBlock > params.range ? params.range : 0);
+        var toBlock = web3.eth.blockNumber;
+        if (params.rangeEnd)
+          toBlock = params.rangeEnd;
+        var fromBlock = toBlock - (toBlock > params.range ? params.range : 0);
+        if (fromBlock == toBlock)
+          fromBlock = 0;
 
         try {
             var txs = [];
@@ -347,7 +355,7 @@ var EthereumClient = function(params) {
               sender: user.id
             }, {
               fromBlock: fromBlock,
-              toBlock: params.rangeEnd ? params.rangeEnd : 'latest'
+              toBlock: toBlock
             });
             var txlogs = tx_filter.get();
             // console.log("TRANSACTIONS: ", txlogs);
@@ -372,7 +380,7 @@ var EthereumClient = function(params) {
               address: user.id
             }, {
               fromBlock: fromBlock,
-              toBlock: params.rangeEnd ? params.rangeEnd : 'latest'
+              toBlock: toBlock
             });
             txlogs = tx_filter.get();
             // console.log("TRANSACTIONS: ", txlogs);
@@ -397,7 +405,7 @@ var EthereumClient = function(params) {
               sender: user.id
             }, {
               fromBlock: fromBlock,
-              toBlock: params.rangeEnd ? params.rangeEnd : 'latest'
+              toBlock: toBlock
             });
             txlogs = tx_filter.get();
             // console.log("TRANSACTIONS: ", txlogs);
@@ -427,7 +435,7 @@ var EthereumClient = function(params) {
               sender: user.id
             }, {
               fromBlock: fromBlock,
-              toBlock: params.rangeEnd ? params.rangeEnd : 'latest'
+              toBlock: toBlock
             });
             txlogs = tx_filter.get();
             // console.log("TRANSACTIONS: ", txlogs);
@@ -458,7 +466,7 @@ var EthereumClient = function(params) {
               sender: user.id
             }, {
               fromBlock: fromBlock,
-              toBlock: params.rangeEnd ? params.rangeEnd : 'latest'
+              toBlock: toBlock
             });
             txlogs = tx_filter.get();
             // console.log("TRANSACTIONS: ", txlogs);

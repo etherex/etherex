@@ -451,12 +451,12 @@ var TradeForm = React.createClass({
             <div className="visible-md visible-lg">
               <div className="col-md-6">
                 <div className="container-fluid">
-                  <h4 className="text-center">Buy</h4>
+                  <h4 className="text-center" style={{marginTop: 0}}>Buy</h4>
                   <SplitTradeForm ref="buyform" mobile={false} type={1} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
               <div className="col-md-6">
-                <h4 className="text-center">Sell</h4>
+                <h4 className="text-center" style={{marginTop: 0}}>Sell</h4>
                 <div className="container-fluid">
                   <SplitTradeForm ref="sellform" mobile={false} type={2} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
