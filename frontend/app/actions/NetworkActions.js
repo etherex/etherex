@@ -32,16 +32,17 @@ var NetworkActions = function() {
       this.dispatch(constants.trade.LOAD_TRADES);
     }
     else if (wasDown && nowUp) {
-      this.flux.actions.network.loadNetwork();
-
       this.dispatch( constants.network.UPDATE_ETHEREUM_STATUS, {
-          ethereumStatus: constants.network.ETHEREUM_STATUS_CONNECTED
+        ethereumStatus: constants.network.ETHEREUM_STATUS_CONNECTED
       });
+      this.flux.actions.network.startMonitoring();
     }
 
     if (nowUp) {
       var blockChainAge = ethereumClient.blockChainAge();
       this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, { blockChainAge: blockChainAge });
+
+      this.flux.actions.network.loadNetwork();
 
       if (blockChainAge > 90) {
         this.dispatch(constants.network.UPDATE_READY, {
@@ -50,6 +51,9 @@ var NetworkActions = function() {
       }
       else if (blockChainAge <= 90) {
         if (!networkState.ready || wasDown) {
+          // Also put trades in loading state if network was not ready
+          this.dispatch(constants.trade.LOAD_TRADES);
+
           this.dispatch(constants.network.UPDATE_READY, {
             ready: true
           });
@@ -96,11 +100,8 @@ var NetworkActions = function() {
     this.flux.actions.config.updateEthereumClient();
     this.flux.actions.network.loadNetwork();
 
-    var networkState = this.flux.store('network').getState();
-
-    // Triggers loading addresses, which load markets, which load trades
-    if (networkState.ready)
-      this.flux.actions.user.loadAddresses();
+    // Trigger loading addresses, which load markets, which load trades
+    this.flux.actions.user.loadAddresses();
 
     // start monitoring for updates
     this.flux.actions.network.startMonitoring();
@@ -114,8 +115,11 @@ var NetworkActions = function() {
 
     // Already using watch in EthereumClient, but not reliable enough yet
     var networkState = this.flux.store('network').getState();
+
     if (networkState.ready) {
-      this.flux.actions.user.updateBalance();
+      if (this.flux.store("UserStore").getState().user.id)
+        this.flux.actions.user.updateBalance();
+
       var market = this.flux.store("MarketStore").getState().market;
       if (market.id)
         this.flux.actions.user.updateBalanceSub();
