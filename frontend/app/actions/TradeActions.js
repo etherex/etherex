@@ -160,7 +160,7 @@ var TradeActions = function() {
             // console.log("GASPRICE", gasprice);
             var total = bigRat(gasprice.toString()).multiply(result);
             var estimate = utils.formatBalance(total) + " (" + utils.format(result, 0) + " gas)";
-            this.dispatch(constants.trade.ESTIMATE_GAS_FILL, {estimate: total});
+            this.dispatch(constants.trade.ESTIMATE_GAS_FILL, {estimate: estimate});
         }.bind(this), function(error) {
             // console.log("ERROR", error);
             this.dispatch(constants.trade.ESTIMATE_GAS_FILL, {estimate: String(error)});
