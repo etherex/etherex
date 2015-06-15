@@ -27,6 +27,7 @@ var NetworkActions = function() {
       this.dispatch(constants.network.UPDATE_READY, {
         ready: false
       });
+      // this.flux.actions.network.reset(); // need stopPolling() instead
 
       // Put trades in loading state
       this.dispatch(constants.trade.LOAD_TRADES);
@@ -45,9 +46,13 @@ var NetworkActions = function() {
       this.flux.actions.network.loadNetwork();
 
       if (blockChainAge > 90) {
+        // Also put trades in loading state if network was not ready
+        this.dispatch(constants.trade.LOAD_TRADES);
+
         this.dispatch(constants.network.UPDATE_READY, {
           ready: false
         });
+        this.flux.actions.user.loadAddressesOnly();
       }
       else if (blockChainAge <= 90) {
         if (!networkState.ready || wasDown) {
@@ -139,17 +144,23 @@ var NetworkActions = function() {
     }
   };
 
-  this.stopMonitoring = function () {
+  this.stopMonitoring = function (error) {
     var networkState = this.flux.store('network').getState();
 
     if (networkState.isMonitoringBlocks) {
       var ethereumClient = this.flux.store('config').getEthereumClient();
-      ethereumClient.stopMonitoring();
+      ethereumClient.stopMonitoring(error);
 
       this.dispatch(constants.network.UPDATE_IS_MONITORING_BLOCKS, {
         isMonitoringBlocks: false
       });
     }
+  };
+
+  this.reset = function() {
+    var ethereumClient = this.flux.store('config').getEthereumClient();
+    ethereumClient.reset();
+    this.flux.actions.network.startMonitoring();
   };
 };
 

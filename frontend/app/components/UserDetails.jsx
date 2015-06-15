@@ -24,7 +24,7 @@ var UserDetails = React.createClass({
                 <div>
                     <UserSummaryPane user={this.props.user} trades={own} />
                     {(own.tradeBuys && own.tradeSells) &&
-                        <TradeList market={this.props.market} trades={own} user={this.props.user} />}
+                        <TradeList flux={this.getFlux()} market={this.props.market} trades={own} user={this.props.user} />}
                 </div>
             );
         } else {

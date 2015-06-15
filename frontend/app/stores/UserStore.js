@@ -1,3 +1,4 @@
+var _ = require("lodash");
 var Fluxxor = require("fluxxor");
 
 var constants = require("../js/constants");
@@ -8,6 +9,7 @@ var UserStore = Fluxxor.createStore({
     initialize: function(options) {
         this.user = options.user || { id: 'loading' };
         this.user.balance = 0;
+        this.defaultAccount = null;
         // this.createAccount = false;
         this.loading = false;
         this.error = null;
@@ -19,6 +21,7 @@ var UserStore = Fluxxor.createStore({
             constants.user.LOAD_ADDRESSES, this.onLoadAddresses,
             constants.user.LOAD_ADDRESSES_FAIL, this.onUserFail,
             constants.user.LOAD_ADDRESSES_SUCCESS, this.onLoadAddressesSuccess,
+            constants.user.LOAD_DEFAULT_ACCOUNT, this.onLoadDefaultAccount,
             constants.user.UPDATE_BALANCE, this.onUpdateBalance,
             constants.user.UPDATE_BALANCE_FAIL, this.onUserFail,
             constants.user.UPDATE_BALANCE_SUB, this.onUpdateBalanceSub,
@@ -54,6 +57,11 @@ var UserStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
+    onLoadDefaultAccount: function(payload) {
+        this.defaultAccount = payload;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
     onLoadAddresses: function() {
         this.user = {id: 'loading', name: 'loading'};
         this.loading = true;
@@ -63,7 +71,18 @@ var UserStore = Fluxxor.createStore({
 
     onLoadAddressesSuccess: function(payload) {
         // console.log("ADDRESSES", payload);
-        this.user.id = payload[0];
+        var primary = localStorage.getItem('primary');
+        var valid = false;
+        if (primary && typeof(primary) == 'string')
+            valid = _.includes(payload, primary);
+        if (!valid) {
+            if (this.defaultAccount)
+                primary = this.defaultAccount;
+            else
+                primary = this.payload[0];
+        }
+
+        this.user.id = primary;
         this.user.addresses = payload;
         this.loading = false;
         this.error = null;
@@ -72,6 +91,9 @@ var UserStore = Fluxxor.createStore({
 
     onSwitchAddress: function(payload) {
         this.user.id = payload.address;
+
+        localStorage.setItem('primary', payload.address);
+
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -112,7 +134,7 @@ var UserStore = Fluxxor.createStore({
     },
 
     onUserFail: function(payload) {
-        console.log("ERROR: " + payload.error);
+        // console.log("ERROR: " + payload.error);
         this.loading = false;
         this.error = payload.error;
         this.emit(constants.CHANGE_EVENT);
@@ -121,6 +143,7 @@ var UserStore = Fluxxor.createStore({
     getState: function() {
         return {
             user: this.user,
+            defaultAccount: this.defaultAccount,
             loading: this.loading,
             error: this.error
         };

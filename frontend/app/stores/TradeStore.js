@@ -13,12 +13,13 @@ var TradeStore = Fluxxor.createStore({
         this.error = null;
         this.percent = 0;
         this.type = 1;
-        this.price = null;
         this.amount = null;
+        this.price = null;
         this.total = null;
         this.filling = [];
         this.amountLeft = 0;
         this.available = 0;
+        this.estimate = 0;
         this.newAmount = false;
 
         this.bindActions(
@@ -38,6 +39,9 @@ var TradeStore = Fluxxor.createStore({
             constants.trade.FILL_TRADE_FAIL, this.onTradesFail,
             constants.trade.CANCEL_TRADE, this.onCancelTrade,
             constants.trade.CANCEL_TRADE_FAIL, this.onTradesFail,
+            constants.trade.ESTIMATE_GAS, this.onEstimate,
+            constants.trade.ESTIMATE_GAS_ADD, this.onEstimateGas,
+            constants.trade.ESTIMATE_GAS_FILL, this.onEstimateGas,
             constants.trade.HIGHLIGHT_FILLING, this.onHighlightFilling,
             constants.trade.HIGHLIGHT_FILLING_FAIL, this.onTradesFail,
             constants.trade.CLICK_FILL, this.onClickFill,
@@ -66,14 +70,14 @@ var TradeStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onLoadTradesProgress: function(payload) {
+    onLoadTradesProgress: function (payload) {
         // console.log("Progress: " + payload.percent);
         // this.trades = payload.trades || [];
         this.percent = payload.percent;
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onLoadTradesSuccess: function(payload) {
+    onLoadTradesSuccess: function (payload) {
         // Split in buys/sells
         var trades = _.groupBy(payload, 'type');
 
@@ -96,7 +100,7 @@ var TradeStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onAddTrade: function(payload) {
+    onAddTrade: function (payload) {
         var markets = this.flux.store("MarketStore").getState().markets;
         var user = this.flux.store("UserStore").getState().user;
 
@@ -124,7 +128,7 @@ var TradeStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onFillTrade: function(payload) {
+    onFillTrade: function (payload) {
         var index = _.findIndex((payload.type == "buys") ? this.trades.buys : this.trades.sells, {'id': payload.id});
 
         // console.log("Filling trade ", payload, " at index " + index);
@@ -137,7 +141,7 @@ var TradeStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onFillTrades: function(payload) {
+    onFillTrades: function (payload) {
         var ids = _.pluck(payload, 'id');
 
         // console.log("Filling trades " + ids.join(', '));
@@ -162,7 +166,7 @@ var TradeStore = Fluxxor.createStore({
         this.total = null;
     },
 
-    onCancelTrade: function(payload) {
+    onCancelTrade: function (payload) {
         var index = _.findIndex((payload.type == "buys") ? this.trades.buys : this.trades.sells, {'id': payload.id});
 
         // console.log("Cancelling trade ", payload, " at index " + index);
@@ -175,7 +179,17 @@ var TradeStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onHighlightFilling: function(payload) {
+    onEstimate: function (payload) {
+        this.estimate = payload + "...";
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onEstimateGas: function (payload) {
+        this.estimate = payload.estimate;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onHighlightFilling: function (payload) {
         var trades = (payload.type == 1) ? this.trades.tradeSells : this.trades.tradeBuys;
         var siblings = (payload.type == 1) ? this.trades.tradeBuys : this.trades.tradeSells;
         var total_amount = 0;
@@ -293,7 +307,7 @@ var TradeStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onClickFill: function(payload) {
+    onClickFill: function (payload) {
         if (!payload.market)
             return;
         var market = this.flux.store("MarketStore").getState().markets[payload.market.id - 1];
@@ -316,12 +330,12 @@ var TradeStore = Fluxxor.createStore({
         // this.emit(constants.CHANGE_EVENT);
     },
 
-    switchType: function(payload) {
+    switchType: function (payload) {
         this.type = payload;
         this.emit(constants.CHANGE_EVENT);
     },
 
-    switchMarket: function(payload) {
+    switchMarket: function (payload) {
         this.filterMarket(payload, {buys: this.trades.tradeBuys, sells: this.trades.tradeSells});
         this.emit(constants.CHANGE_EVENT);
     },
@@ -338,7 +352,7 @@ var TradeStore = Fluxxor.createStore({
         this.trades.sells = _.filter(trades.sells, {'market': market_filter});
     },
 
-    onTradesFail: function(payload) {
+    onTradesFail: function (payload) {
         this.trades = payload || {};
         this.loading = false;
         this.percent = 0;
@@ -360,6 +374,7 @@ var TradeStore = Fluxxor.createStore({
             amount: this.amount,
             total: this.total,
             filling: this.filling,
+            estimate: this.estimate,
             amountLeft: this.amountLeft,
             available: this.available,
             newAmount: this.newAmount

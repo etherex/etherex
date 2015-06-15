@@ -1,5 +1,6 @@
 var constants = require("../js/constants");
 var utils = require("../js/utils");
+var bigRat = require("big-rational");
 
 var TradeActions = function() {
 
@@ -121,6 +122,48 @@ var TradeActions = function() {
             this.dispatch(constants.trade.CANCEL_TRADE, trade);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.CANCEL_TRADE_FAIL, {error: error});
+        }.bind(this));
+    };
+
+    this.estimateAddTrade = function(trade) {
+        var _client = this.flux.store('config').getEthereumClient();
+
+        var user = this.flux.store("UserStore").getState().user;
+        var market = this.flux.store("MarketStore").getState().market;
+
+        this.dispatch(constants.trade.ESTIMATE_GAS);
+
+        _client.estimateAddTrade(user, trade, market, function(result) {
+            // console.log("RESULT", result);
+            var gasprice = this.flux.store('network').getState().gasPrice;
+            // console.log("GASPRICE", gasprice);
+            var total = bigRat(gasprice.toString()).multiply(result);
+            var estimate = utils.formatBalance(total) + " (" + utils.numeral(result, 0) + " gas)";
+            this.dispatch(constants.trade.ESTIMATE_GAS_ADD, {estimate: estimate});
+        }.bind(this), function(error) {
+            // console.log("ERROR", error);
+            this.dispatch(constants.trade.ESTIMATE_GAS_ADD, {estimate: String(error)});
+        }.bind(this));
+    };
+
+    this.estimateFillTrades = function(trades) {
+        var _client = this.flux.store('config').getEthereumClient();
+
+        var user = this.flux.store("UserStore").getState().user;
+        var market = this.flux.store("MarketStore").getState().market;
+
+        this.dispatch(constants.trade.ESTIMATE_GAS);
+
+        _client.estimateFillTrades(user, trades, market, function(result) {
+            // console.log("RESULT", result);
+            var gasprice = this.flux.store('network').getState().gasPrice;
+            // console.log("GASPRICE", gasprice);
+            var total = bigRat(gasprice.toString()).multiply(result);
+            var estimate = utils.formatBalance(total) + " (" + utils.format(result, 0) + " gas)";
+            this.dispatch(constants.trade.ESTIMATE_GAS_FILL, {estimate: total});
+        }.bind(this), function(error) {
+            // console.log("ERROR", error);
+            this.dispatch(constants.trade.ESTIMATE_GAS_FILL, {estimate: String(error)});
         }.bind(this));
     };
 

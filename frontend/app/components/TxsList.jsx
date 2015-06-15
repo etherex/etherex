@@ -24,7 +24,7 @@ var TxsList = React.createClass({
                     <div className="col-md-9 col-xs-6">
                         <div>
                           {this.props.market.loading ?
-                            <ProgressBar active now={this.props.market.percent} style={{marginTop: 28}} /> :
+                            <ProgressBar active now={this.props.market.percent} style={{marginTop: 30}} /> :
                             <RangeSelect block={this.getFlux().store("network").blockNumber} />}
                         </div>
                     </div>

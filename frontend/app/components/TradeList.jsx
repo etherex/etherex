@@ -35,7 +35,7 @@ var TradeList = React.createClass({
                         <h3>{this.props.trades.title} {this.props.trades.loading && <span>loading...</span>}</h3>
                     </div>
                     <div className="col-md-9 col-xs-6">
-                        <div style={{marginTop: 28}}>
+                        <div style={{marginTop: 30}}>
                             {this.props.trades.loading &&
                                 <ProgressBar active now={this.props.trades.percent} className="" />}
                         </div>

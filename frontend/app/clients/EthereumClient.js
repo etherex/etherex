@@ -45,10 +45,24 @@ var EthereumClient = function(params) {
       });
     };
 
-    this.stopMonitoring = function() {
-      _.each(this.filters, function(filter) {
-        filter.stopWatching();
-      });
+    this.stopMonitoring = function(failure) {
+      try {
+        _.each(this.filters, function(filter) {
+          filter.stopWatching();
+        });
+      }
+      catch (e) {
+        failure(e);
+      }
+    };
+
+    this.reset = function() {
+      try {
+        web3.reset();
+      }
+      catch (e) {
+        console.log(String(e));
+      }
     };
 
     this.setAddressWatch = function(flux, address) {
@@ -111,6 +125,10 @@ var EthereumClient = function(params) {
         }, function (e) {
             failure(String(e));
         });
+    };
+
+    this.loadCoinbase = function() {
+        return web3.eth.coinbase;
     };
 
     this.loadMarkets = function(user, onProgress, success, failure) {
@@ -716,15 +734,14 @@ var EthereumClient = function(params) {
         }
 
         var ids = _.pluck(trades, 'id');
-
         var gas = ids.length * 100000;
 
         try {
             var result = contract.trade.sendTransaction(total_amounts, ids, {
                 from: user.id,
-                gas: String(gas),
                 to: params.address,
-                value: total > 0 ? total.toString() : "0"
+                value: total > 0 ? total.toString() : "0",
+                gas: String(gas)
             });
 
             success(result);
@@ -768,6 +785,64 @@ var EthereumClient = function(params) {
         }
     };
 
+    this.estimateAddTrade = function(user, trade, market, success, failure) {
+        var amounts = this.getAmounts(trade.amount, trade.price, market.decimals, market.precision);
+
+        try {
+            var options = {
+                from: user.id,
+                value: trade.type == 1 ? amounts.total : "0",
+                to: params.address,
+                gas: "500000"
+            };
+
+            var result = false;
+            if (trade.type == 1)
+                result = contract.buy.estimateGas(amounts.amount, amounts.price, trade.market, options);
+            else if (trade.type == 2)
+                result = contract.sell.estimateGas(amounts.amount, amounts.price, trade.market, options);
+            else {
+                failure("Invalid trade type.");
+                return;
+            }
+
+            success(result);
+        }
+        catch(e) {
+            failure(String(e));
+        }
+    };
+
+    this.estimateFillTrades = function(user, trades, market, success, failure) {
+        var total = bigRat(0);
+        var total_amounts = bigRat(0);
+
+        for (var i = trades.length - 1; i >= 0; i--) {
+            var amounts = this.getAmounts(trades[i].amount, trades[i].price, market.decimals, market.precision);
+
+            if (trades[i].type == 'sells')
+                total += bigRat(amounts.total);
+
+            total_amounts += bigRat(amounts.amount);
+        }
+
+        var ids = _.pluck(trades, 'id');
+        var gas = ids.length * 250000;
+
+        try {
+            var result = contract.trade.estimateGas(total_amounts, ids, {
+                from: user.id,
+                to: params.address,
+                value: total > 0 ? total.toString() : "0",
+                gas: String(gas)
+            });
+
+            success(result);
+        }
+        catch(e) {
+            failure(e);
+        }
+    };
 
     // Utilities
 

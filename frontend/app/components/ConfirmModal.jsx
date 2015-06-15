@@ -16,8 +16,10 @@ var ConfirmModal = React.createClass({
                 <form onSubmit={this.confirmSubmit}>
                     <div className="modal-body">
                         <h4>{this.props.message}</h4>
-                        {(this.props.note) ?
-                            this.props.note : ""}
+                        {(this.props.note) &&
+                            this.props.note}
+                        {(this.props.estimate) &&
+                            <p>Bad estimate: {this.props.estimate}</p>}
                         {(TradeTable) &&
                             <TradeTable flux={this.props.flux} tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={true} />}
                     </div>

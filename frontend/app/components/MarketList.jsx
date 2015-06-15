@@ -22,12 +22,12 @@ var MarketList = React.createClass({
                     <div className="col-md-3 col-xs-6">
                         <h3>{this.props.title} {this.props.market.loading && <span>loading...</span>}</h3>
                     </div> : "" }
-                  {this.props.market.loading ?
+                  {(this.props.market.loading && this.props.config.percentLoaded < 100) &&
                     <div className="col-md-9 col-xs-6">
-                      <div style={{marginTop: 28}}>
-                        <ProgressBar active now={this.props.market.percent} className="" />
+                      <div style={{marginTop: 30}}>
+                        <ProgressBar active now={this.props.config.percentLoaded} className="" />
                       </div>
-                    </div> : "" }
+                    </div>}
                 </div>
                 {this.props.market.error &&
                     <AlertDismissable ref="alerts" level={"warning"} message={this.props.market.error} show={true} />}

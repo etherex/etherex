@@ -38,7 +38,7 @@ var Markets = React.createClass({
               <div>
                 <RangeSelect block={this.getFlux().store("network").blockNumber} />
                 <GraphPrice market={this.props.market} height={500} full={true} />
-                <MarketList category={this.state.category} market={this.props.market} trades={this.props.trades} user={this.props.user} />
+                <MarketList category={this.state.category} config={this.props.config} market={this.props.market} trades={this.props.trades} user={this.props.user} />
               </div>
             )}
           </div>

@@ -35,6 +35,7 @@ var SplitTradeForm = React.createClass({
       minimum: null,
       totalLeft: null,
       isValid: false,
+      estimate: null,
       message: null,
       note: null
     };
@@ -98,6 +99,7 @@ var SplitTradeForm = React.createClass({
                   <ConfirmModal
                     message={this.state.message}
                     note={this.state.note}
+                    estimate={this.props.trades.estimate}
                     tradeList={this.props.trades.filling}
                     user={this.props.user.user}
                     market={this.props.market}
@@ -299,6 +301,16 @@ var SplitTradeForm = React.createClass({
       this.refs.triggerSubDeposit.handleToggle();
     }
     else {
+      if (this.props.trades.filling.length > 0)
+        this.getFlux().actions.trade.estimateFillTrades(this.props.trades.filling);
+      else
+        this.getFlux().actions.trade.estimateAddTrade({
+          type: this.props.type,
+          price: this.state.price,
+          amount: this.state.amount,
+          market: this.props.market.market.id
+        });
+
       this.setState({
         newTrade: true
       });

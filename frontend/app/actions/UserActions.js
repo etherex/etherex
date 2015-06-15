@@ -8,6 +8,8 @@ var UserActions = function() {
         this.dispatch(constants.user.LOAD_ADDRESSES);
 
         _client.loadAddresses(function(addresses) {
+            this.flux.actions.user.loadDefaultAccount();
+
             this.dispatch(constants.user.LOAD_ADDRESSES_SUCCESS, addresses);
 
             // Update balance after loading addresses
@@ -24,6 +26,27 @@ var UserActions = function() {
         }.bind(this), function(error) {
             this.dispatch(constants.user.LOAD_ADDRESSES_FAIL, {error: error});
         }.bind(this));
+    };
+
+    this.loadAddressesOnly = function() {
+        var _client = this.flux.store('config').getEthereumClient();
+
+        this.dispatch(constants.user.LOAD_ADDRESSES);
+
+        _client.loadAddresses(function(addresses) {
+            this.dispatch(constants.user.LOAD_ADDRESSES_SUCCESS, addresses);
+
+            // Update balance after loading addresses
+            this.flux.actions.user.updateBalance();
+        }.bind(this), function(error) {
+            this.dispatch(constants.user.LOAD_ADDRESSES_FAIL, {error: error});
+        }.bind(this));
+    };
+
+    this.loadDefaultAccount = function() {
+        var _client = this.flux.store('config').getEthereumClient();
+        var defaultAccount = _client.loadCoinbase();
+        this.dispatch(constants.user.LOAD_DEFAULT_ACCOUNT, defaultAccount);
     };
 
     this.switchAddress = function(payload) {
