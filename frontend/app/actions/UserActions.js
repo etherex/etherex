@@ -34,6 +34,8 @@ var UserActions = function() {
         this.dispatch(constants.user.LOAD_ADDRESSES);
 
         _client.loadAddresses(function(addresses) {
+            this.flux.actions.user.loadDefaultAccount();
+
             this.dispatch(constants.user.LOAD_ADDRESSES_SUCCESS, addresses);
 
             // Update balance after loading addresses

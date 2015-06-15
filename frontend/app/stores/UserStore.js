@@ -79,7 +79,7 @@ var UserStore = Fluxxor.createStore({
             if (this.defaultAccount)
                 primary = this.defaultAccount;
             else
-                primary = this.payload[0];
+                primary = payload[0];
         }
 
         this.user.id = primary;
