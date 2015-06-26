@@ -179,8 +179,8 @@ var TradeStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onEstimate: function (payload) {
-        this.estimate = payload + "...";
+    onEstimate: function () {
+        this.estimate = "...";
         this.emit(constants.CHANGE_EVENT);
     },
 

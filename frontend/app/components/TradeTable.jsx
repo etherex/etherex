@@ -181,11 +181,13 @@ var TradeRow = React.createClass({
 
 var TradeTable = React.createClass({
     render: function() {
-        var tradeListNodes = this.props.tradeList.map(function (trade, i) {
-            return (
-                <TradeRow flux={this.props.flux} key={trade.id} count={i} trade={trade} trades={this.props.trades} tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={this.props.review} />
-            );
-        }.bind(this));
+        var tradeListNodes = <tr></tr>;
+        if (this.props.tradeList)
+          tradeListNodes = this.props.tradeList.map(function (trade, i) {
+              return (
+                  <TradeRow flux={this.props.flux} key={trade.id} count={i} trade={trade} trades={this.props.trades} tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={this.props.review} />
+              );
+          }.bind(this));
 
         return (
             <div>

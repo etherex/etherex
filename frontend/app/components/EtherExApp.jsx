@@ -92,7 +92,7 @@ var EtherExApp = React.createClass({
                   </div>}
               </div>
 
-              {(!this.state.market.error && !this.state.user.error && !this.state.trades.error) &&
+              {(!this.state.market.error && !this.state.user.error) &&
                 <RouteHandler
                   config={this.state.config}
                   network={this.state.network}
