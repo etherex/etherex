@@ -2,9 +2,6 @@
 
 var React = require("react");
 
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
-
 var AlertDismissable = require('./AlertDismissable');
 
 var ProgressBar = require('react-bootstrap/lib/ProgressBar');
@@ -12,8 +9,6 @@ var ProgressBar = require('react-bootstrap/lib/ProgressBar');
 var MarketTable = require('./MarketTable');
 
 var MarketList = React.createClass({
-    mixins: [FluxMixin],
-
     render: function() {
         return (
             <div>
@@ -32,7 +27,7 @@ var MarketList = React.createClass({
                 {this.props.market.error &&
                     <AlertDismissable ref="alerts" level={"warning"} message={this.props.market.error} show={true} />}
                 <div className="container-fluid">
-                    <MarketTable category={this.props.category} market={this.props.market} />
+                    <MarketTable flux={this.props.flux} category={this.props.category} market={this.props.market} />
                 </div>
             </div>
         );

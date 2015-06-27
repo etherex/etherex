@@ -2,9 +2,6 @@
 
 var React = require("react");
 
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
-
 var AlertDismissable = require('./AlertDismissable');
 
 var ProgressBar = require('react-bootstrap/lib/ProgressBar');
@@ -12,7 +9,6 @@ var RangeSelect = require('./RangeSelect');
 var TxsTable = require('./TxsTable');
 
 var TxsList = React.createClass({
-    mixins: [FluxMixin],
 
     render: function() {
         return (
@@ -25,14 +21,14 @@ var TxsList = React.createClass({
                         <div>
                           {this.props.market.loading ?
                             <ProgressBar active now={this.props.market.percent} style={{marginTop: 30}} /> :
-                            <RangeSelect block={this.getFlux().store("network").blockNumber} />}
+                            <RangeSelect flux={this.props.flux} />}
                         </div>
                     </div>
                 </div>
                 {this.props.market.market.error &&
                     <AlertDismissable ref="alerts" level={"warning"} message={this.props.market.market.error} show={true} />}
                 <div className="container-fluid">
-                    <TxsTable txs={this.props.txs} market={this.props.market} user={this.props.user.user} />
+                    <TxsTable flux={this.props.flux} txs={this.props.txs} market={this.props.market} user={this.props.user.user} />
                 </div>
             </div>
         );

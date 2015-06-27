@@ -1,7 +1,5 @@
 var _ = require("lodash");
 var React = require("react");
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var Button = require('react-bootstrap/lib/Button');
 var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
@@ -14,7 +12,6 @@ var DropdownButton = require('react-bootstrap/lib/DropdownButton');
 var MenuItem = require('react-bootstrap/lib/MenuItem');
 
 var SubRegister = React.createClass({
-  mixins: [FluxMixin],
 
   getInitialState: function() {
     return {
@@ -72,7 +69,7 @@ var SubRegister = React.createClass({
                       "with a minimum trade amount of " + this.state.minimum + " ETH, " +
                       this.state.decimals + " decimals to the subcurrency and a " +
                       "price precision of " + this.state.precision + " ?"}
-                  flux={this.getFlux()}
+                  flux={this.props.flux}
                   onSubmit={this.onSubmitForm}
                 />
               }>
@@ -172,7 +169,7 @@ var SubRegister = React.createClass({
     if (!this.validate(e, el))
       return false;
 
-    this.getFlux().actions.market.registerMarket({
+    this.props.flux.actions.market.registerMarket({
         name: this.state.code,
         address: "0x" + this.state.address,
         minimum: bigRat(this.state.minimum).multiply(fixtures.ether).toDecimal(),

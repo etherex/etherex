@@ -1,8 +1,6 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var Button = require('react-bootstrap/lib/Button');
 var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
@@ -12,7 +10,6 @@ var utils = require("../js/utils");
 var bigRat = require("big-rational");
 
 var SubWithdraw = React.createClass({
-  mixins: [FluxMixin],
 
   getInitialState: function() {
     return {
@@ -36,7 +33,7 @@ var SubWithdraw = React.createClass({
                   message={
                     "Are you sure you want to withdraw" +
                       " " + utils.numeral(this.state.amount, 4) + " " + this.props.market.name + " ?"}
-                  flux={this.getFlux()}
+                  flux={this.props.flux}
                   onSubmit={this.onSubmitForm}
                 />
               }>
@@ -99,7 +96,7 @@ var SubWithdraw = React.createClass({
     if (!this.validate(e, el))
       return false;
 
-    this.getFlux().actions.user.withdrawSub({
+    this.props.flux.actions.user.withdrawSub({
       amount: bigRat(this.state.amount).multiply(Math.pow(10, this.props.market.decimals)).toDecimal()
     });
 

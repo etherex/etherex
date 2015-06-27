@@ -1,9 +1,6 @@
 var _ = require("lodash");
 var React = require("react");
 
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
-
 var bigRat = require("big-rational");
 var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
@@ -22,7 +19,6 @@ var AlertDismissable = require('./AlertDismissable');
 
 
 var SplitTradeForm = React.createClass({
-  mixins: [FluxMixin],
 
   getInitialState: function() {
     return {
@@ -103,7 +99,7 @@ var SplitTradeForm = React.createClass({
                     tradeList={this.props.trades.filling}
                     user={this.props.user.user}
                     market={this.props.market}
-                    flux={this.getFlux()}
+                    flux={this.props.flux}
                     onSubmit={this.onSubmitForm}
                   />
                 }>
@@ -115,7 +111,7 @@ var SplitTradeForm = React.createClass({
             ref="triggerSubDeposit"
             setAlert={this.props.setAlert}
             showAlert={this.props.showAlert}
-            flux={this.getFlux()}
+            flux={this.props.flux}
             market={this.props.market.market}
             user={this.props.user.user}
             amount={this.state.amount - this.props.user.user.balance_sub_available}
@@ -225,7 +221,7 @@ var SplitTradeForm = React.createClass({
 
     this.preValidate(this.props.type, amount, price, total);
 
-    this.getFlux().actions.trade.highlightFilling({
+    this.props.flux.actions.trade.highlightFilling({
       type: this.props.type,
       price: parseFloat(price),
       amount: parseFloat(amount),
@@ -254,7 +250,7 @@ var SplitTradeForm = React.createClass({
 
     this.preValidate(this.props.type, amount, price, total);
 
-    this.getFlux().actions.trade.highlightFilling({
+    this.props.flux.actions.trade.highlightFilling({
       type: this.props.type,
       price: parseFloat(price),
       amount: parseFloat(amount),
@@ -302,9 +298,9 @@ var SplitTradeForm = React.createClass({
     }
     else {
       if (this.props.trades.filling.length > 0)
-        this.getFlux().actions.trade.estimateFillTrades(this.props.trades.filling);
+        this.props.flux.actions.trade.estimateFillTrades(this.props.trades.filling);
       else
-        this.getFlux().actions.trade.estimateAddTrade({
+        this.props.flux.actions.trade.estimateAddTrade({
           type: this.props.type,
           price: this.state.price,
           amount: this.state.amount,
@@ -341,11 +337,11 @@ var SplitTradeForm = React.createClass({
     // Fill existing trades
     // console.log("Filling " + _.pluck(this.props.trades.filling, 'id').join(', '));
     if (this.props.trades.filling.length > 0)
-      this.getFlux().actions.trade.fillTrades(this.props.trades.filling);
+      this.props.flux.actions.trade.fillTrades(this.props.trades.filling);
 
     // Add a new trade
     else
-      this.getFlux().actions.trade.addTrade({
+      this.props.flux.actions.trade.addTrade({
         type: this.props.type,
         price: this.state.price,
         amount: this.state.amount,
@@ -398,7 +394,6 @@ var CustomModalTrigger = React.createClass({
 });
 
 var TradeForm = React.createClass({
-  mixins: [FluxMixin],
 
   getInitialState: function() {
     return {
@@ -417,10 +412,6 @@ var TradeForm = React.createClass({
       });
   },
 
-  toggleGraph: function() {
-    this.props.toggleGraph();
-  },
-
   setAlert: function(alertLevel, alertMessage) {
     this.setState({
       alertLevel: alertLevel,
@@ -434,11 +425,11 @@ var TradeForm = React.createClass({
 
   render: function() {
     return (
-    <div className="col-lg-10 col-lg-offset-1">
+    <div className="col-lg-10 col-lg-offset-1 col-md-12">
       <div className="panel panel-default">
         <div className="panel-heading">
           <div className="visible-md visible-lg">
-            <h3 className="panel-title">New Trade <span onClick={this.toggleGraph} className="pull-right btn btn-primary btn-xs icon-chart-line"></span></h3>
+            <h3 className="panel-title">New Trade</h3>
           </div>
           <div className="visible-xs visible-sm text-center">
             <div className="pull-left h4">New Trade</div>
@@ -456,7 +447,7 @@ var TradeForm = React.createClass({
             <div className="visible-xs visible-sm">
               <div>
                 <div className="container-fluid">
-                  <SplitTradeForm ref="mobileform" mobile={true} type={this.state.type} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
+                  <SplitTradeForm ref="mobileform" mobile={true} type={this.state.type} flux={this.props.flux} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
             </div>
@@ -464,13 +455,13 @@ var TradeForm = React.createClass({
               <div className="col-md-6">
                 <div className="container-fluid">
                   <h4 className="text-center" style={{marginTop: 0}}>Buy</h4>
-                  <SplitTradeForm ref="buyform" mobile={false} type={1} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
+                  <SplitTradeForm ref="buyform" mobile={false} type={1} flux={this.props.flux} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
               <div className="col-md-6">
                 <h4 className="text-center" style={{marginTop: 0}}>Sell</h4>
                 <div className="container-fluid">
-                  <SplitTradeForm ref="sellform" mobile={false} type={2} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
+                  <SplitTradeForm ref="sellform" mobile={false} type={2} flux={this.props.flux} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
             </div>
@@ -485,7 +476,7 @@ var TradeForm = React.createClass({
       type: key,
       typename: this.refs.type.props.children[key - 1].props.children
     });
-    this.getFlux().actions.trade.switchType(key);
+    this.props.flux.actions.trade.switchType(key);
   }
 });
 

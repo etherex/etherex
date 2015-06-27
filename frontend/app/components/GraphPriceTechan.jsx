@@ -2,14 +2,10 @@
 var $ = require("jquery");
 var React = require("react");
 
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
-
 var d3 = require("d3");
 var techan = require("techan");
 
 var Chart = React.createClass({
-    mixins: [FluxMixin],
 
     // propTypes: {
     //     data: React.PropTypes.array
@@ -371,7 +367,7 @@ var Chart = React.createClass({
 
             var macdData = null;
             var rsiData = null;
-            if (this.props.full) {
+            if (data.length > 33 && this.props.full) {
                 macdData = techan.indicator.macd()(data);
                 macdScale.domain(techan.scale.plot.macd(macdData).domain());
                 rsiData = techan.indicator.rsi()(data);
@@ -394,7 +390,7 @@ var Chart = React.createClass({
             }
 
             svg.select("g.crosshair.ohlc").call(ohlcCrosshair).call(zoom);
-            if (this.props.full) {
+            if (data.length > 33 && this.props.full) {
                 svg.select("g.crosshair.macd").call(macdCrosshair).call(zoom);
                 svg.select("g.crosshair.rsi").call(rsiCrosshair).call(zoom);
             }
@@ -410,7 +406,7 @@ var Chart = React.createClass({
             svg.select("g.volume.axis").call(volumeAxis);
             svg.select("g.percent.axis").call(percentAxis);
 
-            if (this.props.full) {
+            if (data.length > 33 && this.props.full) {
                 svg.select("g.macd .axis.right").call(macdAxis);
                 svg.select("g.rsi .axis.right").call(rsiAxis);
 

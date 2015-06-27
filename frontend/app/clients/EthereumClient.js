@@ -747,7 +747,7 @@ var EthereumClient = function(params) {
             success(result);
         }
         catch(e) {
-            failure(e);
+            failure(String(e));
         }
     };
 
@@ -840,7 +840,7 @@ var EthereumClient = function(params) {
             success(result);
         }
         catch(e) {
-            failure(e);
+            failure(String(e));
         }
     };
 

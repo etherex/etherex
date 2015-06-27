@@ -1,20 +1,16 @@
 var React = require('react');
 var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
 var StoreWatchMixin = Fluxxor.StoreWatchMixin;
 var utils = require('../js/utils');
 
 var Network = React.createClass({
-  mixins: [FluxMixin, StoreWatchMixin('config', 'network', 'UserStore')],
+  mixins: [StoreWatchMixin('config', 'network', 'UserStore')],
 
   getStateFromFlux: function () {
-    var flux = this.getFlux();
-    var networkState = flux.store('network').getState();
-
     return {
-      user: flux.store('UserStore').getState().user,
-      network: networkState,
-      host: flux.store('config').getState().host
+      user: this.props.flux.store('UserStore').getState().user,
+      network: this.props.flux.store('network').getState(),
+      host: this.props.flux.store('config').getState().host
     };
   },
 

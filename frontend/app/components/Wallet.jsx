@@ -1,8 +1,6 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var AlertDismissable = require('./AlertDismissable');
 
@@ -15,7 +13,6 @@ var SubWithdraw = require('./SubWithdraw');
 var TxsList = require("./TxsList");
 
 var Markets = React.createClass({
-  mixins: [FluxMixin],
 
   getInitialState: function() {
     return {
@@ -36,8 +33,6 @@ var Markets = React.createClass({
   },
 
   render: function() {
-    // console.log(this.props);
-    // <MarketFilter market={this.props.market} trades={this.props.trades} user={this.props.user} />
     return (
       <div>
         <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
@@ -50,7 +45,7 @@ var Markets = React.createClass({
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
-                  <SubDeposit market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
+                  <SubDeposit flux={this.props.flux} market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
                 </div>
               </div>
             </div>
@@ -62,7 +57,7 @@ var Markets = React.createClass({
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
-                  <SubWithdraw market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
+                  <SubWithdraw flux={this.props.flux} market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
                 </div>
               </div>
             </div>
@@ -76,7 +71,7 @@ var Markets = React.createClass({
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
-                  <SubSend market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
+                  <SubSend flux={this.props.flux} market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
                 </div>
               </div>
             </div>
@@ -88,7 +83,7 @@ var Markets = React.createClass({
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
-                  <SendEther user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
+                  <SendEther flux={this.props.flux} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
                 </div>
               </div>
             </div>
@@ -98,7 +93,7 @@ var Markets = React.createClass({
         <div className="container-fluid">
           <div className="row">
             {(!this.props.market.market.txs.error) &&
-              <TxsList title="Transactions" market={this.props.market} txs={this.props.market.market.txs} user={this.props.user} />}
+              <TxsList title="Transactions" flux={this.props.flux} market={this.props.market} txs={this.props.market.market.txs} user={this.props.user} />}
           </div>
         </div>
       </div>

@@ -21,6 +21,8 @@ var Balance = require("./Balance");
 var BalanceSub = require("./BalanceSub");
 var MarketSelect = require("./MarketSelect");
 var LastPrice = require("./LastPrice");
+var RangeSelect = require("./RangeSelect");
+var GraphPrice = require('./GraphPriceTechan');
 
 var Network = require('./Network');
 var constants = require('../js/constants');
@@ -29,9 +31,16 @@ var moment = require('moment');
 var EtherExApp = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore")],
 
+  getInitialState: function () {
+    return {
+      showGraph: false
+    };
+  },
+
   getStateFromFlux: function() {
     var flux = this.getFlux();
     return {
+      flux: flux,
       config: flux.store('config').getState(),
       network: flux.store('network').getState(),
       user: flux.store("UserStore").getState(),
@@ -41,7 +50,15 @@ var EtherExApp = React.createClass({
   },
 
   componentDidMount: function() {
-    this.getFlux().actions.config.initializeState();
+    this.state.flux.actions.config.initializeState();
+  },
+
+  onToggleGraph: function() {
+    this.setState({ showGraph: !this.state.showGraph });
+  },
+
+  onDisableGraph: function() {
+    this.setState({ showGraph: false });
   },
 
   render: function() {
@@ -49,25 +66,21 @@ var EtherExApp = React.createClass({
       <div id="wrap">
         <div className="container-fluid" ref="container">
           <NavBar user={this.state.user} />
-          <div className="container-fluid row">
+          <div className="row">
             <div className="col-lg-2">
               <div className="row">
-                <div className="container-fluid row">
-                  <div className="row">
-                    <Balance user={this.state.user} />
-                    {(!this.state.market.error) &&
-                      <BalanceSub user={this.state.user} market={this.state.market} />
-                    }
-                  </div>
-                  {(this.state.market.error) &&
-                    <div className="alert alert-danger" role="alert">
-                      <h4>Error!</h4>
-                      {this.state.market.error}
-                    </div>}
-                </div>
-                <div className="container-fluid row visible-lg">
-                  <Network />
-                </div>
+                <Balance user={this.state.user} />
+                {(!this.state.market.error) &&
+                  <BalanceSub user={this.state.user} market={this.state.market} />
+                }
+              </div>
+              {(this.state.market.error) &&
+                <div className="alert alert-danger" role="alert">
+                  <h4>Error!</h4>
+                  {this.state.market.error}
+                </div>}
+              <div className="visible-lg">
+                <Network flux={this.props.flux} />
               </div>
             </div>
             <div className="col-lg-10">
@@ -83,34 +96,42 @@ var EtherExApp = React.createClass({
                       </div>
                     </div> :
                     <div className="col-lg-2 col-md-2 col-sm-2 col-xs-3">
-                      <MarketSelect market={this.state.market} user={this.state.user} />
+                      <MarketSelect flux={this.props.flux} market={this.state.market} user={this.state.user} />
                     </div>
                 }
                 {(!this.state.market.error && !this.state.user.error) &&
                   <div className="col-lg-10 col-md-10 col-sm-10 col-xs-9">
-                    <LastPrice market={this.state.market.market} />
+                    <LastPrice market={this.state.market.market} toggleGraph={this.onToggleGraph} />
                   </div>}
               </div>
 
+              {!this.state.market.error && this.state.showGraph &&
+                <div className="col-md-12">
+                  <RangeSelect flux={this.state.flux} />
+                  <GraphPrice market={this.state.market} height={320} full={false} />
+                </div>}
+
               {(!this.state.market.error && !this.state.user.error) &&
                 <RouteHandler
+                  flux={this.state.flux}
                   config={this.state.config}
                   network={this.state.network}
                   market={this.state.market}
                   trades={this.state.trades}
                   user={this.state.user}
+                  disableGraph={this.onDisableGraph}
                 />}
             </div>
           </div>
         </div>
         <footer className="navbar navbar-default navbar-fixed-bottom">
-          <div className="container-fluid navbar">
-            <p className="navbar-left navbar-text">&copy; <a href="http://etherex.org" target="_blank">EtherEx</a></p>
+          <div className="container-fluid">
+            <p className="navbar-text navbar-left" style={{marginLeft: 0}}>&copy; <a href="http://etherex.org" target="_blank">EtherEx</a></p>
             <p className="navbar-text navbar-right">A Decentralized Future Calls For A Decentralized Exchange.</p>
           </div>
         </footer>
 
-        <ErrorModal network={ this.state.network } config={ this.state.config } />
+        <ErrorModal flux={ this.state.flux } network={ this.state.network } config={ this.state.config } />
       </div>
     );
   }
@@ -118,7 +139,7 @@ var EtherExApp = React.createClass({
 
 // Modal prompt for loading exceptions
 var ErrorModal = React.createClass({
-  mixins: [FluxMixin, OverlayMixin],
+  mixins: [OverlayMixin],
 
   getInitialState: function () {
     return {
@@ -169,7 +190,7 @@ var ErrorModal = React.createClass({
     this.setState({
       isDemo: true
     });
-    this.getFlux().actions.config.updateDemoMode(true);
+    this.props.flux.actions.config.updateDemoMode(true);
   },
 
   render: function() {

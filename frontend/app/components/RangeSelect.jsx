@@ -1,19 +1,16 @@
 var _ = require('lodash');
 var React = require("react");
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var ButtonGroup = require('react-bootstrap/lib/ButtonGroup');
 var Button = require('react-bootstrap/lib/Button');
 var utils = require('../js/utils');
 
 var RangeSelect = React.createClass({
-  mixins: [FluxMixin],
 
   getInitialState: function () {
-    var configState = this.getFlux().store("config");
+    var configState = this.props.flux.store("config");
     return {
-      block: this.props.block,
+      block: this.props.flux.store('network').blockNumber,
       range: 75,
       live: "active",
       last15: configState.range == 75 ? "active" : "",
@@ -26,20 +23,23 @@ var RangeSelect = React.createClass({
     if (nextProps && this.state.live == "active") {
       this.refs.range.getDOMNode().defaultValue = nextProps.block;
       this.setState({
-        block: nextProps.block
+        block: nextProps.flux.store('network').blockNumber
       });
     }
   },
 
   handleRange: function(e) {
     e.preventDefault();
+
     var value = _.parseInt(e.target.value);
+
     this.setState({
       last15: "",
       last30: "",
       last60: "",
       range: value
     });
+
     switch (value) {
       case 75:
         this.setState({
@@ -59,33 +59,34 @@ var RangeSelect = React.createClass({
       default:
         break;
     }
-    this.getFlux().actions.config.updateRange(value);
+
+    this.props.flux.actions.config.updateRange(value);
   },
 
-  handleEndRange: function(e) {
+  handleRangeEnd: function(e) {
     e.preventDefault();
 
+    var block = this.props.flux.store('network').blockNumber;
     var value = null;
     if (e.target.value == "live")
-      value = this.props.block;
+      value = block;
     else
       value = _.parseInt(e.target.value);
 
-    if (value >= this.props.block - 25) {
-      this.refs.range.getDOMNode().value = this.props.block;
+    if (value >= block - 25) {
+      this.refs.range.getDOMNode().value = block;
       this.setState({
-        block: this.props.block,
+        block: block,
         live: "active"
       });
-      this.getFlux().actions.config.updateRangeEnd(false);
+      this.props.flux.actions.config.updateRangeEnd(false);
     }
     else {
       this.setState({
         block: value,
         live: ""
       });
-      this.componentWillReceiveProps(this.props);
-      this.getFlux().actions.config.updateRangeEnd(value);
+      this.props.flux.actions.config.updateRangeEnd(value);
     }
   },
 
@@ -100,14 +101,14 @@ var RangeSelect = React.createClass({
                 ref="range"
                 type="range"
                 style={{padding: 3, width: 200}}
-                onChange={this.handleEndRange}
+                onChange={this.handleRangeEnd}
                 min={this.state.range}
-                max={this.props.block}
+                max={this.props.flux.store('network').blockNumber}
                 step={75}
                 defaultValue={this.state.block}
                 />
             </Button>
-            <Button className={this.state.live + " btn-default"} value="live" onClick={this.handleEndRange}>live</Button>
+            <Button className={this.state.live + " btn-default"} value="live" onClick={this.handleRangeEnd}>live</Button>
             <Button className={this.state.last15 + " btn-primary"} value={75} onClick={this.handleRange}>15m</Button>
             <Button className={this.state.last30 + " btn-primary"} value={150} onClick={this.handleRange}>30m</Button>
             <Button className={this.state.last60 + " btn-primary"} value={300} onClick={this.handleRange}>1h</Button>

@@ -2,9 +2,6 @@
 
 var React = require("react");
 
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
-
 var Button = require('react-bootstrap/lib/Button');
 var Modal = require('react-bootstrap/lib/Modal');
 
@@ -15,7 +12,6 @@ var utils = require("../js/utils");
 var bigRat = require("big-rational");
 
 var SubDepositModal = React.createClass({
-  mixins: [FluxMixin],
 
   getInitialState: function() {
     return {
@@ -43,7 +39,7 @@ var SubDepositModal = React.createClass({
                     message={
                       "Are you sure you want to deposit" +
                         " " + utils.numeral(this.state.amount, 4) + " " + this.props.market.name + " ?"}
-                    flux={this.getFlux()}
+                    flux={this.props.flux}
                     onSubmit={this.onSubmitForm}
                   />
                 }>
@@ -107,7 +103,7 @@ var SubDepositModal = React.createClass({
     if (!this.validate(e, el))
       return false;
 
-    this.getFlux().actions.user.depositSub({
+    this.props.flux.actions.user.depositSub({
       amount: bigRat(this.state.amount).multiply(Math.pow(10, this.props.market.decimals)).toDecimal()
     });
 

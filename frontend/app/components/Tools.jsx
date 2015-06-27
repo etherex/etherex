@@ -1,8 +1,6 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var AlertDismissable = require('./AlertDismissable');
 
@@ -11,7 +9,6 @@ var ConfigPane = require("./ConfigPane");
 var SubRegister = require('./SubRegister');
 
 var TradeList = React.createClass({
-  mixins: [FluxMixin],
 
   getInitialState: function() {
     return {
@@ -32,13 +29,13 @@ var TradeList = React.createClass({
   },
 
   render: function() {
-    var address = this.getFlux().stores.config.getState().address;
+    var address = this.props.flux.stores.config.getState().address;
 
     return (
-      <div>
+      <div className="container-fluid row">
         <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
 
-        <ConfigPane address={address} setAlert={this.setAlert} showAlert={this.showAlert} />
+        <ConfigPane flux={this.props.flux} address={address} setAlert={this.setAlert} showAlert={this.showAlert} />
 
         <div className="container col-md-6 col-md-offset-3">
           <div className="panel panel-default">
@@ -47,13 +44,13 @@ var TradeList = React.createClass({
             </div>
             <div className="panel-body">
               <div className="container-fluid">
-                <SubRegister markets={this.props.market.markets} setAlert={this.setAlert} showAlert={this.showAlert} />
+                <SubRegister flux={this.props.flux} markets={this.props.market.markets} setAlert={this.setAlert} showAlert={this.showAlert} />
               </div>
             </div>
           </div>
         </div>
         <div className="container col-md-12 visible-md visible-sm visible-xs">
-          <Network />
+          <Network flux={this.props.flux} />
         </div>
       </div>
     );

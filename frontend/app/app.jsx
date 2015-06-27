@@ -32,6 +32,9 @@ var Tools = require("./components/Tools");
 var Help = require("./components/Help");
 
 // Load bootstrap
+var jQuery = require("jquery");
+window.$ = window.jQuery = jQuery;
+require("bootstrap/dist/js/bootstrap.js");
 require("./css/bootstrap-darkly.css");
 
 require("./css/styles.css");

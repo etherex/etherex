@@ -1,9 +1,6 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Fluxxor = require("fluxxor");
-
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var DropdownButton = require('react-bootstrap/lib/DropdownButton');
 var MenuItem = require('react-bootstrap/lib/MenuItem');
@@ -11,14 +8,13 @@ var MenuItem = require('react-bootstrap/lib/MenuItem');
 var utils = require("../js/utils");
 
 var UserSummaryPane = React.createClass({
-  mixins: [FluxMixin],
 
   handleChange: function(address) {
-    this.getFlux().actions.user.switchAddress({
+    this.props.flux.actions.user.switchAddress({
       address: address
     });
-    this.getFlux().actions.user.updateBalance();
-    this.getFlux().actions.market.updateMarkets();
+    this.props.flux.actions.user.updateBalance();
+    this.props.flux.actions.market.updateMarkets();
   },
 
   render: function() {

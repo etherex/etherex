@@ -1,16 +1,12 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Fluxxor = require("fluxxor");
-
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var Button = require('react-bootstrap/lib/Button');
 var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
 var ConfirmModal = require('./ConfirmModal');
 
 var ConfigPane = React.createClass({
-  mixins: [FluxMixin],
 
   getInitialState: function() {
     return {
@@ -50,7 +46,7 @@ var ConfigPane = React.createClass({
                                   message={
                                     "Are you sure you want to change the exchange's address to " +
                                     this.state.address + " ?"}
-                                  flux={this.getFlux()}
+                                  flux={this.props.flux}
                                   onSubmit={this.onSubmitForm}
                                 />
                               }>
@@ -120,7 +116,7 @@ var ConfigPane = React.createClass({
     if (!this.validate(e, el))
       return false;
 
-    this.getFlux().actions.config.updateAddress({
+    this.props.flux.actions.config.updateAddress({
       address: this.state.address
     });
 

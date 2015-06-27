@@ -1,17 +1,13 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var DropdownButton = require('react-bootstrap/lib/DropdownButton');
 var MenuItem = require('react-bootstrap/lib/MenuItem');
 
 var MarketSelect = React.createClass({
-  mixins: [FluxMixin],
-
   handleChange: function(key) {
-    this.getFlux().actions.market.switchMarket(this.props.market.markets[key - 1]);
+    this.props.flux.actions.market.switchMarket(this.props.market.markets[key - 1]);
   },
 
   render: function() {

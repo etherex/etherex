@@ -1,8 +1,6 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var Button = require('react-bootstrap/lib/Button');
 var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
@@ -12,7 +10,6 @@ var utils = require("../js/utils");
 var bigRat = require("big-rational");
 
 var SubSend = React.createClass({
-  mixins: [FluxMixin],
 
   getInitialState: function() {
     return {
@@ -42,7 +39,7 @@ var SubSend = React.createClass({
                       "Are you sure you want to send" +
                         " " + utils.numeral(this.state.amount, 4) + " " + this.props.market.name +
                         " to " + this.state.recipient + " ?"}
-                    flux={this.getFlux()}
+                    flux={this.props.flux}
                     onSubmit={this.onSubmitForm}
                   />
                 }>
@@ -119,7 +116,7 @@ var SubSend = React.createClass({
         amount: bigRat(this.state.amount).multiply(Math.pow(10, this.props.market.decimals)).valueOf()
     };
 
-    this.getFlux().actions.user.sendSub(payload);
+    this.props.flux.actions.user.sendSub(payload);
 
     this.refs.address.getDOMNode().value = '';
     this.refs.amount.getDOMNode().value = '';

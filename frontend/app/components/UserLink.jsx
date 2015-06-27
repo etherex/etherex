@@ -1,14 +1,11 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var Router = require("react-router");
 var Link = Router.Link;
 
 var UserLink = React.createClass({
-    mixins: [FluxMixin],
 
     propTypes: {
         id: React.PropTypes.string.isRequired

@@ -3,16 +3,12 @@
 var _ = require("lodash");
 var React = require("react");
 
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
-
 var Table = require("react-bootstrap/lib/Table");
 
 var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 
 var MarketRow = React.createClass({
-    mixins: [FluxMixin],
 
     render: function() {
         // draggable="true"
@@ -58,7 +54,7 @@ var MarketRow = React.createClass({
     handleClick: function(e) {
         e.preventDefault();
         if (this.props.market)
-            this.getFlux().actions.market.switchMarket(this.props.market);
+            this.props.flux.actions.market.switchMarket(this.props.market);
     },
 
     toggleFavorite: function(e) {
@@ -67,7 +63,7 @@ var MarketRow = React.createClass({
         if (this.props.market.favorite === false)
             favorite = true;
 
-        this.getFlux().actions.market.toggleFavorite({id: this.props.market.id, favorite: favorite});
+        this.props.flux.actions.market.toggleFavorite({id: this.props.market.id, favorite: favorite});
     }
 });
 

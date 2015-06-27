@@ -1,14 +1,10 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var SubTab = require("./SubTab");
 
 var SubNavBar = React.createClass({
-  mixins: [FluxMixin],
-
   render: function() {
     return (
       <ul className="nav nav-pills nav-lg nav-justified" role="navigation" aria-label="Secondary">

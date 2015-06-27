@@ -1,14 +1,10 @@
 var _ = require('lodash');
 var React = require("react");
-var Fluxxor = require("fluxxor");
-
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var UserSummaryPane = require("./UserSummaryPane");
 var TradeList = require("./TradeList");
 
 var UserDetails = React.createClass({
-    mixins: [FluxMixin],
 
     render: function() {
         var own = {tradeBuys: [], tradeSells: []};
@@ -21,10 +17,10 @@ var UserDetails = React.createClass({
 
         if (this.props.user.user.id) {
             return (
-                <div>
-                    <UserSummaryPane user={this.props.user} trades={own} />
+                <div className="container-fluid row">
+                    <UserSummaryPane flux={this.props.flux} user={this.props.user} trades={own} />
                     {(own.tradeBuys && own.tradeSells) &&
-                        <TradeList flux={this.getFlux()} market={this.props.market} trades={own} user={this.props.user} />}
+                        <TradeList flux={this.props.flux} market={this.props.market} trades={own} user={this.props.user} />}
                 </div>
             );
         } else {

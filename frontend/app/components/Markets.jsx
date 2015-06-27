@@ -1,15 +1,12 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var RangeSelect = require('./RangeSelect');
 var GraphPrice = require('./GraphPriceTechan');
 var MarketList = require("./MarketList");
 
 var Markets = React.createClass({
-  mixins: [FluxMixin],
 
   contextTypes: {
     router: React.PropTypes.func
@@ -20,6 +17,10 @@ var Markets = React.createClass({
       showGraph: false,
       category: this.context.router.getCurrentRoutes()[1].name
     };
+  },
+
+  componentDidMount: function() {
+    this.props.disableGraph();
   },
 
   componentWillReceiveProps: function(nextProps) {
@@ -36,9 +37,9 @@ var Markets = React.createClass({
           <div className="row">
             {!this.props.market.error && (
               <div>
-                <RangeSelect block={this.getFlux().store("network").blockNumber} />
+                <RangeSelect flux={this.props.flux} />
                 <GraphPrice market={this.props.market} height={500} full={true} />
-                <MarketList category={this.state.category} config={this.props.config} market={this.props.market} trades={this.props.trades} user={this.props.user} />
+                <MarketList flux={this.props.flux} category={this.state.category} config={this.props.config} market={this.props.market} trades={this.props.trades} user={this.props.user} />
               </div>
             )}
           </div>

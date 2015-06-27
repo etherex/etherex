@@ -1,9 +1,6 @@
 var _ = require("lodash");
 var React = require("react");
 
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
-
 var Table = require("react-bootstrap/lib/Table");
 
 var bigRat = require("big-rational");
@@ -13,7 +10,6 @@ var utils = require("../js/utils");
 // var UserLink = require("./UserLink");
 
 var TxRow = React.createClass({
-    mixins: [FluxMixin],
 
     render: function() {
         var market = this.props.market.markets[this.props.tx.market - 1];

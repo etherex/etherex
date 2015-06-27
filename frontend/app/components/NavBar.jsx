@@ -1,8 +1,6 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var Router = require("react-router");
 var Link = Router.Link;
@@ -11,7 +9,6 @@ var Tab = require("./Tab");
 var UserLink = require("./UserLink");
 
 var NavBar = React.createClass({
-  mixins: [FluxMixin],
 
   render: function() {
     return (
