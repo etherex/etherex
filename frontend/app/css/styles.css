@@ -35,6 +35,11 @@
   white-space: nowrap !important;
 }
 
+.btn-balance {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
 table .btn-group a:not(.btn) {
   text-decoration: none;
 }

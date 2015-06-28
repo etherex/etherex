@@ -106,9 +106,11 @@ var EtherExApp = React.createClass({
               </div>
 
               {!this.state.market.error && this.state.showGraph &&
-                <div className="col-md-12">
-                  <RangeSelect flux={this.state.flux} />
-                  <GraphPrice market={this.state.market} height={320} full={false} />
+                <div className="container-fluid">
+                  <div className="row">
+                    <RangeSelect flux={this.state.flux} />
+                    <GraphPrice market={this.state.market} height={320} full={false} />
+                  </div>
                 </div>}
 
               {(!this.state.market.error && !this.state.user.error) &&

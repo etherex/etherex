@@ -181,7 +181,7 @@ New market IDs will be created as DAO creators add their subcurrency to the exch
 
 ### Subcurrency API
 
-**Subcurrency contracts need to support the `deposit` ABI call.**
+**Subcurrency contracts need to support the exchange's `deposit` ABI call and implement a `transfer` method for withdrawals.**
 
 It is a different approach than the [MetaCoin API](https://github.com/ethereum/cpp-ethereum/wiki/MetaCoin-API) which will not be used, as the `Approve API` is all-or-nothing and gives too much permissions to the exchange. The new procedure is explained below, and the sample [ETX](https://github.com/etherex/etherex/blob/master/contracts/etx.se) contract can be used as an example.
 
@@ -212,7 +212,7 @@ After registering the subcurrency using the `add_market` ABI call, the subcurren
 
 #### Notifying the exchange of deposits
 
-The second step has to be executed on each asset transfer. The gas costs of comparing the recipient to the exchange's address are minimal but a separate ABI call might be used later on, depending on how this approach will play out on the testnet. The relevant part below is the one under `Notify exchange of deposit`, the top part being what can be considered standard subcurrency functionality. Notice the `extern` definition that will be used for the `deposit` method.
+The second step has to be executed on each asset transfer. The gas costs of comparing the recipient to the exchange's address are minimal but a separate ABI call might be used later on, depending on how this approach will play out on the testnet. The relevant part below is the one under `# Notify exchange of deposit`, the top part being what can be considered standard subcurrency functionality. Notice the `extern` definition that will be used for the `deposit` method.
 
 ```
 data balances[2^160](balance)
@@ -248,6 +248,15 @@ def transfer(recipient, amount):
 ```
 
 **TODO**: Solidity examples.
+
+#### Withdrawal support
+
+If your subcurrency's default method for transferring funds is also named `transfer` like the example above, with `recipient` and `amount` parameters (in that order), then there is nothing else you need to do to support withdrawals from EtherEx to a user's address. Otherwise, you'll need to implement that same `transfer` method with those two parameters, and "translate" that method call to yours, calling your other method with those parameters, in the order they're expected. You may also have to use `tx.origin` instead of `msg.sender` in your method as the latter will return your contract's address.
+
+```
+def transfer(recipient, amount):
+    return(self.invertedtransfer(amount, recipient))
+```
 
 
 Notes

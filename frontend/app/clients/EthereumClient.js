@@ -798,9 +798,9 @@ var EthereumClient = function(params) {
 
             var result = false;
             if (trade.type == 1)
-                result = contract.buy.estimateGas(amounts.amount, amounts.price, trade.market, options);
+                result = contract.buy.estimateGas(amounts.amount, amounts.price, trade.market, options) / 10;
             else if (trade.type == 2)
-                result = contract.sell.estimateGas(amounts.amount, amounts.price, trade.market, options);
+                result = contract.sell.estimateGas(amounts.amount, amounts.price, trade.market, options) / 10;
             else {
                 failure("Invalid trade type.");
                 return;
@@ -837,7 +837,7 @@ var EthereumClient = function(params) {
                 gas: String(gas)
             });
 
-            success(result);
+            success(result / 10);
         }
         catch(e) {
             failure(String(e));

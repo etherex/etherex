@@ -13,8 +13,13 @@ var MarketActions = function() {
           var percent = parseFloat(((progress.current / progress.total) * 100).toFixed(2));
           this.flux.actions.config.updatePercentLoaded(percent);
         }.bind(this), function(markets) {
-            var user = this.flux.store("UserStore").getState().user;
+            this.dispatch(constants.market.LOAD_MARKETS_SUCCESS, markets);
+
+            // Load user sub balances
+            this.flux.actions.user.updateBalanceSub();
+
             // Load per market balances
+            var user = this.flux.store("UserStore").getState().user;
             for (var i = 0; i < markets.length; i++) {
                 _client.updateBalanceSub(markets[i], user.id, function(market, available, trading, balance) {
                     this.flux.actions.market.updateMarketBalance(market, available, trading, balance);
@@ -22,11 +27,6 @@ var MarketActions = function() {
                     this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
                 }.bind(this));
             }
-
-            this.dispatch(constants.market.LOAD_MARKETS_SUCCESS, markets);
-
-            // Load user sub balances
-            this.flux.actions.user.updateBalanceSub();
 
             // Set market balances watch
             _client.setMarketsWatch(this.flux, markets);

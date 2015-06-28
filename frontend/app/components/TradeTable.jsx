@@ -161,7 +161,7 @@ var TradeRow = React.createClass({
             return;
 
         var payload = {
-            type: this.props.trades.type,
+            type: (this.props.trade.type == "buys" ? 2 : 1),
             price: this.props.trades.price,
             amount: this.props.trades.amount,
             total: this.props.trades.total,

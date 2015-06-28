@@ -17,9 +17,9 @@ var ConfirmModal = React.createClass({
                     <div className="modal-body">
                         <h4>{this.props.message}</h4>
                         {(this.props.note) &&
-                            this.props.note}
+                            <p>{this.props.note}</p>}
                         {(this.props.estimate) &&
-                            <p>Bad estimate: {this.props.estimate}</p>}
+                            <p>Gas estimate (probably wrong): {this.props.estimate}</p>}
                         {(TradeTable) &&
                             <TradeTable flux={this.props.flux} tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={true} />}
                     </div>

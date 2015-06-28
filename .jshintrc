@@ -1,0 +1,23 @@
+{
+  "node": true,
+  "esnext": true,
+  "browser": true,
+  "loopfunc": true,
+  "globals": {
+    "jQuery": true,
+    "console": true,
+    "module": true,
+    "require": true,
+    "afterEach": false,
+    "beforeEach": false,
+    "describe": false,
+    "expect": false,
+    "it": false,
+    "jest": false,
+    "pit": false,
+    "xdescribe": false,
+    "xit": false
+  },
+  "undef": true,
+  "unused": true
+}
