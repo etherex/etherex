@@ -20,7 +20,6 @@ var MarketStore = Fluxxor.createStore({
             constants.market.LOAD_MARKETS_FAIL, this.onLoadMarketsFail,
             constants.market.LOAD_MARKETS_SUCCESS, this.onLoadMarketsSuccess,
             constants.market.CHANGE_MARKET, this.onChangeMarket,
-            constants.market.UPDATE_MARKET, this.onUpdateMarket,
             constants.market.UPDATE_MARKET_BALANCE, this.onUpdateMarketBalance,
             constants.market.LOAD_PRICES, this.onLoadPrices,
             constants.market.LOAD_TRANSACTIONS, this.onLoadTransactions,
@@ -47,30 +46,21 @@ var MarketStore = Fluxxor.createStore({
 
     onLoadMarketsSuccess: function(payload) {
         // console.log("MARKETS LOADED: ", payload);
-        if (!this.market.id) {
-            this.market = payload[0]; // Load ETX as default (TODO favorites / custom menu)
-            this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
-        }
-        else if (this.market.id) {
-            this.market = payload[this.market.id - 1];
-            this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
-        }
+        if (!this.market.id)
+            this.market = payload.markets[payload.last];
+        else if (this.market.id)
+            this.market = payload.markets[this.market.id - 1];
+
+        this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
         this.market.txs = [];
         this.market.data = {};
-        this.markets = payload;
+        this.markets = payload.markets;
 
-        var favs = localStorage.getItem('favorites');
-        var favorites = JSON.parse(favs);
-        if (!favorites || typeof(favorites) != 'object')
-            favorites = [];
-        this.favorites = favorites;
+        this.favorites = payload.favorites;
 
         this.loading = false;
         this.error = null;
-        this.emit(constants.CHANGE_EVENT);
-    },
 
-    onUpdateMarket: function() {
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -201,22 +191,7 @@ var MarketStore = Fluxxor.createStore({
 
     toggleFavorite: function(payload) {
         this.markets[payload.id - 1].favorite = payload.favorite;
-
-        var favs = localStorage.getItem('favorites');
-        var favorites = JSON.parse(favs);
-
-        if (typeof(favorites) === 'undefined' || !favorites)
-            favorites = [];
-
-        if (payload.favorite === true)
-            favorites.push(payload.id);
-        else if (payload.favorite === false)
-            _.pull(favorites, payload.id);
-
-        this.favorites = favorites;
-
-        var new_favorites = JSON.stringify(favorites);
-        localStorage.setItem('favorites', new_favorites);
+        this.favorites = payload.favorites;
 
         this.emit(constants.CHANGE_EVENT);
     },

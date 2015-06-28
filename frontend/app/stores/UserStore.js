@@ -1,4 +1,3 @@
-var _ = require("lodash");
 var Fluxxor = require("fluxxor");
 
 var constants = require("../js/constants");
@@ -71,19 +70,9 @@ var UserStore = Fluxxor.createStore({
 
     onLoadAddressesSuccess: function(payload) {
         // console.log("ADDRESSES", payload);
-        var primary = localStorage.getItem('primary');
-        var valid = false;
-        if (primary && typeof(primary) == 'string')
-            valid = _.includes(payload, primary);
-        if (!valid) {
-            if (this.defaultAccount)
-                primary = this.defaultAccount;
-            else
-                primary = payload[0];
-        }
 
-        this.user.id = primary;
-        this.user.addresses = payload;
+        this.user.id = payload.primary;
+        this.user.addresses = payload.addresses;
         this.loading = false;
         this.error = null;
         this.emit(constants.CHANGE_EVENT);
@@ -91,8 +80,6 @@ var UserStore = Fluxxor.createStore({
 
     onSwitchAddress: function(payload) {
         this.user.id = payload.address;
-
-        localStorage.setItem('primary', payload.address);
 
         this.emit(constants.CHANGE_EVENT);
     },

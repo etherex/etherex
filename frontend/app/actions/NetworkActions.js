@@ -52,7 +52,7 @@ var NetworkActions = function() {
         this.dispatch(constants.network.UPDATE_READY, {
           ready: false
         });
-        this.flux.actions.user.loadAddressesOnly();
+        this.flux.actions.user.loadAddresses(false);
       }
       else if (blockChainAge <= 90) {
         if (!networkState.ready || wasDown) {
@@ -106,7 +106,7 @@ var NetworkActions = function() {
     this.flux.actions.network.loadNetwork();
 
     // Trigger loading addresses, which load markets, which load trades
-    this.flux.actions.user.loadAddresses();
+    this.flux.actions.user.loadAddresses(true);
 
     // start monitoring for updates
     this.flux.actions.network.startMonitoring();

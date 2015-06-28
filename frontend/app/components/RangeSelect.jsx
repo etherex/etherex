@@ -100,7 +100,7 @@ var RangeSelect = React.createClass({
               <input
                 ref="range"
                 type="range"
-                style={{padding: 3, width: 200}}
+                className="range-select"
                 onChange={this.handleRangeEnd}
                 min={this.state.range}
                 max={this.props.flux.store('network').blockNumber}

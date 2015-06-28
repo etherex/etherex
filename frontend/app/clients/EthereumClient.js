@@ -65,6 +65,22 @@ var EthereumClient = function(params) {
       }
     };
 
+    this.getString = function(db, key) {
+      return web3.db.getString(db, key);
+    };
+
+    this.putString = function(db, key, value) {
+      web3.db.putString(db, key, value);
+    };
+
+    this.getHex = function(db, key) {
+      return web3.db.getHex(db, key);
+    };
+
+    this.putHex = function(db, key, value) {
+      web3.db.putHex(db, key, value);
+    };
+
     this.setAddressWatch = function(flux, address) {
       // ETH balance
       this.filters.address = web3.eth.filter({
@@ -144,7 +160,13 @@ var EthereumClient = function(params) {
 
             var markets = [];
 
-            var favs = localStorage.getItem('favorites');
+            var favs = '[]';
+            try {
+              favs = web3.db.getString('EtherEx', 'favorites');
+            }
+            catch(e) {
+              web3.db.putString('EtherEx', 'favorites', '[]');
+            }
             var favorites = JSON.parse(favs);
 
             if (!favorites || typeof(favorites) != 'object')

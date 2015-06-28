@@ -1,8 +1,9 @@
+var _ = require("lodash");
 var constants = require("../js/constants");
 
 var UserActions = function() {
 
-    this.loadAddresses = function() {
+    this.loadAddresses = function(init) {
         var _client = this.flux.store('config').getEthereumClient();
 
         this.dispatch(constants.user.LOAD_ADDRESSES);
@@ -10,36 +11,41 @@ var UserActions = function() {
         _client.loadAddresses(function(addresses) {
             this.flux.actions.user.loadDefaultAccount();
 
-            this.dispatch(constants.user.LOAD_ADDRESSES_SUCCESS, addresses);
+            // Load primary address
+            var primary = false;
+            var defaultAccount = this.flux.store('UserStore').defaultAccount;
+            try {
+                primary = _client.getHex('EtherEx', 'primary');
+            }
+            catch(e) {
+                _client.putHex('EtherEx', 'primary', defaultAccount);
+            }
+            var valid = false;
+            if (primary && typeof(primary) == 'string')
+                valid = _.includes(addresses, primary);
+            if (!valid)
+                if (defaultAccount)
+                    primary = defaultAccount;
+                else
+                    primary = addresses[0];
+
+            this.dispatch(constants.user.LOAD_ADDRESSES_SUCCESS, {
+              primary: primary,
+              addresses: addresses
+            });
 
             // Update balance after loading addresses
             this.flux.actions.user.updateBalance();
 
-            // User balance watch
-            var user = this.flux.store("UserStore").getState().user;
-            _client.setAddressWatch(this.flux, user.id);
+            if (init) {
+                // User balance watch
+                var user = this.flux.store("UserStore").getState().user;
+                _client.setAddressWatch(this.flux, user.id);
 
-            // Load markets
-            if (!this.flux.store("UserStore").getState().user.error)
-              this.flux.actions.market.loadMarkets();
-
-        }.bind(this), function(error) {
-            this.dispatch(constants.user.LOAD_ADDRESSES_FAIL, {error: error});
-        }.bind(this));
-    };
-
-    this.loadAddressesOnly = function() {
-        var _client = this.flux.store('config').getEthereumClient();
-
-        this.dispatch(constants.user.LOAD_ADDRESSES);
-
-        _client.loadAddresses(function(addresses) {
-            this.flux.actions.user.loadDefaultAccount();
-
-            this.dispatch(constants.user.LOAD_ADDRESSES_SUCCESS, addresses);
-
-            // Update balance after loading addresses
-            this.flux.actions.user.updateBalance();
+                // Load markets
+                if (!this.flux.store("UserStore").getState().user.error)
+                  this.flux.actions.market.loadMarkets(init);
+            }
         }.bind(this), function(error) {
             this.dispatch(constants.user.LOAD_ADDRESSES_FAIL, {error: error});
         }.bind(this));
@@ -52,6 +58,8 @@ var UserActions = function() {
     };
 
     this.switchAddress = function(payload) {
+        var _client = this.flux.store('config').getEthereumClient();
+        _client.putHex('EtherEx', 'primary', payload.address);
         this.dispatch(constants.user.SWITCH_ADDRESS, payload);
     };
 

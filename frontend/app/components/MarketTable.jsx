@@ -167,7 +167,7 @@ var MarketTable = React.createClass({
 
         var marketListNodes = markets.map(function (market) {
             return (
-                <MarketRow key={market.id} market={market} />
+                <MarketRow flux={this.props.flux} key={market.id} market={market} />
             );
         }.bind(this));
 
