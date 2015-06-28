@@ -20,8 +20,8 @@ var RangeSelect = React.createClass({
   },
 
   componentWillReceiveProps: function(nextProps) {
-    if (nextProps && this.state.live == "active") {
-      this.refs.range.getDOMNode().defaultValue = nextProps.block;
+    if (!nextProps.flux.store('config').rangeEnd && this.state.live === "active") {
+      this.refs.range.getDOMNode().defaultValue = nextProps.flux.store('network').blockNumber;
       this.setState({
         block: nextProps.flux.store('network').blockNumber
       });

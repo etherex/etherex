@@ -97,8 +97,8 @@ var MarketStore = Fluxxor.createStore({
                 // console.log(logs, prices, volumes, high, low, volume);
 
                 // hack together open/close...
-                var open = previous ? (high > previous.High ? previous.Low : previous.High) : low;
-                var close = previous ? (low < previous.Low ? low : high) : high;
+                var open = previous.Low ? (high > previous.High ? previous.Low : previous.High) : low;
+                var close = previous.Low ? (low < previous.Low ? low : high) : high;
 
                 previous = {
                     Date: new Date(logs[0].timestamp * 1000),
