@@ -82,7 +82,7 @@ var TxsTable = React.createClass({
     render: function() {
         var txsListNodes = _.sortBy(this.props.txs, 'block').map(function (tx) {
           return (
-              <TxRow key={tx.hash} tx={tx} market={this.props.market} user={this.props.user} />
+              <TxRow key={tx.hash + '-' + tx.inout} tx={tx} market={this.props.market} user={this.props.user} />
           );
         }.bind(this));
         txsListNodes.reverse();

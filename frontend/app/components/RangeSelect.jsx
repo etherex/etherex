@@ -10,9 +10,9 @@ var RangeSelect = React.createClass({
   getInitialState: function () {
     var configState = this.props.flux.store("config");
     return {
-      block: this.props.flux.store('network').blockNumber,
+      block: configState.rangeEnd ? configState.rangeEnd : this.props.flux.store('network').blockNumber,
       range: 75,
-      live: "active",
+      live: configState.rangeEnd ? "" : "active",
       last15: configState.range == 75 ? "active" : "",
       last30: configState.range == 150 ? "active" : "",
       last60: configState.range == 300 ? "active" : ""

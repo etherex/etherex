@@ -97,7 +97,7 @@ trade:ia:i
 deposit:iii:i
 withdraw:ii:i
 cancel:i:i
-add_market:iiiii:i
+add_market:iiiiii:i
 get_market:i:a
 get_trade_ids:i:a
 get_trade:i:a
@@ -107,7 +107,7 @@ get_sub_balance:ii:a
 
 ## Price API
 ```
-<method> <market_id>
+self.exchange.price(market_id)
 ```
 
 
@@ -115,33 +115,33 @@ get_sub_balance:ii:a
 
 ### Add buy / sell trade
 ```
-<method> <amount> <price> <market ID>
+self.exchange.buy(amount, price, market ID)
+self.exchange.sell(amount, price, market ID)
 ```
 
 ### Trade
 ```
-<method> <max amount> <trade IDs>
+self.exchange.trade(max_amount, trade_IDs)
 ```
 
 ### Deposit (subcurrency contracts only, [see below](#subcurrency-api))
 ```
-<method> <address> <amount> <market ID>
+self.exchange.deposit(address, amount, market_ID)
 ```
 
 ### Withdraw
 ```
-<method> <amount> <market ID>
+self.exchange.withdraw(amount, market_ID)
 ```
 
 ### Cancel trade
 ```
-<method> <trade ID>
+self.exchange.cancel(trade_ID)
 ```
-
 
 ### Adding a market
 ```
-<method> <currency name> <contract address> <decimal precision> <price denominator> <minimum total> <category>
+self.exchange.add_market(currency_name, contract_address, decimal_precision, price_denominator, minimum_total, category)
 ```
 
 #### Market names
@@ -256,6 +256,15 @@ If your subcurrency's default method for transferring funds is also named `trans
 ```
 def transfer(recipient, amount):
     return(self.invertedtransfer(amount, recipient))
+```
+
+#### Balance
+
+Subcurrency contracts also need to implement a `balance` method for the UI to display the user's balance in that contract (also called the subcurrency's wallet).
+
+```
+def balance(address):
+    return(self.balances[address].balance)
 ```
 
 

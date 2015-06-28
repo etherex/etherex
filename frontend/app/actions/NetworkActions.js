@@ -40,12 +40,13 @@ var NetworkActions = function() {
     }
 
     if (nowUp) {
+      var timedOut = 90; // TODO as config
       var blockChainAge = ethereumClient.blockChainAge();
       this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, { blockChainAge: blockChainAge });
 
       this.flux.actions.network.loadNetwork();
 
-      if (blockChainAge > 90) {
+      if (blockChainAge > timedOut) {
         // Also put trades in loading state if network was not ready
         this.dispatch(constants.trade.LOAD_TRADES);
 
@@ -54,7 +55,7 @@ var NetworkActions = function() {
         });
         this.flux.actions.user.loadAddresses(false);
       }
-      else if (blockChainAge <= 90) {
+      else if (blockChainAge <= timedOut) {
         if (!networkState.ready || wasDown) {
           // Also put trades in loading state if network was not ready
           this.dispatch(constants.trade.LOAD_TRADES);

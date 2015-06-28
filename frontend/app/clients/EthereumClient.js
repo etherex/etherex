@@ -517,11 +517,10 @@ var EthereumClient = function(params) {
 
                 txs.push({
                   hash: txlogs[i].transactionHash || txlogs[i].hash,
-                  type: txlogs[i].args.type.valueOf() == 1 ? 'sell' : 'buy',
+                  type: txlogs[i].args.type.valueOf() == 1 ? 'bought' : 'sold',
                   number: txlogs[i].number,
                   block: txlogs[i].blockNumber,
-                  // inout: (_.parseInt(web3.toDecimal(txlogs[i].args.type)) == 1 ? 'in' : 'out'),
-                  inout: 'in',
+                  inout: txlogs[i].args.type.valueOf() == 1 ? 'in' : 'out',
                   from: web3.fromDecimal(txlogs[i].args.sender),
                   to: params.address,
                   amount: amount,
@@ -530,7 +529,39 @@ var EthereumClient = function(params) {
                   total: utils.formatBalance(total),
                   result: 'OK'
                 });
-              }
+            }
+
+            // Get trades filled by others
+            tx_filter = contract.log_fill_tx({
+              owner: user.id
+            }, {
+              fromBlock: fromBlock,
+              toBlock: toBlock
+            });
+            txlogs = tx_filter.get();
+            // console.log("TRANSACTIONS: ", txlogs);
+            for (i = txlogs.length - 1; i >= 0; i--) {
+                amount = txlogs[i].args.amount.valueOf();
+                price = bigRat(txlogs[i].args.price.valueOf()).divide(market.precision).valueOf();
+                total = bigRat(amount).divide(Math.pow(10, market.decimals)).multiply(price).multiply(fixtures.ether);
+
+                // Refilter... TODO remove once owner is indexed / properly filtered
+                if (user.id == web3.fromDecimal(txlogs[i].args.owner))
+                    txs.push({
+                      hash: txlogs[i].transactionHash || txlogs[i].hash,
+                      type: txlogs[i].args.type.valueOf() == 1 ? 'sold' : 'bought',
+                      number: txlogs[i].number,
+                      block: txlogs[i].blockNumber,
+                      inout: txlogs[i].args.type.valueOf() == 1 ? 'out' : 'in',
+                      from: web3.fromDecimal(txlogs[i].args.sender),
+                      to: params.address,
+                      amount: amount,
+                      market: _.parseInt(txlogs[i].args.market.valueOf()),
+                      price: price,
+                      total: utils.formatBalance(total),
+                      result: 'OK'
+                    });
+            }
 
             // console.log("TXS: ", txs);
 
