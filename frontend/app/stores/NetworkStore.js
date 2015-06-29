@@ -10,7 +10,7 @@ var NetworkStore = Fluxxor.createStore({
     this.peerCount = null;
     this.blockNumber = null;
     this.blockTime = null;
-    this.blockDate = null;
+    this.blockTimestamp = null;
     this.ether = null;
     this.gasPrice = null;
     this.ethereumStatus = null;
@@ -34,8 +34,8 @@ var NetworkStore = Fluxxor.createStore({
       client: this.client,
       peerCount: this.peerCount,
       blockNumber: this.blockNumber,
-      blockDate: this.blockDate,
       blockTime: this.blockTime,
+      blockTimestamp: this.blockTimestamp,
       ether: this.ether,
       gasPrice: this.gasPrice,
       ethereumStatus: this.ethereumStatus,

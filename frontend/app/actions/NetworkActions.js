@@ -1,5 +1,4 @@
 var constants = require('../js/constants');
-var moment = require('moment');
 
 var NetworkActions = function() {
   /**
@@ -93,10 +92,10 @@ var NetworkActions = function() {
 
     // Get last block's timestamp and calculate block time and age
     ethereumClient.getBlock('latest', function(block) {
-      // Update block date
+      // Update block number and timestamp
       this.dispatch(constants.network.UPDATE_NETWORK, {
         blockNumber: block.number,
-        blockDate: moment(block.timestamp * 1000).format('MMM Do, HH:mm:ss')
+        blockTimestamp: block.timestamp
       });
 
       // Update block time

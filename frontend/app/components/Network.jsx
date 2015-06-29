@@ -1,17 +1,43 @@
 var React = require('react');
 var Fluxxor = require("fluxxor");
 var StoreWatchMixin = Fluxxor.StoreWatchMixin;
+
 var utils = require('../js/utils');
+var moment = require('moment');
 
 var Network = React.createClass({
   mixins: [StoreWatchMixin('config', 'network', 'UserStore')],
 
   getStateFromFlux: function () {
+    var networkState = this.props.flux.store('network').getState();
     return {
       user: this.props.flux.store('UserStore').getState().user,
-      network: this.props.flux.store('network').getState(),
-      host: this.props.flux.store('config').getState().host
+      network: networkState,
+      host: this.props.flux.store('config').getState().host,
+      blockDate: moment(networkState.blockTimestamp * 1000).format('MMM Do, HH:mm:ss'),
+      lastBlock: utils.numeral(new Date().getTime() / 1000 - networkState.blockTimestamp, 0) + 's'
     };
+  },
+
+  componentDidMount: function() {
+    this.startCounting();
+  },
+
+  componentWillUnmount: function() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  },
+
+  startCounting: function() {
+    this.timer = setInterval(this.count, 1000);
+  },
+
+  count: function () {
+    this.setState({
+      lastBlock: utils.numeral(new Date().getTime() / 1000 - this.state.network.blockTimestamp, 0) + 's'
+    });
   },
 
   render: function () {
@@ -51,10 +77,10 @@ var Network = React.createClass({
             GAS PRICE<span className="pull-right">{ formattedGasPrice }</span>
           </p>
           <p className="block-time">
-            BLOCK TIME<span className="pull-right">{ this.state.network.blockTime || '-' }</span>
+            BLOCK TIME<span className="pull-right">{ (this.state.network.blockTime || '-') + ' / ' + (this.state.lastBlock || '-') }</span>
           </p>
           <p className="last-block">
-            LAST BLOCK<span className="pull-right">{ this.state.network.blockDate || '-' }</span>
+            LAST BLOCK<span className="pull-right">{ this.state.blockDate || '-' }</span>
           </p>
         </div>
       </div>
