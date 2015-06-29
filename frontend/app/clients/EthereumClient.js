@@ -18,7 +18,7 @@ web3.padDecimal = function (string, chars) {
 
 var EthereumClient = function(params) {
     try {
-        web3.setProvider(new web3.providers.HttpProvider('http://' + params.host));
+        web3.setProvider(new web3.providers.HttpProvider('//' + params.host));
 
         var ContractABI = web3.eth.contract(fixtures.contract_desc);
         var contract = ContractABI.at(params.address);
@@ -102,23 +102,81 @@ var EthereumClient = function(params) {
         }).watch(flux.actions.user.updateBalanceSub);
     };
 
-    this.blockChainAge = function() {
-      var currentTimeStamp = new Date().getTime() / 1000;
-
-      if (web3.net.listening) {
-        var blockNumber = web3.eth.blockNumber;
-
-        if (blockNumber) {
-          var blockTimeStamp = web3.eth.getBlock(blockNumber).timestamp;
-          return currentTimeStamp - blockTimeStamp;
+    this.getClient = function(callback) {
+      web3.version.getClient(function(error, result) {
+        if (error) {
+          utils.error(error);
+        } else {
+          callback(result);
         }
-        else
-          return currentTimeStamp;
-      }
-      return currentTimeStamp;
+      });
+    };
+
+    this.getBlock = function(blockNumberOrHash, callback) {
+      web3.eth.getBlock(blockNumberOrHash, function(error, block) {
+        if (error) {
+          utils.error(error);
+        } else {
+          callback(block);
+        }
+      });
+    };
+
+    this.getBlockNumber = function(callback) {
+      web3.eth.getBlockNumber(function(error, result) {
+        if (error) {
+          utils.error(error);
+        } else {
+          callback(result);
+        }
+      });
+    };
+
+    this.getGasPrice = function(callback) {
+      web3.eth.getGasPrice(function(error, result) {
+        if (error) {
+          utils.error(error);
+        } else {
+          callback(result);
+        }
+      });
+    };
+
+    this.getMining = function(callback) {
+      web3.eth.getMining(function(error, result) {
+        if (error) {
+          utils.error(error);
+        } else {
+          callback(result);
+        }
+      });
+    };
+
+    this.getHashrate = function(callback) {
+      web3.eth.getHashrate(function(error, result) {
+        if (error) {
+          utils.error(error);
+        } else {
+          callback(result);
+        }
+      });
+    };
+
+    this.getPeerCount = function(callback) {
+      web3.net.getPeerCount(function(error, result) {
+        if (error) {
+          utils.error(error);
+        } else {
+          callback(result);
+        }
+      });
     };
 
     // Loading methods
+
+    this.loadCoinbase = function() {
+        return web3.eth.coinbase;
+    };
 
     this.loadAddresses = function(success, failure) {
         var loadPromise = new Promise(function (resolve, reject) {
@@ -141,10 +199,6 @@ var EthereumClient = function(params) {
         }, function (e) {
             failure(String(e));
         });
-    };
-
-    this.loadCoinbase = function() {
-        return web3.eth.coinbase;
     };
 
     this.loadMarkets = function(user, onProgress, success, failure) {

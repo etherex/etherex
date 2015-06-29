@@ -9,7 +9,8 @@ var NetworkStore = Fluxxor.createStore({
     this.client = null;
     this.peerCount = null;
     this.blockNumber = null;
-    this.blocktime = null;
+    this.blockTime = null;
+    this.blockDate = null;
     this.ether = null;
     this.gasPrice = null;
     this.ethereumStatus = null;
@@ -19,7 +20,7 @@ var NetworkStore = Fluxxor.createStore({
     this.isMonitoringBlocks = false;
 
     this.bindActions(
-      constants.network.LOAD_NETWORK, this.handleUpdateNetwork,
+      constants.network.UPDATE_NETWORK, this.handleUpdateNetwork,
       constants.network.UPDATE_READY, this.handleUpdateReady,
       constants.network.UPDATE_ETHEREUM_STATUS, this.handleUpdateEthereumStatus,
       constants.network.UPDATE_IS_MONITORING_BLOCKS, this.handleUpdateIsMonitoringBlocks,
@@ -33,7 +34,8 @@ var NetworkStore = Fluxxor.createStore({
       client: this.client,
       peerCount: this.peerCount,
       blockNumber: this.blockNumber,
-      blocktime: this.blocktime,
+      blockDate: this.blockDate,
+      blockTime: this.blockTime,
       ether: this.ether,
       gasPrice: this.gasPrice,
       ethereumStatus: this.ethereumStatus,

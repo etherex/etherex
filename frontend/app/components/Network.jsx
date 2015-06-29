@@ -21,7 +21,7 @@ var Network = React.createClass({
 
     var formattedGasPrice = '-';
     if (this.state.network.gasPrice)
-      formattedGasPrice = utils.formatBalance(this.state.network.gasPrice.valueOf(), 0);
+      formattedGasPrice = utils.formatBalance(this.state.network.gasPrice.valueOf(), 4);
 
     return (
       <div className="panel panel-default network">
@@ -51,7 +51,10 @@ var Network = React.createClass({
             GAS PRICE<span className="pull-right">{ formattedGasPrice }</span>
           </p>
           <p className="block-time">
-            BLOCK TIME<span className="pull-right">{ this.state.network.blocktime || '-' }</span>
+            BLOCK TIME<span className="pull-right">{ this.state.network.blockTime || '-' }</span>
+          </p>
+          <p className="last-block">
+            LAST BLOCK<span className="pull-right">{ this.state.network.blockDate || '-' }</span>
           </p>
         </div>
       </div>

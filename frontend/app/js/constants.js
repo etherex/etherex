@@ -13,7 +13,7 @@ module.exports = {
         UPDATE_RANGE_END: null
     }),
     network: keyMirror({
-        LOAD_NETWORK: null,
+        UPDATE_NETWORK: null,
         UPDATE_READY: null,
         UPDATE_ETHEREUM_STATUS: null,
         UPDATE_IS_MONITORING_BLOCKS: null,

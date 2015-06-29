@@ -1,6 +1,5 @@
 var constants = require('../js/constants');
-if (typeof web3 === 'undefined')
-    var web3 = require('web3');
+var moment = require('moment');
 
 var NetworkActions = function() {
   /**
@@ -40,13 +39,11 @@ var NetworkActions = function() {
     }
 
     if (nowUp) {
-      var timedOut = 120; // TODO as config
-      var blockChainAge = ethereumClient.blockChainAge();
-      this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, { blockChainAge: blockChainAge });
+      var timedOut = this.flux.store('config').getState().timeout;
 
-      this.flux.actions.network.loadNetwork();
+      this.flux.actions.network.updateNetwork();
 
-      if (blockChainAge > timedOut) {
+      if (networkState.blockChainAge > timedOut) {
         // Also put trades in loading state if network was not ready
         this.dispatch(constants.trade.LOAD_TRADES);
 
@@ -56,7 +53,7 @@ var NetworkActions = function() {
         this.dispatch(constants.config.UPDATE_PERCENT_LOADED_SUCCESS, { percentLoaded: 100 });
         this.flux.actions.user.loadAddresses(false);
       }
-      else if (blockChainAge <= timedOut) {
+      else if (networkState.blockChainAge <= timedOut) {
         if (!networkState.ready || wasDown) {
           // Also put trades in loading state if network was not ready
           this.dispatch(constants.trade.LOAD_TRADES);
@@ -75,30 +72,52 @@ var NetworkActions = function() {
       setTimeout(this.flux.actions.network.checkNetwork, 3000);
   };
 
-  this.loadNetwork = function () {
+  this.updateNetwork = function () {
     var ethereumClient = this.flux.store('config').getEthereumClient();
 
-    var networkStats = ethereumClient.getStats();
-    var previousBlock = 0;
-    if (web3.eth.blockNumber > 3)
-      previousBlock = web3.eth.getBlock(web3.eth.blockNumber - 2).timestamp;
-    var currentBlock = web3.eth.getBlock('latest').timestamp;
-    var diff = currentBlock - previousBlock;
+    // Get last block's timestamp and calculate block time and age
+    ethereumClient.getBlock('latest', function(block) {
+      // Update block date
+      this.dispatch(constants.network.UPDATE_NETWORK, {
+        blockNumber: block.number,
+        blockDate: moment(block.timestamp * 1000).format('MMM Do, HH:mm')
+      });
 
-    var blockChainAge = ethereumClient.blockChainAge();
-    this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, {
-      blockChainAge: blockChainAge
-    });
+      // Update block time
+      if (block.number > 1) {
+        ethereumClient.getBlock(block.number - 1, function(previous) {
+          var diff = block.timestamp - previous.timestamp;
+          this.dispatch(constants.network.UPDATE_NETWORK, {
+            blockTime: diff + " s"
+          });
+        }.bind(this));
+      }
 
-    this.dispatch(constants.network.LOAD_NETWORK, {
-      client: networkStats.client,
-      peerCount: networkStats.peerCount,
-      blockNumber: networkStats.blockNumber,
-      gasPrice: networkStats.gasPrice,
-      mining: networkStats.mining,
-      hashrate: networkStats.hashrate,
-      blocktime: diff + " s"
-    });
+      // Update blockchain age
+      if (block.timestamp) {
+        var blockChainAge = (new Date().getTime() / 1000) - block.timestamp;
+        this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, {
+          blockChainAge: blockChainAge
+        });
+      }
+    }.bind(this));
+
+    // Update other metrics
+    ethereumClient.getClient(function(client) {
+      this.dispatch(constants.network.UPDATE_NETWORK, { client: client });
+    }.bind(this));
+    ethereumClient.getPeerCount(function(peerCount) {
+      this.dispatch(constants.network.UPDATE_NETWORK, { peerCount: peerCount });
+    }.bind(this));
+    ethereumClient.getGasPrice(function(gasPrice) {
+      this.dispatch(constants.network.UPDATE_NETWORK, { gasPrice: gasPrice });
+    }.bind(this));
+    ethereumClient.getMining(function(mining) {
+      this.dispatch(constants.network.UPDATE_NETWORK, { mining: mining });
+    }.bind(this));
+    ethereumClient.getHashrate(function(hashrate) {
+      this.dispatch(constants.network.UPDATE_NETWORK, { hashrate: hashrate });
+    }.bind(this));
   };
 
   /**
@@ -106,7 +125,7 @@ var NetworkActions = function() {
    */
   this.loadEverything = function () {
     this.flux.actions.config.updateEthereumClient();
-    this.flux.actions.network.loadNetwork();
+    this.flux.actions.network.updateNetwork();
 
     // Trigger loading addresses, which load markets, which load trades
     this.flux.actions.user.loadAddresses(true);
@@ -119,7 +138,7 @@ var NetworkActions = function() {
    * Update data that should change over time in the UI.
    */
   this.onNewBlock = function () {
-    this.flux.actions.network.loadNetwork();
+    this.flux.actions.network.updateNetwork();
 
     // Already using watch in EthereumClient, but not reliable enough yet
     var networkState = this.flux.store('network').getState();
