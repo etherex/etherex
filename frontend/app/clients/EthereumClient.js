@@ -303,7 +303,7 @@ var EthereumClient = function(params) {
         }
     };
 
-    this.loadTrades = function(flux, market, progress, success, failure) {
+    this.loadTrades = function(market, progress, success, failure) {
         try {
             // Set defaultBlock to 'pending' trade IDs
             web3.eth.defaultBlock = 'pending';

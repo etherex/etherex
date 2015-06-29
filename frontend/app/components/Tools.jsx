@@ -1,6 +1,7 @@
 /** @jsx React.DOM */
 
 var React = require("react");
+var utils = require("../js/utils");
 
 var AlertDismissable = require('./AlertDismissable');
 
@@ -15,6 +16,18 @@ var TradeList = React.createClass({
       alertLevel: 'info',
       alertMessage: ''
     };
+  },
+
+  componentDidMount: function() {
+    if (this.props.flux.store('config').getState().debug) {
+      var measurements = React.addons.Perf.stop();
+      React.addons.Perf.printInclusive(measurements);
+      utils.debug("Inclusive", "^");
+      React.addons.Perf.printExclusive(measurements);
+      utils.debug("Exclusive", "^");
+      React.addons.Perf.printWasted(measurements);
+      utils.debug("Wasted", "^");
+    }
   },
 
   setAlert: function(alertLevel, alertMessage) {

@@ -169,15 +169,11 @@ var ErrorModal = React.createClass({
       else
         lastBlockAge = moment().subtract(nextProps.network.blockChainAge, 'seconds').fromNow();
 
-      var percentLoaded = nextProps.config.percentLoaded;
-      if (!nextProps.network.ready)
-        percentLoaded = (nextProps.config.timeout / nextProps.network.blockChainAge) * 100;
-
       this.setState({
         isModalOpen: true,
         isLoading: true,
         lastBlockAge: lastBlockAge,
-        percentLoaded: percentLoaded
+        percentLoaded: nextProps.config.percentLoaded
       });
     }
     else {

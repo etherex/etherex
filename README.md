@@ -23,8 +23,8 @@ Components
 Requirements
 ------------
 * [Serpent](https://github.com/ethereum/serpent) compiler by Vitalik Buterin
-* [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) node by Gavin Wood
-* [go-ethereum](https://github.com/ethereum/go-ethereum) browser by Jeffrey Wilcke
+* [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) client by Gavin Wood
+* [go-ethereum](https://github.com/ethereum/go-ethereum) client by Jeffrey Wilcke
 * [pyethereum](https://github.com/ethereum/pyethereum) Python Ethereum client (tests only)
 * [PyEPM](https://github.com/etherex/pyepm) for deployment
 * [node](http://nodejs.org/) and [grunt](http://gruntjs.com/) for UI development
@@ -67,10 +67,11 @@ npm install
 grunt
 ```
 
+And open `http://localhost:8089/` in your browser.
 
 ### Deployment
 
-Requires a working [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) client with JSONRPC, [Serpent](https://github.com/ethereum/serpent) and [PyEPM](https://github.com/etherex/pyepm)
+Requires a local client (Go or C++) with JSONRPC, [Serpent](https://github.com/ethereum/serpent) and [PyEPM](https://github.com/etherex/pyepm)
 
 ```
 cd contracts

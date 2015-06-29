@@ -35,25 +35,28 @@ var NetworkActions = function() {
         ethereumStatus: constants.network.ETHEREUM_STATUS_CONNECTED
       });
       this.flux.actions.network.initializeNetwork();
+      this.flux.actions.network.updateBlockchainAge(false); // sync
     }
 
     if (nowUp) {
-      this.flux.actions.network.updateBlockchainAge();
-      this.flux.actions.network.updateNetwork();
+      this.flux.actions.network.updateBlockchainAge(true); // async
 
-      var timedOut = this.flux.store('config').getState().timeout;
+      var timeOut = this.flux.store('config').getState().timeout;
 
-      if (networkState.blockChainAge > timedOut) {
+      if (networkState.blockChainAge > timeOut) {
         // Also put trades in loading state if network was not ready
         this.dispatch(constants.trade.LOAD_TRADES);
 
         this.dispatch(constants.network.UPDATE_READY, {
           ready: false
         });
-        this.dispatch(constants.config.UPDATE_PERCENT_LOADED_SUCCESS, { percentLoaded: 100 });
+
+        this.dispatch(constants.config.UPDATE_PERCENT_LOADED_SUCCESS, {
+          percentLoaded: (timeOut / networkState.blockChainAge) * 100
+        });
         this.flux.actions.user.loadAddresses(false);
       }
-      else if (networkState.blockChainAge && networkState.blockChainAge <= timedOut) {
+      else if (networkState.blockChainAge && networkState.blockChainAge <= timeOut) {
         if (!networkState.ready || wasDown) {
           // Also put trades in loading state if network was not ready
           this.dispatch(constants.trade.LOAD_TRADES);
@@ -73,17 +76,26 @@ var NetworkActions = function() {
   };
 
   // Sync method to update blockchain age
-  this.updateBlockchainAge = function () {
+  this.updateBlockchainAge = function (async) {
     var ethereumClient = this.flux.store('config').getEthereumClient();
-
-    var block = ethereumClient.getBlock('latest');
-
-    // Update blockchain age
-    if (block.timestamp) {
-      var blockChainAge = (new Date().getTime() / 1000) - block.timestamp;
-      this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, {
-        blockChainAge: blockChainAge
-      });
+    if (async) {
+      ethereumClient.getBlock('latest', function(block) {
+        if (block.timestamp) {
+          var blockChainAge = (new Date().getTime() / 1000) - block.timestamp;
+          this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, {
+            blockChainAge: blockChainAge
+          });
+        }
+      }.bind(this));
+    }
+    else {
+      var block = ethereumClient.getBlock('latest');
+      if (block.timestamp) {
+        var blockChainAge = (new Date().getTime() / 1000) - block.timestamp;
+        this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, {
+          blockChainAge: blockChainAge
+        });
+      }
     }
   };
 

@@ -1,6 +1,6 @@
 /** @jsx React.DOM */
 
-var React = require("react");
+var React = require("react/addons");
 var Fluxxor = require("fluxxor");
 var Router = require("react-router");
 var Route = Router.Route;
@@ -60,10 +60,19 @@ var actions = {
 
 var flux = new Fluxxor.Flux(stores, actions);
 
-if (flux.store('config').getState().debug)
+if (flux.store('config').getState().debug) {
+  var utils = require('./js/utils');
   flux.on("dispatch", function(type, payload) {
-    console.log("Dispatched", type, payload);
+    utils.debug(type, payload);
   });
+  React.addons.Perf.start();
+}
+
+flux.setDispatchInterceptor(function(action, dispatch) {
+  React.addons.batchedUpdates(function() {
+    dispatch(action);
+  });
+});
 
 var routes = (
     <Route name="app" handler={EtherExApp} flux={flux}>

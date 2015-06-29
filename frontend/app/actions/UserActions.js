@@ -10,7 +10,8 @@ var UserActions = function() {
         this.dispatch(constants.user.LOAD_ADDRESSES);
 
         _client.loadAddresses(function(addresses) {
-            this.flux.actions.user.loadDefaultAccount();
+            if (init)
+              this.flux.actions.user.loadDefaultAccount();
 
             // Load primary address
             var primary = false;
