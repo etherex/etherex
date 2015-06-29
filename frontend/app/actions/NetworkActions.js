@@ -99,6 +99,13 @@ var NetworkActions = function() {
     }
   };
 
+  this.updateClientInfo = function() {
+    var ethereumClient = this.flux.store('config').getEthereumClient();
+    ethereumClient.getClient(function(client) {
+      this.dispatch(constants.network.UPDATE_NETWORK, { client: client });
+    }.bind(this));
+  };
+
   this.updateNetwork = function () {
     var ethereumClient = this.flux.store('config').getEthereumClient();
 
@@ -113,38 +120,36 @@ var NetworkActions = function() {
       // Update block time
       if (block.number > 1) {
         ethereumClient.getBlock(block.number - 1, function(previous) {
-          var diff = block.timestamp - previous.timestamp;
           this.dispatch(constants.network.UPDATE_NETWORK, {
-            blockTime: diff + " s"
+            blockTime: block.timestamp - previous.timestamp + " s"
           });
         }.bind(this));
       }
 
       // Update blockchain age
       if (block.timestamp) {
-        var blockChainAge = (new Date().getTime() / 1000) - block.timestamp;
         this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, {
-          blockChainAge: blockChainAge
+          blockChainAge: (new Date().getTime() / 1000) - block.timestamp
         });
       }
     }.bind(this));
 
     // Update other metrics
-    ethereumClient.getClient(function(client) {
-      this.dispatch(constants.network.UPDATE_NETWORK, { client: client });
-    }.bind(this));
     ethereumClient.getPeerCount(function(peerCount) {
       this.dispatch(constants.network.UPDATE_NETWORK, { peerCount: peerCount });
     }.bind(this));
-    ethereumClient.getGasPrice(function(gasPrice) {
-      this.dispatch(constants.network.UPDATE_NETWORK, { gasPrice: gasPrice });
-    }.bind(this));
-    ethereumClient.getMining(function(mining) {
-      this.dispatch(constants.network.UPDATE_NETWORK, { mining: mining });
-    }.bind(this));
-    ethereumClient.getHashrate(function(hashrate) {
-      this.dispatch(constants.network.UPDATE_NETWORK, { hashrate: hashrate });
-    }.bind(this));
+
+    if (this.flux.store('network').getState().ready) {
+      ethereumClient.getGasPrice(function(gasPrice) {
+        this.dispatch(constants.network.UPDATE_NETWORK, { gasPrice: gasPrice });
+      }.bind(this));
+      ethereumClient.getMining(function(mining) {
+        this.dispatch(constants.network.UPDATE_NETWORK, { mining: mining });
+      }.bind(this));
+      ethereumClient.getHashrate(function(hashrate) {
+        this.dispatch(constants.network.UPDATE_NETWORK, { hashrate: hashrate });
+      }.bind(this));
+    }
   };
 
   /**
@@ -199,6 +204,7 @@ var NetworkActions = function() {
   };
 
   this.initializeNetwork = function() {
+    this.flux.actions.network.updateClientInfo();
     this.flux.actions.network.updateNetwork();
 
     // start monitoring for updates
