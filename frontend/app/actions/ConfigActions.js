@@ -16,7 +16,7 @@ var ConfigActions = function() {
     var ethereumClient = new EthereumClient(clientParams);
 
     // Reload range configs from client on first run
-    if (!configState.ethereumClient) {
+    if (!configState.ethereumClient && ethereumClient.isAvailable()) {
       var range = false;
       var rangeEnd = false;
 

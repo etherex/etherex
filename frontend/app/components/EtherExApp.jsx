@@ -148,7 +148,8 @@ var ErrorModal = React.createClass({
       isModalOpen: false,
       isLoading: false,
       isDemo: false,
-      lastBlockAge: 0
+      lastBlockAge: 0,
+      percentLoaded: 0
     };
   },
 
@@ -158,7 +159,7 @@ var ErrorModal = React.createClass({
       this.setState({
         isModalOpen: true
       });
-    } else if (!nextProps.network.ready) {
+    } else if (!nextProps.network.ready || nextProps.config.percentLoaded < 100) {
       var lastBlockAge = nextProps.network.blockChainAge;
       var now = (new Date().getTime() / 1000) - 1;
 
@@ -170,7 +171,8 @@ var ErrorModal = React.createClass({
       this.setState({
         isModalOpen: true,
         isLoading: true,
-        lastBlockAge: lastBlockAge
+        lastBlockAge: lastBlockAge,
+        percentLoaded: nextProps.config.percentLoaded
       });
     } else {
       this.setState({
@@ -247,9 +249,7 @@ var ErrorModal = React.createClass({
           <div className="modal-body clearfix">
               <h4>Ethereum loading</h4>
               <p>The Ethereum block chain is not current and is fetching blocks from peers.</p>
-              { this.props.config.percentLoaded ?
-                <ProgressBar active now={this.props.config.percentLoaded} /> :
-                <ProgressBar active now={100} /> }
+              <ProgressBar active now={this.state.percentLoaded} />
               <p>Last block was {this.state.lastBlockAge}.</p>
           </div>
         </Modal>

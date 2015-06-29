@@ -40,7 +40,7 @@ var NetworkActions = function() {
     }
 
     if (nowUp) {
-      var timedOut = 90; // TODO as config
+      var timedOut = 120; // TODO as config
       var blockChainAge = ethereumClient.blockChainAge();
       this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, { blockChainAge: blockChainAge });
 
@@ -53,6 +53,7 @@ var NetworkActions = function() {
         this.dispatch(constants.network.UPDATE_READY, {
           ready: false
         });
+        this.dispatch(constants.config.UPDATE_PERCENT_LOADED_SUCCESS, { percentLoaded: 100 });
         this.flux.actions.user.loadAddresses(false);
       }
       else if (blockChainAge <= timedOut) {
@@ -63,6 +64,7 @@ var NetworkActions = function() {
           this.dispatch(constants.network.UPDATE_READY, {
             ready: true
           });
+          this.dispatch(constants.config.UPDATE_PERCENT_LOADED_SUCCESS, { percentLoaded: 0 });
           this.flux.actions.network.loadEverything();
         }
       }
