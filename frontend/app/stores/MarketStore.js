@@ -5,6 +5,7 @@ var bigRat = require("big-rational");
 
 var constants = require("../js/constants");
 var fixtures = require("../js/fixtures");
+var utils = require("../js/utils");
 
 var MarketStore = Fluxxor.createStore({
 
@@ -65,7 +66,7 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onChangeMarket: function(payload) {
-        // console.log("MARKET: ", payload);
+        utils.log("MARKET: ", payload);
         this.market = payload;
         this.market.txs = [];
         this.market.data = {};

@@ -72,6 +72,27 @@ var utils = {
 
   numeral: function(n, p) {
     return numeral(n).format('0,0.' + '0'.repeat(p));
+  },
+
+  consoleLog: 'background-color: #222; color: #fff; padding: 2px 6px;',
+  consoleWarn: 'background-color: #c87f0a; color: #fff; padding: 2px 6px;',
+  consoleError: 'background-color: #d62c1a; color: #fff; padding: 2px 6px;',
+  consoleDebug: 'background-color: #217dbb; color: #fff; padding: 2px 6px;',
+
+  log: function(prefix, message) {
+    console.log('%cEtherEx', this.consoleLog, prefix, message);
+  },
+
+  warn: function(prefix, message) {
+    console.warn('%cEtherEx', this.consoleWarn, prefix, message);
+  },
+
+  error: function(prefix, message) {
+    console.error('%cEtherEx', this.consoleError, prefix, message);
+  },
+
+  debug: function(prefix, message) {
+    console.log('%cEtherEx', this.consoleDebug, prefix, message);
   }
 };
 

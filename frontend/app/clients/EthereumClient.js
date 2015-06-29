@@ -24,7 +24,7 @@ var EthereumClient = function(params) {
         var contract = ContractABI.at(params.address);
     }
     catch(e) {
-        console.log("Some web3.js error...", String(e));
+        utils.error("Some web3.js error...", String(e));
     }
 
     this.filters = {};
@@ -61,7 +61,7 @@ var EthereumClient = function(params) {
         web3.reset();
       }
       catch (e) {
-        console.log(String(e));
+        utils.error(String(e));
       }
     };
 
