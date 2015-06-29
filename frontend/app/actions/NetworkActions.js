@@ -35,13 +35,14 @@ var NetworkActions = function() {
       this.dispatch( constants.network.UPDATE_ETHEREUM_STATUS, {
         ethereumStatus: constants.network.ETHEREUM_STATUS_CONNECTED
       });
-      this.flux.actions.network.startMonitoring();
+      this.flux.actions.network.initializeNetwork();
     }
 
     if (nowUp) {
-      var timedOut = this.flux.store('config').getState().timeout;
-
+      this.flux.actions.network.updateBlockchainAge();
       this.flux.actions.network.updateNetwork();
+
+      var timedOut = this.flux.store('config').getState().timeout;
 
       if (networkState.blockChainAge > timedOut) {
         // Also put trades in loading state if network was not ready
@@ -53,7 +54,7 @@ var NetworkActions = function() {
         this.dispatch(constants.config.UPDATE_PERCENT_LOADED_SUCCESS, { percentLoaded: 100 });
         this.flux.actions.user.loadAddresses(false);
       }
-      else if (networkState.blockChainAge <= timedOut) {
+      else if (networkState.blockChainAge && networkState.blockChainAge <= timedOut) {
         if (!networkState.ready || wasDown) {
           // Also put trades in loading state if network was not ready
           this.dispatch(constants.trade.LOAD_TRADES);
@@ -62,7 +63,7 @@ var NetworkActions = function() {
             ready: true
           });
           this.dispatch(constants.config.UPDATE_PERCENT_LOADED_SUCCESS, { percentLoaded: 0 });
-          this.flux.actions.network.loadEverything();
+          this.flux.actions.config.initializeData();
         }
       }
     }
@@ -70,6 +71,21 @@ var NetworkActions = function() {
     // check yo self
     if (!this.flux.store('config').getState().demoMode)
       setTimeout(this.flux.actions.network.checkNetwork, 3000);
+  };
+
+  // Sync method to update blockchain age
+  this.updateBlockchainAge = function () {
+    var ethereumClient = this.flux.store('config').getEthereumClient();
+
+    var block = ethereumClient.getBlock('latest');
+
+    // Update blockchain age
+    if (block.timestamp) {
+      var blockChainAge = (new Date().getTime() / 1000) - block.timestamp;
+      this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, {
+        blockChainAge: blockChainAge
+      });
+    }
   };
 
   this.updateNetwork = function () {
@@ -80,7 +96,7 @@ var NetworkActions = function() {
       // Update block date
       this.dispatch(constants.network.UPDATE_NETWORK, {
         blockNumber: block.number,
-        blockDate: moment(block.timestamp * 1000).format('MMM Do, HH:mm')
+        blockDate: moment(block.timestamp * 1000).format('MMM Do, HH:mm:ss')
       });
 
       // Update block time
@@ -118,20 +134,6 @@ var NetworkActions = function() {
     ethereumClient.getHashrate(function(hashrate) {
       this.dispatch(constants.network.UPDATE_NETWORK, { hashrate: hashrate });
     }.bind(this));
-  };
-
-  /**
-   * Load all of the application's data, particularly during initialization.
-   */
-  this.loadEverything = function () {
-    this.flux.actions.config.updateEthereumClient();
-    this.flux.actions.network.updateNetwork();
-
-    // Trigger loading addresses, which load markets, which load trades
-    this.flux.actions.user.loadAddresses(true);
-
-    // start monitoring for updates
-    this.flux.actions.network.startMonitoring();
   };
 
   /**
@@ -182,6 +184,13 @@ var NetworkActions = function() {
   this.reset = function() {
     var ethereumClient = this.flux.store('config').getEthereumClient();
     ethereumClient.reset();
+    this.flux.actions.network.startMonitoring();
+  };
+
+  this.initializeNetwork = function() {
+    this.flux.actions.network.updateNetwork();
+
+    // start monitoring for updates
     this.flux.actions.network.startMonitoring();
   };
 };

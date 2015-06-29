@@ -81,27 +81,6 @@ var EthereumClient = function(params) {
       web3.db.putHex(db, key, value);
     };
 
-    this.setAddressWatch = function(flux, address) {
-      // ETH balance
-      this.filters.address = web3.eth.filter({
-        address: address
-      }).watch(flux.actions.user.updateBalance);
-    };
-
-    this.setMarketsWatch = function(flux, markets) {
-      // Watch exchange's address and update markets
-      this.filters.exchange = web3.eth.filter({
-        address: params.address
-      }).watch(flux.actions.market.updateMarkets);
-
-      // Watch market's contracts and update sub balances
-      var market_addresses = _.pluck(markets, 'address');
-      for (var i = 0; i < market_addresses.length; i++)
-        this.filters.markets = web3.eth.filter({
-          address: market_addresses[i]
-        }).watch(flux.actions.user.updateBalanceSub);
-    };
-
     this.getClient = function(callback) {
       web3.version.getClient(function(error, result) {
         if (error) {
@@ -113,13 +92,16 @@ var EthereumClient = function(params) {
     };
 
     this.getBlock = function(blockNumberOrHash, callback) {
-      web3.eth.getBlock(blockNumberOrHash, function(error, block) {
-        if (error) {
-          utils.error(error);
-        } else {
-          callback(block);
-        }
-      });
+      if (callback)
+        web3.eth.getBlock(blockNumberOrHash, function(error, block) {
+          if (error) {
+            utils.error(error);
+          } else {
+            callback(block);
+          }
+        });
+      else
+        return web3.eth.getBlock(blockNumberOrHash);
     };
 
     this.getBlockNumber = function(callback) {
@@ -171,6 +153,31 @@ var EthereumClient = function(params) {
         }
       });
     };
+
+
+    // Watchers
+
+    this.setAddressWatch = function(flux, address) {
+      // ETH balance
+      this.filters.address = web3.eth.filter({
+        address: address
+      }).watch(flux.actions.user.updateBalance);
+    };
+
+    this.setMarketsWatch = function(flux, markets) {
+      // Watch exchange's address and update markets
+      this.filters.exchange = web3.eth.filter({
+        address: params.address
+      }).watch(flux.actions.market.updateMarkets);
+
+      // Watch market's contracts and update sub balances
+      var market_addresses = _.pluck(markets, 'address');
+      for (var i = 0; i < market_addresses.length; i++)
+        this.filters.markets = web3.eth.filter({
+          address: market_addresses[i]
+        }).watch(flux.actions.user.updateBalanceSub);
+    };
+
 
     // Loading methods
 
@@ -712,6 +719,7 @@ var EthereumClient = function(params) {
         }
     };
 
+
     // Sub actions
 
     this.sendSub = function(user, amount, recipient, market, success, failure) {
@@ -978,17 +986,6 @@ var EthereumClient = function(params) {
             unconfirmed = fn(unconfirmed);
 
         return unconfirmed;
-    };
-
-    this.getStats = function() {
-      return {
-        client: web3.version.client,
-        gasPrice: web3.eth.gasPrice,
-        blockNumber: web3.eth.blockNumber,
-        mining: web3.eth.mining,
-        hashrate: web3.eth.hashrate,
-        peerCount: web3.net.peerCount
-      };
     };
 
 };

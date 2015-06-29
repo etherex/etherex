@@ -255,7 +255,7 @@ var ErrorModal = React.createClass({
           <div className="modal-body clearfix">
               <h4>Ethereum loading</h4>
               <p>The Ethereum block chain is not current and is fetching blocks from peers.</p>
-              <ProgressBar active now={this.state.percentLoaded} />
+              <ProgressBar active bsStyle={this.props.network.ready ? 'success' : 'default'} now={this.state.percentLoaded} />
               <p>Last block was {this.state.lastBlockAge}.</p>
           </div>
         </Modal>

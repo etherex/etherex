@@ -103,6 +103,14 @@ var ConfigActions = function() {
     this.flux.actions.config.updateEthereumClient();
     this.flux.actions.network.checkNetwork();
   };
+
+  /**
+   * Load all of the application's data, particularly during initialization.
+   */
+  this.initializeData = function () {
+    // Trigger loading addresses, which load markets, which load trades
+    this.flux.actions.user.loadAddresses(true);
+  };
 };
 
 module.exports = ConfigActions;
