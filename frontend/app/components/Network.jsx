@@ -14,8 +14,8 @@ var Network = React.createClass({
       user: this.props.flux.store('UserStore').getState().user,
       network: networkState,
       host: this.props.flux.store('config').getState().host,
-      blockDate: moment(networkState.blockTimestamp * 1000).format('MMM Do, HH:mm:ss'),
-      lastBlock: utils.numeral(new Date().getTime() / 1000 - networkState.blockTimestamp, 0) + 's'
+      blockDate: networkState.blockTimestamp ? moment(networkState.blockTimestamp * 1000).format('MMM Do, HH:mm:ss') : '-',
+      lastBlock: networkState.blockTimestamp ? utils.numeral(new Date().getTime() / 1000 - networkState.blockTimestamp, 0) + 's' : '-'
     };
   },
 
@@ -36,7 +36,7 @@ var Network = React.createClass({
 
   count: function () {
     this.setState({
-      lastBlock: utils.numeral(new Date().getTime() / 1000 - this.state.network.blockTimestamp, 0) + 's'
+      lastBlock: this.state.network.blockTimestamp ? utils.numeral(new Date().getTime() / 1000 - this.state.network.blockTimestamp, 0) + 's' : '-'
     });
   },
 
