@@ -14,7 +14,7 @@ data exchange
 data market_id
 data balances[2^160](balance)
 
-extern exchange: [add_market:iiiii:i, buy:iii:i, cancel:i:i, deposit:iii:i, get_market:i:a, get_sub_balance:ii:a, get_trade:i:a, get_trade_ids:i:a, price:i:i, sell:iii:i, trade:ii:i, withdraw:ii:i]
+extern exchange: [deposit:iii:i]
 
 def init():
     self.owner = msg.sender
@@ -47,8 +47,8 @@ def transfer(recipient, amount):
         return(1)
     return(0)
 
-def balance(addr):
-    return(self.balances[addr].balance)
+def balance(address):
+    return(self.balances[address].balance)
 
 def set_exchange(addr, market_id):
     if addr <= 0 or market_id <= 0:

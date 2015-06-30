@@ -9,19 +9,16 @@
 # EtherEx
 #
 
-data type  # 0x
-data creator  # 0x1
-data created  # 0x2
-data status  # 0x3
-data last_market  # 0x4
-data last_trade  # 0x5
+data created  # 0x
+data last_market  # 0x1
+data last_trade  # 0x2
 
-data markets_ptr  # 0x6
-data trades_ptr  # 0x7
+data markets_ptr  # 0x3
+data trades_ptr  # 0x4
 
-data log_gas  # 0x8
-data log_last_trade  # 0x9
-data log_timestamp  # 0xa
+data log_gas  # 0x5
+data log_last_trade  # 0x6
+data log_timestamp  # 0x7
 
 data markets[2^160](id, name, contract, decimals, precision, minimum, category, last_price, owner, block, total_trades, trade_ids[](id))
 data trades[2^160](id, type, market, amount, price, owner, block, refhash)
@@ -29,13 +26,12 @@ data balances[][](available, trading)
 
 event log_price(market:indexed, type, price, amount, timestamp)
 event log_add_tx(sender:indexed, market, type, price, amount)
-event log_fill_tx(sender:indexed, owner, market, type, tradeid, price, amount)
+event log_fill_tx(sender:indexed, owner:indexed, market, type, tradeid, price, amount)
 event log_deposit(sender:indexed, market, amount)
 event log_withdraw(address:indexed, market, amount)
 event log_cancel(sender:indexed, market, tradeid, price, amount)
 
-extern subcurrency: [balance:i:i, transfer:ii:i]
-extern namereg: [getname:i:i, register:ii:i, unregister:i:i]
+extern subcurrency: [transfer:ii:i]
 
 macro MARKET_FIELDS():
     12
@@ -90,7 +86,6 @@ macro save_trade($type, $amount, $price, $market_id):
 
     # Log transaction
     log(type=log_add_tx, msg.sender, $market_id, $type, $price, $amount)
-    # log(msg.sender, $market_id, $type, $price, data=[$amount])
 
     return(trade_id)
 
@@ -106,7 +101,6 @@ macro remove_trade($trade_id):
 
 
 def init():
-    self.creator = msg.sender  # Creator of this contract
     self.created = block.timestamp  # Timestamp when this contract was created
 
 def shared():
@@ -244,7 +238,6 @@ def trade(max_amount, trade_ids:arr):
 
                 # Log transaction
                 log(type=log_fill_tx, msg.sender, owner, market_id, 2, trade_id, price, fill)
-                # log(msg.sender, owner, market_id, 2, data=[trade_id, price, fill])
             else:
                 return(12)
 
@@ -281,7 +274,6 @@ def trade(max_amount, trade_ids:arr):
 
                 # Log transaction
                 log(type=log_fill_tx, msg.sender, owner, market_id, 1, trade_id, price, fill)
-                # log(msg.sender, owner, market_id, 1, data=[trade_id, price, fill])
             else:
                 return(12)
 
@@ -290,7 +282,6 @@ def trade(max_amount, trade_ids:arr):
 
         # Log price, fill amount, type and timestamp
         log(type=log_price, market_id, type, price, fill, block.timestamp)
-        # log(market_id, type, price, fill, data=[block.timestamp])
 
         # Update max_amount and max_value
         max_amount -= fill
@@ -314,7 +305,6 @@ def deposit(address, amount, market_id):
         newbalance = balance + amount
         self.balances[address][market_id].available = newbalance
         log(type=log_deposit, address, market_id, amount)
-        # log(address, market_id, amount)
         return(newbalance)
     return(0)
 
@@ -327,7 +317,6 @@ def withdraw(amount, market_id):
         self.balances[msg.sender][market_id].available = balance - amount
         ret = self.markets[market_id].contract.transfer(msg.sender, amount, datasz=2)
         log(type=log_withdraw, msg.sender, market_id, amount)
-        # log(address, market_id, amount)
         return(ret)
     return(0)
 
@@ -366,7 +355,6 @@ def cancel(trade_id):
 
         # Log cancellation
         log(type=log_cancel, msg.sender, market_id, trade_id, price, amount)
-        # log(msg.sender, market_id, trade_id, price, data=[amount])
         return(1)
 
     return(0)
@@ -375,11 +363,7 @@ def cancel(trade_id):
 # Add market
 #
 def add_market(name, contract, decimals, precision, minimum, category):
-    # if msg.value < 10 ^ 18: # TODO - Require fee to add market?
-    #     if msg.value > 0: # "Refunding"
-    #         ret = send(msg.sender, msg.value)
-    #     return(0) # "Insufficient deposit to add market"
-
+    # Get the next market ID
     id = self.last_market + 1
 
     # Set markets pointer
@@ -401,20 +385,13 @@ def add_market(name, contract, decimals, precision, minimum, category):
     # Set last market ID
     self.last_market = id
 
-    # TODO - Issue ETX to market creator ?
-    # if msg.value > 0:
-    #     xeth = array(4)
-    #     xeth = call(markets, [1], 1, 4)
-    #     ret = msg(xeth[3], msg.value, [msg.sender, msg.value], 2)
-
     return(1)
 
 #
 # Getters
 #
 def get_last_market_id():
-    t = self.last_market
-    return(t)
+    return(self.last_market)
 
 def get_market(id):
     market = array(MARKET_FIELDS() - 1)
@@ -466,23 +443,3 @@ def get_trade(id):
 
 def get_sub_balance(address, market_id):
     return([self.balances[address][market_id].available, self.balances[address][market_id].trading]:arr)
-
-#
-# Change creator
-#
-def change_creator(new_creator):
-    if msg.sender == self.creator:
-        self.creator = new_creator // "Set creator to %s" % new_owner
-        return(1)
-    return(0)
-
-#
-# NameReg
-#
-def register(namereg):
-    if msg.sender == self.creator:
-        namereg.register(text("EtherEx"), datasz=1)
-
-def unregister(namereg):
-    if msg.sender == self.creator:
-        namereg.unregister()
