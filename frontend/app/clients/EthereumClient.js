@@ -38,14 +38,14 @@ var EthereumClient = function(params) {
       }
     };
 
-    this.startMonitoring = function(callback) {
+    this.onNewBlock = function(callback) {
       this.filters.latest = web3.eth.filter('latest');
-      this.filters.latest.watch(function (err, log) {
+      this.filters.latest.watch(_.debounce(function (err, log) {
         callback(err, log);
-      });
+      }, 1000));
     };
 
-    this.stopMonitoring = function(failure) {
+    this.stopWatching = function(failure) {
       try {
         _.each(this.filters, function(filter) {
           filter.stopWatching();
@@ -186,26 +186,18 @@ var EthereumClient = function(params) {
     };
 
     this.loadAddresses = function(success, failure) {
-        var loadPromise = new Promise(function (resolve, reject) {
-            try {
-                var accounts = web3.eth.accounts;
+        try {
+            var accounts = web3.eth.accounts;
 
-                if (!accounts || accounts.length === 0)
-                    reject("No accounts were found on this Ethereum node.");
+            if (!accounts || accounts.length === 0)
+                failure("No accounts were found on this Ethereum node.");
 
-                resolve(accounts);
-            }
-            catch (e) {
-                reject("Unable to load addresses, are you running an Ethereum node? Please load this URL in Mist, AlethZero, or with a geth/eth node running with JSONRPC enabled.");
-                // reject("Error loading accounts: " + String(e));
-            }
-        });
-
-        loadPromise.then(function (accounts) {
             success(accounts);
-        }, function (e) {
-            failure(String(e));
-        });
+        }
+        catch (e) {
+            // reject("Unable to load addresses, are you running an Ethereum node? Please load this URL in Mist, AlethZero, or with a geth/eth node running with JSONRPC enabled.");
+            failure("Error loading accounts: " + String(e));
+        }
     };
 
     this.loadMarkets = function(user, onProgress, success, failure) {

@@ -176,7 +176,7 @@ var NetworkActions = function() {
 
     if (!networkState.isMonitoringBlocks) {
       var ethereumClient = this.flux.store('config').getEthereumClient();
-      ethereumClient.startMonitoring(this.flux.actions.network.onNewBlock);
+      ethereumClient.onNewBlock(this.flux.actions.network.onNewBlock);
 
       this.dispatch(constants.network.UPDATE_IS_MONITORING_BLOCKS, {
         isMonitoringBlocks: true

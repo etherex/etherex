@@ -34,7 +34,7 @@ var Network = React.createClass({
   },
 
   count: function () {
-    var lastBlock = this.state.network.blockTimestamp ? utils.numeral(new Date().getTime() / 1000 - this.state.network.blockTimestamp, 0) : null;
+    var lastBlock = this.state.network.blockTimestamp ? new Date().getTime() / 1000 - this.state.network.blockTimestamp : null;
     var lastState = '';
     if (lastBlock) {
       if (lastBlock > 90)
@@ -45,7 +45,7 @@ var Network = React.createClass({
         lastState = 'success';
     }
     this.setState({
-      lastBlock: lastBlock ? lastBlock + ' s' : '-',
+      lastBlock: lastBlock ? utils.numeral(lastBlock, 0) + ' s' : '-',
       lastState: lastState
     });
   },

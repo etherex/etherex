@@ -23,9 +23,10 @@ var MarketSelect = require("./MarketSelect");
 var LastPrice = require("./LastPrice");
 var RangeSelect = require("./RangeSelect");
 var GraphPrice = require('./GraphPriceTechan');
-
 var Network = require('./Network');
+
 var constants = require('../js/constants');
+var utils = require('../js/utils');
 var moment = require('moment');
 
 var EtherExApp = React.createClass({
@@ -148,6 +149,7 @@ var ErrorModal = React.createClass({
       isModalOpen: false,
       isLoading: false,
       isDemo: false,
+      blocksLeft: null,
       lastBlockAge: 0,
       percentLoaded: 0
     };
@@ -172,6 +174,7 @@ var ErrorModal = React.createClass({
       this.setState({
         isModalOpen: true,
         isLoading: true,
+        blocksLeft: utils.numeral(this.props.network.blockChainAge / constants.SECONDS_PER_BLOCK, 0),
         lastBlockAge: lastBlockAge,
         percentLoaded: nextProps.config.percentLoaded
       });
@@ -253,6 +256,7 @@ var ErrorModal = React.createClass({
               <p>The Ethereum block chain is not current and is fetching blocks from peers.</p>
               <ProgressBar active bsStyle={this.props.network.ready ? 'success' : 'default'} now={this.state.percentLoaded} />
               <p>Last block was {this.state.lastBlockAge}.</p>
+              <p>Approximately {this.state.blocksLeft} blocks left to go.</p>
           </div>
         </Modal>
       );
