@@ -10,7 +10,7 @@ var utils = require("../js/utils");
 var MarketStore = Fluxxor.createStore({
 
     initialize: function(options) {
-        this.market = options.market || {txs: [], data: {}};
+        this.market = options.market || {txs: [], prices: [], data: {}};
         this.markets = options.markets || [];
         this.favorites = [];
         this.loading = true;
@@ -22,8 +22,9 @@ var MarketStore = Fluxxor.createStore({
             constants.market.LOAD_MARKETS_SUCCESS, this.onLoadMarketsSuccess,
             constants.market.CHANGE_MARKET, this.onChangeMarket,
             constants.market.UPDATE_MARKET_BALANCE, this.onUpdateMarketBalance,
-            constants.market.LOAD_PRICES, this.onLoadPrices,
-            constants.market.LOAD_TRANSACTIONS, this.onLoadTransactions,
+            constants.market.UPDATE_PRICES, this.onUpdatePrices,
+            constants.market.UPDATE_PRICES_DATA, this.onUpdatePricesData,
+            constants.market.UPDATE_TRANSACTIONS, this.onUpdateTransactions,
             constants.market.TOGGLE_FAVORITE, this.toggleFavorite
         );
 
@@ -31,7 +32,7 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onLoadMarkets: function() {
-        this.market = {txs: [], data: {}};
+        this.market = {txs: [], prices: [], data: {}};
         this.markets = [];
         this.favorites = [];
         this.loading = true;
@@ -55,6 +56,7 @@ var MarketStore = Fluxxor.createStore({
         this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
         this.market.txs = [];
         this.market.data = {};
+        this.market.prices = [];
         this.markets = payload.markets;
 
         this.favorites = payload.favorites;
@@ -70,6 +72,7 @@ var MarketStore = Fluxxor.createStore({
         this.market = payload;
         this.market.txs = [];
         this.market.data = {};
+        this.market.prices = [];
         this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
         this.emit(constants.CHANGE_EVENT);
     },
@@ -83,11 +86,17 @@ var MarketStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onLoadPrices: function(payload) {
+    onUpdatePrices: function(payload) {
+        this.market.prices.push(payload);
+        // utils.log("PRICES: ", this.market.prices);
+    },
+
+    onUpdatePricesData: function() {
         // console.log("PRICES", payload);
-        if (payload.length) {
+        var prices = this.market.prices;
+        if (prices.length) {
             var previous = {};
-            this.market.data = _.map(_.groupBy(payload.reverse(), 'timestamp'), function(logs) {
+            this.market.data = _.map(_.groupBy(prices.reverse(), 'timestamp'), function(logs) {
                 var prices = _.pluck(logs, 'price');
                 var volumes = _.pluck(logs, 'amount');
                 var high = _.max(prices);
@@ -184,9 +193,10 @@ var MarketStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onLoadTransactions: function(payload) {
-        this.market.txs = payload;
-
+    onUpdateTransactions: function(payload) {
+        this.market.txs.push(payload);
+        // utils.log("TX", payload);
+        // utils.log("TRANSACTIONS", this.market.txs);
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -201,6 +211,7 @@ var MarketStore = Fluxxor.createStore({
         return {
             market: this.market,
             markets: this.markets,
+            prices: this.prices,
             favorites: this.favorites,
             loading: this.loading,
             error: this.error

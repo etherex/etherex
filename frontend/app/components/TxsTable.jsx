@@ -79,14 +79,30 @@ var TxRow = React.createClass({
 });
 
 var TxsTable = React.createClass({
-    render: function() {
-        var txsListNodes = _.sortBy(this.props.txs, 'block').map(function (tx) {
+    getInitialState: function() {
+      return {
+        txsRows: null
+      };
+    },
+
+    componentDidMount: function() {
+      this.componentWillReceiveProps(this.props);
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        var txsRows = _.sortBy(nextProps.txs, 'block').map(function (tx) {
           return (
-              <TxRow key={tx.hash + '-' + tx.inout} tx={tx} market={this.props.market} user={this.props.user} />
+              <TxRow key={_.uniqueId()} tx={tx} market={this.props.market} user={this.props.user} />
           );
         }.bind(this));
-        txsListNodes.reverse();
+        txsRows.reverse();
 
+        this.setState({
+          txsRows: txsRows
+        });
+    },
+
+    render: function() {
         return (
             <div>
                 <h4>{this.props.title}</h4>
@@ -96,7 +112,7 @@ var TxsTable = React.createClass({
                             <th className="text-center">Block #</th>
                             <th className="text-center">In/Out</th>
                             <th className="text-center">Type</th>
-                            <th className="text-center">Origin / From / To</th>
+                            <th className="text-center">From / To</th>
                             <th className="text-right">Amount</th>
                             <th className="text-center">Market</th>
                             <th className="text-right">Price</th>
@@ -105,7 +121,7 @@ var TxsTable = React.createClass({
                         </tr>
                     </thead>
                     <tbody>
-                        {txsListNodes}
+                        {this.state.txsRows}
                     </tbody>
                 </Table>
             </div>

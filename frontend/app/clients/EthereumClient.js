@@ -386,7 +386,7 @@ var EthereumClient = function(params) {
         }
     };
 
-    this.loadPrices = function(market, success, failure) {
+    this.watchPrices = function(market, success, failure) {
         // console.log("Loading prices...");
         var toBlock = web3.eth.blockNumber;
         if (params.rangeEnd)
@@ -396,39 +396,44 @@ var EthereumClient = function(params) {
           fromBlock = 0;
 
         try {
-            var prices_filter = contract.log_price({
+            // Unload previous filter
+            if (this.prices_filter)
+              this.prices_filter.stopWatching();
+
+            this.prices_filter = contract.log_price({
               market: market.id
             }, {
               fromBlock: fromBlock,
               toBlock: toBlock
-            });
-            var pricelogs = prices_filter.get();
-            // console.log("PRICE CHANGES: ", pricelogs);
+            }).watch( function(error, log) {
+              if (error) {
+                failure("Error loading prices: " + String(error));
+                return;
+              }
+              // utils.log("PRICE CHANGE: ", log);
 
-            var prices = [];
-            var amountPrecision = Math.pow(10, market.decimals);
-            var precision = market.precision;
+              var amountPrecision = Math.pow(10, market.decimals);
+              var precision = market.precision;
 
-            for (var i = pricelogs.length - 1; i >= 0; i--) {
-                var pricelog = {
-                    timestamp: _.parseInt(web3.toDecimal(pricelogs[i].args.timestamp)),
-                    type: _.parseInt(web3.toDecimal(pricelogs[i].args.type)),
-                    price: bigRat(web3.toDecimal(pricelogs[i].args.price)).divide(precision).valueOf(),
-                    amount: bigRat(web3.toDecimal(pricelogs[i].args.amount)).divide(amountPrecision).valueOf()
-                };
-                prices.push(pricelog);
-            }
+              // for (var i = logs.length - 1; i >= 0; i--) {
+              var price = {
+                  timestamp: _.parseInt(web3.toDecimal(log.args.timestamp)),
+                  type: _.parseInt(web3.toDecimal(log.args.type)),
+                  price: bigRat(web3.toDecimal(log.args.price)).divide(precision).valueOf(),
+                  amount: bigRat(web3.toDecimal(log.args.amount)).divide(amountPrecision).valueOf()
+              };
+              // }
+              // console.log("PRICES", prices);
 
-            // console.log("PRICES", prices);
-
-            success(prices);
+              success(price);
+          });
         }
         catch (e) {
             failure("Unable to load prices: " + String(e));
         }
     };
 
-    this.loadTransactions = function(user, market, success, failure) {
+    this.watchTransactions = function(user, market, success, failure) {
         // console.log("Loading transactions...");
         var toBlock = web3.eth.blockNumber;
         if (params.rangeEnd)
@@ -438,7 +443,6 @@ var EthereumClient = function(params) {
           fromBlock = 0;
 
         try {
-            var txs = [];
             var amount = '';
             var price = '';
             var total = '';
@@ -449,24 +453,23 @@ var EthereumClient = function(params) {
             }, {
               fromBlock: fromBlock,
               toBlock: toBlock
+            }).watch( function(error, log) {
+              // console.log("TRANSACTION: ", log);
+              success({
+                hash: log.transactionHash || log.hash,
+                type: 'deposit',
+                number: log.number,
+                block: log.blockNumber,
+                inout: 'out',
+                from: web3.fromDecimal(log.args.sender),
+                to: params.address,
+                amount: log.args.amount.valueOf(),
+                market: _.parseInt(log.args.market.valueOf()),
+                price: 'N/A',
+                total: 'N/A',
+                result: 'OK'
+              });
             });
-            var txlogs = tx_filter.get();
-            // console.log("TRANSACTIONS: ", txlogs);
-            for (var i = txlogs.length - 1; i >= 0; i--)
-                txs.push({
-                  hash: txlogs[i].transactionHash || txlogs[i].hash,
-                  type: 'deposit',
-                  number: txlogs[i].number,
-                  block: txlogs[i].blockNumber,
-                  inout: 'out',
-                  from: web3.fromDecimal(txlogs[i].args.sender),
-                  to: params.address,
-                  amount: txlogs[i].args.amount.valueOf(),
-                  market: _.parseInt(txlogs[i].args.market.valueOf()),
-                  price: 'N/A',
-                  total: 'N/A',
-                  result: 'OK'
-                });
 
             // Get withdrawals
             tx_filter = contract.log_withdraw({
@@ -474,24 +477,23 @@ var EthereumClient = function(params) {
             }, {
               fromBlock: fromBlock,
               toBlock: toBlock
+            }).watch( function(error, log) {
+              // console.log("TRANSACTION: ", log);
+              success({
+                hash: log.transactionHash || log.hash,
+                type: 'withdraw',
+                number: log.number,
+                block: log.blockNumber,
+                inout: 'in',
+                from: params.address,
+                to: web3.fromDecimal(log.args.address),
+                amount: log.args.amount.valueOf(),
+                market: _.parseInt(log.args.market.valueOf()),
+                price: 'N/A',
+                total: 'N/A',
+                result: 'OK'
+              });
             });
-            txlogs = tx_filter.get();
-            // console.log("TRANSACTIONS: ", txlogs);
-            for (i = txlogs.length - 1; i >= 0; i--)
-                txs.push({
-                  hash: txlogs[i].transactionHash || txlogs[i].hash,
-                  type: 'withdraw',
-                  number: txlogs[i].number,
-                  block: txlogs[i].blockNumber,
-                  inout: 'in',
-                  from: params.address,
-                  to: web3.fromDecimal(txlogs[i].args.address),
-                  amount: txlogs[i].args.amount.valueOf(),
-                  market: _.parseInt(txlogs[i].args.market.valueOf()),
-                  price: 'N/A',
-                  total: 'N/A',
-                  result: 'OK'
-                });
 
             // Get cancelations
             tx_filter = contract.log_cancel({
@@ -499,29 +501,27 @@ var EthereumClient = function(params) {
             }, {
               fromBlock: fromBlock,
               toBlock: toBlock
-            });
-            txlogs = tx_filter.get();
-            // console.log("TRANSACTIONS: ", txlogs);
-            for (i = txlogs.length - 1; i >= 0; i--) {
-                amount = txlogs[i].args.amount.valueOf();
-                price = bigRat(txlogs[i].args.price.valueOf()).divide(market.precision).valueOf();
-                total = bigRat(amount).divide(Math.pow(10, market.decimals)).multiply(price).multiply(fixtures.ether);
+            }).watch( function(error, log) {
+              // console.log("TRANSACTION: ", log);
+              amount = log.args.amount.valueOf();
+              price = bigRat(log.args.price.valueOf()).divide(market.precision).valueOf();
+              total = bigRat(amount).divide(Math.pow(10, market.decimals)).multiply(price).multiply(fixtures.ether);
 
-                txs.push({
-                  hash: txlogs[i].transactionHash || txlogs[i].hash,
-                  type: 'cancel',
-                  number: txlogs[i].number,
-                  block: txlogs[i].blockNumber,
-                  inout: 'in',
-                  from: web3.fromDecimal(txlogs[i].args.sender),
-                  to: params.address,
-                  amount: amount,
-                  market: _.parseInt(txlogs[i].args.market.valueOf()),
-                  price: price,
-                  total: utils.formatBalance(total),
-                  result: 'OK'
-                });
-            }
+              success({
+                hash: log.transactionHash || log.hash,
+                type: 'cancel',
+                number: log.number,
+                block: log.blockNumber,
+                inout: 'in',
+                from: web3.fromDecimal(log.args.sender),
+                to: params.address,
+                amount: amount,
+                market: _.parseInt(log.args.market.valueOf()),
+                price: price,
+                total: utils.formatBalance(total),
+                result: 'OK'
+              });
+            });
 
             // Get added trades
             tx_filter = contract.log_add_tx({
@@ -529,30 +529,28 @@ var EthereumClient = function(params) {
             }, {
               fromBlock: fromBlock,
               toBlock: toBlock
-            });
-            txlogs = tx_filter.get();
-            // console.log("TRANSACTIONS: ", txlogs);
-            for (i = txlogs.length - 1; i >= 0; i--) {
-                amount = txlogs[i].args.amount.valueOf();
-                price = bigRat(txlogs[i].args.price.valueOf()).divide(market.precision).valueOf();
-                total = bigRat(amount).divide(Math.pow(10, market.decimals)).multiply(price).multiply(fixtures.ether);
+            }).watch( function(error, log) {
+              // console.log("TRANSACTION: ", log);
+              amount = log.args.amount.valueOf();
+              price = bigRat(log.args.price.valueOf()).divide(market.precision).valueOf();
+              total = bigRat(amount).divide(Math.pow(10, market.decimals)).multiply(price).multiply(fixtures.ether);
 
-                txs.push({
-                  hash: txlogs[i].transactionHash || txlogs[i].hash,
-                  type: txlogs[i].args.type.valueOf() == 1 ? 'buy' : 'sell',
-                  number: txlogs[i].number,
-                  block: txlogs[i].blockNumber,
-                  // inout: (_.parseInt(web3.toDecimal(txlogs[i].args.type)) == 1 ? 'in' : 'out'),
-                  inout: 'out',
-                  from: web3.fromDecimal(txlogs[i].args.sender),
-                  to: params.address,
-                  amount: amount,
-                  market: _.parseInt(txlogs[i].args.market.valueOf()),
-                  price: price,
-                  total: utils.formatBalance(total),
-                  result: 'OK'
-                });
-            }
+              success({
+                hash: log.transactionHash || log.hash,
+                type: log.args.type.valueOf() == 1 ? 'buy' : 'sell',
+                number: log.number,
+                block: log.blockNumber,
+                // inout: (_.parseInt(web3.toDecimal(log.args.type)) == 1 ? 'in' : 'out'),
+                inout: 'out',
+                from: web3.fromDecimal(log.args.sender),
+                to: params.address,
+                amount: amount,
+                market: _.parseInt(log.args.market.valueOf()),
+                price: price,
+                total: utils.formatBalance(total),
+                result: 'OK'
+              });
+            });
 
             // Get filled trades
             tx_filter = contract.log_fill_tx({
@@ -560,29 +558,27 @@ var EthereumClient = function(params) {
             }, {
               fromBlock: fromBlock,
               toBlock: toBlock
-            });
-            txlogs = tx_filter.get();
-            // console.log("TRANSACTIONS: ", txlogs);
-            for (i = txlogs.length - 1; i >= 0; i--) {
-                amount = txlogs[i].args.amount.valueOf();
-                price = bigRat(txlogs[i].args.price.valueOf()).divide(market.precision).valueOf();
-                total = bigRat(amount).divide(Math.pow(10, market.decimals)).multiply(price).multiply(fixtures.ether);
+            }).watch( function(error, log) {
+              // console.log("TRANSACTION: ", log);
+              amount = log.args.amount.valueOf();
+              price = bigRat(log.args.price.valueOf()).divide(market.precision).valueOf();
+              total = bigRat(amount).divide(Math.pow(10, market.decimals)).multiply(price).multiply(fixtures.ether);
 
-                txs.push({
-                  hash: txlogs[i].transactionHash || txlogs[i].hash,
-                  type: txlogs[i].args.type.valueOf() == 1 ? 'bought' : 'sold',
-                  number: txlogs[i].number,
-                  block: txlogs[i].blockNumber,
-                  inout: txlogs[i].args.type.valueOf() == 1 ? 'in' : 'out',
-                  from: web3.fromDecimal(txlogs[i].args.sender),
-                  to: params.address,
-                  amount: amount,
-                  market: _.parseInt(txlogs[i].args.market.valueOf()),
-                  price: price,
-                  total: utils.formatBalance(total),
-                  result: 'OK'
-                });
-            }
+              success({
+                hash: log.transactionHash || log.hash,
+                type: log.args.type.valueOf() == 1 ? 'bought' : 'sold',
+                number: log.number,
+                block: log.blockNumber,
+                inout: log.args.type.valueOf() == 1 ? 'in' : 'out',
+                from: web3.fromDecimal(log.args.sender),
+                to: params.address,
+                amount: amount,
+                market: _.parseInt(log.args.market.valueOf()),
+                price: price,
+                total: utils.formatBalance(total),
+                result: 'OK'
+              });
+            });
 
             // Get trades filled by others
             tx_filter = contract.log_fill_tx({
@@ -590,38 +586,29 @@ var EthereumClient = function(params) {
             }, {
               fromBlock: fromBlock,
               toBlock: toBlock
+            }).watch( function(error, log) {
+              // console.log("TRANSACTION: ", log);
+              amount = log.args.amount.valueOf();
+              price = bigRat(log.args.price.valueOf()).divide(market.precision).valueOf();
+              total = bigRat(amount).divide(Math.pow(10, market.decimals)).multiply(price).multiply(fixtures.ether);
+
+              // Refilter... TODO remove once owner is indexed / properly filtered
+              if (user.id == web3.fromDecimal(log.args.owner))
+                  success({
+                    hash: log.transactionHash || log.hash,
+                    type: log.args.type.valueOf() == 1 ? 'sold' : 'bought',
+                    number: log.number,
+                    block: log.blockNumber,
+                    inout: log.args.type.valueOf() == 1 ? 'out' : 'in',
+                    from: web3.fromDecimal(log.args.sender),
+                    to: params.address,
+                    amount: amount,
+                    market: _.parseInt(log.args.market.valueOf()),
+                    price: price,
+                    total: utils.formatBalance(total),
+                    result: 'OK'
+                  });
             });
-            txlogs = tx_filter.get();
-            // console.log("TRANSACTIONS: ", txlogs);
-            for (i = txlogs.length - 1; i >= 0; i--) {
-                amount = txlogs[i].args.amount.valueOf();
-                price = bigRat(txlogs[i].args.price.valueOf()).divide(market.precision).valueOf();
-                total = bigRat(amount).divide(Math.pow(10, market.decimals)).multiply(price).multiply(fixtures.ether);
-
-                // Refilter... TODO remove once owner is indexed / properly filtered
-                if (user.id == web3.fromDecimal(txlogs[i].args.owner))
-                    txs.push({
-                      hash: txlogs[i].transactionHash || txlogs[i].hash,
-                      type: txlogs[i].args.type.valueOf() == 1 ? 'sold' : 'bought',
-                      number: txlogs[i].number,
-                      block: txlogs[i].blockNumber,
-                      inout: txlogs[i].args.type.valueOf() == 1 ? 'out' : 'in',
-                      from: web3.fromDecimal(txlogs[i].args.sender),
-                      to: params.address,
-                      amount: amount,
-                      market: _.parseInt(txlogs[i].args.market.valueOf()),
-                      price: price,
-                      total: utils.formatBalance(total),
-                      result: 'OK'
-                    });
-            }
-
-            // console.log("TXS: ", txs);
-
-            // Refilter per market...
-            txs = _.filter(txs, {market: market.id});
-
-            success(txs);
         }
         catch (e) {
             failure("Unable to load transactions: " + String(e));

@@ -81,6 +81,9 @@ var UserActions = function() {
     };
 
     this.updateBalanceSub = function() {
+        if (this.flux.store('config').getState().debug)
+          console.count("updateBalanceSub triggered");
+
         var _client = this.flux.store('config').getEthereumClient();
 
         var user = this.flux.store("UserStore").getState().user;

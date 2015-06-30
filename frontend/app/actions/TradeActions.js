@@ -5,6 +5,9 @@ var bigRat = require("big-rational");
 var TradeActions = function() {
 
     this.loadTrades = function() {
+        if (this.flux.store('config').getState().debug)
+          console.count("loadTrades triggered");
+
         var _client = this.flux.store('config').getEthereumClient();
 
         this.dispatch(constants.trade.LOAD_TRADES);
@@ -21,6 +24,9 @@ var TradeActions = function() {
     };
 
     this.updateTrades = function() {
+        if (this.flux.store('config').getState().debug)
+          console.count("updateTrades triggered");
+
         var _client = this.flux.store('config').getEthereumClient();
 
         this.dispatch(constants.trade.UPDATE_TRADES);

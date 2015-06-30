@@ -1,9 +1,13 @@
 var _ = require("lodash");
+// var utils = require("../js/utils");
 var constants = require("../js/constants");
 
 var MarketActions = function() {
 
     this.loadMarkets = function(init) {
+        if (init && this.flux.store('config').getState().debug)
+          console.count("loadMarkets triggered");
+
         var _client = this.flux.store('config').getEthereumClient();
 
         var updateProgress = false;
@@ -64,26 +68,21 @@ var MarketActions = function() {
             else
               this.flux.actions.trade.updateTrades();
 
-            // Load price changes
+            // Watch price changes
             var market = this.flux.store("MarketStore").getState().market;
-            _client.loadPrices(market, function(prices) {
-                this.dispatch(constants.market.LOAD_PRICES, prices);
-            }.bind(this), function(error) {
-                this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
-            }.bind(this));
+            _client.watchPrices(market, this.flux.actions.market.updatePrices);
 
-            // Load ETX txs
-            _client.loadTransactions(user, market, function(txs) {
-                this.dispatch(constants.market.LOAD_TRANSACTIONS, txs);
-            }.bind(this), function(error) {
-                this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
-            }.bind(this));
+            // Watch transactions
+            _client.watchTransactions(user, market, this.flux.actions.market.updateTransactions);
+
         }.bind(this), function(error) {
             this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
         }.bind(this));
     };
 
     this.updateMarkets = function() {
+        if (this.flux.store('config').getState().debug)
+          console.count("updateMarkets triggered");
         this.flux.actions.market.loadMarkets(false);
     };
 
@@ -98,21 +97,12 @@ var MarketActions = function() {
         // Save last market
         _client.putString('EtherEx', 'market', String(market.id - 1));
 
-        // Load price changes
-        _client.loadPrices(market, function(prices) {
-            this.dispatch(constants.market.LOAD_PRICES, prices);
-        }.bind(this), function(error) {
-            this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
-        }.bind(this));
+        // Watch price changes
+        _client.watchPrices(market, this.flux.actions.market.updatePrices);
 
-        // Load txs
+        // Watch transactions
         var user = this.flux.store("UserStore").getState().user;
-        _client.loadTransactions(user, market, function(txs) {
-            this.dispatch(constants.market.LOAD_TRANSACTIONS, txs);
-        }.bind(this), function(error) {
-            this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
-        }.bind(this));
-
+        _client.watchTransactions(user, market, this.flux.actions.market.updateTransactions);
     };
 
     this.updateMarketBalance = function(market, available, trading, balance) {
@@ -135,6 +125,15 @@ var MarketActions = function() {
         }.bind(this), function(error) {
             this.dispatch(constants.market.REGISTER_MARKET_FAIL, {error: error});
         }.bind(this));
+    };
+
+    this.updatePrices = function(price) {
+        this.dispatch(constants.market.UPDATE_PRICES, price);
+        this.dispatch(constants.market.UPDATE_PRICES_DATA);
+    };
+
+    this.updateTransactions = function(tx) {
+        this.dispatch(constants.market.UPDATE_TRANSACTIONS, tx);
     };
 
     this.toggleFavorite = function(favorite) {

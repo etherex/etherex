@@ -180,6 +180,30 @@ var TradeRow = React.createClass({
 });
 
 var TradeTable = React.createClass({
+    getInitialState: function() {
+      return {
+        tradeRows: null
+      };
+    },
+
+    componentDidMount: function() {
+      this.componentWillReceiveProps(this.props);
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        var tradeRows = <tr></tr>;
+        if (nextProps.tradeList)
+            tradeRows = nextProps.tradeList.map(function (trade, i) {
+            return (
+                <TradeRow flux={this.props.flux} key={trade.id} count={i} trade={trade} trades={this.props.trades} tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={this.props.review} />
+            );
+          }.bind(this));
+
+        this.setState({
+          tradeRows: tradeRows
+        });
+    },
+
     render: function() {
         var tradeListNodes = <tr></tr>;
         if (this.props.tradeList)
@@ -205,7 +229,7 @@ var TradeTable = React.createClass({
                         </tr>
                     </thead>
                     <tbody>
-                        {tradeListNodes}
+                        {this.state.tradeRows}
                     </tbody>
                 </Table>
             </div>

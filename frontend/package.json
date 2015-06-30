@@ -72,6 +72,6 @@
     "si-prefix": "^0.1.0",
     "techan": "caktux/techan.js",
     "url-loader": "^0.5.6",
-    "web3": "=0.5.0"
+    "web3": "^0.7.1"
   }
 }

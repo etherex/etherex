@@ -252,11 +252,13 @@ var ErrorModal = React.createClass({
       return (
         <Modal {...this.props} bsSize='small' onRequestHide={ this.handleToggle } backdrop='static'>
           <div className="modal-body clearfix">
-              <h4>Ethereum loading</h4>
-              <p>The Ethereum block chain is not current and is fetching blocks from peers.</p>
-              <ProgressBar active bsStyle={this.props.network.ready ? 'success' : 'default'} now={this.state.percentLoaded} />
-              <p>Last block was {this.state.lastBlockAge}.</p>
-              <p>Approximately {this.state.blocksLeft} blocks left to go.</p>
+            <h4>Ethereum loading</h4>
+            { this.props.network.blockChainAge < this.props.config.timeout ?
+              <p>The Ethereum block chain is current.<br />Hang in there...</p> :
+              <p>The Ethereum block chain is not current and is fetching blocks from peers.</p> }
+            <ProgressBar active bsStyle={this.props.network.ready ? 'success' : 'default'} now={this.state.percentLoaded} />
+            <p>Last block was {this.state.lastBlockAge}.</p>
+            <p>Approximately {this.state.blocksLeft} blocks left to go.</p>
           </div>
         </Modal>
       );

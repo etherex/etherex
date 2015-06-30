@@ -25,11 +25,11 @@ data trades[2^160](id, type, market, amount, price, owner, block, refhash)
 data balances[][](available, trading)
 
 event log_price(market:indexed, type, price, amount, timestamp)
-event log_add_tx(sender:indexed, market, type, price, amount)
+event log_add_tx(sender:indexed, market:indexed, type, price, amount)
 event log_fill_tx(sender:indexed, owner:indexed, market, type, tradeid, price, amount)
-event log_deposit(sender:indexed, market, amount)
-event log_withdraw(address:indexed, market, amount)
-event log_cancel(sender:indexed, market, tradeid, price, amount)
+event log_deposit(sender:indexed, market:indexed, amount)
+event log_withdraw(address:indexed, market:indexed, amount)
+event log_cancel(sender:indexed, market:indexed, tradeid, price, amount)
 
 extern subcurrency: [transfer:ii:i]
 
