@@ -14,10 +14,8 @@ var TradeActions = function() {
 
         var market = this.flux.store("MarketStore").getState().market;
 
-        _client.loadTrades(market, function(progress) {
-            this.dispatch(constants.trade.LOAD_TRADES_PROGRESS, progress);
-        }.bind(this), function(trades) {
-            this.dispatch(constants.trade.LOAD_TRADES_SUCCESS, trades);
+        _client.loadTrades(market, this.flux.actions.trade.updateProgress, function(trade) {
+            this.dispatch(constants.trade.LOAD_TRADE, trade);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.LOAD_TRADES_FAIL, {error: error});
         }.bind(this));
@@ -33,28 +31,34 @@ var TradeActions = function() {
 
         var market = this.flux.store("MarketStore").getState().market;
 
-        _client.loadTrades(market, function(progress) {
-            this.dispatch(constants.trade.UPDATE_TRADES_PROGRESS, progress);
-        }.bind(this), function(trades) {
-            this.dispatch(constants.trade.UPDATE_TRADES_SUCCESS, trades);
-
-            // Highlight filling trades
-            var trade = this.flux.store("TradeStore").getState();
-            var market = this.flux.store("MarketStore").getState().market;
-            var user = this.flux.store("UserStore").getState().user;
-
-            if (trade.type && trade.price && trade.amount && trade.total && market && user)
-                this.flux.actions.trade.highlightFilling({
-                    type: trade.type,
-                    price: trade.price,
-                    amount: trade.amount,
-                    total: trade.total,
-                    market: market,
-                    user: user
-                });
+        _client.loadTrades(market, this.flux.actions.trade.updateProgress, function(trade) {
+            this.dispatch(constants.trade.UPDATE_TRADE, trade);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.UPDATE_TRADES_FAIL, {error: error});
         }.bind(this));
+    };
+
+
+    this.updateProgress = function(progress) {
+      var percent = parseFloat(((progress.current / progress.total) * 100).toFixed(2));
+      this.dispatch(constants.trade.LOAD_TRADES_PROGRESS, percent);
+      if (percent >= 100)
+          this.dispatch(constants.trade.UPDATE_TRADES_SUCCESS);
+
+      // Highlight filling trades
+      var trade = this.flux.store("TradeStore").getState();
+      var market = this.flux.store("MarketStore").getState().market;
+      var user = this.flux.store("UserStore").getState().user;
+
+      if (trade.type && trade.price && trade.amount && trade.total && market && user)
+          this.flux.actions.trade.highlightFilling({
+              type: trade.type,
+              price: trade.price,
+              amount: trade.amount,
+              total: trade.total,
+              market: market,
+              user: user
+          });
     };
 
     this.addTrade = function(trade) {
@@ -140,14 +144,16 @@ var TradeActions = function() {
         this.dispatch(constants.trade.ESTIMATE_GAS);
 
         _client.estimateAddTrade(user, trade, market, function(result) {
-            // console.log("RESULT", result);
+            // utils.log("RESULT", result);
             var gasprice = this.flux.store('network').getState().gasPrice;
-            // console.log("GASPRICE", gasprice);
-            var total = bigRat(gasprice.toString()).multiply(result);
-            var estimate = utils.formatBalance(total) + " (" + utils.numeral(result, 0) + " gas)";
+            // utils.log("GASPRICE", gasprice);
+            var estimate = "N/A";
+            if (result && gasprice) {
+              var total = bigRat(gasprice.toString()).multiply(result);
+              estimate = utils.formatBalance(total) + " (" + utils.numeral(result, 0) + " gas)";
+            }
             this.dispatch(constants.trade.ESTIMATE_GAS_ADD, {estimate: estimate});
         }.bind(this), function(error) {
-            // console.log("ERROR", error);
             this.dispatch(constants.trade.ESTIMATE_GAS_ADD, {estimate: String(error)});
         }.bind(this));
     };
@@ -161,14 +167,16 @@ var TradeActions = function() {
         this.dispatch(constants.trade.ESTIMATE_GAS);
 
         _client.estimateFillTrades(user, trades, market, function(result) {
-            // console.log("RESULT", result);
+            // utils.log("RESULT", result);
             var gasprice = this.flux.store('network').getState().gasPrice;
-            // console.log("GASPRICE", gasprice);
-            var total = bigRat(gasprice.toString()).multiply(result);
-            var estimate = utils.formatBalance(total) + " (" + utils.format(result, 0) + " gas)";
+            // utils.log("GASPRICE", gasprice);
+            var estimate = "N/A";
+            if (result && gasprice) {
+              var total = bigRat(gasprice.toString()).multiply(result);
+              estimate = utils.formatBalance(total) + " (" + utils.format(result, 0) + " gas)";
+            }
             this.dispatch(constants.trade.ESTIMATE_GAS_FILL, {estimate: estimate});
         }.bind(this), function(error) {
-            // console.log("ERROR", error);
             this.dispatch(constants.trade.ESTIMATE_GAS_FILL, {estimate: String(error)});
         }.bind(this));
     };
@@ -206,7 +214,7 @@ var TradeActions = function() {
 
     this.switchMarket = function(market) {
         this.dispatch(constants.trade.SWITCH_MARKET, market);
-        this.flux.actions.trade.updateTrades();
+        this.flux.actions.trade.loadTrades();
     };
 };
 

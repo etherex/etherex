@@ -24,10 +24,12 @@ module.exports = {
         ETHEREUM_STATUS_LOADING: null
     }),
     trade: keyMirror ({
+        LOAD_TRADE: null,
         LOAD_TRADES: null,
         LOAD_TRADES_FAIL: null,
         LOAD_TRADES_SUCCESS: null,
         LOAD_TRADES_PROGRESS: null,
+        UPDATE_TRADE: null,
         UPDATE_TRADES: null,
         UPDATE_TRADES_FAIL: null,
         UPDATE_TRADES_SUCCESS: null,

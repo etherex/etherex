@@ -4,8 +4,6 @@ var fixtures = require("../js/fixtures");
 
 var bigRat = require('big-rational');
 
-require('es6-promise').polyfill();
-
 if (typeof web3 === 'undefined') {
     var web3 = require('web3');
     window.web3 = web3;
@@ -200,7 +198,7 @@ var EthereumClient = function(params) {
         }
     };
 
-    this.loadMarkets = function(user, onProgress, success, failure) {
+    this.loadMarkets = function(user, progress, success, failure) {
         try {
             var last = _.parseInt(contract.get_last_market_id.call().toString());
 
@@ -226,9 +224,9 @@ var EthereumClient = function(params) {
                 favorites = [];
             // console.log('FAVORITES', favorites);
 
-            var progress = {current: 0, total: last};
-            if (onProgress)
-              onProgress(progress);
+            var currentProgress = {current: 0, total: last};
+            if (progress)
+              progress(currentProgress);
 
             for (var i = 1; i < last + 1; i++) {
                 try {
@@ -275,9 +273,9 @@ var EthereumClient = function(params) {
                         favorite: favorite
                     });
 
-                    if (onProgress) {
-                      progress.current += 1;
-                      onProgress(progress);
+                    if (progress) {
+                      currentProgress.current += 1;
+                      progress(currentProgress);
                     }
                 }
                 catch(e) {
@@ -310,31 +308,38 @@ var EthereumClient = function(params) {
             var total = trade_ids.length;
             // console.log("TOTAL TRADES: ", total);
 
-            var tradePromises = [];
+            var currentProgress = {current: 0, total: total};
+            progress(currentProgress);
 
-            for (var i = 0; i < total; i++) {
-                var tradePromise = new Promise(function (resolve, reject) {
-                    var id = trade_ids[i];
-                    var p = i;
+            for (var i = total - 1; i >= 0; i--) {
+                var id = trade_ids[i];
 
-                    var trade = contract.get_trade.call(id, 'latest');
-                    // console.log("Trade from ABI:", trade);
+                contract.get_trade.call(id, 'pending', function(error, trade) {
+                    // utils.log("Trade from ABI:", trade);
+                    if (error) {
+                      // Update progress
+                      currentProgress.current += 1;
+                      progress(currentProgress);
+                      failure("Error loading trade " + id + ": " + String(error));
+                      return;
+                    }
 
                     try {
                         var tradeId = web3.fromDecimal(trade[0]);
                         var ref = trade[7];
 
                         // Resolve on filled trades
-                        if (tradeId == "0x0" || ref == "0"){
-                            resolve({});
+                        if (tradeId == "0x0" || ref.toString() == "0") {
+                            // Update progress
+                            currentProgress.current += 1;
+                            progress(currentProgress);
                             return;
                         }
 
                         var status = 'mined';
 
                         var tradeExists = web3.eth.getStorageAt(params.address, web3.fromDecimal(ref), 'latest');
-
-                        if (tradeExists == "0x0")
+                        if (tradeExists === null || tradeExists == "0x0" || tradeExists == "0x0000000000000000000000000000000000000000000000000000000000000000")
                             status = 'pending';
                         else
                             status = 'mined';
@@ -350,9 +355,10 @@ var EthereumClient = function(params) {
                         var price = bigRat(trade[4].toString()).divide(precision).valueOf();
 
                         // Update progress
-                        progress({percent: (p + 1) / total * 100 });
+                        currentProgress.current += 1;
+                        progress(currentProgress);
 
-                        resolve({
+                        success({
                             id: tradeId,
                             type: type == 1 ? 'buys' : 'sells',
                             price: price,
@@ -368,18 +374,11 @@ var EthereumClient = function(params) {
                         });
                     }
                     catch(e) {
-                        reject(e);
+                        utils.error("TRADE", e);
+                        failure("Failed to load trade " + id + ": " + String(e));
                     }
                 });
-                tradePromises.push(tradePromise);
             }
-
-            Promise.all(tradePromises).then(function (trades) {
-                // console.log("TRADES", trades);
-                success(trades);
-            }, function(e) {
-                failure("Could not load all trades: " + String(e));
-            });
         }
         catch (e) {
             failure("Unable to load trades: " + String(e));
@@ -903,6 +902,7 @@ var EthereumClient = function(params) {
             success(result);
         }
         catch(e) {
+            utils.error(e);
             failure(String(e));
         }
     };
@@ -934,6 +934,7 @@ var EthereumClient = function(params) {
             success(result / 10);
         }
         catch(e) {
+            utils.error(e);
             failure(String(e));
         }
     };

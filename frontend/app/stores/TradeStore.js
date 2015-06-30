@@ -1,4 +1,5 @@
 var _ = require("lodash");
+// var utils = require("../js/utils");
 var Fluxxor = require("fluxxor");
 
 var constants = require("../js/constants");
@@ -7,7 +8,7 @@ var TradeStore = Fluxxor.createStore({
 
     initialize: function(options) {
         this.title = "Trades";
-        this.trades = options.trades || {};
+        this.trades = options.trades || {buys: [], sells: []};
         this.loading = true;
         this.updating = false;
         this.error = null;
@@ -23,10 +24,12 @@ var TradeStore = Fluxxor.createStore({
         this.newAmount = false;
 
         this.bindActions(
+            constants.trade.LOAD_TRADE, this.onLoadTrade,
             constants.trade.LOAD_TRADES, this.onLoadTrades,
             constants.trade.LOAD_TRADES_PROGRESS, this.onLoadTradesProgress,
             constants.trade.LOAD_TRADES_SUCCESS, this.onLoadTradesSuccess,
             constants.trade.LOAD_TRADES_FAIL, this.onTradesFail,
+            constants.trade.UPDATE_TRADE, this.onUpdateTrade,
             constants.trade.UPDATE_TRADES, this.onUpdateTrades,
             constants.trade.UPDATE_TRADES_PROGRESS, this.onLoadTradesProgress,
             constants.trade.UPDATE_TRADES_SUCCESS, this.onLoadTradesSuccess,
@@ -55,7 +58,7 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onLoadTrades: function() {
-        this.trades = {};
+        this.trades = {buys: [], sells: []};
         this.loading = true;
         this.error = null;
         this.percent = 0;
@@ -71,32 +74,46 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onLoadTradesProgress: function (payload) {
-        // console.log("Progress: " + payload.percent);
-        // this.trades = payload.trades || [];
-        this.percent = payload.percent;
+        // utils.log("Progress: ", payload);
+        this.percent = payload;
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onLoadTradesSuccess: function (payload) {
-        // Split in buys/sells
-        var trades = _.groupBy(payload, 'type');
+    onLoadTrade: function(payload) {
+        // utils.log("TRADE", payload);
+        if (payload.type == 'buys')
+            this.trades.buys.push(payload);
+        else if (payload.type == 'sells')
+            this.trades.sells.push(payload);
+        this.refreshTrades();
+    },
 
-        // Sort
-        this.trades.buys = _.sortBy(trades.buys, 'price').reverse();
-        this.trades.sells = _.sortBy(trades.sells, 'price');
+    onUpdateTrade: function(payload) {
+        // utils.log("TRADE", payload);
+        if (payload.type == 'buys')
+            _.merge(this.trades.buys, payload);
+        else if (payload.type == 'sells')
+            _.merge(this.trades.sells, payload);
+        this.refreshTrades();
+    },
 
-        // Update trades state
+    refreshTrades: function() {
+        // Sort and update state
+        this.trades.buys = _.sortBy(this.trades.buys, 'price').reverse();
+        this.trades.sells = _.sortBy(this.trades.sells, 'price');
+
+        // Copy trades state
         this.trades.tradeBuys = this.trades.buys;
         this.trades.tradeSells = this.trades.sells;
 
-        // Filter by market
-        var market = this.flux.store("MarketStore").getState().market;
-        this.filterMarket(market, this.trades);
+        this.emit(constants.CHANGE_EVENT);
+    },
 
+    onLoadTradesSuccess: function () {
         this.loading = false;
         this.updating = false;
-        // this.error = null;
         this.percent = 100;
+
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -353,7 +370,7 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onTradesFail: function (payload) {
-        this.trades = payload || {};
+        this.trades = payload || {buys: [], sells: []};
         this.loading = false;
         this.percent = 0;
         this.error = payload.error;
