@@ -6,11 +6,10 @@ var utils = require("../js/utils");
 var UserStore = Fluxxor.createStore({
 
     initialize: function(options) {
-        this.user = options.user || { id: 'loading' };
-        this.user.balance = 0;
+        this.user = options.user || { id: 'loading...', balance: 0, addresses: [] };
         this.defaultAccount = null;
         // this.createAccount = false;
-        this.loading = false;
+        this.loading = true;
         this.error = null;
 
         this.bindActions(
@@ -40,8 +39,6 @@ var UserStore = Fluxxor.createStore({
     },
 
     onLoadUser: function() {
-        this.user.name = 'loading';
-        // this.createAccount = false;
         this.loading = true;
         this.error = null;
         this.emit(constants.CHANGE_EVENT);
@@ -49,8 +46,6 @@ var UserStore = Fluxxor.createStore({
 
     onLoadUserSuccess: function(payload) {
         this.user = payload;
-        // if (!payload.name)
-        //     this.createAccount = true;
         this.loading = false;
         this.error = null;
         this.emit(constants.CHANGE_EVENT);
@@ -62,7 +57,7 @@ var UserStore = Fluxxor.createStore({
     },
 
     onLoadAddresses: function() {
-        this.user = {id: 'loading', name: 'loading'};
+        this.user.id = 'loading...';
         this.loading = true;
         this.error = null;
         this.emit(constants.CHANGE_EVENT);

@@ -20,13 +20,11 @@ var TradeRow = React.createClass({
 
     render: function() {
         var isOwn = (this.props.trade.owner == this.props.user.id);
-        var market = this.props.market.markets[this.props.trade.market.id - 1];
-        var precision = String(market.precision).length - 1;
         return (
             <tr className={"trade-" + (!this.props.review ? this.props.trade.status : "review") + ((isOwn && !this.props.user.own) ? " disabled" : "")} onMouseEnter={this.handleHover} onMouseLeave={this.handleHoverOut} onClick={this.handleClick}>
                 <td>
                     <div className="text-right">
-                        {utils.numeral(this.props.trade.amount, market.decimals)}
+                        {utils.numeral(this.props.trade.amount, this.props.market.decimals)}
                     </div>
                 </td>
                 <td>
@@ -36,7 +34,7 @@ var TradeRow = React.createClass({
                 </td>
                 <td>
                     <div className="text-right">
-                        {utils.numeral(this.props.trade.price, precision)}
+                        {utils.numeral(this.props.trade.price, this.props.precision)}
                     </div>
                 </td>
                 <td>
@@ -103,55 +101,53 @@ var TradeRow = React.createClass({
             return;
 
         // Select previous trades
-        var totalAmount = 0;
-        var totalValue = 0;
-        var thisUser = this.props.user;
-        var thisTrade = this.props.trade;
-        var count = this.props.count;
         var trades = _.filter(this.props.tradeList, function(trade, i) {
             return (
-                thisUser.id != trade.owner &&
+                this.props.user.id != trade.owner &&
+                trade.status != "filling" &&
                 trade.status != "pending" &&
                 trade.status != "new" &&
-                ((trade.type == "buys" && thisTrade.price <= trade.price) ||
-                 (trade.type == "sells" && thisTrade.price >= trade.price)) &&
-                i <= count
+                // ((trade.type == "buys" && this.props.trade.price <= trade.price) ||
+                //  (trade.type == "sells" && this.props.trade.price >= trade.price)) &&
+                i <= this.props.count
             );
-        });
+        }.bind(this));
 
         if (!trades.length)
             return;
 
+        var totalAmount = 0;
+        var totalValue = 0;
+
         totalAmount = _.reduce(_.pluck(trades, 'amount'), function(sum, num) {
             return parseFloat(sum) + parseFloat(num);
         });
+        if (!totalAmount)
+            return;
+
         totalValue = _.reduce(_.pluck(trades, 'total'), function(sum, num) {
             return parseFloat(sum) + parseFloat(num);
         });
-
-        if (!totalAmount || !totalValue)
+        if (!totalValue)
             return;
 
-        var payload = {
-            type: (this.props.trade.type == "buys" ? 1 : 2),
-            price: this.props.trade.price,
-            amount: totalAmount,
-            total: totalValue,
-            market: this.props.trade.market,
-            user: this.props.user
-        };
-
         _.forEach(this.props.tradeList, function(trade) {
-            if (!_.find(trades, {'id': trade.id}) && trade.status == "filling")
-                trade.status = "mined";
-            else if (_.find(trades, {'id': trade.id}) && trade.status == "mined")
+            // if (trade.status == "filling" && _.find(trades, {'id': trade.id}))
+            //     trade.status = "mined";
+            if (trade.status == "mined" && _.find(trades, {'id': trade.id}))
                 trade.status = "filling";
         });
 
-        payload.fills = trades.length;
-
         this.setState({
-            payload: payload
+            payload: {
+                type: (this.props.trade.type == "buys" ? 1 : 2),
+                fills: trades.length,
+                price: this.props.trade.price,
+                amount: totalAmount,
+                total: totalValue,
+                market: this.props.trade.market,
+                user: this.props.user
+            }
         });
     },
 
@@ -160,16 +156,14 @@ var TradeRow = React.createClass({
         if (!this.props.trades)
             return;
 
-        var payload = {
+        this.props.flux.actions.trade.highlightFilling({
             type: (this.props.trade.type == "buys" ? 2 : 1),
             price: this.props.trades.price,
             amount: this.props.trades.amount,
             total: this.props.trades.total,
-            market: this.props.trade.market,
+            market: this.props.market,
             user: this.props.user
-        };
-
-        this.props.flux.actions.trade.highlightFilling(payload);
+        });
     },
 
     handleClick: function(e) {
@@ -181,21 +175,27 @@ var TradeRow = React.createClass({
 
 var TradeTable = React.createClass({
     getInitialState: function() {
-      return {
-        tradeRows: null
-      };
+        return {
+            tradeRows: null
+        };
     },
 
     componentDidMount: function() {
-      this.componentWillReceiveProps(this.props);
+        this.componentWillReceiveProps(this.props);
     },
 
     componentWillReceiveProps: function(nextProps) {
+        var index = _.findIndex(nextProps.market.markets, {'id': nextProps.market.market.id});
+        var market = nextProps.market.markets[index];
+        var precision = 0;
+        if (market)
+            precision = String(market.precision).length - 1;
+
         var tradeRows = <tr></tr>;
         if (nextProps.tradeList)
             tradeRows = nextProps.tradeList.map(function (trade, i) {
             return (
-                <TradeRow flux={this.props.flux} key={trade.id} count={i} trade={trade} trades={this.props.trades} tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={this.props.review} />
+                <TradeRow flux={this.props.flux} key={trade.id} count={i} user={this.props.user} trade={trade} trades={this.props.trades} tradeList={this.props.tradeList} market={market} precision={precision} review={this.props.review} />
             );
           }.bind(this));
 

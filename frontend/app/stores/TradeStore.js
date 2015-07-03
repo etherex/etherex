@@ -1,5 +1,5 @@
 var _ = require("lodash");
-// var utils = require("../js/utils");
+var utils = require('../js/utils');
 var Fluxxor = require("fluxxor");
 
 var constants = require("../js/constants");
@@ -12,7 +12,9 @@ var TradeStore = Fluxxor.createStore({
         this.loading = true;
         this.updating = false;
         this.error = null;
+        this.tradeIDs = [];
         this.percent = 0;
+        this.progress = 0;
         this.type = 1;
         this.amount = null;
         this.price = null;
@@ -21,9 +23,13 @@ var TradeStore = Fluxxor.createStore({
         this.amountLeft = 0;
         this.available = 0;
         this.estimate = 0;
+        this.note = '';
+        this.message = '';
         this.newAmount = false;
 
         this.bindActions(
+            constants.trade.LOAD_TRADE_IDS, this.onUpdateTradeIDs,
+            constants.trade.LOAD_TRADE_IDS_FAIL, this.onTradesFail,
             constants.trade.LOAD_TRADE, this.onLoadTrade,
             constants.trade.LOAD_TRADES, this.onLoadTrades,
             constants.trade.LOAD_TRADES_PROGRESS, this.onLoadTradesProgress,
@@ -31,9 +37,10 @@ var TradeStore = Fluxxor.createStore({
             constants.trade.LOAD_TRADES_FAIL, this.onTradesFail,
             constants.trade.UPDATE_TRADE, this.onUpdateTrade,
             constants.trade.UPDATE_TRADES, this.onUpdateTrades,
-            constants.trade.UPDATE_TRADES_PROGRESS, this.onLoadTradesProgress,
+            constants.trade.UPDATE_TRADES_MESSAGE, this.onUpdateMessage,
             constants.trade.UPDATE_TRADES_SUCCESS, this.onLoadTradesSuccess,
             constants.trade.UPDATE_TRADES_FAIL, this.onTradesFail,
+            constants.trade.CHECK_PENDING, this.onCheckPending,
             constants.trade.ADD_TRADE, this.onAddTrade,
             constants.trade.ADD_TRADE_FAIL, this.onTradesFail,
             constants.trade.FILL_TRADES, this.onFillTrades,
@@ -48,8 +55,6 @@ var TradeStore = Fluxxor.createStore({
             constants.trade.HIGHLIGHT_FILLING, this.onHighlightFilling,
             constants.trade.HIGHLIGHT_FILLING_FAIL, this.onTradesFail,
             constants.trade.CLICK_FILL, this.onClickFill,
-            constants.trade.CLICK_FILL_FAIL, this.onTradesFail,
-            constants.trade.CLICK_FILL_SUCCESS, this.onClickFillSuccess,
             constants.trade.SWITCH_MARKET, this.switchMarket,
             constants.trade.SWITCH_MARKET_FAIL, this.onTradesFail,
             constants.trade.SWITCH_TYPE, this.switchType,
@@ -57,11 +62,18 @@ var TradeStore = Fluxxor.createStore({
         );
     },
 
+    onUpdateTradeIDs: function(payload) {
+        this.tradeIDs = payload;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
     onLoadTrades: function() {
-        this.trades = {buys: [], sells: []};
+        this.trades = {buys: [], sells: [], tradeBuys: [], tradeSells: []};
         this.loading = true;
         this.error = null;
         this.percent = 0;
+        this.progress = 0;
+
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -70,30 +82,48 @@ var TradeStore = Fluxxor.createStore({
         this.updating = true;
         this.error = null;
         this.percent = 0;
+        this.progress = 0;
         this.emit(constants.CHANGE_EVENT);
     },
 
     onLoadTradesProgress: function (payload) {
-        // utils.log("Progress: ", payload);
-        this.percent = payload;
+        this.progress = payload.progress;
+        this.percent = payload.percent;
         this.emit(constants.CHANGE_EVENT);
     },
 
     onLoadTrade: function(payload) {
-        // utils.log("TRADE", payload);
         if (payload.type == 'buys')
             this.trades.buys.push(payload);
         else if (payload.type == 'sells')
             this.trades.sells.push(payload);
+
         this.refreshTrades();
     },
 
     onUpdateTrade: function(payload) {
-        // utils.log("TRADE", payload);
-        if (payload.type == 'buys')
-            _.merge(this.trades.buys, payload);
-        else if (payload.type == 'sells')
-            _.merge(this.trades.sells, payload);
+        if (this.flux.store('config').getState().debug)
+          utils.log("UPDATE", payload);
+
+        var key = -1;
+
+        // Replace current trade with updated one or add new ones
+        // TODO compare change and animate
+        if (payload.type == 'buys') {
+            key = _.findKey(this.trades.buys, { 'id': payload.id });
+            if (key && key != -1)
+                this.trades.buys[key] = payload;
+            else
+                this.trades.buys.push(payload);
+        }
+        else if (payload.type == 'sells') {
+            key = _.findKey(this.trades.sells, { 'id': payload.id });
+            if (key && key != -1)
+                this.trades.sells[key] = payload;
+            else
+                this.trades.sells.push(payload);
+        }
+
         this.refreshTrades();
     },
 
@@ -109,35 +139,52 @@ var TradeStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onLoadTradesSuccess: function () {
+    onLoadTradesSuccess: function() {
         this.loading = false;
         this.updating = false;
         this.percent = 100;
 
+        // Remove trades that are no longer in our tradeIDs
+        this.trades.buys = _.filter(this.trades.buys, function(trade) {
+          return _.contains(this.tradeIDs, trade.id);
+        }.bind(this));
+        this.trades.sells = _.filter(this.trades.sells, function(trade) {
+          return _.contains(this.tradeIDs, trade.id);
+        }.bind(this));
+
         this.emit(constants.CHANGE_EVENT);
     },
 
+    onUpdateMessage: function(payload) {
+        this.note = payload.note;
+        this.message = payload.message;
+
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onCheckPending: function(payload) {
+        // TODO
+
+        var buyKey = _.findKey(this.trades.tradeBuys, { id: payload });
+        var sellKey = _.findKey(this.trades.tradeSells, { id: payload });
+        // utils.log(buyKey, sellKey);
+
+        if (buyKey != 1)
+            if (this.trades.tradeBuys[buyKey])
+                this.trades.tradeBuys[buyKey].status = "pending";
+        else if (sellKey != 1)
+            if (this.trades.tradeSells[sellKey])
+                this.trades.tradeSells[sellKey].status = "pending";
+    },
+
     onAddTrade: function (payload) {
-        var markets = this.flux.store("MarketStore").getState().markets;
-        var user = this.flux.store("UserStore").getState().user;
-
-        var trade = {
-            id: payload.id,
-            type: (payload.type == 1) ? 'buy' : 'sell',
-            price: payload.price,
-            amount: payload.amount,
-            total: payload.amount * payload.price,
-            market: markets[payload.market - 1],
-            owner: user.id,
-            status: payload.status
-        };
-
-        // Add and re-sort... TODO improve that...
-        if (payload.type == 1)
-          this.trades.buys.push(trade);
+        // Add and re-sort
+        if (payload.type == "buys")
+          this.trades.buys.push(payload);
         else
-          this.trades.sells.push(trade);
-        if (payload.type == 1)
+          this.trades.sells.push(payload);
+
+        if (payload.type == "sells")
             this.trades.buys = _.sortBy(this.trades.buys, 'price').reverse();
         else
             this.trades.sells = _.sortBy(this.trades.sells, 'price');
@@ -147,8 +194,6 @@ var TradeStore = Fluxxor.createStore({
 
     onFillTrade: function (payload) {
         var index = _.findIndex((payload.type == "buys") ? this.trades.buys : this.trades.sells, {'id': payload.id});
-
-        // console.log("Filling trade ", payload, " at index " + index);
 
         if (payload.type == "buys")
           this.trades.buys[index].status = "success";
@@ -160,8 +205,6 @@ var TradeStore = Fluxxor.createStore({
 
     onFillTrades: function (payload) {
         var ids = _.pluck(payload, 'id');
-
-        // console.log("Filling trades " + ids.join(', '));
 
         for (var i = ids.length - 1; i >= 0; i--) {
             var index = _.findIndex(
@@ -186,8 +229,6 @@ var TradeStore = Fluxxor.createStore({
     onCancelTrade: function (payload) {
         var index = _.findIndex((payload.type == "buys") ? this.trades.buys : this.trades.sells, {'id': payload.id});
 
-        // console.log("Cancelling trade ", payload, " at index " + index);
-
         if (payload.type == "buys")
           this.trades.buys[index].status = "new";
         else
@@ -206,7 +247,13 @@ var TradeStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
+    refreshHighlight: function() {
+        this.emit(constants.CHANGE_EVENT);
+    },
+
     onHighlightFilling: function (payload) {
+        // FIXME this is quite ridiculous... needs a serious refactor...
+
         var trades = (payload.type == 1) ? this.trades.tradeSells : this.trades.tradeBuys;
         var siblings = (payload.type == 1) ? this.trades.tradeBuys : this.trades.tradeSells;
         var total_amount = 0;
@@ -245,6 +292,7 @@ var TradeStore = Fluxxor.createStore({
                        available < this_total ||
                        amountLeft < trades[i].amount) &&
                        trades[i].owner != payload.user.id &&
+                       trades[i].status != "success" &&
                        trades[i].status != "pending" &&
                        trades[i].status != "new") {
 
@@ -273,6 +321,7 @@ var TradeStore = Fluxxor.createStore({
                       amountLeft > 0 &&
                       trades[i].owner != payload.user.id &&
                       trades[i].market.id == payload.market.id &&
+                      trades[i].status != "success" &&
                       trades[i].status != "pending" &&
                       trades[i].status != "new") {
 
@@ -327,7 +376,10 @@ var TradeStore = Fluxxor.createStore({
     onClickFill: function (payload) {
         if (!payload.market)
             return;
-        var market = this.flux.store("MarketStore").getState().markets[payload.market.id - 1];
+        var markets = this.flux.store("MarketStore").getState().markets;
+        var index = _.findIndex(markets, {'id': payload.market.id});
+        var market = markets[index];
+
         var decimals = market.decimals;
         var precision = String(market.precision).length - 1;
         var amount = payload.amount.toFixed(decimals);
@@ -338,12 +390,8 @@ var TradeStore = Fluxxor.createStore({
         this.type = payload.type == 1 ? 2 : 1;
 
         this.emit(constants.CHANGE_EVENT);
-        this.newAmount = false;
-    },
 
-    onClickFillSuccess: function() {
         this.newAmount = false;
-        // this.type = payload.type == 1 ? 2 : 1;
         // this.emit(constants.CHANGE_EVENT);
     },
 
@@ -370,7 +418,7 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onTradesFail: function (payload) {
-        this.trades = payload || {buys: [], sells: []};
+        this.trades = payload || {buys: [], sells: [], tradeBuys: [], tradeSells: []};
         this.loading = false;
         this.percent = 0;
         this.error = payload.error;
@@ -381,17 +429,20 @@ var TradeStore = Fluxxor.createStore({
         return {
             tradeBuys: _.values(this.trades.buys),
             tradeSells: _.values(this.trades.sells),
-            // tradeById: this.trades,
             loading: this.loading,
             error: this.error,
             title: this.title,
             percent: this.percent,
+            progress: this.progress,
+            tradeIDs: this.tradeIDs,
             type: this.type,
             price: this.price,
             amount: this.amount,
             total: this.total,
             filling: this.filling,
             estimate: this.estimate,
+            message: this.message,
+            note: this.note,
             amountLeft: this.amountLeft,
             available: this.available,
             newAmount: this.newAmount

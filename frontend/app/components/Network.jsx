@@ -14,7 +14,9 @@ var Network = React.createClass({
       user: this.props.flux.store('UserStore').getState().user,
       network: networkState,
       host: this.props.flux.store('config').getState().host,
-      blockDate: networkState.blockTimestamp ? moment(networkState.blockTimestamp * 1000).format('MMM Do, HH:mm:ss') : '-'
+      blockDate: networkState.blockTimestamp ? moment(networkState.blockTimestamp * 1000).format('MMM Do, HH:mm:ss') : '-',
+      blockTime: networkState.blockTime ? networkState.blockTime + " s" : "",
+      networkLag: networkState.networkLag ? networkState.networkLag + " s" : ""
     };
   },
 
@@ -87,7 +89,10 @@ var Network = React.createClass({
             GAS PRICE<span className="pull-right">{ formattedGasPrice }</span>
           </p>
           <p className="block-time">
-            BLOCK TIME<span className="pull-right">{ this.state.network.blockTime || '-' } / <span className={'text-' + this.state.lastState}>{ this.state.lastBlock || '-' }</span></span>
+            BLOCK TIME<span className="pull-right">{ this.state.blockTime || '-' } / <span className={'text-' + this.state.lastState}>{ this.state.lastBlock || '-' }</span></span>
+          </p>
+          <p className="net-lag">
+            NETWORK LAG<span className="pull-right"> { this.state.networkLag || '-' }</span>
           </p>
           <p className="last-block">
             LAST BLOCK<span className="pull-right">{ this.state.blockDate || '-' }</span>

@@ -14,7 +14,7 @@ data exchange
 data market_id
 data balances[2^160](balance)
 
-extern exchange: [deposit:iii:i]
+extern exchange: [deposit:[int256,int256,int256]:int256]
 
 def init():
     self.owner = msg.sender
@@ -37,7 +37,7 @@ def transfer(recipient, amount):
 
         # Notify exchange of deposit
         if recipient == self.exchange:
-            ret = self.exchange.deposit(msg.sender, amount, self.market_id, datasz=3)
+            ret = self.exchange.deposit(msg.sender, amount, self.market_id)
             # Exchange returns our new balance as confirmation
             if ret >= amount:
                 return(1)

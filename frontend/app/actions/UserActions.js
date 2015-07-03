@@ -10,12 +10,11 @@ var UserActions = function() {
         this.dispatch(constants.user.LOAD_ADDRESSES);
 
         _client.loadAddresses(function(addresses) {
-            if (init)
-              this.flux.actions.user.loadDefaultAccount();
+            var defaultAccount = _client.loadCoinbase();
+            this.dispatch(constants.user.LOAD_DEFAULT_ACCOUNT, defaultAccount);
 
             // Load primary address
             var primary = false;
-            var defaultAccount = this.flux.store('UserStore').defaultAccount;
             try {
                 primary = _client.getHex('EtherEx', 'primary');
             }
@@ -46,23 +45,24 @@ var UserActions = function() {
 
                 // Load markets
                 if (!this.flux.store("UserStore").getState().user.error)
-                  this.flux.actions.market.loadMarkets(init);
+                  this.flux.actions.market.initializeMarkets();
             }
         }.bind(this), function(error) {
             this.dispatch(constants.user.LOAD_ADDRESSES_FAIL, {error: error});
         }.bind(this));
     };
 
-    this.loadDefaultAccount = function() {
-        var _client = this.flux.store('config').getEthereumClient();
-        var defaultAccount = _client.loadCoinbase();
-        this.dispatch(constants.user.LOAD_DEFAULT_ACCOUNT, defaultAccount);
-    };
-
     this.switchAddress = function(payload) {
         var _client = this.flux.store('config').getEthereumClient();
         _client.putHex('EtherEx', 'primary', payload.address);
+
         this.dispatch(constants.user.SWITCH_ADDRESS, payload);
+
+        this.flux.actions.user.updateBalance();
+        this.flux.actions.user.updateBalanceSub();
+        this.flux.actions.market.updateMarketsBalances();
+
+        this.flux.actions.market.reloadTransactions();
     };
 
     this.updateBalance = function() {
@@ -95,7 +95,7 @@ var UserActions = function() {
                 trading: trading,
                 balance: balance
             });
-            this.flux.actions.market.updateMarketBalance(market, available, trading, balance);
+            this.flux.actions.market.updateMarketBalances(market, available, trading, balance);
         }.bind(this), function(error) {
             this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
         }.bind(this));
@@ -132,7 +132,7 @@ var UserActions = function() {
                     trading: trading,
                     balance: balance
                 });
-                this.flux.actions.market.updateMarketBalance(market, available, trading, balance);
+                this.flux.actions.market.updateMarketBalances(market, available, trading, balance);
             }.bind(this), function(error) {
                 this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
             }.bind(this));
@@ -157,7 +157,7 @@ var UserActions = function() {
                     trading: trading,
                     balance: balance
                 });
-                this.flux.actions.market.updateMarketBalance(market, available, trading, balance);
+                this.flux.actions.market.updateMarketBalances(market, available, trading, balance);
             }.bind(this), function(error) {
                 this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
             }.bind(this));
@@ -183,7 +183,7 @@ var UserActions = function() {
                     trading: trading,
                     balance: balance
                 });
-                this.flux.actions.market.updateMarketBalance(market, available, trading, balance);
+                this.flux.actions.market.updateMarketBalances(market, available, trading, balance);
             }.bind(this), function(error) {
                 this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
             }.bind(this));

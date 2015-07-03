@@ -11,6 +11,7 @@ var NetworkStore = Fluxxor.createStore({
     this.blockNumber = null;
     this.blockTime = null;
     this.blockTimestamp = null;
+    this.networkLag = null;
     this.ether = null;
     this.gasPrice = null;
     this.ethereumStatus = null;
@@ -36,6 +37,7 @@ var NetworkStore = Fluxxor.createStore({
       blockNumber: this.blockNumber,
       blockTime: this.blockTime,
       blockTimestamp: this.blockTimestamp,
+      networkLag: this.networkLag,
       ether: this.ether,
       gasPrice: this.gasPrice,
       ethereumStatus: this.ethereumStatus,

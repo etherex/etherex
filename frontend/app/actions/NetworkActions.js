@@ -1,4 +1,5 @@
 var constants = require('../js/constants');
+var utils = require('../js/utils');
 
 var NetworkActions = function() {
   /**
@@ -7,7 +8,7 @@ var NetworkActions = function() {
    * If the daemon just became reachable (including startup), load the
    * latest data and ensure that we're monitoring new blocks to update our
    * stores. If our Ethereum daemon just became unreachable, dispatch an event so
-   * an error dialog can be display.
+   * an error dialog can be displayed.
    */
   this.checkNetwork = function() {
     var ethereumClient = this.flux.store('config').getEthereumClient();
@@ -25,7 +26,7 @@ var NetworkActions = function() {
       this.dispatch(constants.network.UPDATE_READY, {
         ready: false
       });
-      // this.flux.actions.network.reset(); // need stopPolling() instead
+      this.flux.actions.network.reset(); // need stopPolling() instead
 
       // Put trades in loading state
       this.dispatch(constants.trade.LOAD_TRADES);
@@ -35,26 +36,33 @@ var NetworkActions = function() {
         ethereumStatus: constants.network.ETHEREUM_STATUS_CONNECTED
       });
       this.flux.actions.network.initializeNetwork();
-      this.flux.actions.network.updateBlockchainAge(false); // sync
+      this.flux.actions.network.updateBlockchain(false); // sync
     }
 
     if (nowUp) {
-      this.flux.actions.network.updateBlockchainAge(true); // async
+      this.flux.actions.network.updateBlockchain(true); // async
 
       var timeOut = this.flux.store('config').getState().timeout;
 
       if (networkState.blockChainAge > timeOut) {
         // Also put trades in loading state if network was not ready
-        this.dispatch(constants.trade.LOAD_TRADES);
+        if (!networkState.ready) {
+          this.dispatch(constants.trade.LOAD_TRADES);
 
-        this.dispatch(constants.network.UPDATE_READY, {
-          ready: false
-        });
+          this.dispatch(constants.network.UPDATE_READY, {
+            ready: false
+          });
+        }
 
         this.dispatch(constants.config.UPDATE_PERCENT_LOADED_SUCCESS, {
           percentLoaded: (timeOut / networkState.blockChainAge) * 100
         });
-        this.flux.actions.user.loadAddresses(false);
+
+        // Load user addresses if they weren't, update balance otherwise
+        if (!this.flux.store("UserStore").getState().user.addresses.length)
+          this.flux.actions.user.loadAddresses(false);
+        else
+          this.flux.actions.user.updateBalance();
       }
       else if (networkState.blockChainAge && networkState.blockChainAge <= timeOut) {
         if (!networkState.ready || wasDown) {
@@ -76,15 +84,33 @@ var NetworkActions = function() {
   };
 
   // Sync method to update blockchain age
-  this.updateBlockchainAge = function (async) {
+  // and async to update all blockchain and network infos
+  this.updateBlockchain = function (async) {
     var ethereumClient = this.flux.store('config').getEthereumClient();
     if (async) {
       ethereumClient.getBlock('latest', function(block) {
         if (block.timestamp) {
-          var blockChainAge = (new Date().getTime() / 1000) - block.timestamp;
+          var lastState = this.flux.store('network').getState();
+          var blockChainAge = new Date().getTime() / 1000 - block.timestamp;
+          var blockTime = lastState.blockTimestamp ? block.timestamp - lastState.blockTimestamp : 0;
+
           this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, {
             blockChainAge: blockChainAge
           });
+
+          // Update blockchain stats
+          if (block.number > lastState.blockNumber) {
+            this.dispatch(constants.network.UPDATE_NETWORK, {
+              blockNumber: block.number,
+              blockTimestamp: block.timestamp,
+              blockTime: blockTime ? blockTime : null,
+              networkLag: blockChainAge > 0 ? blockChainAge.toFixed(2) : null
+            });
+
+            // Update network if block.number changed, meaning new blocks
+            // were imported without triggering onNewBlock
+            this.flux.actions.network.updateNetwork();
+          }
         }
       }.bind(this));
     }
@@ -109,32 +135,6 @@ var NetworkActions = function() {
   this.updateNetwork = function () {
     var ethereumClient = this.flux.store('config').getEthereumClient();
 
-    // Get last block's timestamp and calculate block time and age
-    ethereumClient.getBlock('latest', function(block) {
-      // Update block number and timestamp
-      this.dispatch(constants.network.UPDATE_NETWORK, {
-        blockNumber: block.number,
-        blockTimestamp: block.timestamp
-      });
-
-      // Update block time
-      if (block.number > 1) {
-        ethereumClient.getBlock(block.number - 1, function(previous) {
-          this.dispatch(constants.network.UPDATE_NETWORK, {
-            blockTime: block.timestamp - previous.timestamp + " s"
-          });
-        }.bind(this));
-      }
-
-      // Update blockchain age
-      if (block.timestamp) {
-        this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, {
-          blockChainAge: (new Date().getTime() / 1000) - block.timestamp
-        });
-      }
-    }.bind(this));
-
-    // Update other metrics
     ethereumClient.getPeerCount(function(peerCount) {
       this.dispatch(constants.network.UPDATE_NETWORK, { peerCount: peerCount });
     }.bind(this));
@@ -155,20 +155,10 @@ var NetworkActions = function() {
   /**
    * Update data that should change over time in the UI.
    */
-  this.onNewBlock = function () {
-    this.flux.actions.network.updateNetwork();
-
-    // Already using watch in EthereumClient, but not reliable enough yet
-    var networkState = this.flux.store('network').getState();
-
-    if (networkState.ready) {
-      if (this.flux.store("UserStore").getState().user.id)
-        this.flux.actions.user.updateBalance();
-
-      var market = this.flux.store("MarketStore").getState().market;
-      if (market.id)
-        this.flux.actions.user.updateBalanceSub();
-    }
+  this.onNewBlock = function (error, log) {
+    if (this.flux.store('config').getState().debug)
+      utils.log("GOT BLOCK", log);
+    this.flux.actions.network.updateBlockchain(true);
   };
 
   this.startMonitoring = function () {

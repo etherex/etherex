@@ -10,7 +10,7 @@ var TradeBuys = React.createClass({
   render: function() {
     return (
       <div className="col-md-6">
-        <TradeTable flux={this.props.flux} title="Bids" trades={this.props.trades} tradeList={this.props.trades.tradeBuys} market={this.props.market} user={this.props.user.user} />
+        <TradeTable flux={this.props.flux} title="Bids" type={1} trades={this.props.trades} tradeList={this.props.trades.tradeBuys} market={this.props.market} user={this.props.user.user} />
       </div>
     );
   }
@@ -20,7 +20,7 @@ var TradeSells = React.createClass({
   render: function() {
     return (
       <div className="col-md-6">
-        <TradeTable flux={this.props.flux} title="Asks" trades={this.props.trades} tradeList={this.props.trades.tradeSells} market={this.props.market} user={this.props.user.user} />
+        <TradeTable flux={this.props.flux} title="Asks" type={2} trades={this.props.trades} tradeList={this.props.trades.tradeSells} market={this.props.market} user={this.props.user.user} />
       </div>
     );
   }

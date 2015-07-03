@@ -13,8 +13,6 @@ var UserSummaryPane = React.createClass({
     this.props.flux.actions.user.switchAddress({
       address: address
     });
-    this.props.flux.actions.user.updateBalance();
-    this.props.flux.actions.market.updateMarkets();
   },
 
   render: function() {

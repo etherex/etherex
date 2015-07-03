@@ -117,7 +117,7 @@ class TestEtherEx(object):
         assert self._storage(self.etx_contract, self.xhex(1)) == "0x" + self.contract.address.encode('hex')
 
         # Get markets pointer...
-        self.ptr = self._storage(self.contract, "0x03")
+        self.ptr = self._storage(self.contract, "0x02")
         # logger.info("Markets start at %s, then %s ..." % (self.ptr, self.ptr_add(self.ptr, 1)))
         # logger.info(self.state.block.account_to_dict(self.contract.address.encode('hex'))['storage'])
         # logger.info("===")
@@ -401,7 +401,7 @@ class TestEtherEx(object):
             25000000L,
             745948140856946866108753121277737810491401257713L,
             0L,
-            -43661844752590979300431051014294333542661024257584153614584419342051414010808L]
+            -43661844752590979300431051012832831905330121339380468781868136322395481467836L]
 
     def test_trade_already_exists(self):
         self.test_add_buy_trades()
@@ -435,12 +435,12 @@ class TestEtherEx(object):
 
         ans = self.contract.get_trade_ids(1)
         assert ans == [
-            23490291715255176443338864873375620519154876621682055163056454432194948412040L,
-            -35168633768494065610302920664120686116555617894816459733689825088489895266148L,
-            38936224262371094519907212029104196662516973526369593745812124922634258039407L,
-            49800558551364658298467690253710486242473574128865389798518930174170604985043L,
+            -11872296793322400290999375245896441639313038086627719556596606178564438289113L,
             -34362698062012420373581910342777892308255636544894323695139344222373572831032L,
-            -11872296793322400290999375245896441639313038086627719556596606178564438289113L]
+            49800558551364658298467690253710486242473574128865389798518930174170604985043L,
+            38936224262371094519907212029104196662516973526369593745812124922634258039407L,
+            -35168633768494065610302920664120686116555617894816459733689825088489895266148L,
+            23490291715255176443338864873375620519154876621682055163056454432194948412040L]
 
     def test_cancel_trade_fail(self):
         self.test_add_buy_trades()
@@ -537,6 +537,15 @@ class TestEtherEx(object):
             return snapshot
         # TODO - proper balance assertions
 
+    def test_get_trade_ids_after_first_buy(self):
+        snapshot = self.test_fulfill_first_buy(False)
+
+        ans = self.contract.get_trade_ids(1)
+        assert ans == [
+            38936224262371094519907212029104196662516973526369593745812124922634258039407L,
+            -35168633768494065610302920664120686116555617894816459733689825088489895266148L]
+        self.state.revert(snapshot)
+
     def test_get_last_price(self):
         snapshot = self.test_fulfill_first_buy(False)
         # snapshot = self.state.snapshot()
@@ -602,8 +611,8 @@ class TestEtherEx(object):
         }]
         self.state.revert(snapshot)
 
-    def test_fulfill_first_sell(self):
-        self.test_add_sell_trades()
+    def test_fulfill_first_sell(self, revert=True):
+        self.test_add_sell_trades(revert)
         snapshot = self.state.snapshot()
         self.state.mine(1)
 
@@ -619,9 +628,25 @@ class TestEtherEx(object):
         ans = self.contract.get_trade(49800558551364658298467690253710486242473574128865389798518930174170604985043L)
         assert ans == [0, 0, 0, 0, 0, 0, 0, 0]
 
+        if revert:
+            self.state.revert(snapshot)
+        else:
+            return snapshot
+
+    def test_get_trade_ids_after_first_sell(self):
+        self.test_add_buy_trades()
+        snapshot = self.test_fulfill_first_sell(False)
+
+        ans = self.contract.get_trade_ids(1)
+        assert ans == [
+            -11872296793322400290999375245896441639313038086627719556596606178564438289113L,
+            -34362698062012420373581910342777892308255636544894323695139344222373572831032L,
+            38936224262371094519907212029104196662516973526369593745812124922634258039407L,
+            -35168633768494065610302920664120686116555617894816459733689825088489895266148L,
+            23490291715255176443338864873375620519154876621682055163056454432194948412040L]
         self.state.revert(snapshot)
 
-    def test_fulfill_multiple_trades(self):
+    def test_fulfill_multiple_trades(self, revert=True):
         self.test_add_buy_trades()
         self.test_add_sell_trades(False)
         self.test_transfer_to_bob_and_deposit()
@@ -652,9 +677,22 @@ class TestEtherEx(object):
         assert ans > 1000449999999999999000000L
         assert ans < 1000450000000000000000000L
 
+        if revert:
+            self.state.revert(snapshot)
+        else:
+            return snapshot
+
+    def test_get_trade_ids_after_multiple_trades(self):
+        snapshot = self.test_fulfill_multiple_trades(False)
+
+        ans = self.contract.get_trade_ids(1)
+        assert ans == [
+            -11872296793322400290999375245896441639313038086627719556596606178564438289113L,
+            -34362698062012420373581910342777892308255636544894323695139344222373572831032L,
+            49800558551364658298467690253710486242473574128865389798518930174170604985043L]
         self.state.revert(snapshot)
 
-    def test_partial_fill_multiple_trades(self):
+    def test_partial_fill_multiple_trades(self, revert=True):
         self.test_add_buy_trades()
         self.test_add_sell_trades(False)
         self.test_transfer_to_bob_and_deposit()
@@ -676,4 +714,18 @@ class TestEtherEx(object):
         ans = self.contract.get_sub_balance(self.BOB['address'], 1)
         assert ans == [balance_from_transfer - fill_amount, 0]
 
+        if revert:
+            self.state.revert(snapshot)
+        else:
+            return snapshot
+
+    def test_get_trade_ids_after_partial_fill(self):
+        snapshot = self.test_partial_fill_multiple_trades(False)
+
+        ans = self.contract.get_trade_ids(1)
+        assert ans == [
+            -11872296793322400290999375245896441639313038086627719556596606178564438289113L,
+            -34362698062012420373581910342777892308255636544894323695139344222373572831032L,
+            49800558551364658298467690253710486242473574128865389798518930174170604985043L,
+            38936224262371094519907212029104196662516973526369593745812124922634258039407L]
         self.state.revert(snapshot)

@@ -24,6 +24,8 @@ module.exports = {
         ETHEREUM_STATUS_LOADING: null
     }),
     trade: keyMirror ({
+        LOAD_TRADE_IDS: null,
+        LOAD_TRADE_IDS_FAIL: null,
         LOAD_TRADE: null,
         LOAD_TRADES: null,
         LOAD_TRADES_FAIL: null,
@@ -33,7 +35,8 @@ module.exports = {
         UPDATE_TRADES: null,
         UPDATE_TRADES_FAIL: null,
         UPDATE_TRADES_SUCCESS: null,
-        UPDATE_TRADES_PROGRESS: null,
+        UPDATE_TRADES_MESSAGE: null,
+        CHECK_PENDING: null,
         ADD_TRADE: null,
         ADD_TRADE_FAIL: null,
         FILL_TRADE: null,
@@ -48,8 +51,6 @@ module.exports = {
         HIGHLIGHT_FILLING: null,
         HIGHLIGHT_FILLING_FAIL: null,
         CLICK_FILL: null,
-        CLICK_FILL_FAIL: null,
-        CLICK_FILL_SUCCESS: null,
         SWITCH_MARKET: null,
         SWITCH_MARKET_FAIL: null,
         SWITCH_TYPE: null,
@@ -78,13 +79,19 @@ module.exports = {
         SWITCH_ADDRESS: null
     }),
     market: keyMirror ({
-        CHANGE_MARKET: null,
+        LOAD_MARKET: null,
         LOAD_MARKETS: null,
         LOAD_MARKETS_FAIL: null,
         LOAD_MARKETS_SUCCESS: null,
+        LOAD_MARKETS_PROGRESS: null,
+        UPDATE_MARKET: null,
+        UPDATE_MARKETS: null,
         UPDATE_MARKET_BALANCE: null,
+        CHANGE_MARKET: null,
+        RELOAD_PRICES: null,
         UPDATE_PRICES: null,
         UPDATE_PRICES_DATA: null,
+        RELOAD_TRANSACTIONS: null,
         UPDATE_TRANSACTIONS: null,
         TOGGLE_FAVORITE: null
     })

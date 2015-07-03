@@ -12,9 +12,7 @@ var utils = require("../js/utils");
 var TxRow = React.createClass({
 
     render: function() {
-        var market = this.props.market.markets[this.props.tx.market - 1];
-        var amount = utils.format(bigRat(this.props.tx.amount).divide(Math.pow(10, market.decimals)));
-
+        var amount = utils.format(bigRat(this.props.tx.amount).divide(Math.pow(10, this.props.market.decimals)));
         return (
             <tr>
                 <td>
@@ -50,7 +48,7 @@ var TxRow = React.createClass({
                 </td>
                 <td>
                     <div className="text-right">
-                        {market.name}
+                        {this.props.market.name}
                     </div>
                 </td>
                 <td>
@@ -90,9 +88,12 @@ var TxsTable = React.createClass({
     },
 
     componentWillReceiveProps: function(nextProps) {
+        var index = _.findIndex(nextProps.market.markets, {'id': nextProps.market.market.id});
+        var market = nextProps.market.markets[index];
+
         var txsRows = _.sortBy(nextProps.txs, 'block').map(function (tx) {
           return (
-              <TxRow key={_.uniqueId()} tx={tx} market={this.props.market} user={this.props.user} />
+              <TxRow key={_.uniqueId()} tx={tx} market={market} user={this.props.user} />
           );
         }.bind(this));
         txsRows.reverse();

@@ -1,4 +1,3 @@
-var _ = require("lodash");
 var React = require("react");
 
 var bigRat = require("big-rational");
@@ -29,21 +28,21 @@ var SplitTradeForm = React.createClass({
       amountPrecision: null,
       precision: null,
       minimum: null,
-      totalLeft: null,
-      isValid: false,
-      estimate: null,
-      message: null,
-      note: null
+      isValid: false
     };
   },
 
   componentDidMount: function() {
     this.componentWillReceiveProps(this.props);
-    this.preValidate(this.props.type, this.state.amount, this.state.price, this.state.total);
+    this.preValidate(this.props.type, this.state.amount, this.state.price, this.state.total, true);
   },
 
   componentWillReceiveProps: function(nextProps) {
-    if (nextProps.mobile || (nextProps.trades.newAmount && nextProps.trades.type == this.props.type)) {
+    // utils.log("MESSAGE", nextProps.trades.message);
+    // utils.log(nextProps.trades.amount, nextProps.trades.newAmount);
+    // if (nextProps.trades.amount &&
+    //     nextProps.trades.amount != this.props.trades.amount &&
+    if (nextProps.trades.newAmount &&  nextProps.trades.type == this.props.type) {
       this.setState({
         amount: parseFloat(nextProps.trades.amount),
         price: parseFloat(nextProps.trades.price),
@@ -66,7 +65,7 @@ var SplitTradeForm = React.createClass({
           <label className="sr-only" forHtml="amount">Amount</label>
           <div className="input-group">
             <div className="input-group-addon">Amount</div>
-            <input type="number" min={this.state.amountPrecision} step={this.state.amountPrecision} className="form-control medium" placeholder={this.state.amountPrecision} ref="amount" onChange={this.handleChange} value={this.state.amount} />
+            <input type="number" min={this.props.market.market.amountPrecision} step={this.props.market.market.amountPrecision} className="form-control medium" placeholder={this.props.market.market.amountPrecision} ref="amount" onChange={this.handleChange} value={this.state.amount} />
             <div className="input-group-addon">{this.props.market.market.name}</div>
           </div>
         </div>
@@ -74,7 +73,7 @@ var SplitTradeForm = React.createClass({
           <label className="sr-only" forHtml="price">Price</label>
           <div className="input-group">
             <div className="input-group-addon">Price</div>
-            <input type="number" min={this.state.precision} step={this.state.precision} className="form-control medium" placeholder={this.state.precision} ref="price" onChange={this.handleChange} value={this.state.price} />
+            <input type="number" min={this.props.market.market.pricePrecision} step={this.props.market.market.pricePrecision} className="form-control medium" placeholder={this.props.market.market.pricePrecision} ref="price" onChange={this.handleChange} value={this.state.price} />
             <div className="input-group-addon">
               {this.props.market.market.name}/ETH
             </div>
@@ -83,7 +82,7 @@ var SplitTradeForm = React.createClass({
         <div className="form-group">
           <div className="input-group">
             <div className="input-group-addon">Total</div>
-            <input type="number" min={this.state.minimum} step={this.state.precision} className="form-control medium" placeholder={this.state.minimum} ref="total" onChange={this.handleChangeTotal} value={this.state.total} />
+            <input type="number" min={this.props.market.market.minimumTotal} step={this.props.market.market.amountPrecision} className="form-control medium" placeholder={this.props.market.market.minimumTotal} ref="total" onChange={this.handleChangeTotal} value={this.state.total} />
             <div className="input-group-addon">
               ETH
             </div>
@@ -93,8 +92,8 @@ var SplitTradeForm = React.createClass({
           {this.state.isValid ?
               <ModalTrigger modal={
                   <ConfirmModal
-                    message={this.state.message}
-                    note={this.state.note}
+                    message={this.props.trades.message}
+                    note={this.props.trades.note}
                     estimate={this.props.trades.estimate}
                     tradeList={this.props.trades.filling}
                     user={this.props.user.user}
@@ -121,29 +120,23 @@ var SplitTradeForm = React.createClass({
     );
   },
 
-  preValidate: function(type, amount, price, total) {
-    // Price precision
-    var marketPrecision = this.props.market.market.precision;
-    var priceDecimals = marketPrecision ? String(marketPrecision).length - 1 : 5;
-    var precision = (1 / (this.props.market.market.precision ?
-                          _.parseInt(this.props.market.market.precision) : 1000)).toFixed(priceDecimals);
+  preValidate: function(type, amount, price, total, init) {
+    if (!amount && !init)
+      return;
 
     // Amount decimals
-    var decimals = this.props.market.market.decimals ? this.props.market.market.decimals : 5;
-    var amountPrecision = (1 / Math.pow(10, decimals)).toFixed(decimals);
-
-    // Minimum total
-    var minimum = bigRat(this.props.market.market.minimum).divide(fixtures.ether).valueOf().toFixed(priceDecimals);
-
-    var message = "";
-    var note = "";
+    var decimals = this.props.market.market.decimals;
+    var message = '';
+    var note = '';
     var isValid = false;
 
     amount = parseFloat(amount) || 0;
     price = parseFloat(price) || 0;
     total = parseFloat(total) || 0;
 
-    // Pre-check if trade will be valid
+    var totalLeft = this.props.trades.amountLeft ? this.props.trades.amountLeft * price : 0;
+
+    // Pre-check if trade will be valid and update confirm message
     if (price > 0 &&
         amount > 0 &&
         total >= this.props.market.market.minTotal &&
@@ -154,8 +147,9 @@ var SplitTradeForm = React.createClass({
       // Dialog messages and notes
       message = "Are you sure you want to " + (type == 1 ? "buy" : "sell") +
         " " + utils.numeral(amount, decimals) + " " + this.props.market.market.name +
-        " at " + utils.numeral(price, priceDecimals) + " " + this.props.market.market.name + "/ETH" +
+        " at " + utils.numeral(price, this.props.market.market.priceDecimals) + " " + this.props.market.market.name + "/ETH" +
         " for " + utils.formatBalance(bigRat(total).multiply(fixtures.ether), decimals) + " ?";
+
       note = (this.props.trades.filling.length > 0 ?
           "You will be filling " + this.props.trades.filling.length + " trade" +
           (this.props.trades.filling.length > 1 ? "s" : "") +
@@ -165,39 +159,39 @@ var SplitTradeForm = React.createClass({
             utils.formatBalance(bigRat(this.props.trades.available).multiply(fixtures.ether), decimals) + " left)" : "") +
           "."
           : "") +
-        (this.state.totalLeft >= this.props.market.market.minTotal &&
+        (totalLeft >= this.props.market.market.minTotal &&
           this.props.trades.filling.length > 0 &&
           this.props.trades.available ?
           " You will also be adding a new trade of " +
             utils.numeral(this.props.trades.amountLeft, this.props.market.market.decimals) + " " +
             this.props.market.market.name +
-          " at " + utils.numeral(price, priceDecimals) + " " + this.props.market.market.name + "/ETH" +
+          " at " + utils.numeral(price, this.props.market.market.priceDecimals) + " " + this.props.market.market.name + "/ETH" +
           " for " + utils.formatBalance(bigRat(this.props.trades.amountLeft)
                       .multiply(price)
                       .multiply(fixtures.ether), decimals) +
           "."
           : "") +
-        (this.state.totalLeft &&
-         this.state.totalLeft < this.props.market.market.minTotal &&
+        (totalLeft &&
+         totalLeft < this.props.market.market.minTotal &&
          this.props.trades.filling.length > 0 &&
          this.props.trades.amountLeft &&
          this.props.trades.available ?
           " Not enough left for a new trade with " +
             utils.numeral(this.props.trades.amountLeft, decimals) + " " + this.props.market.market.name + " for " +
-            utils.formatBalance(bigRat(this.state.totalLeft).multiply(fixtures.ether), decimals) +
+            utils.formatBalance(bigRat(totalLeft).multiply(fixtures.ether), decimals) +
             "."
             : "");
       isValid = true;
     }
 
+    if (!init)
+      this.props.flux.actions.trade.updateMessage({
+        note: note,
+        message: message
+      });
+
     this.setState({
-      amountPrecision: amountPrecision,
-      precision: precision,
-      minimum: minimum,
-      message: message,
-      note: note,
-      isValid: isValid,
-      totalLeft: this.props.trades.amountLeft ? this.props.trades.amountLeft * price : 0
+      isValid: isValid
     });
   },
 
@@ -383,9 +377,8 @@ var CustomModalTrigger = React.createClass({
   // This is called by the `OverlayMixin` when this component
   // is mounted or updated and the return value is appended to the body.
   renderOverlay: function () {
-    if (!this.state.isModalOpen) {
+    if (!this.state.isModalOpen)
       return <span/>;
-    }
 
     return (
         <SubDepositModal {...this.props} onRequestHide={this.handleToggle} title={"Deposit " + this.props.market.name} animation={true} />

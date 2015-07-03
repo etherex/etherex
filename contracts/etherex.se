@@ -11,16 +11,11 @@
 
 data created  # 0x
 data last_market  # 0x1
-data last_trade  # 0x2
 
 data markets_ptr  # 0x3
 data trades_ptr  # 0x4
 
-data log_gas  # 0x5
-data log_last_trade  # 0x6
-data log_timestamp  # 0x7
-
-data markets[2^160](id, name, contract, decimals, precision, minimum, category, last_price, owner, block, total_trades, trade_ids[](id))
+data markets[2^160](id, name, contract, decimals, precision, minimum, category, last_price, owner, block, total_trades, last_trade, trade_ids[](id, next_id, prev_id))
 data trades[2^160](id, type, market, amount, price, owner, block, refhash)
 data balances[][](available, trading)
 
@@ -31,7 +26,7 @@ event log_deposit(sender:indexed, market:indexed, amount)
 event log_withdraw(address:indexed, market:indexed, amount)
 event log_cancel(sender:indexed, market:indexed, tradeid, price, amount)
 
-extern subcurrency: [transfer:ii:i]
+extern subcurrency: [transfer:[int256,int256]:int256]
 
 macro MARKET_FIELDS():
     12
@@ -66,30 +61,27 @@ macro save_trade($type, $amount, $price, $market_id):
         self.trades[trade_id].block = block.number
         self.trades[trade_id].refhash = ref(self.trades[trade_id].id)
 
-        # Update available and trading amounts for sells
+        # Update market
+        last_id = self.markets[$market_id].last_trade
+        self.markets[$market_id].trade_ids[last_id].next_id = trade_id
+        self.markets[$market_id].trade_ids[trade_id].prev_id = last_id
+        self.markets[$market_id].trade_ids[trade_id].id = trade_id
+        self.markets[$market_id].last_trade = trade_id
+        self.markets[$market_id].total_trades += 1
+
+        # Update available and trading amounts for asks
         if $type == 2:
             self.balances[msg.sender][$market_id].available -= $amount
             self.balances[msg.sender][$market_id].trading += $amount
-
-        # Update market
-        new_total = self.markets[$market_id].total_trades + 1
-        self.markets[$market_id].total_trades = new_total
-        self.markets[$market_id].trade_ids[new_total].id = trade_id
-
-        # Save last trade ID, not much use currently
-        self.last_trade = trade_id
     else:
         return(15) // "Trade already exists"
-
-    # Record last added trade
-    self.log_last_trade = trade_id
 
     # Log transaction
     log(type=log_add_tx, msg.sender, $market_id, $type, $price, $amount)
 
     return(trade_id)
 
-macro remove_trade($trade_id):
+macro remove_trade($trade_id, $market_id):
     self.trades[$trade_id].id = 0
     self.trades[$trade_id].type = 0
     self.trades[$trade_id].market = 0
@@ -99,18 +91,15 @@ macro remove_trade($trade_id):
     self.trades[$trade_id].block = 0
     self.trades[$trade_id].refhash = 0
 
+    self.markets[$market_id].trade_ids[$trade_id].id = 0
+    prev_id = self.markets[$market_id].trade_ids[$trade_id].prev_id
+    next_id = self.markets[$market_id].trade_ids[$trade_id].next_id
+    self.markets[$market_id].trade_ids[prev_id].next_id = next_id
+    self.markets[$market_id].trade_ids[next_id].prev_id = prev_id
+    self.markets[$market_id].total_trades -= 1
 
 def init():
     self.created = block.timestamp  # Timestamp when this contract was created
-
-def shared():
-    # Basic gas check
-    if msg.gas < 1000:
-        return(0) // "Insufficient gas"
-
-    # Logging
-    self.log_gas = msg.gas
-    self.log_timestamp = block.timestamp
 
 
 #
@@ -227,7 +216,7 @@ def trade(max_amount, trade_ids:arr):
                 if fill < amount:
                     self.trades[trade_id].amount -= fill
                 else:
-                    remove_trade(trade_id)
+                    remove_trade(trade_id, market_id)
 
                 # Update balances
                 self.balances[msg.sender][market_id].available -= fill
@@ -263,7 +252,7 @@ def trade(max_amount, trade_ids:arr):
                     self.trades[trade_id].amount -= fill
                 else:
                     fill = amount
-                    remove_trade(trade_id)
+                    remove_trade(trade_id, market_id)
 
                 # Update balances
                 self.balances[self][market_id].trading -= fill
@@ -315,7 +304,7 @@ def withdraw(amount, market_id):
     balance = self.balances[msg.sender][market_id].available
     if balance >= amount:
         self.balances[msg.sender][market_id].available = balance - amount
-        ret = self.markets[market_id].contract.transfer(msg.sender, amount, datasz=2)
+        ret = self.markets[market_id].contract.transfer(msg.sender, amount)
         log(type=log_withdraw, msg.sender, market_id, amount)
         return(ret)
     return(0)
@@ -340,11 +329,11 @@ def cancel(trade_id):
     if msg.sender == owner:
 
         # Clear the trade first
-        remove_trade(trade_id)
+        remove_trade(trade_id, market_id)
 
         # Issue refunds
         if type == 1:
-            # ETH sell refund
+            # ETH refund
             value = ((amount * price) / (precision * 10 ^ decimals)) * 10 ^ 18
             send(msg.sender, value)
 
@@ -414,11 +403,13 @@ def get_market(id):
 
 def get_trade_ids(market_id):
     trades_count = self.markets[market_id].total_trades
+    trade_id = self.markets[market_id].last_trade
     trade_ids = array(trades_count)
 
-    i = 1
-    while i < trades_count + 1:
-        trade_ids[i - 1] = self.markets[market_id].trade_ids[i].id
+    i = 0
+    while i < trades_count:
+        trade_ids[i] = self.markets[market_id].trade_ids[trade_id].id
+        trade_id = self.markets[market_id].trade_ids[trade_id].prev_id
         i = i + 1
 
     if trade_ids:

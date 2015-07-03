@@ -2,7 +2,6 @@
   "node": true,
   "esnext": true,
   "browser": true,
-  "loopfunc": true,
   "globals": {
     "jQuery": true,
     "console": true,

@@ -1,20 +1,37 @@
+var _ = require("lodash");
 var constants = require("../js/constants");
 var utils = require("../js/utils");
 var bigRat = require("big-rational");
 
 var TradeActions = function() {
 
-    this.loadTrades = function() {
+    this.loadTradeIDs = function(market, init) {
+        if (this.flux.store('config').getState().debug)
+          console.count("loadTradeIDs triggered");
+
+        var _client = this.flux.store('config').getEthereumClient();
+
+        _client.loadTradeIDs(market, function(trade_ids) {
+            this.dispatch(constants.trade.LOAD_TRADE_IDS, trade_ids);
+            if (init)
+                this.flux.actions.trade.loadTrades(trade_ids);
+        }.bind(this), function(error) {
+            this.dispatch(constants.trade.LOAD_TRADE_IDS_FAIL, {error: error});
+        }.bind(this));
+    };
+
+    this.loadTrades = function(trade_ids) {
         if (this.flux.store('config').getState().debug)
           console.count("loadTrades triggered");
 
         var _client = this.flux.store('config').getEthereumClient();
 
+        // Put trades in loading state
         this.dispatch(constants.trade.LOAD_TRADES);
 
         var market = this.flux.store("MarketStore").getState().market;
 
-        _client.loadTrades(market, this.flux.actions.trade.updateProgress, function(trade) {
+        _client.loadTrades(trade_ids, market, this.flux.actions.trade.updateProgress, function(trade) {
             this.dispatch(constants.trade.LOAD_TRADE, trade);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.LOAD_TRADES_FAIL, {error: error});
@@ -31,52 +48,100 @@ var TradeActions = function() {
 
         var market = this.flux.store("MarketStore").getState().market;
 
-        _client.loadTrades(market, this.flux.actions.trade.updateProgress, function(trade) {
-            this.dispatch(constants.trade.UPDATE_TRADE, trade);
+        _client.loadTradeIDs(market, function(trade_ids) {
+            this.dispatch(constants.trade.LOAD_TRADE_IDS, trade_ids);
+
+            _client.loadTrades(trade_ids, market, this.flux.actions.trade.updateProgress, function(trade) {
+                this.dispatch(constants.trade.UPDATE_TRADE, trade);
+            }.bind(this), function(error) {
+                this.dispatch(constants.trade.UPDATE_TRADES_FAIL, {error: error});
+            }.bind(this));
         }.bind(this), function(error) {
-            this.dispatch(constants.trade.UPDATE_TRADES_FAIL, {error: error});
+            this.dispatch(constants.trade.LOAD_TRADE_IDS_FAIL, {error: error});
         }.bind(this));
     };
 
+    this.tradesLoaded = function() {
+        this.dispatch(constants.trade.UPDATE_TRADES_SUCCESS);
 
-    this.updateProgress = function(progress) {
-      var percent = parseFloat(((progress.current / progress.total) * 100).toFixed(2));
-      this.dispatch(constants.trade.LOAD_TRADES_PROGRESS, percent);
-      if (percent >= 100)
-          this.dispatch(constants.trade.UPDATE_TRADES_SUCCESS);
+        // Highlight filling trades
+        var market = this.flux.store("MarketStore").getState().market;
+        var trades = this.flux.store("TradeStore").getState();
+        var user = this.flux.store("UserStore").getState().user;
 
-      // Highlight filling trades
-      var trade = this.flux.store("TradeStore").getState();
-      var market = this.flux.store("MarketStore").getState().market;
-      var user = this.flux.store("UserStore").getState().user;
+        if (trades.type && trades.price && trades.amount && trades.total && market && user)
+            this.flux.actions.trade.highlightFilling({
+                type: trades.type,
+                price: trades.price,
+                amount: trades.amount,
+                total: trades.total,
+                market: market,
+                user: user
+            });
+    };
 
-      if (trade.type && trade.price && trade.amount && trade.total && market && user)
-          this.flux.actions.trade.highlightFilling({
-              type: trade.type,
-              price: trade.price,
-              amount: trade.amount,
-              total: trade.total,
-              market: market,
-              user: user
+    this.updateProgress = function() {
+        var trades = this.flux.store("TradeStore").getState();
+        var current = trades.progress + 1;
+        var total = trades.tradeIDs.length;
+
+        if (!total) {
+          this.dispatch(constants.trade.LOAD_TRADES_PROGRESS, {
+            progress: current,
+            percent: current
           });
+          return;
+        }
+
+        var percent = parseFloat(((current / total) * 100).toFixed(2));
+
+        this.dispatch(constants.trade.LOAD_TRADES_PROGRESS, {
+          progress: current,
+          percent: percent
+        });
+
+        if (percent >= 100)
+            this.flux.actions.trade.tradesLoaded();
+    };
+
+    this.updateMessage = function(payload) {
+      this.dispatch(constants.trade.UPDATE_TRADES_MESSAGE, payload);
+    };
+
+    this.checkPending = function(error, tx) {
+      // TODO
+      // utils.log(error, tx);
+      this.dispatch(constants.trade.CHECK_PENDING, tx);
     };
 
     this.addTrade = function(trade) {
         var _client = this.flux.store('config').getEthereumClient();
 
-        var id = utils.randomId();
-        trade.id = id;
-        trade.status = "new";
-
         var user = this.flux.store("UserStore").getState().user;
-        var market = this.flux.store("MarketStore").getState().market;
+        var markets = this.flux.store("MarketStore").getState().markets;
+        var index = _.findIndex(markets, {'id': trade.market});
 
         // console.log("ON MARKET: " + market.name, "ADD_TRADE", trade);
+        trade.id = _.uniqueId(); // result;
+        trade.status = "new";
 
-        _client.addTrade(user, trade, market, function(result) {
+        var payload = {
+            id: trade.id,
+            type: (trade.type == 1) ? 'buys' : 'sells',
+            price: trade.price,
+            amount: trade.amount,
+            total: trade.amount * trade.price,
+            market: markets[index],
+            owner: user.id,
+            status: trade.status
+        };
+
+        this.dispatch(constants.trade.ADD_TRADE, payload);
+
+        _client.addTrade(user, trade, markets[index], function(result) {
             utils.log("ADD_TRADE_RESULT", result);
-            this.dispatch(constants.trade.ADD_TRADE, trade);
-            this.flux.actions.market.updateMarkets();
+            payload.status = "pending";
+            this.dispatch(constants.trade.UPDATE_TRADE, payload);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.ADD_TRADE_FAIL, {error: error});
         }.bind(this));
@@ -189,10 +254,6 @@ var TradeActions = function() {
         this.dispatch(constants.trade.CLICK_FILL, trades);
     };
 
-    this.clickFillSuccess = function(trades) {
-        this.dispatch(constants.trade.CLICK_FILL_SUCCESS, trades);
-    };
-
     this.switchType = function(type) {
         this.dispatch(constants.trade.SWITCH_TYPE, type);
 
@@ -213,8 +274,11 @@ var TradeActions = function() {
     };
 
     this.switchMarket = function(market) {
-        this.dispatch(constants.trade.SWITCH_MARKET, market);
-        this.flux.actions.trade.loadTrades();
+        if (this.flux.store('config').getState().debug)
+          console.count("SWITCH", market);
+        // this.dispatch(constants.trade.SWITCH_MARKET, market);
+        this.dispatch(constants.trade.LOAD_TRADES);
+        this.flux.actions.trade.loadTradeIDs(market, true);
     };
 };
 

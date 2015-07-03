@@ -53,12 +53,15 @@ var MarketRow = React.createClass({
 
     handleClick: function(e) {
         e.preventDefault();
+
         if (this.props.market)
             this.props.flux.actions.market.switchMarket(this.props.market);
     },
 
     toggleFavorite: function(e) {
         e.preventDefault();
+        e.stopPropagation();
+
         var favorite = false;
         if (this.props.market.favorite === false)
             favorite = true;
@@ -154,23 +157,38 @@ var MarketTable = React.createClass({
     //     }
     // },
 
-    render: function() {
-        // var markets = _.sortBy(this.props.market.markets.reverse(), 'favorite').reverse();
+    getInitialState: function() {
+        return {
+            marketRows: null
+        };
+    },
+
+    componentDidMount: function() {
+        this.componentWillReceiveProps(this.props);
+    },
+
+    componentWillReceiveProps: function(nextProps) {
         var markets = [];
 
         // Filter by category
-        var category = _.filter(fixtures.categories, {key: this.props.category})[0];
-        if (this.props.category != 'markets')
-            markets = _.filter(this.props.market.markets, {category: category.id});
+        var category = _.filter(fixtures.categories, {key: nextProps.category})[0];
+        if (nextProps.category != 'markets')
+            markets = _.filter(nextProps.market.markets, {category: category.id});
         else
-            markets = this.props.market.markets;
+            markets = nextProps.market.markets;
 
-        var marketListNodes = markets.map(function (market) {
+        var marketRows = markets.map(function (market) {
             return (
                 <MarketRow flux={this.props.flux} key={market.id} market={market} />
             );
         }.bind(this));
 
+        this.setState({
+          marketRows: marketRows
+        });
+    },
+
+    render: function() {
         // <tbody onDragOver={this.dragOver}>
         return (
             <div>
@@ -186,7 +204,7 @@ var MarketTable = React.createClass({
                         </tr>
                     </thead>
                     <tbody>
-                        {marketListNodes}
+                        {this.state.marketRows}
                     </tbody>
                 </Table>
             </div>

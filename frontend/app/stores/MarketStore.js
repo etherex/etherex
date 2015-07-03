@@ -10,33 +10,65 @@ var utils = require("../js/utils");
 var MarketStore = Fluxxor.createStore({
 
     initialize: function(options) {
-        this.market = options.market || {txs: [], prices: [], data: {}};
+        this.market = options.market || {txs: [], prices: [], data: []};
         this.markets = options.markets || [];
         this.favorites = [];
+        this.progress = 0;
+        this.lastMarketID = 0;
+        this.lastOpenedMarketID = 0;
         this.loading = true;
         this.error = null;
 
         this.bindActions(
+            constants.market.LOAD_MARKET, this.onLoadMarket,
             constants.market.LOAD_MARKETS, this.onLoadMarkets,
             constants.market.LOAD_MARKETS_FAIL, this.onLoadMarketsFail,
             constants.market.LOAD_MARKETS_SUCCESS, this.onLoadMarketsSuccess,
-            constants.market.CHANGE_MARKET, this.onChangeMarket,
+            constants.market.LOAD_MARKETS_PROGRESS, this.onLoadMarketsProgress,
+            constants.market.UPDATE_MARKET, this.onUpdateMarket,
+            constants.market.UPDATE_MARKETS, this.onUpdateMarkets,
             constants.market.UPDATE_MARKET_BALANCE, this.onUpdateMarketBalance,
+            constants.market.CHANGE_MARKET, this.onChangeMarket,
+            constants.market.RELOAD_PRICES, this.onReloadPrices,
             constants.market.UPDATE_PRICES, this.onUpdatePrices,
             constants.market.UPDATE_PRICES_DATA, this.onUpdatePricesData,
             constants.market.UPDATE_TRANSACTIONS, this.onUpdateTransactions,
+            constants.market.RELOAD_TRANSACTIONS, this.onReloadTransactions,
             constants.market.TOGGLE_FAVORITE, this.toggleFavorite
         );
 
         this.setMaxListeners(1024); // prevent "possible EventEmitter memory leak detected"
     },
 
+    onUpdateMarkets: function(payload) {
+        this.lastMarketID = payload.lastMarketID;
+        this.lastOpenedMarketID = payload.lastOpenedMarketID;
+        this.favorites = payload.favorites;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
     onLoadMarkets: function() {
-        this.market = {txs: [], prices: [], data: {}};
+        this.market = {txs: [], prices: [], data: []};
         this.markets = [];
-        this.favorites = [];
+        this.progress = 0;
         this.loading = true;
         this.error = null;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onLoadMarket: function(payload) {
+        var index = _.findIndex(this.markets, {'id': payload.id});
+        if (index != -1)
+            this.markets[index] = payload;
+        else
+            this.markets.push(payload);
+
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onUpdateMarket: function(payload) {
+        // this.market = {txs: [], prices: [], data: []};
+        _.merge(this.market, payload);
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -46,20 +78,30 @@ var MarketStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onLoadMarketsSuccess: function(payload) {
-        // console.log("MARKETS LOADED: ", payload);
-        if (!this.market.id)
-            this.market = payload.markets[payload.last];
-        else if (this.market.id)
-            this.market = payload.markets[this.market.id - 1];
+    onLoadMarketsProgress: function(payload) {
+        this.progress = payload;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onLoadMarketsSuccess: function() {
+        // utils.log("MARKETS LOADED: ", this.markets);
+        if (!this.market.id) {
+            var index = _.findIndex(this.markets, {'id': this.lastOpenedMarketID});
+            if (index == -1)
+                this.market = this.markets[0];
+            else
+                this.market = this.markets[index];
+        }
+
+        // Sort by favorite and ID
+        this.markets = _.sortBy(this.markets, function(market) {
+            return [market.favorite ? 'a' : 'b', market.id.toString()].join('-');
+        });
 
         this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
         this.market.txs = [];
-        this.market.data = {};
+        this.market.data = [];
         this.market.prices = [];
-        this.markets = payload.markets;
-
-        this.favorites = payload.favorites;
 
         this.loading = false;
         this.error = null;
@@ -71,18 +113,23 @@ var MarketStore = Fluxxor.createStore({
         utils.log("MARKET: ", payload);
         this.market = payload;
         this.market.txs = [];
-        this.market.data = {};
+        this.market.data = [];
         this.market.prices = [];
         this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
         this.emit(constants.CHANGE_EVENT);
     },
 
     onUpdateMarketBalance: function(payload) {
-        // console.log("UPDATING MARKET " + payload.market.name + " WITH " + payload.balance.confirmed);
         var index = _.findIndex(this.markets, {'id': payload.market.id});
         this.markets[index].available = payload.balance.available;
         this.markets[index].trading = payload.balance.trading;
         this.markets[index].balance = payload.balance.balance;
+        // utils.log(this.markets[index].name, this.markets[index].available);
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onReloadPrices: function() {
+        this.market.prices = [];
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -92,8 +139,9 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onUpdatePricesData: function() {
-        // console.log("PRICES", payload);
+        // utils.log("PRICES", this.market.prices);
         var prices = this.market.prices;
+
         if (prices.length) {
             var previous = {};
             this.market.data = _.map(_.groupBy(prices.reverse(), 'timestamp'), function(logs) {
@@ -194,14 +242,20 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onUpdateTransactions: function(payload) {
-        this.market.txs.push(payload);
         // utils.log("TX", payload);
+        this.market.txs.push(payload);
         // utils.log("TRANSACTIONS", this.market.txs);
         this.emit(constants.CHANGE_EVENT);
     },
 
+    onReloadTransactions: function() {
+        this.market.txs = [];
+        this.emit(constants.CHANGE_EVENT);
+    },
+
     toggleFavorite: function(payload) {
-        this.markets[payload.id - 1].favorite = payload.favorite;
+        var index = _.findIndex(this.markets, {'id': payload.id});
+        this.markets[index].favorite = payload.favorite;
         this.favorites = payload.favorites;
 
         this.emit(constants.CHANGE_EVENT);
@@ -213,6 +267,9 @@ var MarketStore = Fluxxor.createStore({
             markets: this.markets,
             prices: this.prices,
             favorites: this.favorites,
+            lastMarketID: this.lastMarketID,
+            lastOpenedMarketID: this.lastOpenedMarketID,
+            progress: this.progress,
             loading: this.loading,
             error: this.error
         };

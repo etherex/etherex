@@ -7,9 +7,9 @@ var techan = require("techan");
 
 var Chart = React.createClass({
 
-    // propTypes: {
-    //     data: React.PropTypes.array
-    // },
+    propTypes: {
+        data: React.PropTypes.array
+    },
 
     getInitialState: function() {
         return {

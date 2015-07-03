@@ -1,5 +1,5 @@
 /** @jsx React.DOM */
-
+var _ = require("lodash");
 var React = require("react");
 
 var DropdownButton = require('react-bootstrap/lib/DropdownButton');
@@ -7,7 +7,8 @@ var MenuItem = require('react-bootstrap/lib/MenuItem');
 
 var MarketSelect = React.createClass({
   handleChange: function(key) {
-    this.props.flux.actions.market.switchMarket(this.props.market.markets[key - 1]);
+    var index = _.findIndex(this.props.market.markets, {'id': key});
+    this.props.flux.actions.market.switchMarket(this.props.market.markets[index]);
   },
 
   render: function() {

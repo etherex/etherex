@@ -11,7 +11,7 @@ var ConfigStore = Fluxxor.createStore({
     this.ethereumClient = null;
     this.demoMode = false;
     this.range = 75; // max 300 blocks / ~ 1 hour
-    this.rangeEnd = false;
+    this.rangeEnd = 0;
     this.timeout = 120;
 
     this.bindActions(

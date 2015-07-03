@@ -1,4 +1,5 @@
 var _ = require("lodash");
+var utils = require('../js/utils');
 var constants = require('../js/constants');
 var EthereumClient = require('../clients/EthereumClient');
 
@@ -6,19 +7,25 @@ var ConfigActions = function() {
 
   this.updateEthereumClient = function () {
     var configState = this.flux.store('config').getState();
+    var debug = this.flux.store('config').getState().debug;
+
+    if (debug)
+      utils.log("DEBUGGING", debug);
 
     var clientParams = {
       address: configState.address,
       host: configState.host,
       range: configState.range,
-      rangeEnd: configState.rangeEnd
+      rangeEnd: configState.rangeEnd,
+      debug: debug
     };
+
     var ethereumClient = new EthereumClient(clientParams);
 
     // Reload range configs from client on first run
     if (!configState.ethereumClient && ethereumClient.isAvailable()) {
-      var range = false;
-      var rangeEnd = false;
+      var range = configState.range;
+      var rangeEnd = configState.rangeEnd;
 
       try {
           range = _.parseInt(ethereumClient.getString('EtherEx', 'range'));
@@ -39,7 +46,8 @@ var ConfigActions = function() {
             address: configState.address,
             host: configState.host,
             range: range,
-            rangeEnd: rangeEnd
+            rangeEnd: rangeEnd,
+            debug: debug
           };
           ethereumClient = new EthereumClient(clientParams);
 
@@ -68,7 +76,7 @@ var ConfigActions = function() {
       address: payload.address
     });
     this.flux.actions.config.updateEthereumClient();
-    this.flux.actions.market.updateMarkets();
+    // this.flux.actions.market.updateMarkets();
   };
 
   this.updateDemoMode = function(value) {
@@ -85,7 +93,9 @@ var ConfigActions = function() {
     _client.putString('EtherEx', 'range', String(range));
 
     this.flux.actions.config.updateEthereumClient();
-    this.flux.actions.market.updateMarkets();
+    // this.flux.actions.market.updateMarkets();
+    this.flux.actions.market.reloadPrices();
+    this.flux.actions.market.reloadTransactions();
   };
 
   this.updateRangeEnd = function(rangeEnd) {
@@ -96,7 +106,9 @@ var ConfigActions = function() {
     _client.putString('EtherEx', 'rangeEnd', String(rangeEnd));
 
     this.flux.actions.config.updateEthereumClient();
-    this.flux.actions.market.updateMarkets();
+    // this.flux.actions.market.updateMarkets();
+    this.flux.actions.market.reloadPrices();
+    this.flux.actions.market.reloadTransactions();
   };
 
   this.initializeState = function() {

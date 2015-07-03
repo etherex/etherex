@@ -6,8 +6,6 @@
 # Set some variables.
 -
   set:
-    NameReg: "0x72ba7d8e73fe8eb666ea66babc8116a41bfb10e2"
-    Cow: "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826"
     zg: "0xe68faeeff09f46b87e83e13cef47275ebaa34349"
     caktux: "0xcf523d526b21aef4284a7f9d91a003646d5c8542"
     mids: "0x2ad9e5d8960882c07b96e2a21d5a39ab082e7368"
@@ -20,12 +18,6 @@
       gas: 2500000
       wait: True
       # endowment: 1000000000000000000
--
-  deploy:
-    OwnNameReg:
-      contract: namereg.se
-      gas: 1000000
-      wait: True
 -
   deploy:
     ETX:
@@ -44,61 +36,14 @@
       contract: etx.se
       gas: 1000000
       wait: True
-# -
-#   deploy:
-#     Update:
-#       contract: update.se
-
-# Register with global NameReg
-# -
-#   transact:
-#     NameReg:
-#       to: $EtherEx
-#       fun_name: register
-#       data:
-#         - "0x72ba7d8e73fe8eb666ea66babc8116a41bfb10e2"
-
-# Register names to our own NameReg
--
-  transact:
-    OwnNameRegEtherEx:
-      to: $OwnNameReg
-      fun_name: register
-      sig: ii
-      data:
-        - $EtherEx
-        - EtherEx
-    OwnNameRegETX:
-      to: $OwnNameReg
-      fun_name: register
-      sig: ii
-      data:
-        - $ETX
-        - ETX
-    OwnNameRegCAK:
-      to: $OwnNameReg
-      fun_name: register
-      sig: ii
-      data:
-        - $CAK
-        - CAK
-    OwnNameRegMID:
-      to: $OwnNameReg
-      fun_name: register
-      sig: ii
-      data:
-        - $MID
-        - MID
-      wait: True
 
 # Register subcurrencies on the exchange
 -
   transact:
     RegisterETX:
       to: $EtherEx
-      fun_name: add_market
       gas: 1000000
-      sig: iiiiii
+      sig: add_market:[int256,int256,int256,int256,int256,int256]:int256
       data:
         - ETX
         - $ETX
@@ -111,9 +56,8 @@
   transact:
     RegisterCAK:
       to: $EtherEx
-      fun_name: add_market
       gas: 1000000
-      sig: iiiiii
+      sig: add_market:[int256,int256,int256,int256,int256,int256]:int256
       data:
         - CAK
         - $CAK
@@ -126,9 +70,8 @@
   transact:
     RegisterMID:
       to: $EtherEx
-      fun_name: add_market
       gas: 1000000
-      sig: iiiiii
+      sig: add_market:[int256,int256,int256,int256,int256,int256]:int256
       data:
         - MID
         - $MID
@@ -138,13 +81,13 @@
         - 3
       wait: True
 
+
 # Set exchange address and market ID in subcurrency contracts
 -
   transact:
     SetExchangeETX:
       to: $ETX
-      fun_name: set_exchange
-      sig: ii
+      sig: set_exchange:[int256,int256]:int256
       data:
         - $EtherEx
         - 1
@@ -152,8 +95,7 @@
   transact:
     SetExchangeCAK:
       to: $CAK
-      fun_name: set_exchange
-      sig: ii
+      sig: set_exchange:[int256,int256]:int256
       data:
         - $EtherEx
         - 2
@@ -161,43 +103,29 @@
   transact:
     SetExchangeMID:
       to: $MID
-      fun_name: set_exchange
-      sig: ii
+      sig: set_exchange:[int256,int256]:int256
       data:
         - $EtherEx
         - 3
       wait: True
 
-# Change creator
--
-  transact:
-    SetExchangeCreator:
-      to: $EtherEx
-      fun_name: change_creator
-      sig: i
-      data:
-        - $zg
-      wait: True
 
 # Change sub-currencies' ownership
 -
   transact:
     SetETXOwner:
       to: $ETX
-      fun_name: change_ownership
-      sig: i
+      sig: change_ownership:[int256]:int256
       data:
         - $zg
     SetCAKOwner:
       to: $CAK
-      fun_name: change_ownership
-      sig: i
+      sig: change_ownership:[int256]:int256
       data:
         - $zg
     SetMIDOwner:
       to: $MID
-      fun_name: change_ownership
-      sig: i
+      sig: change_ownership:[int256]:int256
       data:
         - $zg
       wait: True
@@ -219,22 +147,19 @@
   transact:
     ZGetx:
       to: $ETX
-      fun_name: transfer
-      sig: ii
+      sig: transfer:[int256,int256]:int256
       data:
         - $zg
         - 10000000000
     CAKetx:
       to: $ETX
-      fun_name: transfer
-      sig: ii
+      sig: transfer:[int256,int256]:int256
       data:
         - $caktux
         - 10000000000
     MIDetx:
       to: $ETX
-      fun_name: transfer
-      sig: ii
+      sig: transfer:[int256,int256]:int256
       data:
         - $mids
         - 10000000000
@@ -243,22 +168,19 @@
   transact:
     ZGcak:
       to: $CAK
-      fun_name: transfer
-      sig: ii
+      sig: transfer:[int256,int256]:int256
       data:
         - $zg
         - 5000000000
     CAKcak:
       to: $CAK
-      fun_name: transfer
-      sig: ii
+      sig: transfer:[int256,int256]:int256
       data:
         - $caktux
         - 50000000000
     MIDcak:
       to: $CAK
-      fun_name: transfer
-      sig: ii
+      sig: transfer:[int256,int256]:int256
       data:
         - $mids
         - 5000000000
@@ -267,22 +189,19 @@
   transact:
     ZGetx:
       to: $MID
-      fun_name: transfer
-      sig: ii
+      sig: transfer:[int256,int256]:int256
       data:
         - $zg
         - 5000000000
     CAKetx:
       to: $MID
-      fun_name: transfer
-      sig: ii
+      sig: transfer:[int256,int256]:int256
       data:
         - $caktux
         - 5000000000
     MIDetx:
       to: $MID
-      fun_name: transfer
-      sig: ii
+      sig: transfer:[int256,int256]:int256
       data:
         - $mids
         - 50000000000
@@ -294,25 +213,22 @@
   transact:
     deposit:
       to: $ETX
-      fun_name: transfer
+      sig: transfer:[int256,int256]:int256
       gas: 250000
-      sig: ii
       data:
         - $EtherEx
         - 1000000000
     depositCAK:
       to: $CAK
-      fun_name: transfer
+      sig: transfer:[int256,int256]:int256
       gas: 250000
-      sig: ii
       data:
         - $EtherEx
         - 10000000000
     depositMID:
       to: $MID
-      fun_name: transfer
+      sig: transfer:[int256,int256]:int256
       gas: 250000
-      sig: ii
       data:
         - $EtherEx
         - 10000000000
@@ -324,45 +240,40 @@
     # Sells
     trade1:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 5000000
         - 25000000
         - 1
     trade2:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 15000000
         - 25000000
         - 1
     trade3:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 25000000
         - 25000000
         - 1
     trade4:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 35000000
         - 26000000
         - 1
     trade5:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 45000000
         - 27000000
@@ -370,45 +281,40 @@
       wait: True
     trade6:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 55000000
         - 28000000
         - 1
     trade7:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 1500000
         - 29000000
         - 1
     trade8:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 25000000
         - 30000000
         - 1
     trade9:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 25000000
         - 31000000
         - 1
     trade10:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 25000000
         - 32000000
@@ -418,9 +324,8 @@
     # Buys
     trade11:
       to: $EtherEx
-      fun_name: buy
+      sig: buy:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 5000000
         - 24000000
@@ -428,9 +333,8 @@
       value: 12000000000000000000
     trade12:
       to: $EtherEx
-      fun_name: buy
+      sig: buy:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 5000000
         - 23000000
@@ -438,9 +342,8 @@
       value: 11500000000000000000
     trade13:
       to: $EtherEx
-      fun_name: buy
+      sig: buy:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 5000000
         - 22000000
@@ -448,9 +351,8 @@
       value: 11000000000000000000
     trade14:
       to: $EtherEx
-      fun_name: buy
+      sig: buy:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 5000000
         - 21000000
@@ -466,54 +368,48 @@
     # Sells
     trade1:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 50000000
         - 25
         - 2
     trade2:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 150000000
         - 26
         - 2
     trade3:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 250000000
         - 27
         - 2
     trade4:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 350000000
         - 28
         - 2
     trade5:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 450000000
         - 29
         - 2
     trade6:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 550000000
         - 30
@@ -523,9 +419,8 @@
     # Buys
     trade11:
       to: $EtherEx
-      fun_name: buy
+      sig: buy:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 5000000
         - 24
@@ -533,9 +428,8 @@
       value: 12000000000000000000
     trade12:
       to: $EtherEx
-      fun_name: buy
+      sig: buy:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 5000000
         - 23
@@ -543,9 +437,8 @@
       value: 11500000000000000000
     trade13:
       to: $EtherEx
-      fun_name: buy
+      sig: buy:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 5000000
         - 22
@@ -553,9 +446,8 @@
       value: 11000000000000000000
     trade14:
       to: $EtherEx
-      fun_name: buy
+      sig: buy:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 5000000
         - 21
@@ -570,54 +462,48 @@
     # Sells
     trade1:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 50000000
         - 25
         - 3
     trade2:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 150000000
         - 26
         - 3
     trade3:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 250000000
         - 27
         - 3
     trade4:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 350000000
         - 28
         - 3
     trade5:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 450000000
         - 29
         - 3
     trade6:
       to: $EtherEx
-      fun_name: sell
+      sig: sell:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 550000000
         - 30
@@ -627,9 +513,8 @@
     # Buys
     trade11:
       to: $EtherEx
-      fun_name: buy
+      sig: buy:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 5000000
         - 24
@@ -637,9 +522,8 @@
       value: 12000000000000000000
     trade12:
       to: $EtherEx
-      fun_name: buy
+      sig: buy:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 5000000
         - 23
@@ -647,9 +531,8 @@
       value: 11500000000000000000
     trade13:
       to: $EtherEx
-      fun_name: buy
+      sig: buy:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 5000000
         - 22
@@ -657,9 +540,8 @@
       value: 11000000000000000000
     trade14:
       to: $EtherEx
-      fun_name: buy
+      sig: buy:[int256,int256,int256]:int256
       gas: 500000
-      sig: iii
       data:
         - 5000000
         - 21

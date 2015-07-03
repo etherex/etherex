@@ -91,18 +91,21 @@ API
 
 Methods (with serpent type definitions):
 ```
-price:i:i
-buy:iii:i
-sell:iii:i
-trade:ia:i
-deposit:iii:i
-withdraw:ii:i
-cancel:i:i
-add_market:iiiiii:i
-get_market:i:a
-get_trade_ids:i:a
-get_trade:i:a
-get_sub_balance:ii:a
+[
+  price:[int256]:int256,
+  buy:[int256,int256,int256]:int256,
+  sell:[int256,int256,int256]:int256,
+  trade:[int256,int256[]]:int256,
+  cancel:[int256]:int256,
+  deposit:[int256,int256,int256]:int256,
+  withdraw:[int256,int256]:int256,
+  add_market:[int256,int256,int256,int256,int256,int256]:int256,
+  get_last_market_id:[]:int256,
+  get_market:[int256]:int256[],
+  get_trade:[int256]:int256[],
+  get_trade_ids:[int256]:int256[],
+  get_sub_balance:[int256,int256]:int256[]
+]
 ```
 
 
@@ -217,7 +220,7 @@ The second step has to be executed on each asset transfer. The gas costs of comp
 
 ```
 data balances[2^160](balance)
-extern exchange: [deposit:iii:i]
+extern exchange: [deposit:[int256,int256,int256]:int256]
 
 def transfer(recipient, amount):
     # Prevent negative send from stealing funds
@@ -236,7 +239,7 @@ def transfer(recipient, amount):
 
         # Notify exchange of deposit
         if recipient == self.exchange:
-            ret = self.exchange.deposit(msg.sender, amount, self.market_id, datasz=3)
+            ret = self.exchange.deposit(msg.sender, amount, self.market_id)
             # Exchange returns our new balance as confirmation
             if ret >= amount:
                 return(1)

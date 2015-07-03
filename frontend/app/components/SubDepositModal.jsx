@@ -15,6 +15,7 @@ var SubDepositModal = React.createClass({
 
   getInitialState: function() {
     return {
+      isModalOpen: true,
       amount: this.props.amount,
       newDeposit: false
     };
@@ -24,9 +25,18 @@ var SubDepositModal = React.createClass({
     this.validate(new Event('validate'));
   },
 
+  handleToggle: function() {
+    this.setState({
+      isModalOpen: !this.state.isModalOpen
+    });
+  },
+
   render: function() {
+    if (!this.state.isModalOpen)
+      return <span/>;
+
     return (
-      <Modal {...this.props} title={this.props.title} animation={true}>
+      <Modal {...this.props} title={this.props.title} animation={true} enforceFocus={false} onRequestHide={this.handleToggle}>
         <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
           <div className="modal-body">
             <label forHtml="amount">Amount</label>
@@ -64,6 +74,7 @@ var SubDepositModal = React.createClass({
 
   validate: function(e, showAlerts) {
     e.preventDefault();
+    e.stopPropagation();
 
     var amount = parseFloat(this.refs.amount.getDOMNode().value.trim());
 
@@ -71,12 +82,10 @@ var SubDepositModal = React.createClass({
       amount: amount
     });
 
-    if (!amount) {
+    if (!amount)
       this.props.setAlert('warning', "Dont' be cheap...");
-    }
-    else if (amount > this.props.user.balance_sub) {
+    else if (amount > this.props.user.balance_sub)
       this.props.setAlert('warning', "Not enough " + this.props.market.name + " for deposit, got " + utils.format(this.props.user.balance_sub) + ", needs " + utils.format(amount));
-    }
     else {
       this.setState({
         newDeposit: true
@@ -91,17 +100,22 @@ var SubDepositModal = React.createClass({
       newDeposit: false
     });
 
-    if (showAlerts)
+    if (showAlerts) {
       this.props.showAlert(true);
+      this.handleToggle();
+      this.props.onRequestHide();
+    }
 
-    e.stopPropagation();
+    return false;
   },
 
   onSubmitForm: function(e, el) {
     e.preventDefault();
 
-    if (!this.validate(e, el))
+    if (!this.validate(e, el)) {
+      this.props.onRequestHide();
       return false;
+    }
 
     this.props.flux.actions.user.depositSub({
       amount: bigRat(this.state.amount).multiply(Math.pow(10, this.props.market.decimals)).toDecimal()
@@ -113,6 +127,9 @@ var SubDepositModal = React.createClass({
       amount: null,
       newDeposit: false
     });
+
+    this.handleToggle();
+    this.props.onRequestHide();
   }
 });
 
