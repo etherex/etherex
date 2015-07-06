@@ -13,7 +13,8 @@ var ConfigStore = Fluxxor.createStore({
     this.demoMode = false;
     this.range = 75; // max 300 blocks / ~ 1 hour
     this.rangeEnd = 0;
-    this.timeout = 120;
+    this.timeout = 3600;
+    this.si = false;
 
     this.bindActions(
       constants.config.UPDATE_CONFIG, this.handleUpdateConfig,
@@ -34,7 +35,8 @@ var ConfigStore = Fluxxor.createStore({
       demoMode: this.demoMode,
       range: this.range,
       rangeEnd: this.rangeEnd,
-      timeout: this.timeout
+      timeout: this.timeout,
+      si: this.si
     };
   },
 

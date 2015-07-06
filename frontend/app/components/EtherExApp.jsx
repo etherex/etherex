@@ -72,7 +72,10 @@ var EtherExApp = React.createClass({
               <div className="row">
                 <Balance user={this.state.user} />
                 {(!this.state.market.error) &&
-                  <BalanceSub user={this.state.user} market={this.state.market} />
+                  <BalanceSub
+                    user={this.state.user}
+                    market={this.state.market}
+                    si={this.state.config.si} />
                 }
               </div>
               {(this.state.market.error) &&
@@ -230,10 +233,8 @@ var ErrorModal = React.createClass({
       modalSize = 'small';
 
     } else if (this.props.network.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED && !this.state.isDemo) {
-
-      var host = window.location.origin;
-
       // No ethereum client detected
+      var host = window.location.origin;
       modalBody =
         <div>
           <h4><FormattedMessage message={this.getIntlMessage('init.connect.failed')} /></h4>
@@ -248,8 +249,7 @@ var ErrorModal = React.createClass({
       modalSize = 'medium';
 
     } else if (this.state.isLoading) {
-
-      // EtherEx client failed to load
+      // Blockchain is syncing
       modalBody =
         <div>
           <h4><FormattedMessage message={this.getIntlMessage('init.loading')} /></h4>
@@ -268,7 +268,9 @@ var ErrorModal = React.createClass({
               left={parseInt(this.state.blocksLeft)} />
           </p>
         </div>;
-      modalFooter = false;
+      modalFooter = <Button className="pull-right" onClick={ this.forceLoad }>
+                      <FormattedMessage message={this.getIntlMessage('init.force')} />
+                    </Button>;
       modalSize = 'small';
     }
 
@@ -292,6 +294,10 @@ var ErrorModal = React.createClass({
       isDemo: true
     });
     this.props.flux.actions.config.updateDemoMode(true);
+  },
+
+  forceLoad() {
+    this.props.flux.actions.config.forceLoad();
   },
 
   render: function () {

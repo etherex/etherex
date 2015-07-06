@@ -1,12 +1,23 @@
 var Fluxxor = require("fluxxor");
 
 var constants = require("../js/constants");
+var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
+var bigRat = require("big-rational");
 
 var UserStore = Fluxxor.createStore({
 
     initialize: function(options) {
-        this.user = options.user || { id: 'loading...', balance: 0, addresses: [] };
+        this.user = options.user || {
+          id: 'loading...',
+          balance: 0,
+          balance_pending: 0,
+          balance_sub: 0,
+          balance_sub_available: 0,
+          balance_sub_trading: 0,
+          balance_sub_pending: 0,
+          addresses: []
+        };
         this.defaultAccount = null;
         // this.createAccount = false;
         this.loading = true;
@@ -65,7 +76,6 @@ var UserStore = Fluxxor.createStore({
 
     onLoadAddressesSuccess: function(payload) {
         // console.log("ADDRESSES", payload);
-
         this.user.id = payload.primary;
         this.user.addresses = payload.addresses;
         this.loading = false;
@@ -91,9 +101,10 @@ var UserStore = Fluxxor.createStore({
 
     onUpdateBalance: function(payload) {
         // console.log("BALANCE", payload.balance);
-        this.user.balance = utils.formatBalance(payload.balance);
+        this.user.balance = bigRat(payload.balance).divide(bigRat(fixtures.ether)).valueOf();
+        this.user.balanceFormatted = utils.formatBalance(payload.balance);
         this.user.balance_raw = payload.balance;
-        this.user.balance_unconfirmed = payload.balance_unconfirmed;
+        this.user.balance_pending = bigRat(payload.balance_pending).divide(bigRat(fixtures.ether)).valueOf();
         this.emit(constants.CHANGE_EVENT);
     },
 

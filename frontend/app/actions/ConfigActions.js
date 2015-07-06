@@ -17,7 +17,8 @@ var ConfigActions = function() {
       host: configState.host,
       range: configState.range,
       rangeEnd: configState.rangeEnd,
-      debug: debug
+      si: configState.rangeEnd,
+      debug: debug,
     };
 
     var ethereumClient = new EthereumClient(clientParams);
@@ -27,6 +28,7 @@ var ConfigActions = function() {
       var range = configState.range;
       var rangeEnd = configState.rangeEnd;
       var timeout = configState.timeout;
+      var si = configState.si;
 
       // Load range from web3.db
       try {
@@ -44,6 +46,14 @@ var ConfigActions = function() {
           ethereumClient.putString('EtherEx', 'rangeEnd', String(rangeEnd));
       }
 
+      // Load SI config from web3.db
+      try {
+          si = _.parseInt(ethereumClient.getHex('EtherEx', 'si'));
+      }
+      catch(e) {
+          ethereumClient.putHex('EtherEx', 'si', '0x0');
+      }
+
       // Load timeout from web3.db
       try {
           timeout = _.parseInt(ethereumClient.getString('EtherEx', 'timeout'));
@@ -52,6 +62,11 @@ var ConfigActions = function() {
           ethereumClient.putString('EtherEx', 'timeout', String(timeout));
       }
       this.dispatch(constants.config.UPDATE_CONFIG, {
+        timeout: timeout
+      });
+
+      this.dispatch(constants.config.UPDATE_CONFIG, {
+        si: si,
         timeout: timeout
       });
 
@@ -77,6 +92,13 @@ var ConfigActions = function() {
     });
   };
 
+  this.forceLoad = function() {
+    var timeout = _.parseInt(this.flux.store('network').blockChainAge + 300);
+    this.dispatch(constants.config.UPDATE_CONFIG, {
+      timeout: timeout
+    });
+  };
+
   this.updatePercentLoaded = function(percent) {
     this.dispatch(constants.config.UPDATE_PERCENT_LOADED_SUCCESS, {
       percentLoaded: percent
@@ -85,10 +107,13 @@ var ConfigActions = function() {
 
   this.updateConfig = function(payload) {
     this.dispatch(constants.config.UPDATE_CONFIG, payload);
-    if (payload.timeout) {
-      var _client = this.flux.store('config').getEthereumClient();
-      _client.putString('EtherEx', 'timeout', payload.timeout);
-    }
+    var _client = this.flux.store('config').getEthereumClient();
+
+    if (payload.timeout)
+      _client.putString('EtherEx', 'timeout', String(payload.timeout));
+    else if (typeof payload.si !== 'undefined')
+      _client.putHex('EtherEx', 'si', payload.si ? '0x01' : '0x00');
+
     this.flux.actions.config.updateEthereumClient();
   };
 

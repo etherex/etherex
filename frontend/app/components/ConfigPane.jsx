@@ -19,6 +19,8 @@ var ConfigPane = React.createClass({
       address: this.props.address,
       debug: configState.debug,
       timeout: configState.timeout,
+      timeoutUpdated: false,
+      si: configState.si,
       message: null,
       newAddress: false,
       showModal: false,
@@ -34,6 +36,18 @@ var ConfigPane = React.createClass({
     this.setState({ showModal: true });
   },
 
+  componentWillReceiveProps(nextProps) {
+    var config = nextProps.flux.store('config');
+    if (config.si != this.state.si)
+      this.setState({
+        si: config.si
+      });
+    if (config.timeout != this.state.timeout && !this.state.timeoutUpdated)
+      this.setState({
+        timeout: config.timeout
+      });
+  },
+
   render: function() {
     return (
       <div className="panel panel-default">
@@ -44,36 +58,45 @@ var ConfigPane = React.createClass({
         </div>
         <div className="panel-body">
           <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
-
             <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.current')} />}
               labelClassName='col-sm-2' wrapperClassName='col-sm-10'
               value={this.props.address} readOnly hasFeedback />
 
-            <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.current')} />}
+            <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.new')} />}
               labelClassName='col-sm-2' wrapperClassName='col-sm-10'
               maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="Address" ref="address" onChange={this.handleChange}/>
             <Input wrapperClassName="col-sm-10 col-sm-offset-2">
               <Button className={"btn-block" + (this.state.newAddress ? " btn-primary" : "")} type="submit">Update</Button>
             </Input>
+          </form>
 
-            <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.current')} />}
+          <form className="form-horizontal" role="form" onSubmit={this.handleTimeout} >
+            <Input ref="timeout" type="number" min="1" step="1"
+              label={<FormattedMessage message={this.getIntlMessage('config.timeout')} />}
               labelClassName='col-sm-2' wrapperClassName='col-sm-10'
-              ref="timeout" value={this.state.timeout} onChange={this.handleChangeTimeout} />
+              value={this.state.timeout} onChange={this.handleChangeTimeout} />
             <Input wrapperClassName="col-sm-10 col-sm-offset-2">
-              <Button onClick={this.handleTimeout} className="btn-primary" wrapperClassName="col-sm-10 col-sm-offset-2">
+              <Button
+                onClick={this.handleTimeout}
+                wrapperClassName="col-sm-10 col-sm-offset-2"
+                className={this.state.timeoutUpdated ? "btn-primary" : ""} >
                 <FormattedMessage message={this.getIntlMessage('config.update')} />
               </Button>
             </Input>
-
-            <Input type='checkbox' ref='debug' label={<FormattedMessage message={this.getIntlMessage('config.debug_mode')} />}
-              wrapperClassName="col-sm-10 col-sm-offset-2"
-              checked={this.state.debug} onChange={this.toggleDebug}
-              help={
-                <Alert bsStyle='warning' className='text-black'>
-                  <b><FormattedMessage message={this.getIntlMessage('form.warning')} /></b>
-                  <FormattedMessage message={this.getIntlMessage('config.debug_warning')} />
-                </Alert>} />
           </form>
+
+          <Input type='checkbox' ref='si' label={<FormattedMessage message={this.getIntlMessage('config.si')} />}
+            wrapperClassName="col-sm-10 col-sm-offset-2"
+            checked={this.state.si} onChange={this.toggleSI} />
+
+          <Input type='checkbox' ref='debug' label={<FormattedMessage message={this.getIntlMessage('config.debug_mode')} />}
+            wrapperClassName="col-sm-10 col-sm-offset-2"
+            checked={this.state.debug} onChange={this.toggleDebug}
+            help={
+              <Alert bsStyle='warning' className='text-black'>
+                <b><FormattedMessage message={this.getIntlMessage('form.warning')} /></b>
+                <FormattedMessage message={this.getIntlMessage('config.debug_warning')} />
+              </Alert>} />
         </div>
         <ConfirmModal
           show={this.state.showModal}
@@ -109,16 +132,24 @@ var ConfigPane = React.createClass({
     });
   },
 
-  handleChangeTimeout() {
-    var timeout = this.refs.timeout.getValue();
-    this.setState({ timeout: timeout });
+  toggleSI: function() {
+    var si = this.refs.si.getChecked();
+    this.setState({ si: si });
+    this.props.flux.actions.config.updateConfig({
+      si: si
+    });
   },
 
-  handleTimeout: function() {
+  handleChangeTimeout(e) {
+    e.preventDefault();
     var timeout = this.refs.timeout.getValue();
+    this.setState({ timeout: timeout, timeoutUpdated: true });
+  },
 
-    this.setState({ timeout: timeout });
-
+  handleTimeout: function(e) {
+    e.preventDefault();
+    var timeout = this.refs.timeout.getValue();
+    this.setState({ timeout: timeout, timeoutUpdated: false });
     this.props.flux.actions.config.updateConfig({
       timeout: timeout
     });
@@ -137,9 +168,7 @@ var ConfigPane = React.createClass({
 
   validate: function(e, showAlerts) {
     e.preventDefault();
-
     var address = this.refs.address.getValue().trim();
-
     this.setState({
       address: address
     });

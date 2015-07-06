@@ -31,7 +31,7 @@ var UserDetails = React.createClass({
     if (this.props.user.user.id) {
       return (
         <div className="container-fluid row">
-          <UserSummaryPane flux={this.props.flux} user={this.props.user} trades={own} />
+          <UserSummaryPane flux={this.props.flux} user={this.props.user} market={this.props.market.market} trades={own} />
           {(own.tradeBuys && own.tradeSells) &&
             <TradeList flux={this.props.flux} market={this.props.market} trades={own} user={this.props.user} />}
         </div>

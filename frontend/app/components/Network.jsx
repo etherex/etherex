@@ -59,7 +59,7 @@ var Network = React.createClass({
   render: function () {
     var formattedEther = '-';
     if (this.state.user.balance)
-      formattedEther = this.state.user.balance;
+      formattedEther = this.state.user.balanceFormatted;
 
     var formattedGasPrice = '-';
     if (this.state.network.gasPrice)

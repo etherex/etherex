@@ -1,7 +1,6 @@
 var React = require("react");
 var ReactIntl = require('react-intl');
 var IntlMixin = ReactIntl.IntlMixin;
-// var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Button = require('react-bootstrap/lib/Button');
 var Modal = require('react-bootstrap/lib/Modal');

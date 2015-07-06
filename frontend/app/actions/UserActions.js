@@ -74,7 +74,7 @@ var UserActions = function() {
         _client.updateBalance(user.id, function(confirmed, unconfirmed) {
             this.dispatch(constants.user.UPDATE_BALANCE, {
                 balance: confirmed,
-                balance_unconfirmed: unconfirmed
+                balance_pending: unconfirmed
             });
         }.bind(this), function(error) {
             this.dispatch(constants.user.UPDATE_BALANCE_FAIL, {error: error});

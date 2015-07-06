@@ -28,10 +28,17 @@ module.exports = {
     "loading": "loading",
     "error": "Error!",
     "slogan": "A Decentralized Future Calls For A Decentralized Exchange.",
+    "balance": "Balance",
+    "available": "Available",
+    "trading": "Trading",
+    "last": "Last Price",
+    "price": "{price, number} {currency}/ETH",
+    "trades": "Trades",
     "init": {
       "loading": "Ethereum loading...",
       "ready": "The Ethereum block chain is current. Just a few more seconds...",
       "not_ready": "The Ethereum block chain is not current and is fetching blocks from peers.",
+      "force": "Load anyway",
       "failed": {
         "header": "EtherEx failed to load",
         "explain": "There was a problem loading EtherEx.",
@@ -52,18 +59,22 @@ module.exports = {
     "demo": {
       "proceed": "Proceed in demo mode"
     },
+    "wallet": {
+      "balance": "In {currency} wallet: {balance, number}",
+      "available": "Available {currency} balance: {balance, number}",
+      "trading": "{currency} in trades: {balance, number}",
+      "sub": "{balance, number} {currency}",
+      "pending": `{currency} balance: {balance, number}
+                  {pending, plural,
+                    =0 {}
+                    other {(# pending)}
+                  }`
+    },
     "confirm": {
       "required": "Confirmation required",
       "estimate": "Gas cost estimate (probably wrong)",
       "no": "No",
       "yes": "Yes"
-    },
-    "ether": {
-      "balance": `ETH balance: {balance}
-        {pending, plural,
-          =0 {}
-          other {# pending}
-        }`
     },
     "form": {
       "buy": "Buy",
@@ -91,7 +102,8 @@ module.exports = {
       "update": "Update",
       "debug_mode": "Debug mode",
       "debug_warning": "This prints a truckload of logs to the console and can slow down the UI considerably.",
-      "address": "Are you sure you want to change the exchange's address to {address} ?"
+      "address": "Are you sure you want to change the exchange's address to {address} ?",
+      "si": "Use named large numbers for balances"
     },
     "address": {
       "size": `Address too {size, select,
@@ -118,6 +130,11 @@ module.exports = {
       "send": "Send",
       "currency": "Send {currency}"
     },
+    "market": {
+      "favorite": "Favorite",
+      "pair": "Currency pair",
+      "change": "% change in<br />24h/1w/1m"
+    },
     "trade": {
       "asks": "Asks",
       "bids": "Bids",
@@ -140,7 +157,16 @@ module.exports = {
       "not_enough": `Not enough {currency} for this trade, {amount} {currency} required.`
     },
     "user": {
-      "not_found": "User not found"
+      "not_found": "User not found",
+      "summary": "User summary",
+      "address": "Current address",
+      "switch": "Switch address",
+      "sub": "Current {currency} balance",
+      "balance": `{balance, number} {currency}
+                  {pending, plural,
+                    =0 {}
+                    other {(# pending)}
+                  }`
     },
     "hashrate": "{hashrate, number} H/s"
   }

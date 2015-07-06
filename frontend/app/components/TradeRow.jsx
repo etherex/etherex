@@ -2,7 +2,6 @@ var _ = require('lodash');
 var React = require("react");
 var ReactIntl = require('react-intl');
 var IntlMixin = ReactIntl.IntlMixin;
-// var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Button = require("react-bootstrap/lib/Button");
 var Glyphicon = require("react-bootstrap/lib/Glyphicon");
