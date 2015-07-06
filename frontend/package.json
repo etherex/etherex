@@ -70,6 +70,8 @@
     "d3": "^3.5.6",
     "file-loader": "^0.8.4",
     "fluxxor": "^1.6.0",
+    "intl": "^0.1.4",
+    "intl-locales-supported": "^1.0.0",
     "jquery": "^2.1.4",
     "lodash": "^3.10.0",
     "numeral": "^1.5.3",

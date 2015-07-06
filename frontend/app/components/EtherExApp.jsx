@@ -162,6 +162,7 @@ var ErrorModal = React.createClass({
       blocksLeft: null,
       lastBlockAge: 0,
       percentLoaded: 0,
+      modalHeader: null,
       modalBody: <ProgressBar active bsStyle={this.props.network.ready ? 'success' : 'default'} style={{marginTop: 25}} now={100} />,
       modalFooter: false,
       modalSize: 'small'
@@ -212,15 +213,16 @@ var ErrorModal = React.createClass({
     if (!openModal)
       return;
 
+    var modalHeader = this.state.modalHeader;
     var modalBody = this.state.modalBody;
     var modalFooter = this.state.modalFooter;
     var modalSize = this.state.modalSize;
 
     if (this.props.config.ethereumClientFailed) {
       // EtherEx client failed to load
+      modalHeader = <FormattedMessage message={this.getIntlMessage('init.failed.header')} />;
       modalBody =
           <div className="modal-body clearfix">
-            <h4><FormattedMessage message={this.getIntlMessage('init.failed.header')} /></h4>
             <p><FormattedMessage message={this.getIntlMessage('init.failed.explain')} /></p>
             <p><FormattedMessage message={this.getIntlMessage('init.failed.assistance')} /></p>
           </div>;
@@ -230,14 +232,14 @@ var ErrorModal = React.createClass({
                 <FormattedMessage message={this.getIntlMessage('demo.proceed')} />
               </Button>
           </div>;
-      modalSize = 'small';
+      modalSize = 'medium';
 
     } else if (this.props.network.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED && !this.state.isDemo) {
       // No ethereum client detected
       var host = window.location.origin;
+      modalHeader = <FormattedMessage message={this.getIntlMessage('init.connect.failed')} />;
       modalBody =
         <div>
-          <h4><FormattedMessage message={this.getIntlMessage('init.connect.failed')} /></h4>
           <p><FormattedMessage message={this.getIntlMessage('init.connect.explain')} /></p>
           <p><FormattedHTMLMessage message={this.getIntlMessage('init.connect.assistance')} /></p>
           <p><FormattedMessage message={this.getIntlMessage('init.connect.installed')} /></p>
@@ -250,12 +252,18 @@ var ErrorModal = React.createClass({
 
     } else if (this.state.isLoading) {
       // Blockchain is syncing
+      modalHeader = null;
       modalBody =
         <div>
           <h4><FormattedMessage message={this.getIntlMessage('init.loading')} /></h4>
           { this.props.network.blockChainAge < this.props.config.timeout ?
             <p><FormattedMessage message={this.getIntlMessage('init.ready')} /></p> :
-            <p><FormattedHTMLMessage message={this.getIntlMessage('init.not_ready')} /></p> }
+            <p>
+              <FormattedHTMLMessage
+                message={this.getIntlMessage('init.not_ready')}
+                peers={this.props.network.peerCount} />
+            </p>
+          }
           <ProgressBar active bsStyle={this.props.network.ready ? 'success' : 'default'} now={this.state.percentLoaded} />
           <p>
             <FormattedMessage
@@ -276,6 +284,7 @@ var ErrorModal = React.createClass({
 
     this.setState({
       isLaunching: false,
+      modalHeader: modalHeader,
       modalBody: modalBody,
       modalFooter: modalFooter,
       modalSize: modalSize
@@ -302,20 +311,23 @@ var ErrorModal = React.createClass({
 
   render: function () {
     return (
-      <Modal {...this.props} show={this.state.isModalOpen} animate={true} bsSize={this.state.modalSize} onHide={ this.closeModal } backdrop='static'>
-        {(this.props.network.lastBlockAge === 0 && this.state.launching) ?
-          <Modal.Header>
-            <h3 className="text-center">
-              <FormattedMessage message={this.getIntlMessage('loading')} />...
-            </h3>
-          </Modal.Header> : <span />}
-        <Modal.Body>
-          {this.state.modalBody}
-        </Modal.Body>
-        {this.state.modalFooter ?
-          <Modal.Footer>
-            {this.state.modalFooter}
-          </Modal.Footer> : <span />}
+      <Modal {...this.props}
+        show={this.state.isModalOpen}
+        animate={true}
+        bsSize={this.state.modalSize}
+        onHide={ this.closeModal }
+        backdrop='static'>
+          {this.state.modalHeader ?
+            <Modal.Header>
+              <h4>{this.state.modalHeader}</h4>
+            </Modal.Header> : {}}
+          <Modal.Body>
+            {this.state.modalBody}
+          </Modal.Body>
+          {this.state.modalFooter ?
+            <Modal.Footer>
+              {this.state.modalFooter}
+            </Modal.Footer> : {}}
       </Modal>
     );
   }

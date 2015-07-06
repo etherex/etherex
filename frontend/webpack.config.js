@@ -5,7 +5,7 @@ module.exports = {
   output: {
     /* global __dirname */
     path: __dirname + "/app",
-    filename: "bundle.js"
+    filename: "app.js"
   },
   plugins: [],
   resolve: {

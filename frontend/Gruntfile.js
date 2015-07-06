@@ -89,9 +89,9 @@ module.exports = function(grunt) {
         base: 'app',
         repo: 'git@github.com:etherex/etherex.git'
       },
-      src: ['index.html', 'bundle.js', '*.svg', '*.woff', '*.eot', '*.ttf']
+      src: ['index.html', 'app.js', '*.svg', '*.woff', '*.eot', '*.ttf']
     },
-    clean: ["app/*.svg", "app/*.woff", "app/*.eot", "app/*.ttf", "app/bundle.js", "app/*.js.map"]
+    clean: ["app/*.svg", "app/*.woff", "app/*.eot", "app/*.ttf", "app/app.js", "app/*.js.map"]
   });
 
   // grunt.loadNpmTasks('grunt-jest');

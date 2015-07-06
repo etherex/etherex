@@ -1,3 +1,21 @@
+var localesSupported = require('intl-locales-supported');
+var i18n = {
+    locales: ['en-US']
+};
+if (window.Intl) {
+  // Determine if the built-in `Intl` has the locale data we need.
+  if (!localesSupported(i18n.locales)) {
+    // `Intl` exists, but it doesn't have the data we need, so load the
+    // polyfill and replace the constructors with need with the polyfill's.
+    require('intl');
+    Intl.NumberFormat   = window.IntlPolyfill.NumberFormat;
+    Intl.DateTimeFormat = window.IntlPolyfill.DateTimeFormat;
+  }
+} else {
+  // No `Intl`, so use and load the polyfill.
+  window.Intl = require('intl');
+}
+
 var React = require("react/addons");
 var Fluxxor = require("fluxxor");
 var Router = require("react-router");
@@ -37,9 +55,6 @@ require("./css/bootstrap-darkly.css");
 
 require("./css/styles.css");
 
-var i18n = {
-    locales: ['en-US']
-};
 var intlData = require('./js/intlData');
 
 var Route = Router.Route;

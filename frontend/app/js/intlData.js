@@ -37,7 +37,10 @@ module.exports = {
     "init": {
       "loading": "Ethereum loading...",
       "ready": "The Ethereum block chain is current. Just a few more seconds...",
-      "not_ready": "The Ethereum block chain is not current and is fetching blocks from peers.",
+      "not_ready": `The Ethereum block chain is not current and
+                    {peers, plural,
+                      =0 {we're looking for peers}
+                      other {is fetching blocks from # peers}}.`,
       "force": "Load anyway",
       "failed": {
         "header": "EtherEx failed to load",
