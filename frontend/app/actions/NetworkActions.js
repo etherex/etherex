@@ -45,10 +45,9 @@ var NetworkActions = function() {
       var timeOut = this.flux.store('config').getState().timeout;
 
       if (networkState.blockChainAge > timeOut) {
-        // Also put trades in loading state if network was not ready
-        if (!networkState.ready) {
+        // Put trades in loading state if network is no longer ready
+        if (networkState.ready || networkState.ready === null) {
           this.dispatch(constants.trade.LOAD_TRADES);
-
           this.dispatch(constants.network.UPDATE_READY, {
             ready: false
           });

@@ -1,5 +1,6 @@
 var _ = require("lodash");
 var utils = require("../js/utils");
+var bigRat = require("big-rational");
 var constants = require("../js/constants");
 
 var UserActions = function() {
@@ -122,20 +123,12 @@ var UserActions = function() {
         var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
 
-        this.dispatch(constants.user.SEND_SUB, payload);
+        var amount = bigRat(payload.amount).multiply(Math.pow(10, market.decimals)).toDecimal();
 
-        _client.sendSub(user, payload.amount, payload.recipient, market, function(result) {
+        this.dispatch(constants.user.SEND_SUB, { amount: amount });
+
+        _client.sendSub(user, amount, payload.recipient, market, function(result) {
             utils.log("SEND_SUB_RESULT", result);
-            _client.updateBalanceSub(market, user.id, function(market, available, trading, balance) {
-                this.dispatch(constants.user.UPDATE_BALANCE_SUB, {
-                    available: available,
-                    trading: trading,
-                    balance: balance
-                });
-                this.flux.actions.market.updateMarketBalances(market, available, trading, balance);
-            }.bind(this), function(error) {
-                this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
-            }.bind(this));
         }.bind(this), function(error) {
             this.dispatch(constants.user.SEND_SUB_FAIL, {error: error});
         }.bind(this));
@@ -147,20 +140,12 @@ var UserActions = function() {
         var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
 
-        this.dispatch(constants.user.DEPOSIT, payload);
+        var amount = bigRat(payload.amount).multiply(Math.pow(10, market.decimals)).toDecimal();
 
-        _client.depositSub(user, payload.amount, market, function(result) {
+        this.dispatch(constants.user.DEPOSIT, { amount: amount });
+
+        _client.depositSub(user, amount, market, function(result) {
             utils.log("DEPOSIT_RESULT", result);
-            _client.updateBalanceSub(market, user.id, function(market, available, trading, balance) {
-                this.dispatch(constants.user.UPDATE_BALANCE_SUB, {
-                    available: available,
-                    trading: trading,
-                    balance: balance
-                });
-                this.flux.actions.market.updateMarketBalances(market, available, trading, balance);
-            }.bind(this), function(error) {
-                this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
-            }.bind(this));
         }.bind(this), function(error) {
             this.dispatch(constants.user.DEPOSIT_FAIL, {error: error});
         }.bind(this));
@@ -172,21 +157,12 @@ var UserActions = function() {
         var user = this.flux.store("UserStore").getState().user;
         var market = this.flux.store("MarketStore").getState().market;
 
-        this.dispatch(constants.user.WITHDRAW, payload);
+        var amount = bigRat(payload.amount).multiply(Math.pow(10, market.decimals)).toDecimal();
 
-        _client.withdrawSub(user, payload.amount, market, function(result) {
+        this.dispatch(constants.user.WITHDRAW, { amount: amount });
+
+        _client.withdrawSub(user, amount, market, function(result) {
             utils.log("WITHDRAW_RESULT", result);
-            var user = this.flux.store("UserStore").getState().user;
-            _client.updateBalanceSub(market, user.id, function(market, available, trading, balance) {
-                this.dispatch(constants.user.UPDATE_BALANCE_SUB, {
-                    available: available,
-                    trading: trading,
-                    balance: balance
-                });
-                this.flux.actions.market.updateMarketBalances(market, available, trading, balance);
-            }.bind(this), function(error) {
-                this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
-            }.bind(this));
         }.bind(this), function(error) {
             this.dispatch(constants.user.WITHDRAW_FAIL, {error: error});
         }.bind(this));

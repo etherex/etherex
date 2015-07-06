@@ -2,8 +2,8 @@ var _ = require("lodash");
 var React = require("react");
 
 var Button = require('react-bootstrap/lib/Button');
-var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
 var ConfirmModal = require('./ConfirmModal');
+var AlertModal = require('./AlertModal');
 
 var fixtures = require("../js/fixtures");
 var bigRat = require("big-rational");
@@ -22,8 +22,28 @@ var SubRegister = React.createClass({
       precision: null,
       category: 1,
       categoryName: fixtures.categories[0].name,
-      newReg: false
+      newReg: false,
+      showModal: false,
+      showAlert: false,
+      alertMessage: false,
+      alertLevel: 'warning'
     };
+  },
+
+  openModal: function() {
+    this.setState({ showModal: true });
+  },
+
+  closeModal: function() {
+    this.setState({ showModal: false });
+  },
+
+  showAlert: function() {
+    this.setState({ showAlert: true });
+  },
+
+  hideAlert: function() {
+    this.setState({ showAlert: false});
   },
 
   render: function() {
@@ -44,7 +64,7 @@ var SubRegister = React.createClass({
         </div>
         <div className="form-group">
           <label forHtml="address">Contract address</label>
-          <input type="text" className="form-control" pattern="\w{40}" placeholder="Address" ref="address" onChange={this.handleChange}/>
+          <input type="text" className="form-control" maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="Address" ref="address" onChange={this.handleChange}/>
         </div>
         <div className="form-group">
           <label forHtml="minimum">Minimum ETH amount</label>
@@ -59,24 +79,29 @@ var SubRegister = React.createClass({
           <input type="number" min="0.00000001" step="0.00000001" className="form-control medium" placeholder="0.00000001" ref="precision" onChange={this.handleChange} />
         </div>
         <div className="form-group">
-          {this.state.newReg ?
-            <ModalTrigger modal={
-                <ConfirmModal
-                  message={
-                    "Are you sure you want to register " +
-                      this.state.code + " " +
-                      "at address " + this.state.address + ", " +
-                      "with a minimum trade amount of " + this.state.minimum + " ETH, " +
-                      this.state.decimals + " decimals to the subcurrency and a " +
-                      "price precision of " + this.state.precision + " ?"}
-                  flux={this.props.flux}
-                  onSubmit={this.onSubmitForm}
-                />
-              }>
-              <Button className="btn-block btn-primary" type="submit" key="register">Register</Button>
-            </ModalTrigger>
-          : <Button className="btn-block" type="submit" key="register_fail">Register</Button>}
+            <Button className={"btn-block" + (this.state.newReg ? " btn-primary" : "")} type="submit" key="register">Register</Button>
         </div>
+
+        <ConfirmModal
+          show={this.state.showModal}
+          onHide={this.closeModal}
+          message={
+            "Are you sure you want to register " +
+              this.state.code +
+              " at address " + this.state.address +
+              " in the " + this.state.categoryName + " section," +
+              " with a minimum trade amount of " + this.state.minimum + " ETH, " +
+              this.state.decimals + " decimals to the subcurrency and a" +
+              " price precision of " + this.state.precision + " ?"}
+          flux={this.props.flux}
+          onSubmit={this.onSubmitForm} />
+
+        <AlertModal
+          show={this.state.showAlert}
+          onHide={this.hideAlert}
+          alertTitle="Oh snap!"
+          message={this.state.alertMessage}
+          level={this.state.alertLevel} />
       </form>
     );
   },
@@ -95,10 +120,11 @@ var SubRegister = React.createClass({
 
   handleValidation: function(e) {
     e.preventDefault();
-    this.validate(e, true);
+    if (this.validate(e, true))
+      this.openModal();
   },
 
-  validate: function(e, showAlerts) {
+  validate: function(e, showAlert) {
     e.preventDefault();
 
     var code = this.refs.code.getDOMNode().value.trim();
@@ -116,49 +142,42 @@ var SubRegister = React.createClass({
       precision: precision
     });
 
+    var message = false;
+
     if (!code ||
         !address ||
         !minimum ||
         !decimals ||
         !precision ||
-        !category) {
-
-      this.props.setAlert('warning', "Fill it up mate!");
-    }
-    else if (code == 'ETH') {
-        this.props.setAlert('warning', "Nice try.");
-    }
-    else if (code.length < 3 || code.length > 4) {
-        this.props.setAlert('warning', "Subcurrency code too " + (code.length < 3 ? "short" : "long") + ".");
-    }
-    else if (address.length != 40) {
-        this.props.setAlert('warning', "Address too " + (address.length < 40 ? "short" : "long") + ".");
-    }
-    else if (_.find(this.props.markets, {name: code})) {
-        this.props.setAlert('warning', "Subcurrency code " + code + " already taken.");
-    }
-    else if (_.find(this.props.markets, {address: "0x" + address})) {
-        this.props.setAlert('warning', "Subcurrency address " + address + " already taken.");
-    }
-    else if (!_.find(fixtures.categories, {id: category})) {
-        this.props.setAlert('warning', "Invalid category, we must have screwed up something...");
-    }
+        !category)
+      message = "Fill it up mate!";
+    else if (code == 'ETH' || this.props.address == address)
+      message = "Nice try.";
+    else if (code.length < 3 || code.length > 4)
+      message = "Subcurrency code too " + (code.length < 3 ? "short" : "long") + ".";
+    else if (address.length != 42)
+      message = "Address too " + (address.length < 42 ? "short" : "long") + ".";
+    else if (_.find(this.props.markets, {name: code}))
+      message = "Subcurrency code " + code + " already taken.";
+    else if (_.find(this.props.markets, {address: address}))
+      message = "Subcurrency address " + address + " already taken.";
+    else if (!_.find(fixtures.categories, {id: category}))
+      message = "Invalid category, we must have screwed up something...";
     else {
       this.setState({
+        showAlert: false,
         newReg: true
       });
-
-      this.props.showAlert(false);
-
       return true;
     }
 
-    this.setState({
-      newReg: false
-    });
+    if (showAlert)
+      this.setState({
+        showAlert: true,
+        alertMessage: message
+      });
 
-    if (showAlerts)
-      this.props.showAlert(true);
+    this.setState({ newReg: false });
 
     return false;
   },

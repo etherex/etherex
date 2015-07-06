@@ -342,27 +342,21 @@ var EthereumClient = function(params) {
         }
     };
 
-    this.loadTrades = function(trade_ids, market, progress, success, failure) {
-        try {
-            // var trade_ids = this.contract.get_trade_ids.call(market.id, 'pending');
-
-            // if (params.debug)
-            //   utils.log("TRADE_IDS", _.map(trade_ids, function(trade) {
-            //     return web3.fromDecimal(trade);
-            //   }));
-
-            if (!trade_ids || trade_ids.length === 0) {
-                failure("No trades found");
-                return;
-            }
-
-            for (var i = trade_ids.length - 1; i >= 0; i--)
-                this.loadTrade(trade_ids[i], market, progress, success, failure);
-        }
-        catch (e) {
-            failure("Unable to load trades: " + String(e));
-        }
-    };
+    // OBSOLETE
+    // this.loadTrades = function(trade_ids, market, progress, success, failure) {
+    //     try {
+    //         if (!trade_ids || trade_ids.length === 0) {
+    //             failure("No trades found");
+    //             return;
+    //         }
+    //
+    //         for (var i = trade_ids.length - 1; i >= 0; i--)
+    //             this.loadTrade(trade_ids[i], market, progress, success, failure);
+    //     }
+    //     catch (e) {
+    //         failure("Unable to load trades: " + String(e));
+    //     }
+    // };
 
     this.loadTrade = function(id, market, progress, success, failure) {
         this.contract.get_trade.call(id, 'pending', function(error, trade) {
@@ -372,8 +366,8 @@ var EthereumClient = function(params) {
               // currentProgress.current += 1;
               // progress(currentProgress);
               progress();
-              failure("Error loading trade: " + String(error));
               utils.error(error);
+              failure("Error loading trade: " + String(error));
               return;
             }
 
@@ -383,9 +377,6 @@ var EthereumClient = function(params) {
 
                 // Resolve on filled trades
                 if (tradeId == "0x0" || ref == "0x0") {
-                    // Update progress
-                    // currentProgress.current += 1;
-                    // progress(currentProgress);
                     progress();
                     return;
                 }
@@ -395,6 +386,7 @@ var EthereumClient = function(params) {
                 var tradeExists = web3.eth.getStorageAt(params.address, ref, 'latest');
 
                 // if (params.debug) {
+                //     utils.log("LOADING TRADE", tradeId);
                 //     utils.log("EXISTS", tradeId);
                 //     utils.log(tradeExists, ref);
                 // }
@@ -409,12 +401,10 @@ var EthereumClient = function(params) {
                 var amountPrecision = Math.pow(10, market.decimals);
                 var precision = market.precision;
 
-                // console.log("Loading trade " + id + " for market " + market.name);
-
                 var amount = bigRat(trade[3].toString()).divide(amountPrecision).valueOf();
                 var price = bigRat(trade[4].toString()).divide(precision).valueOf();
 
-                success({
+                trade = {
                     id: tradeId,
                     type: type == 1 ? 'buys' : 'sells',
                     price: price,
@@ -427,15 +417,20 @@ var EthereumClient = function(params) {
                     },
                     status: status,
                     block: _.parseInt(trade[6].toString())
-                });
+                };
+
+                if (params.debug)
+                  utils.log("LOADED", trade);
+
+                success(trade);
 
                 // Update progress
                 // currentProgress.current += 1;
                 progress();
             }
             catch(e) {
+                utils.error("LOAD TRADE ERROR", e);
                 failure("Failed to load trade " + web3.fromDecimal(id) + ": " + String(e));
-                utils.error("TRADE", e);
             }
         });
     };

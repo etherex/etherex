@@ -4,21 +4,18 @@ module.exports = {
     SECONDS_PER_BLOCK: 12,
     CHANGE_EVENT: "change",
     config: keyMirror({
-        UPDATE_ADDRESS: null,
         UPDATE_ETHEREUM_CLIENT_SUCCESS: null,
         UPDATE_ETHEREUM_CLIENT_FAILED: null,
-        UPDATE_DEBUG: null,
         UPDATE_PERCENT_LOADED_SUCCESS: null,
         UPDATE_DEMO_MODE: null,
-        UPDATE_RANGE: null,
-        UPDATE_RANGE_END: null
+        UPDATE_CONFIG: null
     }),
     network: keyMirror({
-        UPDATE_NETWORK: null,
         UPDATE_READY: null,
+        UPDATE_NETWORK: null,
         UPDATE_ETHEREUM_STATUS: null,
-        UPDATE_IS_MONITORING_BLOCKS: null,
         UPDATE_BLOCK_CHAIN_AGE: null,
+        UPDATE_IS_MONITORING_BLOCKS: null,
         ETHEREUM_STATUS_CONNECTED: null,
         ETHEREUM_STATUS_FAILED: null,
         ETHEREUM_STATUS_LOADING: null

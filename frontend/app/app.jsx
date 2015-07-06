@@ -1,5 +1,3 @@
-/** @jsx React.DOM */
-
 var React = require("react/addons");
 var Fluxxor = require("fluxxor");
 var Router = require("react-router");
@@ -38,6 +36,11 @@ require("bootstrap/dist/js/bootstrap.js");
 require("./css/bootstrap-darkly.css");
 
 require("./css/styles.css");
+
+var i18n = {
+    locales: ['en-US']
+};
+var intlData = require('./js/intlData');
 
 var Route = Router.Route;
 // var Redirect = Router.Redirect;
@@ -93,5 +96,5 @@ var routes = (
 );
 
 Router.run(routes, function (Handler) {
-  React.render(<Handler flux={flux}/>, document.body);
+  React.render(<Handler flux={flux} locales={i18n.locales} {...intlData} />, document.body);
 });

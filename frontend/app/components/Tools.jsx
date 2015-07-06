@@ -1,5 +1,3 @@
-/** @jsx React.DOM */
-
 var React = require("react");
 var utils = require("../js/utils");
 
@@ -57,7 +55,7 @@ var TradeList = React.createClass({
             </div>
             <div className="panel-body">
               <div className="container-fluid">
-                <SubRegister flux={this.props.flux} markets={this.props.market.markets} setAlert={this.setAlert} showAlert={this.showAlert} />
+                <SubRegister flux={this.props.flux} address={address} markets={this.props.market.markets} setAlert={this.setAlert} showAlert={this.showAlert} />
               </div>
             </div>
           </div>

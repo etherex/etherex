@@ -8,7 +8,7 @@ var TradeStore = Fluxxor.createStore({
 
     initialize: function(options) {
         this.title = "Trades";
-        this.trades = options.trades || {buys: [], sells: []};
+        this.trades = options.trades || {buys: [], sells: [], tradeBuys: [], tradeSells: []};
         this.loading = true;
         this.updating = false;
         this.error = null;
@@ -418,9 +418,9 @@ var TradeStore = Fluxxor.createStore({
     },
 
     onTradesFail: function (payload) {
-        this.trades = payload || {buys: [], sells: [], tradeBuys: [], tradeSells: []};
+        this.trades = {buys: [], sells: [], tradeBuys: [], tradeSells: []};
         this.loading = false;
-        this.percent = 0;
+        this.percent = 100;
         this.error = payload.error;
         this.emit(constants.CHANGE_EVENT);
     },

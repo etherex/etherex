@@ -1,23 +1,23 @@
 var React = require("react");
+var ReactIntl = require('react-intl');
+var IntlMixin = ReactIntl.IntlMixin;
+var FormattedMessage = ReactIntl.FormattedMessage;
 
 var bigRat = require("big-rational");
 var fixtures = require("../js/fixtures");
 var utils = require("../js/utils");
 
-// var mq = require('react-responsive');
-
 var DropdownButton = require('react-bootstrap/lib/DropdownButton');
 var MenuItem = require('react-bootstrap/lib/MenuItem');
 var Button = require('react-bootstrap/lib/Button');
-var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
-var ConfirmModal = require('./ConfirmModal');
-var SubDepositModal = require('./SubDepositModal');
-var OverlayMixin = require('react-bootstrap/lib/OverlayMixin');
 
 var AlertDismissable = require('./AlertDismissable');
+var SubDepositModal = require('./SubDepositModal');
+var ConfirmModal = require('./ConfirmModal');
 
 
 var SplitTradeForm = React.createClass({
+  mixins: [IntlMixin],
 
   getInitialState: function() {
     return {
@@ -28,8 +28,31 @@ var SplitTradeForm = React.createClass({
       amountPrecision: null,
       precision: null,
       minimum: null,
-      isValid: false
+      isValid: false,
+      showModal: false,
+      showDepositModal: false,
+      depositAmount: null
     };
+  },
+
+  openConfirmModal: function() {
+    this.setState({ showModal: true });
+  },
+
+  closeConfirmModal: function() {
+    this.setState({ showModal: false });
+  },
+
+  closeDepositModal: function() {
+    this.setState({ showDepositModal: false });
+  },
+
+  openDepositModal: function() {
+    this.setState({
+      showModal: false,
+      showDepositModal: true,
+      depositAmount: this.state.amount - this.props.user.user.balance_sub_available
+    });
   },
 
   componentDidMount: function() {
@@ -38,11 +61,8 @@ var SplitTradeForm = React.createClass({
   },
 
   componentWillReceiveProps: function(nextProps) {
-    // utils.log("MESSAGE", nextProps.trades.message);
-    // utils.log(nextProps.trades.amount, nextProps.trades.newAmount);
-    // if (nextProps.trades.amount &&
-    //     nextProps.trades.amount != this.props.trades.amount &&
-    if (nextProps.trades.newAmount &&  nextProps.trades.type == this.props.type) {
+    if (nextProps.trades.newAmount &&
+        nextProps.trades.type == this.props.type) {
       this.setState({
         amount: parseFloat(nextProps.trades.amount),
         price: parseFloat(nextProps.trades.price),
@@ -62,18 +82,32 @@ var SplitTradeForm = React.createClass({
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
         <input type="hidden" ref="market" value={this.props.market.market.id} />
         <div className="form-group">
-          <label className="sr-only" forHtml="amount">Amount</label>
+          <label className="sr-only" forHtml="amount">
+            <FormattedMessage message={this.getIntlMessage('form.amount')} />
+          </label>
           <div className="input-group">
-            <div className="input-group-addon">Amount</div>
-            <input type="number" min={this.props.market.market.amountPrecision} step={this.props.market.market.amountPrecision} className="form-control medium" placeholder={this.props.market.market.amountPrecision} ref="amount" onChange={this.handleChange} value={this.state.amount} />
+            <div className="input-group-addon">
+              <FormattedMessage message={this.getIntlMessage('form.amount')} />
+            </div>
+            <input type="number" ref="amount" className="form-control medium" placeholder={this.props.market.market.amountPrecision}
+                   min={this.props.market.market.amountPrecision} step={this.props.market.market.amountPrecision}
+                   onChange={this.handleChange}
+                   value={this.state.amount} />
             <div className="input-group-addon">{this.props.market.market.name}</div>
           </div>
         </div>
         <div className="form-group">
-          <label className="sr-only" forHtml="price">Price</label>
+          <label className="sr-only" forHtml="price">
+            <FormattedMessage message={this.getIntlMessage('form.price')} />
+          </label>
           <div className="input-group">
-            <div className="input-group-addon">Price</div>
-            <input type="number" min={this.props.market.market.pricePrecision} step={this.props.market.market.pricePrecision} className="form-control medium" placeholder={this.props.market.market.pricePrecision} ref="price" onChange={this.handleChange} value={this.state.price} />
+            <div className="input-group-addon">
+              <FormattedMessage message={this.getIntlMessage('form.price')} />
+            </div>
+            <input type="number" ref="price" className="form-control medium" placeholder={this.props.market.market.pricePrecision}
+                   min={this.props.market.market.pricePrecision} step={this.props.market.market.pricePrecision}
+                   onChange={this.handleChange}
+                   value={this.state.price} />
             <div className="input-group-addon">
               {this.props.market.market.name}/ETH
             </div>
@@ -82,41 +116,76 @@ var SplitTradeForm = React.createClass({
         <div className="form-group">
           <div className="input-group">
             <div className="input-group-addon">Total</div>
-            <input type="number" min={this.props.market.market.minimumTotal} step={this.props.market.market.amountPrecision} className="form-control medium" placeholder={this.props.market.market.minimumTotal} ref="total" onChange={this.handleChangeTotal} value={this.state.total} />
+            <input type="number" ref="total" className="form-control medium" placeholder={this.props.market.market.minimumTotal}
+              min={this.props.market.market.minimumTotal} step={this.props.market.market.amountPrecision}
+              onChange={this.handleChangeTotal}
+              value={this.state.total} />
             <div className="input-group-addon">
               ETH
             </div>
           </div>
         </div>
         <div className="form-group">
-          {this.state.isValid ?
-              <ModalTrigger modal={
-                  <ConfirmModal
-                    message={this.props.trades.message}
-                    note={this.props.trades.note}
-                    estimate={this.props.trades.estimate}
-                    tradeList={this.props.trades.filling}
-                    user={this.props.user.user}
-                    market={this.props.market}
-                    flux={this.props.flux}
-                    onSubmit={this.onSubmitForm}
-                  />
-                }>
-                <Button className="btn-block btn-primary" type="submit">Place trade</Button>
-              </ModalTrigger>
-            : <Button className="btn-block" type="submit">Place trade</Button>
-          }
-          <CustomModalTrigger
-            ref="triggerSubDeposit"
+          <Button className={"btn-block" + (this.state.isValid ? " btn-primary" : "")} type="submit">
+            <FormattedMessage message={this.getIntlMessage('form.trade')} />
+          </Button>
+
+          <ConfirmModal
+            show={this.state.showModal}
+            onHide={this.closeConfirmModal}
+            message={this.props.trades.message}
+            note={this.props.trades.note}
+            estimate={this.props.trades.estimate}
+            tradeList={this.props.trades.filling}
+            user={this.props.user.user}
+            market={this.props.market}
+            flux={this.props.flux}
+            onSubmit={this.onSubmitForm}
+          />
+
+          <SubDepositModal
+            show={this.state.showDepositModal}
+            onHide={this.closeDepositModal}
+            modalTitle={this.formatMessage(this.getIntlMessage('deposit.currency'), {
+              currency: this.props.market.market.name
+            })}
+            flux={this.props.flux}
+            user={this.props.user.user}
+            market={this.props.market.market}
+            amount={this.state.depositAmount}
             setAlert={this.props.setAlert}
             showAlert={this.props.showAlert}
-            flux={this.props.flux}
-            market={this.props.market.market}
-            user={this.props.user.user}
-            amount={this.state.amount - this.props.user.user.balance_sub_available}
           />
         </div>
       </form>
+    );
+  },
+
+  isValid(type, price, amount, total) {
+    return (
+      price > 0 &&
+      amount > 0 &&
+      total >= this.props.market.market.minTotal &&
+      ((type == 1 && bigRat(this.props.user.user.balance_raw).greaterOrEquals(bigRat(total).multiply(fixtures.ether))) ||
+       (type == 2 && this.props.user.user.balance_sub_available >= amount))
+    );
+  },
+
+  isAlsoAdding(totalLeft) {
+    return (
+      totalLeft >= this.props.market.market.minTotal &&
+      this.props.trades.filling.length > 0 &&
+      this.props.trades.available
+    );
+  },
+
+  isNotEnoughToAdd(totalLeft) {
+    return (
+      totalLeft &&
+       totalLeft < this.props.market.market.minTotal &&
+       this.props.trades.filling.length > 0 &&
+       this.props.trades.amountLeft &&
+       this.props.trades.available
     );
   },
 
@@ -124,8 +193,6 @@ var SplitTradeForm = React.createClass({
     if (!amount && !init)
       return;
 
-    // Amount decimals
-    var decimals = this.props.market.market.decimals;
     var message = '';
     var note = '';
     var isValid = false;
@@ -137,50 +204,42 @@ var SplitTradeForm = React.createClass({
     var totalLeft = this.props.trades.amountLeft ? this.props.trades.amountLeft * price : 0;
 
     // Pre-check if trade will be valid and update confirm message
-    if (price > 0 &&
-        amount > 0 &&
-        total >= this.props.market.market.minTotal &&
-        ((type == 1 && bigRat(this.props.user.user.balance_raw).greaterOrEquals(bigRat(total).multiply(fixtures.ether))) ||
-         (type == 2 && this.props.user.user.balance_sub_available >= amount)
-        )) {
+    if (this.isValid(type, price, amount, total)) {
 
       // Dialog messages and notes
-      message = "Are you sure you want to " + (type == 1 ? "buy" : "sell") +
-        " " + utils.numeral(amount, decimals) + " " + this.props.market.market.name +
-        " at " + utils.numeral(price, this.props.market.market.priceDecimals) + " " + this.props.market.market.name + "/ETH" +
-        " for " + utils.formatBalance(bigRat(total).multiply(fixtures.ether), decimals) + " ?";
+      message = this.formatMessage(this.getIntlMessage('trade.confirm'), {
+        type: (type == 1 ? "buy" : "sell"),
+        amount: amount,
+        price: price,
+        currency: this.props.market.market.name,
+        total: total
+      });
 
-      note = (this.props.trades.filling.length > 0 ?
-          "You will be filling " + this.props.trades.filling.length + " trade" +
-          (this.props.trades.filling.length > 1 ? "s" : "") +
-          " for a total of " +
-          utils.formatBalance(bigRat(total - this.props.trades.available).multiply(fixtures.ether), decimals) +
-          (this.props.trades.available > 0 ? " (" +
-            utils.formatBalance(bigRat(this.props.trades.available).multiply(fixtures.ether), decimals) + " left)" : "") +
-          "."
-          : "") +
-        (totalLeft >= this.props.market.market.minTotal &&
-          this.props.trades.filling.length > 0 &&
-          this.props.trades.available ?
-          " You will also be adding a new trade of " +
-            utils.numeral(this.props.trades.amountLeft, this.props.market.market.decimals) + " " +
-            this.props.market.market.name +
-          " at " + utils.numeral(price, this.props.market.market.priceDecimals) + " " + this.props.market.market.name + "/ETH" +
-          " for " + utils.formatBalance(bigRat(this.props.trades.amountLeft)
-                      .multiply(price)
-                      .multiply(fixtures.ether), decimals) +
-          "."
-          : "") +
-        (totalLeft &&
-         totalLeft < this.props.market.market.minTotal &&
-         this.props.trades.filling.length > 0 &&
-         this.props.trades.amountLeft &&
-         this.props.trades.available ?
-          " Not enough left for a new trade with " +
-            utils.numeral(this.props.trades.amountLeft, decimals) + " " + this.props.market.market.name + " for " +
-            utils.formatBalance(bigRat(totalLeft).multiply(fixtures.ether), decimals) +
-            "."
-            : "");
+      // How many filling
+      note = this.formatMessage(this.getIntlMessage('trade.filling'), {
+        numTrades: this.props.trades.filling.length,
+        total: total - this.props.trades.available,
+        left: this.props.trades.available,
+        balance: this.props.trades.available
+      }) + " " +
+
+      // Is also adding
+        (this.isAlsoAdding(totalLeft) ?
+          this.formatMessage(this.getIntlMessage('trade.adding'), {
+            amount: this.props.trades.amountLeft,
+            currency: this.props.market.market.name,
+            price: price,
+            total: this.props.trades.amountLeft * price
+          }) : "") + " " +
+
+      // Not enough left to add also
+        (this.isNotEnoughToAdd(totalLeft) ?
+             this.formatMessage(this.getIntlMessage('trade.not_left'), {
+               amount: this.props.trades.amountLeft,
+               currency: this.props.market.market.name,
+               price: price,
+               total: totalLeft
+             }) : "");
       isValid = true;
     }
 
@@ -257,7 +316,36 @@ var SplitTradeForm = React.createClass({
   handleValidation: function(e) {
     e.preventDefault();
     this.handleChange(new Event('validate'));
-    this.validate(e, true);
+    if (this.validate(e, true))
+      this.openConfirmModal();
+  },
+
+  isEmpty(amount, price, total) {
+    return (
+      !this.props.type ||
+      !this.props.market.market.id ||
+      !amount ||
+      !price ||
+      !total
+    );
+  },
+
+  isNotMinimum(total) {
+    return total < this.props.market.market.minTotal;
+  },
+
+  isNotEnoughTotal(total) {
+    return (
+      this.props.type == 1 &&
+      bigRat(this.props.user.user.balance_raw).lesser(bigRat(total).multiply(fixtures.ether))
+    );
+  },
+
+  isNotEnough(amount) {
+    return (
+      this.props.type == 2 &&
+      this.props.user.user.balance_sub_available < amount
+    );
   },
 
   validate: function(e, showAlerts) {
@@ -271,24 +359,25 @@ var SplitTradeForm = React.createClass({
       total: total,
     });
 
-    if (!this.props.type ||
-        !this.props.market.market.id ||
-        !amount ||
-        !price ||
-        !total) {
-
-      this.props.setAlert('warning', "Fill it up mate!");
+    if (this.isEmpty(amount, price, total)) {
+      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.empty')));
     }
-    else if (total < this.props.market.market.minTotal) {
-      this.props.setAlert('warning', "Minimum total is " + this.props.market.market.minTotal + " ETH");
+    else if (this.isNotMinimum(total)) {
+      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('trade.minimum'), {
+        minimum: this.props.market.market.minTotal
+      }));
     }
-    else if (this.props.type == 1 &&
-        bigRat(this.props.user.user.balance_raw).lesser(bigRat(total).multiply(fixtures.ether))) {
-      this.props.setAlert('warning', "Not enough ETH for this trade, " + utils.formatBalance(bigRat(total).multiply(fixtures.ether)) + " required.");
+    else if (this.isNotEnoughTotal(total)) {
+      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('trade.not_total'), {
+        minimum: utils.formatBalance(bigRat(total).multiply(fixtures.ether))
+      }));
     }
-    else if (this.props.type == 2 && this.props.user.user.balance_sub_available < amount) {
-      this.props.setAlert('warning', "Not enough " + this.props.market.market.name + " for this trade, " + amount + " " + this.props.market.market.name + " required.");
-      this.refs.triggerSubDeposit.handleToggle();
+    else if (this.isNotEnough(amount)) {
+      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('trade.not_enough'), {
+        currency: this.props.market.market.name,
+        amount: amount
+      }));
+      this.openDepositModal();
     }
     else {
       if (this.props.trades.filling.length > 0)
@@ -329,7 +418,6 @@ var SplitTradeForm = React.createClass({
       return;
 
     // Fill existing trades
-    // console.log("Filling " + _.pluck(this.props.trades.filling, 'id').join(', '));
     if (this.props.trades.filling.length > 0)
       this.props.flux.actions.trade.fillTrades(this.props.trades.filling);
 
@@ -355,43 +443,14 @@ var SplitTradeForm = React.createClass({
   }
 });
 
-var CustomModalTrigger = React.createClass({
-  mixins: [OverlayMixin],
-
-  getInitialState: function () {
-    return {
-      isModalOpen: false
-    };
-  },
-
-  handleToggle: function () {
-    this.setState({
-      isModalOpen: !this.state.isModalOpen
-    });
-  },
-
-  render: function () {
-    return <span />;
-  },
-
-  // This is called by the `OverlayMixin` when this component
-  // is mounted or updated and the return value is appended to the body.
-  renderOverlay: function () {
-    if (!this.state.isModalOpen)
-      return <span/>;
-
-    return (
-        <SubDepositModal {...this.props} onRequestHide={this.handleToggle} title={"Deposit " + this.props.market.name} animation={true} />
-      );
-  }
-});
 
 var TradeForm = React.createClass({
+  mixins: [IntlMixin],
 
   getInitialState: function() {
     return {
       type: 1,
-      typename: "Buy",
+      typename: this.formatMessage(this.getIntlMessage('form.buy')),
       alertLevel: 'info',
       alertMessage: ''
     };
@@ -401,7 +460,9 @@ var TradeForm = React.createClass({
     if (nextProps.trades.newAmount && nextProps.trades.type != this.props.type)
       this.setState({
         type: nextProps.trades.type,
-        typename: nextProps.trades.type == 1 ? "Buy" : "Sell"
+        typename: nextProps.trades.type == 1 ?
+          this.formatMessage(this.getIntlMessage('form.buy')) :
+          this.formatMessage(this.getIntlMessage('form.sell'))
       });
   },
 
@@ -422,13 +483,15 @@ var TradeForm = React.createClass({
       <div className="panel panel-default">
         <div className="panel-heading">
           <div className="visible-md visible-lg">
-            <h3 className="panel-title">New Trade</h3>
+            <h3 className="panel-title">{this.formatMessage(this.getIntlMessage('form.new'))}</h3>
           </div>
           <div className="visible-xs visible-sm text-center">
-            <div className="pull-left h4">New Trade</div>
+            <div className="pull-left h4">{this.formatMessage(this.getIntlMessage('form.new'))}</div>
             <span className="panel-title">
-              <label className="sr-only" forHtml="type">Buy or sell</label>
-              <DropdownButton bsStyle="primary" bsSize="medium" ref="type" onSelect={this.handleType} key={this.state.type} title={this.state.typename}>
+              <label className="sr-only" forHtml="type">this.formatMessage(this.getIntlMessage('form.buyorsell'))</label>
+              <DropdownButton bsStyle="primary" bsSize="medium"
+                              ref="type" onSelect={this.handleType}
+                              key={this.state.type} title={this.state.typename}>
                 <MenuItem key={1} eventKey={1}>Buy</MenuItem>
                 <MenuItem key={2} eventKey={2}>Sell</MenuItem>
               </DropdownButton>
@@ -440,21 +503,27 @@ var TradeForm = React.createClass({
             <div className="visible-xs visible-sm">
               <div>
                 <div className="container-fluid">
-                  <SplitTradeForm ref="mobileform" mobile={true} type={this.state.type} flux={this.props.flux} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
+                  <SplitTradeForm ref="mobileform" mobile={true} type={this.state.type} flux={this.props.flux}
+                    market={this.props.market} trades={this.props.trades} user={this.props.user}
+                    setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
             </div>
             <div className="visible-md visible-lg">
               <div className="col-md-6">
                 <div className="container-fluid">
-                  <h4 className="text-center" style={{marginTop: 0}}>Buy</h4>
-                  <SplitTradeForm ref="buyform" mobile={false} type={1} flux={this.props.flux} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
+                  <h4 className="text-center" style={{marginTop: 0}}>{this.formatMessage(this.getIntlMessage('form.buy'))}</h4>
+                  <SplitTradeForm ref="buyform" mobile={false} type={1} flux={this.props.flux}
+                    market={this.props.market} trades={this.props.trades} user={this.props.user}
+                    setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
               <div className="col-md-6">
-                <h4 className="text-center" style={{marginTop: 0}}>Sell</h4>
+                <h4 className="text-center" style={{marginTop: 0}}>{this.formatMessage(this.getIntlMessage('form.sell'))}</h4>
                 <div className="container-fluid">
-                  <SplitTradeForm ref="sellform" mobile={false} type={2} flux={this.props.flux} market={this.props.market} trades={this.props.trades} user={this.props.user} setAlert={this.setAlert} showAlert={this.showAlert} />
+                  <SplitTradeForm ref="sellform" mobile={false} type={2} flux={this.props.flux}
+                    market={this.props.market} trades={this.props.trades} user={this.props.user}
+                    setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
             </div>

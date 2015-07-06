@@ -7,7 +7,7 @@
 -
   set:
     zg: "0xe68faeeff09f46b87e83e13cef47275ebaa34349"
-    caktux: "0xcf523d526b21aef4284a7f9d91a003646d5c8542"
+    caktux: "0xd5623514f22d7569a13126e91c2eaff5b8df8479"
     mids: "0x2ad9e5d8960882c07b96e2a21d5a39ab082e7368"
 
 # Deploy contracts
@@ -15,26 +15,30 @@
   deploy:
     EtherEx:
       contract: etherex.se
-      gas: 2500000
+      gas: 3000000
+      retry: 60
       wait: True
       # endowment: 1000000000000000000
 -
   deploy:
     ETX:
       contract: etx.se
-      gas: 1000000
+      gas: 1500000
+      retry: 60
       wait: True
 -
   deploy:
     CAK:
       contract: etx.se
-      gas: 1000000
+      gas: 1500000
+      retry: 60
       wait: True
 -
   deploy:
     MID:
       contract: etx.se
-      gas: 1000000
+      gas: 1500000
+      retry: 60
       wait: True
 
 # Register subcurrencies on the exchange
@@ -42,7 +46,7 @@
   transact:
     RegisterETX:
       to: $EtherEx
-      gas: 1000000
+      gas: 500000
       sig: add_market:[int256,int256,int256,int256,int256,int256]:int256
       data:
         - ETX
@@ -51,12 +55,13 @@
         - 100000000
         - 1000000000000000000
         - 1
+      retry: 60
       wait: True
 -
   transact:
     RegisterCAK:
       to: $EtherEx
-      gas: 1000000
+      gas: 500000
       sig: add_market:[int256,int256,int256,int256,int256,int256]:int256
       data:
         - CAK
@@ -65,12 +70,13 @@
         - 1000
         - 1000000000000000000
         - 1
+      retry: 60
       wait: True
 -
   transact:
     RegisterMID:
       to: $EtherEx
-      gas: 1000000
+      gas: 500000
       sig: add_market:[int256,int256,int256,int256,int256,int256]:int256
       data:
         - MID
@@ -79,6 +85,7 @@
         - 10000
         - 1000000000000000000
         - 3
+      retry: 60
       wait: True
 
 
@@ -91,6 +98,8 @@
       data:
         - $EtherEx
         - 1
+      retry: 60
+      wait: True
 -
   transact:
     SetExchangeCAK:
@@ -99,6 +108,8 @@
       data:
         - $EtherEx
         - 2
+      retry: 60
+      wait: True
 -
   transact:
     SetExchangeMID:
@@ -107,6 +118,7 @@
       data:
         - $EtherEx
         - 3
+      retry: 60
       wait: True
 
 
@@ -118,31 +130,34 @@
       sig: change_ownership:[int256]:int256
       data:
         - $zg
+      retry: 60
     SetCAKOwner:
       to: $CAK
       sig: change_ownership:[int256]:int256
       data:
         - $zg
+      retry: 60
     SetMIDOwner:
       to: $MID
       sig: change_ownership:[int256]:int256
       data:
         - $zg
+      retry: 60
       wait: True
 
 # Fill up
--
-  transact:
-    ZG:
-      to: $zg
-      value: 1000000000000000000000
-    CAK:
-      to: $caktux
-      value: 1000000000000000000000
-    MID:
-      to: $mids
-      value: 1000000000000000000000
-      wait: True
+# -
+#   transact:
+#     ZG:
+#       to: $zg
+#       value: 1000000000000000000000
+#     CAK:
+#       to: $caktux
+#       value: 1000000000000000000000
+#     MID:
+#       to: $mids
+#       value: 1000000000000000000000
+#       wait: True
 -
   transact:
     ZGetx:
@@ -151,18 +166,25 @@
       data:
         - $zg
         - 10000000000
+      retry: 60
+-
+  transact:
     CAKetx:
       to: $ETX
       sig: transfer:[int256,int256]:int256
       data:
         - $caktux
         - 10000000000
+      retry: 60
+-
+  transact:
     MIDetx:
       to: $ETX
       sig: transfer:[int256,int256]:int256
       data:
         - $mids
         - 10000000000
+      retry: 60
       wait: True
 -
   transact:
@@ -172,18 +194,25 @@
       data:
         - $zg
         - 5000000000
+      retry: 60
+-
+  transact:
     CAKcak:
       to: $CAK
       sig: transfer:[int256,int256]:int256
       data:
         - $caktux
         - 50000000000
+      retry: 60
+-
+  transact:
     MIDcak:
       to: $CAK
       sig: transfer:[int256,int256]:int256
       data:
         - $mids
         - 5000000000
+      retry: 60
       wait: True
 -
   transact:
@@ -193,31 +222,42 @@
       data:
         - $zg
         - 5000000000
+      retry: 60
+-
+  transact:
     CAKetx:
       to: $MID
       sig: transfer:[int256,int256]:int256
       data:
         - $caktux
         - 5000000000
+      retry: 60
+-
+  transact:
     MIDetx:
       to: $MID
       sig: transfer:[int256,int256]:int256
       data:
         - $mids
         - 50000000000
+      retry: 60
       wait: True
 
 
 # Deposit into exchange
 -
   transact:
-    deposit:
+    depositETX:
       to: $ETX
       sig: transfer:[int256,int256]:int256
       gas: 250000
       data:
         - $EtherEx
         - 1000000000
+      retry: 60
+      wait: True
+-
+  transact:
     depositCAK:
       to: $CAK
       sig: transfer:[int256,int256]:int256
@@ -225,6 +265,10 @@
       data:
         - $EtherEx
         - 10000000000
+      retry: 60
+      wait: True
+-
+  transact:
     depositMID:
       to: $MID
       sig: transfer:[int256,int256]:int256
@@ -232,6 +276,7 @@
       data:
         - $EtherEx
         - 10000000000
+      retry: 60
       wait: True
 
 # ETX test trades
@@ -246,6 +291,7 @@
         - 5000000
         - 25000000
         - 1
+      retry: 60
     trade2:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -254,6 +300,7 @@
         - 15000000
         - 25000000
         - 1
+      retry: 60
     trade3:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -262,6 +309,7 @@
         - 25000000
         - 25000000
         - 1
+      retry: 60
     trade4:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -270,6 +318,7 @@
         - 35000000
         - 26000000
         - 1
+      retry: 60
     trade5:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -278,6 +327,7 @@
         - 45000000
         - 27000000
         - 1
+      retry: 60
       wait: True
     trade6:
       to: $EtherEx
@@ -287,6 +337,7 @@
         - 55000000
         - 28000000
         - 1
+      retry: 60
     trade7:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -295,6 +346,7 @@
         - 1500000
         - 29000000
         - 1
+      retry: 60
     trade8:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -303,6 +355,7 @@
         - 25000000
         - 30000000
         - 1
+      retry: 60
     trade9:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -311,6 +364,7 @@
         - 25000000
         - 31000000
         - 1
+      retry: 60
     trade10:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -319,6 +373,7 @@
         - 25000000
         - 32000000
         - 1
+      retry: 60
       wait: True
 
     # Buys
@@ -331,6 +386,7 @@
         - 24000000
         - 1
       value: 12000000000000000000
+      retry: 60
     trade12:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
@@ -340,6 +396,7 @@
         - 23000000
         - 1
       value: 11500000000000000000
+      retry: 60
     trade13:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
@@ -349,6 +406,7 @@
         - 22000000
         - 1
       value: 11000000000000000000
+      retry: 60
     trade14:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
@@ -358,6 +416,7 @@
         - 21000000
         - 1
       value: 10500000000000000000
+      retry: 60
       wait: True
 
 
@@ -374,6 +433,7 @@
         - 50000000
         - 25
         - 2
+      retry: 60
     trade2:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -382,6 +442,7 @@
         - 150000000
         - 26
         - 2
+      retry: 60
     trade3:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -390,6 +451,7 @@
         - 250000000
         - 27
         - 2
+      retry: 60
     trade4:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -398,6 +460,7 @@
         - 350000000
         - 28
         - 2
+      retry: 60
     trade5:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -406,6 +469,7 @@
         - 450000000
         - 29
         - 2
+      retry: 60
     trade6:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -414,6 +478,7 @@
         - 550000000
         - 30
         - 2
+      retry: 60
       wait: True
 
     # Buys
@@ -426,6 +491,7 @@
         - 24
         - 2
       value: 12000000000000000000
+      retry: 60
     trade12:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
@@ -435,6 +501,7 @@
         - 23
         - 2
       value: 11500000000000000000
+      retry: 60
     trade13:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
@@ -444,6 +511,7 @@
         - 22
         - 2
       value: 11000000000000000000
+      retry: 60
     trade14:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
@@ -453,6 +521,7 @@
         - 21
         - 2
       value: 10500000000000000000
+      retry: 60
       wait: True
 
 
@@ -468,6 +537,7 @@
         - 50000000
         - 25
         - 3
+      retry: 60
     trade2:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -476,6 +546,7 @@
         - 150000000
         - 26
         - 3
+      retry: 60
     trade3:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -484,6 +555,7 @@
         - 250000000
         - 27
         - 3
+      retry: 60
     trade4:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -492,6 +564,7 @@
         - 350000000
         - 28
         - 3
+      retry: 60
     trade5:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -500,6 +573,7 @@
         - 450000000
         - 29
         - 3
+      retry: 60
     trade6:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
@@ -508,6 +582,7 @@
         - 550000000
         - 30
         - 3
+      retry: 60
       wait: True
 
     # Buys
@@ -519,6 +594,7 @@
         - 5000000
         - 24
         - 3
+      retry: 60
       value: 12000000000000000000
     trade12:
       to: $EtherEx
@@ -528,6 +604,7 @@
         - 5000000
         - 23
         - 3
+      retry: 60
       value: 11500000000000000000
     trade13:
       to: $EtherEx
@@ -537,6 +614,7 @@
         - 5000000
         - 22
         - 3
+      retry: 60
       value: 11000000000000000000
     trade14:
       to: $EtherEx
@@ -546,5 +624,6 @@
         - 5000000
         - 21
         - 3
+      retry: 60
       value: 10500000000000000000
       wait: True

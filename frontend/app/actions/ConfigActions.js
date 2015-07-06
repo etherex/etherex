@@ -26,20 +26,34 @@ var ConfigActions = function() {
     if (!configState.ethereumClient && ethereumClient.isAvailable()) {
       var range = configState.range;
       var rangeEnd = configState.rangeEnd;
+      var timeout = configState.timeout;
 
+      // Load range from web3.db
       try {
           range = _.parseInt(ethereumClient.getString('EtherEx', 'range'));
       }
       catch(e) {
-          ethereumClient.putString('EtherEx', 'range', String(configState.range));
+          ethereumClient.putString('EtherEx', 'range', String(range));
       }
 
+      // Load rangeEnd from web3.db
       try {
           rangeEnd = _.parseInt(ethereumClient.getString('EtherEx', 'rangeEnd'));
       }
       catch(e) {
-          ethereumClient.putString('EtherEx', 'rangeEnd', String(configState.rangeEnd));
+          ethereumClient.putString('EtherEx', 'rangeEnd', String(rangeEnd));
       }
+
+      // Load timeout from web3.db
+      try {
+          timeout = _.parseInt(ethereumClient.getString('EtherEx', 'timeout'));
+      }
+      catch(e) {
+          ethereumClient.putString('EtherEx', 'timeout', String(timeout));
+      }
+      this.dispatch(constants.config.UPDATE_CONFIG, {
+        timeout: timeout
+      });
 
       if (range || rangeEnd) {
           clientParams = {
@@ -51,10 +65,8 @@ var ConfigActions = function() {
           };
           ethereumClient = new EthereumClient(clientParams);
 
-          this.dispatch(constants.config.UPDATE_RANGE, {
-            range: range
-          });
-          this.dispatch(constants.config.UPDATE_RANGE_END, {
+          this.dispatch(constants.config.UPDATE_CONFIG, {
+            range: range,
             rangeEnd: rangeEnd
           });
       }
@@ -71,10 +83,22 @@ var ConfigActions = function() {
     });
   };
 
+  this.updateConfig = function(payload) {
+    this.dispatch(constants.config.UPDATE_CONFIG, payload);
+    if (payload.timeout) {
+      var _client = this.flux.store('config').getEthereumClient();
+      _client.putString('EtherEx', 'timeout', payload.timeout);
+    }
+    this.flux.actions.config.updateEthereumClient();
+  };
+
   this.updateAddress = function(payload) {
-    this.dispatch(constants.config.UPDATE_ADDRESS, {
+    this.dispatch(constants.config.UPDATE_CONFIG, {
       address: payload.address
     });
+    var _client = this.flux.store('config').getEthereumClient();
+    _client.putString('EtherEx', 'address', payload.address);
+
     this.flux.actions.config.updateEthereumClient();
     // this.flux.actions.market.updateMarkets();
   };
@@ -86,7 +110,7 @@ var ConfigActions = function() {
   };
 
   this.updateRange = function(range) {
-    this.dispatch(constants.config.UPDATE_RANGE, {
+    this.dispatch(constants.config.UPDATE_CONFIG, {
       range: range
     });
     var _client = this.flux.store('config').getEthereumClient();
@@ -99,7 +123,7 @@ var ConfigActions = function() {
   };
 
   this.updateRangeEnd = function(rangeEnd) {
-    this.dispatch(constants.config.UPDATE_RANGE_END, {
+    this.dispatch(constants.config.UPDATE_CONFIG, {
       rangeEnd: rangeEnd
     });
     var _client = this.flux.store('config').getEthereumClient();

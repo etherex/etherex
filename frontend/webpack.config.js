@@ -16,6 +16,8 @@ module.exports = {
       { test: /\.css$/, loader: "style!css" },
       { test: /\.less$/, loader: "style!css!less" },
       { test: /\.jsx$/, loaders: ["react-hot", "jsx"] },
+      { test: /\.js$/, exclude: /node_modules/, loader: "babel"},
+      { test: /\.jsx$/, exclude: /node_modules/, loader: "babel"},
       { test: /\.json$/, loader: "json" },
       { test: /\.woff$/, loader: "url?limit=10000&minetype=application/font-woff" },
       { test: /\.ttf$/, loader: "file" },

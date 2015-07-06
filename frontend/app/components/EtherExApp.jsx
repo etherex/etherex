@@ -1,7 +1,10 @@
-/** @jsx React.DOM */
-
 var React = require("react");
 var Fluxxor = require("fluxxor");
+var ReactIntl = require('react-intl');
+var IntlMixin = ReactIntl.IntlMixin;
+var FormattedHTMLMessage = ReactIntl.FormattedHTMLMessage;
+var FormattedRelative = ReactIntl.FormattedRelative;
+var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Router = require("react-router");
 var RouteHandler = Router.RouteHandler;
@@ -9,7 +12,6 @@ var RouteHandler = Router.RouteHandler;
 var FluxMixin = Fluxxor.FluxMixin(React),
     StoreWatchMixin = Fluxxor.StoreWatchMixin;
 
-var OverlayMixin = require('react-bootstrap/lib/OverlayMixin');
 var ReactBootstrap = require('react-bootstrap');
 var ProgressBar = ReactBootstrap.ProgressBar;
 var Modal = ReactBootstrap.Modal;
@@ -26,11 +28,9 @@ var GraphPrice = require('./GraphPriceTechan');
 var Network = require('./Network');
 
 var constants = require('../js/constants');
-var utils = require('../js/utils');
-var moment = require('moment');
 
 var EtherExApp = React.createClass({
-  mixins: [FluxMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore")],
+  mixins: [IntlMixin, FluxMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore")],
 
   getInitialState: function () {
     return {
@@ -77,7 +77,9 @@ var EtherExApp = React.createClass({
               </div>
               {(this.state.market.error) &&
                 <div className="alert alert-danger" role="alert">
-                  <h4>Error!</h4>
+                  <h4>
+                    <FormattedMessage message={this.getIntlMessage('error')} />
+                  </h4>
                   {this.state.market.error}
                 </div>}
               <div className="visible-lg">
@@ -92,7 +94,9 @@ var EtherExApp = React.createClass({
                 {(this.state.user.error) ?
                     <div className="container-fluid">
                       <div className="alert alert-danger" role="alert">
-                        <h4>Error!</h4>
+                        <h4>
+                          <FormattedMessage message={this.getIntlMessage('error')} />
+                        </h4>
                         {this.state.user.error}
                       </div>
                     </div> :
@@ -130,7 +134,9 @@ var EtherExApp = React.createClass({
         <footer className="navbar navbar-default navbar-fixed-bottom">
           <div className="container-fluid">
             <p className="navbar-text navbar-left" style={{marginLeft: 0}}>&copy; <a href="http://etherex.org" target="_blank">EtherEx</a></p>
-            <p className="navbar-text navbar-right">A Decentralized Future Calls For A Decentralized Exchange.</p>
+            <p className="navbar-text navbar-right">
+              <FormattedMessage message={this.getIntlMessage('slogan')} />
+            </p>
           </div>
         </footer>
 
@@ -142,42 +148,56 @@ var EtherExApp = React.createClass({
 
 // Modal prompt for loading exceptions
 var ErrorModal = React.createClass({
-  mixins: [OverlayMixin],
+  mixins: [IntlMixin],
 
   getInitialState: function () {
     return {
+      isLaunching: true,
       isModalOpen: false,
       isLoading: false,
       isDemo: false,
       blocksLeft: null,
       lastBlockAge: 0,
-      percentLoaded: 0
+      percentLoaded: 0,
+      modalBody: <ProgressBar active bsStyle={this.props.network.ready ? 'success' : 'default'} style={{marginTop: 25}} now={100} />,
+      modalFooter: false,
+      modalSize: 'small'
     };
   },
 
+  // componentDidMount: function() {
+  //   this.componentWillReceiveProps(this.props);
+  // },
+
   componentWillReceiveProps: function(nextProps) {
+    var openModal = false;
+
     if (nextProps.network.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED ||
         nextProps.config.ethereumClientFailed === true) {
+
       this.setState({
         isModalOpen: true
       });
+      openModal = true;
     }
     else if (!nextProps.network.ready || nextProps.config.percentLoaded < 100) {
+
       var lastBlockAge = nextProps.network.blockChainAge;
-      var now = (new Date().getTime() / 1000) - 1;
+      var now = Date.now();
 
       if (nextProps.network.blockChainAge >= now)
-        lastBlockAge = "not mined yet";
+        lastBlockAge = <FormattedMessage message={this.getIntlMessage('init.block.genesis')} />;
       else
-        lastBlockAge = moment().subtract(nextProps.network.blockChainAge, 'seconds').fromNow();
+        lastBlockAge = <FormattedRelative value={now - nextProps.network.blockChainAge * 1000} />;
 
       this.setState({
         isModalOpen: true,
         isLoading: true,
-        blocksLeft: utils.numeral(this.props.network.blockChainAge / constants.SECONDS_PER_BLOCK, 0),
+        blocksLeft: this.props.network.blockChainAge / constants.SECONDS_PER_BLOCK,
         lastBlockAge: lastBlockAge,
         percentLoaded: nextProps.config.percentLoaded
       });
+      openModal = true;
     }
     else {
       this.setState({
@@ -185,84 +205,113 @@ var ErrorModal = React.createClass({
         isLoading: false
       });
     }
-  },
 
-  handleToggle: function() {
-    this.setState({
-      isModalOpen: !this.state.isModalOpen
-    });
-  },
+    if (!openModal)
+      return;
 
-  startDemoMode: function () {
-    // Start ethereum client demo mode
-    this.handleToggle();
-    this.setState({
-      isDemo: true
-    });
-    this.props.flux.actions.config.updateDemoMode(true);
-  },
-
-  render: function() {
-    return <span />;
-  },
-
-  renderOverlay: function () {
-
-    if (!this.state.isModalOpen) return <span />;
+    var modalBody = this.state.modalBody;
+    var modalFooter = this.state.modalFooter;
+    var modalSize = this.state.modalSize;
 
     if (this.props.config.ethereumClientFailed) {
-
       // EtherEx client failed to load
-      return (
-        <Modal {...this.props} bsSize='small' onRequestHide={ this.handleToggle } backdrop='static'>
+      modalBody =
           <div className="modal-body clearfix">
-              <h4>EtherEx failed to load</h4>
-              <p>There was a problem loading EtherEx.</p>
-              <p>Visit our help page for assitance contact us directly.</p>
-          </div>
+            <h4><FormattedMessage message={this.getIntlMessage('init.failed.header')} /></h4>
+            <p><FormattedMessage message={this.getIntlMessage('init.failed.explain')} /></p>
+            <p><FormattedMessage message={this.getIntlMessage('init.failed.assistance')} /></p>
+          </div>;
+      modalFooter =
           <div className="modal-footer">
-              <Button className="pull-right start-demo-mode" onClick={ this.startDemoMode }>Proceed in demo mode</Button>
-          </div>
-        </Modal>
-      );
+              <Button className="pull-right start-demo-mode" onClick={ this.startDemoMode }>
+                <FormattedMessage message={this.getIntlMessage('demo.proceed')} />
+              </Button>
+          </div>;
+      modalSize = 'small';
 
     } else if (this.props.network.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED && !this.state.isDemo) {
 
       var host = window.location.origin;
 
       // No ethereum client detected
-      return (
-        <Modal {...this.props} id="no-eth-modal" onRequestHide={ this.handleToggle } backdrop='static'>
-          <div className="modal-body clearfix">
-              <h4>Failed to connect to Ethereum</h4>
-              <p>EtherEx requires a local node of the Ethereum client running.</p>
-              <p>Visit <a href="https://github.com/ethereum/go-ethereum/wiki">the Ethereum wiki on GitHub</a> for help installing the latest client.</p>
-              <p>If geth is installed:</p>
-              <p><small><pre>geth --rpc --rpccorsdomain { host } --unlock primary</pre></small></p>
-          </div>
-          <div className="modal-footer">
-              <Button className="pull-right start-demo-mode" onClick={ this.startDemoMode }>Proceed in demo mode</Button>
-          </div>
-        </Modal>
-      );
+      modalBody =
+        <div>
+          <h4><FormattedMessage message={this.getIntlMessage('init.connect.failed')} /></h4>
+          <p><FormattedMessage message={this.getIntlMessage('init.connect.explain')} /></p>
+          <p><FormattedHTMLMessage message={this.getIntlMessage('init.connect.assistance')} /></p>
+          <p><FormattedMessage message={this.getIntlMessage('init.connect.installed')} /></p>
+          <pre className="small">geth --rpc --rpccorsdomain { host } --unlock primary</pre>
+        </div>;
+      modalFooter = <Button className="pull-right start-demo-mode" onClick={ this.startDemoMode }>
+                      <FormattedMessage message={this.getIntlMessage('demo.proceed')} />
+                    </Button>;
+      modalSize = 'medium';
 
     } else if (this.state.isLoading) {
 
       // EtherEx client failed to load
-      return (
-        <Modal {...this.props} bsSize='small' onRequestHide={ this.handleToggle } backdrop='static'>
-          <div className="modal-body clearfix">
-            <h4>Ethereum loading</h4>
-            { this.props.network.blockChainAge < this.props.config.timeout ?
-              <p>The Ethereum block chain is current.<br />Hang in there...</p> :
-              <p>The Ethereum block chain is not current and is fetching blocks from peers.</p> }
-            <ProgressBar active bsStyle={this.props.network.ready ? 'success' : 'default'} now={this.state.percentLoaded} />
-            <p>Last block was {this.state.lastBlockAge}.</p>
-            <p>Approximately {this.state.blocksLeft} blocks left to go.</p>
-          </div>
-        </Modal>
-      );
+      modalBody =
+        <div>
+          <h4><FormattedMessage message={this.getIntlMessage('init.loading')} /></h4>
+          { this.props.network.blockChainAge < this.props.config.timeout ?
+            <p><FormattedMessage message={this.getIntlMessage('init.ready')} /></p> :
+            <p><FormattedHTMLMessage message={this.getIntlMessage('init.not_ready')} /></p> }
+          <ProgressBar active bsStyle={this.props.network.ready ? 'success' : 'default'} now={this.state.percentLoaded} />
+          <p>
+            <FormattedMessage
+              message={this.getIntlMessage('init.block.age')}
+              age={this.state.lastBlockAge} />
+          </p>
+          <p>
+            <FormattedMessage
+              message={this.getIntlMessage('init.block.left')}
+              left={parseInt(this.state.blocksLeft)} />
+          </p>
+        </div>;
+      modalFooter = false;
+      modalSize = 'small';
     }
+
+    this.setState({
+      isLaunching: false,
+      modalBody: modalBody,
+      modalFooter: modalFooter,
+      modalSize: modalSize
+    });
+  },
+
+  closeModal: function() {
+    this.setState({ isModalOpen: false });
+  },
+
+  startDemoMode: function () {
+    // Start ethereum client demo mode
+    // TODO some fake data for that?
+    this.closeModal();
+    this.setState({
+      isDemo: true
+    });
+    this.props.flux.actions.config.updateDemoMode(true);
+  },
+
+  render: function () {
+    return (
+      <Modal {...this.props} show={this.state.isModalOpen} animate={true} bsSize={this.state.modalSize} onHide={ this.closeModal } backdrop='static'>
+        {(this.props.network.lastBlockAge === 0 && this.state.launching) ?
+          <Modal.Header>
+            <h3 className="text-center">
+              <FormattedMessage message={this.getIntlMessage('loading')} />...
+            </h3>
+          </Modal.Header> : <span />}
+        <Modal.Body>
+          {this.state.modalBody}
+        </Modal.Body>
+        {this.state.modalFooter ?
+          <Modal.Footer>
+            {this.state.modalFooter}
+          </Modal.Footer> : <span />}
+      </Modal>
+    );
   }
 });
 

@@ -1,23 +1,34 @@
-/** @jsx React.DOM */
-
+var _ = require('lodash');
 var React = require("react");
+var ReactIntl = require("react-intl");
+var IntlMixin = ReactIntl.IntlMixin;
+var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Button = require('react-bootstrap/lib/Button');
-var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
 var ConfirmModal = require('./ConfirmModal');
 
 var fixtures = require("../js/fixtures");
-var utils = require("../js/utils");
 var bigRat = require("big-rational");
 
 var SubSend = React.createClass({
+  mixins: [IntlMixin],
 
   getInitialState: function() {
     return {
       amount: 0,
       recipient: null,
-      newSend: false
+      newSend: false,
+      showModal: false,
+      confirmMessage: null
     };
+  },
+
+  openModal: function() {
+    this.setState({ showModal: true });
+  },
+
+  closeModal: function() {
+    this.setState({ showModal: false });
   },
 
   render: function() {
@@ -25,30 +36,34 @@ var SubSend = React.createClass({
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
         <div className="container-fluid row">
           <div className="form-group">
-            <label className="sr-only" forHtml="address">Address</label>
-            <input type="text" className="form-control" maxLength="40" pattern="[a-fA-F\d]+" placeholder="Address" ref="address" onChange={this.handleChange} />
+            <label className="sr-only" forHtml="address">
+              <FormattedMessage message={this.getIntlMessage('form.address')} />
+            </label>
+            <input ref="address" type="text" className="form-control"
+                   maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="0x"
+                   onChange={this.handleChange} />
           </div>
           <div className="form-group">
-            <label className="sr-only" forHtml="amount">Amount</label>
-            <input type="number" min="0.0001" step="0.00000001" className="form-control" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
+            <label className="sr-only" forHtml="amount">
+              <FormattedMessage message={this.getIntlMessage('form.amount')} />
+            </label>
+            <input ref="amount" type="number" className="form-control"
+              min={1 / _.parseInt(fixtures.ether)} step={1 / _.parseInt(fixtures.ether)} placeholder="10.0000"
+              onChange={this.handleChange} />
           </div>
           <div className="form-group">
-            {this.state.newSend ?
-              <ModalTrigger modal={
-                  <ConfirmModal
-                    message={
-                      "Are you sure you want to send" +
-                        " " + utils.numeral(this.state.amount, 4) + " ETH" +
-                        " to " + this.state.recipient + " ?"}
-                    flux={this.props.flux}
-                    onSubmit={this.onSubmitForm}
-                  />
-                }>
-                <Button className="btn-block btn-primary" type="submit" key="send">Send</Button>
-              </ModalTrigger>
-            : <Button className="btn-block" type="submit" key="send_fail">Send</Button>}
+            <Button className={"btn-block" + (this.state.newSend ? " btn-primary" : "")} type="submit" key="send">
+              <FormattedMessage message={this.getIntlMessage('send.send')} />
+            </Button>
           </div>
         </div>
+        <ConfirmModal
+          show={this.state.showModal}
+          onHide={this.closeModal}
+          message={this.state.confirmMessage}
+          flux={this.props.flux}
+          onSubmit={this.onSubmitForm}
+        />
       </form>
     );
   },
@@ -60,7 +75,8 @@ var SubSend = React.createClass({
 
   handleValidation: function(e) {
     e.preventDefault();
-    this.validate(e, true);
+    if (this.validate(e, true))
+      this.openModal();
   },
 
   validate: function(e, showAlerts) {
@@ -75,20 +91,34 @@ var SubSend = React.createClass({
     });
 
     if (!address || !amount) {
-      this.props.setAlert('warning', "Fill it up mate!");
+      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.empty')));
     }
     else if (!amount) {
-      this.props.setAlert('warning', "Dont' be cheap...");
+      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.cheap')));
     }
-    else if (amount > this.props.user.balance) {
-      this.props.setAlert('warning', "Not enough ETH available to send, got " + utils.format(this.props.user.balance) + ", needs " + utils.format(amount));
+    else if (amount > this.props.user.balance_raw) {
+      this.props.setAlert('warning', this.formatMessage(
+        this.getIntlMessage('send.not_enough'), {
+          currency: "ETH",
+          balance: this.props.user.balance
+        })
+      );
     }
-    else if (address.length != 40) {
-        this.props.setAlert('warning', "Address too " + (address.length < 40 ? "short" : "long") + ".");
+    else if (address.length != 42) {
+      this.props.setAlert('warning',
+        this.formatMessage(this.getIntlMessage('address.size'), {
+          size: (address.length < 42 ? "short" : "long")
+        })
+      );
     }
     else {
       this.setState({
-        newSend: true
+        newSend: true,
+        confirmMessage: <FormattedMessage
+                          message={this.getIntlMessage('sub.send')}
+                          amount={this.state.amount}
+                          currency="ETH"
+                          recipient={this.state.recipient} />
       });
 
       this.props.showAlert(false);

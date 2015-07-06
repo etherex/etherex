@@ -1,6 +1,7 @@
-/** @jsx React.DOM */
-
 var React = require("react");
+var ReactIntl = require('react-intl');
+var IntlMixin = ReactIntl.IntlMixin;
+var FormattedMessage = ReactIntl.FormattedMessage;
 
 var AlertDismissable = require('./AlertDismissable');
 
@@ -12,7 +13,8 @@ var SubWithdraw = require('./SubWithdraw');
 
 var TxsList = require("./TxsList");
 
-var Markets = React.createClass({
+var Wallet = React.createClass({
+  mixins: [IntlMixin],
 
   getInitialState: function() {
     return {
@@ -41,11 +43,15 @@ var Markets = React.createClass({
           <div className="col-md-6">
             <div className="panel panel-default">
               <div className="panel-heading">
-                <h3 className="panel-title">Deposit {this.props.market.market.name}</h3>
+                <h3 className="panel-title">
+                  <FormattedMessage message={this.getIntlMessage('deposit.currency')}
+                                    currency={this.props.market.market.name} />
+                </h3>
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
-                  <SubDeposit flux={this.props.flux} market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
+                  <SubDeposit flux={this.props.flux} market={this.props.market.market} user={this.props.user.user}
+                              setAlert={this.setAlert} showAlert={this.showAlert}  />
                 </div>
               </div>
             </div>
@@ -53,11 +59,15 @@ var Markets = React.createClass({
           <div className="col-md-6">
             <div className="panel panel-default">
               <div className="panel-heading">
-                <h3 className="panel-title">Withdraw {this.props.market.market.name}</h3>
+                <h3 className="panel-title">
+                  <FormattedMessage message={this.getIntlMessage('withdraw.currency')}
+                                    currency={this.props.market.market.name} />
+                </h3>
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
-                  <SubWithdraw flux={this.props.flux} market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
+                  <SubWithdraw flux={this.props.flux} market={this.props.market.market} user={this.props.user.user}
+                               setAlert={this.setAlert} showAlert={this.showAlert}  />
                 </div>
               </div>
             </div>
@@ -67,11 +77,15 @@ var Markets = React.createClass({
           <div className="col-md-6">
             <div className="panel panel-default">
               <div className="panel-heading">
-                <h3 className="panel-title">Send {this.props.market.market.name}</h3>
+                <h3 className="panel-title">
+                  <FormattedMessage message={this.getIntlMessage('send.currency')}
+                                    currency={this.props.market.market.name} />
+                </h3>
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
-                  <SubSend flux={this.props.flux} market={this.props.market.market} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
+                  <SubSend flux={this.props.flux} market={this.props.market.market} user={this.props.user.user}
+                           setAlert={this.setAlert} showAlert={this.showAlert}  />
                 </div>
               </div>
             </div>
@@ -79,11 +93,15 @@ var Markets = React.createClass({
           <div className="col-md-6">
             <div className="panel panel-default">
               <div className="panel-heading">
-                <h3 className="panel-title">Send Ether</h3>
+                <h3 className="panel-title">
+                  <FormattedMessage message={this.getIntlMessage('send.currency')}
+                                    currency="ETH" />
+                </h3>
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
-                  <SendEther flux={this.props.flux} user={this.props.user.user} setAlert={this.setAlert} showAlert={this.showAlert}  />
+                  <SendEther flux={this.props.flux} user={this.props.user.user}
+                             setAlert={this.setAlert} showAlert={this.showAlert}  />
                 </div>
               </div>
             </div>
@@ -93,7 +111,8 @@ var Markets = React.createClass({
         <div className="container-fluid">
           <div className="row">
             {(!this.props.market.market.txs.error) &&
-              <TxsList title="Transactions" flux={this.props.flux} market={this.props.market} txs={this.props.market.market.txs} user={this.props.user} />}
+              <TxsList title="Transactions" flux={this.props.flux} market={this.props.market}
+                       txs={this.props.market.market.txs} user={this.props.user} />}
           </div>
         </div>
       </div>
@@ -102,4 +121,4 @@ var Markets = React.createClass({
 
 });
 
-module.exports = Markets;
+module.exports = Wallet;

@@ -24,14 +24,19 @@ var TradeActions = function() {
         if (this.flux.store('config').getState().debug)
           console.count("loadTrades triggered");
 
-        var _client = this.flux.store('config').getEthereumClient();
-
         // Put trades in loading state
         this.dispatch(constants.trade.LOAD_TRADES);
 
         var market = this.flux.store("MarketStore").getState().market;
 
-        _client.loadTrades(trade_ids, market, this.flux.actions.trade.updateProgress, function(trade) {
+        for (var i = trade_ids.length - 1; i >= 0; i--)
+            this.flux.actions.trade.loadTrade(trade_ids[i], market);
+    };
+
+    this.loadTrade = function(id, market) {
+        var _client = this.flux.store('config').getEthereumClient();
+
+        _client.loadTrade(id, market, this.flux.actions.trade.updateProgress, function(trade) {
             this.dispatch(constants.trade.LOAD_TRADE, trade);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.LOAD_TRADES_FAIL, {error: error});
@@ -51,11 +56,8 @@ var TradeActions = function() {
         _client.loadTradeIDs(market, function(trade_ids) {
             this.dispatch(constants.trade.LOAD_TRADE_IDS, trade_ids);
 
-            _client.loadTrades(trade_ids, market, this.flux.actions.trade.updateProgress, function(trade) {
-                this.dispatch(constants.trade.UPDATE_TRADE, trade);
-            }.bind(this), function(error) {
-                this.dispatch(constants.trade.UPDATE_TRADES_FAIL, {error: error});
-            }.bind(this));
+            for (var i = trade_ids.length - 1; i >= 0; i--)
+                this.flux.actions.trade.loadTrade(trade_ids[i], market);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.LOAD_TRADE_IDS_FAIL, {error: error});
         }.bind(this));

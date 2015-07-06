@@ -1,12 +1,16 @@
 var React = require('react');
+var ReactIntl = require("react-intl");
+var IntlMixin = ReactIntl.IntlMixin;
+var FormattedDate = ReactIntl.FormattedDate;
+var FormattedNumber = ReactIntl.FormattedNumber;
+var FormattedMessage = ReactIntl.FormattedMessage;
 var Fluxxor = require("fluxxor");
 var StoreWatchMixin = Fluxxor.StoreWatchMixin;
 
 var utils = require('../js/utils');
-var moment = require('moment');
 
 var Network = React.createClass({
-  mixins: [StoreWatchMixin('config', 'network', 'UserStore')],
+  mixins: [IntlMixin, StoreWatchMixin('config', 'network', 'UserStore')],
 
   getStateFromFlux: function () {
     var networkState = this.props.flux.store('network').getState();
@@ -14,7 +18,7 @@ var Network = React.createClass({
       user: this.props.flux.store('UserStore').getState().user,
       network: networkState,
       host: this.props.flux.store('config').getState().host,
-      blockDate: networkState.blockTimestamp ? moment(networkState.blockTimestamp * 1000).format('MMM Do, HH:mm:ss') : '-',
+      blockTimestamp: networkState.blockTimestamp,
       blockTime: networkState.blockTime ? networkState.blockTime + " s" : "",
       networkLag: networkState.networkLag ? networkState.networkLag + " s" : ""
     };
@@ -77,10 +81,15 @@ var Network = React.createClass({
             PEERS<span className="pull-right">{this.state.network.peerCount || '-'}</span>
           </p>
           <p className="blocks">
-            BLOCKS<span className="pull-right">{utils.numeral(this.state.network.blockNumber, 0) || '-'}</span>
+            BLOCKS<span className="pull-right">{<FormattedNumber value={this.state.network.blockNumber} /> || '-'}</span>
           </p>
           <p className="miner">
-            MINER<span className="pull-right">{this.state.network.mining ? utils.format(this.state.network.hashrate) + " H/s" : 'off'}</span>
+            MINER<span className="pull-right">
+            {
+              this.state.network.mining ?
+                <FormattedMessage
+                  message={this.getIntlMessage('hashrate')}
+                  hashrate={this.state.network.hashrate} /> : 'off' }</span>
           </p>
           <p className="ether">
             ETHER<span className="pull-right">{ formattedEther }</span>
@@ -95,7 +104,9 @@ var Network = React.createClass({
             NETWORK LAG<span className="pull-right"> { this.state.networkLag || '-' }</span>
           </p>
           <p className="last-block">
-            LAST BLOCK<span className="pull-right">{ this.state.blockDate || '-' }</span>
+            LAST BLOCK<span className="pull-right"><FormattedDate
+                                                    value={this.state.blockTimestamp * 1000}
+                                                    format="long" /></span>
           </p>
         </div>
       </div>

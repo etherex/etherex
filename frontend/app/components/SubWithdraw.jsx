@@ -1,46 +1,57 @@
-/** @jsx React.DOM */
-
 var React = require("react");
+var ReactIntl = require("react-intl");
+var IntlMixin = ReactIntl.IntlMixin;
+var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Button = require('react-bootstrap/lib/Button');
-var ModalTrigger = require('react-bootstrap/lib/ModalTrigger');
 var ConfirmModal = require('./ConfirmModal');
 
-var utils = require("../js/utils");
-var bigRat = require("big-rational");
-
 var SubWithdraw = React.createClass({
+  mixins: [IntlMixin],
 
   getInitialState: function() {
     return {
       amount: null,
       recipient: null,
-      newWithdrawal: false
+      newWithdrawal: false,
+      showModal: false,
+      confirmMessage: null
     };
+  },
+
+  openModal: function() {
+    this.setState({ showModal: true });
+  },
+
+  closeModal: function() {
+    this.setState({ showModal: false });
   },
 
   render: function() {
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
         <div className="form-group">
-          <label className="sr-only" forHtml="amount">Amount</label>
-          <input type="number" min="0.0001" step="0.00000001" className="form-control" placeholder="10.0000" ref="amount" onChange={this.handleChange} />
+          <label className="sr-only" forHtml="amount">
+            <FormattedMessage message={this.getIntlMessage('form.amount')} />
+          </label>
+          <input ref="amount" type="number" className="form-control"
+            min={this.props.market.amountPrecision}
+            step={this.props.market.amountPrecision}
+            placeholder="10.0000"
+            onChange={this.handleChange} />
         </div>
         <div className="form-group">
-          {this.state.newWithdrawal ?
-            <ModalTrigger modal={
-                <ConfirmModal
-                  message={
-                    "Are you sure you want to withdraw" +
-                      " " + utils.numeral(this.state.amount, 4) + " " + this.props.market.name + " ?"}
-                  flux={this.props.flux}
-                  onSubmit={this.onSubmitForm}
-                />
-              }>
-              <Button className="btn-block btn-primary" type="submit" key="withdraw">Withdraw</Button>
-            </ModalTrigger>
-          : <Button className="btn-block" type="submit" key="withdraw_fail">Withdraw</Button>}
+          <Button className={"btn-block" + (this.state.newWithdrawal ? " btn-primary" : "")} type="submit" key="withdraw">
+            <FormattedMessage message={this.getIntlMessage('form.withdraw')} />
+          </Button>
         </div>
+        <ConfirmModal
+          show={this.state.showModal}
+          onHide={this.closeModal}
+          message={this.state.confirmMessage}
+          flux={this.props.flux}
+          onSubmit={this.onSubmitForm}
+        />
       </form>
     );
   },
@@ -52,7 +63,8 @@ var SubWithdraw = React.createClass({
 
   handleValidation: function(e) {
     e.preventDefault();
-    this.validate(e, true);
+    if (this.validate(e, true))
+      this.openModal();
   },
 
   validate: function(e, showAlerts) {
@@ -65,14 +77,23 @@ var SubWithdraw = React.createClass({
     });
 
     if (!amount) {
-      this.props.setAlert('warning', "Dont' be cheap to yourself...");
+      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('withdraw.empty')));
     }
     else if (amount > this.props.user.balance_sub_available) {
-      this.props.setAlert('warning', "Not enough " + this.props.market.name + " available for withdraw, got " + utils.format(this.props.user.balance_sub_available) + ", needs " + utils.format(amount));
+      this.props.setAlert('warning',
+        this.formatMessage(this.getIntlMessage('withdraw.not_enough'), {
+          currency: this.props.market.name,
+          balance: this.props.user.balance_sub_available,
+          amount: amount
+        })
+      );
     }
     else {
       this.setState({
-        newWithdrawal: true
+        newWithdrawal: true,
+        confirmMessage: <FormattedMessage message={this.getIntlMessage('withdraw.confirm')}
+                                          amount={amount}
+                                          currency={this.props.market.name} />,
       });
 
       this.props.showAlert(false);
@@ -97,7 +118,7 @@ var SubWithdraw = React.createClass({
       return false;
 
     this.props.flux.actions.user.withdrawSub({
-      amount: bigRat(this.state.amount).multiply(Math.pow(10, this.props.market.decimals)).toDecimal()
+      amount: this.state.amount
     });
 
     this.refs.amount.getDOMNode().value = '';

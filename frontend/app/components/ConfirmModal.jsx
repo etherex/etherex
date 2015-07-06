@@ -1,46 +1,65 @@
-/** @jsx React.DOM */
-
 var React = require("react");
+var ReactIntl = require('react-intl');
+var IntlMixin = ReactIntl.IntlMixin;
+// var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Button = require('react-bootstrap/lib/Button');
 var Modal = require('react-bootstrap/lib/Modal');
+var TradeTable = require("./TradeTable");
 
 var ConfirmModal = React.createClass({
+  mixins: [IntlMixin],
 
-    render: function() {
-        var TradeTable = false;
-        if (this.props.tradeList && this.props.tradeList.length > 0)
-            TradeTable = require("./TradeTable");
-        return (
-            <Modal {...this.props} title="Confirmation required" animation={true}>
-                <form onSubmit={this.confirmSubmit}>
-                    <div className="modal-body">
-                        <h4>{this.props.message}</h4>
-                        {(this.props.note) &&
-                            <p>{this.props.note}</p>}
-                        {(this.props.estimate) &&
-                            <p>Gas cost estimate (probably wrong): {this.props.estimate}</p>}
-                        {(TradeTable) &&
-                            <TradeTable flux={this.props.flux} tradeList={this.props.tradeList} market={this.props.market} user={this.props.user} review={true} />}
-                    </div>
-                    <div className="modal-footer">
-                        <Button onClick={this.onRequestHide}>No</Button>
-                        <Button type="submit" bsStyle="primary">Yes</Button>
-                    </div>
-                </form>
-            </Modal>
-        );
-    },
+  getInitialState() {
+    return {
+      tradeTable: null
+    };
+  },
 
-    onRequestHide: function(e) {
-        e.preventDefault();
-        this.props.onRequestHide();
-    },
+  onHide: function(e) {
+    e.preventDefault();
+    this.props.onHide();
+  },
 
-    confirmSubmit: function(e) {
-        e.preventDefault();
-        this.props.onRequestHide();
-    }
+  componentWillReceiveProps: function(nextProps) {
+    if (nextProps.user && nextProps.market && nextProps.tradeList && nextProps.tradeList.length)
+      this.setState({
+        tradeTable:
+          <TradeTable
+            type={nextProps.type}
+            tradeList={nextProps.tradeList}
+            market={nextProps.market}
+            user={nextProps.user}
+            review={true} />
+      });
+  },
+
+  render: function() {
+    return (
+      <Modal {...this.props} animation={true} enforceFocus={false}>
+        <Modal.Header closeButton>
+          <Modal.Title>{this.formatMessage(this.getIntlMessage('confirm.required'))}</Modal.Title>
+        </Modal.Header>
+        <form onSubmit={this.onHide}>
+          <Modal.Body>
+            <big><p>{this.props.message}</p></big>
+
+            {(this.props.note) &&
+              <p>{this.props.note}</p>}
+
+            {(this.props.estimate) &&
+              <p>{this.formatMessage(this.getIntlMessage('confirm.estimate'))}: {this.props.estimate}</p>}
+
+            {this.state.tradeTable}
+          </Modal.Body>
+          <Modal.Footer>
+              <Button onClick={this.onHide}>{this.formatMessage(this.getIntlMessage('confirm.no'))}</Button>
+              <Button type="submit" bsStyle="primary">{this.formatMessage(this.getIntlMessage('confirm.yes'))}</Button>
+          </Modal.Footer>
+        </form>
+      </Modal>
+    );
+  }
 });
 
 module.exports = ConfirmModal;

@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var Fluxxor = require('fluxxor');
 var fixtures = require("../js/fixtures");
 var constants = require('../js/constants');
@@ -15,14 +16,11 @@ var ConfigStore = Fluxxor.createStore({
     this.timeout = 120;
 
     this.bindActions(
-      constants.config.UPDATE_ADDRESS, this.handleUpdateAddress,
-      constants.config.UPDATE_DEBUG, this.handleUpdateDebug,
+      constants.config.UPDATE_CONFIG, this.handleUpdateConfig,
       constants.config.UPDATE_DEMO_MODE, this.handleDemoMode,
       constants.config.UPDATE_ETHEREUM_CLIENT_SUCCESS, this.handleUpdateEthereumClientSuccess,
       constants.config.UPDATE_ETHEREUM_CLIENT_FAILED, this.handleUpdateEthereumClientFailed,
-      constants.config.UPDATE_PERCENT_LOADED_SUCCESS, this.handleUpdatePercentLoadedSuccess,
-      constants.config.UPDATE_RANGE, this.onUpdateRange,
-      constants.config.UPDATE_RANGE_END, this.onUpdateRangeEnd
+      constants.config.UPDATE_PERCENT_LOADED_SUCCESS, this.handleUpdatePercentLoadedSuccess
     );
   },
 
@@ -61,29 +59,14 @@ var ConfigStore = Fluxxor.createStore({
     this.emit(constants.CHANGE_EVENT);
   },
 
-  handleUpdateAddress: function (payload) {
-    this.address = payload.address;
-    this.emit(constants.CHANGE_EVENT);
-  },
-
-  handleUpdateDebug: function (payload) {
-    this.debug = payload.debug;
+  handleUpdateConfig: function (payload) {
+    _.merge(this, payload);
     this.emit(constants.CHANGE_EVENT);
   },
 
   handleDemoMode: function (payload) {
     this.demoMode = payload.enable;
     // this.emit(constants.CHANGE_EVENT);
-  },
-
-  onUpdateRange: function(payload) {
-    this.range = payload.range;
-    this.emit(constants.CHANGE_EVENT);
-  },
-
-  onUpdateRangeEnd: function(payload) {
-    this.rangeEnd = payload.rangeEnd;
-    this.emit(constants.CHANGE_EVENT);
   }
 });
 
