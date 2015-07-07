@@ -5,7 +5,6 @@ var FormattedMessage = ReactIntl.FormattedMessage;
 
 var bigRat = require("big-rational");
 var fixtures = require("../js/fixtures");
-var utils = require("../js/utils");
 
 var DropdownButton = require('react-bootstrap/lib/DropdownButton');
 var MenuItem = require('react-bootstrap/lib/MenuItem');
