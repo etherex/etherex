@@ -28,6 +28,7 @@ var GraphPrice = require('./GraphPriceTechan');
 var Network = require('./Network');
 
 var constants = require('../js/constants');
+var UAParser = require('ua-parser-js');
 
 var EtherExApp = React.createClass({
   mixins: [IntlMixin, FluxMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore")],
@@ -165,13 +166,77 @@ var ErrorModal = React.createClass({
       modalHeader: null,
       modalBody: <ProgressBar active bsStyle={this.props.network.ready ? 'success' : 'default'} style={{marginTop: 25}} now={100} />,
       modalFooter: false,
-      modalSize: 'small'
+      modalSize: 'small',
+      host: window.location.origin,
+      os: new UAParser(navigator.userAgent).getOS().name,
+      installHelp: null
     };
   },
 
-  // componentDidMount: function() {
-  //   this.componentWillReceiveProps(this.props);
-  // },
+  toggleInstallationHelp: function(e) {
+    e.preventDefault();
+    this.setState({ installationHelp: !this.state.installationHelp });
+  },
+
+  componentDidMount() {
+    var steps = [];
+
+    if (this.state.os === 'Mac OS') {
+      steps.push(<FormattedHTMLMessage message={this.getIntlMessage('init.install.OSX.brew')} />);
+      steps.push(<pre className="small"><FormattedHTMLMessage message={this.getIntlMessage('init.install.OSX.install')} /></pre>);
+    } else if (this.state.os == 'Windows') {
+      steps.push(<FormattedHTMLMessage message={this.getIntlMessage('init.install.Win.install')} />);
+    } else if (this.state.os == 'Ubuntu') {
+      steps.push(<pre className="small"><FormattedMessage message={this.getIntlMessage('init.install.Ubuntu.PPA')} /></pre>);
+    } else {
+      steps.push(<FormattedHTMLMessage message={this.getIntlMessage('init.install.Others.build')} />);
+    }
+
+    steps.push(<FormattedMessage
+                message={this.getIntlMessage('init.install.account')}
+                geth={<pre className="small">geth account new</pre>} />);
+    steps.push(<FormattedMessage
+                message={this.getIntlMessage('init.install.start')}
+                geth={<pre className="small">geth --rpc --rpccorsdomain { this.state.host } --unlock 0</pre>} />);
+
+    if (this.state.os == 'Mac OS')
+      steps.push(<FormattedHTMLMessage
+                    message={this.getIntlMessage('init.install.OSX.link')}
+                    wiki={"https://github.com/ethereum/go-ethereum/wiki/Installation-Instructions-for-Mac"}
+                    brew={"https://github.com/ethereum/homebrew-ethereum"}
+                    />);
+    else if (this.state.os == 'Ubuntu')
+      steps.push(<FormattedHTMLMessage
+                    message={this.getIntlMessage('init.install.Ubuntu.link')}
+                    wiki={"https://github.com/ethereum/go-ethereum/wiki/Installation-Instructions-for-Ubuntu"}
+                    ppa={"https://launchpad.net/~ethereum/+archive/ubuntu/ethereum/+packages"}
+                    />);
+    else if (this.state.os == 'Windows')
+      steps.push(<FormattedHTMLMessage
+                    message={this.getIntlMessage('init.install.Win.link')}
+                    wiki={"https://github.com/ethereum/go-ethereum/wiki/Installation-instructions-for-Windows"}
+                    choco={"https://chocolatey.org/packages/geth-stable"}
+                    />);
+
+    var installSteps = steps.map(function(step, i) {
+      return <li key={i}>{ step }</li>;
+    });
+
+    var help = (
+      <div className="installation-help">
+        <p className="row">
+          <h4><FormattedHTMLMessage message={this.getIntlMessage('init.install.title')} /></h4>
+          <ol>
+            { installSteps }
+          </ol>
+        </p>
+      </div>
+    );
+
+    this.setState({
+      installHelp: help
+    });
+  },
 
   componentWillReceiveProps: function(nextProps) {
     var openModal = false;
@@ -236,14 +301,15 @@ var ErrorModal = React.createClass({
 
     } else if (this.props.network.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED && !this.state.isDemo) {
       // No ethereum client detected
-      var host = window.location.origin;
       modalHeader = <FormattedMessage message={this.getIntlMessage('init.connect.failed')} />;
       modalBody =
         <div>
           <p><FormattedMessage message={this.getIntlMessage('init.connect.explain')} /></p>
-          <p><FormattedHTMLMessage message={this.getIntlMessage('init.connect.assistance')} /></p>
-          <p><FormattedMessage message={this.getIntlMessage('init.connect.installed')} /></p>
-          <pre className="small">geth --rpc --rpccorsdomain { host } --unlock primary</pre>
+          <p>
+            <Button onClick={ this.toggleInstallationHelp }>
+              <FormattedMessage message={this.getIntlMessage('init.connect.assistance')} />
+            </Button>
+          </p>
         </div>;
       modalFooter = <Button className="pull-right start-demo-mode" onClick={ this.startDemoMode }>
                       <FormattedMessage message={this.getIntlMessage('demo.proceed')} />
@@ -323,6 +389,8 @@ var ErrorModal = React.createClass({
             </Modal.Header> : {}}
           <Modal.Body>
             {this.state.modalBody}
+            { this.state.installationHelp ?
+                this.state.installHelp : {} }
           </Modal.Body>
           {this.state.modalFooter ?
             <Modal.Footer>

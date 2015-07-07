@@ -1,5 +1,3 @@
-
-
 var React = require("react");
 
 var Alert = require('react-bootstrap/lib/Alert');

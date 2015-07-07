@@ -48,10 +48,44 @@ module.exports = {
         "assistance": "Visit #etherex on IRC for assitance."
       },
       "connect": {
-        "failed": "Failed to connect to Ethereum",
-        "explain": "EtherEx requires a local node of the Ethereum client running.",
-        "assistance": 'Visit <a href="https://github.com/ethereum/go-ethereum/wiki">the Ethereum wiki on GitHub</a> for help installing the latest client.',
-        "installed": "If geth is installed:"
+        "failed": "Ethereum not found",
+        "explain": `EtherEx requires an Ethereum client to be running and current.
+                    EtherEx could not detect a client running which probably means
+                    it's not installed, running or is misconfigured.`,
+        "assistance": `Get help installing and configuring Ethereum`
+      },
+      "install": {
+        "title": "Installing and configuring Ethereum",
+        "OSX": {
+          "brew": `<a target="_blank" href="http://brew.sh/">Install Homebrew</a> for Mac OS`,
+          "install": `brew tap ethereum/ethereum\nbrew install ethereum --devel`,
+          "link": `See also the <a href="{wiki}" target="_blank">Wiki page</a>
+                  and the <a href="{brew}" target="_blank">homebrew-ethereum README</a>.`
+        },
+        "Ubuntu": {
+          "PPA": `sudo add-apt-repository ppa:ethereum/ethereum\nsudo apt-get update\nsudo apt-get install ethereum`,
+          "link": `See also the <a href="{wiki}" target="_blank">Wiki page</a>
+                  and the <a href="{ppa}" target="_blank">PPA repository</a>.`
+        },
+        "Win": {
+          "install": `Download the
+                        <a href="https://build.ethdev.com/builds/Windows%20Go%20develop%20branch/Geth-Win64-latest.zip">
+                          lastest geth build
+                        </a>
+                      for Windows`,
+          "link": `See also the <a href="{wiki}" target="_blank">Wiki page</a>
+                  and the <a href="{choco}" target="_blank">Chocolatery package</a>.`
+        },
+        "Others": {
+          "build": `Follow the Ethereum
+                      <a href="https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum">
+                        install guide
+                      </a>
+                    on GitHub`
+        },
+        "installed": `Once <pre className="small">geth</pre> is installed:`,
+        "account": `Add a new account using { geth }`,
+        "start": `Start geth with { geth } and enter your password.`
       },
       "block": {
         "age": "Last block was {age}.",
@@ -61,6 +95,20 @@ module.exports = {
     },
     "demo": {
       "proceed": "Proceed in demo mode"
+    },
+    "nav": {
+      "toggle": "Toggle navigation",
+      "trades": "Trades",
+      "markets": "Markets",
+      "wallet": "Wallet",
+      "tools": "Tools",
+      "help": "Help"
+    },
+    "sections": {
+      "sub": "Subcurrencies",
+      "xchain": "X-Chain",
+      "assets": "Assets",
+      "currencies": "Currencies"
     },
     "wallet": {
       "balance": "In {currency} wallet: {balance, number}",

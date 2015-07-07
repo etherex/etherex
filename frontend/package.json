@@ -1,6 +1,6 @@
 {
   "name": "EtherEx",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "EtherEx frontend",
   "main": "app/app.jsx",
   "scripts": {
@@ -80,6 +80,7 @@
     "react-router": "^0.13.3",
     "si-prefix": "^0.1.0",
     "techan": "caktux/techan.js",
+    "ua-parser-js": "^0.7.7",
     "url-loader": "^0.5.6",
     "web3": "^0.7.1"
   }

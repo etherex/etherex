@@ -11,6 +11,7 @@ var UserStore = Fluxxor.createStore({
         this.user = options.user || {
           id: 'loading...',
           balance: 0,
+          balanceFormatted: 0,
           balance_pending: 0,
           balance_sub: 0,
           balance_sub_available: 0,
@@ -85,7 +86,6 @@ var UserStore = Fluxxor.createStore({
 
     onSwitchAddress: function(payload) {
         this.user.id = payload.address;
-
         this.emit(constants.CHANGE_EVENT);
     },
 
