@@ -46,11 +46,11 @@ var SplitTradeForm = React.createClass({
     this.setState({ showDepositModal: false });
   },
 
-  openDepositModal: function() {
+  openDepositModal: function(amount) {
     this.setState({
       showModal: false,
       showDepositModal: true,
-      depositAmount: this.state.amount - this.props.user.user.balance_sub_available
+      depositAmount: amount - this.props.user.user.balance_sub_available
     });
   },
 
@@ -376,7 +376,7 @@ var SplitTradeForm = React.createClass({
         currency: this.props.market.market.name,
         amount: amount
       }));
-      this.openDepositModal();
+      this.openDepositModal(amount);
     }
     else {
       if (this.props.trades.filling.length > 0)

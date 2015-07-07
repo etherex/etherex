@@ -1,25 +1,22 @@
 var React = require("react");
 var ReactIntl = require("react-intl");
 var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Button = require('react-bootstrap/lib/Button');
 var Modal = require('react-bootstrap/lib/Modal');
 
 var ConfirmModal = require('./ConfirmModal');
 
-var utils = require("../js/utils");
-
 var SubDepositModal = React.createClass({
   mixins: [IntlMixin],
 
   getInitialState: function() {
     return {
-      amount: this.props.amount ? utils.numeral(this.props.amount, 4) : 0,
+      amount: null,
       newDeposit: false,
       isModalOpen: false,
       showConfirmModal: false,
-      showDefaultAmount: true
+      amountChanged: false
     };
   },
 
@@ -27,19 +24,32 @@ var SubDepositModal = React.createClass({
     this.validate(new Event('validate'));
   },
 
+  componentWillReceiveProps: function(nextProps) {
+    if (!this.state.amountChanged)
+      this.setState({
+        amount: nextProps.amount
+      });
+  },
+
   onHide: function(e) {
     e.preventDefault();
-    this.setState({ showDefaultAmount: true });
+    if (!this.state.showConfirmModal)
+      this.setState({ amountChanged: false });
     this.props.onHide();
   },
 
   openConfirmModal: function() {
     this.props.onHide();
-    this.setState({ showConfirmModal: true });
+    this.setState({
+      showConfirmModal: true
+    });
   },
 
   closeConfirmModal: function() {
-    this.setState({ showConfirmModal: false });
+    this.setState({
+      amountChanged: false,
+      showConfirmModal: false
+    });
   },
 
   render: function() {
@@ -53,7 +63,7 @@ var SubDepositModal = React.createClass({
             <Modal.Body>
                   <label forHtml="amount">Amount</label>
                   <input type="number" min="0.0001" step="0.00000001" className="form-control" placeholder="10.0000" ref="amount"
-                         onChange={this.handleChange} value={this.state.showDefaultAmount ? this.props.amount : this.state.amount} />
+                         onChange={this.handleChange} value={this.state.amount} />
             </Modal.Body>
             <Modal.Footer>
                 <Button className={"btn-block" + (this.state.newDeposit ? " btn-primary" : "")} type="submit" key="deposit">Deposit</Button>
@@ -63,9 +73,10 @@ var SubDepositModal = React.createClass({
         <ConfirmModal
           show={this.state.showConfirmModal}
           onHide={this.closeConfirmModal}
-          message={<FormattedMessage message={this.getIntlMessage('deposit.confirm')}
-                                            amount={this.state.amount}
-                                            currency={this.props.market.name} />}
+          message={this.formatMessage(this.getIntlMessage('deposit.confirm'), {
+                      amount: this.state.amount,
+                      currency: this.props.market.name
+                    }) }
           flux={this.props.flux}
           onSubmit={this.onSubmitForm}
         />
@@ -75,6 +86,9 @@ var SubDepositModal = React.createClass({
 
   handleChange: function(e) {
     e.preventDefault();
+    this.setState({
+      amountChanged: true
+    });
     this.validate(e);
   },
 
@@ -91,8 +105,7 @@ var SubDepositModal = React.createClass({
     var amount = this.refs.amount ? parseFloat(this.refs.amount.getDOMNode().value.trim()) : 0;
 
     this.setState({
-      amount: amount,
-      showDefaultAmount: false
+      amount: amount
     });
 
     if (!amount)

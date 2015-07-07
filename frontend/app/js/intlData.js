@@ -63,7 +63,7 @@ module.exports = {
                   and the <a href="{brew}" target="_blank">homebrew-ethereum README</a>.`
         },
         "Ubuntu": {
-          "PPA": `sudo add-apt-repository ppa:ethereum/ethereum\nsudo apt-get update\nsudo apt-get install ethereum`,
+          "PPA": `sudo apt-get install software-properties-common\nsudo add-apt-repository ppa:ethereum/ethereum\nsudo apt-get update\nsudo apt-get install ethereum`,
           "link": `See also the <a href="{wiki}" target="_blank">Wiki page</a>
                   and the <a href="{ppa}" target="_blank">PPA repository</a>.`
         },
