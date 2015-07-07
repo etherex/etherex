@@ -96,7 +96,7 @@ var SubSend = React.createClass({
     }
     else if (amount > this.props.user.balance_sub) {
       this.props.setAlert('warning',
-        this.formatMessage(this.getIntlMessage('send.not_enough'), {
+        this.formatMessage(this.getIntlMessage('sub.not_enough'), {
           currency: this.props.market.name,
           balance: this.props.user.balance_sub_available
         })

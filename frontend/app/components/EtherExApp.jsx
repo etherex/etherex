@@ -346,6 +346,8 @@ var ErrorModal = React.createClass({
                       <FormattedMessage message={this.getIntlMessage('init.force')} />
                     </Button>;
       modalSize = 'small';
+
+      this.setState({ installationHelp: false });
     }
 
     this.setState({

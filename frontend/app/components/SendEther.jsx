@@ -98,7 +98,7 @@ var SubSend = React.createClass({
     }
     else if (amount > this.props.user.balance_raw) {
       this.props.setAlert('warning', this.formatMessage(
-        this.getIntlMessage('send.not_enough'), {
+        this.getIntlMessage('sub.not_enough'), {
           currency: "ETH",
           balance: this.props.user.balance
         })

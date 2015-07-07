@@ -168,13 +168,13 @@ module.exports = {
       "not_enough": "Not enough {currency} for a deposit of {amount, number}, you have {balance, number}"
     },
     "sub": {
-      "send": "Are you sure you want to send {amount} {currency} to {recipient}?",
-      "not_enough": "Not enough {currency} available to send, got {balance}"
+      "send": "Are you sure you want to send {amount, number} {currency} to {recipient}?",
+      "not_enough": "Not enough {currency} available to send, got {balance, number}"
     },
     "withdraw": {
       "currency": "Withdraw {currency}",
-      "confirm": "Are you sure you want to withdraw {amount} {currency} ?",
-      "not_enough": "Not enough {currency} available for withdrawal, got {balance, number}, needs {amount}",
+      "confirm": "Are you sure you want to withdraw {amount, number} {currency}?",
+      "not_enough": "Not enough {currency} available for withdrawal, got {balance, number}, needs {amount, number}",
       "empty": "Dont' be cheap to yourself..."
     },
     "send": {
@@ -193,19 +193,19 @@ module.exports = {
       "confirm": `Are you sure you want to {type, select,
                     buy {buy}
                     sell {sell}
-                  } {amount} {currency} at {price} {currency}/ETH for {total} ETH?`,
+                  } {amount, number} {currency} at {price, number} {currency}/ETH for {total, number} ETH?`,
       "filling": `You will be filling
                   {numTrades, plural, =1 {one trade} other {# trades}}
-                  for a total of {total} ETH
+                  for a total of {total, number} ETH
                   {left, plural,
                     =0 {}
-                    other {({balance} ETH left going in your pocket)}}.`,
-      "adding": `You will also be adding a new trade of {amount} {currency}
-                  at {price} {currency}/ETH for {total} ETH.`,
-      "not_left": `Not enough left for a new trade with {amount} for {total} ETH.`,
-      "minimum": `Minimum total is {minimum} ETH`,
-      "not_total": `Not enough ETH for this trade, {minimum} required.`,
-      "not_enough": `Not enough {currency} for this trade, {amount} {currency} required.`
+                    other {({balance, number} ETH left going in your pocket)}}.`,
+      "adding": `You will also be adding a new trade of {amount, number} {currency}
+                  at {price, number} {currency}/ETH for {total, number} ETH.`,
+      "not_left": `Not enough left for a new trade with {amount, number} for {total, number} ETH.`,
+      "minimum": `Minimum total is {minimum, number} ETH`,
+      "not_total": `Not enough ETH for this trade, {minimum, number} ETH required.`,
+      "not_enough": `Not enough {currency} for this trade, {amount, number} {currency} required.`
     },
     "user": {
       "not_found": "User not found",

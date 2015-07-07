@@ -369,7 +369,7 @@ var SplitTradeForm = React.createClass({
     }
     else if (this.isNotEnoughTotal(total)) {
       this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('trade.not_total'), {
-        minimum: utils.formatBalance(bigRat(total).multiply(fixtures.ether))
+        minimum: total
       }));
     }
     else if (this.isNotEnough(amount)) {
