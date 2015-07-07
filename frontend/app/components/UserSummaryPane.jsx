@@ -60,12 +60,13 @@ var UserSummaryPane = React.createClass({
                 <td><FormattedMessage message={this.getIntlMessage('balance')} /></td>
                 <td>
                   { this.props.user.user.balanceFormatted }<br />
-                  { this.formatMessage(
-                      this.getIntlMessage('user.balance'), {
-                        currency: "wei",
-                        balance: this.props.user.user.balance,
-                        pending: this.props.user.user.balance_pending
-                      })
+                  { this.props.user.user.balance &&
+                      this.formatMessage(
+                        this.getIntlMessage('user.balance'), {
+                          currency: "wei",
+                          balance: this.props.user.user.balance_raw,
+                          pending: this.props.user.user.balance_pending
+                        })
                   }
                 </td>
               </tr>

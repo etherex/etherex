@@ -156,7 +156,6 @@ var ErrorModal = React.createClass({
 
   getInitialState: function () {
     return {
-      isLaunching: true,
       isModalOpen: false,
       isLoading: false,
       isDemo: false,
@@ -169,7 +168,8 @@ var ErrorModal = React.createClass({
       modalSize: 'small',
       host: window.location.origin,
       os: new UAParser(navigator.userAgent).getOS().name,
-      installHelp: null
+      installHelp: null,
+      launchStep: null
     };
   },
 
@@ -180,6 +180,13 @@ var ErrorModal = React.createClass({
 
   componentDidMount() {
     var steps = [];
+
+    var launchStep = <FormattedMessage
+                        message={this.getIntlMessage('init.install.start')}
+                        geth={<pre className="small">geth --rpc --rpccorsdomain { this.state.host } --unlock 0</pre>} />;
+    this.setState({
+      launchStep: launchStep
+    });
 
     if (this.state.os === 'Mac OS') {
       steps.push(<FormattedHTMLMessage message={this.getIntlMessage('init.install.OSX.brew')} />);
@@ -195,9 +202,7 @@ var ErrorModal = React.createClass({
     steps.push(<FormattedMessage
                 message={this.getIntlMessage('init.install.account')}
                 geth={<pre className="small">geth account new</pre>} />);
-    steps.push(<FormattedMessage
-                message={this.getIntlMessage('init.install.start')}
-                geth={<pre className="small">geth --rpc --rpccorsdomain { this.state.host } --unlock 0</pre>} />);
+    steps.push(launchStep);
 
     if (this.state.os == 'Mac OS')
       steps.push(<FormattedHTMLMessage
@@ -299,13 +304,13 @@ var ErrorModal = React.createClass({
           </div>;
       modalSize = 'medium';
 
-    } else if (this.props.network.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED && !this.state.isDemo) {
+    } else if (this.props.network.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED) {
       // No ethereum client detected
       modalHeader = <FormattedMessage message={this.getIntlMessage('init.connect.failed')} />;
       modalBody =
         <div>
           <p><FormattedMessage message={this.getIntlMessage('init.connect.explain')} /></p>
-          <p>
+          <p className="navbar">
             <Button onClick={ this.toggleInstallationHelp }>
               <FormattedMessage message={this.getIntlMessage('init.connect.assistance')} />
             </Button>
@@ -351,7 +356,6 @@ var ErrorModal = React.createClass({
     }
 
     this.setState({
-      isLaunching: false,
       modalHeader: modalHeader,
       modalBody: modalBody,
       modalFooter: modalFooter,
@@ -366,11 +370,11 @@ var ErrorModal = React.createClass({
   startDemoMode: function () {
     // Start ethereum client demo mode
     // TODO some fake data for that?
-    this.closeModal();
     this.setState({
       isDemo: true
     });
     this.props.flux.actions.config.updateDemoMode(true);
+    this.closeModal();
   },
 
   forceLoad() {
@@ -380,7 +384,7 @@ var ErrorModal = React.createClass({
   render: function () {
     return (
       <Modal {...this.props}
-        show={this.state.isModalOpen}
+        show={this.state.isModalOpen && !this.state.isDemo}
         animate={true}
         bsSize={this.state.modalSize}
         onHide={ this.closeModal }
@@ -392,7 +396,9 @@ var ErrorModal = React.createClass({
           <Modal.Body>
             {this.state.modalBody}
             { this.state.installationHelp ?
-                this.state.installHelp : {} }
+                this.state.installHelp :
+                (!this.state.isLoading && this.state.modalHeader) &&
+                    this.state.launchStep }
           </Modal.Body>
           {this.state.modalFooter ?
             <Modal.Footer>

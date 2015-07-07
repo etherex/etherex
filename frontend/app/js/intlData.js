@@ -85,7 +85,7 @@ module.exports = {
         },
         "installed": `Once <pre className="small">geth</pre> is installed:`,
         "account": `Add a new account using { geth }`,
-        "start": `Start geth with { geth } and enter your password.`
+        "start": `Start geth with: { geth }`
       },
       "block": {
         "age": "Last block was {age}.",

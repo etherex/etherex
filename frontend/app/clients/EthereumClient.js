@@ -176,6 +176,11 @@ var EthereumClient = function(params) {
     };
 
     this.setMarketsWatch = function(flux, markets, market) {
+      if (params.debug)
+        utils.log("WATCH", market);
+      if (params.debug)
+        utils.log("WATCH", markets);
+
       // Watch market's contracts and update sub balances
       // var market_addresses = _.pluck(markets, 'address');
       // for (var i = 0; i < market_addresses.length; i++)

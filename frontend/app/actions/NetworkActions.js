@@ -78,8 +78,7 @@ var NetworkActions = function() {
     }
 
     // check yo self
-    if (!this.flux.store('config').getState().demoMode)
-      setTimeout(this.flux.actions.network.checkNetwork, 3000);
+    setTimeout(this.flux.actions.network.checkNetwork, 3000);
   };
 
   // Sync method to update blockchain age
@@ -157,6 +156,8 @@ var NetworkActions = function() {
   this.onNewBlock = function (error, log) {
     if (this.flux.store('config').getState().debug)
       utils.log("GOT BLOCK", log);
+    this.flux.actions.user.updateBalance();
+    this.flux.actions.user.updateBalanceSub();
     this.flux.actions.network.updateBlockchain(true);
   };
 

@@ -68,7 +68,7 @@ var ConfigStore = Fluxxor.createStore({
 
   handleDemoMode: function (payload) {
     this.demoMode = payload.enable;
-    // this.emit(constants.CHANGE_EVENT);
+    this.emit(constants.CHANGE_EVENT);
   }
 });
 
