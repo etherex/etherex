@@ -1,6 +1,7 @@
 var _ = require("lodash");
 var utils = require("../js/utils");
 var constants = require("../js/constants");
+var web3 = require("web3");
 
 var MarketActions = function() {
 
@@ -15,10 +16,10 @@ var MarketActions = function() {
             // Get last opened market ID
             var lastOpenedMarketID = 1;
             try {
-              lastOpenedMarketID = _.parseInt(_client.getString('EtherEx', 'market'));
+              lastOpenedMarketID = web3.toDecimal(_client.getHex('EtherEx', 'market'));
             }
             catch(e) {
-              _client.putString('EtherEx', 'market', '1');
+              _client.putHex('EtherEx', 'market', web3.fromDecimal(lastOpenedMarketID));
             }
 
             // Get favorites
@@ -161,7 +162,7 @@ var MarketActions = function() {
         this.dispatch(constants.market.CHANGE_MARKET, market);
 
         // Save last market ID
-        _client.putString('EtherEx', 'market', String(market.id));
+        _client.putHex('EtherEx', 'market', web3.fromDecimal(market.id));
 
         // Update sub balance
         this.flux.actions.user.updateBalanceSub();

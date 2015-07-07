@@ -3,8 +3,6 @@ var ReactIntl = require("react-intl");
 var IntlMixin = ReactIntl.IntlMixin;
 var FormattedMessage = ReactIntl.FormattedMessage;
 
-var utils = require('../js/utils');
-
 var Button = require('react-bootstrap/lib/Button');
 var Alert = require('react-bootstrap/lib/Alert');
 var Input = require('react-bootstrap/lib/Input');
@@ -18,9 +16,9 @@ var ConfigPane = React.createClass({
     return {
       address: this.props.address,
       debug: configState.debug,
+      si: configState.si,
       timeout: configState.timeout,
       timeoutUpdated: false,
-      si: configState.si,
       message: null,
       newAddress: false,
       showModal: false,
@@ -41,6 +39,10 @@ var ConfigPane = React.createClass({
     if (config.si != this.state.si)
       this.setState({
         si: config.si
+      });
+    if (config.debug != this.state.debug)
+      this.setState({
+        debug: config.debug
       });
     if (config.timeout != this.state.timeout && !this.state.timeoutUpdated)
       this.setState({
@@ -113,19 +115,6 @@ var ConfigPane = React.createClass({
     var debug = this.refs.debug.getChecked();
 
     this.setState({ debug: debug });
-
-    if (debug) {
-      var handler = function(type, payload) {
-          utils.debug(type, payload);
-      };
-      this.setState({ handler: handler} );
-      this.props.flux.on("dispatch", handler);
-      React.addons.Perf.start();
-    }
-    else {
-      this.props.flux.removeListener("dispatch", this.state.handler);
-      utils.log("DEBUGGING", debug);
-    }
 
     this.props.flux.actions.config.updateConfig({
       debug: debug

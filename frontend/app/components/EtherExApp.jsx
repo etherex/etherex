@@ -327,7 +327,7 @@ var ErrorModal = React.createClass({
       modalBody =
         <div>
           <h4><FormattedMessage message={this.getIntlMessage('init.loading')} /></h4>
-          { this.props.network.blockChainAge < this.props.config.timeout ?
+          { this.props.network.ready ?
             <p><FormattedMessage message={this.getIntlMessage('init.ready')} /></p> :
             <p>
               <FormattedHTMLMessage
@@ -347,9 +347,10 @@ var ErrorModal = React.createClass({
               left={parseInt(this.state.blocksLeft)} />
           </p>
         </div>;
-      modalFooter = <Button className="pull-right" onClick={ this.forceLoad }>
-                      <FormattedMessage message={this.getIntlMessage('init.force')} />
-                    </Button>;
+      modalFooter = !this.props.network.ready &&
+                      <Button className="pull-right" onClick={ this.forceLoad }>
+                        <FormattedMessage message={this.getIntlMessage('init.force')} />
+                      </Button>;
       modalSize = 'small';
 
       this.setState({ installationHelp: false });

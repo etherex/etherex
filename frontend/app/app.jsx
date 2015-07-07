@@ -78,14 +78,6 @@ var actions = {
 
 var flux = new Fluxxor.Flux(stores, actions);
 
-if (flux.store('config').getState().debug) {
-  var utils = require('./js/utils');
-  flux.on("dispatch", function(type, payload) {
-    utils.debug(type, payload);
-  });
-  React.addons.Perf.start();
-}
-
 flux.setDispatchInterceptor(function(action, dispatch) {
   React.addons.batchedUpdates(function() {
     dispatch(action);

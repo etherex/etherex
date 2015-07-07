@@ -8,6 +8,7 @@ var ConfigStore = Fluxxor.createStore({
     this.host = process.env.RPC_HOST || fixtures.host;
     this.address = fixtures.addresses.etherex;
     this.debug = false;
+    this.debugHandler = null;
     this.percentLoaded = null;
     this.ethereumClient = null;
     this.demoMode = false;
@@ -30,6 +31,7 @@ var ConfigStore = Fluxxor.createStore({
       host: this.host,
       address: this.address,
       debug: this.debug,
+      debugHandler: this.debugHandler,
       percentLoaded: this.percentLoaded,
       ethereumClient: this.ethereumClient,
       demoMode: this.demoMode,
