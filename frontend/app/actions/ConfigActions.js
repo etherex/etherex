@@ -17,8 +17,7 @@ var ConfigActions = function() {
       range: configState.range,
       rangeEnd: configState.rangeEnd,
       si: configState.si,
-      debug: debug,
-      error: this.flux.actions.config.failed
+      debug: debug
     };
 
     var ethereumClient = new EthereumClient(clientParams);

@@ -22,7 +22,7 @@ var EthereumClient = function(params) {
         var ContractABI = web3.eth.contract(abi.etherex);
         this.contract = ContractABI.at(params.address);
 
-        if (web3.eth.getCode(params.address) == "0x")
+        if (params.error && web3.eth.getCode(params.address) == "0x")
             params.error("Unable to find contract!");
     }
     catch(e) {
