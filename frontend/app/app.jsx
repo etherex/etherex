@@ -53,6 +53,7 @@ window.$ = window.jQuery = jQuery;
 require("bootstrap/dist/js/bootstrap.js");
 require("./css/bootstrap-darkly.css");
 
+require("./css/icons.css");
 require("./css/styles.css");
 
 var intlData = require('./js/intlData');

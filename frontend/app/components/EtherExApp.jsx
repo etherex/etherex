@@ -384,27 +384,27 @@ var ErrorModal = React.createClass({
 
   render: function () {
     return (
-      <Modal {...this.props}
-        show={this.state.isModalOpen && !this.state.isDemo}
+      <Modal { ...this.props }
+        show={ this.state.isModalOpen && !this.state.isDemo }
         animate={true}
         bsSize={this.state.modalSize}
         onHide={ this.closeModal }
         backdrop='static'>
-          {this.state.modalHeader ?
+          { this.state.modalHeader ?
             <Modal.Header>
-              <h4>{this.state.modalHeader}</h4>
-            </Modal.Header> : {}}
+              <h4>{ this.state.modalHeader }</h4>
+            </Modal.Header> : <span />}
           <Modal.Body>
-            {this.state.modalBody}
+            { this.state.modalBody }
             { this.state.installationHelp ?
-                this.state.installHelp :
-                (!this.state.isLoading && this.state.modalHeader) &&
-                    this.state.launchStep }
+              this.state.installHelp :
+              ( !this.state.isLoading && this.state.modalHeader ) &&
+                this.state.launchStep }
           </Modal.Body>
-          {this.state.modalFooter ?
-            <Modal.Footer>
-              {this.state.modalFooter}
-            </Modal.Footer> : {}}
+          { this.state.modalFooter ?
+              <Modal.Footer>
+                {this.state.modalFooter}
+              </Modal.Footer> : <span />}
       </Modal>
     );
   }
