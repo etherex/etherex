@@ -18,6 +18,7 @@ var ConfigActions = function() {
       rangeEnd: configState.rangeEnd,
       si: configState.si,
       debug: debug,
+      error: this.flux.actions.config.failed
     };
 
     var ethereumClient = new EthereumClient(clientParams);
@@ -65,7 +66,8 @@ var ConfigActions = function() {
             address: configState.address,
             range: configs.range,
             rangeEnd: configs.rangeEnd,
-            debug: configs.debug
+            debug: configs.debug,
+            error: this.flux.actions.config.failed
           };
           ethereumClient = new EthereumClient(clientParams);
 
@@ -178,6 +180,12 @@ var ConfigActions = function() {
     // this.flux.actions.market.updateMarkets();
     this.flux.actions.market.reloadPrices();
     this.flux.actions.market.reloadTransactions();
+  };
+
+  this.failed = function(error) {
+    this.dispatch(constants.market.LOAD_MARKETS_FAIL, {
+      error: error
+    });
   };
 
   this.initializeState = function() {
