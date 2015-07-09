@@ -20,16 +20,18 @@ var NetworkActions = function() {
     var wasDown = (!networkState.ethereumStatus || networkState.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED);
 
     if (!nowUp) {
+      // Reset our web3 filters
+      this.flux.actions.network.reset();
+
+      // Put trades in loading state
+      this.dispatch(constants.trade.LOAD_TRADES);
+
       this.dispatch( constants.network.UPDATE_ETHEREUM_STATUS, {
         ethereumStatus: constants.network.ETHEREUM_STATUS_FAILED
       });
       this.dispatch(constants.network.UPDATE_READY, {
         ready: false
       });
-      this.flux.actions.network.reset(); // need stopPolling() instead
-
-      // Put trades in loading state
-      this.dispatch(constants.trade.LOAD_TRADES);
     }
     else if (wasDown && nowUp) {
       this.dispatch( constants.network.UPDATE_ETHEREUM_STATUS, {
@@ -37,14 +39,22 @@ var NetworkActions = function() {
       });
       this.flux.actions.network.initializeNetwork();
       this.flux.actions.network.updateBlockchain(false); // sync
+
+      // TODO Reload our filters
+      this.flux.actions.config.updateEthereumClient();
+      // Watch new blocks / reset filter
+      // if (!ethereumClient.filters.blocks)
+      ethereumClient.watchNewBlock(this.flux.actions.network.onNewBlock);
     }
 
     if (nowUp) {
       this.flux.actions.network.updateBlockchain(true); // async
+      this.flux.actions.network.updatePeerCount();
 
       var timeOut = this.flux.store('config').getState().timeout;
 
       if (networkState.blockChainAge > timeOut) {
+
         // Put trades in loading state if network is no longer ready
         if (networkState.ready || networkState.ready === null) {
           this.dispatch(constants.trade.LOAD_TRADES);
@@ -57,11 +67,9 @@ var NetworkActions = function() {
           percentLoaded: (timeOut / networkState.blockChainAge) * 100
         });
 
-        // Load user addresses if they weren't, update balance otherwise
+        // Load user addresses if they weren't
         if (!this.flux.store("UserStore").getState().user.addresses.length)
           this.flux.actions.user.loadAddresses(false);
-        else
-          this.flux.actions.user.updateBalance();
       }
       else if (networkState.blockChainAge && networkState.blockChainAge <= timeOut) {
         if (!networkState.ready || wasDown) {
@@ -130,6 +138,14 @@ var NetworkActions = function() {
     }.bind(this));
   };
 
+  this.updatePeerCount = function () {
+    var ethereumClient = this.flux.store('config').getEthereumClient();
+
+    ethereumClient.getPeerCount(function(peerCount) {
+      this.dispatch(constants.network.UPDATE_NETWORK, { peerCount: peerCount });
+    }.bind(this));
+  };
+
   this.updateNetwork = function () {
     var ethereumClient = this.flux.store('config').getEthereumClient();
 
@@ -156,49 +172,44 @@ var NetworkActions = function() {
   this.onNewBlock = function (error, log) {
     if (this.flux.store('config').getState().debug)
       utils.log("GOT BLOCK", log);
-    this.flux.actions.user.updateBalance();
-    this.flux.actions.user.updateBalanceSub();
+
     this.flux.actions.network.updateBlockchain(true);
+
+    var user = this.flux.store("UserStore").getState().user;
+    if (user.addresses)
+      this.flux.actions.user.updateBalance();
+    // this.flux.actions.user.updateBalanceSub();
   };
+
+  // TODO ???
+  // this.setWatchers = function (error, log) {
+  //
+  // };
 
   this.startMonitoring = function () {
     var networkState = this.flux.store('network').getState();
 
-    if (!networkState.isMonitoringBlocks) {
-      var ethereumClient = this.flux.store('config').getEthereumClient();
-      ethereumClient.onNewBlock(this.flux.actions.network.onNewBlock);
-
+    if (!networkState.isMonitoring) {
       this.dispatch(constants.network.UPDATE_IS_MONITORING_BLOCKS, {
-        isMonitoringBlocks: true
+        isMonitoring: true
       });
-    }
-  };
 
-  this.stopMonitoring = function (error) {
-    var networkState = this.flux.store('network').getState();
-
-    if (networkState.isMonitoringBlocks) {
-      var ethereumClient = this.flux.store('config').getEthereumClient();
-      ethereumClient.stopMonitoring(error);
-
-      this.dispatch(constants.network.UPDATE_IS_MONITORING_BLOCKS, {
-        isMonitoringBlocks: false
-      });
+      // Start network checking loop
+      this.flux.actions.network.checkNetwork();
     }
   };
 
   this.reset = function() {
     var ethereumClient = this.flux.store('config').getEthereumClient();
     ethereumClient.reset();
+
+    // Restart monitoring
     this.flux.actions.network.startMonitoring();
   };
 
   this.initializeNetwork = function() {
     this.flux.actions.network.updateClientInfo();
     this.flux.actions.network.updateNetwork();
-
-    // start monitoring for updates
-    this.flux.actions.network.startMonitoring();
   };
 };
 

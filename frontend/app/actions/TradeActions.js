@@ -20,6 +20,16 @@ var TradeActions = function() {
         }.bind(this));
     };
 
+    this.loadTrade = function(id, market) {
+        var _client = this.flux.store('config').getEthereumClient();
+
+        _client.loadTrade(id, market, this.flux.actions.trade.updateProgress, function(trade) {
+            this.dispatch(constants.trade.LOAD_TRADE, trade);
+        }.bind(this), function(error) {
+            this.dispatch(constants.trade.LOAD_TRADES_FAIL, {error: error});
+        }.bind(this));
+    };
+
     this.loadTrades = function(trade_ids) {
         if (this.flux.store('config').getState().debug)
           console.count("loadTrades triggered");
@@ -33,11 +43,11 @@ var TradeActions = function() {
             this.flux.actions.trade.loadTrade(trade_ids[i], market);
     };
 
-    this.loadTrade = function(id, market) {
+    this.updateTrade = function(id, market) {
         var _client = this.flux.store('config').getEthereumClient();
 
-        _client.loadTrade(id, market, this.flux.actions.trade.updateProgress, function(trade) {
-            this.dispatch(constants.trade.LOAD_TRADE, trade);
+        _client.loadTrade(id, market, false, function(trade) {
+            this.dispatch(constants.trade.UPDATE_TRADE, trade);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.LOAD_TRADES_FAIL, {error: error});
         }.bind(this));
@@ -57,7 +67,7 @@ var TradeActions = function() {
             this.dispatch(constants.trade.LOAD_TRADE_IDS, trade_ids);
 
             for (var i = trade_ids.length - 1; i >= 0; i--)
-                this.flux.actions.trade.loadTrade(trade_ids[i], market);
+                this.flux.actions.trade.updateTrade(trade_ids[i], market);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.LOAD_TRADE_IDS_FAIL, {error: error});
         }.bind(this));
@@ -106,7 +116,7 @@ var TradeActions = function() {
             this.flux.actions.trade.tradesLoaded();
     };
 
-    this.updateMessage = function(payload) {
+    this.updateConfirmMessage = function(payload) {
       this.dispatch(constants.trade.UPDATE_TRADES_MESSAGE, payload);
     };
 

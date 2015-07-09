@@ -25,6 +25,7 @@ var MarketStore = Fluxxor.createStore({
             constants.market.LOAD_MARKETS_FAIL, this.onLoadMarketsFail,
             constants.market.LOAD_MARKETS_SUCCESS, this.onLoadMarketsSuccess,
             constants.market.LOAD_MARKETS_PROGRESS, this.onLoadMarketsProgress,
+            constants.market.UPDATE_LAST_PRICE, this.onUpdateLastPrice,
             constants.market.UPDATE_MARKET, this.onUpdateMarket,
             constants.market.UPDATE_MARKETS, this.onUpdateMarkets,
             constants.market.UPDATE_MARKET_BALANCE, this.onUpdateMarketBalance,
@@ -130,6 +131,12 @@ var MarketStore = Fluxxor.createStore({
 
     onReloadPrices: function() {
         this.market.prices = [];
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onUpdateLastPrice: function(payload) {
+        this.market.lastPrice = payload.price;
+        this.market.total_trades += 1;
         this.emit(constants.CHANGE_EVENT);
     },
 

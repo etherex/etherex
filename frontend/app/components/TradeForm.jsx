@@ -243,7 +243,7 @@ var SplitTradeForm = React.createClass({
     }
 
     if (!init)
-      this.props.flux.actions.trade.updateMessage({
+      this.props.flux.actions.trade.updateConfirmMessage({
         note: note,
         message: message
       });

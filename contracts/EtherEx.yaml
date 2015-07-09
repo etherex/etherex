@@ -16,7 +16,7 @@
     EtherEx:
       contract: etherex.se
       gas: 3000000
-      retry: 60
+      retry: 90
       wait: True
       # endowment: 1000000000000000000
 -

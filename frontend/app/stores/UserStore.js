@@ -20,7 +20,6 @@ var UserStore = Fluxxor.createStore({
           addresses: []
         };
         this.defaultAccount = null;
-        // this.createAccount = false;
         this.loading = true;
         this.error = null;
 
@@ -127,7 +126,7 @@ var UserStore = Fluxxor.createStore({
     },
 
     onUserFail: function(payload) {
-        // console.log("ERROR: " + payload.error);
+        utils.error("ERROR: ", payload.error);
         this.loading = false;
         this.error = payload.error;
         this.emit(constants.CHANGE_EVENT);

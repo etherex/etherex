@@ -81,6 +81,7 @@ module.exports = {
         LOAD_MARKETS_FAIL: null,
         LOAD_MARKETS_SUCCESS: null,
         LOAD_MARKETS_PROGRESS: null,
+        UPDATE_LAST_PRICE: null,
         UPDATE_MARKET: null,
         UPDATE_MARKETS: null,
         UPDATE_MARKET_BALANCE: null,

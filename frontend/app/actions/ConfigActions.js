@@ -17,12 +17,13 @@ var ConfigActions = function() {
       range: configState.range,
       rangeEnd: configState.rangeEnd,
       si: configState.si,
-      debug: debug
+      debug: debug,
+      flux: this.flux
     };
 
     var ethereumClient = new EthereumClient(clientParams);
 
-    // Reload range configs from client on first run
+    // Reload configs from client on first run
     if (!configState.ethereumClient && ethereumClient.isAvailable()) {
       var configs = {
         'range': configState.range,
@@ -66,7 +67,8 @@ var ConfigActions = function() {
             range: configs.range,
             rangeEnd: configs.rangeEnd,
             debug: configs.debug,
-            error: this.flux.actions.config.failed
+            error: this.flux.actions.config.failed,
+            flux: this.flux
           };
           ethereumClient = new EthereumClient(clientParams);
 
@@ -76,6 +78,10 @@ var ConfigActions = function() {
           });
       }
     }
+    // // Transfer our previous filters to the new instance
+    // else if (ethereumClient.isAvailable()) {
+    //   // ethereumClient.filters = configState.ethereumClient.filters;
+    // }
 
     this.dispatch(constants.config.UPDATE_ETHEREUM_CLIENT_SUCCESS, {
       ethereumClient: ethereumClient
@@ -163,6 +169,7 @@ var ConfigActions = function() {
     _client.putHex('EtherEx', 'range', web3.fromDecimal(range));
 
     this.flux.actions.config.updateEthereumClient();
+
     // this.flux.actions.market.updateMarkets();
     this.flux.actions.market.reloadPrices();
     this.flux.actions.market.reloadTransactions();
@@ -176,6 +183,7 @@ var ConfigActions = function() {
     _client.putHex('EtherEx', 'rangeEnd', web3.fromDecimal(rangeEnd));
 
     this.flux.actions.config.updateEthereumClient();
+
     // this.flux.actions.market.updateMarkets();
     this.flux.actions.market.reloadPrices();
     this.flux.actions.market.reloadTransactions();
@@ -189,14 +197,14 @@ var ConfigActions = function() {
 
   this.initializeState = function() {
     this.flux.actions.config.updateEthereumClient();
-    this.flux.actions.network.checkNetwork();
+    this.flux.actions.network.startMonitoring();
   };
 
   /**
    * Load all of the application's data, particularly during initialization.
    */
   this.initializeData = function () {
-    // Trigger loading addresses, which load markets, which load trades
+    // Trigger loading addresses, which loads markets, which loads trades
     this.flux.actions.user.loadAddresses(true);
   };
 };

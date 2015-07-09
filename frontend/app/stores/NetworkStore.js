@@ -18,13 +18,13 @@ var NetworkStore = Fluxxor.createStore({
     this.mining = null;
     this.hashrate = null;
     this.blockChainAge = null;
-    this.isMonitoringBlocks = false;
+    this.isMonitoring = false;
 
     this.bindActions(
       constants.network.UPDATE_NETWORK, this.handleUpdateNetwork,
       constants.network.UPDATE_READY, this.handleUpdateReady,
       constants.network.UPDATE_ETHEREUM_STATUS, this.handleUpdateEthereumStatus,
-      constants.network.UPDATE_IS_MONITORING_BLOCKS, this.handleUpdateIsMonitoringBlocks,
+      constants.network.UPDATE_IS_MONITORING_BLOCKS, this.handleUpdateIsMonitoring,
       constants.network.UPDATE_BLOCK_CHAIN_AGE, this.handleUpdateBlockChainAge
     );
   },
@@ -44,7 +44,7 @@ var NetworkStore = Fluxxor.createStore({
       mining: this.mining,
       hashrate: this.hashrate,
       blockChainAge: this.blockChainAge,
-      isMonitoringBlocks: this.isMonitoringBlocks
+      isMonitoring: this.isMonitoring
     };
   },
 
@@ -68,8 +68,8 @@ var NetworkStore = Fluxxor.createStore({
     this.emit(constants.CHANGE_EVENT);
   },
 
-  handleUpdateIsMonitoringBlocks: function (payload) {
-    this.isMonitoringBlocks = payload.isMonitoringBlocks;
+  handleUpdateIsMonitoring: function (payload) {
+    this.isMonitoring = payload.isMonitoring;
     this.emit(constants.CHANGE_EVENT);
   }
 });

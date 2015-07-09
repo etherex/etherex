@@ -310,7 +310,7 @@ def withdraw(amount, market_id):
     return(0)
 
 #
-# Cancelation
+# Cancellation
 #
 def cancel(trade_id):
     # Get trade

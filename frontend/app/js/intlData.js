@@ -58,7 +58,7 @@ module.exports = {
         "title": "Installing and configuring Ethereum",
         "OSX": {
           "brew": `<a target="_blank" href="http://brew.sh/">Install Homebrew</a> for Mac OS`,
-          "install": `brew tap ethereum/ethereum\nbrew install ethereum --devel`,
+          "install": `brew tap ethereum/ethereum\nbrew install ethereum`,
           "link": `See also the <a href="{wiki}" target="_blank">Wiki page</a>
                   and the <a href="{brew}" target="_blank">homebrew-ethereum README</a>.`
         },

@@ -57,7 +57,7 @@
     "less-loader": "^2.2.0",
     "node-libs-browser": "^0.5.2",
     "react-bootstrap": "^0.23.7",
-    "react-hot-loader": "^1.2.7",
+    "react-hot-loader": "^1.2.8",
     "react-tools": "^0.13.3",
     "style-loader": "^0.12.3",
     "webpack": "^1.10.1",
