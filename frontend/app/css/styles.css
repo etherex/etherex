@@ -88,6 +88,30 @@ tr.disabled td {
   opacity: 0.5;
 }
 
+/* Trade animations */
+.trades-appear {
+  opacity: 0.01;
+  transition: opacity .5s ease-in;
+}
+.trades-appear.trades-appear-active {
+  opacity: 1;
+}
+
+.trades-enter {
+  opacity: 0.01;
+  transition: opacity .5s ease-in;
+}
+.trades-enter.trades-enter-active {
+  opacity: 1;
+}
+
+.trades-leave {
+  opacity: 1;
+  transition: opacity .5s ease-in;
+}
+.trades-leave.trades-leave-active {
+  opacity: 0.01;
+}
 
 /* Chart */
 .axis path,

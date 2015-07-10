@@ -32,6 +32,8 @@ var ConfigActions = function() {
         'timeout': configState.timeout,
         'debug': debug
       };
+      if (debug)
+        utils.log("CONFIGS", configs);
 
       // Load / set default configs in web3.db
       for (var key in configs) {

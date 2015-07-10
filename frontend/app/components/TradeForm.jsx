@@ -215,16 +215,23 @@ var SplitTradeForm = React.createClass({
       });
 
       // How many filling
-      note = this.formatMessage(this.getIntlMessage('trade.filling'), {
-        numTrades: this.props.trades.filling.length,
-        total: total - this.props.trades.available,
-        left: this.props.trades.available,
-        balance: this.props.trades.available
-      }) + " " +
+      note = (!this.props.trades.filling.length ?
+        this.formatMessage(this.getIntlMessage('trade.adding'), {
+          amount: this.props.trades.amountLeft,
+          currency: this.props.market.market.name,
+          price: price,
+          total: this.props.trades.amountLeft * price
+        }) :
+        this.formatMessage(this.getIntlMessage('trade.filling'), {
+          numTrades: this.props.trades.filling.length,
+          total: total - this.props.trades.available,
+          left: this.props.trades.available,
+          balance: this.props.trades.available
+        })) + " " +
 
       // Is also adding
         (this.isAlsoAdding(totalLeft) ?
-          this.formatMessage(this.getIntlMessage('trade.adding'), {
+          this.formatMessage(this.getIntlMessage('trade.also_adding'), {
             amount: this.props.trades.amountLeft,
             currency: this.props.market.market.name,
             price: price,

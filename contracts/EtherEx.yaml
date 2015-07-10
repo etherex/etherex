@@ -130,19 +130,19 @@
       sig: change_ownership:[int256]:int256
       data:
         - $zg
-      retry: 60
+      retry: 30
     SetCAKOwner:
       to: $CAK
       sig: change_ownership:[int256]:int256
       data:
         - $zg
-      retry: 60
+      retry: 30
     SetMIDOwner:
       to: $MID
       sig: change_ownership:[int256]:int256
       data:
         - $zg
-      retry: 60
+      retry: 30
       wait: True
 
 # Fill up
@@ -158,6 +158,8 @@
 #       to: $mids
 #       value: 1000000000000000000000
 #       wait: True
+
+# Transfer ETXs
 -
   transact:
     ZGetx:
@@ -166,7 +168,8 @@
       data:
         - $zg
         - 10000000000
-      retry: 60
+      retry: 30
+      wait: True
 -
   transact:
     CAKetx:
@@ -175,7 +178,8 @@
       data:
         - $caktux
         - 10000000000
-      retry: 60
+      retry: 30
+      wait: True
 -
   transact:
     MIDetx:
@@ -184,8 +188,10 @@
       data:
         - $mids
         - 10000000000
-      retry: 60
+      retry: 30
       wait: True
+
+# Transfer CAKs
 -
   transact:
     ZGcak:
@@ -194,7 +200,8 @@
       data:
         - $zg
         - 5000000000
-      retry: 60
+      retry: 30
+      wait: True
 -
   transact:
     CAKcak:
@@ -203,7 +210,8 @@
       data:
         - $caktux
         - 50000000000
-      retry: 60
+      retry: 30
+      wait: True
 -
   transact:
     MIDcak:
@@ -212,8 +220,10 @@
       data:
         - $mids
         - 5000000000
-      retry: 60
+      retry: 30
       wait: True
+
+# Transfer MIDs
 -
   transact:
     ZGetx:
@@ -222,7 +232,8 @@
       data:
         - $zg
         - 5000000000
-      retry: 60
+      retry: 30
+      wait: True
 -
   transact:
     CAKetx:
@@ -231,7 +242,8 @@
       data:
         - $caktux
         - 5000000000
-      retry: 60
+      retry: 30
+      wait: True
 -
   transact:
     MIDetx:
@@ -240,7 +252,7 @@
       data:
         - $mids
         - 50000000000
-      retry: 60
+      retry: 30
       wait: True
 
 
@@ -286,53 +298,53 @@
     trade1:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 5000000
         - 25000000
         - 1
-      retry: 60
+      retry: 30
     trade2:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 15000000
         - 25000000
         - 1
-      retry: 60
+      retry: 30
     trade3:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 25000000
         - 25000000
         - 1
-      retry: 60
+      retry: 30
     trade4:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 35000000
         - 26000000
         - 1
-      retry: 60
+      retry: 30
     trade5:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 45000000
         - 27000000
         - 1
-      retry: 60
+      retry: 30
       wait: True
     trade6:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 55000000
         - 28000000
@@ -341,7 +353,7 @@
     trade7:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 1500000
         - 29000000
@@ -350,7 +362,7 @@
     trade8:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 25000000
         - 30000000
@@ -359,7 +371,7 @@
     trade9:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 25000000
         - 31000000
@@ -368,7 +380,7 @@
     trade10:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 25000000
         - 32000000
@@ -380,7 +392,7 @@
     trade11:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 5000000
         - 24000000
@@ -390,7 +402,7 @@
     trade12:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 5000000
         - 23000000
@@ -400,7 +412,7 @@
     trade13:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 5000000
         - 22000000
@@ -410,7 +422,7 @@
     trade14:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 5000000
         - 21000000
@@ -428,7 +440,7 @@
     trade1:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 50000000
         - 25
@@ -437,7 +449,7 @@
     trade2:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 150000000
         - 26
@@ -446,7 +458,7 @@
     trade3:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 250000000
         - 27
@@ -455,7 +467,7 @@
     trade4:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 350000000
         - 28
@@ -464,7 +476,7 @@
     trade5:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 450000000
         - 29
@@ -473,7 +485,7 @@
     trade6:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 550000000
         - 30
@@ -485,7 +497,7 @@
     trade11:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 5000000
         - 24
@@ -495,7 +507,7 @@
     trade12:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 5000000
         - 23
@@ -505,7 +517,7 @@
     trade13:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 5000000
         - 22
@@ -515,7 +527,7 @@
     trade14:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 5000000
         - 21
@@ -532,7 +544,7 @@
     trade1:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 50000000
         - 25
@@ -541,7 +553,7 @@
     trade2:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 150000000
         - 26
@@ -550,7 +562,7 @@
     trade3:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 250000000
         - 27
@@ -559,7 +571,7 @@
     trade4:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 350000000
         - 28
@@ -568,7 +580,7 @@
     trade5:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 450000000
         - 29
@@ -577,7 +589,7 @@
     trade6:
       to: $EtherEx
       sig: sell:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 550000000
         - 30
@@ -589,7 +601,7 @@
     trade11:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 5000000
         - 24
@@ -599,7 +611,7 @@
     trade12:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 5000000
         - 23
@@ -609,7 +621,7 @@
     trade13:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 5000000
         - 22
@@ -619,7 +631,7 @@
     trade14:
       to: $EtherEx
       sig: buy:[int256,int256,int256]:int256
-      gas: 500000
+      gas: 350000
       data:
         - 5000000
         - 21

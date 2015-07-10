@@ -35,6 +35,7 @@ module.exports = {
         UPDATE_TRADES_MESSAGE: null,
         CHECK_PENDING: null,
         ADD_TRADE: null,
+        ADD_TRADE_SUCCESS: null,
         ADD_TRADE_FAIL: null,
         FILL_TRADE: null,
         FILL_TRADE_FAIL: null,

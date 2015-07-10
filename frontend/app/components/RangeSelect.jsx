@@ -79,7 +79,7 @@ var RangeSelect = React.createClass({
         block: block,
         live: "active"
       });
-      this.props.flux.actions.config.updateRangeEnd(false);
+      this.props.flux.actions.config.updateRangeEnd(0);
     }
     else {
       this.setState({

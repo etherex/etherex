@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
+// var ReactIntl = require('react-intl');
+// var IntlMixin = ReactIntl.IntlMixin;
 
 var Button = require("react-bootstrap/lib/Button");
 var Glyphicon = require("react-bootstrap/lib/Glyphicon");
@@ -9,7 +9,7 @@ var Glyphicon = require("react-bootstrap/lib/Glyphicon");
 var utils = require("../js/utils");
 
 var TradeRow = React.createClass({
-  mixins: [IntlMixin],
+  // mixins: [IntlMixin],
 
   getInitialState: function() {
     return {

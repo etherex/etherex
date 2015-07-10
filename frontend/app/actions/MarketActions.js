@@ -59,71 +59,70 @@ var MarketActions = function() {
     var user = this.flux.store("UserStore").getState().user;
     var state = this.flux.store("MarketStore").getState();
 
-    _client.loadMarket(id, user, init, init ? this.flux.actions.market.updateProgress : false, state.favorites, function(market) {
+    _client.loadMarket(id, user, state.favorites, function(market) {
       this.dispatch(constants.market.LOAD_MARKET, market);
-      if (!init)
+
+      // TODO this shouldn't be needed...
+      this.flux.actions.market.loadMarketBalances(market);
+
+      // Watch prices
+      _client.watchPrices(market, this.flux.actions.market.updatePrices, function(error) {
+        this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
+      }.bind(this));
+
+      // Watch transactions / trades
+      var user = this.flux.store("UserStore").getState().user;
+      _client.watchTransactions(user, market, this.flux.actions.market.updateTransactions, function(error) {
+        this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
+      }.bind(this));
+
+      if (init)
+        this.flux.actions.market.updateProgress(init);
+      else
         this.dispatch(constants.market.UPDATE_MARKET, market);
+
     }.bind(this), function(error) {
       this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
     }.bind(this));
   };
 
+  this.updateMarket = function() {
+    if (this.flux.store('config').getState().debug)
+      console.count("updateMarket triggered");
+
+    var id = this.flux.store("MarketStore").getState().market.id;
+    this.flux.actions.market.loadMarket(id, false);
+  };
+
   this.marketsLoaded = function(init) {
-      if (init && this.flux.store('config').getState().debug)
-        utils.log("Markets", "loaded");
+    if (init && this.flux.store('config').getState().debug)
+      utils.log("Markets", "loaded");
 
-      var _client = this.flux.store('config').getEthereumClient();
+    this.dispatch(constants.market.LOAD_MARKETS_SUCCESS);
 
-      this.dispatch(constants.market.LOAD_MARKETS_SUCCESS);
+    this.flux.actions.user.updateBalanceSub();
 
-      // Load user sub balances
-      this.flux.actions.user.updateBalanceSub();
+    var market = this.flux.store("MarketStore").getState().market;
 
-      // Update user's market balances
-      this.flux.actions.market.updateMarketsBalances();
-
-      var marketsState = this.flux.store("MarketStore").getState();
-
-      // Load trades
-      if (init)
-        this.flux.actions.trade.loadTradeIDs(marketsState.market, true);
-      else
-        this.flux.actions.trade.updateTrades();
-
-      // Watch price changes
-      var market = this.flux.store("MarketStore").getState().market;
-      _client.watchPrices(market, this.flux.actions.market.updatePrices, function(error) {
-        this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
-      }.bind(this));
-
-      // Watch transactions
-      var user = this.flux.store("UserStore").getState().user;
-      _client.watchTransactions(user, market, this.flux.actions.market.updateTransactions);
+    // Load trades
+    if (init)
+      this.flux.actions.trade.loadTradeIDs(market, true);
+    else
+      this.flux.actions.trade.updateTrades();
   };
 
   this.loadMarketBalances = function(market) {
-      var _client = this.flux.store('config').getEthereumClient();
-      var user = this.flux.store("UserStore").getState().user;
+    var _client = this.flux.store('config').getEthereumClient();
+    var user = this.flux.store("UserStore").getState().user;
 
-      _client.updateBalanceSub(market, user.id, function(market, available, trading, balance) {
-          this.flux.actions.market.updateMarketBalances(market, available, trading, balance);
-      }.bind(this), function(error) {
-          this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
-      }.bind(this));
-  };
-
-  this.updateMarketsBalances = function() {
-    if (this.flux.store('config').getState().debug)
-      console.count("updateMarketsBalances triggered");
-
-    // Load per market balances
-    var markets = this.flux.store("MarketStore").getState().markets;
-    for (var i = 0; i < markets.length; i++)
-      this.flux.actions.market.loadMarketBalances(markets[i]);
+    _client.updateBalanceSub(market, user.id, function(market, available, trading, balance) {
+        this.flux.actions.market.updateMarketBalances(market, available, trading, balance);
+    }.bind(this), function(error) {
+        this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
+    }.bind(this));
   };
 
   this.updateMarketBalances = function(market, available, trading, balance) {
-    // console.log(market.name, available, trading, balance);
     this.dispatch(constants.market.UPDATE_MARKET_BALANCE, {
       market: market,
       balance: {
@@ -147,12 +146,13 @@ var MarketActions = function() {
       this.flux.actions.market.marketsLoaded(init);
   };
 
-  this.updateMarket = function() {
-    if (this.flux.store('config').getState().debug)
-      console.count("updateMarket triggered");
-
-    var id = this.flux.store("MarketStore").getState().market.id;
-    this.flux.actions.market.loadMarket(id, false);
+  this.updateLastPrice = function(market_id, price) {
+    var market = this.flux.store("MarketStore").getState().market;
+    if (market_id == market.id) {
+      this.dispatch(constants.market.UPDATE_LAST_PRICE, {
+        price: price
+      });
+    }
   };
 
   this.switchMarket = function(market) {
@@ -164,16 +164,16 @@ var MarketActions = function() {
     _client.putHex('EtherEx', 'market', web3.fromDecimal(market.id));
 
     // Update sub balance
-    this.flux.actions.user.updateBalanceSub();
-
-    // Switch market's trades
-    this.flux.actions.trade.switchMarket(market);
+    this.flux.actions.user.updateBalanceSub(market);
 
     // Reload and watch price changes
     this.flux.actions.market.reloadPrices();
 
     // Reload and watch transactions
     this.flux.actions.market.reloadTransactions();
+
+    // Switch market's trades
+    this.flux.actions.trade.switchMarket(market);
   };
 
   this.registerMarket = function(market) {
@@ -187,22 +187,15 @@ var MarketActions = function() {
     }.bind(this));
   };
 
-  this.updateLastPrice = function(market_id, price) {
-    var market = this.flux.store("MarketStore").getState().market;
-    if (market_id == market.id) {
-      this.dispatch(constants.market.UPDATE_LAST_PRICE, {
-        price: price
-      });
-    }
-  };
-
   this.reloadPrices = function() {
     var _client = this.flux.store('config').getEthereumClient();
 
     this.dispatch(constants.market.RELOAD_PRICES);
 
     var market = this.flux.store("MarketStore").getState().market;
-    _client.watchPrices(market, this.flux.actions.market.updatePrices);
+    _client.watchPrices(market, this.flux.actions.market.updatePrices, function(error) {
+      this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
+    }.bind(this));
 
     this.dispatch(constants.market.UPDATE_PRICES_DATA);
   };
@@ -219,7 +212,9 @@ var MarketActions = function() {
 
     var user = this.flux.store("UserStore").getState().user;
     var market = this.flux.store("MarketStore").getState().market;
-    _client.watchTransactions(user, market, this.flux.actions.market.updateTransactions);
+    _client.watchTransactions(user, market, this.flux.actions.market.updateTransactions, function(error) {
+      this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
+    }.bind(this));
   };
 
   this.updateTransactions = function(tx) {

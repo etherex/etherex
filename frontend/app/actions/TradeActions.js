@@ -23,6 +23,11 @@ var TradeActions = function() {
     this.loadTrade = function(id, market) {
         var _client = this.flux.store('config').getEthereumClient();
 
+        // TODO not sure about this...
+        var trades = this.flux.store("TradeStore").getState();
+        if (trades.error)
+          this.flux.actions.trade.tradesLoaded();
+
         _client.loadTrade(id, market, this.flux.actions.trade.updateProgress, function(trade) {
             this.dispatch(constants.trade.LOAD_TRADE, trade);
         }.bind(this), function(error) {
@@ -44,6 +49,9 @@ var TradeActions = function() {
     };
 
     this.updateTrade = function(id, market) {
+        if (this.flux.store('config').getState().debug)
+          console.count("updateTrade triggered");
+
         var _client = this.flux.store('config').getEthereumClient();
 
         _client.loadTrade(id, market, false, function(trade) {
@@ -53,25 +61,26 @@ var TradeActions = function() {
         }.bind(this));
     };
 
-    this.updateTrades = function() {
-        if (this.flux.store('config').getState().debug)
-          console.count("updateTrades triggered");
-
-        var _client = this.flux.store('config').getEthereumClient();
-
-        this.dispatch(constants.trade.UPDATE_TRADES);
-
-        var market = this.flux.store("MarketStore").getState().market;
-
-        _client.loadTradeIDs(market, function(trade_ids) {
-            this.dispatch(constants.trade.LOAD_TRADE_IDS, trade_ids);
-
-            for (var i = trade_ids.length - 1; i >= 0; i--)
-                this.flux.actions.trade.updateTrade(trade_ids[i], market);
-        }.bind(this), function(error) {
-            this.dispatch(constants.trade.LOAD_TRADE_IDS_FAIL, {error: error});
-        }.bind(this));
-    };
+    // TODO Obsolete, or put on a timer to reload trades from fresh once in a while?
+    // this.updateTrades = function() {
+    //     if (this.flux.store('config').getState().debug)
+    //       console.count("updateTrades triggered");
+    //
+    //     var _client = this.flux.store('config').getEthereumClient();
+    //
+    //     this.dispatch(constants.trade.UPDATE_TRADES);
+    //
+    //     var market = this.flux.store("MarketStore").getState().market;
+    //
+    //     _client.loadTradeIDs(market, function(trade_ids) {
+    //         this.dispatch(constants.trade.LOAD_TRADE_IDS, trade_ids);
+    //
+    //         for (var i = trade_ids.length - 1; i >= 0; i--)
+    //             this.flux.actions.trade.updateTrade(trade_ids[i], market);
+    //     }.bind(this), function(error) {
+    //         this.dispatch(constants.trade.LOAD_TRADE_IDS_FAIL, {error: error});
+    //     }.bind(this));
+    // };
 
     this.tradesLoaded = function() {
         this.dispatch(constants.trade.UPDATE_TRADES_SUCCESS);
@@ -133,29 +142,46 @@ var TradeActions = function() {
         var markets = this.flux.store("MarketStore").getState().markets;
         var index = _.findIndex(markets, {'id': trade.market});
 
-        // console.log("ON MARKET: " + market.name, "ADD_TRADE", trade);
-        trade.id = _.uniqueId(); // result;
-        trade.status = "new";
-
         var payload = {
-            id: trade.id,
+            id: _.uniqueId(),
             type: (trade.type == 1) ? 'buys' : 'sells',
             price: trade.price,
             amount: trade.amount,
             total: trade.amount * trade.price,
             market: markets[index],
             owner: user.id,
-            status: trade.status
+            status: "new"
         };
 
         this.dispatch(constants.trade.ADD_TRADE, payload);
 
         _client.addTrade(user, trade, markets[index], function(result) {
-            utils.log("ADD_TRADE_RESULT", result);
+            if (this.flux.store('config').getState().debug)
+              utils.log("ADD_TRADE_RESULT", result);
+
+            payload.hash = trade.hash;
             payload.status = "pending";
             this.dispatch(constants.trade.UPDATE_TRADE, payload);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.ADD_TRADE_FAIL, {error: error});
+        }.bind(this));
+    };
+
+    this.addTradeSuccess = function(id, market) {
+        if (this.flux.store('config').getState().debug)
+          console.count("addTradeSuccess triggered");
+
+        var _client = this.flux.store('config').getEthereumClient();
+
+        _client.loadTrade(id, market, false, function(trade) {
+            var trades = this.flux.store("TradeStore").trades;
+            var isLoaded = _.find(trades.buys, { id: id }) || _.find(trades.sells, { id: id }) ;
+            if (!isLoaded)
+              this.dispatch(constants.trade.ADD_TRADE_SUCCESS, trade);
+            else
+              this.dispatch(constants.trade.UPDATE_TRADE, trade);
+        }.bind(this), function(error) {
+            this.dispatch(constants.trade.LOAD_TRADES_FAIL, {error: error});
         }.bind(this));
     };
 
@@ -166,7 +192,9 @@ var TradeActions = function() {
         var market = this.flux.store("MarketStore").getState().market;
 
         _client.fillTrades(user, trades, market, function(result) {
-            utils.log("FILL_TRADES_RESULT", result);
+            if (this.flux.store('config').getState().debug)
+              utils.log("FILL_TRADES_RESULT", result);
+
             var trade = this.flux.store("TradeStore").getState();
 
             // Partial filling adds a new trade for remaining available
@@ -193,7 +221,9 @@ var TradeActions = function() {
         var market = this.flux.store("MarketStore").getState().market;
 
         _client.fillTrade(user, trade, market, function(result) {
-            utils.log("FILL_TRADE_RESULT", result);
+            if (this.flux.store('config').getState().debug)
+              utils.log("FILL_TRADE_RESULT", result);
+
             this.dispatch(constants.trade.FILL_TRADE, trade);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.FILL_TRADE_FAIL, {error: error});
@@ -205,7 +235,8 @@ var TradeActions = function() {
 
         var user = this.flux.store("UserStore").getState().user;
         _client.cancelTrade(user, trade, function(result) {
-            utils.log("CANCEL_RESULT", result);
+            if (this.flux.store('config').getState().debug)
+              utils.log("CANCEL_RESULT", result);
             this.dispatch(constants.trade.CANCEL_TRADE, trade);
         }.bind(this), function(error) {
             this.dispatch(constants.trade.CANCEL_TRADE_FAIL, {error: error});
@@ -221,9 +252,13 @@ var TradeActions = function() {
         this.dispatch(constants.trade.ESTIMATE_GAS);
 
         _client.estimateAddTrade(user, trade, market, function(result) {
-            // utils.log("RESULT", result);
+            if (this.flux.store('config').getState().debug)
+              utils.log("ESTIMATE RESULT", result);
+
             var gasprice = this.flux.store('network').getState().gasPrice;
-            // utils.log("GASPRICE", gasprice);
+            if (this.flux.store('config').getState().debug)
+              utils.log("GASPRICE", gasprice);
+
             var estimate = "N/A";
             if (result && gasprice) {
               var total = bigRat(gasprice.toString()).multiply(result);
@@ -244,9 +279,12 @@ var TradeActions = function() {
         this.dispatch(constants.trade.ESTIMATE_GAS);
 
         _client.estimateFillTrades(user, trades, market, function(result) {
-            // utils.log("RESULT", result);
+            if (this.flux.store('config').getState().debug)
+              utils.log("ESTIMATE RESULT", result);
+
             var gasprice = this.flux.store('network').getState().gasPrice;
-            // utils.log("GASPRICE", gasprice);
+            if (this.flux.store('config').getState().debug)
+              utils.log("GASPRICE", gasprice);
             var estimate = "N/A";
             if (result && gasprice) {
               var total = bigRat(gasprice.toString()).multiply(result);

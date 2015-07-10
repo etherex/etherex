@@ -194,18 +194,27 @@ module.exports = {
                     buy {buy}
                     sell {sell}
                   } {amount, number} {currency} at {price, number} {currency}/ETH for {total, number} ETH?`,
+      "adding": `You will be adding a new trade of {amount, number} {currency}
+                  at {price, number} {currency}/ETH for {total, number} ETH.`,
       "filling": `You will be filling
                   {numTrades, plural, =1 {one trade} other {# trades}}
                   for a total of {total, number} ETH
                   {left, plural,
                     =0 {}
                     other {({balance, number} ETH left going in your pocket)}}.`,
-      "adding": `You will also be adding a new trade of {amount, number} {currency}
-                  at {price, number} {currency}/ETH for {total, number} ETH.`,
+      "also_adding": `You will also be adding a new trade of {amount, number} {currency}
+                      at {price, number} {currency}/ETH for {total, number} ETH.`,
       "not_left": `Not enough left for a new trade with {amount, number} for {total, number} ETH.`,
       "minimum": `Minimum total is {minimum, number} ETH`,
       "not_total": `Not enough ETH for this trade, {minimum, number} ETH required.`,
       "not_enough": `Not enough {currency} for this trade, {amount, number} {currency} required.`
+    },
+    "tradelist": {
+      "market": "Market",
+      "amount": "Amount",
+      "price": "Price",
+      "total": "Total",
+      "owner": "By"
     },
     "user": {
       "not_found": "User not found",

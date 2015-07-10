@@ -2,6 +2,8 @@ var _ = require('lodash');
 var React = require("react");
 var ReactIntl = require('react-intl');
 var IntlMixin = ReactIntl.IntlMixin;
+// var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+var TransitionGroup = require('./TransitionGroup');
 
 var Table = require("react-bootstrap/lib/Table");
 var TradeRow = require("./TradeRow");
@@ -9,16 +11,12 @@ var TradeRow = require("./TradeRow");
 var TradeTable = React.createClass({
   mixins: [IntlMixin],
 
-  getInitialState: function() {
-    return {
-      tradeRows: null
-    };
-  },
-
   render: function() {
     var index = _.findIndex(this.props.market.markets, {'id': this.props.market.market.id});
     var market = this.props.market.markets[index];
     var tradeRows = this.props.tradeList.map(function (trade, i) {
+      if (!trade)
+        return;
       return (
         <TradeRow
           flux={this.props.flux} key={trade.id} count={i} type={this.props.type}
@@ -44,9 +42,9 @@ var TradeTable = React.createClass({
               <th className="text-center trade-op"></th>
             </tr>
           </thead>
-          <tbody>
+          <TransitionGroup transitionName="trades" component="tbody" enterTimeout={1000} leaveTimeout={1000}>
             {tradeRows}
-          </tbody>
+          </TransitionGroup>
         </Table>
       </div>
     );

@@ -60,8 +60,8 @@ var UserActions = function() {
 
     this.flux.actions.user.updateBalance();
     this.flux.actions.user.updateBalanceSub();
-    // this.flux.actions.market.updateMarketsBalances();
-    // this.flux.actions.market.reloadTransactions();
+
+    this.flux.actions.market.reloadTransactions();
   };
 
   this.updateBalance = function() {
@@ -87,16 +87,20 @@ var UserActions = function() {
 
     var user = this.flux.store("UserStore").getState().user;
 
+    var currentMarket = this.flux.store("MarketStore").getState().market;
     if (!market)
-      market = this.flux.store("MarketStore").getState().market;
+      market = currentMarket;
 
     _client.updateBalanceSub(market, user.id, function(market, available, trading, balance) {
-      this.dispatch(constants.user.UPDATE_BALANCE_SUB, {
-          available: available,
-          trading: trading,
-          balance: balance
-      });
+        if (market.id == currentMarket.id)
+          this.dispatch(constants.user.UPDATE_BALANCE_SUB, {
+              available: available,
+              trading: trading,
+              balance: balance
+          });
+
       this.flux.actions.market.updateMarketBalances(market, available, trading, balance);
+
     }.bind(this), function(error) {
       this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});
     }.bind(this));
@@ -110,7 +114,8 @@ var UserActions = function() {
     this.dispatch(constants.user.SEND_ETHER, payload);
 
     _client.sendEther(user, payload.amount, payload.recipient, function(result) {
-      utils.log("SEND_ETHER_RESULT", result);
+      if (this.flux.store('config').getState().debug)
+        utils.log("SEND_ETHER_RESULT", result);
       this.flux.actions.user.updateBalance();
     }.bind(this), function(error) {
       this.dispatch(constants.user.SEND_ETHER_FAIL, {error: error});
@@ -128,7 +133,8 @@ var UserActions = function() {
     this.dispatch(constants.user.SEND_SUB, { amount: amount });
 
     _client.sendSub(user, amount, payload.recipient, market, function(result) {
-      utils.log("SEND_SUB_RESULT", result);
+      if (this.flux.store('config').getState().debug)
+        utils.log("SEND_SUB_RESULT", result);
     }.bind(this), function(error) {
       this.dispatch(constants.user.SEND_SUB_FAIL, {error: error});
     }.bind(this));
@@ -145,7 +151,8 @@ var UserActions = function() {
     this.dispatch(constants.user.DEPOSIT, { amount: amount });
 
     _client.depositSub(user, amount, market, function(result) {
-      utils.log("DEPOSIT_RESULT", result);
+      if (this.flux.store('config').getState().debug)
+        utils.log("DEPOSIT_RESULT", result);
     }.bind(this), function(error) {
       this.dispatch(constants.user.DEPOSIT_FAIL, {error: error});
     }.bind(this));
@@ -162,7 +169,8 @@ var UserActions = function() {
     this.dispatch(constants.user.WITHDRAW, { amount: amount });
 
     _client.withdrawSub(user, amount, market, function(result) {
-      utils.log("WITHDRAW_RESULT", result);
+      if (this.flux.store('config').getState().debug)
+        utils.log("WITHDRAW_RESULT", result);
     }.bind(this), function(error) {
       this.dispatch(constants.user.WITHDRAW_FAIL, {error: error});
     }.bind(this));
