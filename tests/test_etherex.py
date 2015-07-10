@@ -238,9 +238,11 @@ class TestEtherEx(object):
         self.test_deposit_to_exchange()
 
         assert o == [{
+            '_event_type': 'log_market', 'id': 1
+        }, {
             "_event_type": "log_deposit",
-            "sender": int("0x" + self.ALICE['address'], 16),
             "market": 1,
+            "sender": int("0x" + self.ALICE['address'], 16),
             "amount": 10000 * 10 ** 5
         }]
         self.state.revert(snapshot)
@@ -567,47 +569,52 @@ class TestEtherEx(object):
         last_timestamp = self.state.block.timestamp
 
         assert o == [{
+            '_event_type': 'log_market', 'id': 1
+        }, {
             '_event_type': 'log_add_tx',
+            'market': 1,
             'sender': 745948140856946866108753121277737810491401257713L,
+            'type': 1,
             'amount': 50000000,
-            'market': 1,
             'price': 25000000,
-            'type': 1
+            'tradeid': 23490291715255176443338864873375620519154876621682055163056454432194948412040L
         }, {
             '_event_type': 'log_add_tx',
+            'market': 1,
+            'sender': 745948140856946866108753121277737810491401257713L,
+            'type': 1,
+            'price': 25000000,
             'amount': 60000000,
-            'market': 1,
-            'price': 25000000,
-            'sender': 745948140856946866108753121277737810491401257713L,
-            'type': 1
+            'tradeid': -35168633768494065610302920664120686116555617894816459733689825088489895266148L
         }, {
             '_event_type': 'log_add_tx',
-            'amount': 70000000,
             'market': 1,
-            'price': 25000000,
             'sender': 745948140856946866108753121277737810491401257713L,
-            'type': 1
+            'type': 1,
+            'price': 25000000,
+            'amount': 70000000,
+            'tradeid': 38936224262371094519907212029104196662516973526369593745812124922634258039407L
         }, {
             '_event_type': 'log_deposit',
-            'amount': 1000000000,
             'market': 1,
-            'sender': 715574669332965331462488905126228088406116900462L
+            'sender': 715574669332965331462488905126228088406116900462L,
+            'amount': 1000000000
         }, {
             '_event_type': 'log_fill_tx',
-            'amount': 50000000,
             'market': 1,
-            'owner': 745948140856946866108753121277737810491401257713L,
-            'price': 25000000,
             'sender': 715574669332965331462488905126228088406116900462L,
-            'tradeid': 23490291715255176443338864873375620519154876621682055163056454432194948412040L,
-            'type': 2
+            'owner': 745948140856946866108753121277737810491401257713L,
+            'type': 2,
+            'price': 25000000,
+            'amount': 50000000,
+            'tradeid': 23490291715255176443338864873375620519154876621682055163056454432194948412040L
         }, {
             '_event_type': 'log_price',
-            'amount': 50000000,
             'market': 1,
+            'type': 1,
             'price': 25000000,
-            'timestamp': long(last_timestamp),
-            'type': 1
+            'amount': 50000000,
+            'timestamp': last_timestamp
         }]
         self.state.revert(snapshot)
 

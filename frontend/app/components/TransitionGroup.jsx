@@ -127,7 +127,8 @@ var TimeoutTransitionGroupChild = React.createClass({
 
             // Usually this optional callback is used for informing an owner of
             // a leave animation and telling it to remove the child.
-            finishCallback && finishCallback();
+            if (finishCallback)
+                finishCallback();
         };
 
         if (!animationSupported()) {
