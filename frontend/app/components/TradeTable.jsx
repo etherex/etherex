@@ -15,8 +15,6 @@ var TradeTable = React.createClass({
     var index = _.findIndex(this.props.market.markets, {'id': this.props.market.market.id});
     var market = this.props.market.markets[index];
     var tradeRows = this.props.tradeList.map(function (trade, i) {
-      if (!trade)
-        return;
       return (
         <TradeRow
           flux={this.props.flux} key={trade.id} count={i} type={this.props.type}

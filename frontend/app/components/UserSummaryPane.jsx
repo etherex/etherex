@@ -31,7 +31,7 @@ var UserSummaryPane = React.createClass({
                 <td><FormattedMessage message={this.getIntlMessage('user.address')} /></td>
                 <td>
                   <samp>
-                    {this.props.user.user.id != "loading..." ?
+                    {!this.props.user.loading ?
                       this.props.user.user.id.substr(2) :
                       <FormattedMessage message={this.getIntlMessage('loading')} />}
                   </samp>
@@ -59,9 +59,10 @@ var UserSummaryPane = React.createClass({
               <tr>
                 <td><FormattedMessage message={this.getIntlMessage('balance')} /></td>
                 <td>
-                  <FormattedMessage message={this.getIntlMessage('ether')}
-                                    value={this.props.user.user.balanceFormatted.value}
-                                    unit={this.props.user.user.balanceFormatted.unit} />
+                  { !this.props.user.loading &&
+                    <FormattedMessage message={this.getIntlMessage('ether')}
+                                      value={this.props.user.user.balanceFormatted.value}
+                                      unit={this.props.user.user.balanceFormatted.unit} /> }
                   { this.props.user.user.balance &&
                       <span> = <br/>
                         { this.formatMessage(

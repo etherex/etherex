@@ -91,19 +91,11 @@ var TradeList = React.createClass({
   render: function() {
     return (
       <div className="container-fluid">
-        <div className="row">
-          <div className="col-md-3 col-xs-6">
-            <h3>{this.props.trades.title} {
-                this.props.trades.loading &&
-                  <span><FormattedMessage message={this.getIntlMessage('loading')} />...</span>
-            }</h3>
-          </div>
-          <div className="col-md-9 col-xs-6">
-            <div style={{marginTop: 30}}>
+        <div className="row col-md-12">
+            <div style={{height: 22}}>
               {this.props.trades.loading &&
                 <ProgressBar active now={this.props.trades.percent} />}
             </div>
-          </div>
         </div>
         <div className="row">
           {this.props.trades.error &&

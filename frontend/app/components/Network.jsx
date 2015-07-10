@@ -19,8 +19,8 @@ var Network = React.createClass({
       network: networkState,
       host: this.props.flux.store('config').getState().host,
       blockTimestamp: networkState.blockTimestamp,
-      blockTime: networkState.blockTime,
-      networkLag: networkState.networkLag
+      blockTime: parseInt(networkState.blockTime),
+      networkLag: parseInt(networkState.networkLag)
     };
   },
 
@@ -41,7 +41,7 @@ var Network = React.createClass({
     }
   },
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps() {
     var formattedGasPrice = '-';
     if (this.state.network.gasPrice) {
       var gasPrice = utils.formatEther(this.state.network.gasPrice);
@@ -68,7 +68,7 @@ var Network = React.createClass({
         lastState = 'success';
     }
     this.setState({
-      lastBlock: lastBlock,
+      lastBlock: parseInt(lastBlock),
       lastState: lastState
     });
   },

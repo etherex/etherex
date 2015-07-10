@@ -1,3 +1,4 @@
+var _ = require("lodash");
 var React = require("react");
 var Fluxxor = require("fluxxor");
 var ReactIntl = require('react-intl');
@@ -9,8 +10,7 @@ var FormattedMessage = ReactIntl.FormattedMessage;
 var Router = require("react-router");
 var RouteHandler = Router.RouteHandler;
 
-var FluxMixin = Fluxxor.FluxMixin(React),
-    StoreWatchMixin = Fluxxor.StoreWatchMixin;
+var StoreWatchMixin = Fluxxor.StoreWatchMixin;
 
 var ReactBootstrap = require('react-bootstrap');
 var ProgressBar = ReactBootstrap.ProgressBar;
@@ -31,41 +31,55 @@ var constants = require('../js/constants');
 var UAParser = require('ua-parser-js');
 
 var EtherExApp = React.createClass({
-  mixins: [IntlMixin, FluxMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore")],
+  mixins: [IntlMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore")],
 
-  getInitialState: function () {
+  getInitialState() {
     return {
-      showGraph: false
+      showGraph: false,
+      theme: 'flatly'
     };
   },
 
-  getStateFromFlux: function() {
-    var flux = this.getFlux();
+  getStateFromFlux() {
     return {
-      flux: flux,
-      config: flux.store('config').getState(),
-      network: flux.store('network').getState(),
-      user: flux.store("UserStore").getState(),
-      trades: flux.store("TradeStore").getState(),
-      market: flux.store("MarketStore").getState()
+      flux: this.props.flux,
+      config: this.props.flux.store('config').getState(),
+      network: this.props.flux.store('network').getState(),
+      user: this.props.flux.store("UserStore").getState(),
+      trades: this.props.flux.store("TradeStore").getState(),
+      market: this.props.flux.store("MarketStore").getState()
     };
   },
 
-  componentDidMount: function() {
+  componentWillMount() {
+    // Load theme preference
+    var theme = localStorage.theme;
+    if (!_.includes(['darkly', 'flatly', 'superhero'], theme))
+      theme = 'flatly';
+    this.setState({ theme: theme });
+
+    // Load bootstrap theme
+    require("../css/bootstrap-" + theme + ".css");
+
+    // Load custom styles and overrides
+    require("../css/styles.css");
+  },
+
+  componentDidMount() {
     this.state.flux.actions.config.initializeState();
   },
 
-  onToggleGraph: function() {
+  onToggleGraph() {
     this.setState({ showGraph: !this.state.showGraph });
   },
 
-  onDisableGraph: function() {
+  onDisableGraph() {
     this.setState({ showGraph: false });
   },
 
-  render: function() {
+  render() {
     return (
-      <div id="wrap">
+      <div id="wrap" className={"theme-" + this.state.theme}>
         <div className="container-fluid" ref="container">
           <NavBar user={this.state.user} />
           <div className="row">
@@ -137,7 +151,7 @@ var EtherExApp = React.createClass({
         </div>
         <footer className="navbar navbar-default navbar-fixed-bottom">
           <div className="container-fluid">
-            <p className="navbar-text navbar-left" style={{marginLeft: 0}}>&copy; <a href="http://etherex.org" target="_blank">EtherEx</a></p>
+            <p className="navbar-text navbar-left" style={{marginLeft: 0}}>&copy; <a href="https://etherex.org" target="_blank">EtherEx</a></p>
             <p className="navbar-text navbar-right">
               <FormattedMessage message={this.getIntlMessage('slogan')} />
             </p>
@@ -154,7 +168,7 @@ var EtherExApp = React.createClass({
 var ErrorModal = React.createClass({
   mixins: [IntlMixin],
 
-  getInitialState: function () {
+  getInitialState() {
     return {
       isModalOpen: false,
       isLoading: false,
@@ -364,11 +378,11 @@ var ErrorModal = React.createClass({
     });
   },
 
-  closeModal: function() {
+  closeModal() {
     this.setState({ isModalOpen: false });
   },
 
-  startDemoMode: function () {
+  startDemoMode() {
     // Start ethereum client demo mode
     // TODO some fake data for that?
     this.setState({
@@ -382,7 +396,7 @@ var ErrorModal = React.createClass({
     this.props.flux.actions.config.forceLoad();
   },
 
-  render: function () {
+  render() {
     return (
       <Modal { ...this.props }
         show={ this.state.isModalOpen && !this.state.isDemo }

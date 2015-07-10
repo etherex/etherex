@@ -3,6 +3,8 @@ var ReactIntl = require("react-intl");
 var IntlMixin = ReactIntl.IntlMixin;
 var FormattedMessage = ReactIntl.FormattedMessage;
 
+var DropdownButton = require('react-bootstrap/lib/DropdownButton');
+var MenuItem = require('react-bootstrap/lib/MenuItem');
 var Button = require('react-bootstrap/lib/Button');
 var Alert = require('react-bootstrap/lib/Alert');
 var Input = require('react-bootstrap/lib/Input');
@@ -15,12 +17,19 @@ var ConfigPane = React.createClass({
     var configState = this.props.flux.store("config").getState();
     return {
       address: this.props.address,
+      newAddress: false,
       debug: configState.debug,
       si: configState.si,
       timeout: configState.timeout,
       timeoutUpdated: false,
       message: null,
-      newAddress: false,
+      theme: localStorage.theme || 'flatly',
+      themes: {
+        'flatly': 'Flatly',
+        'darkly': 'Darkly',
+        'superhero': 'Superhero'
+      },
+      newTheme: false,
       showModal: false,
       handler: false
     };
@@ -59,6 +68,20 @@ var ConfigPane = React.createClass({
           </h3>
         </div>
         <div className="panel-body">
+
+          <form className="form-horizontal" role="form" onSubmit={this.handleUpdateTheme} >
+            <Input label="Theme" labelClassName='col-sm-2' wrapperClassName='col-sm-10 wrapper'>
+              <DropdownButton ref="theme" title={this.state.themes[this.state.theme]} onSelect={this.handleChangeTheme}>
+                <MenuItem key={"flatly"} eventKey={"flatly"}>Flatly</MenuItem>
+                <MenuItem key={"darkly"} eventKey={"darkly"}>Darkly</MenuItem>
+                <MenuItem key={"superhero"} eventKey={"superhero"}>Superhero</MenuItem>
+              </DropdownButton>
+              <Button style={{marginLeft: 10}} className={this.state.newTheme && " btn-primary"} type="submit">
+                <FormattedMessage message={this.getIntlMessage('config.refresh')} />
+              </Button>
+            </Input>
+          </form>
+
           <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
             <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.current')} />}
               labelClassName='col-sm-2' wrapperClassName='col-sm-10'
@@ -68,7 +91,9 @@ var ConfigPane = React.createClass({
               labelClassName='col-sm-2' wrapperClassName='col-sm-10'
               maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="Address" ref="address" onChange={this.handleChange}/>
             <Input wrapperClassName="col-sm-10 col-sm-offset-2">
-              <Button className={"btn-block" + (this.state.newAddress ? " btn-primary" : "")} type="submit">Update</Button>
+              <Button className={"btn-block" + (this.state.newAddress ? " btn-primary" : "")} type="submit">
+                <FormattedMessage message={this.getIntlMessage('config.update')} />
+              </Button>
             </Input>
           </form>
 
@@ -127,6 +152,19 @@ var ConfigPane = React.createClass({
     this.props.flux.actions.config.updateConfig({
       si: si
     });
+  },
+
+  handleChangeTheme(theme) {
+    this.setState({
+      theme: theme,
+      newTheme: true
+    });
+  },
+
+  handleUpdateTheme(e) {
+    e.preventDefault();
+    localStorage.theme = this.state.theme;
+    window.location.reload();
   },
 
   handleChangeTimeout(e) {

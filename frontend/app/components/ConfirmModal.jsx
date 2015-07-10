@@ -31,6 +31,10 @@ var ConfirmModal = React.createClass({
             user={nextProps.user}
             review={true} />
       });
+    else
+      this.setState({
+        tradeTable: <span />
+      });
   },
 
   render: function() {

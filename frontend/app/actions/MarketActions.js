@@ -6,7 +6,7 @@ var web3 = require("web3");
 var MarketActions = function() {
 
   this.initializeMarkets = function() {
-    if (this.flux.store('config').getState().debug)
+    if (this.flux.store('config').debug)
       console.count("Initializing markets");
 
     var _client = this.flux.store('config').getEthereumClient();
@@ -51,7 +51,7 @@ var MarketActions = function() {
   };
 
   this.loadMarket = function(id, init) {
-    if (init && this.flux.store('config').getState().debug)
+    if (init && this.flux.store('config').debug)
       console.count("loadMarket triggered");
 
     var _client = this.flux.store('config').getEthereumClient();
@@ -87,7 +87,7 @@ var MarketActions = function() {
   };
 
   this.updateMarket = function() {
-    if (this.flux.store('config').getState().debug)
+    if (this.flux.store('config').debug)
       console.count("updateMarket triggered");
 
     var id = this.flux.store("MarketStore").getState().market.id;
@@ -95,7 +95,7 @@ var MarketActions = function() {
   };
 
   this.marketsLoaded = function(init) {
-    if (init && this.flux.store('config').getState().debug)
+    if (init && this.flux.store('config').debug)
       utils.log("Markets", "loaded");
 
     this.dispatch(constants.market.LOAD_MARKETS_SUCCESS);

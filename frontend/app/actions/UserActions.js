@@ -80,7 +80,7 @@ var UserActions = function() {
   };
 
   this.updateBalanceSub = function(market) {
-    if (this.flux.store('config').getState().debug)
+    if (this.flux.store('config').debug)
       console.count("updateBalanceSub triggered");
 
     var _client = this.flux.store('config').getEthereumClient();
@@ -114,7 +114,7 @@ var UserActions = function() {
     this.dispatch(constants.user.SEND_ETHER, payload);
 
     _client.sendEther(user, payload.amount, payload.recipient, function(result) {
-      if (this.flux.store('config').getState().debug)
+      if (this.flux.store('config').debug)
         utils.log("SEND_ETHER_RESULT", result);
       this.flux.actions.user.updateBalance();
     }.bind(this), function(error) {
@@ -133,7 +133,7 @@ var UserActions = function() {
     this.dispatch(constants.user.SEND_SUB, { amount: amount });
 
     _client.sendSub(user, amount, payload.recipient, market, function(result) {
-      if (this.flux.store('config').getState().debug)
+      if (this.flux.store('config').debug)
         utils.log("SEND_SUB_RESULT", result);
     }.bind(this), function(error) {
       this.dispatch(constants.user.SEND_SUB_FAIL, {error: error});
@@ -151,7 +151,7 @@ var UserActions = function() {
     this.dispatch(constants.user.DEPOSIT, { amount: amount });
 
     _client.depositSub(user, amount, market, function(result) {
-      if (this.flux.store('config').getState().debug)
+      if (this.flux.store('config').debug)
         utils.log("DEPOSIT_RESULT", result);
     }.bind(this), function(error) {
       this.dispatch(constants.user.DEPOSIT_FAIL, {error: error});
@@ -169,7 +169,7 @@ var UserActions = function() {
     this.dispatch(constants.user.WITHDRAW, { amount: amount });
 
     _client.withdrawSub(user, amount, market, function(result) {
-      if (this.flux.store('config').getState().debug)
+      if (this.flux.store('config').debug)
         utils.log("WITHDRAW_RESULT", result);
     }.bind(this), function(error) {
       this.dispatch(constants.user.WITHDRAW_FAIL, {error: error});

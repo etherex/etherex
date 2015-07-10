@@ -344,7 +344,7 @@ var EthereumClient = function(params) {
   };
 
   this.loadTrade = function(id, market, progress, success, failure) {
-    this.contract.get_trade.call(id, 'latest', function(error, trade) {
+    this.contract.get_trade.call(id, 'pending', function(error, trade) {
       if (error) {
         if (progress)
           progress();
@@ -376,17 +376,21 @@ var EthereumClient = function(params) {
 
         var status = 'mined';
 
-        // TODO think that's obsolete now...
-        var tradeExists = web3.eth.getStorageAt(this.address, ref, 'latest');
+        // TODO this is screwed up again...
+        // var tradeExists = web3.eth.getStorageAt(this.address, ref, 'latest');
         // if (this.debug) {
-        //     utils.log("LOADING TRADE", tradeId);
-        //     utils.log("EXISTS", tradeId);
+        //     utils.log("THIS TRADE", tradeId);
+        //     utils.log("REF", ref);
+        //     utils.log("EXISTS", tradeExists);
         //     utils.log(tradeExists, ref);
         // }
-        if (tradeExists === null || tradeExists == "0x0" || tradeExists == "0x0000000000000000000000000000000000000000000000000000000000000000")
-            status = 'pending';
-        else
-            status = 'mined';
+        // if (tradeExists === null ||
+        //     tradeExists == "0x0" ||
+        //     tradeExists == "0x0000000000000000000000000000000000000000000000000000000000000000" ||
+        //     tradeExists != ref)
+        //     status = 'pending';
+        // else
+        //     status = 'mined';
 
         var type = _.parseInt(trade[1].toString());
 
@@ -464,6 +468,11 @@ var EthereumClient = function(params) {
         var amountPrecision = Math.pow(10, market.decimals);
         var precision = market.precision;
         var price = bigRat(web3.toDecimal(log.args.price)).divide(precision).valueOf();
+
+        // Update current market's prices only
+        var currentMarket = this.flux.store("MarketStore").getState().market;
+        if (market.id != currentMarket.id)
+          return;
 
         // Update current market's last price
         var trades = this.flux.store("TradeStore").getState();
@@ -762,7 +771,8 @@ var EthereumClient = function(params) {
         var id = web3.fromDecimal(log.args.tradeid);
         var trades = this.flux.store("TradeStore").getState();
         if (!trades.loading && !trades.updating) {
-          utils.log("UPDATING", id);
+          if (this.debug)
+            utils.log("UPDATING", id);
           this.flux.actions.trade.updateTrade(id, market);
         }
 

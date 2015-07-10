@@ -6,7 +6,7 @@ var bigRat = require("big-rational");
 var TradeActions = function() {
 
     this.loadTradeIDs = function(market, init) {
-        if (this.flux.store('config').getState().debug)
+        if (this.flux.store('config').debug)
           console.count("loadTradeIDs triggered");
 
         var _client = this.flux.store('config').getEthereumClient();
@@ -36,7 +36,7 @@ var TradeActions = function() {
     };
 
     this.loadTrades = function(trade_ids) {
-        if (this.flux.store('config').getState().debug)
+        if (this.flux.store('config').debug)
           console.count("loadTrades triggered");
 
         // Put trades in loading state
@@ -49,7 +49,7 @@ var TradeActions = function() {
     };
 
     this.updateTrade = function(id, market) {
-        if (this.flux.store('config').getState().debug)
+        if (this.flux.store('config').debug)
           console.count("updateTrade triggered");
 
         var _client = this.flux.store('config').getEthereumClient();
@@ -63,7 +63,7 @@ var TradeActions = function() {
 
     // TODO Obsolete, or put on a timer to reload trades from fresh once in a while?
     // this.updateTrades = function() {
-    //     if (this.flux.store('config').getState().debug)
+    //     if (this.flux.store('config').debug)
     //       console.count("updateTrades triggered");
     //
     //     var _client = this.flux.store('config').getEthereumClient();
@@ -156,7 +156,7 @@ var TradeActions = function() {
         this.dispatch(constants.trade.ADD_TRADE, payload);
 
         _client.addTrade(user, trade, markets[index], function(result) {
-            if (this.flux.store('config').getState().debug)
+            if (this.flux.store('config').debug)
               utils.log("ADD_TRADE_RESULT", result);
 
             payload.hash = trade.hash;
@@ -168,7 +168,7 @@ var TradeActions = function() {
     };
 
     this.addTradeSuccess = function(id, market) {
-        if (this.flux.store('config').getState().debug)
+        if (this.flux.store('config').debug)
           console.count("addTradeSuccess triggered");
 
         var _client = this.flux.store('config').getEthereumClient();
@@ -192,7 +192,7 @@ var TradeActions = function() {
         var market = this.flux.store("MarketStore").getState().market;
 
         _client.fillTrades(user, trades, market, function(result) {
-            if (this.flux.store('config').getState().debug)
+            if (this.flux.store('config').debug)
               utils.log("FILL_TRADES_RESULT", result);
 
             var trade = this.flux.store("TradeStore").getState();
@@ -221,7 +221,7 @@ var TradeActions = function() {
         var market = this.flux.store("MarketStore").getState().market;
 
         _client.fillTrade(user, trade, market, function(result) {
-            if (this.flux.store('config').getState().debug)
+            if (this.flux.store('config').debug)
               utils.log("FILL_TRADE_RESULT", result);
 
             this.dispatch(constants.trade.FILL_TRADE, trade);
@@ -235,7 +235,7 @@ var TradeActions = function() {
 
         var user = this.flux.store("UserStore").getState().user;
         _client.cancelTrade(user, trade, function(result) {
-            if (this.flux.store('config').getState().debug)
+            if (this.flux.store('config').debug)
               utils.log("CANCEL_RESULT", result);
             this.dispatch(constants.trade.CANCEL_TRADE, trade);
         }.bind(this), function(error) {
@@ -252,11 +252,11 @@ var TradeActions = function() {
         this.dispatch(constants.trade.ESTIMATE_GAS);
 
         _client.estimateAddTrade(user, trade, market, function(result) {
-            if (this.flux.store('config').getState().debug)
+            if (this.flux.store('config').debug)
               utils.log("ESTIMATE RESULT", result);
 
             var gasprice = this.flux.store('network').getState().gasPrice;
-            if (this.flux.store('config').getState().debug)
+            if (this.flux.store('config').debug)
               utils.log("GASPRICE", gasprice);
 
             var estimate = "N/A";
@@ -279,11 +279,11 @@ var TradeActions = function() {
         this.dispatch(constants.trade.ESTIMATE_GAS);
 
         _client.estimateFillTrades(user, trades, market, function(result) {
-            if (this.flux.store('config').getState().debug)
+            if (this.flux.store('config').debug)
               utils.log("ESTIMATE RESULT", result);
 
             var gasprice = this.flux.store('network').getState().gasPrice;
-            if (this.flux.store('config').getState().debug)
+            if (this.flux.store('config').debug)
               utils.log("GASPRICE", gasprice);
             var estimate = "N/A";
             if (result && gasprice) {
@@ -324,7 +324,7 @@ var TradeActions = function() {
     };
 
     this.switchMarket = function(market) {
-        if (this.flux.store('config').getState().debug)
+        if (this.flux.store('config').debug)
           console.count("SWITCH", market);
         // this.dispatch(constants.trade.SWITCH_MARKET, market);
         this.dispatch(constants.trade.LOAD_TRADES);

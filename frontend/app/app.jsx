@@ -47,15 +47,18 @@ var Wallet = require("./components/Wallet");
 var Tools = require("./components/Tools");
 var Help = require("./components/Help");
 
-// Load bootstrap
+// Load jQuery for bootstrap
 var jQuery = require("jquery");
 window.$ = window.jQuery = jQuery;
-require("bootstrap/dist/js/bootstrap.js");
-require("./css/bootstrap-darkly.css");
 
+// Load fonts and icons
+require("./css/fonts.css");
 require("./css/icons.css");
-require("./css/styles.css");
 
+// Load bootstrap
+require("bootstrap/dist/js/bootstrap.js");
+
+// Load Intl data
 var intlData = require('./js/intlData');
 
 var Route = Router.Route;
@@ -87,8 +90,8 @@ flux.setDispatchInterceptor(function(action, dispatch) {
 
 var routes = (
     <Route name="app" handler={EtherExApp} flux={flux}>
-      <DefaultRoute handler={Trades} title="Home" />
-      <Route name="home" path="/" handler={Trades} title="Trades" />
+      <DefaultRoute handler={Trades} flux={flux} title="Home" />
+      <Route name="home" path="/" handler={Trades} flux={flux} title="Trades" />
       <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
       <Route name="markets" path="/markets" handler={Markets} flux={flux} title="Markets" />
       <Route name="subs" path="/markets/subs" handler={Markets} flux={flux} title="Subs" />
@@ -99,7 +102,7 @@ var routes = (
       <Route name="tools" path="/tools" handler={Tools} flux={flux} title="Tools" />
       <Route name="help" path="/help" handler={Help} flux={flux} title="Help" />
       <Route name="userDetails" path="/user" handler={UserDetails} flux={flux} title="User details" />
-      <NotFoundRoute name="notfound" handler={Placeholder} title="User or Trade ID not found" flux={flux} />
+      <NotFoundRoute name="notfound" handler={Placeholder} flux={flux} title="User or Trade ID not found" />
     </Route>
 );
 

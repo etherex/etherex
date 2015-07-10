@@ -64,7 +64,7 @@ module.exports = {
       "install": {
         "title": "Installing and configuring Ethereum",
         "OSX": {
-          "brew": `<a target="_blank" href="http://brew.sh/">Install Homebrew</a> for Mac OS`,
+          "brew": `<a target="_blank" href="http://brew.sh/">Install Homebrew</a> for Mac OS, then:`,
           "install": `brew tap ethereum/ethereum\nbrew install ethereum`,
           "link": `See also the <a href="{wiki}" target="_blank">Wiki page</a>
                   and the <a href="{brew}" target="_blank">homebrew-ethereum README</a>.`
@@ -91,7 +91,7 @@ module.exports = {
                     on GitHub`
         },
         "installed": `Once <pre className="small">geth</pre> is installed:`,
-        "account": `Add a new account using { geth }`,
+        "account": `Add a new account using: { geth }`,
         "start": `Start geth with: { geth }`
       },
       "block": {
@@ -158,6 +158,7 @@ module.exports = {
       "new": "New address",
       "timeout": "Network timeout (seconds)",
       "update": "Update",
+      "refresh": "Refresh",
       "debug_mode": "Debug mode",
       "debug_warning": "This prints a truckload of logs to the console and can slow down the UI considerably.",
       "address": "Are you sure you want to change the exchange's address to {address} ?",

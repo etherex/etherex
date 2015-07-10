@@ -41,6 +41,10 @@
   text-align: left;
 }
 
+.alert h3 {
+  margin-top: 5px;
+}
+
 .range-select {
   height: 22px;
   -webkit-margin-before: -1px;
@@ -72,21 +76,66 @@ tr.trade-pending:hover td {
 
 tr.trade-filling td {
   background-color: #3498db !important;
+  color: #fff;
 }
 tr.trade-filling:hover td {
   background-color: #217dbb !important;
+  color: #fff;
 }
 
 tr.trade-success td {
   background-color: #00bc8c !important;
+  color: #fff;
 }
 tr.trade-success:hover td {
   background-color: #008966 !important;
+  color: #fff;
 }
 
 tr.disabled td {
   opacity: 0.5;
 }
+
+
+/* Bootstrap overrides */
+.theme-darkly a,
+.navbar a {
+  color: #ccc; /*#0ce3ac;*/
+}
+
+.theme-darkly a:hover,
+.theme-darkly a:focus,
+.navbar a:hover,
+.navbar a:focus {
+  color: #fff; /*#0ce3ac;*/
+}
+
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-brand:focus {
+  color: #eee; /*#00bc8c*/
+}
+
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
+  color: #ddd; /*#00bc8c*/
+}
+
+@media (max-width: 767px) {
+  .navbar-default .navbar-nav .open .dropdown-menu > li > a:hover,
+  .navbar-default .navbar-nav .open .dropdown-menu > li > a:focus {
+    color: #ddd; /*#00bc8c*/
+  }
+}
+
+.navbar-default .navbar-link:hover {
+  color: #ddd; /*#00bc8c*/
+}
+
+.navbar-default .btn-link:hover,
+.navbar-default .btn-link:focus {
+  color: #ddd; /*#00bc8c*/
+}
+
 
 /* Trade animations */
 .trades-appear {
@@ -144,13 +193,13 @@ path.candle.body {
 }
 
 path.candle.up {
-    fill: #005500;
-    stroke: #005500;
+    fill: #00bc8c;
+    stroke: #00bc8c;
 }
 
 path.candle.down {
-    fill: #550000;
-    stroke: #550000;
+    fill: #e43725;
+    stroke: #e43725;
 }
 
 .close.annotation {
@@ -158,11 +207,11 @@ path.candle.down {
 }
 
 .close.annotation.up path {
-    fill: #00AA00;
+    fill: #00bc8c;
 }
 
 .close.annotation.down path {
-    fill: #550000;
+    fill: #e43725;
 }
 
 path.volume {

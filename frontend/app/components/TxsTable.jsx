@@ -13,9 +13,6 @@ var Table = require("react-bootstrap/lib/Table");
 
 var bigRat = require("big-rational");
 
-// var Link = Router.Link;
-// var UserLink = require("./UserLink");
-
 var TxRow = React.createClass({
   mixins: [IntlMixin],
 
@@ -51,7 +48,9 @@ var TxRow = React.createClass({
         </td>
         <td>
           <div className="text-right">
-            <FormattedNumber value={amount} /> { this.props.market.name }
+            <FormattedMessage message={this.getIntlMessage('ether')}
+                              value={amount}
+                              unit={this.props.market.name} />
           </div>
         </td>
         <td>
@@ -63,7 +62,9 @@ var TxRow = React.createClass({
         </td>
         <td>
           <div className="text-right">
-            <FormattedNumber value={this.props.tx.total.value} /> { this.props.tx.total.unit }
+            <FormattedMessage message={this.getIntlMessage('ether')}
+                              value={this.props.tx.total.value}
+                              unit={this.props.tx.total.unit} />
           </div>
         </td>
         <td>

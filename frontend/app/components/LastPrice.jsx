@@ -1,17 +1,14 @@
 var React = require("react");
-var Fluxxor = require("fluxxor");
-var FluxMixin = Fluxxor.FluxMixin(React);
 
 var utils = require("../js/utils");
 
 var LastPrice = React.createClass({
-  mixins: [FluxMixin],
 
   getInitialState: function () {
     return {
       lastMarket: null,
       lastPrice: null,
-      priceChange: 'info'
+      priceChange: 'default'
     };
   },
 
@@ -30,7 +27,7 @@ var LastPrice = React.createClass({
       this.setState({
         lastMarket: nextProps.market.name,
         lastPrice: "N/A",
-        priceChange: 'info'
+        priceChange: 'default'
       });
 
     if (nextProps.market.lastPrice && nextProps.market.name) {

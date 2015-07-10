@@ -170,7 +170,7 @@ var NetworkActions = function() {
    * Update data that should change over time in the UI.
    */
   this.onNewBlock = function (error, log) {
-    if (this.flux.store('config').getState().debug)
+    if (this.flux.store('config').debug)
       utils.log("GOT BLOCK", log);
 
     this.flux.actions.network.updateBlockchain(true);
