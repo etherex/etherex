@@ -1,7 +1,7 @@
 var React = require("react");
 var ReactIntl = require("react-intl");
 var IntlMixin = ReactIntl.IntlMixin;
-var FormattedNumber = ReactIntl.FormattedNumber;
+var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Button = require('react-bootstrap/lib/Button');
 var Popover = require('react-bootstrap/lib/Popover');
@@ -13,9 +13,9 @@ var Balance = React.createClass({
   render: function() {
     return (
       <div className="navbar col-lg-12 col-md-6 col-sm-6">
-        <OverlayTrigger trigger={['hover', 'focus', 'click']} placement='right' overlay={
+        <OverlayTrigger trigger={['hover', 'focus']} placement='right' overlay={
             <Popover>
-              <div>
+              <div className="text-overflow">
                 { this.formatMessage(
                     this.getIntlMessage('wallet.pending'), {
                       currency: "ETH",
@@ -28,7 +28,9 @@ var Balance = React.createClass({
           <Button bsStyle="primary" bsSize="large" className="text-overflow btn-balance">
             { this.props.user.user.balanceFormatted &&
               <span>
-                <FormattedNumber value={this.props.user.user.balanceFormatted.value} /> { this.props.user.user.balanceFormatted.unit }
+                <FormattedMessage message={this.getIntlMessage('ether')}
+                                  value={this.props.user.user.balanceFormatted.value}
+                                  unit={this.props.user.user.balanceFormatted.unit} />
               </span> }
           </Button>
         </OverlayTrigger>

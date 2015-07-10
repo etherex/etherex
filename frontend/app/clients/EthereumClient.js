@@ -304,7 +304,10 @@ var EthereumClient = function(params) {
           block: block,
           total_trades: total_trades,
           balance: _.parseInt(balance),
-          favorite: favorite
+          favorite: favorite,
+          dayChange: '-',
+          weekChange: '-',
+          monthChange: '-'
         });
       });
     }

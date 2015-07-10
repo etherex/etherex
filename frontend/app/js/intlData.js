@@ -38,6 +38,9 @@ module.exports = {
     "amount": "Amount",
     "total": "Total",
     "by": "By",
+    "network": "Network",
+    "blocktime": "{time, number} s",
+    "ether": "{value, number} {unit}",
     "init": {
       "loading": "Ethereum loading...",
       "ready": "The Ethereum block chain is current. Just a few more seconds...",
