@@ -50,27 +50,46 @@ var scale = new si.Scale({
 var unit = new si.Unit(scale, '');
 
 var utils = {
-  formatBalance: function(_b, _p) {
-    var b = bigRat(_b);
-    if (typeof _p === 'undefined')
-      _p = 4;
-    if (b.compare(units.Uether.multiply(1000)) > 0)
-      return this.numeral(b.divide(units.Uether).valueOf(), _p) + " " + Object.keys(units)[0];
-    for (var i in units)
-      if (units[i].valueOf() != 1 && b.compare(units[i]) >= 0)
-        return this.numeral(b.divide(units[i].divide(1000)).divide(1000).valueOf(), _p) + " " + i;
-    return this.numeral(_b.valueOf(), 0) + " wei";
+  formatEther(wei) {
+    if (!wei)
+      return 0;
+    return this.formatBalance(wei, 0, true);
   },
 
-  randomId: function() {
+  formatBalance(wei, precision, split) {
+    var value = 0;
+    var unit = 0;
+    var big = bigRat(wei);
+    if (typeof precision === 'undefined')
+      precision = 4;
+    if (big.compare(units.Uether.multiply(1000)) > 0) {
+      value = big.divide(units.Uether).valueOf();
+      unit = Object.keys(units)[0];
+      if (split)
+        return { value: value, unit: unit };
+      return this.numeral(value, precision) + " " + unit;
+    }
+    for (var i in units)
+      if (units[i].valueOf() != 1 && big.compare(units[i]) >= 0) {
+        value = big.divide(units[i].divide(1000)).divide(1000).valueOf();
+        if (split)
+          return { value: value, unit: i };
+        return this.numeral(value, precision) + " " + i;
+      }
+    if (split)
+      return { value: wei.valueOf(), unit: "wei"};
+    return this.numeral(wei.valueOf(), 0) + " wei";
+  },
+
+  randomId() {
     return crypto.randomBytes(32).toString('hex');
   },
 
-  format: function(n) {
+  format(n) {
     return n ? unit.format(n, ' ') : '0';
   },
 
-  numeral: function(n, p) {
+  numeral(n, p) {
     return numeral(n).format('0,0.' + '0'.repeat(p));
   },
 
@@ -79,19 +98,19 @@ var utils = {
   consoleError: 'background-color: #d62c1a; color: #fff; padding: 2px 6px;',
   consoleDebug: 'background-color: #217dbb; color: #fff; padding: 2px 6px;',
 
-  log: function(prefix, message) {
+  log(prefix, message) {
     console.log('%cEtherEx', this.consoleLog, prefix, message);
   },
 
-  warn: function(prefix, message) {
+  warn(prefix, message) {
     console.warn('%cEtherEx', this.consoleWarn, prefix, message);
   },
 
-  error: function(prefix, message) {
+  error(prefix, message) {
     console.error('%cEtherEx', this.consoleError, prefix, message);
   },
 
-  debug: function(prefix, message) {
+  debug(prefix, message) {
     console.log('%cEtherEx', this.consoleDebug, prefix, message);
   }
 };

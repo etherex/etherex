@@ -1,6 +1,7 @@
 var React = require("react");
 var ReactIntl = require("react-intl");
 var IntlMixin = ReactIntl.IntlMixin;
+var FormattedNumber = ReactIntl.FormattedNumber;
 
 var Button = require('react-bootstrap/lib/Button');
 var Popover = require('react-bootstrap/lib/Popover');
@@ -25,7 +26,10 @@ var Balance = React.createClass({
               </div>
             </Popover>}>
           <Button bsStyle="primary" bsSize="large" className="text-overflow btn-balance">
-            {this.props.user.user.balanceFormatted}
+            { this.props.user.user.balanceFormatted &&
+              <span>
+                <FormattedNumber value={this.props.user.user.balanceFormatted.value} /> { this.props.user.user.balanceFormatted.unit }
+              </span> }
           </Button>
         </OverlayTrigger>
       </div>

@@ -34,6 +34,10 @@ module.exports = {
     "last": "Last Price",
     "price": "{price, number} {currency}/ETH",
     "trades": "Trades",
+    "markets": "Markets",
+    "amount": "Amount",
+    "total": "Total",
+    "by": "By",
     "init": {
       "loading": "Ethereum loading...",
       "ready": "The Ethereum block chain is current. Just a few more seconds...",
@@ -209,12 +213,17 @@ module.exports = {
       "not_total": `Not enough ETH for this trade, {minimum, number} ETH required.`,
       "not_enough": `Not enough {currency} for this trade, {amount, number} {currency} required.`
     },
-    "tradelist": {
-      "market": "Market",
-      "amount": "Amount",
+    "txs": {
+      "block": "Block #",
+      "inout": "In / Out",
+      "type": "Type",
+      "fromto": "From / To",
       "price": "Price",
-      "total": "Total",
-      "owner": "By"
+      "amount": "Amount",
+      "totaleth": "Total ETH",
+      "details": "Details",
+      "hash": "Hash",
+      "id": "Trade ID"
     },
     "user": {
       "not_found": "User not found",

@@ -59,7 +59,7 @@ var UserSummaryPane = React.createClass({
               <tr>
                 <td><FormattedMessage message={this.getIntlMessage('balance')} /></td>
                 <td>
-                  { this.props.user.user.balanceFormatted }<br />
+                  <FormattedNumber value={this.props.user.user.balanceFormatted.value} /> { this.props.user.user.balanceFormatted.unit }<br />
                   { this.props.user.user.balance &&
                       this.formatMessage(
                         this.getIntlMessage('user.balance'), {

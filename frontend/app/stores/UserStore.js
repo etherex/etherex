@@ -101,7 +101,7 @@ var UserStore = Fluxxor.createStore({
     onUpdateBalance: function(payload) {
         // console.log("BALANCE", payload.balance);
         this.user.balance = bigRat(payload.balance).divide(bigRat(fixtures.ether)).valueOf();
-        this.user.balanceFormatted = utils.formatBalance(payload.balance);
+        this.user.balanceFormatted = utils.formatEther(payload.balance);
         this.user.balance_raw = payload.balance;
         this.user.balance_pending = bigRat(payload.balance_pending).divide(bigRat(fixtures.ether)).valueOf();
         this.emit(constants.CHANGE_EVENT);

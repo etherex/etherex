@@ -59,7 +59,7 @@ var Network = React.createClass({
   render: function () {
     var formattedEther = '-';
     if (this.state.user.balance)
-      formattedEther = this.state.user.balanceFormatted;
+      formattedEther = <span><FormattedNumber value={this.state.user.balanceFormatted.value} /> { this.state.user.balanceFormatted.unit }</span>;
 
     var formattedGasPrice = '-';
     if (this.state.network.gasPrice)
@@ -98,7 +98,10 @@ var Network = React.createClass({
             GAS PRICE<span className="pull-right">{ formattedGasPrice }</span>
           </p>
           <p className="block-time">
-            BLOCK TIME<span className="pull-right">{ this.state.blockTime || '-' } / <span className={'text-' + this.state.lastState}>{ this.state.lastBlock || '-' }</span></span>
+            BLOCK TIME
+              <span className="pull-right">
+                { this.state.blockTime || '-' } / <span className={'text-' + this.state.lastState}>{ this.state.lastBlock || '-' }</span>
+              </span>
           </p>
           <p className="net-lag">
             NETWORK LAG<span className="pull-right"> { this.state.networkLag || '-' }</span>
