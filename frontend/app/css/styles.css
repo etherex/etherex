@@ -36,9 +36,24 @@
 }
 
 .btn-balance {
+  border: 0;
   padding-left: 15px;
   padding-right: 15px;
   text-align: left;
+}
+
+.btn-marketselect,
+.btn-marketselect button {
+  border: 0;
+}
+
+.btn-lastprice {
+  border: 0;
+  text-align: center;
+}
+
+.nav-market {
+  padding-top: 1px;
 }
 
 .alert h3 {
@@ -108,6 +123,7 @@ tr.disabled td {
 .navbar a:hover,
 .navbar a:focus {
   color: #fff; /*#0ce3ac;*/
+  text-decoration: none;
 }
 
 .navbar-default .navbar-brand:hover,

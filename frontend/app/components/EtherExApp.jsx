@@ -108,7 +108,7 @@ var EtherExApp = React.createClass({
               <div className="navbar">
                 <SubNavBar />
               </div>
-              <div className="navbar row">
+              <div className="navbar row nav-market">
                 {(this.state.user.error) ?
                     <div className="container-fluid">
                       <div className="alert alert-danger" role="alert">
@@ -158,7 +158,7 @@ var EtherExApp = React.createClass({
           </div>
         </footer>
 
-        <ErrorModal flux={ this.state.flux } network={ this.state.network } config={ this.state.config } />
+        <ErrorModal flux={ this.state.flux } network={ this.state.network } config={ this.state.config } theme={ this.state.theme } />
       </div>
     );
   }
@@ -398,7 +398,7 @@ var ErrorModal = React.createClass({
 
   render() {
     return (
-      <Modal { ...this.props }
+      <Modal { ...this.props } className={"theme-" + this.props.theme}
         show={ this.state.isModalOpen && !this.state.isDemo }
         animate={true}
         bsSize={this.state.modalSize}

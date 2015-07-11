@@ -12,7 +12,13 @@ var MarketSelect = React.createClass({
 
   render: function() {
     return (
-      <DropdownButton bsSize="large" ref="market" onSelect={this.handleChange} key={1} title={this.props.market.market.name} pullLeft>
+      <DropdownButton bsSize="large"
+                      ref="market"
+                      onSelect={this.handleChange}
+                      key={1}
+                      title={this.props.market.market.name}
+                      className="btn-marketselect"
+                      pullLeft >
         {this.props.market.markets.map(function(market) {
           if (!this.props.market.favorites || this.props.market.favorites.length === 0 || (market.id > 0 && market.favorite))
             return <MenuItem key={market.id} eventKey={market.id}>{market.name}</MenuItem>;
