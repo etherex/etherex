@@ -136,6 +136,16 @@ tr.disabled td {
   color: #ddd; /*#00bc8c*/
 }
 
+.theme-flatly .nav-pills > li > a:hover,
+.theme-flatly .nav-pills > li > a:focus {
+  color: inherit;
+}
+
+.theme-flatly .nav-pills > li.active > a:hover,
+.theme-flatly .nav-pills > li.active > a:focus {
+  color: #fff;
+}
+
 @media (max-width: 767px) {
   .navbar-default .navbar-nav .open .dropdown-menu > li > a:hover,
   .navbar-default .navbar-nav .open .dropdown-menu > li > a:focus {

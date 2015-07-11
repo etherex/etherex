@@ -33,10 +33,15 @@ var UAParser = require('ua-parser-js');
 var EtherExApp = React.createClass({
   mixins: [IntlMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore")],
 
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+
   getInitialState() {
     return {
       showGraph: false,
-      theme: 'flatly'
+      theme: 'flatly',
+      category: false
     };
   },
 
@@ -69,8 +74,18 @@ var EtherExApp = React.createClass({
     this.state.flux.actions.config.initializeState();
   },
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps) {
+      var category = this.context.router.getCurrentRoutes()[1].name;
+      this.setState({
+        category: category
+      });
+    }
+  },
+
   onToggleGraph() {
-    this.setState({ showGraph: !this.state.showGraph });
+    if (!_.includes(['markets', 'subs', 'xchain', 'assets', 'currencies'], this.state.category))
+      this.setState({ showGraph: !this.state.showGraph });
   },
 
   onDisableGraph() {
