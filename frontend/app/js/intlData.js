@@ -120,7 +120,7 @@ module.exports = {
     "wallet": {
       "balance": "In {currency} wallet: {balance, number}",
       "available": "Available {currency} balance: {balance, number}",
-      "trading": "{currency} in trades: {balance, number}",
+      "trading": "In trades {currency}: {balance, number}",
       "sub": "{balance, number} {currency}",
       "pending": `{currency} balance: {balance, number}
                   {pending, plural,

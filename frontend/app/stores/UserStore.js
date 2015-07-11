@@ -1,3 +1,4 @@
+var _ = require("lodash");
 var Fluxxor = require("fluxxor");
 
 var constants = require("../js/constants");
@@ -32,6 +33,7 @@ var UserStore = Fluxxor.createStore({
       constants.user.LOAD_ADDRESSES_FAIL, this.onUserFail,
       constants.user.LOAD_ADDRESSES_SUCCESS, this.onLoadAddressesSuccess,
       constants.user.LOAD_DEFAULT_ACCOUNT, this.onLoadDefaultAccount,
+      constants.user.UPDATE_USER, this.onUpdateUser,
       constants.user.UPDATE_BALANCE, this.onUpdateBalance,
       constants.user.UPDATE_BALANCE_FAIL, this.onUserFail,
       constants.user.UPDATE_BALANCE_SUB, this.onUpdateBalanceSub,
@@ -76,11 +78,15 @@ var UserStore = Fluxxor.createStore({
   },
 
   onLoadAddressesSuccess: function(payload) {
-    // console.log("ADDRESSES", payload);
     this.user.id = payload.primary;
     this.user.addresses = payload.addresses;
     this.loading = false;
     this.error = null;
+    this.emit(constants.CHANGE_EVENT);
+  },
+
+  onUpdateUser: function(payload) {
+    _.merge(this, payload);
     this.emit(constants.CHANGE_EVENT);
   },
 

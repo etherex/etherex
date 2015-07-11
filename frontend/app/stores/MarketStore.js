@@ -25,6 +25,7 @@ var MarketStore = Fluxxor.createStore({
             constants.market.LOAD_MARKETS_FAIL, this.onLoadMarketsFail,
             constants.market.LOAD_MARKETS_SUCCESS, this.onLoadMarketsSuccess,
             constants.market.LOAD_MARKETS_PROGRESS, this.onLoadMarketsProgress,
+            constants.market.LOAD_DEMO_DATA, this.onLoadDemoData,
             constants.market.UPDATE_LAST_PRICE, this.onUpdateLastPrice,
             constants.market.UPDATE_MARKET, this.onUpdateMarket,
             constants.market.UPDATE_MARKETS, this.onUpdateMarkets,
@@ -67,8 +68,12 @@ var MarketStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
+    onLoadDemoData: function(payload) {
+        _.merge(this, payload);
+        this.emit(constants.CHANGE_EVENT);
+    },
+
     onUpdateMarket: function(payload) {
-        // this.market = {txs: [], prices: [], data: []};
         _.merge(this.market, payload);
         this.emit(constants.CHANGE_EVENT);
     },
@@ -85,7 +90,9 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onLoadMarketsSuccess: function() {
-        // utils.log("MARKETS LOADED: ", this.markets);
+        if (this.flux.store('config').debug)
+            utils.log("MARKETS LOADED: ", this.markets);
+
         if (!this.market.id) {
             var index = _.findIndex(this.markets, {'id': this.lastOpenedMarketID});
             if (index == -1)

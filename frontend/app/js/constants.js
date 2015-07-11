@@ -18,7 +18,8 @@ module.exports = {
         UPDATE_IS_MONITORING_BLOCKS: null,
         ETHEREUM_STATUS_CONNECTED: null,
         ETHEREUM_STATUS_FAILED: null,
-        ETHEREUM_STATUS_LOADING: null
+        ETHEREUM_STATUS_LOADING: null,
+        LOAD_DEMO_DATA: null
     }),
     trade: keyMirror ({
         LOAD_TRADE_IDS: null,
@@ -28,6 +29,7 @@ module.exports = {
         LOAD_TRADES_FAIL: null,
         LOAD_TRADES_SUCCESS: null,
         LOAD_TRADES_PROGRESS: null,
+        LOAD_DEMO_DATA: null,
         UPDATE_TRADE: null,
         UPDATE_TRADES: null,
         UPDATE_TRADES_FAIL: null,
@@ -62,6 +64,7 @@ module.exports = {
         LOAD_ADDRESSES_FAIL: null,
         LOAD_ADDRESSES_SUCCESS: null,
         LOAD_DEFAULT_ACCOUNT: null,
+        UPDATE_USER: null,
         UPDATE_BALANCE: null,
         UPDATE_BALANCE_FAIL: null,
         UPDATE_BALANCE_SUB: null,
@@ -82,6 +85,7 @@ module.exports = {
         LOAD_MARKETS_FAIL: null,
         LOAD_MARKETS_SUCCESS: null,
         LOAD_MARKETS_PROGRESS: null,
+        LOAD_DEMO_DATA: null,
         UPDATE_LAST_PRICE: null,
         UPDATE_MARKET: null,
         UPDATE_MARKETS: null,

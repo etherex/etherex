@@ -96,7 +96,7 @@ var EtherExApp = React.createClass({
     return (
       <div id="wrap" className={"theme-" + this.state.theme}>
         <div className="container-fluid" ref="container">
-          <NavBar user={this.state.user} />
+          <NavBar flux={this.state.flux} user={this.state.user} />
           <div className="row">
             <div className="col-lg-2">
               <div className="row">
@@ -386,6 +386,7 @@ var ErrorModal = React.createClass({
     }
 
     this.setState({
+      isDemo: nextProps.config.demoMode,
       modalHeader: modalHeader,
       modalBody: modalBody,
       modalFooter: modalFooter,
@@ -398,8 +399,7 @@ var ErrorModal = React.createClass({
   },
 
   startDemoMode() {
-    // Start ethereum client demo mode
-    // TODO some fake data for that?
+    // Start EtherEx Demo Mode
     this.setState({
       isDemo: true
     });

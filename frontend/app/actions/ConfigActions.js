@@ -2,6 +2,7 @@ var _ = require("lodash");
 var web3 = require('web3');
 var utils = require('../js/utils');
 var React = require("react/addons");
+var fixtures = require('../js/fixtures');
 var constants = require('../js/constants');
 var EthereumClient = require('../clients/EthereumClient');
 
@@ -161,6 +162,18 @@ var ConfigActions = function() {
     this.dispatch(constants.config.UPDATE_DEMO_MODE, {
       enable: enable
     });
+
+    if (enable) {
+      this.dispatch(constants.config.UPDATE_CONFIG, fixtures.demo.config);
+      this.dispatch(constants.network.UPDATE_NETWORK, fixtures.demo.network);
+      this.dispatch(constants.user.UPDATE_USER, fixtures.demo.user);
+      this.dispatch(constants.market.LOAD_DEMO_DATA, fixtures.demo.markets);
+      this.dispatch(constants.trade.LOAD_DEMO_DATA, fixtures.demo.trades);
+    }
+    else {
+      this.flux.actions.config.updateEthereumClient();
+      this.flux.actions.network.startMonitoring();
+    }
   };
 
   this.updateRange = function(range) {

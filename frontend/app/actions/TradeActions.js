@@ -90,6 +90,14 @@ var TradeActions = function() {
         var trades = this.flux.store("TradeStore").getState();
         var user = this.flux.store("UserStore").getState().user;
 
+        // Demo data dumper
+        if (this.flux.store('config').debug)
+            console.log("LOADED", {
+              markets: this.flux.store("MarketStore").getState(),
+              trades: trades,
+              user: this.flux.store("UserStore").getState()
+            });
+
         if (trades.type && trades.price && trades.amount && trades.total && market && user)
             this.flux.actions.trade.highlightFilling({
                 type: trades.type,

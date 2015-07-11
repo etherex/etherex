@@ -34,6 +34,7 @@ var TradeStore = Fluxxor.createStore({
             constants.trade.LOAD_TRADES_PROGRESS, this.onLoadTradesProgress,
             constants.trade.LOAD_TRADES_SUCCESS, this.onLoadTradesSuccess,
             constants.trade.LOAD_TRADES_FAIL, this.onTradesFail,
+            constants.trade.LOAD_DEMO_DATA, this.onLoadDemoData,
             constants.trade.UPDATE_TRADE, this.onUpdateTrade,
             constants.trade.UPDATE_TRADES, this.onUpdateTrades,
             constants.trade.UPDATE_TRADES_MESSAGE, this.onUpdateMessage,
@@ -74,6 +75,11 @@ var TradeStore = Fluxxor.createStore({
         this.percent = 0;
         this.progress = 0;
 
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onLoadDemoData: function(payload) {
+        _.merge(this, payload);
         this.emit(constants.CHANGE_EVENT);
     },
 

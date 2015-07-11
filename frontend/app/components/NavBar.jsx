@@ -7,12 +7,30 @@ var Router = require("react-router");
 var Link = Router.Link;
 
 var Tab = require("./Tab");
+var Button = require('react-bootstrap').Button;
 var UserLink = require("./UserLink");
 
 var NavBar = React.createClass({
   mixins: [IntlMixin],
 
-  render: function() {
+  getInitialState() {
+    return {
+      demoMode: false
+    };
+  },
+
+  componentWillReceiveProps(nextProps) {
+    var demoMode = nextProps.flux.store('config').demoMode;
+    this.setState({
+      demoMode: demoMode
+    });
+  },
+
+  disableDemoMode() {
+    this.props.flux.actions.config.updateDemoMode(false);
+  },
+
+  render() {
     return (
       <nav className="navbar navbar-default" role="navigation" aria-label="Primary">
         <div className="container-fluid">
@@ -47,9 +65,13 @@ var NavBar = React.createClass({
               </ul>
               <ul className="nav navbar-nav navbar-right">
                 <li>
-                  <UserLink address={this.props.user.user.id} showIcon={true} />
+                  <UserLink address={ this.props.user.user.id } showIcon={true} />
                 </li>
               </ul>
+              { this.state.demoMode &&
+                <ul className="nav navbar-nav navbar-right">
+                  <Button bsStyle="warning" style={{marginTop: 7}} onClick={this.disableDemoMode}>DEMO MODE</Button>
+                </ul> }
             </div>
           </div>
         </div>

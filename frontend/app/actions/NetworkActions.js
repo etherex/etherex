@@ -11,6 +11,12 @@ var NetworkActions = function() {
    * an error dialog can be displayed.
    */
   this.checkNetwork = function() {
+    var demoMode = this.flux.store('config').demoMode;
+    if (demoMode) {
+      this.flux.actions.network.stopMonitoring();
+      return;
+    }
+
     var ethereumClient = this.flux.store('config').getEthereumClient();
     var networkState = this.flux.store('network').getState();
 
@@ -196,6 +202,16 @@ var NetworkActions = function() {
 
       // Start network checking loop
       this.flux.actions.network.checkNetwork();
+    }
+  };
+
+  this.stopMonitoring = function () {
+    var networkState = this.flux.store('network').getState();
+
+    if (networkState.isMonitoring) {
+      this.dispatch(constants.network.UPDATE_IS_MONITORING_BLOCKS, {
+        isMonitoring: false
+      });
     }
   };
 
