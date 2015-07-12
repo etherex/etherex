@@ -2,18 +2,23 @@ var localesSupported = require('intl-locales-supported');
 var i18n = {
     locales: ['en-US']
 };
+
 if (window.Intl) {
   // Determine if the built-in `Intl` has the locale data we need.
   if (!localesSupported(i18n.locales)) {
     // `Intl` exists, but it doesn't have the data we need, so load the
     // polyfill and replace the constructors with need with the polyfill's.
-    require('intl');
-    Intl.NumberFormat   = window.IntlPolyfill.NumberFormat;
-    Intl.DateTimeFormat = window.IntlPolyfill.DateTimeFormat;
+    window.IntlPolyfill = require('intl/dist/Intl').IntlPolyfill;
+    window.Intl.NumberFormat   = window.IntlPolyfill.NumberFormat;
+    window.Intl.DateTimeFormat = window.IntlPolyfill.DateTimeFormat;
   }
 } else {
   // No `Intl`, so use and load the polyfill.
-  window.Intl = require('intl');
+  window.Intl = require("intl/dist/Intl").Intl;
+  window.IntlPolyfill = require("intl/dist/Intl").IntlPolyfill;
+  window.Intl.NumberFormat   = window.IntlPolyfill.NumberFormat;
+  window.Intl.DateTimeFormat = window.IntlPolyfill.DateTimeFormat;
+  require("intl/locale-data/jsonp/en-US");
 }
 
 var React = require("react/addons");

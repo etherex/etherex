@@ -2,6 +2,7 @@ var _ = require('lodash');
 var React = require("react");
 var ReactIntl = require('react-intl');
 var IntlMixin = ReactIntl.IntlMixin;
+var FormattedMessage = ReactIntl.FormattedMessage;
 // var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 var TransitionGroup = require('./TransitionGroup');
 
@@ -32,11 +33,11 @@ var TradeTable = React.createClass({
         <Table condensed hover responsive striped>
           <thead>
             <tr>
-              <th className="text-right">Amount</th>
-              <th className="text-center">Market</th>
-              <th className="text-right">Price</th>
-              <th className="text-right">Total</th>
-              <th className="text-center">By</th>
+              <th className="text-right"><FormattedMessage message={this.getIntlMessage('form.amount')} /></th>
+              <th className="text-right"><FormattedMessage message={this.getIntlMessage('form.market')} /></th>
+              <th className="text-right"><FormattedMessage message={this.getIntlMessage('form.price')} /></th>
+              <th className="text-right"><FormattedMessage message={this.getIntlMessage('form.total')} /></th>
+              <th className="text-center"><FormattedMessage message={this.getIntlMessage('by')} /></th>
               <th className="text-center trade-op"></th>
             </tr>
           </thead>

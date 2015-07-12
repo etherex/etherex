@@ -147,6 +147,7 @@ module.exports = {
       "withdraw": "Withdraw",
       "recipient": "Recipient",
       "address": "Address",
+      "market": "Market",
       "empty": "Fill it up mate!",
       "cheap": "Don't be cheap...",
       "warning": "Warning!",

@@ -1,7 +1,8 @@
 var _ = require('lodash');
 var React = require("react");
-// var ReactIntl = require('react-intl');
-// var IntlMixin = ReactIntl.IntlMixin;
+var ReactIntl = require('react-intl');
+var IntlMixin = ReactIntl.IntlMixin;
+var FormattedNumber = ReactIntl.FormattedNumber;
 
 var Button = require("react-bootstrap/lib/Button");
 var Glyphicon = require("react-bootstrap/lib/Glyphicon");
@@ -9,7 +10,7 @@ var Glyphicon = require("react-bootstrap/lib/Glyphicon");
 var utils = require("../js/utils");
 
 var TradeRow = React.createClass({
-  // mixins: [IntlMixin],
+  mixins: [IntlMixin],
 
   getInitialState: function() {
     return {
@@ -108,7 +109,8 @@ var TradeRow = React.createClass({
     return (
       <tr className={"trade-" + (!this.props.review ? this.props.trade.status : "review") +
                                 ((this.props.isOwn && !this.props.user.own) ? " disabled" : "")}
-          onMouseEnter={this.handleHover} onMouseLeave={this.handleHoverOut} onClick={this.handleClick}>
+          onMouseEnter={this.handleHover} onMouseLeave={this.handleHoverOut}
+          onClick={this.handleClick} onTouchStart={this.handleClick}>
         <td>
           <div className="text-right">
             {utils.numeral(this.props.trade.amount, this.props.market.decimals)}
@@ -126,7 +128,7 @@ var TradeRow = React.createClass({
         </td>
         <td>
           <div className="text-right">
-            {utils.numeral(this.props.trade.total, 4)} ETH
+            <FormattedNumber value={this.props.trade.total} /> ETH
           </div>
         </td>
         <td>
