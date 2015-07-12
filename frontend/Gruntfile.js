@@ -89,7 +89,7 @@ module.exports = function(grunt) {
         base: 'app',
         repo: 'git@github.com:etherex/etherex.git'
       },
-      src: ['index.html', 'app.js', '*.svg', '*.woff', '*.eot', '*.ttf']
+      src: ['index.html', 'app.js', '*.svg', '*.woff', '*.eot', '*.ttf', '*.ico']
     },
     clean: ["app/*.svg", "app/*.woff", "app/*.eot", "app/*.ttf", "app/app.js", "app/*.js.map"]
   });

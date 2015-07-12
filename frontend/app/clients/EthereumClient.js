@@ -476,7 +476,7 @@ var EthereumClient = function(params) {
 
         // Update current market's last price
         var trades = this.flux.store("TradeStore").getState();
-        if (!trades.loading && !trades.updating && toBlock == 'latest')
+        if (!trades.loading && !trades.updating && this.toBlock == 'latest')
           updateLastPrice(price);
 
         var priceLog = {
@@ -535,7 +535,7 @@ var EthereumClient = function(params) {
 
         // Update user's sub balance for that market
         var markets = this.flux.store("MarketStore").getState();
-        if (!markets.loading)
+        if (!markets.loading && this.toBlock == 'latest')
           updateSubBalance(market);
 
         // Update current market's deposits only
@@ -583,7 +583,7 @@ var EthereumClient = function(params) {
 
         // Update user's sub balance for that market
         var markets = this.flux.store("MarketStore").getState();
-        if (!markets.loading)
+        if (!markets.loading && this.toBlock == 'latest')
           updateSubBalance(market);
 
         // Update current market's withdrawals only
@@ -639,7 +639,7 @@ var EthereumClient = function(params) {
         // Update trade
         var id = web3.fromDecimal(log.args.tradeid);
         var trades = this.flux.store("TradeStore").getState();
-        if (!trades.loading && !trades.updating) {
+        if (!trades.loading && this.toBlock == 'latest') {
           this.flux.actions.trade.updateTrade(id, market);
         }
 
@@ -693,7 +693,7 @@ var EthereumClient = function(params) {
         // Update user's sub balance
         var sender = web3.fromDecimal(log.args.sender);
         var markets = this.flux.store("MarketStore").getState();
-        if (!markets.loading && sender == user.id)
+        if (!markets.loading && this.toBlock == 'latest' && sender == user.id)
           updateSubBalance(market);
 
         // Update current market's trades only
@@ -706,7 +706,7 @@ var EthereumClient = function(params) {
         // ADD_TRADE_SUCCESS when switching markets, as the transactions get
         // loaded after trades
         var id = web3.fromDecimal(log.args.tradeid);
-        if (!trades.loading && !trades.updating) {
+        if (!trades.loading && !trades.updating && this.toBlock == 'latest') {
           this.flux.actions.trade.addTradeSuccess(id, market, false);
         }
 
@@ -760,7 +760,7 @@ var EthereumClient = function(params) {
 
         // Update user's sub balance
         var markets = this.flux.store("MarketStore").getState();
-        if (!markets.loading)
+        if (!markets.loading && this.toBlock == 'latest')
           updateSubBalance(market);
 
         // Update current market's trades only
@@ -830,8 +830,12 @@ var EthereumClient = function(params) {
 
         // Update user's sub balance
         var markets = this.flux.store("MarketStore").getState();
-        if (!markets.loading)
+        if (!markets.loading && this.toBlock == 'latest') {
           updateSubBalance(market);
+
+          var alerts = this.flux.store('config').alertCount;
+          this.flux.actions.config.updateAlertCount(alerts + 1);
+        }
 
         // Update current market's trades only
         if (market.id != markets.market.id)

@@ -16,6 +16,7 @@ var ConfigStore = Fluxxor.createStore({
     this.rangeEnd = 0;
     this.timeout = 3600;
     this.si = false;
+    this.alertCount = null;
 
     this.bindActions(
       constants.config.UPDATE_CONFIG, this.handleUpdateConfig,
@@ -38,7 +39,8 @@ var ConfigStore = Fluxxor.createStore({
       range: this.range,
       rangeEnd: this.rangeEnd,
       timeout: this.timeout,
-      si: this.si
+      si: this.si,
+      alertCount: this.alertCount
     };
   },
 

@@ -39,7 +39,7 @@
     ]
   },
   "devDependencies": {
-    "babel-core": "^5.6.17",
+    "babel-core": "^5.6.18",
     "babel-loader": "^5.3.1",
     "css-loader": "^0.15.2",
     "grunt": "^0.4.5",
@@ -70,12 +70,13 @@
     "d3": "^3.5.6",
     "file-loader": "^0.8.4",
     "fluxxor": "^1.6.0",
-    "intl": "^0.1.4",
+    "intl": "^1.0.0",
     "intl-locales-supported": "^1.0.0",
     "jquery": "^2.1.4",
     "lodash": "^3.10.0",
     "numeral": "^1.5.3",
     "react": "^0.13.3",
+    "react-favicon": "caktux/react-favicon",
     "react-intl": "^1.2.0",
     "react-router": "^0.13.3",
     "si-prefix": "^0.1.0",

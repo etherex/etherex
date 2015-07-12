@@ -28,7 +28,9 @@ var GraphPrice = require('./GraphPriceTechan');
 var Network = require('./Network');
 
 var constants = require('../js/constants');
+var fixtures = require('../js/fixtures');
 var UAParser = require('ua-parser-js');
+var Favicon = require('react-favicon');
 
 var EtherExApp = React.createClass({
   mixins: [IntlMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore")],
@@ -174,6 +176,8 @@ var EtherExApp = React.createClass({
         </footer>
 
         <ErrorModal flux={ this.state.flux } network={ this.state.network } config={ this.state.config } theme={ this.state.theme } />
+
+        <Favicon url={fixtures.favicon} animated={false} alertCount={ this.state.config.alertCount } />
       </div>
     );
   }
@@ -282,6 +286,8 @@ var ErrorModal = React.createClass({
         isModalOpen: true
       });
       openModal = true;
+      if (!nextProps.config.alertCount && !nextProps.config.demoMode)
+        this.props.flux.actions.config.updateAlertCount(1);
     }
     else if (!nextProps.network.ready || nextProps.config.percentLoaded < 100) {
 
@@ -296,17 +302,21 @@ var ErrorModal = React.createClass({
       this.setState({
         isModalOpen: true,
         isLoading: true,
-        blocksLeft: this.props.network.blockChainAge / constants.SECONDS_PER_BLOCK,
+        blocksLeft: nextProps.network.blockChainAge / constants.SECONDS_PER_BLOCK,
         lastBlockAge: lastBlockAge,
         percentLoaded: nextProps.config.percentLoaded
       });
       openModal = true;
+      if (!nextProps.config.alertCount && !nextProps.config.demoMode)
+        this.props.flux.actions.config.updateAlertCount(1);
     }
-    else {
+    else if (this.state.isModalOpen) {
       this.setState({
         isModalOpen: false,
         isLoading: false
       });
+      if (nextProps.config.alertCount && this.state.isLoading)
+        this.props.flux.actions.config.updateAlertCount(null);
     }
 
     if (!openModal)
@@ -317,7 +327,7 @@ var ErrorModal = React.createClass({
     var modalFooter = this.state.modalFooter;
     var modalSize = this.state.modalSize;
 
-    if (this.props.config.ethereumClientFailed) {
+    if (nextProps.config.ethereumClientFailed) {
       // EtherEx client failed to load
       modalHeader = <FormattedMessage message={this.getIntlMessage('init.failed.header')} />;
       modalBody =
@@ -333,7 +343,7 @@ var ErrorModal = React.createClass({
           </div>;
       modalSize = 'medium';
 
-    } else if (this.props.network.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED) {
+    } else if (nextProps.network.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED) {
       // No ethereum client detected
       modalHeader = <FormattedMessage message={this.getIntlMessage('init.connect.failed')} />;
       modalBody =
@@ -356,15 +366,15 @@ var ErrorModal = React.createClass({
       modalBody =
         <div>
           <h4><FormattedMessage message={this.getIntlMessage('init.loading')} /></h4>
-          { this.props.network.ready ?
+          { nextProps.network.ready ?
             <p><FormattedMessage message={this.getIntlMessage('init.ready')} /></p> :
             <p>
               <FormattedHTMLMessage
                 message={this.getIntlMessage('init.not_ready')}
-                peers={this.props.network.peerCount} />
+                peers={nextProps.network.peerCount} />
             </p>
           }
-          <ProgressBar active bsStyle={this.props.network.ready ? 'success' : 'default'} now={this.state.percentLoaded} />
+          <ProgressBar active bsStyle={nextProps.network.ready ? 'success' : 'default'} now={this.state.percentLoaded} />
           <p>
             <FormattedMessage
               message={this.getIntlMessage('init.block.age')}
@@ -376,7 +386,7 @@ var ErrorModal = React.createClass({
               left={parseInt(this.state.blocksLeft)} />
           </p>
         </div>;
-      modalFooter = !this.props.network.ready &&
+      modalFooter = !nextProps.network.ready &&
                       <Button className="pull-right" onClick={ this.forceLoad }>
                         <FormattedMessage message={this.getIntlMessage('init.force')} />
                       </Button>;
@@ -396,6 +406,7 @@ var ErrorModal = React.createClass({
 
   closeModal() {
     this.setState({ isModalOpen: false });
+    this.props.flux.actions.config.updateAlertCount(null);
   },
 
   startDemoMode() {
@@ -409,6 +420,7 @@ var ErrorModal = React.createClass({
 
   forceLoad() {
     this.props.flux.actions.config.forceLoad();
+    this.props.flux.actions.config.updateAlertCount(null);
   },
 
   render() {

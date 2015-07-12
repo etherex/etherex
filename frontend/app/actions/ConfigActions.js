@@ -176,6 +176,12 @@ var ConfigActions = function() {
     }
   };
 
+  this.updateAlertCount = function(count) {
+    this.dispatch(constants.config.UPDATE_CONFIG, {
+      alertCount: count
+    });
+  };
+
   this.updateRange = function(range) {
     this.dispatch(constants.config.UPDATE_CONFIG, {
       range: range

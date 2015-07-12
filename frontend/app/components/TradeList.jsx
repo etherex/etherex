@@ -98,8 +98,10 @@ var TradeList = React.createClass({
             </div>
         </div>
         <div className="row">
-          {this.props.trades.error &&
-            <AlertDismissable ref="alerts" level={"warning"} message={this.props.trades.error} show={true} />}
+          { this.props.trades.error &&
+              <div className="col-md-12">
+                <AlertDismissable ref="alerts" level={"warning"} message={this.props.trades.error} show={true} />
+              </div> }
           <div className="visible-xs visible-sm">
             {
               (this.props.trades.type == 1) ?

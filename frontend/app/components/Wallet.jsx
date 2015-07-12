@@ -16,25 +16,29 @@ var TxsList = require("./TxsList");
 var Wallet = React.createClass({
   mixins: [IntlMixin],
 
-  getInitialState: function() {
+  getInitialState() {
     return {
       alertLevel: 'info',
       alertMessage: ''
     };
   },
 
-  setAlert: function(alertLevel, alertMessage) {
+  componentDidMount() {
+    this.props.flux.actions.config.updateAlertCount(null);
+  },
+
+  setAlert(alertLevel, alertMessage) {
     this.setState({
       alertLevel: alertLevel,
       alertMessage: alertMessage
     });
   },
 
-  showAlert: function(show) {
+  showAlert(show) {
     this.refs.alerts.setState({alertVisible: show});
   },
 
-  render: function() {
+  render() {
     return (
       <div>
         <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />

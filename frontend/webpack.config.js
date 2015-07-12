@@ -23,9 +23,9 @@ module.exports = {
       { test: /\.ttf$/, loader: "file" },
       { test: /\.eot$/, loader: "file" },
       { test: /\.svg$/, loader: "file" },
-      { test: /\.gif/, loader: 'url?limit=10000&minetype=image/gif' },
-      { test: /\.jpg/, loader: 'url?limit=10000&minetype=image/jpg' },
-      { test: /\.png/, loader: 'url?limit=10000&minetype=image/png' }
+      { test: /\.gif/, loader: 'url?limit=10000&mimetype=image/gif' },
+      { test: /\.jpg/, loader: 'url?limit=10000&mimetype=image/jpg' },
+      { test: /\.png/, loader: 'url?limit=10000&mimetype=image/png' }
     ]
   }
 };
