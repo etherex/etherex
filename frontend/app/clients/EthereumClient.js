@@ -56,7 +56,7 @@ var EthereumClient = function(params) {
       if (error)
         utils.error(error);
       if (error && params.error)
-        params.error("Error getting last block number.")
+        params.error("Error getting last block number.");
 
       if (this.rangeEnd !== 0)
         toBlock = this.rangeEnd;
