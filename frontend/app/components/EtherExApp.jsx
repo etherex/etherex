@@ -297,7 +297,7 @@ var ErrorModal = React.createClass({
       if (nextProps.network.blockChainAge >= now)
         lastBlockAge = <FormattedMessage message={this.getIntlMessage('init.block.genesis')} />;
       else
-        lastBlockAge = <FormattedRelative value={now - nextProps.network.blockChainAge * 1000} />;
+        lastBlockAge = <FormattedRelative value={nextProps.network.blockTimestamp * 1000} />;
 
       this.setState({
         isModalOpen: true,

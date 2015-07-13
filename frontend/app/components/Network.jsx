@@ -4,6 +4,7 @@ var IntlMixin = ReactIntl.IntlMixin;
 var FormattedDate = ReactIntl.FormattedDate;
 var FormattedNumber = ReactIntl.FormattedNumber;
 var FormattedMessage = ReactIntl.FormattedMessage;
+var FormattedRelative = ReactIntl.FormattedRelative;
 var Fluxxor = require("fluxxor");
 var StoreWatchMixin = Fluxxor.StoreWatchMixin;
 
@@ -16,6 +17,7 @@ var Network = React.createClass({
     var networkState = this.props.flux.store('network').getState();
     return {
       user: this.props.flux.store('UserStore').getState().user,
+      config: this.props.flux.store('config').getState(),
       network: networkState,
       host: this.props.flux.store('config').getState().host,
       blockTimestamp: networkState.blockTimestamp,
@@ -137,11 +139,13 @@ var Network = React.createClass({
                 { this.state.blockTime ?
                     <FormattedMessage message={this.getIntlMessage('blocktime')}
                                       time={this.state.blockTime} /> : '-' } /{' '}
-                  <span className={'text-' + this.state.lastState}>
-                    { this.state.lastBlock ?
+                <span className={'text-' + this.state.lastState}>
+                  { this.state.lastBlock ?
+                    ( this.state.lastBlock < this.state.config.timeout ?
                       <FormattedMessage message={this.getIntlMessage('blocktime')}
-                                        time={this.state.lastBlock} /> : '-' }
-                  </span>
+                                        time={this.state.lastBlock} /> :
+                      <FormattedRelative value={this.state.blockTimestamp * 1000} /> ) : '-' }
+                </span>
               </span>
           </p>
           <p className="net-lag">

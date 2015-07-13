@@ -22,8 +22,13 @@ var EthereumClient = function(params) {
     var ContractABI = web3.eth.contract(abi.etherex);
     this.contract = ContractABI.at(params.address);
 
-    if (params.error && web3.eth.getCode(params.address) == "0x")
-        params.error("Unable to find contract!");
+    if (params.error)
+      web3.eth.getCode(params.address, function(error, result) {
+        if (error)
+          utils.error(error);
+        if (error || result == "0x")
+          params.error("Unable to find contract!");
+      });
 
     this.address = params.address;
     this.debug = params.debug;
@@ -45,18 +50,26 @@ var EthereumClient = function(params) {
 
     // fromBlock / toBlock
     var toBlock = 'latest';
-    var toBlockNumber = web3.eth.blockNumber;
-    if (this.rangeEnd !== 0)
-      toBlock = this.rangeEnd;
-    var fromBlock = toBlockNumber - (toBlockNumber >= this.range ? this.range : 0);
-    if (fromBlock >= toBlock || fromBlock < 0)
-      fromBlock = 0;
-
-    this.fromBlock = fromBlock;
+    this.fromBlock = null;
     this.toBlock = toBlock;
+    web3.eth.getBlockNumber( function(error, result) {
+      if (error)
+        utils.error(error);
+      if (error && params.error)
+        params.error("Error getting last block number.")
+
+      if (this.rangeEnd !== 0)
+        toBlock = this.rangeEnd;
+      var fromBlock = result - (result >= this.range ? this.range : 0);
+      if (fromBlock >= toBlock || fromBlock < 0)
+        fromBlock = 0;
+
+      this.fromBlock = fromBlock;
+      this.toBlock = toBlock;
+    }.bind(this));
   }
   catch(e) {
-    utils.error("Some web3.js error...", e);
+    utils.error("web3 error: ", e);
   }
 
   this.isAvailable = function() {
