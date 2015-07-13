@@ -50,23 +50,15 @@ var EthereumClient = function(params) {
 
     // fromBlock / toBlock
     var toBlock = 'latest';
-    this.fromBlock = null;
+    var toBlockNumber = web3.eth.blockNumber;
+    if (this.rangeEnd !== 0)
+      toBlock = this.rangeEnd;
+    var fromBlock = toBlockNumber - (toBlockNumber >= this.range ? this.range : 0);
+    if (fromBlock >= toBlock || fromBlock < 0)
+      fromBlock = 0;
+
+    this.fromBlock = fromBlock;
     this.toBlock = toBlock;
-    web3.eth.getBlockNumber( function(error, result) {
-      if (error)
-        utils.error(error);
-      if (error && params.error)
-        params.error("Error getting last block number.");
-
-      if (this.rangeEnd !== 0)
-        toBlock = this.rangeEnd;
-      var fromBlock = result - (result >= this.range ? this.range : 0);
-      if (fromBlock >= toBlock || fromBlock < 0)
-        fromBlock = 0;
-
-      this.fromBlock = fromBlock;
-      this.toBlock = toBlock;
-    }.bind(this));
   }
   catch(e) {
     utils.error("web3 error: ", e);
