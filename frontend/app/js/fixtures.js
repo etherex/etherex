@@ -10,7 +10,7 @@ var fixtures = {
   precision: precision,
   addresses: {
       nameregs: ["0xb46312830127306cd3de3b84dbdb51899613719d", "0xda7ce79725418f4f6e13bf5f520c89cec5f6a974"],
-      etherex: "0x77045e71a7a2c50903d88e564cd72fab11e82051"
+      etherex: "0x761fe08a3616fc3bf91e42135a116b7bc3a0cbe4"
   },
   categories: [
     {
@@ -65,7 +65,7 @@ var fixtures = {
         "lastPrice": 0.245,
         "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
         "block": 25,
-        "total_trades": 7,
+        "total_trades": 13,
         "balance": 690000,
         "favorite": true,
         "dayChange": "-8.70 %",
@@ -516,7 +516,7 @@ var fixtures = {
           "lastPrice": 0.245,
           "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
           "block": 25,
-          "total_trades": 7,
+          "total_trades": 13,
           "balance": 690000,
           "favorite": true,
           "dayChange": "-8.70 %",
@@ -966,7 +966,7 @@ var fixtures = {
           "lastPrice": 0.024,
           "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
           "block": 28,
-          "total_trades": 5,
+          "total_trades": 9,
           "balance": 3000000,
           "favorite": true,
           "dayChange": "-",
@@ -1014,35 +1014,35 @@ var fixtures = {
       "trades": {
         "buys": [
           {
-            "id": "-0x3e2df7a25b4bc76855f160c502e23ed59de7320ea398e2f0f4383d77d78f5524",
+            "id": "-0x3a0bda455e4434e7b9a2eff4e6c6e722266f27d4acd4c259d9d1880e2f3261c7",
             "type": "buys",
             "price": 0.24,
-            "amount": 100,
-            "total": 24,
+            "amount": 50,
+            "total": 12,
             "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
             "market": {
               "id": 1,
               "name": "ETX"
             },
             "status": "mined",
-            "block": 2497
+            "block": 875428
           },
           {
-            "id": "-0xd288d90ed8f488cf2946c2408912ddc8004f5b2f18d03bd3311ba2f6a814c2cd",
+            "id": "-0xe6928c317ecbd7877ef708e0447839b0429448ee4950d448b59be2b6607a3971",
             "type": "buys",
             "price": 0.23,
-            "amount": 75,
-            "total": 17.25,
+            "amount": 50,
+            "total": 11.5,
             "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
             "market": {
               "id": 1,
               "name": "ETX"
             },
             "status": "mined",
-            "block": 1849
+            "block": 875426
           },
           {
-            "id": "-0x91cdd5f73c1da43db7aa568dd27b36c54a2e885601c89749422206fc6070f526",
+            "id": "-0x7aebc2f9c1c2be1e337e612825ad35a8ceb8ec596723fb29a79046a63a17766c",
             "type": "buys",
             "price": 0.22,
             "amount": 50,
@@ -1053,12 +1053,40 @@ var fixtures = {
               "name": "ETX"
             },
             "status": "mined",
-            "block": 161
+            "block": 875426
+          },
+          {
+            "id": "-0xd7b8ea6c21816e3fddbe916aebbc515c44dfdce84373d1de2db4343015f5127c",
+            "type": "buys",
+            "price": 0.21,
+            "amount": 50,
+            "total": 10.5,
+            "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
+            "market": {
+              "id": 1,
+              "name": "ETX"
+            },
+            "status": "mined",
+            "block": 875428
           }
         ],
         "sells": [
           {
-            "id": "-0x12fd8c41a53f537a6302fbfe6e681e4d0b018a6885f9d042d0ea07911acbb594",
+            "id": "-0x5dfe7749c4ddf97c55783fbbcd4f05fdeb7ce623108dbb92bb6be1301c54c212",
+            "type": "sells",
+            "price": 0.25,
+            "amount": 150,
+            "total": 37.5,
+            "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
+            "market": {
+              "id": 1,
+              "name": "ETX"
+            },
+            "status": "mined",
+            "block": 875424
+          },
+          {
+            "id": "-0xd84efd3e6504215e5b73a674e8a35a09aaffd32277ba556511176b782bb342b1",
             "type": "sells",
             "price": 0.25,
             "amount": 250,
@@ -1069,10 +1097,10 @@ var fixtures = {
               "name": "ETX"
             },
             "status": "mined",
-            "block": 2461
+            "block": 875424
           },
           {
-            "id": "-0x92d19a32d108e1919f6d9c656093a4a8a841509cc41c5c348ce114cdf456c5f8",
+            "id": "-0xd3ae03fab932d794ddfe7acdc338ea37cc25fcf8f8d1ba9fe9b0e5208256015f",
             "type": "sells",
             "price": 0.26,
             "amount": 350,
@@ -1083,172 +1111,114 @@ var fixtures = {
               "name": "ETX"
             },
             "status": "mined",
-            "block": 1838
-          }
-        ],
-        "tradeBuys": [
-          {
-            "id": "-0x3e2df7a25b4bc76855f160c502e23ed59de7320ea398e2f0f4383d77d78f5524",
-            "type": "buys",
-            "price": 0.24,
-            "amount": 100,
-            "total": 24,
-            "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
-            "market": {
-              "id": 1,
-              "name": "ETX"
-            },
-            "status": "mined",
-            "block": 2497
+            "block": 875424
           },
           {
-            "id": "-0xd288d90ed8f488cf2946c2408912ddc8004f5b2f18d03bd3311ba2f6a814c2cd",
-            "type": "buys",
-            "price": 0.23,
-            "amount": 75,
-            "total": 17.25,
-            "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
-            "market": {
-              "id": 1,
-              "name": "ETX"
-            },
-            "status": "mined",
-            "block": 1849
-          },
-          {
-            "id": "-0x91cdd5f73c1da43db7aa568dd27b36c54a2e885601c89749422206fc6070f526",
-            "type": "buys",
-            "price": 0.22,
-            "amount": 50,
-            "total": 11,
-            "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
-            "market": {
-              "id": 1,
-              "name": "ETX"
-            },
-            "status": "mined",
-            "block": 161
-          }
-        ],
-        "tradeSells": [
-          {
-            "id": "-0x12fd8c41a53f537a6302fbfe6e681e4d0b018a6885f9d042d0ea07911acbb594",
+            "id": "-0x1444f6eb306fae50db5d9af2fb4e61e9b1dbf65bd74b8b14b85a32cdb7efdc4c",
             "type": "sells",
-            "price": 0.25,
+            "price": 0.27,
+            "amount": 450,
+            "total": 121.50000000000001,
+            "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
+            "market": {
+              "id": 1,
+              "name": "ETX"
+            },
+            "status": "mined",
+            "block": 875424
+          },
+          {
+            "id": "-0xd0511cb50e0645b386e6958d587de78f26f136ad8a96190af61aa06e5202629e",
+            "type": "sells",
+            "price": 0.28,
+            "amount": 550,
+            "total": 154.00000000000003,
+            "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
+            "market": {
+              "id": 1,
+              "name": "ETX"
+            },
+            "status": "mined",
+            "block": 875426
+          },
+          {
+            "id": "0x9437490062c7c71e2cda06c255d46adf5da7bb315f7f1dd34d1713a9f6f0e86",
+            "type": "sells",
+            "price": 0.29,
+            "amount": 15,
+            "total": 4.35,
+            "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
+            "market": {
+              "id": 1,
+              "name": "ETX"
+            },
+            "status": "mined",
+            "block": 875426
+          },
+          {
+            "id": "-0x51dc0f5b65f03b21591c4a0839f22bef37b241a2b1b9865fd696df7d09af37da",
+            "type": "sells",
+            "price": 0.3,
             "amount": 250,
-            "total": 62.5,
+            "total": 75,
             "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
             "market": {
               "id": 1,
               "name": "ETX"
             },
             "status": "mined",
-            "block": 2461
+            "block": 875424
           },
           {
-            "id": "-0x92d19a32d108e1919f6d9c656093a4a8a841509cc41c5c348ce114cdf456c5f8",
+            "id": "-0x7a3d7d3d5b7b9de36cb6cafbfa5e478875ef13b37ad32577c02ef2c27d483e33",
             "type": "sells",
-            "price": 0.26,
-            "amount": 350,
-            "total": 91,
+            "price": 0.31,
+            "amount": 250,
+            "total": 77.5,
             "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
             "market": {
               "id": 1,
               "name": "ETX"
             },
             "status": "mined",
-            "block": 1838
+            "block": 875424
+          },
+          {
+            "id": "-0x5c4cf7ae3f2bfd1405547b3090deff9577fbeb3f7325af959c2da865d82071f6",
+            "type": "sells",
+            "price": 0.32,
+            "amount": 250,
+            "total": 80,
+            "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
+            "market": {
+              "id": 1,
+              "name": "ETX"
+            },
+            "status": "mined",
+            "block": 875426
           }
         ]
       },
-      "tradeBuys": [
-        {
-          "id": "-0x3e2df7a25b4bc76855f160c502e23ed59de7320ea398e2f0f4383d77d78f5524",
-          "type": "buys",
-          "price": 0.24,
-          "amount": 100,
-          "total": 24,
-          "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
-          "market": {
-            "id": 1,
-            "name": "ETX"
-          },
-          "status": "mined",
-          "block": 2497
-        },
-        {
-          "id": "-0xd288d90ed8f488cf2946c2408912ddc8004f5b2f18d03bd3311ba2f6a814c2cd",
-          "type": "buys",
-          "price": 0.23,
-          "amount": 75,
-          "total": 17.25,
-          "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
-          "market": {
-            "id": 1,
-            "name": "ETX"
-          },
-          "status": "mined",
-          "block": 1849
-        },
-        {
-          "id": "-0x91cdd5f73c1da43db7aa568dd27b36c54a2e885601c89749422206fc6070f526",
-          "type": "buys",
-          "price": 0.22,
-          "amount": 50,
-          "total": 11,
-          "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
-          "market": {
-            "id": 1,
-            "name": "ETX"
-          },
-          "status": "mined",
-          "block": 161
-        }
-      ],
-      "tradeSells": [
-        {
-          "id": "-0x12fd8c41a53f537a6302fbfe6e681e4d0b018a6885f9d042d0ea07911acbb594",
-          "type": "sells",
-          "price": 0.25,
-          "amount": 250,
-          "total": 62.5,
-          "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
-          "market": {
-            "id": 1,
-            "name": "ETX"
-          },
-          "status": "mined",
-          "block": 2461
-        },
-        {
-          "id": "-0x92d19a32d108e1919f6d9c656093a4a8a841509cc41c5c348ce114cdf456c5f8",
-          "type": "sells",
-          "price": 0.26,
-          "amount": 350,
-          "total": 91,
-          "owner": "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
-          "market": {
-            "id": 1,
-            "name": "ETX"
-          },
-          "status": "mined",
-          "block": 1838
-        }
-      ],
       "loading": false,
       "updating": false,
       "error": null,
       "title": "Trades",
       "percent": 100,
-      "progress": 7,
+      "progress": 13,
       "tradeIDs": [
-        "0x0",
-        "-0x3e2df7a25b4bc76855f160c502e23ed59de7320ea398e2f0f4383d77d78f5524",
-        "-0x12fd8c41a53f537a6302fbfe6e681e4d0b018a6885f9d042d0ea07911acbb594",
-        "0x0",
-        "-0xd288d90ed8f488cf2946c2408912ddc8004f5b2f18d03bd3311ba2f6a814c2cd",
-        "-0x92d19a32d108e1919f6d9c656093a4a8a841509cc41c5c348ce114cdf456c5f8",
-        "-0x91cdd5f73c1da43db7aa568dd27b36c54a2e885601c89749422206fc6070f526"
+        "-0xd7b8ea6c21816e3fddbe916aebbc515c44dfdce84373d1de2db4343015f5127c",
+        "-0x3a0bda455e4434e7b9a2eff4e6c6e722266f27d4acd4c259d9d1880e2f3261c7",
+        "-0x5c4cf7ae3f2bfd1405547b3090deff9577fbeb3f7325af959c2da865d82071f6",
+        "-0x7aebc2f9c1c2be1e337e612825ad35a8ceb8ec596723fb29a79046a63a17766c",
+        "-0xe6928c317ecbd7877ef708e0447839b0429448ee4950d448b59be2b6607a3971",
+        "0x9437490062c7c71e2cda06c255d46adf5da7bb315f7f1dd34d1713a9f6f0e86",
+        "-0xd0511cb50e0645b386e6958d587de78f26f136ad8a96190af61aa06e5202629e",
+        "-0x1444f6eb306fae50db5d9af2fb4e61e9b1dbf65bd74b8b14b85a32cdb7efdc4c",
+        "-0xd3ae03fab932d794ddfe7acdc338ea37cc25fcf8f8d1ba9fe9b0e5208256015f",
+        "-0xd84efd3e6504215e5b73a674e8a35a09aaffd32277ba556511176b782bb342b1",
+        "-0x5dfe7749c4ddf97c55783fbbcd4f05fdeb7ce623108dbb92bb6be1301c54c212",
+        "-0x7a3d7d3d5b7b9de36cb6cafbfa5e478875ef13b37ad32577c02ef2c27d483e33",
+        "-0x51dc0f5b65f03b21591c4a0839f22bef37b241a2b1b9865fd696df7d09af37da"
       ],
       "type": 1,
       "price": null,
