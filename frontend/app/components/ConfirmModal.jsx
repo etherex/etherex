@@ -25,6 +25,7 @@ var ConfirmModal = React.createClass({
       this.setState({
         tradeTable:
           <TradeTable
+            {...this.context}
             type={nextProps.type}
             tradeList={nextProps.tradeList}
             market={nextProps.market}
