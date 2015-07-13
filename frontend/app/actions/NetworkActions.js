@@ -70,8 +70,9 @@ var NetworkActions = function() {
         }
 
         var blocksRemaining = networkState.blockChainAge / constants.SECONDS_PER_BLOCK;
+        var totalBlocks = networkState.blockNumber + blocksRemaining;
         this.dispatch(constants.config.UPDATE_PERCENT_LOADED_SUCCESS, {
-          percentLoaded: (networkState.blockNumber - blocksRemaining) * 100 / networkState.blockNumber
+          percentLoaded: (totalBlocks - blocksRemaining) * 100 / totalBlocks
         });
 
         // Load user addresses if they weren't
