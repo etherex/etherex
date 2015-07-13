@@ -105,6 +105,7 @@ module.exports = {
     },
     "nav": {
       "toggle": "Toggle navigation",
+      "categories": "Categories",
       "trades": "Trades",
       "markets": "Markets",
       "wallet": "Wallet",

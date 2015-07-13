@@ -136,6 +136,10 @@ tr.disabled td {
   color: #ddd; /*#00bc8c*/
 }
 
+.theme-flatly .navbar-default .navbar-toggle {
+  color: #fff;
+}
+
 .theme-flatly .nav-pills > li > a:hover,
 .theme-flatly .nav-pills > li > a:focus {
   color: inherit;

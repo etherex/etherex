@@ -46,26 +46,26 @@ var NavBar = React.createClass({
           <div className="nav">
             <div className="collapse navbar-collapse" id="navbar-collapse">
               <ul className="nav navbar-nav">
-                <Tab to="home">
+                <Tab to="home" data-toggle="collapse" data-target="#navbar-collapse">
                   <i className="glyphicon glyphicon-stats"></i> &nbsp;
                   <FormattedMessage message={this.getIntlMessage('nav.trades')} />
                 </Tab>
-                <Tab to="markets" className="icon-chart-line"> &nbsp;
+                <Tab to="markets" className="icon-chart-line" data-toggle="collapse" data-target="#navbar-collapse"> &nbsp;
                   <FormattedMessage message={this.getIntlMessage('nav.markets')} />
                 </Tab>
-                <Tab to="wallet" className="icon-wallet"> &nbsp;
+                <Tab to="wallet" className="icon-wallet" data-toggle="collapse" data-target="#navbar-collapse"> &nbsp;
                   <FormattedMessage message={this.getIntlMessage('nav.wallet')} />
                 </Tab>
-                <Tab to="tools" className="icon-cog-alt"> &nbsp;
+                <Tab to="tools" className="icon-cog-alt" data-toggle="collapse" data-target="#navbar-collapse"> &nbsp;
                   <FormattedMessage message={this.getIntlMessage('nav.tools')} />
                 </Tab>
-                <Tab to="help" className="icon-help">
+                <Tab to="help" className="icon-help" data-toggle="collapse" data-target="#navbar-collapse">
                   <FormattedMessage message={this.getIntlMessage('nav.help')} />
                 </Tab>
               </ul>
               <ul className="nav navbar-nav navbar-right">
                 <li>
-                  <UserLink address={ this.props.user.user.id } showIcon={true} />
+                  <UserLink address={ this.props.user.user.id } showIcon={true} data-toggle="collapse" data-target="#navbar-collapse" />
                 </li>
               </ul>
               { this.state.demoMode &&

@@ -110,7 +110,7 @@ var TradeRow = React.createClass({
       <tr className={"trade-" + (!this.props.review ? this.props.trade.status : "review") +
                                 ((this.props.isOwn && !this.props.user.own) ? " disabled" : "")}
           onMouseEnter={this.handleHover} onMouseLeave={this.handleHoverOut}
-          onClick={this.handleClick} onTouchStart={this.handleClick}>
+          onClick={this.handleClick} onFocus={this.handleClick}>
         <td>
           <div className="text-right">
             {utils.numeral(this.props.trade.amount, this.props.market.decimals)}
