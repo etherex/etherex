@@ -101,10 +101,14 @@ var RangeSelect = React.createClass({
   render: function() {
     return (
       <div className="container-fluid row">
-        <form className="form-horizontal" role="form">
-          <ButtonGroup className="pull-right">
-            <Button># {utils.numeral(this.state.block, 0)}</Button>
-            <Button>
+        <form className="form-horizontal row" role="form">
+          <ButtonGroup className="col-xs-12 col-sm-8 col-lg-9" pullRight>
+            <Button className="col-xs-4 col-sm-2">
+              <div className="text-overflow">
+                # {utils.numeral(this.state.block, 0)}
+              </div>
+            </Button>
+            <Button className="col-xs-6 col-sm-8">
               <input
                 ref="range"
                 type="range"
@@ -116,10 +120,14 @@ var RangeSelect = React.createClass({
                 defaultValue={this.state.block}
                 />
             </Button>
-            <Button className={this.state.live + " btn-default"} value="live" onClick={this.handleRangeEnd}>live</Button>
-            <Button className={this.state.last15 + " btn-primary"} value={75} onClick={this.handleRange}>15m</Button>
-            <Button className={this.state.last30 + " btn-primary"} value={150} onClick={this.handleRange}>30m</Button>
-            <Button className={this.state.last60 + " btn-primary"} value={300} onClick={this.handleRange}>1h</Button>
+            <Button className={this.state.live + " btn-default col-xs-2"} value="live" onClick={this.handleRangeEnd}>live</Button>
+          </ButtonGroup>
+          <ButtonGroup className="col-xs-12 col-sm-4 col-lg-3">
+            <div className="pull-right">
+              <Button className={this.state.last15 + " btn-primary"} value={75} onClick={this.handleRange}>15m</Button>
+              <Button className={this.state.last30 + " btn-primary"} value={150} onClick={this.handleRange}>30m</Button>
+              <Button className={this.state.last60 + " btn-primary"} value={300} onClick={this.handleRange}>1h</Button>
+            </div>
           </ButtonGroup>
         </form>
       </div>

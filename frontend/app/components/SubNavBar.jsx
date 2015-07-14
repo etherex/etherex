@@ -1,3 +1,4 @@
+var _ = require("lodash");
 var React = require("react");
 var ReactIntl = require('react-intl');
 var IntlMixin = ReactIntl.IntlMixin;
@@ -6,34 +7,65 @@ var FormattedMessage = ReactIntl.FormattedMessage;
 var Button = require('react-bootstrap').Button;
 var SubTab = require("./SubTab");
 
+var fixtures = require('../js/fixtures');
+
 var SubNavBar = React.createClass({
   mixins: [IntlMixin],
+
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+
+  getInitialState: function () {
+    var marketSections = _.pluck(fixtures.categories, 'key');
+    marketSections.push('markets');
+
+    return {
+      category: this.context.router.getCurrentRoutes()[1].name,
+      marketSections: marketSections
+    };
+  },
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps) {
+      var category = this.context.router.getCurrentRoutes()[1].name;
+      this.setState({
+        category: category
+      });
+    }
+  },
 
   render: function() {
     return (
       <div role="navigation" aria-label="Secondary">
-        <div className="navbar-toggle" style={{margin: 0, marginRight: -10}}>
-          <Button bsSize="large" className="text-overflow btn-balance" data-toggle="collapse" data-target="#subnav-collapse">
-            <span className="sr-only">
-              <FormattedMessage message={this.getIntlMessage('nav.toggle')} />
-            </span>
-            <div className="text-center">
-              <span className="btn-xs glyphicon glyphicon-th-list"></span> <FormattedMessage message={this.getIntlMessage('nav.categories')} />
+        { _.includes(this.state.marketSections, this.state.category) &&
+          <div className="visible-xs visible-sm navbar">
+            <div className="col-md-12">
+              <div className="navbar-toggle btn-block" style={{padding: 0, margin: 0}}>
+                <Button bsSize="large" className="text-overflow btn-balance" data-toggle="collapse" data-target="#subnav-collapse">
+                  <span className="sr-only">
+                    <FormattedMessage message={this.getIntlMessage('nav.toggle')} />
+                  </span>
+                  <div className="text-center">
+                    <FormattedMessage message={this.getIntlMessage('nav.categories')} />
+                  </div>
+                </Button>
+              </div>
             </div>
-          </Button>
-        </div>
+          </div>
+        }
         <div className="collapse navbar-collapse row" id="subnav-collapse">
-          <ul className="nav nav-pills nav-lg nav-justified" id="subnav-collapse">
-            <SubTab to="subs" style={{color: '#000'}}>
+          <ul className="nav navbar nav-pills nav-lg nav-justified">
+            <SubTab to="subs" data-toggle="collapse" data-target="#subnav-collapse.in">
               <i className="icon-chart-pie"></i> <FormattedMessage message={this.getIntlMessage('sections.sub')} />
             </SubTab>
-            <SubTab to="xchain">
+            <SubTab to="xchain" data-toggle="collapse" data-target="#subnav-collapse.in">
               <i className="icon-bitcoin"></i> <FormattedMessage message={this.getIntlMessage('sections.xchain')} />
             </SubTab>
-            <SubTab to="assets">
+            <SubTab to="assets" data-toggle="collapse" data-target="#subnav-collapse.in">
               <i className="icon-diamond"></i> <FormattedMessage message={this.getIntlMessage('sections.assets')} />
             </SubTab>
-            <SubTab to="currencies">
+            <SubTab to="currencies" data-toggle="collapse" data-target="#subnav-collapse.in">
               <i className="icon-money"></i> <FormattedMessage message={this.getIntlMessage('sections.currencies')} />
             </SubTab>
           </ul>

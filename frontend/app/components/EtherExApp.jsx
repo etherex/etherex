@@ -86,7 +86,9 @@ var EtherExApp = React.createClass({
   },
 
   onToggleGraph() {
-    if (!_.includes(['markets', 'subs', 'xchain', 'assets', 'currencies'], this.state.category))
+    var marketSections = _.pluck(fixtures.categories, 'key');
+    marketSections.push('markets');
+    if (!_.includes(marketSections, this.state.category))
       this.setState({ showGraph: !this.state.showGraph });
   },
 
@@ -122,9 +124,7 @@ var EtherExApp = React.createClass({
               </div>
             </div>
             <div className="col-lg-10">
-              <div className="navbar">
-                <SubNavBar />
-              </div>
+              <SubNavBar />
               <div className="navbar row nav-market">
                 {(this.state.user.error) ?
                     <div className="container-fluid">
