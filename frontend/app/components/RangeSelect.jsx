@@ -108,7 +108,7 @@ var RangeSelect = React.createClass({
                 # {utils.numeral(this.state.block, 0)}
               </div>
             </Button>
-            <Button className="col-xs-6 col-sm-8">
+            <Button className="col-xs-6 col-sm-8 col-md-9">
               <input
                 ref="range"
                 type="range"
@@ -120,13 +120,13 @@ var RangeSelect = React.createClass({
                 defaultValue={this.state.block}
                 />
             </Button>
-            <Button className={this.state.live + " btn-default col-xs-2"} value="live" onClick={this.handleRangeEnd}>live</Button>
+            <Button className={this.state.live + " btn-default col-xs-2 col-md-1"} value="live" onClick={this.handleRangeEnd}>live</Button>
           </ButtonGroup>
           <ButtonGroup className="col-xs-12 col-sm-4 col-lg-3">
             <div className="pull-right">
               <Button className={this.state.last15 + " btn-primary"} value={75} onClick={this.handleRange}>15m</Button>
               <Button className={this.state.last30 + " btn-primary"} value={150} onClick={this.handleRange}>30m</Button>
-              <Button className={this.state.last60 + " btn-primary"} value={300} onClick={this.handleRange}>1h</Button>
+              <Button className={this.state.last60 + " btn-primary"} value={300} onClick={this.handleRange}>&nbsp;1h&nbsp;</Button>
             </div>
           </ButtonGroup>
         </form>

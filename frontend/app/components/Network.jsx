@@ -22,7 +22,7 @@ var Network = React.createClass({
       host: this.props.flux.store('config').getState().host,
       blockTimestamp: networkState.blockTimestamp,
       blockTime: parseInt(networkState.blockTime),
-      networkLag: parseInt(networkState.networkLag)
+      networkLag: networkState.networkLag
     };
   },
 

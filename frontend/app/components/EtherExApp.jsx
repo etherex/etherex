@@ -292,9 +292,8 @@ var ErrorModal = React.createClass({
     else if (!nextProps.network.ready || nextProps.config.percentLoaded < 100) {
 
       var lastBlockAge = nextProps.network.blockChainAge;
-      var now = Date.now();
 
-      if (nextProps.network.blockChainAge >= now)
+      if (!nextProps.network.blockTimestamp)
         lastBlockAge = <FormattedMessage message={this.getIntlMessage('init.block.genesis')} />;
       else
         lastBlockAge = <FormattedRelative value={nextProps.network.blockTimestamp * 1000} />;
