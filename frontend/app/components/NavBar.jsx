@@ -53,6 +53,9 @@ var NavBar = React.createClass({
                 <Tab to="markets" className="icon-chart-line" data-toggle="collapse" data-target="#navbar-collapse.in"> &nbsp;
                   <FormattedMessage message={this.getIntlMessage('nav.markets')} />
                 </Tab>
+                <Tab to="btc" className="icon-bitcoin" data-toggle="collapse" data-target="#navbar-collapse.in">
+                  BTC
+                </Tab>
                 <Tab to="wallet" className="icon-wallet" data-toggle="collapse" data-target="#navbar-collapse.in"> &nbsp;
                   <FormattedMessage message={this.getIntlMessage('nav.wallet')} />
                 </Tab>

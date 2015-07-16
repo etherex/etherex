@@ -1,10 +1,15 @@
+var path = require('path');
+
 module.exports = {
   entry: [
     "./app/app.jsx"
   ],
+  resolveLoader: {
+    root: path.join(__dirname, 'node_modules')
+  },
   output: {
     /* global __dirname */
-    path: __dirname + "/app",
+    path: path.join(__dirname, "app"),
     filename: "app.js"
   },
   plugins: [],
@@ -16,8 +21,8 @@ module.exports = {
       { test: /\.css$/, loader: "style!css" },
       { test: /\.less$/, loader: "style!css!less" },
       { test: /\.jsx$/, loaders: ["react-hot", "jsx"] },
-      { test: /\.js$/, exclude: /node_modules/, loader: "babel"},
-      { test: /\.jsx$/, exclude: /node_modules/, loader: "babel"},
+      { test: /\.js$/, include: /app/, loader: "babel"},
+      { test: /\.jsx$/, include: /app/, loader: "babel"},
       { test: /\.json$/, loader: "json" },
       { test: /\.woff$/, loader: "url?limit=10000&minetype=application/font-woff" },
       { test: /\.ttf$/, loader: "file" },

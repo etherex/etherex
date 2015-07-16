@@ -29,7 +29,7 @@ var EtherExApp = React.createClass({
     router: React.PropTypes.func
   },
 
-  mixins: [IntlMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore")],
+  mixins: [IntlMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore", "TicketStore")],
 
   getInitialState() {
     return {
@@ -73,7 +73,8 @@ var EtherExApp = React.createClass({
       network: this.props.flux.store('network').getState(),
       user: this.props.flux.store("UserStore").getState(),
       trades: this.props.flux.store("TradeStore").getState(),
-      market: this.props.flux.store("MarketStore").getState()
+      market: this.props.flux.store("MarketStore").getState(),
+      ticket: this.props.flux.store("TicketStore").getState()
     };
   },
 
@@ -153,6 +154,7 @@ var EtherExApp = React.createClass({
                   market={this.state.market}
                   trades={this.state.trades}
                   user={this.state.user}
+                  ticket={this.state.ticket}
                   disableGraph={this.onDisableGraph}
                 />}
             </div>

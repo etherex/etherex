@@ -2,18 +2,14 @@ var _ = require("lodash");
 var utils = require("../js/utils");
 var fixtures = require("../js/fixtures");
 var abi = require("../js/abi");
+var web3 = require('web3');
 
 var bigRat = require('big-rational');
 
-if (typeof web3 === 'undefined') {
-    var web3 = require('web3');
-    window.web3 = web3;
-}
-
-web3.padDecimal = function (string, chars) {
-    string = web3.fromDecimal(string).substr(2);
-    return Array(chars - string.length + 1).join("0") + string;
-};
+// web3.padDecimal = function (string, chars) {
+//     string = web3.fromDecimal(string).substr(2);
+//     return Array(chars - string.length + 1).join("0") + string;
+// };
 
 var EthereumClient = function(params) {
   try {
@@ -274,10 +270,10 @@ var EthereumClient = function(params) {
             lastPrice = parseFloat(bigRat(market[6].toString()).divide(bigRat(Math.pow(10, market[4].toString().length - 1))).toDecimal());
         var owner = web3.fromDecimal(market[7]);
         var block = _.parseInt(market[8].toString());
-        var total_trades = _.parseInt(market[9].toString());
+        var totalTrades = _.parseInt(market[9].toString());
         var category = _.parseInt(market[10].toString());
 
-        // console.log(id, name, address, decimals, precision, minimum, category, lastPrice, owner, block, total_trades);
+        // console.log(id, name, address, decimals, precision, minimum, category, lastPrice, owner, block, totalTrades);
 
         var SubContractABI = web3.eth.contract(abi.sub);
         var subcontract = SubContractABI.at(address);
@@ -307,7 +303,7 @@ var EthereumClient = function(params) {
           lastPrice: lastPrice,
           owner: owner,
           block: block,
-          total_trades: total_trades,
+          totalTrades: totalTrades,
           balance: _.parseInt(balance),
           favorite: favorite,
           dayChange: '-',
@@ -324,22 +320,22 @@ var EthereumClient = function(params) {
   this.loadTradeIDs = function(market, success, failure) {
     try {
       // web3.eth.defaultBlock = 'pending';
-      this.contract.get_trade_ids.call(market.id, 'pending', function(error, trade_ids) {
+      this.contract.get_trade_ids.call(market.id, 'pending', function(error, tradeIDs) {
         if (error) {
           failure("Error loading trade IDs: " + String(error));
           utils.error(error);
           return;
         }
 
-        if (!trade_ids || trade_ids.length === 0) {
+        if (!tradeIDs || tradeIDs.length === 0) {
           failure("No trades found");
           return;
         }
-        var tradeIDs = _.map(trade_ids, function(id) {
+        var mappedIDs = _.map(tradeIDs, function(id) {
           return web3.fromDecimal(id);
         });
 
-        success(tradeIDs);
+        success(mappedIDs);
       });
     }
     catch (e) {
@@ -504,7 +500,7 @@ var EthereumClient = function(params) {
     if (this.debug)
       utils.log("WATCHING", market.name + " TRANSACTIONS");
 
-    var updateSubBalance = _.debounce( function(market) {
+    var updateSubBalance = _.debounce( function() {
       this.flux.actions.user.updateBalanceSub(market);
     }.bind(this), 1000, {
       leading: true,
@@ -889,7 +885,7 @@ var EthereumClient = function(params) {
   // Balances
   //
   this.updateBalance = function(address, success, failure) {
-    var error = "Failed to update balance: ";
+    var errorStr = "Failed to update balance: ";
 
     try {
       web3.eth.getBalance(address, function(error, hexbalance) {
@@ -908,12 +904,12 @@ var EthereumClient = function(params) {
       });
     }
     catch(e) {
-      failure(error + String(e));
+      failure(errorStr + String(e));
     }
   };
 
   this.updateBalanceSub = function(market, address, success, failure) {
-    var error = "Failed to update subcurrency balance: ";
+    var errorStr = "Failed to update subcurrency balance: ";
 
     if (!market || !address)
       return;
@@ -921,7 +917,7 @@ var EthereumClient = function(params) {
     try {
       var SubContractABI = web3.eth.contract(abi.sub);
       var subcontract = SubContractABI.at(market.address);
-      var sub_balance = subcontract.balance.call(address).toString();
+      var subBalance = subcontract.balance.call(address).toString();
 
       this.contract.get_sub_balance.call(address, market.id, function(error, balances) {
         if (error) {
@@ -932,31 +928,31 @@ var EthereumClient = function(params) {
         var available = balances[0].toString();
         var trading = balances[1].toString();
 
-        if (!sub_balance || sub_balance == "0")
-          sub_balance = 0;
+        if (!subBalance || subBalance == "0")
+          subBalance = 0;
         if (!available || available == "0")
           available = 0;
         if (!trading || trading == "0")
           trading = 0;
 
-        if (!available && !trading && !sub_balance) {
+        if (!available && !trading && !subBalance) {
           success(market, 0, 0, 0);
           return;
         }
 
-        if (sub_balance)
-          sub_balance = bigRat(sub_balance).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
+        if (subBalance)
+          subBalance = bigRat(subBalance).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
         if (available)
           available = bigRat(available).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
         if (trading)
           trading = bigRat(trading).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
 
-        success(market, available, trading, sub_balance);
+        success(market, available, trading, subBalance);
       });
     }
     catch(e) {
       utils.error(e);
-      failure(error + String(e));
+      failure(errorStr + String(e));
     }
   };
 
@@ -1093,7 +1089,7 @@ var EthereumClient = function(params) {
 
   this.fillTrades = function(user, trades, market, success, failure) {
     var total = bigRat(0);
-    var total_amounts = bigRat(0);
+    var totalAmounts = bigRat(0);
 
     for (var i = trades.length - 1; i >= 0; i--) {
       var amounts = this.getAmounts(trades[i].amount, trades[i].price, market.decimals, market.precision);
@@ -1101,14 +1097,14 @@ var EthereumClient = function(params) {
       if (trades[i].type == 'sells')
         total += bigRat(amounts.total);
 
-      total_amounts += bigRat(amounts.amount);
+      totalAmounts += bigRat(amounts.amount);
     }
 
     var ids = _.pluck(trades, 'id');
     var gas = ids.length * 250000;
 
     try {
-      var result = this.contract.trade.sendTransaction(total_amounts, ids, {
+      var result = this.contract.trade.sendTransaction(totalAmounts, ids, {
         from: user.id,
         to: this.address,
         value: total > 0 ? total.toString() : "0",
@@ -1188,7 +1184,7 @@ var EthereumClient = function(params) {
 
   this.estimateFillTrades = function(user, trades, market, success, failure) {
     var total = bigRat(0);
-    var total_amounts = bigRat(0);
+    var totalAmounts = bigRat(0);
 
     for (var i = trades.length - 1; i >= 0; i--) {
       var amounts = this.getAmounts(trades[i].amount, trades[i].price, market.decimals, market.precision);
@@ -1196,14 +1192,14 @@ var EthereumClient = function(params) {
       if (trades[i].type == 'sells')
         total += bigRat(amounts.total);
 
-      total_amounts += bigRat(amounts.amount);
+      totalAmounts += bigRat(amounts.amount);
     }
 
     var ids = _.pluck(trades, 'id');
     var gas = ids.length * 250000;
 
     try {
-      var result = this.contract.trade.estimateGas(total_amounts, ids, {
+      var result = this.contract.trade.estimateGas(totalAmounts, ids, {
         from: user.id,
         to: this.address,
         value: total > 0 ? total.toString() : "0",

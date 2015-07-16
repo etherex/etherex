@@ -21,7 +21,7 @@ module.exports = {
         ETHEREUM_STATUS_LOADING: null,
         LOAD_DEMO_DATA: null
     }),
-    trade: keyMirror ({
+    trade: keyMirror({
         LOAD_TRADE_IDS: null,
         LOAD_TRADE_IDS_FAIL: null,
         LOAD_TRADE: null,
@@ -56,7 +56,7 @@ module.exports = {
         SWITCH_TYPE: null,
         SWITCH_TYPE_FAIL: null
     }),
-    user: keyMirror ({
+    user: keyMirror({
         LOAD_USER: null,
         LOAD_USER_FAIL: null,
         LOAD_USER_SUCCESS: null,
@@ -79,7 +79,7 @@ module.exports = {
         SEND_ETHER_FAIL: null,
         SWITCH_ADDRESS: null
     }),
-    market: keyMirror ({
+    market: keyMirror({
         LOAD_MARKET: null,
         LOAD_MARKETS: null,
         LOAD_MARKETS_FAIL: null,
@@ -97,5 +97,33 @@ module.exports = {
         RELOAD_TRANSACTIONS: null,
         UPDATE_TRANSACTIONS: null,
         TOGGLE_FAVORITE: null
+    }),
+    ticket: keyMirror({
+        LOOKUP_TICKET: null,
+        LOOKUP_TICKET_FAIL: null,
+        LOAD_TICKET_IDS: null,
+        LOAD_TICKET_IDS_FAIL: null,
+        LOAD_TICKET: null,
+        LOAD_TICKETS_PROGRESS: null,
+        LOAD_TICKETS_SUCCESS: null,
+        LOAD_TICKET_FAIL: null,
+        LOAD_DEMO_DATA: null,
+        UPDATE_POW: null,
+        UPDATE_TICKET: null,
+        UPDATE_TICKETS: null,
+        UPDATE_TICKETS_MESSAGE: null,
+        UPDATE_TICKETS_SUCCESS: null,
+        UPDATE_TICKETS_FAIL: null,
+        CREATE_TICKET: null,
+        CREATE_TICKET_SUCCESS: null,
+        CREATE_TICKET_FAIL: null,
+        RESERVE_TICKET: null,
+        RESERVE_TICKET_FAIL: null,
+        CLAIM_TICKET: null,
+        CLAIM_TICKET_FAIL: null,
+        CANCEL_TICKET: null,
+        CANCEL_TICKET_FAIL: null,
+        ESTIMATE_GAS: null,
+        ESTIMATE_GAS_ACTION: null
     })
 };

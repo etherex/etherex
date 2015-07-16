@@ -143,7 +143,7 @@ var MarketStore = Fluxxor.createStore({
 
     onUpdateLastPrice: function(payload) {
         this.market.lastPrice = payload.price;
-        this.market.total_trades += 1;
+        this.market.totalTrades += 1;
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -154,17 +154,17 @@ var MarketStore = Fluxxor.createStore({
 
     onUpdatePricesData: function() {
         // utils.log("PRICES", this.market.prices);
-        var prices = this.market.prices;
+        var currentPrices = this.market.prices;
 
-        if (prices.length) {
+        if (currentPrices.length) {
             var previous = {};
-            this.market.data = _.map(_.groupBy(prices.reverse(), 'timestamp'), function(logs) {
+            this.market.data = _.map(_.groupBy(currentPrices.reverse(), 'timestamp'), function(logs) {
                 var prices = _.pluck(logs, 'price');
                 var volumes = _.pluck(logs, 'amount');
                 var high = _.max(prices);
                 var low = _.min(prices);
-                var volume = _.reduce(volumes, function(sum, volume) {
-                    return sum + volume;
+                var volume = _.reduce(volumes, function(sum, vol) {
+                    return sum + vol;
                 });
                 // console.log(logs, prices, volumes, high, low, volume);
 
