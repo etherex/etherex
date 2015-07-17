@@ -14,7 +14,7 @@ var UserStore = Fluxxor.createStore({
       id: 'loading...',
       balance: 0,
       balanceFormatted: 0,
-      balance_pending: 0,
+      balancePending: 0,
       balance_sub: 0,
       balance_sub_available: 0,
       balance_sub_trading: 0,
@@ -112,7 +112,7 @@ var UserStore = Fluxxor.createStore({
     this.user.balance = bigRat(payload.balance).divide(bigRat(fixtures.ether)).valueOf();
     this.user.balanceFormatted = utils.formatEther(payload.balance);
     this.user.balance_raw = payload.balance;
-    this.user.balance_pending = bigRat(payload.balance_pending).divide(bigRat(fixtures.ether)).valueOf();
+    this.user.balancePending = bigRat(payload.balancePending).divide(bigRat(fixtures.ether)).valueOf();
     this.emit(constants.CHANGE_EVENT);
   },
 

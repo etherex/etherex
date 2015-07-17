@@ -16,8 +16,10 @@ var CreateTicket = React.createClass({
     };
   },
 
-  handleClick() {
-    // TODO
+  handleSubmit(e) {
+    e.preventDefault();
+
+    // TODO confirm modal...
     var address = this.refs.address.getValue();
     var amount = this.refs.amount.getValue();
     var btc = this.refs.btc.getValue();
@@ -29,7 +31,9 @@ var CreateTicket = React.createClass({
     this.props.flux.actions.ticket.createTicket(address, amount, btc);
   },
 
-  handleChange() {
+  handleChange(e) {
+    e.preventDefault();
+
     var amount = this.refs.amount.getValue().trim();
     var btc = this.refs.btc.getValue().trim();
 
@@ -86,9 +90,9 @@ var CreateTicket = React.createClass({
               </h3>
             </div>
             <div className="panel-body">
-              <form className="form">
+              <form role="form" onSubmit={this.handleSubmit}>
                 <Input type="text" ref="address" label="Bitcoin address" className="form-control"
-                  minLength="26" maxLength="35" pattern="[13][a-km-zA-HJ-NP-Z1-9]{25,34}"
+                  minLength="26" maxLength="35" pattern="[13m][a-km-zA-HJ-NP-Z1-9]{25,34}"
                   data-bind="value: btcAddr"
                   help="Address where you want to receive bitcoins" />
 
@@ -107,7 +111,7 @@ var CreateTicket = React.createClass({
                 <Input type="number" ref="price" label="Unit Price" className="form-control" readOnly
                   value={this.state.price}
                   help="Effectively how many BTC you are asking for each ETH" />
-                <Button onClick={this.handleClick}>Submit offer</Button>
+                <Button type="submit">Submit offer</Button>
               </form>
             </div>
           </div>

@@ -223,9 +223,9 @@ var TicketActions = function() {
     var btcSwapClient = this.flux.store('config').getBtcSwapClient();
 
     btcSwapClient.createTicket(btcAddress, numEther, btcTotal, function(result) {
-      utils.log('createTicket tx result: ', result);
+      utils.log('createTicket tx result:', result);
       var ticket = {
-        id: '-',
+        id: 0,
         address: btcAddress,
         amount: bigRat(numEther).times(fixtures.ether),
         price: bigRat(btcTotal).divide(numEther).toDecimal(),
@@ -237,6 +237,7 @@ var TicketActions = function() {
       this.dispatch(constants.ticket.CREATE_TICKET, ticket);
     }.bind(this), function(pendingHash, ticket) {
       utils.log('createTicket completed for ticket #', ticket.id);
+      utils.log('pendingHash was', pendingHash);
       this.dispatch(constants.ticket.CREATE_TICKET_SUCCESS, {
         pendingHash: pendingHash,
         ticket: ticket
@@ -253,9 +254,9 @@ var TicketActions = function() {
     btcSwapClient.cancelTicket(id, function(result) {
       utils.log('cancelTicket result: ', result);
       this.dispatch(constants.ticket.CANCEL_TICKET, id);
-    }.bind(this), function(cancelled) {
-      utils.log('cancelTicket completed for ticket #', cancelled);
-      this.dispatch(constants.ticket.CANCEL_TICKET_SUCCESS, cancelled);
+    }.bind(this), function(cancelledId) {
+      utils.log('cancelTicket completed for ticket #', cancelledId);
+      this.dispatch(constants.ticket.CANCEL_TICKET_SUCCESS, cancelledId);
     }.bind(this), function(error) {
       utils.error('Ticket could not be cancelled:', error);
       this.dispatch(constants.ticket.CANCEL_TICKET_FAIL, {error: error});
@@ -268,9 +269,9 @@ var TicketActions = function() {
     btcSwapClient.reserveTicket(id, "0x" + txHash, powNonce, function(result) {
       utils.log('reserveTicket result: ', result);
       this.dispatch(constants.ticket.RESERVE_TICKET, id);
-    }.bind(this), function(reserved) {
-      utils.log('reserveTicket completed for ticket #', reserved);
-      this.dispatch(constants.ticket.RESERVE_TICKET_SUCCESS, reserved);
+    }.bind(this), function(reservedTicket) {
+      utils.log('reserveTicket completed for ticket #', reservedTicket.id);
+      this.dispatch(constants.ticket.RESERVE_TICKET_SUCCESS, reservedTicket);
     }.bind(this), function(error) {
       utils.error('Ticket could not be reserved:', error);
       this.dispatch(constants.ticket.RESERVE_TICKET_FAIL, {error: error});
@@ -287,9 +288,9 @@ var TicketActions = function() {
     btcSwapClient.claimTicket(id, txHex, "0x" + txHash, txIndex, merkleSibling, "0x" + txBlockHash, function(result) {
       utils.log('claimTicket result: ', result);
       this.dispatch(constants.ticket.CLAIM_TICKET, id);
-    }.bind(this), function(claimed) {
-      utils.log('claimedTicket completed for ticket #', claimed.id);
-      this.dispatch(constants.ticket.CLAIM_TICKET_SUCCESS, claimed);
+    }.bind(this), function(claimedId) {
+      utils.log('claimedTicket completed for ticket #', claimedId);
+      this.dispatch(constants.ticket.CLAIM_TICKET_SUCCESS, claimedId);
     }.bind(this), function(error) {
       utils.error('Ticket could not be claimed:', error);
       this.dispatch(constants.ticket.CLAIM_TICKET_FAIL, {error: error});

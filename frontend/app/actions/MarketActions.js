@@ -71,7 +71,6 @@ var MarketActions = function() {
       }.bind(this));
 
       // Watch transactions / trades
-      var user = this.flux.store("UserStore").getState().user;
       _client.watchTransactions(user, market, this.flux.actions.market.updateTransactions, function(error) {
         this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
       }.bind(this));
@@ -109,14 +108,17 @@ var MarketActions = function() {
       this.flux.actions.trade.loadTradeIDs(market, true);
     else
       this.flux.actions.trade.updateTrades();
+
+    // Load BtcSwap tickets
+    this.flux.actions.ticket.loadTickets();
   };
 
   this.loadMarketBalances = function(market) {
     var _client = this.flux.store('config').getEthereumClient();
     var user = this.flux.store("UserStore").getState().user;
 
-    _client.updateBalanceSub(market, user.id, function(market, available, trading, balance) {
-        this.flux.actions.market.updateMarketBalances(market, available, trading, balance);
+    _client.updateBalanceSub(market, user.id, function(_market, available, trading, balance) {
+        this.flux.actions.market.updateMarketBalances(_market, available, trading, balance);
     }.bind(this), function(error) {
         this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
     }.bind(this));
@@ -146,9 +148,9 @@ var MarketActions = function() {
       this.flux.actions.market.marketsLoaded(init);
   };
 
-  this.updateLastPrice = function(market_id, price) {
+  this.updateLastPrice = function(marketId, price) {
     var market = this.flux.store("MarketStore").getState().market;
-    if (market_id == market.id) {
+    if (marketId == market.id) {
       this.dispatch(constants.market.UPDATE_LAST_PRICE, {
         price: price
       });

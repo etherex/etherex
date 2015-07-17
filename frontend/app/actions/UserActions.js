@@ -43,12 +43,12 @@ var UserActions = function() {
       var user = this.flux.store("UserStore").getState().user;
       _client.watchAddress(user.id);
 
+      // Load BtcSwap client
+      this.flux.actions.config.updateBtcSwapClient(user.id);
+
       // Load markets
       if (init && !this.flux.store("UserStore").getState().user.error)
         this.flux.actions.market.initializeMarkets();
-
-      // Load BtcSwap client
-      this.flux.actions.config.updateBtcSwapClient(user.id);
 
     }.bind(this), function(error) {
       this.dispatch(constants.user.LOAD_ADDRESSES_FAIL, {error: error});
@@ -75,7 +75,7 @@ var UserActions = function() {
     _client.updateBalance(user.id, function(confirmed, unconfirmed) {
       this.dispatch(constants.user.UPDATE_BALANCE, {
           balance: confirmed,
-          balance_pending: unconfirmed
+          balancePending: unconfirmed
       });
     }.bind(this), function(error) {
       this.dispatch(constants.user.UPDATE_BALANCE_FAIL, {error: error});

@@ -69,7 +69,7 @@ var UserSummaryPane = React.createClass({
                             this.getIntlMessage('user.balance'), {
                               currency: "wei",
                               balance: this.props.user.user.balance_raw,
-                              pending: this.props.user.user.balance_pending
+                              pending: this.props.user.user.balancePending
                             })
                         }
                       </span>

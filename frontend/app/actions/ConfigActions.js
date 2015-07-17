@@ -104,8 +104,6 @@ var ConfigActions = function() {
     this.dispatch(constants.config.UPDATE_BTC_SWAP_CLIENT, {
       btcSwapClient: btcSwap
     });
-
-    this.flux.actions.ticket.loadTickets();
   };
 
   this.forceLoad = function() {

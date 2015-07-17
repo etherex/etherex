@@ -20,7 +20,7 @@ var Balance = React.createClass({
                     this.getIntlMessage('wallet.pending'), {
                       currency: "ETH",
                       balance: this.props.user.user.balance,
-                      pending: this.props.user.user.balance_pending
+                      pending: this.props.user.user.balancePending
                     })
                 }
               </div>

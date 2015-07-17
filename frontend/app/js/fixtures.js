@@ -1244,7 +1244,7 @@ var fixtures = {
           "value": 3.8665339013603495,
           "unit": "Kether"
         },
-        "balance_pending": 0,
+        "balancePending": 0,
         "balance_sub": 0,
         "balance_sub_available": 600,
         "balance_sub_trading": 0,

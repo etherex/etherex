@@ -120,14 +120,11 @@ var ClaimTicket = React.createClass({
                 </h3>
               </div>
               <div className="panel-body">
-                <form className="form" onSubmit={this.handleLookup}>
-                  <div className="form-group">
-                    <label>Ticket ID</label>
-                    <Input type="number" className="form-control" ref="ticketId"
-                      min={1} step={1}
-                      value={this.state.ticketId}
-                      onChange={this.handleChange}/>
-                  </div>
+                <form role="form" onSubmit={this.handleLookup}>
+                  <Input type="number" className="form-control" ref="ticketId" label="Ticket ID"
+                    min={1} step={1}
+                    value={this.state.ticketId}
+                    onChange={this.handleChange}/>
                   <Button onClick={this.handleLookup} disabled={this.state.lookingUp}>
                     Lookup
                   </Button>
@@ -175,7 +172,7 @@ var ClaimTicket = React.createClass({
             </h3>
           </div>
           <div className="panel-body">
-            <form className="form-horizontal">
+            <form role="form" className="form-horizontal" onSubmit={this.handleReserve}>
               <Input type="text" ref="txhash" label="Bitcoin Transaction Hash"
                 labelClassName="col-md-2" wrapperClassName="col-md-7"
                 disabled={!this.state.ticket.reservable}
@@ -185,9 +182,8 @@ var ClaimTicket = React.createClass({
                 disabled={!this.state.ticket.reservable}
                 data-bind="value: powNonce" />
               <Input wrapperClassName="col-sm-10 col-sm-offset-2">
-                <Button className={ this.state.ticket.reservable ? "btn-primary" : ""}
-                  disabled={!this.state.ticket.reservable}
-                  onClick={this.handleReserve}>
+                <Button className={ this.state.ticket.reservable ? "btn-primary" : ""} type="submit"
+                  disabled={!this.state.ticket.reservable}>
                   Reserve
                 </Button>
               </Input>

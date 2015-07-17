@@ -134,27 +134,27 @@ var TicketStore = Fluxxor.createStore({
     },
 
     onUpdateTicket: function(payload) {
-      var key = -1;
+      var index = -1;
 
       // Replace current ticket with updated one or delete claimed ones
       // TODO compare changes and animate in components
       if (payload.amount !== 0) {
-        key = _.findKey(this.tickets, { 'id': payload.id });
-        if (key && key != -1) {
+        index = _.findIndex(this.tickets, { 'id': payload.id });
+        if (index && index != -1) {
           // console.log("TICKET UPDATED", payload.id);
           if (payload.amount === 0)
-            this.tickets.splice(key, 1);
+            this.tickets.splice(index, 1);
           else
-            this.tickets[key] = payload;
+            this.tickets[index] = payload;
         }
         else
           this.tickets.push(payload);
       }
       else {
         //   console.log("TICKET REMOVED", payload.id);
-        key = _.findKey(this.tickets, { 'id': payload.id });
-        if (key && key != -1)
-          this.tickets.splice(key, 1);
+        index = _.findIndex(this.tickets, { 'id': payload.id });
+        if (index && index != -1)
+          this.tickets.splice(index, 1);
       }
 
       this.refreshTickets();
@@ -190,16 +190,16 @@ var TicketStore = Fluxxor.createStore({
     },
 
     onCreateTicketSuccess: function(payload) {
-        var key = -1;
+        var index = -1;
 
         // Replace current ticket with updated one or delete failed ones
         // TODO compare changes and animate
-        key = _.findKey(this.tickets, { 'pendingHash': payload.pendingHash });
-        if (key && key != -1) {
+        index = _.findIndex(this.tickets, { 'pendingHash': payload.pendingHash });
+        if (index && index != -1) {
             if (payload.ticket.amount === 0)
-              this.tickets.splice(key, 1);
+              this.tickets.splice(index, 1);
             else
-              this.tickets[key] = payload.ticket;
+              this.tickets[index] = payload.ticket;
         }
         else
           this.tickets.push(payload.ticket);
@@ -214,7 +214,7 @@ var TicketStore = Fluxxor.createStore({
     },
 
     onClaimTicketSuccess: function (payload) {
-        var index = _.findIndex(this.tickets, {'id': payload.id});
+        var index = _.findIndex(this.tickets, {'id': payload});
         this.tickets.splice(index, 1);
         // this.tickets[index].status = "success";
         this.emit(constants.CHANGE_EVENT);
@@ -227,8 +227,8 @@ var TicketStore = Fluxxor.createStore({
     },
 
     onReserveTicketSuccess: function (payload) {
-        var index = _.findIndex(this.tickets, {'id': payload});
-        this.tickets[index].status = "new";
+        var index = _.findIndex(this.tickets, {'id': payload.id});
+        this.tickets[index] = payload;
         this.emit(constants.CHANGE_EVENT);
     },
 
