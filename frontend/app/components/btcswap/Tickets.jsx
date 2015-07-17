@@ -12,6 +12,8 @@ var Table = require("react-bootstrap/lib/Table");
 var Nav = require("./Nav");
 var TicketRow = require("./TicketRow");
 var TicketDetails = require("./TicketDetails");
+var Button = require('react-bootstrap/lib/Button');
+var Modal = require('react-bootstrap/lib/Modal');
 var ConfirmModal = require('../ConfirmModal');
 // var utils = require('../js/utils');
 
@@ -25,6 +27,7 @@ var Tickets = React.createClass({
   getInitialState() {
     return {
       showModal: false,
+      showConfirmModal: false,
       message: null,
       submit: null
     };
@@ -36,18 +39,28 @@ var Tickets = React.createClass({
     };
   },
 
-  openModal: function(ticket, action) {
+  openConfirmModal: function(ticket) {
+    this.setState({
+      showConfirmModal: true,
+      message: ticket.owner == this.props.user.user.id ?
+        "Are you sure you want to cancel this ticket?" :
+        <div>
+          { (!ticket.claimer || (ticket.expiry > 1 && ticket.expiry < new Date().getTime() / 1000)) ?
+              "Reserve ticket #" + ticket.id + "?" : "Claim ticket #" + ticket.id + "?" }
+          <TicketDetails ticket={ticket} />
+        </div>,
+      submit: function() { this.handleAction(ticket); }.bind(this)
+    });
+  },
+
+  closeConfirmModal: function() {
+    this.setState({ showConfirmModal: false });
+  },
+
+  openModal: function(ticket) {
     this.setState({
       showModal: true,
-      message: !action ? <TicketDetails ticket={ticket} /> :
-        ticket.owner == this.props.user.user.id ?
-          "Are you sure you want to cancel this ticket?" :
-          <div>
-            { (!ticket.claimer || (ticket.expiry > 1 && ticket.expiry < new Date().getTime() / 1000)) ?
-                "Reserve?" : "Claim?" }
-            <TicketDetails ticket={ticket} />
-          </div>,
-      submit: function() { this.handleAction(ticket); }.bind(this)
+      message: <TicketDetails ticket={ticket} />
     });
   },
 
@@ -74,7 +87,8 @@ var Tickets = React.createClass({
         <TicketRow
           flux={this.props.flux} key={ticket.id} count={i} ticket={ticket}
           isOwn={ticket.owner === this.props.user.user.id} user={this.props.user.user}
-          openModal={this.openModal} review={this.props.review} />
+          openModal={this.openModal} openConfirmModal={this.openConfirmModal}
+          review={this.props.review} />
       );
     }.bind(this));
 
@@ -102,12 +116,23 @@ var Tickets = React.createClass({
         </Table>
 
         <ConfirmModal
-          show={this.state.showModal}
-          onHide={this.closeModal}
-          user={this.props.user.user}
+          show={this.state.showConfirmModal}
+          onHide={this.closeConfirmModal}
           message={this.state.message}
           onSubmit={this.state.submit}
         />
+
+        <Modal show={this.state.showModal} onHide={this.closeModal} animation={true} enforceFocus={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>Ticket details</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <big><p>{this.state.message}</p></big>
+          </Modal.Body>
+          <Modal.Footer>
+              <Button onClick={this.closeModal} bsStyle="primary">Close</Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     );
   }

@@ -15,11 +15,6 @@ var ConfirmModal = React.createClass({
     };
   },
 
-  onHide: function(e) {
-    e.preventDefault();
-    this.props.onHide();
-  },
-
   componentWillReceiveProps: function(nextProps) {
     if (nextProps.user && nextProps.market && nextProps.tradeList && nextProps.tradeList.length)
       this.setState({
@@ -36,6 +31,11 @@ var ConfirmModal = React.createClass({
       this.setState({
         tradeTable: <span />
       });
+  },
+
+  onHide: function(e) {
+    e.preventDefault();
+    this.props.onHide();
   },
 
   render: function() {

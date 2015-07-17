@@ -4,8 +4,6 @@ var React = require("react");
 var Button = require('react-bootstrap/lib/Button');
 var Input = require('react-bootstrap/lib/Input');
 // var Alert = require('react-bootstrap/lib/Alert');
-// var Nav = require("./Nav");
-var utils = require('../../js/utils');
 
 // dd5a8f13c97c8b8d47329fa7bd487df24b7d3b7e855a65eb7fd51e8f94f7e482
 // ticket 2 nonce = 2460830
@@ -20,13 +18,9 @@ var ProofOfWork = React.createClass({
   },
 
   handleCompute() {
-    // TODO
+    // TODO validate inputs
     var id = this.refs.ticketId.getValue();
-    var txHash = this.refs.txhash.getValue();
-    // var nonce = this.refs.nonce.getValue();
-    utils.log("ticketId", id);
-    utils.log("txHash", txHash);
-    // utils.log("nonce", nonce);
+    var txHash = this.refs.txHash.getValue();
 
     this.props.flux.actions.ticket.computePoW(id, txHash);
   },
@@ -49,9 +43,11 @@ var ProofOfWork = React.createClass({
             <Input type="number" ref="ticketId" label="Ticket ID"
               min="1" step="1"
               labelClassName="col-md-2" wrapperClassName="col-md-10" />
-            <Input type="text" ref="txhash" label="Bitcoin Transaction Hash"
+
+            <Input type="text" ref="txHash" label="Bitcoin Transaction Hash"
               labelClassName="col-md-2" wrapperClassName="col-md-10"
               help="Hash of the bitcoin transaction that will be used to reserve the ticket." />
+
             <Input type="text" ref="nonce" label="Computed nonce"
               labelClassName="col-md-2" wrapperClassName="col-md-10"
               value={this.props.flux.store("TicketStore").pow}

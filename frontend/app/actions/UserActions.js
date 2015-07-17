@@ -44,7 +44,7 @@ var UserActions = function() {
       _client.watchAddress(user.id);
 
       // Load BtcSwap client
-      this.flux.actions.config.updateBtcSwapClient(user.id);
+      this.flux.actions.config.updateBtcSwapClient();
 
       // Load markets
       if (init && !this.flux.store("UserStore").getState().user.error)
@@ -65,6 +65,9 @@ var UserActions = function() {
     this.flux.actions.user.updateBalanceSub();
 
     this.flux.actions.market.reloadTransactions();
+
+    // Reload BtcSwap client
+    this.flux.actions.config.updateBtcSwapClient();
   };
 
   this.updateBalance = function() {

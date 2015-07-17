@@ -92,13 +92,15 @@ var ConfigActions = function() {
     });
   };
 
-  this.updateBtcSwapClient = function(userId) {
+  this.updateBtcSwapClient = function() {
     var configState = this.flux.store('config').getState();
+    var userState = this.flux.store('UserStore').getState();
+
     var btcSwap = new BtcSwap({
       address: configState.btcSwapAddress,
       host: configState.host,
-      from: userId,
-      debug: true
+      from: userState.user.id,
+      debug: this.flux.store('config').debug
     });
 
     this.dispatch(constants.config.UPDATE_BTC_SWAP_CLIENT, {

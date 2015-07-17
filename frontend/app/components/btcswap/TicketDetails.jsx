@@ -9,8 +9,10 @@ var TicketDetails = React.createClass({
     return (
       <div>
         <h3 data-bind="text: labelNetwork"></h3>
-        <p>Ticket address: { this.props.ticket.address }</p>
         <p>Amount: { amount.value } { amount.unit }</p>
+        <p>Price: { this.props.ticket.price } BTC/ETH</p>
+        <p>Total: { this.props.ticket.total } BTC</p>
+        <p>BTC address: <samp>{ this.props.ticket.address }</samp></p>
       </div>
     );
   }

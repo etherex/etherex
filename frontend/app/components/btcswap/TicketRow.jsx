@@ -16,13 +16,13 @@ var TicketRow = React.createClass({
   handleClick(e) {
     e.preventDefault();
     e.stopPropagation();
-    this.props.openModal(this.props.ticket, false);
+    this.props.openModal(this.props.ticket);
   },
 
   handleAction(e) {
     e.preventDefault();
     e.stopPropagation();
-    this.props.openModal(this.props.ticket, true);
+    this.props.openConfirmModal(this.props.ticket);
   },
 
   render() {

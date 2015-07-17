@@ -6,8 +6,6 @@ var Input = require('react-bootstrap/lib/Input');
 // var Alert = require('react-bootstrap/lib/Alert');
 var Nav = require("./Nav");
 
-var utils = require('../../js/utils');
-
 var CreateTicket = React.createClass({
 
   getInitialState() {
@@ -23,10 +21,6 @@ var CreateTicket = React.createClass({
     var address = this.refs.address.getValue();
     var amount = this.refs.amount.getValue();
     var btc = this.refs.btc.getValue();
-    var price = this.refs.price.getValue();
-    utils.log("amount", amount);
-    utils.log("btc", btc);
-    utils.log("price", price);
 
     this.props.flux.actions.ticket.createTicket(address, amount, btc);
   },
@@ -37,46 +31,12 @@ var CreateTicket = React.createClass({
     var amount = this.refs.amount.getValue().trim();
     var btc = this.refs.btc.getValue().trim();
 
-    // var wei = bigRat(amount).times(fixtures.ether);
-    // var satoshi = bigRat(btc).times(fixtures.btc).times(Math.pow(10, 10));
-    // utils.log("WEI", wei.valueOf());
-    // utils.log("SAT", satoshi.valueOf());
-    // var price = null;
-    // if (satoshi.valueOf())
-    //   price = satoshi.divide(wei).valueOf().toFixed(8);
-    // utils.log("PRICE", price);
-
     this.setState({
       amount: amount,
       btc: btc,
       price: (parseFloat(btc) / parseFloat(amount)).toFixed(8)
     });
   },
-
-  // TODO use flux action
-  // submitOffer(btcAddress, numEther, btcPrice, addrHex, numWei, weiPerSatoshi) {
-  //   EthBtcSwapClient.createTicket(btcAddress, numEther, btcPrice, function(err, ticketId) {
-  //     if (err) {
-  //       swal('Offer could not be created', err, 'error');
-  //       return;
-  //     }
-  //
-  //     console.log('@@@ createTicket good: ', ticketId)
-  //
-  //     swal('Offer created', 'ticket id '+ticketId, 'success');
-  //
-  //     // this is approximate for UI update
-  //     TicketColl.insert({
-  //       ticketId: ticketId,
-  //       bnstrBtcAddr: addrHex,
-  //       numWei: new BigNumber(numWei).toNumber(),
-  //       numWeiPerSatoshi: new BigNumber(weiPerSatoshi).negated().toNumber(),  // negated so that sort is ascending
-  //       bnstrWeiPerSatoshi: new BigNumber(weiPerSatoshi).toString(10),
-  //       numClaimExpiry: 1
-  //     });
-  //
-  //   });
-  // },
 
   render() {
     return (
