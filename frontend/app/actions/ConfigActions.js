@@ -1,5 +1,6 @@
 var _ = require("lodash");
 var web3 = require('web3');
+var BtcSwap = require("btc-swap");
 var utils = require('../js/utils');
 var React = require("react/addons");
 var fixtures = require('../js/fixtures');
@@ -91,6 +92,22 @@ var ConfigActions = function() {
     });
   };
 
+  this.updateBtcSwapClient = function(userId) {
+    var configState = this.flux.store('config').getState();
+    var btcSwap = new BtcSwap({
+      address: configState.btcSwapAddress,
+      host: configState.host,
+      from: userId,
+      debug: true
+    });
+
+    this.dispatch(constants.config.UPDATE_BTC_SWAP_CLIENT, {
+      btcSwapClient: btcSwap
+    });
+
+    this.flux.actions.ticket.loadTickets();
+  };
+
   this.forceLoad = function() {
     var timeout = _.parseInt(this.flux.store('network').blockChainAge + 300);
     this.dispatch(constants.config.UPDATE_CONFIG, {
@@ -122,8 +139,8 @@ var ConfigActions = function() {
         utils.log("DEBUGGING", payload.debug);
 
       if (payload.debug) {
-        var handler = function(type, payload) {
-            utils.debug(type, payload);
+        var handler = function(type, _payload) {
+            utils.debug(type, _payload);
         };
         this.dispatch(constants.config.UPDATE_CONFIG, {
           debugHandler: handler

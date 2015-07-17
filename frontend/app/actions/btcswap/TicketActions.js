@@ -1,133 +1,311 @@
-// var _ = require("lodash");
-// var bigRat = require("big-rational");
-var btcswap = require("btc-swap"); // TODO
+var _ = require("lodash");
+var https = require('https');
+var bigRat = require('big-rational');
 
 var constants = require("../../js/constants");
+var fixtures = require("../../js/fixtures");
 var utils = require("../../js/utils");
 
 var TicketActions = function() {
 
-  this.loadTicketIDs = function(market, init) {
-    if (this.flux.store('config').debug)
-      console.count("loadTradeIDs triggered");
+  // TODO update loading method
+  // this.loadTicketIDs = function(market, init) {
+  //   if (this.flux.store('config').debug)
+  //     console.count("loadTradeIDs triggered");
 
-    // var _client = this.flux.store('config').getEthereumClient();
+  //   // var _client = this.flux.store('config').getEthereumClient();
 
-    btcswap.loadTicketIDs(market, function(ticketIDs) {
-      this.dispatch(constants.ticket.LOAD_TICKET_IDS, ticketIDs);
-      if (init)
-        this.flux.actions.ticket.loadTickets(ticketIDs);
-    }.bind(this), function(error) {
-      this.dispatch(constants.trade.LOAD_TICKET_IDS_FAIL, {error: error});
-    }.bind(this));
-  };
+  //   btcswap.loadTicketIDs(market, function(ticketIDs) {
+  //     this.dispatch(constants.ticket.LOAD_TICKET_IDS, ticketIDs);
+  //     if (init)
+  //       this.flux.actions.ticket.loadTickets(ticketIDs);
+  //   }.bind(this), function(error) {
+  //     this.dispatch(constants.trade.LOAD_TICKET_IDS_FAIL, {error: error});
+  //   }.bind(this));
+  // };
 
-  this.loadTicket = function(id) {
-    var configState = this.flux.store('config').getState();
-    var btcSwap = new btcswap({address: configState.btcSwapAddress});
+  // this.loadTicket = function(id) {
+  //   var configState = this.flux.store('config').getState();
+  //   var btcSwap = new BtcSwap({address: configState.btcSwapAddress});
 
-    // TODO not sure about this...
-    var tickets = this.flux.store("TradeStore").getState();
-    if (tickets.error)
-      this.flux.actions.ticket.ticketsLoaded();
+  //   var tickets = this.flux.store("TradeStore").getState();
+  //   if (tickets.error)
+  //     this.flux.actions.ticket.ticketsLoaded();
 
-    btcSwap.loadTicket(id, this.flux.actions.ticket.updateProgress, function(ticket) {
-      this.dispatch(constants.ticket.LOAD_TICKET, ticket);
+  //   btcSwap.loadTicket(id, this.flux.actions.ticket.updateProgress, function(ticket) {
+  //     this.dispatch(constants.ticket.LOAD_TICKET, ticket);
+  //   }.bind(this), function(error) {
+  //     this.dispatch(constants.trade.LOAD_TICKET_FAIL, {error: error});
+  //   }.bind(this));
+  // };
+
+  // TODO replace with methods above
+  this.loadTickets = function() {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+    btcSwapClient.getOpenTickets(0, 100, function(tickets) {
+      utils.log("TICKETS", tickets);
+      this.dispatch(constants.ticket.LOAD_TICKETS_LOAD, tickets);
     }.bind(this), function(error) {
       this.dispatch(constants.trade.LOAD_TICKET_FAIL, {error: error});
     }.bind(this));
   };
 
-  this.lookupTicket = function(ticketId) {
-    var configState = this.flux.store('config').getState();
+  this.lookupTicket = function(id) {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
     var userState = this.flux.store('UserStore').getState();
 
-    var btcSwap = new btcswap({
-      address: configState.btcSwapAddress,
-      host: configState.host,
-      from: userState.user.id,
-      debug: true
-    });
-
-    btcSwap.lookupTicket(ticketId, function(ticket) {
+    btcSwapClient.lookupTicket(id, function(ticket) {
       utils.log('Ticket: ', ticket);
+      if (!ticket || !ticket.id) {
+        ticket = {
+          id: null,
+          address: null,
+          amount: null,
+          formattedAmount: {value: null, unit: null},
+          price: null,
+          total: null,
+          expiry: 1
+        };
+        this.dispatch(constants.ticket.LOOKUP_TICKET, ticket);
+      }
+
+      var formattedAmount = utils.formatEther(ticket.amount);
+
+      var reservable = false;
+      if (!ticket.claimer ||
+          (ticket.expiry > 1 && ticket.expiry < new Date().getTime() / 1000)) {
+        reservable = true;
+        ticket.txHash = null;
+        ticket.claimer = null;
+        ticket.expiry = 1;
+      }
+
+      var claimable = false;
+      if (!reservable && ticket.claimer == userState.user.id.substr(2))
+        claimable = true;
+
+      ticket.formattedAmount = formattedAmount;
+      ticket.reservable = reservable;
+      ticket.claimable = claimable;
+
       this.dispatch(constants.ticket.LOOKUP_TICKET, ticket);
+
+      if (ticket.txHash && claimable)
+        this.flux.actions.ticket.lookupBitcoinTxHash(ticket);
+
     }.bind(this), function(error) {
       this.dispatch(constants.trade.LOOKUP_TICKET_FAIL, {error: error});
     }.bind(this));
-
-    // var ticketInfo = btcswap.lookupTicket(ticketId);
-
-    // if (!ticketInfo) {
-    //   // swal('Ticket does not exist...', 'or may have been claimed', 'error');
-    //   return;
-    // }
-
-    // var unixExpiry = ticketInfo.numClaimExpiry;
-    // viewm.claimExpiry(unixExpiry);
-
-    // if (!isTicketAvailable(unixExpiry)) {
-    //   viewm.claimerAddr(ticketInfo.claimerAddr);
-    //   viewm.claimTxHash(ticketInfo.claimTxHash);
-    // }
-
-    // viewm.numEther(ticketInfo.numEther);
-    // viewm.btcPrice(ticketInfo.btcPrice);
-    // viewm.btcAddr(ticketInfo.btcAddr);
   };
 
-  this.cancelTicket = function(ticket) {
-    console.log(ticket);
+  this.lookupBitcoinTxHash = function(ticket, live) {
+    var options = {
+      hostname: (live ? '' : 't') + 'btc.blockr.io',
+      port: 443,
+      path: '/api/v1/tx/raw/' + ticket.txHash,
+      method: 'GET',
+      withCredentials: false
+    };
+
+    var req = https.request(options, function(res) {
+      if (!res || res.statusCode !== 200) {
+        utils.error("Error retrieving BTC transaction.");
+        return;
+      }
+
+      res.on('data', function(data) {
+        var json = JSON.parse(data);
+
+        if (json.status !== 'success') {
+          utils.error("Error retrieving BTC transaction data:", json);
+          return;
+        }
+
+        data = json.data;
+        // TODO check scriptpubkeys, etc exist
+        if (!data || !data.tx || !data.tx.vout || data.tx.vout.length < 2 || !data.tx.hex || !data.tx.blockhash) {
+          utils.error('Error: not enough data in BTC transaction');
+          return;
+        }
+
+        ticket.rawTx = data.tx.hex;
+        ticket.btcPayment = data.tx.vout[0].value;
+        ticket.paymentAddr = data.tx.vout[0].scriptPubKey.addresses[0];
+
+        var tx1Script = data.tx.vout[1].scriptPubKey.hex;
+        var etherAddr;
+        if (tx1Script && tx1Script.length === 50 &&
+            tx1Script.slice(0, 6) === '76a914' && tx1Script.slice(-4) === '88ac') { // WTF is this
+          etherAddr = tx1Script.slice(6, -4);
+        }
+        else {
+          etherAddr = 'INVALID';
+          utils.error('Invalid Ethereum address: ', tx1Script);
+        }
+        ticket.etherAddr = etherAddr;
+
+        var feePercentage = bigRat("10").pow("8").times(bigRat(data.tx.vout[1].value)).mod(10000);
+        ticket.feePercentage = bigRat(feePercentage).divide(100).valueOf(10) + '%';
+
+        ticket.feeAmount = bigRat(feePercentage).times(ticket.amount).divide(10000).toDecimal();
+        ticket.formattedFee = utils.formatEther(ticket.feeAmount);
+
+        if (data.tx.blockhash)
+          this.flux.actions.ticket.lookupExtendedDetails(ticket, data.tx.blockhash, live);
+        else
+          utils.error("Missing block hash on transaction.");
+
+      }.bind(this));
+    }.bind(this));
+
+    req.end();
+    req.on('error', function(e) {
+      utils.error(e);
+    });
+
+    this.dispatch(constants.ticket.LOOKUP_TICKET, ticket);
+  };
+
+  // extended details for claiming ticket, such as merkle proof
+  this.lookupExtendedDetails = function(ticket, blockHash, live) {
+    var options = {
+      hostname: (live ? '' : 't') + 'btc.blockr.io',
+      port: 443,
+      path: '/api/v1/block/raw/' + blockHash,
+      method: 'GET',
+      withCredentials: false
+    };
+
+    var req = https.request(options, function(res) {
+      if (!res || res.statusCode !== 200) {
+        utils.error("Error retrieving BTC transaction.");
+        return;
+      }
+
+      res.on('data', function(data) {
+        var json = JSON.parse(data);
+
+        if (json.status !== 'success') {
+          utils.error("Error retrieving BTC block data:", json);
+          return;
+        }
+
+        data = json.data;
+        if (!data || !data.tx) {
+          utils.error('Error: not enough data in BTC block');
+          return;
+        }
+
+        ticket.blockHash = (data.hash);
+
+        var txIndex = _.indexOf(data.tx, ticket.txHash);
+
+        var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+        var merkleProof = btcSwapClient.merkleProof(data.tx, txIndex);
+
+        ticket.merkleProof = merkleProof;
+        ticket.merkleProofStr = JSON.stringify(merkleProof);
+
+      }.bind(this));
+    }.bind(this));
+
+    req.end();
+    req.on('error', function(e) {
+      utils.error(e);
+    });
+
+    this.dispatch(constants.ticket.LOOKUP_TICKET, ticket);
+  };
+
+  this.createTicket = function(btcAddress, numEther, btcTotal) {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+    btcSwapClient.createTicket(btcAddress, numEther, btcTotal, function(result) {
+      utils.log('createTicket tx result: ', result);
+      var ticket = {
+        id: '-',
+        address: btcAddress,
+        amount: bigRat(numEther).times(fixtures.ether),
+        price: bigRat(btcTotal).divide(numEther).toDecimal(),
+        total: btcTotal,
+        expiry: 1,
+        pendingHash: result,
+        status: 'new'
+      };
+      this.dispatch(constants.ticket.CREATE_TICKET, ticket);
+    }.bind(this), function(pendingHash, ticket) {
+      utils.log('createTicket completed for ticket #', ticket.id);
+      this.dispatch(constants.ticket.CREATE_TICKET_SUCCESS, {
+        pendingHash: pendingHash,
+        ticket: ticket
+      });
+    }.bind(this), function(error) {
+      utils.error('Ticket could not be created:', error);
+      this.dispatch(constants.ticket.CREATE_TICKET_FAIL, {error: error});
+    }.bind(this));
+  };
+
+  this.cancelTicket = function(id) {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+    btcSwapClient.cancelTicket(id, function(result) {
+      utils.log('cancelTicket result: ', result);
+      this.dispatch(constants.ticket.CANCEL_TICKET, id);
+    }.bind(this), function(cancelled) {
+      utils.log('cancelTicket completed for ticket #', cancelled);
+      this.dispatch(constants.ticket.CANCEL_TICKET_SUCCESS, cancelled);
+    }.bind(this), function(error) {
+      utils.error('Ticket could not be cancelled:', error);
+      this.dispatch(constants.ticket.CANCEL_TICKET_FAIL, {error: error});
+    }.bind(this));
   };
 
   this.reserveTicket = function(id, txHash, powNonce) {
-    var configState = this.flux.store('config').getState();
-    var userState = this.flux.store('UserStore').getState();
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
 
-    var btcSwap = new btcswap({
-      address: configState.btcSwapAddress,
-      host: configState.host,
-      from: userState.user.id,
-      debug: true
-    });
-
-    btcSwap.reserveTicket(id, "0x" + txHash, powNonce, function(result) {
+    btcSwapClient.reserveTicket(id, "0x" + txHash, powNonce, function(result) {
       utils.log('reserveTicket result: ', result);
       this.dispatch(constants.ticket.RESERVE_TICKET, id);
-      // swal(result, '', 'success');
-      // update UI
-      // viewm.claimerAddr(web3.eth.defaultAccount.substr(2));
-      // viewm.claimTxHash(txHash.substr(2));
-      // viewm.claimExpiry(moment().add(4, 'hours').unix());
-      // doLookup(viewm);
+    }.bind(this), function(reserved) {
+      utils.log('reserveTicket completed for ticket #', reserved);
+      this.dispatch(constants.ticket.RESERVE_TICKET_SUCCESS, reserved);
     }.bind(this), function(error) {
-      utils.error('Ticket could not be reserved', error);
-      this.dispatch(constants.RESERVE_TICKET_FAIL, {error: error});
+      utils.error('Ticket could not be reserved:', error);
+      this.dispatch(constants.ticket.RESERVE_TICKET_FAIL, {error: error});
+    }.bind(this));
+  };
+
+  this.claimTicket = function(id, txHex, txHash, txIndex, merkleSibling, txBlockHash) {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+    merkleSibling = merkleSibling.map(function(sib) {
+      return '0x' + sib;
+    });
+
+    btcSwapClient.claimTicket(id, txHex, "0x" + txHash, txIndex, merkleSibling, "0x" + txBlockHash, function(result) {
+      utils.log('claimTicket result: ', result);
+      this.dispatch(constants.ticket.CLAIM_TICKET, id);
+    }.bind(this), function(claimed) {
+      utils.log('claimedTicket completed for ticket #', claimed.id);
+      this.dispatch(constants.ticket.CLAIM_TICKET_SUCCESS, claimed);
+    }.bind(this), function(error) {
+      utils.error('Ticket could not be claimed:', error);
+      this.dispatch(constants.ticket.CLAIM_TICKET_FAIL, {error: error});
     }.bind(this));
   };
 
   this.computePoW = function(id, txHash) {
-    var configState = this.flux.store('config').getState();
-    var userState = this.flux.store('UserStore').getState();
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
 
-    var btcSwap = new btcswap({
-      address: configState.btcSwapAddress,
-      host: configState.host,
-      from: userState.user.id,
-      debug: true
-    });
-
-    btcSwap.computePoW(id, txHash, function(result) {
-      utils.log('POW', result);
+    btcSwapClient.computePoW(id, txHash, function(result) {
+      utils.log('PoW nonce:', result);
       this.dispatch(constants.ticket.UPDATE_POW, result);
     }.bind(this), function(error) {
       utils.error(error);
       this.dispatch(constants.ticket.RESERVE_TICKET_FAIL, {error: error});
     }.bind(this));
-  };
-
-  this.claimTicket = function(ticket) {
-    console.log(ticket);
   };
 };
 

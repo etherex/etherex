@@ -16,6 +16,10 @@ var ConfirmModal = require('../ConfirmModal');
 // var utils = require('../js/utils');
 
 var Tickets = React.createClass({
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+
   mixins: [IntlMixin, StoreWatchMixin("TicketStore")],
 
   getInitialState() {
@@ -33,14 +37,14 @@ var Tickets = React.createClass({
   },
 
   openModal: function(ticket, action) {
-    // console.log(ticket, this.props);
     this.setState({
       showModal: true,
       message: !action ? <TicketDetails ticket={ticket} /> :
         ticket.owner == this.props.user.user.id ?
           "Are you sure you want to cancel this ticket?" :
           <div>
-            { ticket.reservable ? "Reserve?" : "Claim?" }
+            { (!ticket.claimer || (ticket.expiry > 1 && ticket.expiry < new Date().getTime() / 1000)) ?
+                "Reserve?" : "Claim?" }
             <TicketDetails ticket={ticket} />
           </div>,
       submit: function() { this.handleAction(ticket); }.bind(this)
@@ -53,17 +57,15 @@ var Tickets = React.createClass({
 
   handleAction(ticket) {
       if (ticket.owner == this.props.user.user.id)
-        this.props.flux.actions.ticket.cancelTicket({
-          ticket: ticket
-        });
-      else if (ticket.reservable)
-        this.props.flux.actions.ticket.reserveTicket({
-          ticket: ticket
-        });
-      else
-        this.props.flux.actions.ticket.claimTicket({
-          ticket: ticket
-        });
+        this.props.flux.actions.ticket.cancelTicket(ticket.id);
+      else if (!ticket.claimer) {
+        this.props.flux.actions.ticket.lookupTicket(ticket.id);
+        this.context.router.transitionTo('claim');
+      }
+      else {
+        this.props.flux.actions.ticket.lookupTicket(ticket.id);
+        this.context.router.transitionTo('claim');
+      }
   },
 
   render() {
@@ -86,9 +88,9 @@ var Tickets = React.createClass({
           <thead>
             <tr>
               <th className="text-right">ID</th>
-              <th className="text-right">ETHER</th>
-              <th className="text-right">PRICE PER BTC</th>
-              <th className="text-right">TOTAL BTC</th>
+              <th className="text-right">AMOUNT</th>
+              <th className="text-right">PRICE BTC/ETH</th>
+              <th className="text-right">TOTAL</th>
               <th className="text-center">BTC ADDRESS</th>
               <th className="text-center">EXPIRY</th>
               <th className="text-center trade-op"></th>

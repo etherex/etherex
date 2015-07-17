@@ -6,9 +6,7 @@ var Input = require('react-bootstrap/lib/Input');
 // var Alert = require('react-bootstrap/lib/Alert');
 var Nav = require("./Nav");
 
-var bigRat = require("big-rational");
 var utils = require('../../js/utils');
-var fixtures = require('../../js/fixtures');
 
 var CreateTicket = React.createClass({
 
@@ -24,31 +22,11 @@ var CreateTicket = React.createClass({
     var amount = this.refs.amount.getValue();
     var btc = this.refs.btc.getValue();
     var price = this.refs.price.getValue();
-    utils.log("CLICK", address);
     utils.log("amount", amount);
     utils.log("btc", btc);
     utils.log("price", price);
 
-    // var btcPrice = viewm.btcPrice();
-
-    // these are passed to contract
-    var addrHex;
-    try {
-      addrHex = '0x' + this.decodeBase58Check(address);
-    }
-    catch (err) {
-      // TODO use AlertDismissable
-      utils.log('Bad Bitcoin address', err.message);
-      return;
-    }
-    var numWei = bigRat(amount).times(fixtures.ether);
-    // var weiPerSatoshi = numWei.divided(SATOSHI_PER_BTC.mul(btcPrice)).round(0).toString(10);
-    var weiPerSatoshi = btc.times(fixtures.btc).divided(numWei);
-    console.log('addrHex: ', addrHex, ' numWei: ', numWei, ' weiPerSatoshi: ', weiPerSatoshi);
-
-    // uiTxProgress();
-
-    this.submitOffer(address, amount, btc, addrHex, numWei, weiPerSatoshi);
+    this.props.flux.actions.ticket.createTicket(address, amount, btc);
   },
 
   handleChange() {
@@ -67,7 +45,7 @@ var CreateTicket = React.createClass({
     this.setState({
       amount: amount,
       btc: btc,
-      price: parseFloat(btc) / parseFloat(amount)
+      price: (parseFloat(btc) / parseFloat(amount)).toFixed(8)
     });
   },
 
@@ -95,27 +73,6 @@ var CreateTicket = React.createClass({
   //
   //   });
   // },
-
-  decodeBase58Check(btcAddr) {
-    var versionAndHash = Bitcoin.Address.decodeString(btcAddr);
-    var byteArrayData = versionAndHash.hash;
-
-    var ret = "",
-      i = 0,
-      len = byteArrayData.length;
-
-    while (i < len) {
-      var a = byteArrayData[i];
-      var h = a.toString(16);
-      if (a < 10) {
-        h = "0" + h;
-      }
-      ret += h;
-      i++;
-    }
-
-    return ret;
-  },
 
   render() {
     return (

@@ -8,11 +8,11 @@ var Button = require('react-bootstrap').Button;
 var SubTab = require("../SubTab");
 
 var Nav = React.createClass({
-  mixins: [IntlMixin],
-
   contextTypes: {
     router: React.PropTypes.func
   },
+
+  mixins: [IntlMixin],
 
   getInitialState: function () {
     return {
@@ -55,7 +55,7 @@ var Nav = React.createClass({
               <Glyphicon glyph="upload" /> <FormattedMessage message={this.getIntlMessage('form.sell')} /> ether
             </SubTab>
             <SubTab to="claim" data-toggle="collapse" data-target="#btcnav-collapse.in">
-              <Glyphicon glyph="download-alt" /> Claim
+              <Glyphicon glyph="download-alt" /> Reserve / Claim
             </SubTab>
             <SubTab to="btc-help" data-toggle="collapse" data-target="#btcnav-collapse.in">
               <Glyphicon glyph="question-sign" /> <FormattedMessage message={this.getIntlMessage('nav.help')} />

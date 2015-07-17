@@ -7,30 +7,31 @@ var TicketStore = Fluxxor.createStore({
 
     initialize: function(options) {
         this.title = "Tickets";
-        this.tickets = options.tickets || [
-          {
-            id: 1,
-            reservable: false,
-            status: "default",
-            owner: "0xd5623514f22d7569a13126e91c2eaff5b8df8479",
-            address: "18zX3wb318o2Pw9ZUHgG3mmQME536Qg2Ha",
-            amount: 42000000000000000000,
-            price: 0.0081337,
-            total: 0.3416154,
-            expiry: new Date().getTime() + 3600 * 1000
-          },
-          {
-            id: 2,
-            reservable: true,
-            status: "default",
-            owner: "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
-            address: "18zX3wb318o2Pw9ZUHgG3mmQME536Qg2Ha",
-            amount: 1337000000000000000000,
-            price: 0.00748739,
-            total: 10.01064043,
-            expiry: new Date().getTime() + 4200 * 1000
-          }
-        ];
+        this.tickets = options.tickets || [];
+        // [
+        //   {
+        //     id: 1,
+        //     reservable: false,
+        //     status: "default",
+        //     owner: "0xd5623514f22d7569a13126e91c2eaff5b8df8479",
+        //     address: "18zX3wb318o2Pw9ZUHgG3mmQME536Qg2Ha",
+        //     amount: 42000000000000000000,
+        //     price: 0.0081337,
+        //     total: 0.3416154,
+        //     expiry: new Date().getTime() + 3600 * 1000
+        //   },
+        //   {
+        //     id: 2,
+        //     reservable: true,
+        //     status: "default",
+        //     owner: "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
+        //     address: "18zX3wb318o2Pw9ZUHgG3mmQME536Qg2Ha",
+        //     amount: 1337000000000000000000,
+        //     price: 0.00748739,
+        //     total: 10.01064043,
+        //     expiry: new Date().getTime() + 4200 * 1000
+        //   }
+        // ];
         this.ticket = {};
         this.loading = true;
         this.updating = false;
@@ -49,6 +50,7 @@ var TicketStore = Fluxxor.createStore({
             constants.ticket.LOAD_TICKET_IDS, this.onUpdateTicketIDs,
             constants.ticket.LOAD_TICKET_IDS_FAIL, this.onTicketsFail,
             constants.ticket.LOAD_TICKET, this.onLoadTicket,
+            constants.ticket.LOAD_TICKETS_LOAD, this.onLoadTicketsLoad, // ugh...
             constants.ticket.LOAD_TICKETS_PROGRESS, this.onLoadTicketsProgress,
             constants.ticket.LOAD_TICKETS_SUCCESS, this.onLoadTicketsSuccess,
             constants.ticket.LOAD_TICKET_FAIL, this.onTicketsFail,
@@ -62,9 +64,11 @@ var TicketStore = Fluxxor.createStore({
             constants.ticket.CREATE_TICKET, this.onCreateTicket,
             constants.ticket.CREATE_TICKET_SUCCESS, this.onCreateTicketSuccess,
             constants.ticket.CREATE_TICKET_FAIL, this.onTicketsFail,
-            constants.ticket.RESERVE_TICKET, this.onClaimTicket,
+            constants.ticket.RESERVE_TICKET, this.onReserveTicket,
+            constants.ticket.RESERVE_TICKET_SUCCESS, this.onReserveTicketSuccess,
             constants.ticket.RESERVE_TICKET_FAIL, this.onTicketsFail,
             constants.ticket.CLAIM_TICKET, this.onClaimTicket,
+            constants.ticket.CLAIM_TICKET_SUCCESS, this.onClaimTicketSuccess,
             constants.ticket.CLAIM_TICKET_FAIL, this.onTicketsFail,
             constants.ticket.CANCEL_TICKET, this.onCancelTicket,
             constants.ticket.CANCEL_TICKET_FAIL, this.onTicketsFail,
@@ -115,12 +119,17 @@ var TicketStore = Fluxxor.createStore({
 
     refreshTickets: function() {
         // Sort and update state
-        this.tickets = _.sortBy(this.tickets, 'price').reverse();
+        this.tickets = _.sortBy(this.tickets, 'price');
         this.emit(constants.CHANGE_EVENT);
     },
 
     onLoadTicket: function(payload) {
         this.tickets.push(payload);
+        this.refreshTickets();
+    },
+
+    onLoadTicketsLoad: function(payload) {
+        this.tickets = payload;
         this.refreshTickets();
     },
 
@@ -185,28 +194,53 @@ var TicketStore = Fluxxor.createStore({
 
         // Replace current ticket with updated one or delete failed ones
         // TODO compare changes and animate
-        key = _.findKey(this.tickets, { 'hash': payload.hash });
+        key = _.findKey(this.tickets, { 'pendingHash': payload.pendingHash });
         if (key && key != -1) {
-            if (payload.amount === 0)
+            if (payload.ticket.amount === 0)
               this.tickets.splice(key, 1);
             else
-              this.tickets[key] = payload;
+              this.tickets[key] = payload.ticket;
         }
         else
-          this.tickets.push(payload);
+          this.tickets.push(payload.ticket);
 
         this.refreshTickets();
     },
 
     onClaimTicket: function (payload) {
-        var index = _.findIndex(this.tickets, {'id': payload.id});
+        var index = _.findIndex(this.tickets, {'id': payload});
         this.tickets[index].status = "success";
         this.emit(constants.CHANGE_EVENT);
     },
 
-    onCancelTicket: function (payload) {
+    onClaimTicketSuccess: function (payload) {
         var index = _.findIndex(this.tickets, {'id': payload.id});
+        this.tickets.splice(index, 1);
+        // this.tickets[index].status = "success";
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onReserveTicket: function (payload) {
+        var index = _.findIndex(this.tickets, {'id': payload});
+        this.tickets[index].status = "pending";
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onReserveTicketSuccess: function (payload) {
+        var index = _.findIndex(this.tickets, {'id': payload});
         this.tickets[index].status = "new";
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onCancelTicket: function (payload) {
+        var index = _.findIndex(this.tickets, {'id': payload});
+        this.tickets[index].status = "new";
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onCancelTicketSuccess: function (payload) {
+        var index = _.findIndex(this.tickets, {'id': payload});
+        this.tickets.splice(index, 1);
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -226,9 +260,9 @@ var TicketStore = Fluxxor.createStore({
     },
 
     onTicketsFail: function (payload) {
-        this.tickets = [];
-        this.loading = false;
-        this.percent = 100;
+        // this.tickets = [];
+        // this.loading = false;
+        // this.percent = 100;
         this.error = payload.error;
         this.emit(constants.CHANGE_EVENT);
     },

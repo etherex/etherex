@@ -23,7 +23,7 @@ var UserActions = function() {
         _client.putHex('EtherEx', 'primary', defaultAccount);
       }
       var valid = false;
-      if (primary && typeof(primary) == 'string')
+      if (primary && typeof primary == 'string')
         valid = _.includes(addresses, primary);
       if (!valid)
         if (defaultAccount)
@@ -46,6 +46,9 @@ var UserActions = function() {
       // Load markets
       if (init && !this.flux.store("UserStore").getState().user.error)
         this.flux.actions.market.initializeMarkets();
+
+      // Load BtcSwap client
+      this.flux.actions.config.updateBtcSwapClient(user.id);
 
     }.bind(this), function(error) {
       this.dispatch(constants.user.LOAD_ADDRESSES_FAIL, {error: error});
@@ -91,15 +94,15 @@ var UserActions = function() {
     if (!market)
       market = currentMarket;
 
-    _client.updateBalanceSub(market, user.id, function(market, available, trading, balance) {
-        if (market.id == currentMarket.id)
+    _client.updateBalanceSub(market, user.id, function(_market, available, trading, balance) {
+        if (_market.id == currentMarket.id)
           this.dispatch(constants.user.UPDATE_BALANCE_SUB, {
               available: available,
               trading: trading,
               balance: balance
           });
 
-      this.flux.actions.market.updateMarketBalances(market, available, trading, balance);
+      this.flux.actions.market.updateMarketBalances(_market, available, trading, balance);
 
     }.bind(this), function(error) {
       this.dispatch(constants.user.UPDATE_BALANCE_SUB_FAIL, {error: error});

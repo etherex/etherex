@@ -7,6 +7,10 @@ var Input = require('react-bootstrap/lib/Input');
 // var Nav = require("./Nav");
 var utils = require('../../js/utils');
 
+// dd5a8f13c97c8b8d47329fa7bd487df24b7d3b7e855a65eb7fd51e8f94f7e482
+// ticket 2 nonce = 2460830
+// ticket 3 nonce = 726771
+
 var ProofOfWork = React.createClass({
 
   getInitialState() {
@@ -48,7 +52,7 @@ var ProofOfWork = React.createClass({
             <Input type="text" ref="txhash" label="Bitcoin Transaction Hash"
               labelClassName="col-md-2" wrapperClassName="col-md-10"
               help="Hash of the bitcoin transaction that will be used to reserve the ticket." />
-            <Input type="text" ref="nonce" label="Proof of Work (Nonce)"
+            <Input type="text" ref="nonce" label="Computed nonce"
               labelClassName="col-md-2" wrapperClassName="col-md-10"
               value={this.props.flux.store("TicketStore").pow}
               disabled={true}

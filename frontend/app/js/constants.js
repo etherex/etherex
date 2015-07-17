@@ -8,7 +8,8 @@ module.exports = {
         UPDATE_ETHEREUM_CLIENT_FAILED: null,
         UPDATE_PERCENT_LOADED_SUCCESS: null,
         UPDATE_DEMO_MODE: null,
-        UPDATE_CONFIG: null
+        UPDATE_CONFIG: null,
+        UPDATE_BTC_SWAP_CLIENT: null
     }),
     network: keyMirror({
         UPDATE_READY: null,
@@ -104,6 +105,8 @@ module.exports = {
         LOAD_TICKET_IDS: null,
         LOAD_TICKET_IDS_FAIL: null,
         LOAD_TICKET: null,
+        LOAD_TICKETS: null,
+        LOAD_TICKETS_LOAD: null, // ugh...
         LOAD_TICKETS_PROGRESS: null,
         LOAD_TICKETS_SUCCESS: null,
         LOAD_TICKET_FAIL: null,
@@ -118,10 +121,13 @@ module.exports = {
         CREATE_TICKET_SUCCESS: null,
         CREATE_TICKET_FAIL: null,
         RESERVE_TICKET: null,
+        RESERVE_TICKET_SUCCESS: null,
         RESERVE_TICKET_FAIL: null,
         CLAIM_TICKET: null,
+        CLAIM_TICKET_SUCCESS: null,
         CLAIM_TICKET_FAIL: null,
         CANCEL_TICKET: null,
+        CANCEL_TICKET_SUCCESS: null,
         CANCEL_TICKET_FAIL: null,
         ESTIMATE_GAS: null,
         ESTIMATE_GAS_ACTION: null

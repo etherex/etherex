@@ -7,16 +7,17 @@ var ConfigStore = Fluxxor.createStore({
   initialize: function () {
     this.host = process.env.RPC_HOST || fixtures.host;
     this.address = fixtures.addresses.etherex;
-    this.btcSwapAddress = "0x3e38d51065df2f08dc2ee858a1090c0c56c93bd6";
+    this.ethereumClient = null;
+    this.btcSwapAddress = fixtures.addresses.btcswap;
+    this.btcSwapClient = null;
     this.debug = false;
     this.debugHandler = null;
-    this.percentLoaded = null;
-    this.ethereumClient = null;
     this.demoMode = false;
+    this.percentLoaded = null;
     this.range = 75; // max 300 blocks / ~ 1 hour
     this.rangeEnd = 0;
-    this.timeout = 120;
     this.si = false;
+    this.timeout = 120;
     this.alertCount = null;
 
     this.bindActions(
@@ -24,7 +25,8 @@ var ConfigStore = Fluxxor.createStore({
       constants.config.UPDATE_DEMO_MODE, this.handleDemoMode,
       constants.config.UPDATE_ETHEREUM_CLIENT_SUCCESS, this.handleUpdateEthereumClientSuccess,
       constants.config.UPDATE_ETHEREUM_CLIENT_FAILED, this.handleUpdateEthereumClientFailed,
-      constants.config.UPDATE_PERCENT_LOADED_SUCCESS, this.handleUpdatePercentLoadedSuccess
+      constants.config.UPDATE_PERCENT_LOADED_SUCCESS, this.handleUpdatePercentLoadedSuccess,
+      constants.config.UPDATE_BTC_SWAP_CLIENT, this.handleUpdateBtcSwapClient
     );
   },
 
@@ -32,22 +34,27 @@ var ConfigStore = Fluxxor.createStore({
     return {
       host: this.host,
       address: this.address,
+      ethereumClient: this.ethereumClient,
       btcSwapAddress: this.btcSwapAddress,
+      btcSwapClient: this.btcSwapClient,
       debug: this.debug,
       debugHandler: this.debugHandler,
-      percentLoaded: this.percentLoaded,
-      ethereumClient: this.ethereumClient,
       demoMode: this.demoMode,
+      percentLoaded: this.percentLoaded,
       range: this.range,
       rangeEnd: this.rangeEnd,
-      timeout: this.timeout,
       si: this.si,
+      timeout: this.timeout,
       alertCount: this.alertCount
     };
   },
 
   getEthereumClient: function () {
     return this.ethereumClient;
+  },
+
+  getBtcSwapClient: function () {
+    return this.btcSwapClient;
   },
 
   handleUpdatePercentLoadedSuccess: function (payload) {
@@ -64,6 +71,11 @@ var ConfigStore = Fluxxor.createStore({
   handleUpdateEthereumClientFailed: function () {
     this.ethereumClient = null;
     this.ethereumClientFailed = true;
+    this.emit(constants.CHANGE_EVENT);
+  },
+
+  handleUpdateBtcSwapClient: function(payload) {
+    this.btcSwapClient = payload.btcSwapClient;
     this.emit(constants.CHANGE_EVENT);
   },
 
