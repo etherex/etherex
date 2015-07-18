@@ -34,6 +34,13 @@ var Network = React.createClass({
     }
   },
 
+  componentWillUnmount() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  },
+
   getStateFromFlux() {
     var networkState = this.props.flux.store('network').getState();
     return {

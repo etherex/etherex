@@ -243,6 +243,11 @@ module.exports = {
                     other {(# pending)}
                   }`
     },
+    "btc": {
+      "sell": `Are you sure you want to sell {amount, number} {unit}
+                for {total, number} BTC at a price of {price, number} ETH/BTC,
+                paid to {address} ?`
+    },
     "hashrate": "{hashrate, number} H/s"
   }
 };
