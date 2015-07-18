@@ -46,30 +46,24 @@ module.exports = function(grunt) {
         }
       }
     },
-    jshint: {
-      // define the files to lint
-      files: ['Gruntfile.js', 'webpack.config.js', 'app/**/*.js', 'app/**/*.jsx'],
-      // configure JSHint (documented at http://www.jshint.com/docs/)
-      options: {
-        node: true,
-        esnext: true,
-        browser: true,
-        // more options here if you want to override JSHint defaults
-        globals: {
-          jQuery: true,
-          console: true,
-          module: true,
-          require: true
-        },
-        "undef": true,
-        "unused": true
-      }
-    },
     eslint: {
       options: {
         configFile: '.eslintrc'
       },
       target: ['Gruntfile.js', 'webpack.config.js', 'app/**/*.js', 'app/**/*.jsx']
+    },
+    karma: {
+      options: {
+        configFile: 'karma.conf.js'
+      },
+      unit: {
+        singleRun: true
+      },
+      continuous: {
+        singleRun: false
+        // browsers: ['PhantomJS']
+        // background: true
+      }
     },
     watch: {
       app: {
@@ -90,9 +84,10 @@ module.exports = function(grunt) {
     clean: ["app/*.svg", "app/*.woff", "app/*.eot", "app/*.ttf", "app/app.js", "app/*.js.map"]
   });
 
-  grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-eslint');
+  grunt.loadNpmTasks('grunt-karma');
   grunt.loadNpmTasks('grunt-webpack');
   grunt.loadNpmTasks('grunt-gh-pages');
 
@@ -100,4 +95,5 @@ module.exports = function(grunt) {
   grunt.registerTask("dev", ["eslint", "webpack:build-dev", "watch:app"]);
   grunt.registerTask("build", ["clean", "eslint", "webpack:build"]);
   grunt.registerTask("publish", ["build", "gh-pages"]);
+  grunt.registerTask("lint", ["eslint"]);
 };

@@ -101,24 +101,24 @@ flux.setDispatchInterceptor(function(action, dispatch) {
 });
 
 var routes = (
-    <Route name="app" handler={EtherExApp} flux={flux}>
-      <DefaultRoute handler={Trades} flux={flux} title="Home" />
-      <Route name="home" path="/" handler={Trades} flux={flux} title="Trades" />
-      <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} flux={flux} title="Trade details" />
-      <Route name="markets" path="/markets" handler={Markets} flux={flux} title="Markets" />
-      <Route name="subs" path="/markets/subs" handler={Markets} flux={flux} title="Subs" />
-      <Route name="xchain" path="/markets/xchain" handler={Markets} flux={flux} title="X-Chain" />
-      <Route name="assets" path="/markets/assets" handler={Markets} flux={flux} title="Assets" />
-      <Route name="currencies" path="/markets/currencies" handler={Markets} flux={flux} title="Currencies" />
-      <Route name="btc" path="/btc" handler={Tickets} flux={flux} title="BTC" />
-      <Route name="sell" path="/btc/sell" handler={CreateTicket} flux={flux} title="Sell" />
-      <Route name="claim" path="/btc/claim" handler={ClaimTicket} flux={flux} title="Claim" />
-      <Route name="btc-help" path="/btc/help" handler={BtcHelp} flux={flux} title="Help" />
-      <Route name="wallet" path="/wallet" handler={Wallet} flux={flux} title="Wallet" />
-      <Route name="tools" path="/tools" handler={Tools} flux={flux} title="Tools" />
-      <Route name="help" path="/help" handler={Help} flux={flux} title="Help" />
-      <Route name="userDetails" path="/user" handler={UserDetails} flux={flux} title="User details" />
-      <NotFoundRoute name="notfound" handler={Placeholder} flux={flux} title="User or Trade ID not found" />
+    <Route name="app" handler={EtherExApp}>
+      <DefaultRoute handler={Trades} title="Home" />
+      <Route name="home" path="/" handler={Trades} title="Trades" />
+      <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} title="Trade details" />
+      <Route name="markets" path="/markets" handler={Markets} title="Markets" />
+      <Route name="subs" path="/markets/subs" handler={Markets} title="Subs" />
+      <Route name="xchain" path="/markets/xchain" handler={Markets} title="X-Chain" />
+      <Route name="assets" path="/markets/assets" handler={Markets} title="Assets" />
+      <Route name="currencies" path="/markets/currencies" handler={Markets} title="Currencies" />
+      <Route name="btc" path="/btc" handler={Tickets} title="BTC" />
+      <Route name="sell" path="/btc/sell" handler={CreateTicket} title="Sell" />
+      <Route name="claim" path="/btc/claim" handler={ClaimTicket} title="Claim" />
+      <Route name="btc-help" path="/btc/help" handler={BtcHelp} title="Help" />
+      <Route name="wallet" path="/wallet" handler={Wallet} title="Wallet" />
+      <Route name="tools" path="/tools" handler={Tools} title="Tools" />
+      <Route name="help" path="/help" handler={Help} title="Help" />
+      <Route name="userDetails" path="/user" handler={UserDetails} title="User details" />
+      <NotFoundRoute name="notfound" handler={Placeholder} title="User or Trade ID not found" />
     </Route>
 );
 

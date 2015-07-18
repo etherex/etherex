@@ -5,7 +5,6 @@ var TradeList = require("./TradeList");
 
 var Trades = React.createClass({
   render: function() {
-    this.props.user.user.own = false;
     return (
       <div className="row">
         {!this.props.market.error &&

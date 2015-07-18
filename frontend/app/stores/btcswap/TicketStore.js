@@ -8,30 +8,6 @@ var TicketStore = Fluxxor.createStore({
     initialize: function(options) {
         this.title = "Tickets";
         this.tickets = options.tickets || [];
-        // [
-        //   {
-        //     id: 1,
-        //     reservable: false,
-        //     status: "default",
-        //     owner: "0xd5623514f22d7569a13126e91c2eaff5b8df8479",
-        //     address: "18zX3wb318o2Pw9ZUHgG3mmQME536Qg2Ha",
-        //     amount: 42000000000000000000,
-        //     price: 0.0081337,
-        //     total: 0.3416154,
-        //     expiry: new Date().getTime() + 3600 * 1000
-        //   },
-        //   {
-        //     id: 2,
-        //     reservable: true,
-        //     status: "default",
-        //     owner: "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826",
-        //     address: "18zX3wb318o2Pw9ZUHgG3mmQME536Qg2Ha",
-        //     amount: 1337000000000000000000,
-        //     price: 0.00748739,
-        //     total: 10.01064043,
-        //     expiry: new Date().getTime() + 4200 * 1000
-        //   }
-        // ];
         this.ticket = {};
         this.loading = true;
         this.updating = false;
