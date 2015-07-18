@@ -18,7 +18,7 @@ var BalanceSub = require("./BalanceSub");
 var MarketSelect = require("./MarketSelect");
 var LastPrice = require("./LastPrice");
 var RangeSelect = require("./RangeSelect");
-var GraphPrice = require('./GraphPriceTechan');
+var GraphPrice = require('./GraphPrice');
 var Network = require('./Network');
 
 var fixtures = require('../js/fixtures');

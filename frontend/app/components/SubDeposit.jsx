@@ -26,35 +26,6 @@ var SubDeposit = React.createClass({
     this.setState({ showModal: false });
   },
 
-  render: function() {
-    return (
-      <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
-        <div className="form-group">
-          <label className="sr-only" forHtml="amount">
-            <FormattedMessage message={this.getIntlMessage('form.amount')} />
-          </label>
-          <input ref="amount" type="number" className="form-control"
-            min={this.props.market.amountPrecision}
-            step={this.props.market.amountPrecision}
-            placeholder="10.0000"
-            onChange={this.handleChange} />
-        </div>
-        <div className="form-group">
-          <Button className={"btn-block" + (this.state.newDeposit ? " btn-primary" : "")} type="submit">
-            <FormattedMessage message={this.getIntlMessage('form.deposit')} />
-          </Button>
-        </div>
-        <ConfirmModal
-          show={this.state.showModal}
-          onHide={this.closeModal}
-          message={this.state.confirmMessage}
-          flux={this.props.flux}
-          onSubmit={this.onSubmitForm}
-        />
-      </form>
-    );
-  },
-
   handleChange: function(e) {
     e.preventDefault();
     this.validate(e);
@@ -78,11 +49,11 @@ var SubDeposit = React.createClass({
     if (!amount) {
       this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.empty')));
     }
-    else if (amount > this.props.user.balance_sub) {
+    else if (amount > this.props.user.balanceSub) {
       this.props.setAlert('warning',
         this.formatMessage(this.getIntlMessage('deposit.not_enough'), {
           currency: this.props.market.name,
-          balance: this.props.user.balance_sub,
+          balance: this.props.user.balanceSub,
           amount: amount
         })
       );
@@ -126,6 +97,35 @@ var SubDeposit = React.createClass({
       amount: null,
       newDeposit: false
     });
+  },
+
+  render: function() {
+    return (
+      <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
+        <div className="form-group">
+          <label className="sr-only" forHtml="amount">
+            <FormattedMessage message={this.getIntlMessage('form.amount')} />
+          </label>
+          <input ref="amount" type="number" className="form-control"
+            min={this.props.market.amountPrecision}
+            step={this.props.market.amountPrecision}
+            placeholder="10.0000"
+            onChange={this.handleChange} />
+        </div>
+        <div className="form-group">
+          <Button className={"btn-block" + (this.state.newDeposit ? " btn-primary" : "")} type="submit">
+            <FormattedMessage message={this.getIntlMessage('form.deposit')} />
+          </Button>
+        </div>
+        <ConfirmModal
+          show={this.state.showModal}
+          onHide={this.closeModal}
+          message={this.state.confirmMessage}
+          flux={this.props.flux}
+          onSubmit={this.onSubmitForm}
+        />
+      </form>
+    );
   }
 });
 

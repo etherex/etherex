@@ -12,9 +12,9 @@ var BalanceSub = React.createClass({
   mixins: [IntlMixin],
 
   render: function() {
-    var available = this.props.user.user.balance_sub_available;
-    var trading = this.props.user.user.balance_sub_trading;
-    var balance = this.props.user.user.balance_sub;
+    var available = this.props.user.user.balanceSubAvailable;
+    var trading = this.props.user.user.balanceSubTrading;
+    var balance = this.props.user.user.balanceSub;
 
     return (
       <div>

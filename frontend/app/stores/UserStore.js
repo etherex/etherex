@@ -15,10 +15,10 @@ var UserStore = Fluxxor.createStore({
       balance: 0,
       balanceFormatted: 0,
       balancePending: 0,
-      balance_sub: 0,
-      balance_sub_available: 0,
-      balance_sub_trading: 0,
-      balance_sub_pending: 0,
+      balanceSub: 0,
+      balanceSubAvailable: 0,
+      balanceSubTrading: 0,
+      balanceSubPending: 0,
       addresses: []
     };
     this.defaultAccount = null;
@@ -111,16 +111,16 @@ var UserStore = Fluxxor.createStore({
     // console.log("BALANCE", payload.balance);
     this.user.balance = bigRat(payload.balance).divide(bigRat(fixtures.ether)).valueOf();
     this.user.balanceFormatted = utils.formatEther(payload.balance);
-    this.user.balance_raw = payload.balance;
+    this.user.balanceWei = payload.balance;
     this.user.balancePending = bigRat(payload.balancePending).divide(bigRat(fixtures.ether)).valueOf();
     this.emit(constants.CHANGE_EVENT);
   },
 
   onUpdateBalanceSub: function(payload) {
     // console.log("BALANCE_SUB", payload);
-    this.user.balance_sub_available = payload.available;
-    this.user.balance_sub_trading = payload.trading;
-    this.user.balance_sub = payload.balance;
+    this.user.balanceSubAvailable = payload.available;
+    this.user.balanceSubTrading = payload.trading;
+    this.user.balanceSub = payload.balance;
     this.emit(constants.CHANGE_EVENT);
   },
 

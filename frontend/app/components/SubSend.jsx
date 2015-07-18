@@ -27,45 +27,6 @@ var SubSend = React.createClass({
     this.setState({ showModal: false });
   },
 
-  render: function() {
-    return (
-      <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
-        <div className="container-fluid row">
-          <div className="form-group">
-            <label className="sr-only" forHtml="address">
-              <FormattedMessage message={this.getIntlMessage('form.recipient')} />
-            </label>
-            <input type="text" className="form-control"
-                   maxLength="42" pattern="0x[a-fA-F\d]+"
-                   placeholder="0x" ref="address" onChange={this.handleChange} />
-          </div>
-          <div className="form-group">
-            <label className="sr-only" forHtml="amount">
-              <FormattedMessage message={this.getIntlMessage('form.amount')} />
-            </label>
-            <input ref="amount" type="number" className="form-control"
-              min={this.props.market.amountPrecision}
-              step={this.props.market.amountPrecision}
-              placeholder="10.0000"
-              onChange={this.handleChange} />
-          </div>
-          <div className="form-group">
-            <Button className={"btn-block" + (this.state.newSend ? " btn-primary" : "")} type="submit" key="send">
-              <FormattedMessage message={this.getIntlMessage('send.send')} />
-            </Button>
-          </div>
-        </div>
-        <ConfirmModal
-          show={this.state.showModal}
-          onHide={this.closeModal}
-          message={this.state.confirmMessage}
-          flux={this.props.flux}
-          onSubmit={this.onSubmitForm}
-        />
-      </form>
-    );
-  },
-
   handleChange: function(e) {
     e.preventDefault();
     this.validate(e);
@@ -94,11 +55,11 @@ var SubSend = React.createClass({
     else if (!amount) {
       this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.cheap')));
     }
-    else if (amount > this.props.user.balance_sub) {
+    else if (amount > this.props.user.balanceSub) {
       this.props.setAlert('warning',
         this.formatMessage(this.getIntlMessage('sub.not_enough'), {
           currency: this.props.market.name,
-          balance: this.props.user.balance_sub_available
+          balance: this.props.user.balanceSubAvailable
         })
       );
     }
@@ -155,6 +116,45 @@ var SubSend = React.createClass({
         amount: null,
         newSend: false
     });
+  },
+
+  render: function() {
+    return (
+      <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
+        <div className="container-fluid row">
+          <div className="form-group">
+            <label className="sr-only" forHtml="address">
+              <FormattedMessage message={this.getIntlMessage('form.recipient')} />
+            </label>
+            <input type="text" className="form-control"
+                   maxLength="42" pattern="0x[a-fA-F\d]+"
+                   placeholder="0x" ref="address" onChange={this.handleChange} />
+          </div>
+          <div className="form-group">
+            <label className="sr-only" forHtml="amount">
+              <FormattedMessage message={this.getIntlMessage('form.amount')} />
+            </label>
+            <input ref="amount" type="number" className="form-control"
+              min={this.props.market.amountPrecision}
+              step={this.props.market.amountPrecision}
+              placeholder="10.0000"
+              onChange={this.handleChange} />
+          </div>
+          <div className="form-group">
+            <Button className={"btn-block" + (this.state.newSend ? " btn-primary" : "")} type="submit" key="send">
+              <FormattedMessage message={this.getIntlMessage('send.send')} />
+            </Button>
+          </div>
+        </div>
+        <ConfirmModal
+          show={this.state.showModal}
+          onHide={this.closeModal}
+          message={this.state.confirmMessage}
+          flux={this.props.flux}
+          onSubmit={this.onSubmitForm}
+        />
+      </form>
+    );
   }
 });
 

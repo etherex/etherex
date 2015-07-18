@@ -9,8 +9,6 @@ var UserLink = React.createClass({
       address: React.PropTypes.string.isRequired
   },
 
-  shortIdLength: 8,
-
   getInitialState() {
     return {
       shortId: this.props.address
@@ -19,9 +17,10 @@ var UserLink = React.createClass({
 
   componentWillReceiveProps(nextProps) {
     this.setState({
-      shortId: nextProps.address.substr(0, this.shortIdLength)
+      shortId: nextProps.address.substr(0, 8)
     });
   },
+
 
   render() {
     return (

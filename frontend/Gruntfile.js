@@ -59,28 +59,24 @@ module.exports = function(grunt) {
           jQuery: true,
           console: true,
           module: true,
-          require: true,
-          /* jest */
-          afterEach: false,
-          beforeEach: false,
-          describe: false,
-          expect: false,
-          it: false,
-          jest: false,
-          pit: false,
-          xdescribe: false,
-          xit: false
+          require: true
         },
         "undef": true,
         "unused": true
       }
     },
+    eslint: {
+      options: {
+        configFile: '.eslintrc'
+      },
+      target: ['Gruntfile.js', 'webpack.config.js', 'app/**/*.js', 'app/**/*.jsx']
+    },
     watch: {
       app: {
         files: ["app/**/*.js", "app/**/*.jsx", "app/**/*.css"],
-        tasks: ["jshint", "webpack:build-dev"],
+        tasks: ["eslint", "webpack:build-dev"],
         options: {
-          spawn: false,
+          spawn: false
         }
       }
     },
@@ -94,15 +90,14 @@ module.exports = function(grunt) {
     clean: ["app/*.svg", "app/*.woff", "app/*.eot", "app/*.ttf", "app/app.js", "app/*.js.map"]
   });
 
-  // grunt.loadNpmTasks('grunt-jest');
-  grunt.loadNpmTasks('grunt-jsxhint');
+  grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-webpack');
   grunt.loadNpmTasks('grunt-gh-pages');
 
   grunt.registerTask("default", ["webpack-dev-server:start"]);
-  grunt.registerTask("dev", ["jshint", "webpack:build-dev", "watch:app"]);
-  grunt.registerTask("build", ["clean", "jshint", "webpack:build"]);
+  grunt.registerTask("dev", ["eslint", "webpack:build-dev", "watch:app"]);
+  grunt.registerTask("build", ["clean", "eslint", "webpack:build"]);
   grunt.registerTask("publish", ["build", "gh-pages"]);
 };

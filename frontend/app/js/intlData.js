@@ -22,7 +22,7 @@ module.exports = {
         "currency": "USD",
         "minimumFractionDigits": 2
       }
-    },
+    }
   },
   "messages": {
     "loading": "loading",

@@ -4,10 +4,6 @@ var bigRat = require('big-rational');
 var numeral = require("numeral");
 var si = require("si-prefix");
 
-String.prototype.repeat = function(num) {
-  return new Array(num + 1).join(this);
-};
-
 var scale = new si.Scale({
   minor: true,
   above: {
@@ -47,7 +43,7 @@ var scale = new si.Scale({
     24: 'yocto'
   }
 });
-var unit = new si.Unit(scale, '');
+var scaleUnit = new si.Unit(scale, '');
 
 var utils = {
   formatEther(wei) {
@@ -58,7 +54,7 @@ var utils = {
 
   formatBalance(wei, precision, split) {
     var value = 0;
-    var unit = 0;
+    var unit = null;
     var big = bigRat(wei);
     if (typeof precision === 'undefined')
       precision = 4;
@@ -86,11 +82,15 @@ var utils = {
   },
 
   format(n) {
-    return n ? unit.format(n, ' ') : '0';
+    return n ? scaleUnit.format(n, ' ') : '0';
   },
 
   numeral(n, p) {
-    return numeral(n).format('0,0.' + '0'.repeat(p));
+    return numeral(n).format('0,0.' + this.repeat('0', p));
+  },
+
+  repeat(str, num) {
+    return new Array(num + 1).join(str);
   },
 
   consoleLog: 'background-color: #222; color: #fff; padding: 2px 6px;',

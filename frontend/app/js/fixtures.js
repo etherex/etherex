@@ -1245,16 +1245,16 @@ var fixtures = {
           "unit": "Kether"
         },
         "balancePending": 0,
-        "balance_sub": 0,
-        "balance_sub_available": 600,
-        "balance_sub_trading": 0,
-        "balance_sub_pending": 0,
+        "balanceSub": 0,
+        "balanceSubAvailable": 600,
+        "balanceSubTrading": 0,
+        "balanceSubPending": 0,
         "addresses": [
           "0x239eb5afa5b1da814a3ccb60e79de1f933f1b470",
           "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826"
         ],
         "own": false,
-        "balance_raw": 3.8665339013603493e+21
+        "balanceWei": 3.8665339013603493e+21
       },
       "defaultAccount": "0x239eb5afa5b1da814a3ccb60e79de1f933f1b470",
       "loading": false,

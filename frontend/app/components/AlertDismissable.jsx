@@ -9,6 +9,14 @@ var AlertDismissable = React.createClass({
     };
   },
 
+  handleAlertDismiss: function() {
+    this.setState({alertVisible: false});
+  },
+
+  handleAlertShow: function() {
+    this.setState({alertVisible: true});
+  },
+
   render: function() {
     if (this.state.alertVisible) {
       return (
@@ -22,14 +30,6 @@ var AlertDismissable = React.createClass({
       );
     }
     return false;
-  },
-
-  handleAlertDismiss: function() {
-    this.setState({alertVisible: false});
-  },
-
-  handleAlertShow: function() {
-    this.setState({alertVisible: true});
   }
 });
 

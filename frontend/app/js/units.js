@@ -13,13 +13,13 @@ var units = {
   "Gether": bigRat("1000000000000000000000000000"),
   "Mether": bigRat("1000000000000000000000000"),
   "Kether": bigRat("1000000000000000000000"),
-  "ether" : bigRat("1000000000000000000"),
+   "ether": bigRat("1000000000000000000"),
   "finney": bigRat("1000000000000000"),
-  "szabo" : bigRat("1000000000000"),
-  "Gwei"  : bigRat("1000000000"),
-  "Mwei"  : bigRat("1000000"),
-  "Kwei"  : bigRat("1000"),
-  "wei"   : bigRat("1")
+   "szabo": bigRat("1000000000000"),
+    "Gwei": bigRat("1000000000"),
+    "Mwei": bigRat("1000000"),
+    "Kwei": bigRat("1000"),
+     "wei": bigRat("1")
 };
 
 module.exports = units;

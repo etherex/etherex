@@ -1,7 +1,7 @@
 var React = require("react");
 
 var RangeSelect = require('./RangeSelect');
-var GraphPrice = require('./GraphPriceTechan');
+var GraphPrice = require('./GraphPrice');
 var MarketList = require("./MarketList");
 
 var Markets = React.createClass({

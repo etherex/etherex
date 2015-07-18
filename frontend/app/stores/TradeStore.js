@@ -316,8 +316,8 @@ var TradeStore = Fluxxor.createStore({
 
         var trades = (payload.type == 1) ? this.trades.tradeSells : this.trades.tradeBuys;
         var siblings = (payload.type == 1) ? this.trades.tradeBuys : this.trades.tradeSells;
-        var total_amount = 0;
-        var trades_total = 0;
+        var totalAmount = 0;
+        var tradesTotal = 0;
         var filling = [];
         var amountLeft = payload.amount;
         var available = payload.total;
@@ -335,21 +335,21 @@ var TradeStore = Fluxxor.createStore({
 
         if (trades)
             for (i = 0; i <= trades.length - 1; i++) {
-                var this_total = 0;
+                var thisTotal = 0;
 
                 // Add totals and amounts
                 if (trades[i].owner != payload.user.id) {
-                    this_total = trades[i].amount * trades[i].price;
-                    // console.log("against total of " + this_total);
-                    total_amount += trades[i].amount;
-                    trades_total += this_total;
+                    thisTotal = trades[i].amount * trades[i].price;
+                    // console.log("against total of " + thisTotal);
+                    totalAmount += trades[i].amount;
+                    tradesTotal += thisTotal;
                 }
 
                 // Reset to normal first if we no longer have enough
                 if ((((payload.type == 1 && payload.price < trades[i].price) ||
                       (payload.type == 2 && payload.price > trades[i].price)) ||
                        payload.price <= 0 ||
-                       available < this_total ||
+                       available < thisTotal ||
                        amountLeft < trades[i].amount) &&
                        trades[i].owner != payload.user.id &&
                        trades[i].status != "success" &&
@@ -367,7 +367,7 @@ var TradeStore = Fluxxor.createStore({
 
                         // Add back to available and amountLeft
                         amountLeft += trades[i].amount;
-                        available += this_total;
+                        available += thisTotal;
                     }
 
                     // console.log("Unfilling, available: " + utils.formatBalance(bigRat(available).multiply(fixtures.ether).valueOf()));
@@ -407,11 +407,11 @@ var TradeStore = Fluxxor.createStore({
                     else {
                         if (!_.find(filling, {'id': trades[i].id})) {
                             filling.push(trades[i]);
-                            available -= this_total;
+                            available -= thisTotal;
                             amountLeft -= trades[i].amount;
                         }
                     }
-                    // console.log("Would fill trade # " + i + " with total of " + trades_total);
+                    // console.log("Would fill trade # " + i + " with total of " + tradesTotal);
 
                     // Show filling status on trade
                     if (payload.type == 1)
@@ -467,14 +467,14 @@ var TradeStore = Fluxxor.createStore({
 
     filterMarket: function(market, trades) {
         // Filter by market
-        var market_filter = {
+        var marketFilter = {
             id: market.id,
             name: market.name
         };
-        // console.log("Filtering for market " + market.name, "with", market_filter, "on", trades);
+        // console.log("Filtering for market " + market.name, "with", marketFilter, "on", trades);
 
-        this.trades.buys = _.filter(trades.buys, {'market': market_filter});
-        this.trades.sells = _.filter(trades.sells, {'market': market_filter});
+        this.trades.buys = _.filter(trades.buys, {'market': marketFilter});
+        this.trades.sells = _.filter(trades.sells, {'market': marketFilter});
     },
 
     onTradesFail: function (payload) {

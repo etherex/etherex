@@ -27,35 +27,6 @@ var SubWithdraw = React.createClass({
     this.setState({ showModal: false });
   },
 
-  render: function() {
-    return (
-      <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
-        <div className="form-group">
-          <label className="sr-only" forHtml="amount">
-            <FormattedMessage message={this.getIntlMessage('form.amount')} />
-          </label>
-          <input ref="amount" type="number" className="form-control"
-            min={this.props.market.amountPrecision}
-            step={this.props.market.amountPrecision}
-            placeholder="10.0000"
-            onChange={this.handleChange} />
-        </div>
-        <div className="form-group">
-          <Button className={"btn-block" + (this.state.newWithdrawal ? " btn-primary" : "")} type="submit" key="withdraw">
-            <FormattedMessage message={this.getIntlMessage('form.withdraw')} />
-          </Button>
-        </div>
-        <ConfirmModal
-          show={this.state.showModal}
-          onHide={this.closeModal}
-          message={this.state.confirmMessage}
-          flux={this.props.flux}
-          onSubmit={this.onSubmitForm}
-        />
-      </form>
-    );
-  },
-
   handleChange: function(e) {
     e.preventDefault();
     this.validate(e);
@@ -79,11 +50,11 @@ var SubWithdraw = React.createClass({
     if (!amount) {
       this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('withdraw.empty')));
     }
-    else if (amount > this.props.user.balance_sub_available) {
+    else if (amount > this.props.user.balanceSubAvailable) {
       this.props.setAlert('warning',
         this.formatMessage(this.getIntlMessage('withdraw.not_enough'), {
           currency: this.props.market.name,
-          balance: this.props.user.balance_sub_available,
+          balance: this.props.user.balanceSubAvailable,
           amount: amount
         })
       );
@@ -93,7 +64,7 @@ var SubWithdraw = React.createClass({
         newWithdrawal: true,
         confirmMessage: <FormattedMessage message={this.getIntlMessage('withdraw.confirm')}
                                           amount={amount}
-                                          currency={this.props.market.name} />,
+                                          currency={this.props.market.name} />
       });
 
       this.props.showAlert(false);
@@ -127,6 +98,35 @@ var SubWithdraw = React.createClass({
       amount: null,
       newWithdrawal: false
     });
+  },
+
+  render: function() {
+    return (
+      <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
+        <div className="form-group">
+          <label className="sr-only" forHtml="amount">
+            <FormattedMessage message={this.getIntlMessage('form.amount')} />
+          </label>
+          <input ref="amount" type="number" className="form-control"
+            min={this.props.market.amountPrecision}
+            step={this.props.market.amountPrecision}
+            placeholder="10.0000"
+            onChange={this.handleChange} />
+        </div>
+        <div className="form-group">
+          <Button className={"btn-block" + (this.state.newWithdrawal ? " btn-primary" : "")} type="submit" key="withdraw">
+            <FormattedMessage message={this.getIntlMessage('form.withdraw')} />
+          </Button>
+        </div>
+        <ConfirmModal
+          show={this.state.showModal}
+          onHide={this.closeModal}
+          message={this.state.confirmMessage}
+          flux={this.props.flux}
+          onSubmit={this.onSubmitForm}
+        />
+      </form>
+    );
   }
 });
 

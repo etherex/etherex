@@ -4,7 +4,7 @@ var React = require("react");
 var d3 = require("d3");
 var techan = require("techan");
 
-var Chart = React.createClass({
+var TechanChart = React.createClass({
 
     propTypes: {
         data: React.PropTypes.array
@@ -14,14 +14,6 @@ var Chart = React.createClass({
         return {
             graph: null
         };
-    },
-
-    render: function() {
-        return (
-            <div className="container-fluid chart-container">
-                <div ref="chart"></div>
-            </div>
-        );
     },
 
     componentDidMount: function() {
@@ -45,8 +37,8 @@ var Chart = React.createClass({
             width: dim.width - dim.margin.left - dim.margin.right,
             height: dim.height - dim.margin.top - dim.margin.bottom
         };
-        dim.indicator.top = dim.ohlc.height+dim.indicator.padding;
-        dim.indicator.bottom = dim.indicator.top+dim.indicator.height+dim.indicator.padding;
+        dim.indicator.top = dim.ohlc.height + dim.indicator.padding;
+        dim.indicator.bottom = dim.indicator.top + dim.indicator.height + dim.indicator.padding;
 
         var indicatorTop = d3.scale.linear()
                 .range([dim.indicator.top, dim.indicator.bottom]);
@@ -149,10 +141,10 @@ var Chart = React.createClass({
         var rsiAnnotationLeft = null;
         if (this.props.full) {
             var macdScale = d3.scale.linear()
-                    .range([indicatorTop(0)+dim.indicator.height, indicatorTop(0)]);
+                    .range([indicatorTop(0) + dim.indicator.height, indicatorTop(0)]);
 
             var rsiScale = macdScale.copy()
-                    .range([indicatorTop(1)+dim.indicator.height, indicatorTop(1)]);
+                    .range([indicatorTop(1) + dim.indicator.height, indicatorTop(1)]);
 
             var macd = techan.plot.macd()
                     .xScale(x)
@@ -343,6 +335,18 @@ var Chart = React.createClass({
         var accessor = candlestick.accessor(),
         indicatorPreRoll = 0;  // Don't show where indicators don't have data
 
+        // TODO
+        var trendlineData = [
+            { start: { date: new Date(2015, 1, 1), value: 0.245 }, end: { date: new Date(2015, 6, 1), value: 0.2525 } },
+            { start: { date: new Date(2015, 1, 1), value: 0.265 }, end: { date: new Date(2015, 6, 1), value: 0.2575 } }
+        ];
+
+        // TODO
+        var supstanceData = [
+            { start: new Date(2015, 1, 1), end: new Date(2015, 6, 1), value: 0.275 },
+            { start: new Date(2015, 1, 1), end: new Date(2015, 6, 1), value: 0.25 }
+        ];
+
         this.mapData = function(data) {
             var mapped = data.map(function(d) {
                 return {
@@ -377,7 +381,7 @@ var Chart = React.createClass({
             zoomable.domain([indicatorPreRoll, data.length]); // Zoom in a little to hide indicator preroll
 
             svg.select("g.candlestick").datum(data).call(candlestick);
-            svg.select("g.close.annotation").datum([data[data.length-1]]).call(closeAnnotation);
+            svg.select("g.close.annotation").datum([data[data.length - 1]]).call(closeAnnotation);
             svg.select("g.volume").datum(data).call(volume);
             svg.select("g.sma.ma-0").datum(techan.indicator.sma().period(10)(data)).call(sma0);
             svg.select("g.sma.ma-1").datum(techan.indicator.sma().period(20)(data)).call(sma1);
@@ -420,7 +424,7 @@ var Chart = React.createClass({
 
         this.reset = function() {
             zoom.scale(1);
-            zoom.translate([0,0]);
+            zoom.translate([0, 0]);
             this.refresh();
         };
 
@@ -454,18 +458,6 @@ var Chart = React.createClass({
             svg.select("g.supstances").call(supstance.refresh);
         };
 
-        // TODO
-        var trendlineData = [
-            { start: { date: new Date(2015, 1, 1), value: 0.245 }, end: { date: new Date(2015, 6, 1), value: 0.2525 } },
-            { start: { date: new Date(2015, 1, 1), value: 0.265 }, end: { date: new Date(2015, 6, 1), value: 0.2575 } }
-        ];
-
-        // TODO
-        var supstanceData = [
-            { start: new Date(2015, 1, 1), end: new Date(2015, 6, 1), value: 0.275 },
-            { start: new Date(2015, 1, 1), end: new Date(2015, 6, 1), value: 0.25 }
-        ];
-
         if (this.props.data.length > 3) {
             var data = this.mapData(this.props.data);
             this.redraw(data);
@@ -490,17 +482,14 @@ var Chart = React.createClass({
     // shouldComponentUpdate: function(props) {
     //     return false;
     // }
-});
 
-var GraphPrice = React.createClass({
     render: function() {
         return (
-            <div className="navbar">
-                <h4>{this.props.title}</h4>
-                <Chart height={this.props.height} full={this.props.full} data={this.props.market.market.data} market={this.props.market.market} />
+            <div className="container-fluid chart-container">
+                <div ref="chart"></div>
             </div>
         );
     }
 });
 
-module.exports = GraphPrice;
+module.exports = TechanChart;

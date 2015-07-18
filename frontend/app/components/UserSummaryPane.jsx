@@ -51,7 +51,7 @@ var UserSummaryPane = React.createClass({
                       {this.props.user.user.addresses ?
                         this.props.user.user.addresses.map(function(address) {
                           return <MenuItem key={address} eventKey={address}>{address}</MenuItem>;
-                        }.bind(this)) :
+                        }) :
                       ""}
                   </DropdownButton>
                 </td>
@@ -68,7 +68,7 @@ var UserSummaryPane = React.createClass({
                         { this.formatMessage(
                             this.getIntlMessage('user.balance'), {
                               currency: "wei",
-                              balance: this.props.user.user.balance_raw,
+                              balance: this.props.user.user.balanceWei,
                               pending: this.props.user.user.balancePending
                             })
                         }
@@ -86,8 +86,8 @@ var UserSummaryPane = React.createClass({
                   { this.formatMessage(
                       this.getIntlMessage('user.balance'), {
                         currency: this.props.market.name,
-                        balance: this.props.user.user.balance_sub,
-                        pending: this.props.user.user.balance_sub_pending
+                        balance: this.props.user.user.balanceSub,
+                        pending: this.props.user.user.balanceSubPending
                       })
                   }
                 </td>

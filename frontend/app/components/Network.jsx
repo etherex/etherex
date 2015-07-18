@@ -13,19 +13,6 @@ var utils = require('../js/utils');
 var Network = React.createClass({
   mixins: [IntlMixin, StoreWatchMixin('config', 'network', 'UserStore')],
 
-  getStateFromFlux() {
-    var networkState = this.props.flux.store('network').getState();
-    return {
-      user: this.props.flux.store('UserStore').getState().user,
-      config: this.props.flux.store('config').getState(),
-      network: networkState,
-      host: this.props.flux.store('config').getState().host,
-      blockTimestamp: networkState.blockTimestamp,
-      blockTime: parseInt(networkState.blockTime),
-      networkLag: networkState.networkLag
-    };
-  },
-
   getInitialState() {
     return {
       gasPrice: '-'
@@ -34,13 +21,6 @@ var Network = React.createClass({
 
   componentDidMount() {
     this.startCounting();
-  },
-
-  componentWillUnmount() {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = null;
-    }
   },
 
   componentWillReceiveProps() {
@@ -52,6 +32,19 @@ var Network = React.createClass({
         gasPrice: formattedGasPrice
       });
     }
+  },
+
+  getStateFromFlux() {
+    var networkState = this.props.flux.store('network').getState();
+    return {
+      user: this.props.flux.store('UserStore').getState().user,
+      config: this.props.flux.store('config').getState(),
+      network: networkState,
+      host: this.props.flux.store('config').getState().host,
+      blockTimestamp: networkState.blockTimestamp,
+      blockTime: parseInt(networkState.blockTime),
+      networkLag: networkState.networkLag
+    };
   },
 
   startCounting() {

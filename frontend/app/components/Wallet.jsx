@@ -48,14 +48,13 @@ var Wallet = React.createClass({
             <div className="panel panel-default">
               <div className="panel-heading">
                 <h3 className="panel-title">
-                  <FormattedMessage message={this.getIntlMessage('deposit.currency')}
-                                    currency={this.props.market.market.name} />
+                  <FormattedMessage message={this.getIntlMessage('deposit.currency')} currency={this.props.market.market.name} />
                 </h3>
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
                   <SubDeposit flux={this.props.flux} market={this.props.market.market} user={this.props.user.user}
-                              setAlert={this.setAlert} showAlert={this.showAlert}  />
+                    setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
             </div>
@@ -64,14 +63,13 @@ var Wallet = React.createClass({
             <div className="panel panel-default">
               <div className="panel-heading">
                 <h3 className="panel-title">
-                  <FormattedMessage message={this.getIntlMessage('withdraw.currency')}
-                                    currency={this.props.market.market.name} />
+                  <FormattedMessage message={this.getIntlMessage('withdraw.currency')} currency={this.props.market.market.name} />
                 </h3>
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
                   <SubWithdraw flux={this.props.flux} market={this.props.market.market} user={this.props.user.user}
-                               setAlert={this.setAlert} showAlert={this.showAlert}  />
+                    setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
             </div>
@@ -82,14 +80,13 @@ var Wallet = React.createClass({
             <div className="panel panel-default">
               <div className="panel-heading">
                 <h3 className="panel-title">
-                  <FormattedMessage message={this.getIntlMessage('send.currency')}
-                                    currency={this.props.market.market.name} />
+                  <FormattedMessage message={this.getIntlMessage('send.currency')} currency={this.props.market.market.name} />
                 </h3>
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
                   <SubSend flux={this.props.flux} market={this.props.market.market} user={this.props.user.user}
-                           setAlert={this.setAlert} showAlert={this.showAlert}  />
+                    setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
             </div>
@@ -98,14 +95,13 @@ var Wallet = React.createClass({
             <div className="panel panel-default">
               <div className="panel-heading">
                 <h3 className="panel-title">
-                  <FormattedMessage message={this.getIntlMessage('send.currency')}
-                                    currency="ETH" />
+                  <FormattedMessage message={this.getIntlMessage('send.currency')} currency="ETH" />
                 </h3>
               </div>
               <div className="panel-body">
                 <div className="container-fluid">
                   <SendEther flux={this.props.flux} user={this.props.user.user}
-                             setAlert={this.setAlert} showAlert={this.showAlert}  />
+                    setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
             </div>
@@ -116,7 +112,7 @@ var Wallet = React.createClass({
           <div className="row">
             {(!this.props.market.market.txs.error) &&
               <TxsList title="Transactions" flux={this.props.flux} market={this.props.market}
-                       txs={this.props.market.market.txs} user={this.props.user} />}
+                txs={this.props.market.market.txs} user={this.props.user} />}
           </div>
         </div>
       </div>

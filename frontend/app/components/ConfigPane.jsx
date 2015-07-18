@@ -35,14 +35,6 @@ var ConfigPane = React.createClass({
     };
   },
 
-  closeModal: function() {
-    this.setState({ showModal: false });
-  },
-
-  openModal: function() {
-    this.setState({ showModal: true });
-  },
-
   componentWillReceiveProps(nextProps) {
     var config = nextProps.flux.store('config');
     if (config.si != this.state.si)
@@ -59,81 +51,12 @@ var ConfigPane = React.createClass({
       });
   },
 
-  render: function() {
-    return (
-      <div className="panel panel-default">
-        <div className="panel-heading">
-          <h3 className="panel-title">
-            <FormattedMessage message={this.getIntlMessage('config.title')} />
-          </h3>
-        </div>
-        <div className="panel-body">
+  closeModal: function() {
+    this.setState({ showModal: false });
+  },
 
-          <form className="form-horizontal" role="form" onSubmit={this.handleUpdateTheme} >
-            <Input label="Theme" labelClassName='col-sm-2' wrapperClassName='col-sm-10 wrapper'>
-              <DropdownButton ref="theme" title={this.state.themes[this.state.theme]} onSelect={this.handleChangeTheme}>
-                <MenuItem key={"flatly"} eventKey={"flatly"}>Flatly</MenuItem>
-                <MenuItem key={"darkly"} eventKey={"darkly"}>Darkly</MenuItem>
-                <MenuItem key={"superhero"} eventKey={"superhero"}>Superhero</MenuItem>
-              </DropdownButton>
-              <Button style={{marginLeft: 10}} className={this.state.newTheme && " btn-primary"} type="submit">
-                <FormattedMessage message={this.getIntlMessage('config.refresh')} />
-              </Button>
-            </Input>
-          </form>
-
-          <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
-            <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.current')} />}
-              labelClassName='col-sm-2' wrapperClassName='col-sm-10'
-              value={this.props.address} readOnly hasFeedback />
-
-            <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.new')} />}
-              labelClassName='col-sm-2' wrapperClassName='col-sm-10'
-              maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="Address" ref="address" onChange={this.handleChange}/>
-            <Input wrapperClassName="col-sm-10 col-sm-offset-2">
-              <Button className={"btn-block" + (this.state.newAddress ? " btn-primary" : "")} type="submit">
-                <FormattedMessage message={this.getIntlMessage('config.update')} />
-              </Button>
-            </Input>
-          </form>
-
-          <form className="form-horizontal" role="form" onSubmit={this.handleTimeout} >
-            <Input ref="timeout" type="number" min="1" step="1"
-              label={<FormattedMessage message={this.getIntlMessage('config.timeout')} />}
-              labelClassName='col-sm-2' wrapperClassName='col-sm-10'
-              value={this.state.timeout} onChange={this.handleChangeTimeout} />
-            <Input wrapperClassName="col-sm-10 col-sm-offset-2">
-              <Button
-                onClick={this.handleTimeout}
-                wrapperClassName="col-sm-10 col-sm-offset-2"
-                className={this.state.timeoutUpdated ? "btn-primary" : ""} >
-                <FormattedMessage message={this.getIntlMessage('config.update')} />
-              </Button>
-            </Input>
-          </form>
-
-          <Input type='checkbox' ref='si' label={<FormattedMessage message={this.getIntlMessage('config.si')} />}
-            wrapperClassName="col-sm-10 col-sm-offset-2"
-            checked={this.state.si} onChange={this.toggleSI} />
-
-          <Input type='checkbox' ref='debug' label={<FormattedMessage message={this.getIntlMessage('config.debug_mode')} />}
-            wrapperClassName="col-sm-10 col-sm-offset-2"
-            checked={this.state.debug} onChange={this.toggleDebug}
-            help={
-              <Alert bsStyle='warning' className='text-black'>
-                <b><FormattedMessage message={this.getIntlMessage('form.warning')} /></b>
-                <FormattedMessage message={this.getIntlMessage('config.debug_warning')} />
-              </Alert>} />
-        </div>
-        <ConfirmModal
-          show={this.state.showModal}
-          onHide={this.closeModal}
-          message={this.state.message}
-          flux={this.props.flux}
-          onSubmit={this.onSubmitForm}
-        />
-      </div>
-    );
+  openModal: function() {
+    this.setState({ showModal: true });
   },
 
   toggleDebug: function() {
@@ -245,6 +168,83 @@ var ConfigPane = React.createClass({
     });
 
     this.refs.address.getDOMNode().value = '';
+  },
+
+  render: function() {
+    return (
+      <div className="panel panel-default">
+        <div className="panel-heading">
+          <h3 className="panel-title">
+            <FormattedMessage message={this.getIntlMessage('config.title')} />
+          </h3>
+        </div>
+        <div className="panel-body">
+
+          <form className="form-horizontal" role="form" onSubmit={this.handleUpdateTheme} >
+            <Input label="Theme" labelClassName='col-sm-2' wrapperClassName='col-sm-10 wrapper'>
+              <DropdownButton ref="theme" title={this.state.themes[this.state.theme]} onSelect={this.handleChangeTheme}>
+                <MenuItem key={"flatly"} eventKey={"flatly"}>Flatly</MenuItem>
+                <MenuItem key={"darkly"} eventKey={"darkly"}>Darkly</MenuItem>
+                <MenuItem key={"superhero"} eventKey={"superhero"}>Superhero</MenuItem>
+              </DropdownButton>
+              <Button style={{marginLeft: 10}} className={this.state.newTheme && " btn-primary"} type="submit">
+                <FormattedMessage message={this.getIntlMessage('config.refresh')} />
+              </Button>
+            </Input>
+          </form>
+
+          <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
+            <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.current')} />}
+              labelClassName='col-sm-2' wrapperClassName='col-sm-10'
+              value={this.props.address} readOnly hasFeedback />
+
+            <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.new')} />}
+              labelClassName='col-sm-2' wrapperClassName='col-sm-10'
+              maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="Address" ref="address" onChange={this.handleChange}/>
+            <Input wrapperClassName="col-sm-10 col-sm-offset-2">
+              <Button className={"btn-block" + (this.state.newAddress ? " btn-primary" : "")} type="submit">
+                <FormattedMessage message={this.getIntlMessage('config.update')} />
+              </Button>
+            </Input>
+          </form>
+
+          <form className="form-horizontal" role="form" onSubmit={this.handleTimeout} >
+            <Input ref="timeout" type="number" min="1" step="1"
+              label={<FormattedMessage message={this.getIntlMessage('config.timeout')} />}
+              labelClassName='col-sm-2' wrapperClassName='col-sm-10'
+              value={this.state.timeout} onChange={this.handleChangeTimeout} />
+            <Input wrapperClassName="col-sm-10 col-sm-offset-2">
+              <Button
+                onClick={this.handleTimeout}
+                wrapperClassName="col-sm-10 col-sm-offset-2"
+                className={this.state.timeoutUpdated ? "btn-primary" : ""} >
+                <FormattedMessage message={this.getIntlMessage('config.update')} />
+              </Button>
+            </Input>
+          </form>
+
+          <Input type='checkbox' ref='si' label={<FormattedMessage message={this.getIntlMessage('config.si')} />}
+            wrapperClassName="col-sm-10 col-sm-offset-2"
+            checked={this.state.si} onChange={this.toggleSI} />
+
+          <Input type='checkbox' ref='debug' label={<FormattedMessage message={this.getIntlMessage('config.debug_mode')} />}
+            wrapperClassName="col-sm-10 col-sm-offset-2"
+            checked={this.state.debug} onChange={this.toggleDebug}
+            help={
+              <Alert bsStyle='warning' className='text-black'>
+                <b><FormattedMessage message={this.getIntlMessage('form.warning')} /></b>
+                <FormattedMessage message={this.getIntlMessage('config.debug_warning')} />
+              </Alert>} />
+        </div>
+        <ConfirmModal
+          show={this.state.showModal}
+          onHide={this.closeModal}
+          message={this.state.message}
+          flux={this.props.flux}
+          onSubmit={this.onSubmitForm}
+        />
+      </div>
+    );
   }
 });
 

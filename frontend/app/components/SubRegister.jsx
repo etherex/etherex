@@ -46,66 +46,6 @@ var SubRegister = React.createClass({
     this.setState({ showAlert: false});
   },
 
-  render: function() {
-    return (
-      <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
-        <div className="form-group">
-          <DropdownButton ref="category" key={1} onSelect={this.handleCategories} title={this.state.categoryName}>
-            {
-              fixtures.categories.map(function(category) {
-                return <MenuItem key={category.id} eventKey={category.id}>{category.name}</MenuItem>;
-              }.bind(this))
-            }
-          </DropdownButton>
-        </div>
-        <div className="form-group">
-          <label forHtml="code">Subcurrency code</label>
-          <input type="text" className="form-control" pattern="[A-Z]{3,4}" placeholder="ETX" ref="code" onChange={this.handleChange}/>
-        </div>
-        <div className="form-group">
-          <label forHtml="address">Contract address</label>
-          <input type="text" className="form-control" maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="Address" ref="address" onChange={this.handleChange}/>
-        </div>
-        <div className="form-group">
-          <label forHtml="minimum">Minimum ETH amount</label>
-          <input type="number" min="1" step="1" className="form-control medium" placeholder="10" ref="minimum" onChange={this.handleChange}/>
-        </div>
-        <div className="form-group">
-          <label forHtml="decimals">Decimals</label>
-          <input type="number" min="0" step="1" className="form-control medium" placeholder="4" ref="decimals" onChange={this.handleChange}/>
-        </div>
-        <div className="form-group">
-          <label forHtml="precision">Price precision</label>
-          <input type="number" min="0.00000001" step="0.00000001" className="form-control medium" placeholder="0.00000001" ref="precision" onChange={this.handleChange} />
-        </div>
-        <div className="form-group">
-            <Button className={"btn-block" + (this.state.newReg ? " btn-primary" : "")} type="submit" key="register">Register</Button>
-        </div>
-
-        <ConfirmModal
-          show={this.state.showModal}
-          onHide={this.closeModal}
-          message={
-            "Are you sure you want to register " +
-              this.state.code +
-              " at address " + this.state.address +
-              " in the " + this.state.categoryName + " section," +
-              " with a minimum trade amount of " + this.state.minimum + " ETH, " +
-              this.state.decimals + " decimals to the subcurrency and a" +
-              " price precision of " + this.state.precision + " ?"}
-          flux={this.props.flux}
-          onSubmit={this.onSubmitForm} />
-
-        <AlertModal
-          show={this.state.showAlert}
-          onHide={this.hideAlert}
-          alertTitle="Oh snap!"
-          message={this.state.alertMessage}
-          level={this.state.alertLevel} />
-      </form>
-    );
-  },
-
   handleCategories: function(key) {
     this.setState({
       category: key,
@@ -211,6 +151,66 @@ var SubRegister = React.createClass({
         precision: null,
         newReg: false
     });
+  },
+
+  render: function() {
+    return (
+      <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
+        <div className="form-group">
+          <DropdownButton ref="category" key={1} onSelect={this.handleCategories} title={this.state.categoryName}>
+            {
+              fixtures.categories.map(function(category) {
+                return <MenuItem key={category.id} eventKey={category.id}>{category.name}</MenuItem>;
+              })
+            }
+          </DropdownButton>
+        </div>
+        <div className="form-group">
+          <label forHtml="code">Subcurrency code</label>
+          <input type="text" className="form-control" pattern="[A-Z]{3,4}" placeholder="ETX" ref="code" onChange={this.handleChange}/>
+        </div>
+        <div className="form-group">
+          <label forHtml="address">Contract address</label>
+          <input type="text" className="form-control" maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="Address" ref="address" onChange={this.handleChange}/>
+        </div>
+        <div className="form-group">
+          <label forHtml="minimum">Minimum ETH amount</label>
+          <input type="number" min="1" step="1" className="form-control medium" placeholder="10" ref="minimum" onChange={this.handleChange}/>
+        </div>
+        <div className="form-group">
+          <label forHtml="decimals">Decimals</label>
+          <input type="number" min="0" step="1" className="form-control medium" placeholder="4" ref="decimals" onChange={this.handleChange}/>
+        </div>
+        <div className="form-group">
+          <label forHtml="precision">Price precision</label>
+          <input type="number" min="0.00000001" step="0.00000001" className="form-control medium" placeholder="0.00000001" ref="precision" onChange={this.handleChange} />
+        </div>
+        <div className="form-group">
+            <Button className={"btn-block" + (this.state.newReg ? " btn-primary" : "")} type="submit" key="register">Register</Button>
+        </div>
+
+        <ConfirmModal
+          show={this.state.showModal}
+          onHide={this.closeModal}
+          message={
+            "Are you sure you want to register " +
+              this.state.code +
+              " at address " + this.state.address +
+              " in the " + this.state.categoryName + " section," +
+              " with a minimum trade amount of " + this.state.minimum + " ETH, " +
+              this.state.decimals + " decimals to the subcurrency and a" +
+              " price precision of " + this.state.precision + " ?"}
+          flux={this.props.flux}
+          onSubmit={this.onSubmitForm} />
+
+        <AlertModal
+          show={this.state.showAlert}
+          onHide={this.hideAlert}
+          alertTitle="Oh snap!"
+          message={this.state.alertMessage}
+          level={this.state.alertLevel} />
+      </form>
+    );
   }
 });
 

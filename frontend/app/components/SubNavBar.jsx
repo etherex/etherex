@@ -10,11 +10,12 @@ var SubTab = require("./SubTab");
 var fixtures = require('../js/fixtures');
 
 var SubNavBar = React.createClass({
-  mixins: [IntlMixin],
 
   contextTypes: {
     router: React.PropTypes.func
   },
+
+  mixins: [IntlMixin],
 
   getInitialState: function () {
     var marketSections = _.pluck(fixtures.categories, 'key');
