@@ -246,7 +246,10 @@ module.exports = {
     "btc": {
       "sell": `Are you sure you want to sell {amount, number} {unit}
                 for {total, number} BTC at a price of {price, number} ETH/BTC,
-                paid to {address} ?`
+                paid to {address} ?`,
+      "reserve": `Are you sure you want to reserve ticket # {id, number} at
+                  {amount, number} {unit} for {total, number} BTC at a price of
+                  {price, number} ETH/BTC, paid to {address} ?`
     },
     "hashrate": "{hashrate, number} H/s"
   }

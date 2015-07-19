@@ -232,7 +232,7 @@ var ConfigPane = React.createClass({
             checked={this.state.debug} onChange={this.toggleDebug}
             help={
               <Alert bsStyle='warning' className='text-black'>
-                <b><FormattedMessage message={this.getIntlMessage('form.warning')} /></b>
+                <b><FormattedMessage message={this.getIntlMessage('form.warning')} /></b>{' '}
                 <FormattedMessage message={this.getIntlMessage('config.debug_warning')} />
               </Alert>} />
         </div>

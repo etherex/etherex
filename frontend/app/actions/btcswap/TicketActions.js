@@ -69,36 +69,37 @@ var TicketActions = function() {
           formattedAmount: {value: null, unit: null},
           price: null,
           total: null,
+          reservable: false,
           expiry: 1
         };
         this.dispatch(constants.ticket.LOOKUP_TICKET, ticket);
       }
+      else {
+        var formattedAmount = utils.formatEther(ticket.amount);
 
-      var formattedAmount = utils.formatEther(ticket.amount);
+        var reservable = false;
+        if (!ticket.claimer ||
+            (ticket.expiry > 1 && ticket.expiry < new Date().getTime() / 1000)) {
+          reservable = true;
+          ticket.txHash = null;
+          ticket.claimer = null;
+          ticket.expiry = 1;
+        }
 
-      var reservable = false;
-      if (!ticket.claimer ||
-          (ticket.expiry > 1 && ticket.expiry < new Date().getTime() / 1000)) {
-        reservable = true;
-        ticket.txHash = null;
-        ticket.claimer = null;
-        ticket.expiry = 1;
+        var claimable = false;
+        if (!reservable && ticket.claimer == userState.user.id.substr(2))
+          claimable = true;
+
+        ticket.formattedAmount = formattedAmount;
+        ticket.reservable = reservable;
+        ticket.claimable = claimable;
+
+        this.dispatch(constants.ticket.LOOKUP_TICKET, ticket);
+
+        // TODO live / testnet handling
+        if (ticket.txHash && claimable)
+          this.flux.actions.ticket.lookupBitcoinTxHash(ticket, false);
       }
-
-      var claimable = false;
-      if (!reservable && ticket.claimer == userState.user.id.substr(2))
-        claimable = true;
-
-      ticket.formattedAmount = formattedAmount;
-      ticket.reservable = reservable;
-      ticket.claimable = claimable;
-
-      this.dispatch(constants.ticket.LOOKUP_TICKET, ticket);
-
-      // TODO live / testnet handling
-      if (ticket.txHash && claimable)
-        this.flux.actions.ticket.lookupBitcoinTxHash(ticket, false);
-
     }.bind(this), function(error) {
       this.dispatch(constants.trade.LOOKUP_TICKET_FAIL, {error: error});
     }.bind(this));
