@@ -2,8 +2,6 @@ var _ = require('lodash');
 var React = require("react");
 var ReactIntl = require('react-intl');
 var IntlMixin = ReactIntl.IntlMixin;
-var FormattedDate = ReactIntl.FormattedDate;
-var FormattedRelative = ReactIntl.FormattedRelative;
 var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Button = require('react-bootstrap/lib/Button');
@@ -13,7 +11,7 @@ var ConfirmModal = require('../ConfirmModal');
 
 var Nav = require("./Nav");
 
-var ClaimTicket = React.createClass({
+var ReserveTicket = React.createClass({
   contextTypes: {
     router: React.PropTypes.func
   },
@@ -21,10 +19,9 @@ var ClaimTicket = React.createClass({
   mixins: [IntlMixin],
 
   getInitialState() {
-    var ticket = this.props.ticket.ticket ? this.props.ticket.ticket : null;
     return {
       lookingUp: false,
-      ticketId: ticket ? ticket.id : null,
+      ticketId: this.props.ticket.ticket ? this.props.ticket.ticket.id : null,
       ticket: this.props.ticket.ticket,
       txHash: null,
       nonce: null,
@@ -79,6 +76,46 @@ var ClaimTicket = React.createClass({
     this.setState({ showModal: false });
   },
 
+  validate: function(showAlerts) {
+    // var id = _.parseInt(this.refs.ticketId.getValue());
+    var txHash = this.refs.txhash.getValue().trim();
+    var nonce = this.refs.nonce.getValue();
+
+    this.setState({
+      txHash: txHash,
+      nonce: nonce
+    });
+
+    if (!txHash || !nonce) {
+      this.setAlert('warning', this.formatMessage(this.getIntlMessage('form.empty')));
+    }
+    else {
+      this.setState({
+        isValid: true,
+        confirmMessage: <FormattedMessage message={this.getIntlMessage('btc.reserve')}
+                          id={this.state.ticket.id}
+                          amount={this.state.ticket.formattedAmount.value}
+                          unit={this.state.ticket.formattedAmount.unit}
+                          total={this.state.ticket.total}
+                          price={this.state.ticket.price}
+                          address=<samp>{this.state.ticket.address}</samp> />
+      });
+
+      this.showAlert(false);
+
+      return true;
+    }
+
+    this.setState({
+      isValid: false
+    });
+
+    if (showAlerts)
+      this.showAlert(true);
+
+    return false;
+  },
+
   handleChangeTicket: function(e) {
     e.preventDefault();
     var ticketId = this.refs.ticketId.getValue();
@@ -86,6 +123,17 @@ var ClaimTicket = React.createClass({
       ticketId: ticketId,
       lookingUp: false
     });
+  },
+
+  handleChange: function(e) {
+    e.preventDefault();
+    this.validate(false);
+  },
+
+  handleValidation(e) {
+    e.preventDefault();
+    if (this.validate(true))
+      this.openModal();
   },
 
   handleLookup(e) {
@@ -101,40 +149,18 @@ var ClaimTicket = React.createClass({
     });
   },
 
-  confirmClaim: function() {
-    this.setState({
-      showModal: true,
-      confirmMessage: <FormattedMessage message={this.getIntlMessage('btc.claim')}
-                        id={this.state.ticket.id}
-                        amount={this.state.ticket.formattedAmount.value}
-                        unit={this.state.ticket.formattedAmount.unit}
-                        total={this.state.ticket.total}
-                        price={this.state.ticket.price}
-                        address=<samp>{this.state.ticket.address}</samp> />
-    });
-  },
-
-  handleClaim(e) {
+  handleReserve(e) {
     e.preventDefault();
 
-    // var id = _.parseInt(this.refs.ticketId.getValue());
-    // var txHash = this.refs.txhash.getValue().trim();
-    var ticket = this.state.ticket;
-    var merkleProof = ticket.merkleProof;
+    if (!this.validate(true))
+      return false;
 
-    // TODO validate...
-
-    this.props.flux.actions.ticket.claimTicket(
-      ticket.id,
-      ticket.rawTx,
-      ticket.txHash,
-      merkleProof.txIndex,
-      merkleProof.sibling,
-      ticket.blockHash
-    );
+    this.props.flux.actions.ticket.reserveTicket(this.state.ticketId, this.state.txHash, _.parseInt(this.state.nonce));
 
     this.setState({
-      ticketId: null
+        ticketId: null,
+        txHash: null,
+        nonce: null
     });
 
     this.context.router.transitionTo('btc', {ticket: this.state.ticketId});
@@ -167,7 +193,7 @@ var ClaimTicket = React.createClass({
             </div>
           </div>
 
-          <div className="col-md-5">
+          <div className="col-md-4">
             <div className="panel panel-default">
               <div className="panel-heading">
                 <h3 className="panel-title">
@@ -182,55 +208,37 @@ var ClaimTicket = React.createClass({
               </div>
             </div>
           </div>
-          <div className="col-md-5">
+          <div className="col-md-6">
             <div className="panel panel-default">
               <div className="panel-heading">
                 <h3 className="panel-title">
-                  Bitcoin Transaction
+                  Reserve
                 </h3>
               </div>
               <div className="panel-body">
-                <p className="text-overflow">Ether fee to claimer: <b>{ this.state.ticket.feePercentage }</b></p>
-                <p className="text-overflow">BTC: <b>{ this.state.ticket.btcPayment }</b></p>
-                <p className="text-overflow">Bitcoin address: <b>{ this.state.ticket.paymentAddr }</b></p>
-                <p className="text-overflow">Ether recipient: <b>{ this.state.ticket.etherAddr }</b></p>
-                <p className="text-overflow">Transaction hash: <b>{ this.state.ticket.txHash }</b></p>
+                <form role="form" className="form-horizontal" onSubmit={this.handleValidation}>
+
+                  <Input type="text" ref="txhash" label="BTC Transaction Hash"
+                    labelClassName="col-md-3" wrapperClassName="col-md-9"
+                    maxLength={64}
+                    disabled={!this.state.ticket.reservable}
+                    value={this.state.ticket.txHash ? this.state.ticket.txHash : this.state.txHash}
+                    onChange={this.handleChange} />
+
+                  <Input type="text" ref="nonce" label="Proof of Work"
+                    labelClassName="col-md-3" wrapperClassName="col-md-4"
+                    disabled={!this.state.ticket.reservable}
+                    value={this.state.ticket.nonce ? this.state.ticket.nonce : this.state.nonce}
+                    onChange={this.handleChange} />
+
+                  <Input wrapperClassName="col-sm-10 col-sm-offset-2">
+                    <Button className={ (this.state.ticket.reservable && this.state.isValid) ? "btn-primary" : ""} type="submit"
+                      disabled={(!this.state.ticket.reservable || !this.state.isValid)}>
+                      Reserve
+                    </Button>
+                  </Input>
+                </form>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="panel panel-default">
-          <div className="panel-heading">
-            <h3 className="panel-title">
-              Claimer
-            </h3>
-          </div>
-          <div className="panel-body">
-            <div className="col-md-4">
-              <h5>Address: <b>{ this.state.ticket.claimer }</b></h5>
-              <h5>Expiry: <b>{ this.state.ticket.expiry > 1 &&
-                  <span>
-                    <FormattedDate value={this.state.ticket.expiry * 1000} format="long" />{' '}
-                    (<FormattedRelative value={this.state.ticket.expiry * 1000} />)
-                  </span> }
-                </b>
-              </h5>
-              <h5>Claimer will receive ether: { this.state.ticket.formattedFee &&
-                <b>{ this.state.ticket.formattedFee.value } { this.state.ticket.formattedFee.unit }</b> }
-              </h5>
-            </div>
-
-            <div className="col-md-8">
-              <h5>Merkle Proof</h5>
-              <p>
-                <pre>{ this.state.ticket.merkleProofStr }</pre>
-              </p>
-              <Button className={ this.state.ticket.claimable ? "btn-primary" : ""}
-                disabled={!this.state.ticket.claimable || !this.state.ticket.merkleProofStr}
-                onClick={this.confirmClaim}>
-                Claim
-              </Button>
             </div>
           </div>
         </div>
@@ -240,7 +248,7 @@ var ClaimTicket = React.createClass({
           onHide={this.closeModal}
           message={this.state.confirmMessage}
           flux={this.props.flux}
-          onSubmit={this.handleClaim}
+          onSubmit={this.handleReserve}
         />
 
         <AlertModal
@@ -255,4 +263,4 @@ var ClaimTicket = React.createClass({
   }
 });
 
-module.exports = ClaimTicket;
+module.exports = ReserveTicket;

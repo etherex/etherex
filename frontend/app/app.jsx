@@ -49,14 +49,15 @@ var TicketActions = require("./actions/btcswap/TicketActions");
 var Trades = require("./components/Trades");
 var Markets = require("./components/Markets");
 var UserDetails = require("./components/UserDetails");
-// var TradeDetails = require("./components/TradeDetails");
-var Tickets = require("./components/btcswap/Tickets");
-var CreateTicket = require("./components/btcswap/CreateTicket");
-var ClaimTicket = require("./components/btcswap/ClaimTicket");
-var BtcHelp = require("./components/btcswap/Help");
 var Wallet = require("./components/Wallet");
 var Tools = require("./components/Tools");
 var Help = require("./components/Help");
+
+var Tickets = require("./components/btcswap/Tickets");
+var CreateTicket = require("./components/btcswap/CreateTicket");
+var ReserveTicket = require("./components/btcswap/ReserveTicket");
+var ClaimTicket = require("./components/btcswap/ClaimTicket");
+var BtcHelp = require("./components/btcswap/Help");
 
 // Load jQuery for bootstrap
 var jQuery = require("jquery");
@@ -101,25 +102,26 @@ flux.setDispatchInterceptor(function(action, dispatch) {
 });
 
 var routes = (
-    <Route name="app" handler={EtherExApp}>
-      <DefaultRoute handler={Trades} title="Home" />
-      <Route name="home" path="/" handler={Trades} title="Trades" />
-      <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} title="Trade details" />
-      <Route name="markets" path="/markets" handler={Markets} title="Markets" />
-      <Route name="subs" path="/markets/subs" handler={Markets} title="Subs" />
-      <Route name="xchain" path="/markets/xchain" handler={Markets} title="X-Chain" />
-      <Route name="assets" path="/markets/assets" handler={Markets} title="Assets" />
-      <Route name="currencies" path="/markets/currencies" handler={Markets} title="Currencies" />
-      <Route name="btc" path="/btc" handler={Tickets} title="BTC" />
-      <Route name="sell" path="/btc/sell" handler={CreateTicket} title="Sell" />
-      <Route name="claim" path="/btc/claim" handler={ClaimTicket} title="Claim" />
-      <Route name="btc-help" path="/btc/help" handler={BtcHelp} title="Help" />
-      <Route name="wallet" path="/wallet" handler={Wallet} title="Wallet" />
-      <Route name="tools" path="/tools" handler={Tools} title="Tools" />
-      <Route name="help" path="/help" handler={Help} title="Help" />
-      <Route name="userDetails" path="/user" handler={UserDetails} title="User details" />
-      <NotFoundRoute name="notfound" handler={Placeholder} title="User or Trade ID not found" />
-    </Route>
+  <Route name="app" handler={EtherExApp}>
+    <DefaultRoute handler={Trades} title="Home" />
+    <Route name="home" path="/" handler={Trades} title="Trades" />
+    <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} title="Trade details" />
+    <Route name="markets" path="/markets" handler={Markets} title="Markets" />
+    <Route name="subs" path="/markets/subs" handler={Markets} title="Subs" />
+    <Route name="xchain" path="/markets/xchain" handler={Markets} title="X-Chain" />
+    <Route name="assets" path="/markets/assets" handler={Markets} title="Assets" />
+    <Route name="currencies" path="/markets/currencies" handler={Markets} title="Currencies" />
+    <Route name="btc" path="/btc" handler={Tickets} title="BTC" />
+    <Route name="sell" path="/btc/sell" handler={CreateTicket} title="Sell" />
+    <Route name="reserve" path="/btc/reserve" handler={ReserveTicket} title="Reserve" />
+    <Route name="claim" path="/btc/claim" handler={ClaimTicket} title="Claim" />
+    <Route name="btc-help" path="/btc/help" handler={BtcHelp} title="Help" />
+    <Route name="wallet" path="/wallet" handler={Wallet} title="Wallet" />
+    <Route name="tools" path="/tools" handler={Tools} title="Tools" />
+    <Route name="help" path="/help" handler={Help} title="Help" />
+    <Route name="userDetails" path="/user" handler={UserDetails} title="User details" />
+    <NotFoundRoute name="notfound" handler={Placeholder} title="User or Trade ID not found" />
+  </Route>
 );
 
 Router.run(routes, function (Handler) {

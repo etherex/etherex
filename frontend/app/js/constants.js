@@ -130,6 +130,7 @@ module.exports = {
         CANCEL_TICKET_SUCCESS: null,
         CANCEL_TICKET_FAIL: null,
         ESTIMATE_GAS: null,
-        ESTIMATE_GAS_ACTION: null
+        ESTIMATE_GAS_ACTION: null,
+        CLOSE_ALERT: null
     })
 };

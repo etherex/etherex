@@ -14,17 +14,15 @@ var AlertModal = React.createClass({
   render: function() {
     return (
       <Modal {...this.props} animation={true} enforceFocus={false}>
-        {this.props.modalTitle ?
           <Modal.Header closeButton>
-            <Modal.Title>{this.props.alertTitle}</Modal.Title>
-          </Modal.Header> : {}}
+            <Modal.Title>{ this.props.modalTitle ? this.props.alertTitle : "Oh snap!" }</Modal.Title>
+          </Modal.Header>
         <Modal.Body>
           <Alert bsStyle={this.props.level} >
-            <h3 className="text-center">Oh snap!</h3>
-            <h4 className="text-center">{this.props.message}</h4>
+            <h4 className="text-center">{ this.props.message }</h4>
           </Alert>
-          {(this.props.note) &&
-            <p>{this.props.note}</p>}
+          { (this.props.note) &&
+            <p>{ this.props.note }</p>}
         </Modal.Body>
         <Modal.Footer>
             <Button onClick={this.onHide}>Got it</Button>

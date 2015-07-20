@@ -99,6 +99,8 @@ var CreateTicket = React.createClass({
     if (!this.validate(true))
       return false;
 
+    this.props.flux.actions.ticket.createTicket(this.state.address, this.state.amount, this.state.btc);
+
     this.setState({
         address: null,
         amount: null,
@@ -106,8 +108,6 @@ var CreateTicket = React.createClass({
         price: null,
         isValid: false
     });
-
-    this.props.flux.actions.ticket.createTicket(this.state.address, this.state.amount, this.state.btc);
   },
 
   render() {
@@ -148,7 +148,9 @@ var CreateTicket = React.createClass({
                   value={this.state.price}
                   help="Effectively how many BTC you are asking for each ETH" />
 
-                <Button className={"btn-block" + (this.state.isValid ? " btn-primary" : "")} type="submit">
+                <Button className={"btn-block" + (this.state.isValid ? " btn-primary" : "")}
+                  type="submit"
+                  disabled={!this.state.isValid} >
                   Submit offer
                 </Button>
               </form>

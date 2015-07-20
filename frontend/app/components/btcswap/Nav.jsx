@@ -54,8 +54,11 @@ var Nav = React.createClass({
             <SubTab to="sell" data-toggle="collapse" data-target="#btcnav-collapse.in">
               <Glyphicon glyph="upload" /> <FormattedMessage message={this.getIntlMessage('form.sell')} /> ether
             </SubTab>
+            <SubTab to="reserve" data-toggle="collapse" data-target="#btcnav-collapse.in">
+              <Glyphicon glyph="ok" /> Reserve
+            </SubTab>
             <SubTab to="claim" data-toggle="collapse" data-target="#btcnav-collapse.in">
-              <Glyphicon glyph="download-alt" /> Reserve / Claim
+              <Glyphicon glyph="download-alt" /> Claim
             </SubTab>
             <SubTab to="btc-help" data-toggle="collapse" data-target="#btcnav-collapse.in">
               <Glyphicon glyph="question-sign" /> <FormattedMessage message={this.getIntlMessage('nav.help')} />

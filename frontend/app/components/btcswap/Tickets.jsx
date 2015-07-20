@@ -2,8 +2,6 @@
 var React = require("react");
 var ReactIntl = require('react-intl');
 var IntlMixin = ReactIntl.IntlMixin;
-var Fluxxor = require("fluxxor");
-var StoreWatchMixin = Fluxxor.StoreWatchMixin;
 // var FormattedMessage = ReactIntl.FormattedMessage;
 var TransitionGroup = require('../TransitionGroup');
 
@@ -15,6 +13,7 @@ var TicketDetails = require("./TicketDetails");
 var Button = require('react-bootstrap/lib/Button');
 var Modal = require('react-bootstrap/lib/Modal');
 var ConfirmModal = require('../ConfirmModal');
+var AlertModal = require('../AlertModal');
 // var utils = require('../js/utils');
 
 var Tickets = React.createClass({
@@ -22,10 +21,13 @@ var Tickets = React.createClass({
     router: React.PropTypes.func
   },
 
-  mixins: [IntlMixin, StoreWatchMixin("TicketStore")],
+  mixins: [IntlMixin],
 
   getInitialState() {
     return {
+      alertLevel: 'info',
+      alertMessage: '',
+      showAlert: false,
       showModal: false,
       showConfirmModal: false,
       message: null,
@@ -33,10 +35,13 @@ var Tickets = React.createClass({
     };
   },
 
-  getStateFromFlux() {
-    return {
-      tickets: this.props.flux.store('TicketStore').tickets
-    };
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.ticket.error)
+      this.setState({
+        showAlert: true,
+        alertLevel: 'danger',
+        alertMessage: nextProps.ticket.error
+      });
   },
 
   openConfirmModal: function(ticket) {
@@ -68,12 +73,28 @@ var Tickets = React.createClass({
     this.setState({ showModal: false });
   },
 
+  setAlert: function(alertLevel, alertMessage) {
+    this.setState({
+      alertLevel: alertLevel,
+      alertMessage: alertMessage
+    });
+  },
+
+  showAlert: function() {
+    this.setState({ showAlert: true });
+  },
+
+  hideAlert: function() {
+    this.props.flux.actions.ticket.closeAlert();
+    this.setState({ showAlert: false});
+  },
+
   handleAction(ticket) {
       if (ticket.owner == this.props.user.user.id)
         this.props.flux.actions.ticket.cancelTicket(ticket.id);
       else if (!ticket.claimer) {
         this.props.flux.actions.ticket.lookupTicket(ticket.id);
-        this.context.router.transitionTo('claim');
+        this.context.router.transitionTo('reserve');
       }
       else {
         this.props.flux.actions.ticket.lookupTicket(ticket.id);
@@ -82,13 +103,13 @@ var Tickets = React.createClass({
   },
 
   render() {
-    var ticketRows = this.state.tickets.map(function (ticket, i) {
+    var ticketRows = this.props.ticket.tickets.map(function (ticket, i) {
+      var key = "ticket-" + ticket.id;
       return (
         <TicketRow
-          flux={this.props.flux} key={ticket.id} count={i} ticket={ticket}
+          flux={this.props.flux} key={key} count={i} ticket={ticket}
           isOwn={ticket.owner === this.props.user.user.id} user={this.props.user.user}
-          openModal={this.openModal} openConfirmModal={this.openConfirmModal}
-          review={this.props.review} />
+          openModal={this.openModal} openConfirmModal={this.openConfirmModal} />
       );
     }.bind(this));
 
@@ -114,6 +135,14 @@ var Tickets = React.createClass({
             {ticketRows}
           </TransitionGroup>
         </Table>
+
+        <AlertModal
+          show={this.state.showAlert}
+          onHide={this.hideAlert}
+          alertTitle="Oh snap!"
+          message={this.state.alertMessage}
+          level={this.state.alertLevel}
+        />
 
         <ConfirmModal
           show={this.state.showConfirmModal}

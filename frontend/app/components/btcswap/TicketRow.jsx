@@ -27,10 +27,10 @@ var TicketRow = React.createClass({
 
   render() {
     var totalEther = utils.formatEther(this.props.ticket.amount);
+    var disabled = ((this.props.isOwn && !this.props.user.own) ? " disabled" : "");
+    var className = "trade-" + (this.props.ticket.status ? this.props.ticket.status : "mined") + disabled;
     return (
-      <tr className={"ticket-" + (!this.props.review ? this.props.ticket.status : "review") +
-                                 ((this.props.isOwn && !this.props.user.own) ? " disabled" : "")}
-          onClick={this.handleClick}>
+      <tr id={"ticket-" + this.props.ticket.id} className={className} onClick={this.handleClick}>
         <td>
           <div className="text-right">
             <FormattedNumber value={this.props.ticket.id} />

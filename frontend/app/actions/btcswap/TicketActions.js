@@ -114,9 +114,12 @@ var TicketActions = function() {
       withCredentials: false
     };
 
+    var error;
     var req = https.request(options, function(res) {
       if (!res || res.statusCode !== 200) {
-        utils.error("Error retrieving BTC transaction.");
+        error = "Error retrieving BTC transaction.";
+        this.dispatch(constants.ticket.LOOKUP_TICKET_FAIL, {error: error});
+        utils.error(error);
         return;
       }
 
@@ -124,14 +127,18 @@ var TicketActions = function() {
         var json = JSON.parse(data);
 
         if (json.status !== 'success') {
-          utils.error("Error retrieving BTC transaction data:", json);
+          error = "Error retrieving BTC transaction data.";
+          this.dispatch(constants.ticket.LOOKUP_TICKET_FAIL, {error: error});
+          utils.error(error, json);
           return;
         }
 
         data = json.data;
         // TODO check scriptpubkeys, etc exist
         if (!data || !data.tx || !data.tx.vout || data.tx.vout.length < 2 || !data.tx.hex || !data.tx.blockhash) {
-          utils.error('Error: not enough data in BTC transaction');
+          error = "Not enough data in BTC transaction, please wait until it is mined.";
+          this.dispatch(constants.ticket.LOOKUP_TICKET_FAIL, {error: error});
+          utils.error(error);
           return;
         }
 
@@ -147,7 +154,9 @@ var TicketActions = function() {
         }
         else {
           etherAddr = 'INVALID';
-          utils.error('Invalid Ethereum address: ', tx1Script);
+          error = 'Invalid Ethereum address:';
+          this.dispatch(constants.ticket.LOOKUP_TICKET_FAIL, {error: error + " " + tx1Script});
+          utils.error(error, tx1Script);
         }
         ticket.etherAddr = etherAddr;
 
@@ -159,15 +168,20 @@ var TicketActions = function() {
 
         if (data.tx.blockhash)
           this.flux.actions.ticket.lookupExtendedDetails(ticket, data.tx.blockhash, live);
-        else
-          utils.error("Missing block hash on transaction.");
+        else {
+          error = "Missing block hash on transaction.";
+          this.dispatch(constants.ticket.LOOKUP_TICKET_FAIL, {error: error});
+          utils.error(error);
+        }
 
       }.bind(this));
     }.bind(this));
 
     req.end();
     req.on('error', function(e) {
-      utils.error(e);
+      error = "Request error:";
+      this.dispatch(constants.ticket.LOOKUP_TICKET_FAIL, {error: error + " " + String(e)});
+      utils.error(error, e);
     });
 
     this.dispatch(constants.ticket.LOOKUP_TICKET, ticket);
@@ -183,9 +197,11 @@ var TicketActions = function() {
       withCredentials: false
     };
 
+    var error;
     var req = https.request(options, function(res) {
       if (!res || res.statusCode !== 200) {
-        utils.error("Error retrieving BTC transaction.");
+        error = "Error retrieving BTC transaction.";
+        this.dispatch(constants.ticket.LOOKUP_TICKET_FAIL, {error: error});
         return;
       }
 
@@ -193,13 +209,16 @@ var TicketActions = function() {
         var json = JSON.parse(data);
 
         if (json.status !== 'success') {
-          utils.error("Error retrieving BTC block data:", json);
+          error = "Error retrieving BTC block data.";
+          this.dispatch(constants.ticket.LOOKUP_TICKET_FAIL, {error: error});
+          utils.error(error, json);
           return;
         }
 
         data = json.data;
         if (!data || !data.tx) {
-          utils.error('Error: not enough data in BTC block');
+          error = "Error: not enough data in BTC block.";
+          this.dispatch(constants.ticket.LOOKUP_TICKET_FAIL, {error: error});
           return;
         }
 
@@ -219,7 +238,9 @@ var TicketActions = function() {
 
     req.end();
     req.on('error', function(e) {
-      utils.error(e);
+      error = "Request error:";
+      this.dispatch(constants.ticket.LOOKUP_TICKET_FAIL, {error: error + " " + String(e)});
+      utils.error(error, e);
     });
 
     this.dispatch(constants.ticket.LOOKUP_TICKET, ticket);
@@ -328,6 +349,10 @@ var TicketActions = function() {
       utils.error(error);
       this.dispatch(constants.ticket.RESERVE_TICKET_FAIL, {error: error});
     }.bind(this));
+  };
+
+  this.closeAlert = function() {
+    this.dispatch(constants.ticket.CLOSE_ALERT);
   };
 };
 

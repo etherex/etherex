@@ -8,7 +8,28 @@ var TicketStore = Fluxxor.createStore({
     initialize: function(options) {
         this.title = "Tickets";
         this.tickets = options.tickets || [];
-        this.ticket = {};
+        this.ticket = {
+          id: null,
+          amount: null,
+          formattedAmount: {value: null, unit: null},
+          total: null,
+          price: null,
+          address: null,
+          feePercentage: null,
+          btcPayment: null,
+          paymentAddr: null,
+          etherAddr: null,
+          txHash: null,
+          nonce: null,
+          feeAmount: null,
+          formattedFee: {value: null, unit: null},
+          expiry: null,
+          claimer: null,
+          merkleProof: null,
+          merkleProofStr: null,
+          claimable: false,
+          reservable: false
+        };
         this.loading = true;
         this.updating = false;
         this.error = null;
@@ -49,7 +70,8 @@ var TicketStore = Fluxxor.createStore({
             constants.ticket.CANCEL_TICKET, this.onCancelTicket,
             constants.ticket.CANCEL_TICKET_FAIL, this.onTicketsFail,
             constants.ticket.ESTIMATE_GAS, this.onEstimate,
-            constants.ticket.ESTIMATE_GAS_ACTION, this.onEstimateGas
+            constants.ticket.ESTIMATE_GAS_ACTION, this.onEstimateGas,
+            constants.ticket.CLOSE_ALERT, this.onCloseAlert
         );
     },
 
@@ -232,6 +254,11 @@ var TicketStore = Fluxxor.createStore({
 
     onUpdatePoW: function(payload) {
         this.pow = payload;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onCloseAlert: function() {
+        this.error = null;
         this.emit(constants.CHANGE_EVENT);
     },
 
