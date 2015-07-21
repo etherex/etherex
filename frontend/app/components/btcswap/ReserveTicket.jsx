@@ -11,6 +11,10 @@ var ConfirmModal = require('../ConfirmModal');
 
 var Nav = require("./Nav");
 
+// dd5a8f13c97c8b8d47329fa7bd487df24b7d3b7e855a65eb7fd51e8f94f7e482
+// ticket 2 nonce = 2460830
+// ticket 3 nonce = 726771
+
 var ReserveTicket = React.createClass({
   contextTypes: {
     router: React.PropTypes.func
@@ -145,8 +149,31 @@ var ReserveTicket = React.createClass({
       this.props.flux.actions.ticket.lookupTicket(id);
 
     this.setState({
+      lookingUp: true,
+      txHash: null,
+      nonce: null
+    });
+  },
+
+  handleCompute(e) {
+    e.preventDefault();
+
+    if (!this.validate(true))
+      return;
+
+    this.props.flux.actions.ticket.computePoW(this.state.ticketId, this.state.txHash);
+    this.setState({
       lookingUp: true
     });
+  },
+
+  handleVerify(e) {
+    e.preventDefault();
+
+    if (!this.validate(true))
+      return;
+
+    this.props.flux.actions.ticket.verifyPoW(this.state.ticketId, this.state.txHash, this.state.ticket.nonce);
   },
 
   handleReserve(e) {
@@ -155,7 +182,7 @@ var ReserveTicket = React.createClass({
     if (!this.validate(true))
       return false;
 
-    this.props.flux.actions.ticket.reserveTicket(this.state.ticketId, this.state.txHash, _.parseInt(this.state.nonce));
+    this.props.flux.actions.ticket.reserveTicket(this.state.ticketId, this.state.txHash, this.state.ticket.nonce);
 
     this.setState({
         ticketId: null,
@@ -163,7 +190,7 @@ var ReserveTicket = React.createClass({
         nonce: null
     });
 
-    this.context.router.transitionTo('btc', {ticket: this.state.ticketId});
+    this.context.router.transitionTo('ticket', {ticketId: this.state.ticketId});
   },
 
   render() {
@@ -208,6 +235,7 @@ var ReserveTicket = React.createClass({
               </div>
             </div>
           </div>
+
           <div className="col-md-6">
             <div className="panel panel-default">
               <div className="panel-heading">
@@ -221,20 +249,31 @@ var ReserveTicket = React.createClass({
                   <Input type="text" ref="txhash" label="BTC Transaction Hash"
                     labelClassName="col-md-3" wrapperClassName="col-md-9"
                     maxLength={64}
-                    disabled={!this.state.ticket.reservable}
+                    disabled={this.state.lookingUp || !this.state.ticket.reservable || this.state.ticket.txHash}
                     value={this.state.ticket.txHash ? this.state.ticket.txHash : this.state.txHash}
                     onChange={this.handleChange} />
 
                   <Input type="text" ref="nonce" label="Proof of Work"
                     labelClassName="col-md-3" wrapperClassName="col-md-4"
-                    disabled={!this.state.ticket.reservable}
-                    value={this.state.ticket.nonce ? this.state.ticket.nonce : this.state.nonce}
+                    disabled={true}
+                    value={this.state.ticket.nonce}
                     onChange={this.handleChange} />
 
                   <Input wrapperClassName="col-sm-10 col-sm-offset-2">
-                    <Button className={ (this.state.ticket.reservable && this.state.isValid) ? "btn-primary" : ""} type="submit"
-                      disabled={(!this.state.ticket.reservable || !this.state.isValid)}>
-                      Reserve
+                    <Button onClick={this.handleCompute}
+                      disabled={!this.state.ticket.reservable || this.state.lookingUp}
+                      style={{marginRight: 10}}>
+                        Compute
+                    </Button>
+                    <Button onClick={this.handleVerify}
+                      disabled={!this.state.ticket.nonce}
+                      style={{marginRight: 10}}>
+                        Verify
+                    </Button>
+                    <Button className={(this.state.ticket.reservable && this.state.isValid && this.state.ticket.nonce) ? "btn-primary" : ""}
+                      type="submit"
+                      disabled={(!this.state.ticket.reservable || !this.state.isValid || !this.state.ticket.nonce)}>
+                        Reserve
                     </Button>
                   </Input>
                 </form>

@@ -79,7 +79,7 @@ var ClaimTicket = React.createClass({
     this.setState({ showModal: false });
   },
 
-  handleChangeTicket: function(e) {
+  handleChange: function(e) {
     e.preventDefault();
     var ticketId = this.refs.ticketId.getValue();
     this.setState({
@@ -137,7 +137,7 @@ var ClaimTicket = React.createClass({
       ticketId: null
     });
 
-    this.context.router.transitionTo('btc', {ticket: this.state.ticketId});
+    this.context.router.transitionTo('ticket', {ticketId: this.state.ticketId});
   },
 
   render() {
@@ -158,7 +158,7 @@ var ClaimTicket = React.createClass({
                   <Input type="number" className="form-control" ref="ticketId" label="Ticket ID"
                     min={1} step={1}
                     value={this.state.ticketId}
-                    onChange={this.handleChangeTicket}/>
+                    onChange={this.handleChange}/>
                   <Button type="submit" disabled={this.state.lookingUp}>
                     Lookup
                   </Button>

@@ -30,7 +30,7 @@ var TicketRow = React.createClass({
     var disabled = ((this.props.isOwn && !this.props.user.own) ? " disabled" : "");
     var className = "trade-" + (this.props.ticket.status ? this.props.ticket.status : "mined") + disabled;
     return (
-      <tr id={"ticket-" + this.props.ticket.id} className={className} onClick={this.handleClick}>
+      <tr className={className} onClick={this.handleClick}>
         <td>
           <div className="text-right">
             <FormattedNumber value={this.props.ticket.id} />

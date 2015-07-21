@@ -106,7 +106,7 @@ var SubSend = React.createClass({
       return false;
 
     var payload = {
-        recipient: "0x" + this.state.recipient,
+        recipient: this.state.recipient,
         amount: bigRat(this.state.amount).multiply(fixtures.ether).toDecimal()
     };
 

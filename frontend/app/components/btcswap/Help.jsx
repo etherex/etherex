@@ -1,7 +1,6 @@
 // var _ = require('lodash');
 var React = require("react");
 var Nav = require("./Nav");
-var ProofOfWork = require("./ProofOfWork");
 
 // var ButtonGroup = require('react-bootstrap/lib/ButtonGroup');
 // var Button = require('react-bootstrap/lib/Button');
@@ -13,7 +12,7 @@ var Help = React.createClass({
     return (
       <div>
         <Nav />
-        <div className="col-md-6">
+        <div className="col-md-6 col-md-offset-3">
           <h3>Buying Ether</h3>
           <ol>
             <li>Note the ticket you want to purchase</li>
@@ -43,9 +42,6 @@ var Help = React.createClass({
               any other 3rd party may Claim the ticket for you (and get the ether fee).
             </li>
           </ul>
-        </div>
-        <div className="col-md-6">
-          <ProofOfWork flux={this.props.flux} />
         </div>
       </div>
     );

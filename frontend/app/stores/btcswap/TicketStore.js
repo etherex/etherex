@@ -34,7 +34,6 @@ var TicketStore = Fluxxor.createStore({
         this.updating = false;
         this.error = null;
         this.ticketIDs = [];
-        this.pow = null;
         this.percent = 0;
         this.progress = 0;
         this.estimate = 0;
@@ -52,6 +51,9 @@ var TicketStore = Fluxxor.createStore({
             constants.ticket.LOAD_TICKETS_SUCCESS, this.onLoadTicketsSuccess,
             constants.ticket.LOAD_TICKET_FAIL, this.onTicketsFail,
             constants.ticket.LOAD_DEMO_DATA, this.onLoadDemoData,
+            constants.ticket.COMPUTE_POW_FAIL, this.onTicketsFail,
+            constants.ticket.VERIFY_POW, this.onVerifyPow,
+            constants.ticket.VERIFY_POW_FAIL, this.onTicketsFail,
             constants.ticket.UPDATE_POW, this.onUpdatePoW,
             constants.ticket.UPDATE_TICKET, this.onUpdateTicket,
             constants.ticket.UPDATE_TICKETS, this.onUpdateTickets,
@@ -253,7 +255,12 @@ var TicketStore = Fluxxor.createStore({
     },
 
     onUpdatePoW: function(payload) {
-        this.pow = payload;
+        this.ticket.nonce = payload;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onVerifyPow: function(payload) {
+        this.ticket.nonce = payload; // TODO
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -281,7 +288,6 @@ var TicketStore = Fluxxor.createStore({
             ticketIDs: this.ticketIDs,
             tickets: this.tickets,
             ticket: this.ticket,
-            pow: this.pow,
             estimate: this.estimate,
             message: this.message,
             note: this.note

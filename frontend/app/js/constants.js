@@ -131,6 +131,9 @@ module.exports = {
         CANCEL_TICKET_FAIL: null,
         ESTIMATE_GAS: null,
         ESTIMATE_GAS_ACTION: null,
+        COMPUTE_POW_FAIL: null,
+        VERIFY_POW: null,
+        VERIFY_POW_FAIL: null,
         CLOSE_ALERT: null
     })
 };

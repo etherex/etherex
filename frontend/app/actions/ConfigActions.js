@@ -146,7 +146,9 @@ var ConfigActions = function() {
           debugHandler: handler
         });
         this.flux.on("dispatch", handler);
-        React.addons.Perf.start();
+
+        if (React.addons.Perf)
+          React.addons.Perf.start();
       }
       else {
         var prevHandler = this.flux.store('config').getState().handler;

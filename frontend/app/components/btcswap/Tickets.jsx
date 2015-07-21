@@ -35,6 +35,14 @@ var Tickets = React.createClass({
     };
   },
 
+  componentDidMount() {
+    // TODO smooth / less hackish scroll to ticketId
+    if (this.props.params.ticketId && this.refs["ticket-" + this.props.params.ticketId]) {
+      var ticketOffset = this.refs["ticket-" + this.props.params.ticketId].getDOMNode().offsetTop;
+      window.scroll(0, ticketOffset);
+    }
+  },
+
   componentWillReceiveProps(nextProps) {
     if (nextProps.ticket.error)
       this.setState({
@@ -107,7 +115,7 @@ var Tickets = React.createClass({
       var key = "ticket-" + ticket.id;
       return (
         <TicketRow
-          flux={this.props.flux} key={key} count={i} ticket={ticket}
+          flux={this.props.flux} ref={key} key={key} count={i} ticket={ticket}
           isOwn={ticket.owner === this.props.user.user.id} user={this.props.user.user}
           openModal={this.openModal} openConfirmModal={this.openConfirmModal} />
       );

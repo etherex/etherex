@@ -112,6 +112,9 @@ var routes = (
     <Route name="assets" path="/markets/assets" handler={Markets} title="Assets" />
     <Route name="currencies" path="/markets/currencies" handler={Markets} title="Currencies" />
     <Route name="btc" path="/btc" handler={Tickets} title="BTC" />
+    <Route path="/btc/ticket" handler={Tickets} title="BTC">
+      <Route name="ticket" path="/btc/ticket/:ticketId" handler={Tickets} title="BTC" />
+    </Route>
     <Route name="sell" path="/btc/sell" handler={CreateTicket} title="Sell" />
     <Route name="reserve" path="/btc/reserve" handler={ReserveTicket} title="Reserve" />
     <Route name="claim" path="/btc/claim" handler={ClaimTicket} title="Claim" />

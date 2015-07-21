@@ -347,7 +347,21 @@ var TicketActions = function() {
       this.dispatch(constants.ticket.UPDATE_POW, result);
     }.bind(this), function(error) {
       utils.error(error);
-      this.dispatch(constants.ticket.RESERVE_TICKET_FAIL, {error: error});
+      this.dispatch(constants.ticket.COMPUTE_POW_FAIL, {error: error});
+    }.bind(this));
+  };
+
+  this.verifyPoW = function(id, txHash, nonce) {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+    btcSwapClient.verifyPoW(id, txHash, nonce, function(result) {
+      if (this.flux.store('config').debug)
+        utils.log('PoW result:', result);
+
+      this.dispatch(constants.ticket.VERIFY_POW, result);
+    }.bind(this), function(error) {
+      utils.error(error);
+      this.dispatch(constants.ticket.VERIFY_POW_FAIL, {error: error});
     }.bind(this));
   };
 
