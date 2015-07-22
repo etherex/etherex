@@ -1,5 +1,6 @@
 // var _ = require('lodash');
 var React = require("react");
+var Link = require("react-router").Link;
 var Nav = require("./Nav");
 
 // var ButtonGroup = require('react-bootstrap/lib/ButtonGroup');
@@ -15,15 +16,20 @@ var Help = React.createClass({
         <div className="col-md-6 col-md-offset-3">
           <h3>Buying Ether</h3>
           <ol>
-            <li>Note the ticket you want to purchase</li>
-            <li>Use <a href="https://github.com/ethers/btcToEther" target="_blank">btcToEther</a>{' '}
-              to create a Bitcoin transaction and hash for the ticket (...)</li>
-            <li>Compute a Proof of Work</li>
-            <li>Go to the <a href="#/btc">Buy ether</a> tab, click Reserve</li>
-            <li>Enter the Bitcoin transaction hash and Proof of Work, and click Reserve</li>
-            <li>Broadcast the actual Bitcoin Transaction to the Bitcoin network</li>
-            <li>Wait for 6 confirmations</li>
-            <li>Click Claim</li>
+            <li><Link to="btc">Choose the ticket</Link> you want to purchase ether from and click Reserve.</li>
+            <li>Generate an intermediate BTC wallet in the Reserve section.</li>
+            <li>
+              Send the total BTC amount of the ticket plus a 0.3mBTC miner fee
+              to your intermediate address. You can still recover your bitcoins
+              if you change your mind at this point.</li>
+            <li>Wait for a few confirmations.</li>
+            <li>Click on Create transaction to generate the signed transaction.</li>
+            <li>In the Proof of Work panel, click Compute to get a valid nonce.</li>
+            <li>Enter the Bitcoin transaction hash and Proof of Work, and click Reserve.</li>
+            <li>Broadcast the actual Bitcoin Transaction to the Bitcoin network.</li>
+            <li>Wait for 6 confirmations.</li>
+            <li>Go the the <Link to="claim">Claim</Link> section and lookup your ticket ID.</li>
+            <li>Click Claim.</li>
           </ol>
           <h4>Notes:</h4>
           <ul>

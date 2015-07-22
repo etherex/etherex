@@ -15,7 +15,7 @@ var AlertModal = React.createClass({
     return (
       <Modal {...this.props} animation={true} enforceFocus={false}>
           <Modal.Header closeButton>
-            <Modal.Title>{ this.props.modalTitle ? this.props.alertTitle : "Oh snap!" }</Modal.Title>
+            <Modal.Title>{ this.props.modalTitle ? this.props.modalTitle : "Oh snap!" }</Modal.Title>
           </Modal.Header>
         <Modal.Body>
           <Alert bsStyle={this.props.level} >

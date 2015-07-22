@@ -30,6 +30,7 @@ var TicketStore = Fluxxor.createStore({
           claimable: false,
           reservable: false
         };
+        this.wallet = {address: null, key: null, tx: null};
         this.loading = true;
         this.updating = false;
         this.error = null;
@@ -51,15 +52,16 @@ var TicketStore = Fluxxor.createStore({
             constants.ticket.LOAD_TICKETS_SUCCESS, this.onLoadTicketsSuccess,
             constants.ticket.LOAD_TICKET_FAIL, this.onTicketsFail,
             constants.ticket.LOAD_DEMO_DATA, this.onLoadDemoData,
-            constants.ticket.COMPUTE_POW_FAIL, this.onTicketsFail,
-            constants.ticket.VERIFY_POW, this.onVerifyPow,
-            constants.ticket.VERIFY_POW_FAIL, this.onTicketsFail,
-            constants.ticket.UPDATE_POW, this.onUpdatePoW,
             constants.ticket.UPDATE_TICKET, this.onUpdateTicket,
             constants.ticket.UPDATE_TICKETS, this.onUpdateTickets,
             constants.ticket.UPDATE_TICKETS_MESSAGE, this.onUpdateMessage,
             constants.ticket.UPDATE_TICKETS_SUCCESS, this.onLoadTicketsSuccess,
             constants.ticket.UPDATE_TICKETS_FAIL, this.onTicketsFail,
+            constants.ticket.UPDATE_WALLET, this.onUpdateWallet,
+            constants.ticket.UPDATE_WALLET_FAIL, this.onTicketsFail,
+            constants.ticket.UPDATE_TX, this.onUpdateTx,
+            constants.ticket.UPDATE_TX_FAIL, this.onTicketsFail,
+            constants.ticket.PROPAGATE_TX, this.onPropagateTransaction,
             constants.ticket.CREATE_TICKET, this.onCreateTicket,
             constants.ticket.CREATE_TICKET_SUCCESS, this.onCreateTicketSuccess,
             constants.ticket.CREATE_TICKET_FAIL, this.onTicketsFail,
@@ -71,6 +73,10 @@ var TicketStore = Fluxxor.createStore({
             constants.ticket.CLAIM_TICKET_FAIL, this.onTicketsFail,
             constants.ticket.CANCEL_TICKET, this.onCancelTicket,
             constants.ticket.CANCEL_TICKET_FAIL, this.onTicketsFail,
+            constants.ticket.VERIFY_POW, this.onVerifyPow,
+            constants.ticket.VERIFY_POW_FAIL, this.onTicketsFail,
+            constants.ticket.UPDATE_POW, this.onUpdatePoW,
+            constants.ticket.COMPUTE_POW_FAIL, this.onTicketsFail,
             constants.ticket.ESTIMATE_GAS, this.onEstimate,
             constants.ticket.ESTIMATE_GAS_ACTION, this.onEstimateGas,
             constants.ticket.CLOSE_ALERT, this.onCloseAlert
@@ -244,6 +250,31 @@ var TicketStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
+    onUpdateWallet: function(payload) {
+        this.wallet = payload;
+        if (payload.address) {
+          var message = "Intermediate wallet created. Send ";
+          if (this.ticket.total)
+            this.message = message + (parseFloat(this.ticket.total) + 0.0003) + " BTC (includes 0.0003 BTC miner fee)";
+          else
+            this.message = message + "BTC";
+          this.message += " to " + payload.address;
+        }
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onUpdateTx: function(payload) {
+        this.wallet.tx = payload;
+        this.ticket.txHash = payload.hash;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onPropagateTransaction: function(payload) {
+        this.wallet.tx = null;
+        this.message = "Transaction propagated: " + payload;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
     onEstimate: function () {
         this.estimate = "...";
         this.emit(constants.CHANGE_EVENT);
@@ -260,12 +291,13 @@ var TicketStore = Fluxxor.createStore({
     },
 
     onVerifyPow: function(payload) {
-        this.ticket.nonce = payload; // TODO
+        this.message = payload;
         this.emit(constants.CHANGE_EVENT);
     },
 
     onCloseAlert: function() {
         this.error = null;
+        this.message = null;
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -288,6 +320,7 @@ var TicketStore = Fluxxor.createStore({
             ticketIDs: this.ticketIDs,
             tickets: this.tickets,
             ticket: this.ticket,
+            wallet: this.wallet,
             estimate: this.estimate,
             message: this.message,
             note: this.note

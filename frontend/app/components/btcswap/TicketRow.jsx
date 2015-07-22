@@ -45,8 +45,8 @@ var TicketRow = React.createClass({
           <div className="text-right">
             {
               utils.numeral(this.props.ticket.price, 8)
-            // <FormattedMessage message={this.getIntlMessage('price')} price={this.props.ticket.price} currency="BTC" />
-          }
+              // <FormattedMessage message={this.getIntlMessage('price')} price={this.props.ticket.price} currency="BTC" />
+            }
           </div>
         </td>
         <td>

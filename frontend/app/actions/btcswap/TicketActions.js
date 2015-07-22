@@ -299,6 +299,67 @@ var TicketActions = function() {
     }.bind(this));
   };
 
+  this.generateWallet = function() {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+    btcSwapClient.generateWallet(function(wallet) {
+      if (this.flux.store('config').debug)
+        utils.log('Intermediate wallet:', wallet);
+
+      this.dispatch(constants.ticket.UPDATE_WALLET, wallet);
+    }.bind(this), function(error) {
+      utils.error(error);
+      this.dispatch(constants.ticket.UPDATE_WALLET_FAIL, {error: error});
+    }.bind(this));
+  };
+
+  this.importWallet = function(key) {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+    btcSwapClient.importWallet(key, function(wallet) {
+      if (this.flux.store('config').debug)
+        utils.log('Intermediate wallet:', wallet);
+
+      this.dispatch(constants.ticket.UPDATE_WALLET, wallet);
+    }.bind(this), function(error) {
+      utils.error(error);
+      this.dispatch(constants.ticket.UPDATE_WALLET_FAIL, {error: error});
+    }.bind(this));
+  };
+
+  this.clearWallet = function() {
+    this.dispatch(constants.ticket.UPDATE_WALLET, {address: null, key: null, tx: null});
+  };
+
+  this.createTransaction = function(recipient, amount, fee) {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var wallet = this.flux.store('TicketStore').wallet;
+    var user = this.flux.store('UserStore').user;
+
+    btcSwapClient.createTransaction(wallet, recipient, amount, fee, user.id.substr(2), function(tx) {
+      if (this.flux.store('config').debug)
+        utils.log('BTC transaction:', tx);
+
+      this.dispatch(constants.ticket.UPDATE_TX, tx);
+    }.bind(this), function(error) {
+      utils.error(error);
+      this.dispatch(constants.ticket.UPDATE_TX_FAIL, {error: error});
+    }.bind(this));
+  };
+
+  this.propagateTransaction = function(txHex) {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+    btcSwapClient.propagateTransaction(txHex, function(result) {
+      if (this.flux.store('config').debug)
+        utils.log('Tx propagate result:', result);
+      this.dispatch(constants.ticket.PROPAGATE_TX, result);
+    }.bind(this), function(error) {
+      utils.error(error);
+      this.dispatch(constants.ticket.UPDATE_TX_FAIL, {error: error});
+    }.bind(this));
+  };
+
   this.reserveTicket = function(id, txHash, powNonce) {
     var btcSwapClient = this.flux.store('config').getBtcSwapClient();
 

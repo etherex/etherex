@@ -13,7 +13,7 @@ var fixtures = {
   addresses: {
       // nameregs: ["0xb46312830127306cd3de3b84dbdb51899613719d", "0xda7ce79725418f4f6e13bf5f520c89cec5f6a974"],
       etherex: "0x761fe08a3616fc3bf91e42135a116b7bc3a0cbe4",
-      btcswap: "0xc214fd7067d32ffd79cfa7b425317f7194fc5546"
+      btcswap: "0x4491959fe1772faa7332464b0e7f1aa9aa2d8446"
   },
   categories: [
     {
