@@ -47,6 +47,9 @@ var TicketActions = function() {
       if (this.flux.store('config').debug)
         utils.log("TICKETS", tickets);
 
+      this.flux.actions.ticket.getBlockchainHead();
+      this.flux.actions.ticket.getLastBlockHeight();
+
       this.dispatch(constants.ticket.LOAD_TICKETS_LOAD, tickets);
     }.bind(this), function(error) {
       this.dispatch(constants.trade.LOAD_TICKET_FAIL, {error: error});
@@ -284,10 +287,7 @@ var TicketActions = function() {
     var btcSwapClient = this.flux.store('config').getBtcSwapClient();
 
     btcSwapClient.cancelTicket(id, function(result) {
-      if (this.flux.store('config').debug)
-        utils.log('cancelTicket result: ', result);
-
-      this.dispatch(constants.ticket.CANCEL_TICKET, id);
+      this.dispatch(constants.ticket.CANCEL_TICKET, result);
     }.bind(this), function(cancelledId) {
       if (this.flux.store('config').debug)
         utils.log('cancelTicket completed for ticket #', cancelledId);
@@ -303,9 +303,6 @@ var TicketActions = function() {
     var btcSwapClient = this.flux.store('config').getBtcSwapClient();
 
     btcSwapClient.generateWallet(function(wallet) {
-      if (this.flux.store('config').debug)
-        utils.log('Intermediate wallet:', wallet);
-
       this.dispatch(constants.ticket.UPDATE_WALLET, wallet);
     }.bind(this), function(error) {
       utils.error(error);
@@ -317,9 +314,6 @@ var TicketActions = function() {
     var btcSwapClient = this.flux.store('config').getBtcSwapClient();
 
     btcSwapClient.importWallet(key, function(wallet) {
-      if (this.flux.store('config').debug)
-        utils.log('Intermediate wallet:', wallet);
-
       this.dispatch(constants.ticket.UPDATE_WALLET, wallet);
     }.bind(this), function(error) {
       utils.error(error);
@@ -337,9 +331,6 @@ var TicketActions = function() {
     var user = this.flux.store('UserStore').user;
 
     btcSwapClient.createTransaction(wallet, recipient, amount, fee, user.id.substr(2), function(tx) {
-      if (this.flux.store('config').debug)
-        utils.log('BTC transaction:', tx);
-
       this.dispatch(constants.ticket.UPDATE_TX, tx);
     }.bind(this), function(error) {
       utils.error(error);
@@ -351,8 +342,6 @@ var TicketActions = function() {
     var btcSwapClient = this.flux.store('config').getBtcSwapClient();
 
     btcSwapClient.propagateTransaction(txHex, function(result) {
-      if (this.flux.store('config').debug)
-        utils.log('Tx propagate result:', result);
       this.dispatch(constants.ticket.PROPAGATE_TX, result);
     }.bind(this), function(error) {
       utils.error(error);
@@ -402,9 +391,6 @@ var TicketActions = function() {
     var btcSwapClient = this.flux.store('config').getBtcSwapClient();
 
     btcSwapClient.computePoW(id, txHash, function(result) {
-      if (this.flux.store('config').debug)
-        utils.log('PoW nonce:', result);
-
       this.dispatch(constants.ticket.UPDATE_POW, result);
     }.bind(this), function(error) {
       utils.error(error);
@@ -416,13 +402,151 @@ var TicketActions = function() {
     var btcSwapClient = this.flux.store('config').getBtcSwapClient();
 
     btcSwapClient.verifyPoW(id, txHash, nonce, function(result) {
-      if (this.flux.store('config').debug)
-        utils.log('PoW result:', result);
-
       this.dispatch(constants.ticket.VERIFY_POW, result);
     }.bind(this), function(error) {
       utils.error(error);
       this.dispatch(constants.ticket.VERIFY_POW_FAIL, {error: error});
+    }.bind(this));
+  };
+
+  this.getBlockchainHead = function() {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+    btcSwapClient.getBlockchainHead(function(result) {
+      this.dispatch(constants.ticket.UPDATE_BTC_HEAD, {btcHead: result});
+    }.bind(this), function(error) {
+      utils.error(error);
+      this.dispatch(constants.ticket.UPDATE_BTC_HEAD_FAIL, {error: error});
+    }.bind(this));
+  };
+
+  this.getLastBlockHeight = function() {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+    btcSwapClient.getLastBlockHeight(function(result) {
+      // Check actual latest block height from 'https://btc.blockr.io/api/v1/block/info/last'
+      var live = false;  // TODO live / testnet handling
+      var options = {
+        hostname: (live ? '' : 't') + 'btc.blockr.io',
+        port: 443,
+        path: '/api/v1/block/info/last',
+        method: 'GET',
+        withCredentials: false
+      };
+
+      var error;
+      var req = https.request(options, function(res) {
+        if (!res || res.statusCode !== 200) {
+          error = "Error retrieving BTC block.";
+          this.dispatch(constants.ticket.UPDATE_BTC_HEIGHT_FAIL, {error: error});
+          return;
+        }
+
+        res.on('data', function(data) {
+          var json = JSON.parse(data);
+
+          if (json.status !== 'success') {
+            error = "Error retrieving BTC block height.";
+            this.dispatch(constants.ticket.UPDATE_BTC_HEIGHT_FAIL, {error: error});
+            utils.error(error, json);
+            return;
+          }
+
+          var blockData = json.data;
+          this.dispatch(constants.ticket.UPDATE_BTC_HEIGHT, {btcRealHeight: blockData.nb});
+          this.dispatch(constants.ticket.UPDATE_BTC_HEAD, {btcRealHead: blockData.hash});
+        }.bind(this));
+      }.bind(this));
+
+      req.end();
+      req.on('error', function(e) {
+        error = "Request error:";
+        this.dispatch(constants.ticket.UPDATE_BTC_HEIGHT_FAIL, {error: error + " " + String(e)});
+        utils.error(error, e);
+      }.bind(this));
+
+      // hackish loop for now... FIXME
+      setTimeout(function() {
+        this.flux.actions.ticket.getLastBlockHeight();
+        this.flux.actions.ticket.getBlockchainHead();
+      }.bind(this), 30000);
+
+      this.dispatch(constants.ticket.UPDATE_BTC_HEIGHT, {btcHeight: _.parseInt(result)});
+    }.bind(this), function(error) {
+      utils.error(error);
+      this.dispatch(constants.ticket.UPDATE_BTC_HEIGHT_FAIL, {error: error});
+    }.bind(this));
+  };
+
+  this.updateBlockHeader = function() {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    // TODO
+    var ticketState = this.flux.store('TicketStore').getState();
+    var blocksBehind = ticketState.btcBehind;
+
+    if (!blocksBehind)
+      return;
+
+    var live = false;  // TODO live / testnet handling
+    var options = {
+      hostname: (live ? '' : 't') + 'btc.blockr.io',
+      port: 443,
+      path: '/api/v1/block/info/' + (ticketState.btcHeight + 1),
+      method: 'GET',
+      withCredentials: false
+    };
+    utils.log("STORE_BLOCK_HEADER", ticketState.btcHeight + 1);
+
+    var error;
+    var req = https.request(options, function(res) {
+      if (!res || res.statusCode !== 200) {
+        error = "Error retrieving BTC block.";
+        this.dispatch(constants.ticket.UPDATE_BTC_HEIGHT_FAIL, {error: error});
+        return;
+      }
+
+      res.on('data', function(data) {
+        var json = JSON.parse(data);
+
+        if (json.status !== 'success') {
+          error = "Error retrieving BTC block hash.";
+          this.dispatch(constants.ticket.UPDATE_BTC_HEIGHT_FAIL, {error: error});
+          utils.error(error, json);
+          return;
+        }
+
+        var blockData = json.data;
+
+        btcSwapClient.storeBlockHeader(blockData.hash, function(result) {
+          if (result === blockData.nb) {
+            this.dispatch(constants.ticket.UPDATE_BTC_HEIGHT, {btcHeight: result});
+            this.dispatch(constants.ticket.UPDATE_BTC_HEAD, {btcRealHead: blockData.hash});
+
+            // Loop to next block
+            setTimeout(function() {
+              if (this.flux.store('TicketStore').getState().btcHeight <= result)
+                this.flux.actions.ticket.updateBlockHeader();
+            }.bind(this), 1000);
+          }
+          else {
+            error = `Block height mismatch, expected ${blockData.nb}, saw ${result}`;
+            utils.error(error);
+            this.dispatch(constants.ticket.UPDATE_BTC_HEIGHT_FAIL, {error: error});
+          }
+        }.bind(this), function(err) {
+          error = "Error storing block header:";
+          utils.error(error, err);
+          this.dispatch(constants.ticket.UPDATE_BTC_HEIGHT_FAIL, {error: error + " " + String(err)});
+        }.bind(this));
+
+      }.bind(this));
+    }.bind(this));
+
+    req.end();
+    req.on('error', function(e) {
+      error = "Request error:";
+      this.dispatch(constants.ticket.UPDATE_BTC_HEIGHT_FAIL, {error: error + " " + String(e)});
+      utils.error(error, e);
     }.bind(this));
   };
 

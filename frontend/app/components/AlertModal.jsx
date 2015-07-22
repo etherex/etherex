@@ -19,7 +19,7 @@ var AlertModal = React.createClass({
           </Modal.Header>
         <Modal.Body>
           <Alert bsStyle={this.props.level} >
-            <h4 className="text-center">{ this.props.message }</h4>
+            <h4 className="text-center text-overflow">{ this.props.message }</h4>
           </Alert>
           { (this.props.note) &&
             <p>{ this.props.note }</p>}

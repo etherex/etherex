@@ -252,7 +252,11 @@ module.exports = {
                   {price, number} ETH/BTC, paid to {address} ?`,
       "claim": `Are you sure you want to claim ticket # {id, number} at
                   {amount, number} {unit} for {total, number} BTC at a price of
-                  {price, number} ETH/BTC, paid to {address} ?`
+                  {price, number} ETH/BTC, paid to {address} ?`,
+      "behind": `BTC relay headers are behind by
+                {behind, plural,
+                  =1 {# block}
+                  other {# blocks}}`
     },
     "hashrate": "{hashrate, number} H/s"
   }

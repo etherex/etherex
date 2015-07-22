@@ -113,7 +113,7 @@ var CreateTicket = React.createClass({
   render() {
     return (
       <div>
-        <Nav />
+        <Nav flux={this.props.flux} ticket={this.props.ticket} />
 
         <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
 

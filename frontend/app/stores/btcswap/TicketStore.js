@@ -35,6 +35,11 @@ var TicketStore = Fluxxor.createStore({
         this.updating = false;
         this.error = null;
         this.ticketIDs = [];
+        this.btcHead = null;
+        this.btcRealHead = null;
+        this.btcHeight = 0;
+        this.btcRealHeight = 0;
+        this.btcBehind = false;
         this.percent = 0;
         this.progress = 0;
         this.estimate = 0;
@@ -61,6 +66,10 @@ var TicketStore = Fluxxor.createStore({
             constants.ticket.UPDATE_WALLET_FAIL, this.onTicketsFail,
             constants.ticket.UPDATE_TX, this.onUpdateTx,
             constants.ticket.UPDATE_TX_FAIL, this.onTicketsFail,
+            constants.ticket.UPDATE_BTC_HEAD, this.onUpdateBtcHead,
+            constants.ticket.UPDATE_BTC_HEAD_FAIL, this.onTicketsFail,
+            constants.ticket.UPDATE_BTC_HEIGHT, this.onUpdateBtcHeight,
+            constants.ticket.UPDATE_BTC_HEIGHT_FAIL, this.onTicketsFail,
             constants.ticket.PROPAGATE_TX, this.onPropagateTransaction,
             constants.ticket.CREATE_TICKET, this.onCreateTicket,
             constants.ticket.CREATE_TICKET_SUCCESS, this.onCreateTicketSuccess,
@@ -295,6 +304,28 @@ var TicketStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
+    onUpdateBtcHead: function(payload) {
+        if (payload.btcHead)
+          this.btcHead = payload.btcHead;
+        else if (payload.btcRealHead)
+          this.btcRealHead = payload.btcRealHead;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    onUpdateBtcHeight: function(payload) {
+        if (payload.btcHeight)
+          this.btcHeight = payload.btcHeight;
+        else if (payload.btcRealHeight)
+          this.btcRealHeight = payload.btcRealHeight;
+
+        if (this.btcRealHeight > this.btcHeight)
+          this.btcBehind = this.btcRealHeight - this.btcHeight;
+        else
+          this.btcBehind = false;
+
+        this.emit(constants.CHANGE_EVENT);
+    },
+
     onCloseAlert: function() {
         this.error = null;
         this.message = null;
@@ -321,6 +352,11 @@ var TicketStore = Fluxxor.createStore({
             tickets: this.tickets,
             ticket: this.ticket,
             wallet: this.wallet,
+            btcHead: this.btcHead,
+            btcRealHead: this.btcRealHead,
+            btcHeight: this.btcHeight,
+            btcRealHeight: this.btcRealHeight,
+            btcBehind: this.btcBehind,
             estimate: this.estimate,
             message: this.message,
             note: this.note

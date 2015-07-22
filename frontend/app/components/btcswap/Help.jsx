@@ -12,7 +12,8 @@ var Help = React.createClass({
   render() {
     return (
       <div>
-        <Nav />
+        <Nav flux={this.props.flux} ticket={this.props.ticket} />
+
         <div className="col-md-6 col-md-offset-3">
           <h3>Buying Ether</h3>
           <ol>

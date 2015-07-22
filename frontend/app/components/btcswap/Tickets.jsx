@@ -2,7 +2,6 @@
 var React = require("react");
 var ReactIntl = require('react-intl');
 var IntlMixin = ReactIntl.IntlMixin;
-// var FormattedMessage = ReactIntl.FormattedMessage;
 var TransitionGroup = require('../TransitionGroup');
 
 var Table = require("react-bootstrap/lib/Table");
@@ -123,10 +122,8 @@ var Tickets = React.createClass({
 
     return (
       <div>
-        <Nav />
-        {
-        // <h3>Tickets offering Ether for Bitcoin</h3>
-        }
+        <Nav flux={this.props.flux} ticket={this.props.ticket} />
+
         <Table condensed hover responsive striped>
           <thead>
             <tr>

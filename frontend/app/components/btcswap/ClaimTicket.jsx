@@ -143,7 +143,7 @@ var ClaimTicket = React.createClass({
   render() {
     return (
       <div>
-        <Nav />
+        <Nav flux={this.props.flux} ticket={this.props.ticket} />
 
         <div className="row">
           <div className="col-md-2">
