@@ -17,20 +17,42 @@ var Help = React.createClass({
         <div className="col-md-6 col-md-offset-3">
           <h3>Buying Ether</h3>
           <ol>
-            <li><Link to="btc">Choose the ticket</Link> you want to purchase ether from and click Reserve.</li>
-            <li>Generate an intermediate BTC wallet in the Reserve section.</li>
+            <li>
+              <Link to="btc">Choose the ticket</Link> you want to purchase
+              ether from and click the <b>Reserve</b> button for that ticket.
+            </li>
+            <li>
+              Generate an intermediate BTC wallet in the Reserve section by
+              clicking on <b>Generate wallet</b> button.
+            </li>
             <li>
               Send the total BTC amount of the ticket plus a 0.3mBTC miner fee
               to your intermediate address. You can still recover your bitcoins
-              if you change your mind at this point.</li>
-            <li>Wait for a few confirmations.</li>
-            <li>Click on Create transaction to generate the signed transaction.</li>
-            <li>In the Proof of Work panel, click Compute to get a valid nonce.</li>
-            <li>Enter the Bitcoin transaction hash and Proof of Work, and click Reserve.</li>
-            <li>Broadcast the actual Bitcoin Transaction to the Bitcoin network.</li>
+              if you change your mind later on, at least until you broadcast
+              the transaction you'll generate on the next step.
+            </li>
+            <li>Wait for at least 3 confirmations.</li>
+            <li>
+              Click on <b>Create transaction</b> to generate a signed transaction.
+              Do <b>NOT</b> broadcast the transaction just yet, you only need
+              the transaction hash.
+            </li>
+            <li>
+              Your transaction hash should show up in the Proof of Work panel.
+              Click <b>Compute</b> to get a valid nonce. This can take up to a
+              few minutes on slower computers.
+            </li>
+            <li>Once you have a valid nonce, click <b>Reserve</b>.</li>
+            <li>
+              Broadcast the signed Bitcoin Transaction to the Bitcoin network
+              by clicking on <b>Broadcast transaction</b>.
+            </li>
             <li>Wait for 6 confirmations.</li>
-            <li>Go the the <Link to="claim">Claim</Link> section and lookup your ticket ID.</li>
-            <li>Click Claim.</li>
+            <li>
+              Go the the <Link to="claim">Claim</Link> section and lookup your
+              ticket ID.
+            </li>
+            <li>Click <b>Claim</b>.</li>
           </ol>
           <h4>Notes:</h4>
           <ul>

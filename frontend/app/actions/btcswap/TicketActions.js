@@ -203,7 +203,7 @@ var TicketActions = function() {
     var error;
     var req = https.request(options, function(res) {
       if (!res || res.statusCode !== 200) {
-        error = "Error retrieving BTC transaction.";
+        error = "Error retrieving BTC block.";
         this.dispatch(constants.ticket.LOOKUP_TICKET_FAIL, {error: error});
         return;
       }
@@ -480,22 +480,25 @@ var TicketActions = function() {
 
   this.updateBlockHeader = function() {
     var btcSwapClient = this.flux.store('config').getBtcSwapClient();
-    // TODO
     var ticketState = this.flux.store('TicketStore').getState();
     var blocksBehind = ticketState.btcBehind;
 
-    if (!blocksBehind)
+    if (!blocksBehind) {
+      this.dispatch(constants.ticket.UPDATE_BTC_HEADER, false);
       return;
+    }
 
     var live = false;  // TODO live / testnet handling
+    var nextHeight = ticketState.btcHeight + 1;
+    this.dispatch(constants.ticket.UPDATE_BTC_HEADER, nextHeight);
+
     var options = {
       hostname: (live ? '' : 't') + 'btc.blockr.io',
       port: 443,
-      path: '/api/v1/block/info/' + (ticketState.btcHeight + 1),
+      path: '/api/v1/block/info/' + nextHeight,
       method: 'GET',
       withCredentials: false
     };
-    utils.log("STORE_BLOCK_HEADER", ticketState.btcHeight + 1);
 
     var error;
     var req = https.request(options, function(res) {
@@ -516,6 +519,9 @@ var TicketActions = function() {
         }
 
         var blockData = json.data;
+
+        if (this.flux.store('config').debug)
+          utils.log("BTC_BLOCK_HASH", blockData.hash);
 
         btcSwapClient.storeBlockHeader(blockData.hash, function(result) {
           if (result === blockData.nb) {

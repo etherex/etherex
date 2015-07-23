@@ -478,7 +478,7 @@ var ReserveTicket = React.createClass({
                     className={(this.state.canPropagateTx && !this.state.ticket.reservable) ? "btn-primary" : ""}
                     disabled={!this.state.canPropagateTx}
                     style={{marginRight: 10}}>
-                      Propagate transaction
+                      Broadcast transaction
                   </Button>
                   <Button onClick={this.confirmClearWallet}
                     disabled={this.state.canGenerateWallet}>

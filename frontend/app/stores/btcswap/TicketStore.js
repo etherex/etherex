@@ -40,6 +40,7 @@ var TicketStore = Fluxxor.createStore({
         this.btcHeight = 0;
         this.btcRealHeight = 0;
         this.btcBehind = false;
+        this.btcUpdating = false;
         this.percent = 0;
         this.progress = 0;
         this.estimate = 0;
@@ -70,6 +71,7 @@ var TicketStore = Fluxxor.createStore({
             constants.ticket.UPDATE_BTC_HEAD_FAIL, this.onTicketsFail,
             constants.ticket.UPDATE_BTC_HEIGHT, this.onUpdateBtcHeight,
             constants.ticket.UPDATE_BTC_HEIGHT_FAIL, this.onTicketsFail,
+            constants.ticket.UPDATE_BTC_HEADER, this.onUpdateBtcHeader,
             constants.ticket.PROPAGATE_TX, this.onPropagateTransaction,
             constants.ticket.CREATE_TICKET, this.onCreateTicket,
             constants.ticket.CREATE_TICKET_SUCCESS, this.onCreateTicketSuccess,
@@ -326,6 +328,11 @@ var TicketStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
+    onUpdateBtcHeader: function(payload) {
+        this.btcUpdating = payload;
+        this.emit(constants.CHANGE_EVENT);
+    },
+
     onCloseAlert: function() {
         this.error = null;
         this.message = null;
@@ -336,6 +343,7 @@ var TicketStore = Fluxxor.createStore({
         // this.tickets = [];
         // this.loading = false;
         // this.percent = 100;
+        this.btcUpdating = false;
         this.error = payload.error;
         this.emit(constants.CHANGE_EVENT);
     },
@@ -357,6 +365,7 @@ var TicketStore = Fluxxor.createStore({
             btcHeight: this.btcHeight,
             btcRealHeight: this.btcRealHeight,
             btcBehind: this.btcBehind,
+            btcUpdating: this.btcUpdating,
             estimate: this.estimate,
             message: this.message,
             note: this.note

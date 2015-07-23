@@ -125,6 +125,7 @@ module.exports = {
         UPDATE_BTC_HEAD_FAIL: null,
         UPDATE_BTC_HEIGHT: null,
         UPDATE_BTC_HEIGHT_FAIL: null,
+        UPDATE_BTC_HEADER: null,
         PROPAGATE_TX: null,
         CREATE_TICKET: null,
         CREATE_TICKET_SUCCESS: null,
