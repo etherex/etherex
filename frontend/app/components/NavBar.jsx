@@ -9,22 +9,11 @@ var Link = Router.Link;
 var Tab = require("./Tab");
 var Button = require('react-bootstrap').Button;
 var UserLink = require("./UserLink");
+var Popover = require('react-bootstrap/lib/Popover');
+var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
 
 var NavBar = React.createClass({
   mixins: [IntlMixin],
-
-  getInitialState() {
-    return {
-      demoMode: false
-    };
-  },
-
-  componentWillReceiveProps(nextProps) {
-    var demoMode = nextProps.flux.store('config').demoMode;
-    this.setState({
-      demoMode: demoMode
-    });
-  },
 
   disableDemoMode() {
     this.props.flux.actions.config.updateDemoMode(false);
@@ -71,10 +60,19 @@ var NavBar = React.createClass({
                   <UserLink address={ this.props.user.user.id } showIcon={true} data-toggle="collapse" data-target="#navbar-collapse.in" />
                 </li>
               </ul>
-              { this.state.demoMode &&
+              { this.props.demoMode &&
                 <ul className="nav navbar-nav navbar-right">
                   <Button bsStyle="warning" style={{marginTop: 7}} onClick={this.disableDemoMode}>DEMO MODE</Button>
                 </ul> }
+              { this.props.networkId != 1 &&
+                <OverlayTrigger trigger={['click']} placement='left' rootClose={true} overlay={
+                  <Popover>
+                    Network ID { this.props.networkId }
+                  </Popover>}>
+                  <ul className="nav navbar-nav navbar-right">
+                    <Button bsStyle="warning" style={{marginTop: 7}}>TESTNET</Button>
+                  </ul>
+                </OverlayTrigger> }
             </div>
           </div>
         </div>

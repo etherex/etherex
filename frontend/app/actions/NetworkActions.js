@@ -182,11 +182,6 @@ var NetworkActions = function() {
       utils.log("GOT BLOCK", log);
 
     this.flux.actions.network.updateBlockchain(true);
-
-    var user = this.flux.store("UserStore").getState().user;
-    if (user.addresses)
-      this.flux.actions.user.updateBalance();
-    // this.flux.actions.user.updateBalanceSub();
   };
 
   // TODO ???

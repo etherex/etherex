@@ -93,7 +93,10 @@ var EtherExApp = React.createClass({
     return (
       <div id="wrap" className={"theme-" + this.state.theme}>
         <div className="container-fluid" ref="container">
-          <NavBar flux={this.state.flux} user={this.state.user} />
+          <NavBar flux={this.state.flux}
+                  user={this.state.user}
+                  demoMode={this.state.config.demoMode}
+                  networkId={this.state.config.network} />
           <div className="row">
             <div className="col-lg-2">
               <div className="row">

@@ -104,7 +104,7 @@ var EthereumClient = function(params) {
     this.filters.address = web3.eth.filter('latest').watch(updateBalance);
   };
 
-  // TODO
+  // TODO still needed?
   // this.watchPending = function() {
   //   Watch pending trades
   //   this.filters.pending = web3.eth.filter('pending').watch(flux.actions.trade.checkPending);
@@ -137,6 +137,16 @@ var EthereumClient = function(params) {
 
   this.getClient = function(callback) {
     web3.version.getClient(function(error, result) {
+      if (error) {
+        utils.error(error);
+      } else {
+        callback(result);
+      }
+    });
+  };
+
+  this.getNetwork = function(callback) {
+    web3.version.getNetwork(function(error, result) {
       if (error) {
         utils.error(error);
       } else {

@@ -25,6 +25,15 @@ var ConfigActions = function() {
 
     var ethereumClient = new EthereumClient(clientParams);
 
+    // Check the client's network version
+    ethereumClient.getNetwork(function(network) {
+      if (debug)
+        utils.log("NETWORK ID", network);
+      this.dispatch(constants.config.UPDATE_CONFIG, {
+        network: network
+      });
+    }.bind(this));
+
     // Reload configs from client on first run
     if (!configState.ethereumClient && ethereumClient.isAvailable()) {
       var configs = {
@@ -100,6 +109,7 @@ var ConfigActions = function() {
       address: configState.btcSwapAddress,
       host: configState.host,
       from: userState.user.id,
+      testnet: configState.network === 1 ? false : true,
       debug: this.flux.store('config').debug
     });
 
