@@ -43,12 +43,10 @@ var TradeList = React.createClass({
     var address = this.props.flux.stores.config.getState().address;
 
     return (
-      <div className="container-fluid row">
+      <div className="row">
         <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
 
-        <ConfigPane flux={this.props.flux} address={address} setAlert={this.setAlert} showAlert={this.showAlert} />
-
-        <div className="container col-md-6 col-md-offset-3">
+        <div className="col-md-4">
           <div className="panel panel-default">
             <div className="panel-heading">
               <h3 className="panel-title">Subcurrency registration</h3>
@@ -60,6 +58,10 @@ var TradeList = React.createClass({
             </div>
           </div>
         </div>
+        <div className="col-md-8">
+          <ConfigPane flux={this.props.flux} address={address} setAlert={this.setAlert} showAlert={this.showAlert} />
+        </div>
+
         <div className="container col-md-12 visible-md visible-sm visible-xs">
           <Network flux={this.props.flux} />
         </div>

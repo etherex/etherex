@@ -171,7 +171,7 @@ var SubRegister = React.createClass({
         </div>
         <div className="form-group">
           <label forHtml="address">Contract address</label>
-          <input type="text" className="form-control" maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="Address" ref="address" onChange={this.handleChange}/>
+          <input type="text" className="form-control" maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="0x" ref="address" onChange={this.handleChange}/>
         </div>
         <div className="form-group">
           <label forHtml="minimum">Minimum ETH amount</label>

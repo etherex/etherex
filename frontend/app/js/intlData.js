@@ -162,7 +162,7 @@ module.exports = {
     },
     "config": {
       "title": "Configuration",
-      "current": "Current EtherEx address",
+      "current": "EtherEx address",
       "new": "New address",
       "timeout": "Network timeout (seconds)",
       "update": "Update",

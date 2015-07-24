@@ -181,7 +181,7 @@ var ConfigPane = React.createClass({
         <div className="panel-body">
 
           <form className="form-horizontal" role="form" onSubmit={this.handleUpdateTheme} >
-            <Input label="Theme" labelClassName='col-sm-2' wrapperClassName='col-sm-10 wrapper'>
+            <Input label="Theme" labelClassName='col-sm-3' wrapperClassName='col-sm-9 wrapper'>
               <DropdownButton ref="theme" title={this.state.themes[this.state.theme]} onSelect={this.handleChangeTheme}>
                 <MenuItem key={"flatly"} eventKey={"flatly"}>Flatly</MenuItem>
                 <MenuItem key={"darkly"} eventKey={"darkly"}>Darkly</MenuItem>
@@ -195,13 +195,13 @@ var ConfigPane = React.createClass({
 
           <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
             <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.current')} />}
-              labelClassName='col-sm-2' wrapperClassName='col-sm-10'
+              labelClassName='col-sm-3' wrapperClassName='col-sm-9'
               value={this.props.address} readOnly hasFeedback />
 
             <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.new')} />}
-              labelClassName='col-sm-2' wrapperClassName='col-sm-10'
+              labelClassName='col-sm-3' wrapperClassName='col-sm-9'
               maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="Address" ref="address" onChange={this.handleChange}/>
-            <Input wrapperClassName="col-sm-10 col-sm-offset-2">
+            <Input wrapperClassName="col-sm-9 col-sm-offset-3">
               <Button className={"btn-block" + (this.state.newAddress ? " btn-primary" : "")} type="submit">
                 <FormattedMessage message={this.getIntlMessage('config.update')} />
               </Button>
@@ -211,12 +211,12 @@ var ConfigPane = React.createClass({
           <form className="form-horizontal" role="form" onSubmit={this.handleTimeout} >
             <Input ref="timeout" type="number" min="1" step="1"
               label={<FormattedMessage message={this.getIntlMessage('config.timeout')} />}
-              labelClassName='col-sm-2' wrapperClassName='col-sm-10'
+              labelClassName='col-sm-3' wrapperClassName='col-sm-9'
               value={this.state.timeout} onChange={this.handleChangeTimeout} />
-            <Input wrapperClassName="col-sm-10 col-sm-offset-2">
+            <Input wrapperClassName="col-sm-9 col-sm-offset-3">
               <Button
                 onClick={this.handleTimeout}
-                wrapperClassName="col-sm-10 col-sm-offset-2"
+                wrapperClassName="col-sm-9 col-sm-offset-3"
                 className={this.state.timeoutUpdated ? "btn-primary" : ""} >
                 <FormattedMessage message={this.getIntlMessage('config.update')} />
               </Button>
@@ -224,11 +224,11 @@ var ConfigPane = React.createClass({
           </form>
 
           <Input type='checkbox' ref='si' label={<FormattedMessage message={this.getIntlMessage('config.si')} />}
-            wrapperClassName="col-sm-10 col-sm-offset-2"
+            wrapperClassName="col-sm-9 col-sm-offset-3"
             checked={this.state.si} onChange={this.toggleSI} />
 
           <Input type='checkbox' ref='debug' label={<FormattedMessage message={this.getIntlMessage('config.debug_mode')} />}
-            wrapperClassName="col-sm-10 col-sm-offset-2"
+            wrapperClassName="col-sm-9 col-sm-offset-3"
             checked={this.state.debug} onChange={this.toggleDebug}
             help={
               <Alert bsStyle='warning' className='text-black'>
