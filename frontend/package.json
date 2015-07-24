@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/etherex/etherex",
   "devDependencies": {
-    "babel-core": "^5.7.4",
+    "babel-core": "^5.8.3",
     "babel-loader": "^5.3.2",
     "css-loader": "^0.15.5",
     "eslint": "^0.24.1",
@@ -55,11 +55,11 @@
     "less-loader": "^2.2.0",
     "mocha": "^2.2.5",
     "node-libs-browser": "^0.5.2",
-    "react-bootstrap": "^0.23.7",
+    "react-bootstrap": "^0.24.0",
     "react-hot-loader": "^1.2.8",
     "react-tools": "^0.13.3",
     "style-loader": "^0.12.3",
-    "webpack": "^1.10.1",
+    "webpack": "^1.10.5",
     "webpack-dev-server": "^1.10.1"
   },
   "dependencies": {
