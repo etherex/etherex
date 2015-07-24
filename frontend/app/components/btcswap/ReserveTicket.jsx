@@ -427,7 +427,7 @@ var ReserveTicket = React.createClass({
               </div>
               <div className="panel-body">
                 <form role="form" className="form-horizontal">
-                  <OverlayTrigger trigger={['hover', 'focus']} placement='left' overlay={
+                  <OverlayTrigger trigger={['hover', 'focus']} placement='top' overlay={
                     <Popover>
                       Send the total BTC amount to this address. Make sure you also include
                       a 0.3mBTC fee for the outgoing BTC transaction.
@@ -438,7 +438,7 @@ var ReserveTicket = React.createClass({
                       value={ this.props.ticket.wallet.address } />
                   </OverlayTrigger>
 
-                  <OverlayTrigger trigger={['hover', 'focus']} placement='left' overlay={
+                  <OverlayTrigger trigger={['hover', 'focus']} placement='top' overlay={
                     <Popover>
                       This is your intermediate BTC wallet key. Make sure you back it up
                       if you do send funds to this wallet.

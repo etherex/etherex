@@ -110,7 +110,7 @@ var MarketActions = function() {
       this.flux.actions.trade.updateTrades();
 
     // Load BtcSwap tickets
-    this.flux.actions.ticket.loadTickets();
+    this.flux.actions.ticket.loadTicketIDs(true);
   };
 
   this.loadMarketBalances = function(market) {

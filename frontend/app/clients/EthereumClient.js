@@ -232,21 +232,31 @@ var EthereumClient = function(params) {
   };
 
   this.getLastMarketID = function(success, failure) {
+    var errorMsg = "Unable to load last market ID: ";
+
     try {
-      var id = _.parseInt(this.contract.get_last_market_id.call().toString());
-
-      if (this.debug)
-        utils.log("LAST MARKET ID: ", id);
-
-      if (!id) {
-          failure("No market found, seems like contracts are missing.");
+      this.contract.get_last_market_id.call(function(error, result) {
+        if (error) {
+          utils.error(errorMsg, error);
+          failure(errorMsg + String(error));
           return;
-      }
-      success(id);
+        }
+
+        var id = result.toNumber();
+        if (this.debug)
+          utils.log("LAST MARKET ID: ", id);
+
+        if (!id) {
+            failure("No market found, seems like contracts are missing.");
+            return;
+        }
+
+        success(id);
+      }.bind(this));
     }
     catch (e) {
       utils.error(e);
-      failure("Unable to load market IDs: " + String(e));
+      failure(errorMsg + String(e));
     }
   };
 

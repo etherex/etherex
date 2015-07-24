@@ -21,6 +21,12 @@ module.exports = {
         "style": "currency",
         "currency": "USD",
         "minimumFractionDigits": 2
+      },
+      "btc": {
+        "maximumFractionDigits": 8
+      },
+      "ether": {
+        "maximumFractionDigits": 18
       }
     }
   },
@@ -244,15 +250,15 @@ module.exports = {
                   }`
     },
     "btc": {
-      "sell": `Are you sure you want to sell {amount, number} {unit}
-                for {total, number} BTC at a price of {price, number} ETH/BTC,
-                paid to {address} ?`,
+      "sell": `Are you sure you want to sell {amount} {unit}
+               for {total} BTC at a price of {price} ETH/BTC,
+               paid to {address} ?`,
       "reserve": `Are you sure you want to reserve ticket # {id, number} at
-                  {amount, number} {unit} for {total, number} BTC at a price of
-                  {price, number} ETH/BTC, paid to {address} ?`,
+                  {amount} {unit} for {total} BTC at a price of
+                  {price} ETH/BTC, paid to {address} ?`,
       "claim": `Are you sure you want to claim ticket # {id, number} at
-                  {amount, number} {unit} for {total, number} BTC at a price of
-                  {price, number} ETH/BTC, paid to {address} ?`,
+                  {amount} {unit} for {total} BTC at a price of
+                  {price} ETH/BTC, paid to {address} ?`,
       "behind": `BTC relay headers are behind by
                 {behind, plural,
                   =1 {# block}

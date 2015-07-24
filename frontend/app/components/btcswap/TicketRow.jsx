@@ -33,7 +33,8 @@ var TicketRow = React.createClass({
       <tr className={className} onClick={this.handleClick}>
         <td>
           <div className="text-right">
-            <FormattedNumber value={this.props.ticket.id} />
+            { this.props.ticket.id == '-' ? '-' :
+              <FormattedNumber value={this.props.ticket.id} /> }
           </div>
         </td>
         <td>
@@ -57,6 +58,11 @@ var TicketRow = React.createClass({
         <td>
           <div className="center-block ellipsis">
             {this.props.ticket.address}
+          </div>
+        </td>
+        <td>
+          <div className="center-block ellipsis">
+            {this.props.ticket.owner}
           </div>
         </td>
         <td>

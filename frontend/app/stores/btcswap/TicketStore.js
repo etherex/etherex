@@ -15,6 +15,7 @@ var TicketStore = Fluxxor.createStore({
           total: null,
           price: null,
           address: null,
+          owner: null,
           feePercentage: null,
           btcPayment: null,
           paymentAddr: null,
@@ -48,16 +49,16 @@ var TicketStore = Fluxxor.createStore({
         this.message = '';
 
         this.bindActions(
-            constants.ticket.LOOKUP_TICKET, this.onLookupTicket,
-            constants.ticket.LOOKUP_TICKET_FAIL, this.onTicketsFail,
+            constants.ticket.LOAD_TICKETS, this.onLoadTickets,
+            constants.ticket.LOAD_TICKETS_PROGRESS, this.onLoadTicketsProgress,
+            constants.ticket.LOAD_TICKETS_SUCCESS, this.onLoadTicketsSuccess,
             constants.ticket.LOAD_TICKET_IDS, this.onUpdateTicketIDs,
             constants.ticket.LOAD_TICKET_IDS_FAIL, this.onTicketsFail,
             constants.ticket.LOAD_TICKET, this.onLoadTicket,
-            constants.ticket.LOAD_TICKETS_LOAD, this.onLoadTicketsLoad, // ugh...
-            constants.ticket.LOAD_TICKETS_PROGRESS, this.onLoadTicketsProgress,
-            constants.ticket.LOAD_TICKETS_SUCCESS, this.onLoadTicketsSuccess,
             constants.ticket.LOAD_TICKET_FAIL, this.onTicketsFail,
             constants.ticket.LOAD_DEMO_DATA, this.onLoadDemoData,
+            constants.ticket.LOOKUP_TICKET, this.onLookupTicket,
+            constants.ticket.LOOKUP_TICKET_FAIL, this.onTicketsFail,
             constants.ticket.UPDATE_TICKET, this.onUpdateTicket,
             constants.ticket.UPDATE_TICKETS, this.onUpdateTickets,
             constants.ticket.UPDATE_TICKETS_MESSAGE, this.onUpdateMessage,
@@ -83,6 +84,7 @@ var TicketStore = Fluxxor.createStore({
             constants.ticket.CLAIM_TICKET_SUCCESS, this.onClaimTicketSuccess,
             constants.ticket.CLAIM_TICKET_FAIL, this.onTicketsFail,
             constants.ticket.CANCEL_TICKET, this.onCancelTicket,
+            constants.ticket.CANCEL_TICKET_SUCCESS, this.onCancelTicketSuccess,
             constants.ticket.CANCEL_TICKET_FAIL, this.onTicketsFail,
             constants.ticket.VERIFY_POW, this.onVerifyPow,
             constants.ticket.VERIFY_POW_FAIL, this.onTicketsFail,
@@ -145,32 +147,29 @@ var TicketStore = Fluxxor.createStore({
         this.refreshTickets();
     },
 
-    onLoadTicketsLoad: function(payload) {
-        this.tickets = payload;
-        this.refreshTickets();
-    },
-
     onUpdateTicket: function(payload) {
       var index = -1;
 
-      // Replace current ticket with updated one or delete claimed ones
-      // TODO compare changes and animate in components
+      // Replace current ticket with updated one, add new one or
+      // delete canceled or claimed one
       if (payload.amount !== 0) {
         index = _.findIndex(this.tickets, { 'id': payload.id });
-        if (index && index != -1) {
+        if (index != -1) {
           // console.log("TICKET UPDATED", payload.id);
-          if (payload.amount === 0)
-            this.tickets.splice(index, 1);
-          else
-            this.tickets[index] = payload;
+          this.tickets[index] = payload;
+          if (this.ticket.id == payload.id)
+            this.message = "The current ticket has changed."; // TODO reset current ticket?
         }
-        else
+        else {
+          // console.log("NEW TICKET", payload.id);
+          this.ticketIDs.push(payload.id);
           this.tickets.push(payload);
+        }
       }
       else {
         //   console.log("TICKET REMOVED", payload.id);
         index = _.findIndex(this.tickets, { 'id': payload.id });
-        if (index && index != -1)
+        if (index != -1)
           this.tickets.splice(index, 1);
       }
 
@@ -191,8 +190,8 @@ var TicketStore = Fluxxor.createStore({
     },
 
     onUpdateMessage: function(payload) {
-        this.note = payload.note;
         this.message = payload.message;
+        this.note = payload.note;
 
         this.emit(constants.CHANGE_EVENT);
     },
@@ -209,17 +208,10 @@ var TicketStore = Fluxxor.createStore({
     onCreateTicketSuccess: function(payload) {
         var index = -1;
 
-        // Replace current ticket with updated one or delete failed ones
-        // TODO compare changes and animate
+        // Remove pending ticket, let global watch add mined one
         index = _.findIndex(this.tickets, { 'pendingHash': payload.pendingHash });
-        if (index && index != -1) {
-            if (payload.ticket.amount === 0)
-              this.tickets.splice(index, 1);
-            else
-              this.tickets[index] = payload.ticket;
-        }
-        else
-          this.tickets.push(payload.ticket);
+        if (index != -1)
+            this.tickets.splice(index, 1);
 
         this.refreshTickets();
     },
@@ -230,10 +222,10 @@ var TicketStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
+    // TODO Should now be obsolete w/ global watch and updateTicket...
     onClaimTicketSuccess: function (payload) {
         var index = _.findIndex(this.tickets, {'id': payload});
         this.tickets.splice(index, 1);
-        // this.tickets[index].status = "success";
         this.emit(constants.CHANGE_EVENT);
     },
 
@@ -243,6 +235,7 @@ var TicketStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
+    // TODO Should now be obsolete w/ global watch and updateTicket...
     onReserveTicketSuccess: function (payload) {
         var index = _.findIndex(this.tickets, {'id': payload.id});
         this.tickets[index] = payload;
@@ -255,6 +248,7 @@ var TicketStore = Fluxxor.createStore({
         this.emit(constants.CHANGE_EVENT);
     },
 
+    // TODO Should now be called onRemoveTicket...
     onCancelTicketSuccess: function (payload) {
         var index = _.findIndex(this.tickets, {'id': payload});
         this.tickets.splice(index, 1);

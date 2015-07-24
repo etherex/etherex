@@ -92,11 +92,18 @@ macro remove_trade($trade_id, $market_id):
     self.trades[$trade_id].block = 0
     self.trades[$trade_id].refhash = 0
 
-    self.markets[$market_id].trade_ids[$trade_id].id = 0
     prev_id = self.markets[$market_id].trade_ids[$trade_id].prev_id
     next_id = self.markets[$market_id].trade_ids[$trade_id].next_id
-    self.markets[$market_id].trade_ids[prev_id].next_id = next_id
-    self.markets[$market_id].trade_ids[next_id].prev_id = prev_id
+    if prev_id and next_id:
+        self.markets[$market_id].trade_ids[prev_id].next_id = next_id
+        self.markets[$market_id].trade_ids[next_id].prev_id = prev_id
+    elif prev_id:
+        self.markets[$market_id].last_trade = prev_id
+    if next_id:
+        self.markets[$market_id].trade_ids[$trade_id].next_id = 0
+    if prev_id:
+        self.markets[$market_id].trade_ids[$trade_id].prev_id = 0
+    self.markets[$market_id].trade_ids[$trade_id].id = 0
     self.markets[$market_id].total_trades -= 1
 
 def init():

@@ -10,6 +10,10 @@ var AlertDismissable = require('../AlertDismissable');
 var Nav = require("./Nav");
 
 var CreateTicket = React.createClass({
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+
   mixins: [IntlMixin],
 
   getInitialState() {
@@ -108,6 +112,8 @@ var CreateTicket = React.createClass({
         price: null,
         isValid: false
     });
+
+    this.context.router.transitionTo('ticket', {ticketId: '-'});
   },
 
   render() {

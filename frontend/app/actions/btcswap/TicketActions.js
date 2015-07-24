@@ -8,52 +8,104 @@ var utils = require("../../js/utils");
 
 var TicketActions = function() {
 
-  // TODO update loading method
-  // this.loadTicketIDs = function(market, init) {
-  //   if (this.flux.store('config').debug)
-  //     console.count("loadTradeIDs triggered");
+  this.loadTicketIDs = function(init) {
+    if (this.flux.store('config').debug)
+      console.count("loadTicketIDs triggered");
 
-  //   // var _client = this.flux.store('config').getEthereumClient();
-
-  //   btcswap.loadTicketIDs(market, function(ticketIDs) {
-  //     this.dispatch(constants.ticket.LOAD_TICKET_IDS, ticketIDs);
-  //     if (init)
-  //       this.flux.actions.ticket.loadTickets(ticketIDs);
-  //   }.bind(this), function(error) {
-  //     this.dispatch(constants.trade.LOAD_TICKET_IDS_FAIL, {error: error});
-  //   }.bind(this));
-  // };
-
-  // this.loadTicket = function(id) {
-  //   var configState = this.flux.store('config').getState();
-  //   var btcSwap = new BtcSwap({address: configState.btcSwapAddress});
-
-  //   var tickets = this.flux.store("TradeStore").getState();
-  //   if (tickets.error)
-  //     this.flux.actions.ticket.ticketsLoaded();
-
-  //   btcSwap.loadTicket(id, this.flux.actions.ticket.updateProgress, function(ticket) {
-  //     this.dispatch(constants.ticket.LOAD_TICKET, ticket);
-  //   }.bind(this), function(error) {
-  //     this.dispatch(constants.trade.LOAD_TICKET_FAIL, {error: error});
-  //   }.bind(this));
-  // };
-
-  // TODO replace with methods above
-  this.loadTickets = function() {
     var btcSwapClient = this.flux.store('config').getBtcSwapClient();
 
-    btcSwapClient.getOpenTickets(0, 100, function(tickets) {
-      if (this.flux.store('config').debug)
-        utils.log("TICKETS", tickets);
-
-      this.flux.actions.ticket.getBlockchainHead();
-      this.flux.actions.ticket.getLastBlockHeight();
-
-      this.dispatch(constants.ticket.LOAD_TICKETS_LOAD, tickets);
+    btcSwapClient.getTicketIDs(function(ticketIDs) {
+      this.dispatch(constants.ticket.LOAD_TICKET_IDS, ticketIDs);
+      if (init)
+        this.flux.actions.ticket.loadTickets(ticketIDs);
     }.bind(this), function(error) {
-      this.dispatch(constants.trade.LOAD_TICKET_FAIL, {error: error});
+      this.dispatch(constants.ticket.LOAD_TICKET_IDS_FAIL, {error: error});
     }.bind(this));
+  };
+
+  this.loadTickets = function(ticketIDs) {
+    if (this.flux.store('config').debug)
+      console.count("loadTickets triggered");
+
+    // Put tickets in loading state
+    this.dispatch(constants.ticket.LOAD_TICKETS);
+
+    for (var i = ticketIDs.length - 1; i >= 0; i--)
+      this.flux.actions.ticket.loadTicket(ticketIDs[i]);
+  };
+
+  this.loadTicket = function(id) {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+    var tickets = this.flux.store("TicketStore").getState();
+    if (tickets.error)
+      this.flux.actions.ticket.ticketsLoaded();
+
+    btcSwapClient.lookupTicket(id, function(ticket) {
+      this.dispatch(constants.ticket.LOAD_TICKET, ticket);
+
+      this.flux.actions.ticket.updateProgress();
+    }.bind(this), function(error) {
+      this.dispatch(constants.ticket.LOAD_TICKET_FAIL, {error: error});
+    }.bind(this));
+  };
+
+  this.updateTicket = function(id) {
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+    btcSwapClient.lookupTicket(id, function(ticket) {
+      if (ticket.id)
+        this.dispatch(constants.ticket.UPDATE_TICKET, ticket);
+    }.bind(this), function(error) {
+      this.dispatch(constants.ticket.LOAD_TICKET_FAIL, {error: error});
+    }.bind(this));
+  };
+
+  this.updateProgress = function() {
+    var tickets = this.flux.store("TicketStore").getState();
+    var current = tickets.progress + 1;
+    var total = tickets.ticketIDs.length;
+
+    if (!total) {
+      this.dispatch(constants.ticket.LOAD_TICKETS_PROGRESS, {
+        progress: current,
+        percent: current
+      });
+      return;
+    }
+
+    var percent = parseFloat(((current / total) * 100).toFixed(2));
+
+    this.dispatch(constants.ticket.LOAD_TICKETS_PROGRESS, {
+      progress: current,
+      percent: percent
+    });
+
+    if (percent >= 100)
+        this.flux.actions.ticket.ticketsLoaded();
+  };
+
+  this.ticketsLoaded = function() {
+    if (this.flux.store('config').debug)
+      console.count("ticketsLoaded triggered");
+
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
+    // Watch tickets
+    btcSwapClient.watchTickets(function(ticketEvent, ticketId) {
+      if (ticketEvent == 'new' || ticketEvent == 'reserved')
+        this.flux.actions.ticket.updateTicket(ticketId);
+      else if (ticketEvent == 'removed')
+        this.dispatch(constants.ticket.CANCEL_TICKET_SUCCESS, ticketId);
+    }.bind(this), function(error) {
+      this.dispatch(constants.ticket.LOAD_TICKET_FAIL, {error: error});
+    }.bind(this));
+
+    // Get BTC block height and hash
+    this.flux.actions.ticket.getBlockchainHead();
+    this.flux.actions.ticket.getLastBlockHeight();
+
+    this.dispatch(constants.ticket.LOAD_TICKETS_SUCCESS);
   };
 
   this.lookupTicket = function(id) {
@@ -104,7 +156,7 @@ var TicketActions = function() {
           this.flux.actions.ticket.lookupBitcoinTxHash(ticket, false);
       }
     }.bind(this), function(error) {
-      this.dispatch(constants.trade.LOOKUP_TICKET_FAIL, {error: error});
+      this.dispatch(constants.ticket.LOOKUP_TICKET_FAIL, {error: error});
     }.bind(this));
   };
 
@@ -257,14 +309,15 @@ var TicketActions = function() {
         utils.log('createTicket tx result:', result);
 
       var ticket = {
-        id: 0,
+        id: '-',
         address: btcAddress,
         amount: bigRat(numEther).times(fixtures.ether),
         price: bigRat(btcTotal).divide(numEther).toDecimal(),
         total: btcTotal,
         expiry: 1,
         pendingHash: result,
-        status: 'new'
+        status: 'pending',
+        owner: this.flux.store('UserStore').user.id
       };
       this.dispatch(constants.ticket.CREATE_TICKET, ticket);
     }.bind(this), function(pendingHash, ticket) {
@@ -286,13 +339,18 @@ var TicketActions = function() {
   this.cancelTicket = function(id) {
     var btcSwapClient = this.flux.store('config').getBtcSwapClient();
 
-    btcSwapClient.cancelTicket(id, function(result) {
-      this.dispatch(constants.ticket.CANCEL_TICKET, result);
+    btcSwapClient.cancelTicket(id, function(ticketId, txHash) {
+      if (this.flux.store('config').debug) {
+        utils.log('cancelTicket success for ticket #', ticketId);
+        utils.log('cancelTicket tx result:', txHash);
+      }
+      this.dispatch(constants.ticket.CANCEL_TICKET, ticketId);
     }.bind(this), function(cancelledId) {
       if (this.flux.store('config').debug)
         utils.log('cancelTicket completed for ticket #', cancelledId);
 
-      this.dispatch(constants.ticket.CANCEL_TICKET_SUCCESS, cancelledId);
+      // Let global watch remove ticket...
+      // this.dispatch(constants.ticket.CANCEL_TICKET_SUCCESS, cancelledId);
     }.bind(this), function(error) {
       utils.error('Ticket could not be cancelled:', error);
       this.dispatch(constants.ticket.CANCEL_TICKET_FAIL, {error: error});
@@ -361,7 +419,8 @@ var TicketActions = function() {
       if (this.flux.store('config').debug)
         utils.log('reserveTicket completed for ticket #', reservedTicket.id);
 
-      this.dispatch(constants.ticket.RESERVE_TICKET_SUCCESS, reservedTicket);
+      // Let global watch update ticket...
+      // this.dispatch(constants.ticket.RESERVE_TICKET_SUCCESS, reservedTicket);
     }.bind(this), function(error) {
       utils.error('Ticket could not be reserved:', error);
       this.dispatch(constants.ticket.RESERVE_TICKET_FAIL, {error: error});
@@ -380,7 +439,8 @@ var TicketActions = function() {
       if (this.flux.store('config').debug)
         utils.log('claimedTicket completed for ticket #', claimedId);
 
-      this.dispatch(constants.ticket.CLAIM_TICKET_SUCCESS, claimedId);
+      // Let global watch remove ticket...
+      // this.dispatch(constants.ticket.CLAIM_TICKET_SUCCESS, claimedId);
     }.bind(this), function(error) {
       utils.error('Ticket could not be claimed:', error);
       this.dispatch(constants.ticket.CLAIM_TICKET_FAIL, {error: error});

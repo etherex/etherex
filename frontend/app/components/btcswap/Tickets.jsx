@@ -111,7 +111,7 @@ var Tickets = React.createClass({
 
   render() {
     var ticketRows = this.props.ticket.tickets.map(function (ticket, i) {
-      var key = "ticket-" + ticket.id;
+      var key = "ticket-" + (ticket.id == '-' ? ticket.pendingHash : ticket.id);
       return (
         <TicketRow
           flux={this.props.flux} ref={key} key={key} count={i} ticket={ticket}
@@ -132,6 +132,7 @@ var Tickets = React.createClass({
               <th className="text-right">PRICE BTC/ETH</th>
               <th className="text-right">TOTAL</th>
               <th className="text-center">BTC ADDRESS</th>
+              <th className="text-center">BY</th>
               <th className="text-center">EXPIRY</th>
               <th className="text-center trade-op"></th>
             </tr>
