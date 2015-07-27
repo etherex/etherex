@@ -85,20 +85,25 @@ var Nav = React.createClass({
         <div className="navbar">
           <OverlayTrigger trigger={['click']} placement='left' rootClose={true} overlay={
             <Popover bsSize="large">
+              <p className="text-overflow">BTC block # { this.formatNumber(this.props.ticket.btcHeight) }</p>
               <p className="text-overflow">BTC block hash: <samp>{this.props.ticket.btcHead}</samp></p>
               <p className="text-overflow">Real BTC block # {this.props.ticket.btcRealHeight}</p>
-              <div className="text-overflow">Real BTC block hash: <samp>{this.props.ticket.btcRealHead}</samp></div>
+              <p className="text-overflow">Real BTC block hash: <samp>{this.props.ticket.btcRealHead}</samp></p>
+              { this.props.ticket.btcBehind &&
+                <div>
+                  { this.formatMessage(this.getIntlMessage('btc.behind'), {
+                      behind: this.props.ticket.btcBehind
+                    }) }
+                </div> }
             </Popover>}>
             <Button className="btn-balance pull-right">BTC block # <FormattedNumber value={this.props.ticket.btcHeight} /></Button>
           </OverlayTrigger>
           { this.props.ticket.btcBehind &&
             <OverlayTrigger trigger={['hover', 'focus']} placement='left' overlay={
               <Popover>
-                {
-                  this.formatMessage(this.getIntlMessage('btc.behind'), {
+                { this.formatMessage(this.getIntlMessage('btc.behind'), {
                     behind: this.props.ticket.btcBehind
-                  })
-                }
+                  }) }
               </Popover>}>
               <Button className="btn-balance pull-right" style={{marginRight: 10}} bsStyle="warning"
                 disabled={this.state.updatingBtcHeaders || !!this.props.ticket.btcUpdating}

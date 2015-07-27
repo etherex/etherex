@@ -36,6 +36,8 @@ var ReserveTicket = React.createClass({
       canSetTxHash: false,
       canComputePoW: false,
       canReserve: false,
+      keyLabel: 'Reveal',
+      keyVisible: false,
       isValid: false,
       onConfirm: this.handleReserve,
       showModal: false,
@@ -137,6 +139,21 @@ var ReserveTicket = React.createClass({
          canPropagateTx: false
        });
    }
+  },
+
+  keyButton: function() {
+    return (
+      <Button disabled={!this.props.ticket.wallet.key} onClick={ this.toggleKeyReveal }>
+        { this.state.keyLabel }
+      </Button>
+    );
+  },
+
+  toggleKeyReveal: function() {
+    this.setState({
+      keyVisible: !this.state.keyVisible,
+      keyLabel: !this.state.keyVisible ? "Hide" : "Reveal"
+    });
   },
 
   setAlert: function(alertLevel, alertMessage) {
@@ -443,8 +460,9 @@ var ReserveTicket = React.createClass({
                       This is your intermediate BTC wallet key. Make sure you back it up
                       if you do send funds to this wallet.
                     </Popover>}>
-                    <Input type="text" label="Key"
+                    <Input type={this.state.keyVisible ? "text" : "password"} label="Key"
                       labelClassName="col-md-3" wrapperClassName="col-md-9"
+                      buttonAfter={ this.keyButton() }
                       readOnly
                       value={ this.props.ticket.wallet.key } />
                     { /* TODO export feature instead... */}
@@ -547,7 +565,7 @@ var ReserveTicket = React.createClass({
                     <Popover>
                       Import a previous intermediate BTC wallet key.
                     </Popover>}>
-                    <Input type="text" ref="key" label="Key"
+                    <Input type="password" ref="key" label="Key"
                       labelClassName="col-md-3" wrapperClassName="col-md-9"
                       disabled={!!this.props.ticket.wallet.key}
                       value={ this.state.key } />
