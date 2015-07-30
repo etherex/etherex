@@ -185,7 +185,7 @@ New market IDs will be created as DAO creators add their subcurrency to the exch
 
 ### Subcurrency API
 
-**Subcurrency contracts need to support the exchange's `deposit` ABI call and implement a `transfer` method for withdrawals.**
+**Subcurrency contracts need to support the exchange's `deposit` ABI call, implement a `transfer` method for withdrawals and a `balance` method for the UI to display the user's balance.**
 
 It is a different approach than the [MetaCoin API](https://github.com/ethereum/cpp-ethereum/wiki/MetaCoin-API) which will not be used, as the `Approve API` is all-or-nothing and gives too much permissions to the exchange. The new procedure is explained below, and the sample [ETX](https://github.com/etherex/etherex/blob/master/contracts/etx.se) contract can be used as an example.
 
