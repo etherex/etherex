@@ -59,16 +59,9 @@ var ReserveTicket = require("./components/btcswap/ReserveTicket");
 var ClaimTicket = require("./components/btcswap/ClaimTicket");
 var BtcHelp = require("./components/btcswap/Help");
 
-// Load jQuery for bootstrap
-var jQuery = require("jquery");
-window.$ = window.jQuery = jQuery;
-
 // Load fonts and icons
 require("./css/fonts.css");
 require("./css/icons.css");
-
-// Load bootstrap
-require("bootstrap/dist/js/bootstrap.js");
 
 // Load Intl data
 var intlData = require('./js/intlData');

@@ -7,6 +7,11 @@ module.exports = {
   resolveLoader: {
     root: path.join(__dirname, 'node_modules')
   },
+  node: {
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty'
+  },
   output: {
     /* global __dirname */
     path: path.join(__dirname, "app"),

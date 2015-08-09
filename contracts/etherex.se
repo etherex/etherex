@@ -29,11 +29,8 @@ event log_market(id)
 
 extern subcurrency: [transfer:[int256,int256]:int256]
 
-macro MARKET_FIELDS():
-    12
-
-macro TRADE_FIELDS():
-    8
+macro MARKET_FIELDS: 12
+macro TRADE_FIELDS: 8
 
 macro refund():
     if msg.value > 0:
@@ -394,7 +391,7 @@ def get_last_market_id():
     return(self.last_market)
 
 def get_market(id):
-    market = array(MARKET_FIELDS() - 1)
+    market = array(MARKET_FIELDS - 1)
 
     market[0] = self.markets[id].id
     market[1] = self.markets[id].name
@@ -428,7 +425,7 @@ def get_trade_ids(market_id):
     return([0]:arr)
 
 def get_trade(id):
-    trade = array(TRADE_FIELDS())
+    trade = array(TRADE_FIELDS)
 
     trade[0] = self.trades[id].id
     trade[1] = self.trades[id].type

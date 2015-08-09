@@ -10,6 +10,10 @@
   padding-bottom: 50px;
 }
 
+.navbar-collapse {
+  overflow: hidden;
+}
+
 .navbar-fixed-bottom {
   height: 40px;
   min-height: 40px;

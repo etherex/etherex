@@ -21,7 +21,6 @@ var UserLink = React.createClass({
     });
   },
 
-
   render() {
     return (
       <Link to="userDetails">
