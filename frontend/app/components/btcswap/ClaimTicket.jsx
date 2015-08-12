@@ -205,7 +205,7 @@ var ClaimTicket = React.createClass({
               </div>
               <div className="panel-body">
                 <p className="text-overflow">Ether fee to claimer: <b>{ this.state.ticket.feePercentage }</b></p>
-                <p className="text-overflow">BTC: <b>{ this.state.ticket.btcPayment }</b></p>
+                <p className="text-overflow">Transaction amount: <b>{ this.state.ticket.btcPayment ? this.state.ticket.btcPayment + " BTC" : "" }</b></p>
                 <p className="text-overflow">Bitcoin address: <b>{ this.state.ticket.paymentAddr }</b></p>
                 <p className="text-overflow">Ether recipient: <b>{ this.state.ticket.etherAddr }</b></p>
                 <p className="text-overflow">Transaction hash: <b>{ this.state.ticket.txHash }</b></p>
@@ -222,7 +222,7 @@ var ClaimTicket = React.createClass({
           </div>
           <div className="panel-body">
             <div className="col-md-4">
-              <h5>Recipient: <b>0x{ this.state.ticket.claimer }</b></h5>
+              <h5>Recipient: <b>{ this.state.ticket.claimer ? '0x' + this.state.ticket.claimer : '' }</b></h5>
               <h5>Expiry: <b>{ this.state.ticket.expiry > 1 &&
                   <span>
                     <FormattedDate value={this.state.ticket.expiry * 1000} format="long" />{' '}

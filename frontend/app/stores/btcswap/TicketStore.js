@@ -220,6 +220,7 @@ var TicketStore = Fluxxor.createStore({
     var index = _.findIndex(this.tickets, {'id': payload});
     this.tickets[index].status = "success";
     this.message = "Claiming ticket #" + payload + ", please wait for the Ethereum transaction to be confirmed.";
+    this.ticket.claimable = false;
     this.emit(constants.CHANGE_EVENT);
   },
 
@@ -280,7 +281,7 @@ var TicketStore = Fluxxor.createStore({
 
   onPropagateTransaction: function(payload) {
     this.wallet.tx = null;
-    this.message = "Transaction propagated, wait for 6 confirmations then claim the ticket.";
+    this.message = "Transaction broadcast, wait for 6 confirmations then claim the ticket.";
     this.note = "BTC transaction hash: " + payload;
     this.emit(constants.CHANGE_EVENT);
   },
