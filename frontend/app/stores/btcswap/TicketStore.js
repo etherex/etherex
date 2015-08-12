@@ -45,8 +45,8 @@ var TicketStore = Fluxxor.createStore({
     this.percent = 0;
     this.progress = 0;
     this.estimate = 0;
-    this.note = '';
-    this.message = '';
+    this.message = null;
+    this.note = null;
 
     this.bindActions(
       constants.ticket.LOAD_TICKETS, this.onLoadTickets,
@@ -219,13 +219,15 @@ var TicketStore = Fluxxor.createStore({
   onClaimTicket: function (payload) {
     var index = _.findIndex(this.tickets, {'id': payload});
     this.tickets[index].status = "success";
+    this.message = "Claiming ticket #" + payload + ", please wait for the Ethereum transaction to be confirmed.";
     this.emit(constants.CHANGE_EVENT);
   },
 
   // TODO Should now be obsolete w/ global watch and updateTicket...
   onClaimTicketSuccess: function (payload) {
-    var index = _.findIndex(this.tickets, {'id': payload});
-    this.tickets.splice(index, 1);
+    // var index = _.findIndex(this.tickets, {'id': payload});
+    // this.tickets.splice(index, 1);
+    this.message = "Ticket #" + payload + " successfully claimed.";
     this.emit(constants.CHANGE_EVENT);
   },
 
@@ -238,7 +240,9 @@ var TicketStore = Fluxxor.createStore({
   // TODO Should now be obsolete w/ global watch and updateTicket...
   onReserveTicketSuccess: function (payload) {
     var index = _.findIndex(this.tickets, {'id': payload.id});
-    this.tickets[index] = payload;
+    this.ticket.reservable = false;
+    this.tickets[index].reservable = false;
+    // this.tickets[index] = payload;
     this.emit(constants.CHANGE_EVENT);
   },
 
@@ -258,12 +262,12 @@ var TicketStore = Fluxxor.createStore({
   onUpdateWallet: function(payload) {
     this.wallet = payload;
     if (payload.address) {
-      var message = "Intermediate wallet created. Send ";
+      this.message = "Intermediate wallet created.";
       if (this.ticket.total)
-        this.message = message + (parseFloat(this.ticket.total) + 0.0003) + " BTC (includes 0.0003 BTC miner fee)";
+        this.note = "Send " + this.ticket.totalWithFee + " BTC (includes 0.0003 BTC miner fee)";
       else
-        this.message = message + "BTC";
-      this.message += " to " + payload.address;
+        this.note = "Send BTC";
+      this.note += " to " + payload.address;
     }
     this.emit(constants.CHANGE_EVENT);
   },
@@ -276,7 +280,8 @@ var TicketStore = Fluxxor.createStore({
 
   onPropagateTransaction: function(payload) {
     this.wallet.tx = null;
-    this.message = "Transaction propagated: " + payload;
+    this.message = "Transaction propagated, wait for 6 confirmations then claim the ticket.";
+    this.note = "BTC transaction hash: " + payload;
     this.emit(constants.CHANGE_EVENT);
   },
 
@@ -330,6 +335,7 @@ var TicketStore = Fluxxor.createStore({
   onCloseAlert: function() {
     this.error = null;
     this.message = null;
+    this.note = null;
     this.emit(constants.CHANGE_EVENT);
   },
 

@@ -99,13 +99,17 @@ var Tickets = React.createClass({
   handleAction(ticket) {
       if (ticket.owner == this.props.user.user.id)
         this.props.flux.actions.ticket.cancelTicket(ticket.id);
-      else if (!ticket.claimer) {
+      else if (!ticket.claimer || ticket.reservable) {
         this.props.flux.actions.ticket.lookupTicket(ticket.id);
-        this.context.router.transitionTo('reserve');
+        setTimeout(function() {
+          this.context.router.transitionTo('reserve');
+        }.bind(this), 300);
       }
       else {
         this.props.flux.actions.ticket.lookupTicket(ticket.id);
-        this.context.router.transitionTo('claim');
+        setTimeout(function() {
+          this.context.router.transitionTo('claim');
+        }.bind(this), 300);
       }
   },
 

@@ -12,6 +12,7 @@ var TicketDetails = React.createClass({
         <p>Amount: { amount.value } { amount.unit }</p>
         <p>Price: { this.props.ticket.price } BTC/ETH</p>
         <p>Total: { this.props.ticket.total } BTC</p>
+        <p>Total with fee: { this.props.ticket.totalWithFee } BTC</p>
         <p>BTC address: <samp>{ this.props.ticket.address }</samp></p>
       </div>
     );

@@ -42,6 +42,8 @@ var TicketActions = function() {
       this.flux.actions.ticket.ticketsLoaded();
 
     btcSwapClient.lookupTicket(id, function(ticket) {
+      ticket = this.flux.actions.ticket.setTicketFlags(ticket);
+
       this.dispatch(constants.ticket.LOAD_TICKET, ticket);
 
       this.flux.actions.ticket.updateProgress();
@@ -108,9 +110,33 @@ var TicketActions = function() {
     this.dispatch(constants.ticket.LOAD_TICKETS_SUCCESS);
   };
 
+  this.setTicketFlags = function(ticket) {
+    var userState = this.flux.store('UserStore').getState();
+
+    var formattedAmount = utils.formatEther(ticket.amount);
+
+    var reservable = false;
+    if (!ticket.claimer ||
+        (ticket.expiry > 1 && ticket.expiry < new Date().getTime() / 1000)) {
+      reservable = true;
+      ticket.txHash = null;
+      ticket.claimer = null;
+      ticket.expiry = 1;
+    }
+
+    var claimable = false;
+    if (!reservable && ticket.claimer == userState.user.id.substr(2))
+      claimable = true;
+
+    ticket.formattedAmount = formattedAmount;
+    ticket.reservable = reservable;
+    ticket.claimable = claimable;
+
+    return ticket;
+  };
+
   this.lookupTicket = function(id) {
     var btcSwapClient = this.flux.store('config').getBtcSwapClient();
-    var userState = this.flux.store('UserStore').getState();
 
     btcSwapClient.lookupTicket(id, function(ticket) {
       if (this.flux.store('config').debug)
@@ -130,29 +156,12 @@ var TicketActions = function() {
         this.dispatch(constants.ticket.LOOKUP_TICKET, ticket);
       }
       else {
-        var formattedAmount = utils.formatEther(ticket.amount);
-
-        var reservable = false;
-        if (!ticket.claimer ||
-            (ticket.expiry > 1 && ticket.expiry < new Date().getTime() / 1000)) {
-          reservable = true;
-          ticket.txHash = null;
-          ticket.claimer = null;
-          ticket.expiry = 1;
-        }
-
-        var claimable = false;
-        if (!reservable && ticket.claimer == userState.user.id.substr(2))
-          claimable = true;
-
-        ticket.formattedAmount = formattedAmount;
-        ticket.reservable = reservable;
-        ticket.claimable = claimable;
+        ticket = this.flux.actions.ticket.setTicketFlags(ticket);
 
         this.dispatch(constants.ticket.LOOKUP_TICKET, ticket);
 
         // TODO live / testnet handling
-        if (ticket.txHash && claimable)
+        if (ticket.txHash && ticket.claimable)
           this.flux.actions.ticket.lookupBitcoinTxHash(ticket, false);
       }
     }.bind(this), function(error) {
@@ -420,7 +429,7 @@ var TicketActions = function() {
         utils.log('reserveTicket completed for ticket #', reservedTicket.id);
 
       // Let global watch update ticket...
-      // this.dispatch(constants.ticket.RESERVE_TICKET_SUCCESS, reservedTicket);
+      this.dispatch(constants.ticket.RESERVE_TICKET_SUCCESS, reservedTicket);
     }.bind(this), function(error) {
       utils.error('Ticket could not be reserved:', error);
       this.dispatch(constants.ticket.RESERVE_TICKET_FAIL, {error: error});
@@ -440,7 +449,7 @@ var TicketActions = function() {
         utils.log('claimedTicket completed for ticket #', claimedId);
 
       // Let global watch remove ticket...
-      // this.dispatch(constants.ticket.CLAIM_TICKET_SUCCESS, claimedId);
+      this.dispatch(constants.ticket.CLAIM_TICKET_SUCCESS, claimedId);
     }.bind(this), function(error) {
       utils.error('Ticket could not be claimed:', error);
       this.dispatch(constants.ticket.CLAIM_TICKET_FAIL, {error: error});

@@ -31,7 +31,8 @@ var ClaimTicket = React.createClass({
       isValid: false,
       showModal: false,
       alertLevel: 'info',
-      alertMessage: '',
+      alertMessage: null,
+      alertNote: null,
       showAlert: false
     };
   },
@@ -51,14 +52,24 @@ var ClaimTicket = React.createClass({
       this.setState({
         showAlert: true,
         alertLevel: 'danger',
-        alertMessage: nextProps.ticket.error
+        alertMessage: nextProps.ticket.error,
+        alertNote: null
+      });
+
+    if (nextProps.ticket.message)
+      this.setState({
+        showAlert: true,
+        alertLevel: 'info',
+        alertMessage: nextProps.ticket.message,
+        alertNote: nextProps.ticket.note
       });
   },
 
-  setAlert: function(alertLevel, alertMessage) {
+  setAlert: function(alertLevel, alertMessage, alertNote) {
     this.setState({
       alertLevel: alertLevel,
-      alertMessage: alertMessage
+      alertMessage: alertMessage,
+      alertNote: alertNote
     });
   },
 
@@ -133,11 +144,13 @@ var ClaimTicket = React.createClass({
       ticket.blockHash
     );
 
-    this.setState({
-      ticketId: null
-    });
+    // this.setState({
+    //   ticketId: null
+    // });
 
-    this.context.router.transitionTo('ticket', {ticketId: this.state.ticketId});
+    // setTimeout(function() {
+    //   this.context.router.transitionTo('ticket', {ticketId: ticket.id});
+    // }.bind(this), 300);
   },
 
   render() {
@@ -177,7 +190,8 @@ var ClaimTicket = React.createClass({
               <div className="panel-body">
                 <p>Amount: <b>{ this.state.ticket.formattedAmount.value } { this.state.ticket.formattedAmount.unit }</b></p>
                 <p className="text-overflow">Price: <b>{ this.state.ticket.price ? this.state.ticket.price + " BTC/ETH" : ""} </b></p>
-                <p className="text-overflow">Total BTC: <b>{ this.state.ticket.total }</b></p>
+                <p className="text-overflow">Total BTC: <b>{ this.state.ticket.total ? this.state.ticket.total + " BTC" : "" }</b></p>
+                <p className="text-overflow">Total with fee: <b>{ this.state.ticket.totalWithFee ? this.state.ticket.totalWithFee + " BTC" : "" }</b></p>
                 <p className="text-overflow">Bitcoin Address: <b>{ this.state.ticket.address }</b></p>
               </div>
             </div>
@@ -208,7 +222,7 @@ var ClaimTicket = React.createClass({
           </div>
           <div className="panel-body">
             <div className="col-md-4">
-              <h5>Address: <b>{ this.state.ticket.claimer }</b></h5>
+              <h5>Recipient: <b>0x{ this.state.ticket.claimer }</b></h5>
               <h5>Expiry: <b>{ this.state.ticket.expiry > 1 &&
                   <span>
                     <FormattedDate value={this.state.ticket.expiry * 1000} format="long" />{' '}
@@ -248,6 +262,7 @@ var ClaimTicket = React.createClass({
           onHide={this.hideAlert}
           alertTitle="Oh snap!"
           message={this.state.alertMessage}
+          note={this.state.alertNote}
           level={this.state.alertLevel}
         />
       </div>

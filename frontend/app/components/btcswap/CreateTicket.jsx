@@ -21,7 +21,7 @@ var CreateTicket = React.createClass({
       isValid: false,
       showModal: false,
       alertLevel: 'info',
-      alertMessage: ''
+      alertMessage: null
     };
   },
 
@@ -113,7 +113,9 @@ var CreateTicket = React.createClass({
         isValid: false
     });
 
-    this.context.router.transitionTo('ticket', {ticketId: '-'});
+    setTimeout(function() {
+      this.context.router.transitionTo('ticket', {ticketId: '-'});
+    }.bind(this), 300);
   },
 
   render() {

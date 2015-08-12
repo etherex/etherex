@@ -13,10 +13,6 @@ var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
 
 var Nav = require("./Nav");
 
-// dd5a8f13c97c8b8d47329fa7bd487df24b7d3b7e855a65eb7fd51e8f94f7e482
-// ticket 2 nonce = 2460830
-// ticket 3 nonce = 726771
-
 var ReserveTicket = React.createClass({
   contextTypes: {
     router: React.PropTypes.func
@@ -42,7 +38,8 @@ var ReserveTicket = React.createClass({
       onConfirm: this.handleReserve,
       showModal: false,
       alertLevel: 'info',
-      alertMessage: '',
+      alertMessage: null,
+      alertNote: null,
       showAlert: false
     };
   },
@@ -62,14 +59,16 @@ var ReserveTicket = React.createClass({
       this.setState({
         showAlert: true,
         alertLevel: 'danger',
-        alertMessage: nextProps.ticket.error
+        alertMessage: nextProps.ticket.error,
+        alertNote: null
       });
 
     if (nextProps.ticket.message)
       this.setState({
         showAlert: true,
         alertLevel: 'info',
-        alertMessage: nextProps.ticket.message
+        alertMessage: nextProps.ticket.message,
+        alertNote: nextProps.ticket.note
       });
 
     if (!this.state.ticket.reservable || this.state.lookingUp) {
@@ -119,7 +118,7 @@ var ReserveTicket = React.createClass({
           canComputePoW: false
         });
 
-      if (!this.state.canComputePoW && this.state.ticket.nonce)
+      if (!this.state.canComputePoW && this.state.ticket.nonce && this.state.ticket.reservable)
         this.setState({
           canReserve: true
         });
@@ -130,15 +129,16 @@ var ReserveTicket = React.createClass({
     }
 
     if (!this.state.ticket.reservable && !this.state.lookingUp) {
-     if (nextProps.ticket.wallet.address && nextProps.ticket.wallet.tx)
-       this.setState({
-         canPropagateTx: true
-       });
-     else
-       this.setState({
-         canPropagateTx: false
-       });
-   }
+      if (nextProps.ticket.wallet.address && nextProps.ticket.wallet.tx) {
+        this.setState({
+          canPropagateTx: true
+        });
+      }
+      else
+        this.setState({
+          canPropagateTx: false
+        });
+    }
   },
 
   keyButton: function() {
@@ -156,10 +156,11 @@ var ReserveTicket = React.createClass({
     });
   },
 
-  setAlert: function(alertLevel, alertMessage) {
+  setAlert: function(alertLevel, alertMessage, alertNote) {
     this.setState({
       alertLevel: alertLevel,
-      alertMessage: alertMessage
+      alertMessage: alertMessage,
+      alertNote: alertNote
     });
   },
 
@@ -277,7 +278,8 @@ var ReserveTicket = React.createClass({
       this.setState({
         showAlert: true,
         alertLevel: 'danger',
-        alertMessage: "BTC wallet already generated."
+        alertMessage: "BTC wallet already generated.",
+        alertNote: null
       });
   },
 
@@ -305,7 +307,7 @@ var ReserveTicket = React.createClass({
 
     this.setState({
       showModal: true,
-      confirmMessage: "Are you sure you want to push the BTC transaction?",
+      confirmMessage: "Are you sure you want to broadcast the BTC transaction?",
       onConfirm: this.handlePropagateTransaction
     });
   },
@@ -318,7 +320,8 @@ var ReserveTicket = React.createClass({
     else
       this.setState({
         showAlert: true,
-        alertMessage: "No transaction to push the the Bitcoin network."
+        alertMessage: "No transaction to broadcast to the Bitcoin network.",
+        alertNote: null
       });
   },
 
@@ -342,7 +345,8 @@ var ReserveTicket = React.createClass({
     else
       this.setState({
         showAlert: true,
-        alertMessage: "No wallet to clear."
+        alertMessage: "No wallet to clear.",
+        alertNote: null
       });
   },
 
@@ -380,16 +384,24 @@ var ReserveTicket = React.createClass({
       return;
 
     var txHash = this.state.ticket.txHash || this.state.txHash;
-    console.log(this.state.ticket.id, txHash, this.state.ticket.nonce);
+
     this.props.flux.actions.ticket.reserveTicket(this.state.ticket.id, txHash, this.state.ticket.nonce);
 
     this.setState({
-        ticketId: null,
-        txHash: null,
-        nonce: null
+      alertLevel: "info",
+      alertMessage: "Please wait for the Ethereum transaction to be confirmed, then broadcast the BTC transaction.",
+      alertNote: null,
+      showAlert: true
     });
-
-    this.context.router.transitionTo('ticket', {ticketId: this.state.ticket.id});
+    // this.setState({
+    //     ticketId: null,
+    //     txHash: null,
+    //     nonce: null
+    // });
+    //
+    // setTimeout(function() {
+    //   this.context.router.transitionTo('ticket', {ticketId: this.state.ticket.id});
+    // }.bind(this), 250);
   },
 
   render() {
@@ -428,8 +440,9 @@ var ReserveTicket = React.createClass({
               </div>
               <div className="panel-body">
                 <p>Amount: <b>{ this.state.ticket.formattedAmount.value } { this.state.ticket.formattedAmount.unit }</b></p>
-                <p className="text-overflow">Price: <b>{ this.state.ticket.price ? this.state.ticket.price + " BTC/ETH" : ""} </b></p>
-                <p className="text-overflow">Total BTC: <b>{ this.state.ticket.total }</b></p>
+                <p className="text-overflow">Price: <b>{ this.state.ticket.price ? this.state.ticket.price + " BTC/ETH" : "" }</b></p>
+                <p className="text-overflow">Total BTC: <b>{ this.state.ticket.total ? this.state.ticket.total + " BTC" : "" }</b></p>
+                <p className="text-overflow">Total with fee: <b>{ this.state.ticket.totalWithFee ? this.state.ticket.totalWithFee + " BTC" : "" }</b></p>
                 <p className="text-overflow">Bitcoin Address: <b>{ this.state.ticket.address }</b></p>
               </div>
             </div>
@@ -595,6 +608,7 @@ var ReserveTicket = React.createClass({
           onHide={this.hideAlert}
           modalTitle={this.state.alertLevel != "info" ? "Oh snap!" : "It's alive!"}
           message={this.state.alertMessage}
+          note={this.state.alertNote}
           level={this.state.alertLevel}
         />
       </div>
