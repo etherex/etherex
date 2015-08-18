@@ -271,17 +271,19 @@ class TestEtherEx(object):
 
         self.test_deposit_to_exchange()
 
-        assert o == [{
-            '_event_type': 'log_market', 'id': 1
-        },
-        None,  # Token contract events returning None...
-        None,
-        {
-            "_event_type": "log_deposit",
-            "market": 1,
-            "sender": int("0x" + self.ALICE['address'], 16),
-            "amount": 10000 * 10 ** 5
-        }]
+        assert o == [
+            {
+                '_event_type': 'log_market', 'id': 1
+            },
+            None,  # Token contract events returning None...
+            None,
+            {
+                "_event_type": "log_deposit",
+                "market": 1,
+                "sender": int("0x" + self.ALICE['address'], 16),
+                "amount": 10000 * 10 ** 5
+            }
+        ]
         self.state.revert(snapshot)
 
     def test_withdraw_sub_fail(self):
@@ -646,58 +648,60 @@ class TestEtherEx(object):
 
         last_timestamp = self.state.block.timestamp
 
-        assert o == [{
-            '_event_type': 'log_market', 'id': 1
-        }, {
-            '_event_type': 'log_add_tx',
-            'market': 1,
-            'sender': 745948140856946866108753121277737810491401257713L,
-            'type': 1,
-            'amount': 50000000,
-            'price': 25000000,
-            'tradeid': 23490291715255176443338864873375620519154876621682055163056454432194948412040L
-        }, {
-            '_event_type': 'log_add_tx',
-            'market': 1,
-            'sender': 745948140856946866108753121277737810491401257713L,
-            'type': 1,
-            'price': 25000000,
-            'amount': 60000000,
-            'tradeid': -35168633768494065610302920664120686116555617894816459733689825088489895266148L
-        }, {
-            '_event_type': 'log_add_tx',
-            'market': 1,
-            'sender': 745948140856946866108753121277737810491401257713L,
-            'type': 1,
-            'price': 25000000,
-            'amount': 70000000,
-            'tradeid': 38936224262371094519907212029104196662516973526369593745812124922634258039407L
-        },
-        None,  # Token contract events returning None...
-        None,
-        None,
-        {
-            '_event_type': 'log_deposit',
-            'market': 1,
-            'sender': 715574669332965331462488905126228088406116900462L,
-            'amount': 1000000000
-        }, {
-            '_event_type': 'log_fill_tx',
-            'market': 1,
-            'sender': 715574669332965331462488905126228088406116900462L,
-            'owner': 745948140856946866108753121277737810491401257713L,
-            'type': 2,
-            'price': 25000000,
-            'amount': 50000000,
-            'tradeid': 23490291715255176443338864873375620519154876621682055163056454432194948412040L
-        }, {
-            '_event_type': 'log_price',
-            'market': 1,
-            'type': 1,
-            'price': 25000000,
-            'amount': 50000000,
-            'timestamp': last_timestamp
-        }]
+        assert o == [
+            {
+                '_event_type': 'log_market', 'id': 1
+            }, {
+                '_event_type': 'log_add_tx',
+                'market': 1,
+                'sender': 745948140856946866108753121277737810491401257713L,
+                'type': 1,
+                'amount': 50000000,
+                'price': 25000000,
+                'tradeid': 23490291715255176443338864873375620519154876621682055163056454432194948412040L
+            }, {
+                '_event_type': 'log_add_tx',
+                'market': 1,
+                'sender': 745948140856946866108753121277737810491401257713L,
+                'type': 1,
+                'price': 25000000,
+                'amount': 60000000,
+                'tradeid': -35168633768494065610302920664120686116555617894816459733689825088489895266148L
+            }, {
+                '_event_type': 'log_add_tx',
+                'market': 1,
+                'sender': 745948140856946866108753121277737810491401257713L,
+                'type': 1,
+                'price': 25000000,
+                'amount': 70000000,
+                'tradeid': 38936224262371094519907212029104196662516973526369593745812124922634258039407L
+            },
+            None,  # Token contract events returning None...
+            None,
+            None,
+            {
+                '_event_type': 'log_deposit',
+                'market': 1,
+                'sender': 715574669332965331462488905126228088406116900462L,
+                'amount': 1000000000
+            }, {
+                '_event_type': 'log_fill_tx',
+                'market': 1,
+                'sender': 715574669332965331462488905126228088406116900462L,
+                'owner': 745948140856946866108753121277737810491401257713L,
+                'type': 2,
+                'price': 25000000,
+                'amount': 50000000,
+                'tradeid': 23490291715255176443338864873375620519154876621682055163056454432194948412040L
+            }, {
+                '_event_type': 'log_price',
+                'market': 1,
+                'type': 1,
+                'price': 25000000,
+                'amount': 50000000,
+                'timestamp': last_timestamp
+            }
+        ]
         self.state.revert(snapshot)
 
     def test_fulfill_first_sell(self, revert=True):
