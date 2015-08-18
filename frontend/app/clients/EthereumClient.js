@@ -297,7 +297,7 @@ var EthereumClient = function(params) {
 
         var SubContractABI = web3.eth.contract(abi.sub);
         var subcontract = SubContractABI.at(address);
-        var balance = subcontract.balance.call(user.id).toString();
+        var balance = subcontract.coinBalanceOf.call(user.id).toString();
 
         var favorite = false;
         if (favorites && _.indexOf(favorites, id) >= 0)
@@ -618,7 +618,7 @@ var EthereumClient = function(params) {
           block: log.blockNumber,
           inout: 'in',
           from: this.address,
-          to: web3.fromDecimal(log.args.address),
+          to: web3.fromDecimal(log.args.sender),
           amount: log.args.amount.valueOf(),
           market: _.parseInt(log.args.market.valueOf()),
           price: false,
@@ -937,7 +937,7 @@ var EthereumClient = function(params) {
     try {
       var SubContractABI = web3.eth.contract(abi.sub);
       var subcontract = SubContractABI.at(market.address);
-      var subBalance = subcontract.balance.call(address).toString();
+      var subBalance = subcontract.coinBalanceOf.call(address).toString();
 
       this.contract.get_sub_balance.call(address, market.id, function(error, balances) {
         if (error) {
@@ -991,7 +991,7 @@ var EthereumClient = function(params) {
       success(result);
     }
     catch(e) {
-      failure(String(e));
+      failure(e.message);
     }
   };
 
@@ -1008,31 +1008,63 @@ var EthereumClient = function(params) {
         to: market.address,
         gas: "100000"
       };
-      var result = subcontract.transfer.sendTransaction(recipient, amount, options);
+      var result = subcontract.sendCoin.sendTransaction(amount, recipient, options);
 
       success(result);
     }
     catch(e) {
-      failure(String(e));
+      failure(e.message);
     }
   };
 
   this.depositSub = function(user, amount, market, success, failure) {
+    var self = this;
     var SubContractABI = web3.eth.contract(abi.sub);
     var subcontract = SubContractABI.at(market.address);
 
+    // Use token's approveOnce to authorize deposit
     try {
       var options = {
         from: user.id,
         to: market.address,
-        gas: "150000"
+        gas: "100000"
       };
-      var result = subcontract.transfer.sendTransaction(this.address, amount, options);
+      subcontract.approveOnce.sendTransaction(self.address, amount, options, function(error, result) {
+        if (error) {
+          failure(error);
+          return;
+        }
 
-      success(result);
+        // TODO watch for AddressApprovalOnce when event is formalized as a standard
+        // Poll isApprovedFor meanwhile
+        var pollIsApprovedFor = function() {
+          subcontract.isApprovedFor.call(user.id, self.address, function(err, res) {
+            if (err) {
+              failure(err);
+              return;
+            }
+            if (res) {
+              var opts = {
+                from: user.id,
+                to: self.address,
+                gas: "100000"
+              };
+              self.contract.deposit.sendTransaction(amount, market.id, opts, function(e, r) {
+                if (e) {
+                  failure(e);
+                  return;
+                }
+                clearInterval(self.pollIsApprovedFor);
+                success(r);
+              });
+            }
+          });
+        };
+        self.pollIsApprovedFor = setInterval(pollIsApprovedFor, 1000);
+      });
     }
     catch(e) {
-      failure(String(e));
+      failure(e.message);
     }
   };
 
@@ -1048,7 +1080,7 @@ var EthereumClient = function(params) {
       success(result);
     }
     catch(e) {
-      failure(String(e));
+      failure(e.message);
     }
   };
 
@@ -1072,7 +1104,7 @@ var EthereumClient = function(params) {
       success(result);
     }
     catch(e) {
-      failure(String(e));
+      failure(e.message);
     }
   };
 
@@ -1103,7 +1135,7 @@ var EthereumClient = function(params) {
       success(result);
     }
     catch(e) {
-      failure(String(e));
+      failure(e.message);
     }
   };
 
@@ -1135,7 +1167,7 @@ var EthereumClient = function(params) {
     }
     catch(e) {
       utils.error(e);
-      failure(String(e));
+      failure(e.message);
     }
   };
 
@@ -1153,7 +1185,7 @@ var EthereumClient = function(params) {
       success(result);
     }
     catch(e) {
-      failure(String(e));
+      failure(e.message);
     }
   };
 
@@ -1169,7 +1201,7 @@ var EthereumClient = function(params) {
       success(result);
     }
     catch(e) {
-      failure(String(e));
+      failure(e.message);
     }
   };
 
@@ -1186,9 +1218,9 @@ var EthereumClient = function(params) {
 
       var result = false;
       if (trade.type == 1)
-        result = this.contract.buy.estimateGas(amounts.amount, amounts.price, trade.market, options) / 10;
+        result = this.contract.buy.estimateGas(amounts.amount, amounts.price, trade.market, options);
       else if (trade.type == 2)
-        result = this.contract.sell.estimateGas(amounts.amount, amounts.price, trade.market, options) / 10;
+        result = this.contract.sell.estimateGas(amounts.amount, amounts.price, trade.market, options);
       else {
         failure("Invalid trade type.");
         return;
@@ -1198,7 +1230,7 @@ var EthereumClient = function(params) {
     }
     catch(e) {
       utils.error(e);
-      failure(String(e));
+      failure(e.message);
     }
   };
 
@@ -1226,11 +1258,11 @@ var EthereumClient = function(params) {
         gas: String(gas)
       });
 
-      success(result / 10);
+      success(result);
     }
     catch(e) {
       utils.error(e);
-      failure(String(e));
+      failure(e.message);
     }
   };
 

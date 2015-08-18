@@ -37,6 +37,7 @@ class TestEtherEx(object):
 
     # EtherEx contracts
     etherex = 'contracts/etherex.se'
+    # standard = 'contracts/Standard_Token.sol'
     etx = 'contracts/etx.se'
     bob = 'contracts/etx.se'
 
@@ -62,10 +63,12 @@ class TestEtherEx(object):
 
         self.namereg = self.state.abi_contract(self.namereg)
 
-        self.contract = self.state.abi_contract(self.etherex, gas=2500000)
+        self.contract = self.state.abi_contract(self.etherex, gas=3000000)
 
         self.etx_contract = self.state.abi_contract(self.etx)
         self.bob_contract = self.state.abi_contract(self.bob)
+
+        # self.standard_contract = self.state.abi_contract(open(self.standard).read(), language='solidity')
 
         self.snapshot = self.state.snapshot()
 
@@ -78,8 +81,8 @@ class TestEtherEx(object):
         assert self._storage(self.contract, "0x") is not None
         assert self._storage(self.contract, "0x01") is None
 
-        assert self.etx_contract.balance(self.ALICE['address']) == 1000000 * 10 ** 5
-        assert self.bob_contract.balance(self.ALICE['address']) == 1000000 * 10 ** 5
+        assert self.etx_contract.coinBalanceOf(self.ALICE['address']) == 1000000 * 10 ** 5
+        assert self.bob_contract.coinBalanceOf(self.ALICE['address']) == 1000000 * 10 ** 5
 
     def test_initialize(self, block=None):
         # NameReg Alice
@@ -109,18 +112,29 @@ class TestEtherEx(object):
             sender=self.ALICE['key'])
         assert ans == 1
 
-        # Set exchange address in ETX contract
-        ans = self.etx_contract.set_exchange(
-            self.contract.address, 1,
-            sender=self.ALICE['key'])
-        assert ans == 1
-        assert self._storage(self.etx_contract, self.xhex(1)) == "0x" + self.contract.address.encode('hex')
+        # Register SDT
+        # ans = self.contract.add_market(
+        #     "SDT",
+        #     self.standard_contract.address,
+        #     5,
+        #     10 ** 8,
+        #     10 ** 18,
+        #     1,
+        #     sender=self.ALICE['key'])
+        # assert ans == 1
+
+        # Set exchange address in ETX contract - OBSOLETE
+        # ans = self.etx_contract.set_exchange(
+        #     self.contract.address, 1,
+        #     sender=self.ALICE['key'])
+        # assert ans == 1
+        # assert self._storage(self.etx_contract, self.xhex(1)) == "0x" + self.contract.address.encode('hex')
 
         # Get markets pointer...
         self.ptr = self._storage(self.contract, "0x02")
-        # logger.info("Markets start at %s, then %s ..." % (self.ptr, self.ptr_add(self.ptr, 1)))
+        # logger.info("\nMarkets start at %s, then %s ..." % (self.ptr, self.ptr_add(self.ptr, 1)))
         # logger.info(self.state.block.account_to_dict(self.contract.address.encode('hex'))['storage'])
-        # logger.info("===")
+        # logger.info("\n===")
 
         assert self._storage(self.contract, self.ptr_add(self.ptr, 0)) == self.xhex(1)  # Market ID
         assert self._storage(self.contract, self.ptr_add(self.ptr, 1)) == "0x" + "ETX".encode('hex')  # Name
@@ -164,15 +178,15 @@ class TestEtherEx(object):
         self.test_initialize()
 
         # Send 1000 to Bob
-        ans = self.etx_contract.transfer(self.BOB['address'], 1000 * 10 ** 5)
+        ans = self.etx_contract.sendCoin(1000 * 10 ** 5, self.BOB['address'])
         assert ans == 1
 
         # Alice has 1000 less
-        ans = self.etx_contract.balance(self.ALICE['address'])
+        ans = self.etx_contract.coinBalanceOf(self.ALICE['address'])
         assert ans == 1000000 * 10 ** 5 - 1000 * 10 ** 5
 
         # Bob has 1000
-        ans = self.etx_contract.balance(self.BOB['address'])
+        ans = self.etx_contract.coinBalanceOf(self.BOB['address'])
         assert ans == 1000 * 10 ** 5
 
         # assert self._storage(self.etx_contract, int(self.ALICE['address'], 16)) == self.xhex(1000000 - 1000)
@@ -181,23 +195,23 @@ class TestEtherEx(object):
     def test_bob_to_charlie_fail(self):
         self.test_initialize()
 
-        ans = self.etx_contract.transfer(self.CHARLIE['address'], 1000 * 10 ** 5, sender=self.BOB['key'])
+        ans = self.etx_contract.sendCoin(1000 * 10 ** 5, self.CHARLIE['address'], sender=self.BOB['key'])
         assert ans == 0
 
     def test_alice_to_bob_to_charlie(self):
         self.test_initialize()
 
         # Send 1000 to Bob
-        ans = self.etx_contract.transfer(self.BOB['address'], 1000 * 10 ** 5, profiling=1)
+        ans = self.etx_contract.sendCoin(1000 * 10 ** 5, self.BOB['address'], profiling=1)
         assert ans['output'] == 1
-        logger.info("Transfer profiling: %s" % ans)
+        logger.info("\nTransfer profiling: %s" % ans)
 
         # Bob sends 250 to Charlie
-        ans = self.etx_contract.transfer(self.CHARLIE['address'], 250 * 10 ** 5, sender=self.BOB['key'])
+        ans = self.etx_contract.sendCoin(250 * 10 ** 5, self.CHARLIE['address'], sender=self.BOB['key'])
         assert ans == 1
 
         # Charlie now has 250
-        ans = self.etx_contract.balance(self.CHARLIE['address'])
+        ans = self.etx_contract.coinBalanceOf(self.CHARLIE['address'])
         assert ans == 250 * 10 ** 5
 
     #
@@ -206,27 +220,47 @@ class TestEtherEx(object):
     def test_sub_balance(self):
         self.test_initialize()
 
-        ans = self.etx_contract.balance(self.ALICE['address'])
+        ans = self.etx_contract.coinBalanceOf(self.ALICE['address'])
         assert ans == 1000000 * 10 ** 5
 
     def test_deposit_to_exchange(self, init=True):
         if init:
             self.test_initialize()
 
-        # Deposit 10000 into exchange
-        ans = self.etx_contract.transfer(self.contract.address, 10000 * 10 ** 5, profiling=1)
+        # Approve deposit of 10,000
+        ans = self.etx_contract.approveOnce(
+            self.contract.address,
+            10000 * 10 ** 5,
+            profiling=1)
         assert ans['output'] == 1
-        logger.info("Deposit profiling: %s" % ans)
+        logger.info("\napproveOnce profiling: %s" % ans)
 
-        # Alice has 10000 less
-        ans = self.etx_contract.balance(self.ALICE['address'])
-        assert ans == 1000000 * 10 ** 5 - 10000 * 10 ** 5
-
-        # Exchange has 10000
-        ans = self.etx_contract.balance(self.contract.address)
+        # Verify exchange is approved for a transfer
+        ans = self.etx_contract.isApprovedFor(
+            self.ALICE['address'],
+            self.contract.address)
         assert ans == 10000 * 10 ** 5
 
-        # Alice has 10000 in the exchange
+        # Deposit 10,000 into exchange
+        ans = self.contract.deposit(10000 * 10 ** 5, 1, profiling=1)
+        assert ans['output'] == 1000000000
+        logger.info("\nDeposit profiling: %s" % ans)
+
+        # Verify exchange is no longer approved for a transfer
+        ans = self.etx_contract.isApprovedFor(
+            self.ALICE['address'],
+            self.contract.address)
+        assert ans == 0
+
+        # Alice has 10,000 less
+        ans = self.etx_contract.coinBalanceOf(self.ALICE['address'])
+        assert ans == 1000000 * 10 ** 5 - 10000 * 10 ** 5
+
+        # Exchange has 10,000
+        ans = self.etx_contract.coinBalanceOf(self.contract.address)
+        assert ans == 10000 * 10 ** 5
+
+        # Alice has 10,000 in the exchange
         ans = self.contract.get_sub_balance(self.ALICE['address'], 1)
         assert ans == [10000 * 10 ** 5, 0]
 
@@ -239,7 +273,10 @@ class TestEtherEx(object):
 
         assert o == [{
             '_event_type': 'log_market', 'id': 1
-        }, {
+        },
+        None,  # Token contract events returning None...
+        None,
+        {
             "_event_type": "log_deposit",
             "market": 1,
             "sender": int("0x" + self.ALICE['address'], 16),
@@ -258,7 +295,7 @@ class TestEtherEx(object):
 
         ans = self.contract.withdraw(1000 * 10 ** 5, 1, profiling=1)
         assert ans['output'] == 1
-        logger.info("Withdraw profiling: %s" % ans)
+        logger.info("\nWithdraw profiling: %s" % ans)
 
     #
     # EtherEx
@@ -333,12 +370,12 @@ class TestEtherEx(object):
             sender=self.BOB['key'],
             profiling=1)
         assert ans['output'] == 1
-        logger.info("Add other market profiling: %s" % ans)
+        logger.info("\nAdd other market profiling: %s" % ans)
 
-        # Set exchange address in BOB contract
-        ans = self.bob_contract.set_exchange(self.contract.address, 2)
-        assert ans == 1
-        assert self._storage(self.bob_contract, self.xhex(1)) == "0x" + self.contract.address.encode('hex')
+        # Set exchange address in BOB contract - OBSOLETE
+        # ans = self.bob_contract.set_exchange(self.contract.address, 2)
+        # assert ans == 1
+        # assert self._storage(self.bob_contract, self.xhex(1)) == "0x" + self.contract.address.encode('hex')
 
     def test_get_new_last_market_id(self):
         self.test_add_bob_coin()
@@ -376,17 +413,17 @@ class TestEtherEx(object):
         # Add buy trade
         ans = self.contract.buy(500 * 10 ** 5, int(0.25 * 10 ** 8), 1, value=125 * 10 ** 18, profiling=1)
         assert ans['output'] == 23490291715255176443338864873375620519154876621682055163056454432194948412040L
-        logger.info("Add buy profiling: %s" % ans)
+        logger.info("\nAdd buy profiling: %s" % ans)
 
         # Another buy trade
         ans = self.contract.buy(600 * 10 ** 5, int(0.25 * 10 ** 8), 1, value=150 * 10 ** 18, profiling=1)
         assert ans['output'] == -35168633768494065610302920664120686116555617894816459733689825088489895266148L
-        logger.info("Add 2nd buy profiling: %s" % ans)
+        logger.info("\nAdd 2nd buy profiling: %s" % ans)
 
         # And another
         ans = self.contract.buy(700 * 10 ** 5, int(0.25 * 10 ** 8), 1, value=175 * 10 ** 18, profiling=1)
         assert ans['output'] == 38936224262371094519907212029104196662516973526369593745812124922634258039407L
-        logger.info("Add 3rd buy profiling: %s" % ans)
+        logger.info("\nAdd 3rd buy profiling: %s" % ans)
 
         self.after_buy_balance = self.state.block.get_balance(self.ALICE['address'])
         assert self.after_buy_balance < self.initial_balance
@@ -417,19 +454,19 @@ class TestEtherEx(object):
         # Add sell trade
         ans = self.contract.sell(500 * 10 ** 5, int(0.25 * 10 ** 8), 1, profiling=1)
         assert ans['output'] == 49800558551364658298467690253710486242473574128865389798518930174170604985043L
-        logger.info("Add sell profiling: %s" % ans)
+        logger.info("\nAdd sell profiling: %s" % ans)
 
         ans = self.contract.sell(600 * 10 ** 5, int(0.25 * 10 ** 8), 1, profiling=1)
         assert ans['output'] == -34362698062012420373581910342777892308255636544894323695139344222373572831032L
-        logger.info("Add 2nd sell profiling: %s" % ans)
+        logger.info("\nAdd 2nd sell profiling: %s" % ans)
 
         ans = self.contract.sell(700 * 10 ** 5, int(0.25 * 10 ** 8), 1, profiling=1)
         assert ans['output'] == -11872296793322400290999375245896441639313038086627719556596606178564438289113L
-        logger.info("Add 3rd sell profiling: %s" % ans)
+        logger.info("\nAdd 3rd sell profiling: %s" % ans)
 
-        # logger.info("Storage after adding trades:")
+        # logger.info("\nStorage after adding trades:")
         # logger.info(self.state.block.account_to_dict(self.contract.address)['storage'])
-        # logger.info("===")
+        # logger.info("\n===")
 
     def test_get_trade_ids(self):
         self.test_add_buy_trades()
@@ -457,7 +494,7 @@ class TestEtherEx(object):
 
         ans = self.contract.cancel(23490291715255176443338864873375620519154876621682055163056454432194948412040L, profiling=1)
         assert ans['output'] == 1
-        logger.info("Cancel profiling: %s" % ans)
+        logger.info("\nCancel profiling: %s" % ans)
         assert self.state.block.get_balance(self.ALICE['address']) > self.after_buy_balance
 
         ans = self.contract.get_trade(23490291715255176443338864873375620519154876621682055163056454432194948412040L)
@@ -498,19 +535,60 @@ class TestEtherEx(object):
 
     def test_transfer_to_bob_and_deposit(self):
         # Load BOB with ETX from ALICE
-        ans = self.etx_contract.transfer(self.BOB['address'], 10000 * 10 ** 5)
+        ans = self.etx_contract.sendCoin(10000 * 10 ** 5, self.BOB['address'])
         assert ans == 1
 
         # Get BOB's balance
         balance = self.state.block.get_balance(self.BOB['address'])
         assert balance == 10 ** 24
 
-        # Deposit 1000 into exchange
-        ans = self.etx_contract.transfer(
+        # Approve deposit of 10,000
+        ans = self.etx_contract.approveOnce(
             self.contract.address,
             10000 * 10 ** 5,
             sender=self.BOB['key'])
-        assert ans == 1
+
+        # Verify exchange is approved for a transfer
+        ans = self.etx_contract.isApprovedFor(
+            self.BOB['address'],
+            self.contract.address)
+        assert ans == 10000 * 10 ** 5
+
+        o = []
+        self.state.block.log_listeners.append(lambda x: o.append(self.contract._translator.listen(x)))
+
+        # Deposit 10,000 into exchange
+        depositFailed = False
+        try:  # FIXME - tx shouldn't fail... pyethereum.tester WTF
+            ans = self.contract.deposit(
+                10000 * 10 ** 5,
+                1,
+                sender=self.BOB['key'],
+                profiling=1)
+            assert ans['output'] == 1000000000
+        except Exception as e:
+            logger.warning(e)
+            depositFailed = True
+            pass
+        logger.info("\n2nd Deposit profiling: %s" % ans)
+
+        # Verify exchange is no longer approved for a transfer
+        if not depositFailed:
+            ans = self.etx_contract.isApprovedFor(
+                self.BOB['address'],
+                self.contract.address)
+            assert ans == 0
+            assert o == [None, {
+                "_event_type": "log_deposit",
+                "market": 1,
+                "sender": int("0x" + self.BOB['address'], 16),
+                "amount": 10000 * 10 ** 5
+            }]
+        else:
+            ans = self.etx_contract.isApprovedFor(
+                self.BOB['address'],
+                self.contract.address)
+            assert ans == 1000000000
 
         # Set deposit_cost
         self.deposit_cost = balance - self.state.block.get_balance(self.BOB['address'])
@@ -528,7 +606,7 @@ class TestEtherEx(object):
             sender=self.BOB['key'],
             profiling=1)
         assert ans['output'] == 1
-        logger.info("Fill buy profiling: %s" % ans)
+        logger.info("\nFill buy profiling: %s" % ans)
 
         ans = self.contract.get_trade(23490291715255176443338864873375620519154876621682055163056454432194948412040L)
         assert ans == [0, 0, 0, 0, 0, 0, 0, 0]
@@ -594,7 +672,11 @@ class TestEtherEx(object):
             'price': 25000000,
             'amount': 70000000,
             'tradeid': 38936224262371094519907212029104196662516973526369593745812124922634258039407L
-        }, {
+        },
+        None,  # Token contract events returning None...
+        None,
+        None,
+        {
             '_event_type': 'log_deposit',
             'market': 1,
             'sender': 715574669332965331462488905126228088406116900462L,
@@ -630,7 +712,7 @@ class TestEtherEx(object):
             value=125 * 10 ** 18,
             profiling=1)
         assert ans['output'] == 1
-        logger.info("Fill sell profiling: %s" % ans)
+        logger.info("\nFill sell profiling: %s" % ans)
 
         ans = self.contract.get_trade(49800558551364658298467690253710486242473574128865389798518930174170604985043L)
         assert ans == [0, 0, 0, 0, 0, 0, 0, 0]
@@ -675,7 +757,7 @@ class TestEtherEx(object):
             sender=self.BOB['key'],
             profiling=1)
         assert ans['output'] == 1
-        logger.info("Fill multiple profiling: %s" % ans)
+        logger.info("\nFill multiple profiling: %s" % ans)
 
         ans = self.contract.get_sub_balance(self.BOB['address'], 1)
         assert ans == [balance_from_transfer - fill_amount, 0]

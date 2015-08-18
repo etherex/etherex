@@ -89,40 +89,7 @@
       wait: True
 
 
-# Set exchange address and market ID in subcurrency contracts
--
-  transact:
-    SetExchangeETX:
-      to: $ETX
-      sig: set_exchange:[int256,int256]:int256
-      data:
-        - $EtherEx
-        - 1
-      retry: 60
-      wait: True
--
-  transact:
-    SetExchangeCAK:
-      to: $CAK
-      sig: set_exchange:[int256,int256]:int256
-      data:
-        - $EtherEx
-        - 2
-      retry: 60
-      wait: True
--
-  transact:
-    SetExchangeMID:
-      to: $MID
-      sig: set_exchange:[int256,int256]:int256
-      data:
-        - $EtherEx
-        - 3
-      retry: 60
-      wait: True
-
-
-# Change sub-currencies' ownership
+# Change sub-currencies' ownership - testnet only
 -
   transact:
     SetETXOwner:
@@ -164,30 +131,30 @@
   transact:
     ZGetx:
       to: $ETX
-      sig: transfer:[int256,int256]:int256
+      sig: sendCoin:[int256,int256]:int256
       data:
-        - $zg
         - 10000000000
+        - $zg
       retry: 30
       wait: True
 -
   transact:
     CAKetx:
       to: $ETX
-      sig: transfer:[int256,int256]:int256
+      sig: sendCoin:[int256,int256]:int256
       data:
-        - $caktux
         - 10000000000
+        - $caktux
       retry: 30
       wait: True
 -
   transact:
     MIDetx:
       to: $ETX
-      sig: transfer:[int256,int256]:int256
+      sig: sendCoin:[int256,int256]:int256
       data:
-        - $mids
         - 10000000000
+        - $mids
       retry: 30
       wait: True
 
@@ -196,30 +163,30 @@
   transact:
     ZGcak:
       to: $CAK
-      sig: transfer:[int256,int256]:int256
+      sig: sendCoin:[int256,int256]:int256
       data:
-        - $zg
         - 5000000000
+        - $zg
       retry: 30
       wait: True
 -
   transact:
     CAKcak:
       to: $CAK
-      sig: transfer:[int256,int256]:int256
+      sig: sendCoin:[int256,int256]:int256
       data:
-        - $caktux
         - 50000000000
+        - $caktux
       retry: 30
       wait: True
 -
   transact:
     MIDcak:
       to: $CAK
-      sig: transfer:[int256,int256]:int256
+      sig: sendCoin:[int256,int256]:int256
       data:
-        - $mids
         - 5000000000
+        - $mids
       retry: 30
       wait: True
 
@@ -228,30 +195,30 @@
   transact:
     ZGetx:
       to: $MID
-      sig: transfer:[int256,int256]:int256
+      sig: sendCoin:[int256,int256]:int256
       data:
-        - $zg
         - 5000000000
+        - $zg
       retry: 30
       wait: True
 -
   transact:
     CAKetx:
       to: $MID
-      sig: transfer:[int256,int256]:int256
+      sig: sendCoin:[int256,int256]:int256
       data:
-        - $caktux
         - 5000000000
+        - $caktux
       retry: 30
       wait: True
 -
   transact:
     MIDetx:
       to: $MID
-      sig: transfer:[int256,int256]:int256
+      sig: sendCoin:[int256,int256]:int256
       data:
-        - $mids
         - 50000000000
+        - $mids
       retry: 30
       wait: True
 
@@ -259,10 +226,10 @@
 # Deposit into exchange
 -
   transact:
-    depositETX:
+    approveOnceETX:
       to: $ETX
-      sig: transfer:[int256,int256]:int256
-      gas: 250000
+      sig: approveOnce:[int256,int256]:int256
+      gas: 100000
       data:
         - $EtherEx
         - 1000000000
@@ -270,10 +237,43 @@
       wait: True
 -
   transact:
-    depositCAK:
-      to: $CAK
-      sig: transfer:[int256,int256]:int256
+    depositETX:
+      to: $EtherEx
+      sig: deposit:[int256,int256]:int256
       gas: 250000
+      data:
+        - 1000000000
+        - 1
+      retry: 60
+      wait: True
+-
+  transact:
+    approveOnceCAK:
+      to: $CAK
+      sig: approveOnce:[int256,int256]:int256
+      gas: 100000
+      data:
+        - $EtherEx
+        - 10000000000
+      retry: 60
+      wait: True
+-
+  transact:
+    depositCAK:
+      to: $EtherEx
+      sig: deposit:[int256,int256]:int256
+      gas: 250000
+      data:
+        - 10000000000
+        - 2
+      retry: 60
+      wait: True
+-
+  transact:
+    approveOnceMID:
+      to: $MID
+      sig: approveOnce:[int256,int256]:int256
+      gas: 100000
       data:
         - $EtherEx
         - 10000000000
@@ -282,12 +282,12 @@
 -
   transact:
     depositMID:
-      to: $MID
-      sig: transfer:[int256,int256]:int256
+      to: $EtherEx
+      sig: deposit:[int256,int256]:int256
       gas: 250000
       data:
-        - $EtherEx
         - 10000000000
+        - 3
       retry: 60
       wait: True
 

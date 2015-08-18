@@ -1,17 +1,16 @@
 {
   "name": "EtherEx",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "EtherEx frontend",
   "main": "app/app.jsx",
   "scripts": {
-    "browser": "nightwatch -e firefox,chrome",
     "build": "grunt build",
+    "dist": "grunt build",
     "prestart": "npm install",
     "prebuild": "npm install",
     "test": "",
     "start": "grunt",
-    "upgrade": "npm-check-updates -u && npm test",
-    "dist": "grunt build && npm run browser"
+    "upgrade": "npm-check-updates -u && npm test"
   },
   "repository": {
     "type": "git",
@@ -31,9 +30,9 @@
   "devDependencies": {
     "babel-core": "^5.8.22",
     "babel-loader": "^5.3.2",
-    "css-loader": "^0.15.6",
+    "css-loader": "^0.16.0",
     "eslint": "^1.1.0",
-    "expect": "^1.8.0",
+    "expect": "^1.9.0",
     "grunt": "^0.4.5",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-jshint": "^0.11.2",
@@ -43,9 +42,10 @@
     "grunt-jsxhint": "^0.6.0",
     "grunt-karma": "^0.12.0",
     "grunt-webpack": "^1.0.11",
+    "file-loader": "^0.8.4",
     "json-loader": "^0.5.2",
     "jsx-loader": "^0.13.2",
-    "karma": "^0.13.8",
+    "karma": "^0.13.9",
     "karma-chrome-launcher": "^0.2.0",
     "karma-cli": "^0.1.0",
     "karma-mocha": "^0.2.0",
@@ -55,9 +55,10 @@
     "less-loader": "^2.2.0",
     "mocha": "^2.2.5",
     "node-libs-browser": "^0.5.2",
-    "react-bootstrap": "^0.24.4",
+    "react-bootstrap": "^0.24.5",
     "react-hot-loader": "^1.2.8",
     "style-loader": "^0.12.3",
+    "url-loader": "^0.5.6",
     "webpack": "^1.11.0",
     "webpack-dev-server": "^1.10.1"
   },
@@ -65,9 +66,7 @@
     "big-rational": "^0.10.0",
     "bootstrap": "^3.3.5",
     "btc-swap": "etherex/btc-swap",
-    "crossfilter": "^1.3.11",
     "d3": "^3.5.6",
-    "file-loader": "^0.8.4",
     "fluxxor": "^1.7.1",
     "intl": "^1.0.0",
     "intl-locales-supported": "^1.0.0",
@@ -81,7 +80,6 @@
     "si-prefix": "^0.1.0",
     "techan": "caktux/techan.js",
     "ua-parser-js": "^0.7.9",
-    "url-loader": "^0.5.6",
-    "web3": "^0.12.1"
+    "web3": "^0.12.2"
   }
 }

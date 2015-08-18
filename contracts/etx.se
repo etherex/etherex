@@ -10,56 +10,86 @@
 #
 
 data owner
-data exchange
-data market_id
 data balances[2^160](balance)
+data approved_once[2^160][2^160](value)  # [_from][_proxy]
 
-extern exchange: [deposit:[int256,int256,int256]:int256]
+event CoinTransfer(from:indexed, to:indexed, value)
+event AddressApprovalOnce(from:indexed, to:indexed, value)
+# event AddressApproval(from:indexed, to:indexed, result)  # Not implemented
 
 def init():
     self.owner = msg.sender
     self.balances[msg.sender].balance = 1000000 * 10 ** 5
 
-def transfer(recipient, amount):
+def sendCoin(_value, _to):
     # Prevent negative send from stealing funds
-    if recipient <= 0 or amount <= 0:
+    if _to <= 0 or _value <= 0:
         return(0)
 
     # Get user balance
     balance = self.balances[msg.sender].balance
 
     # Make sure balance is above or equal to amount
-    if balance >= amount:
+    if balance >= _value:
 
         # Update balances
-        self.balances[msg.sender].balance = balance - amount
-        self.balances[recipient].balance += amount
+        self.balances[msg.sender].balance = balance - _value
+        self.balances[_to].balance += _value
 
-        # Notify exchange of deposit
-        if recipient == self.exchange:
-            ret = self.exchange.deposit(msg.sender, amount, self.market_id)
-            # Exchange returns our new balance as confirmation
-            if ret >= amount:
-                return(1)
-            # We return 2 as error code for notification failure
-            return(2)
+        log(type=CoinTransfer, msg.sender, _to, _value)
 
         return(1)
     return(0)
 
-def balance(address):
-    return(self.balances[address].balance)
-
-def set_exchange(addr, market_id):
-    if addr <= 0 or market_id <= 0:
+def sendCoinFrom(_from, _value, _to):
+    # Prevent negative send from stealing funds
+    if _from <= 0 or _value <= 0 or _to <= 0:
         return(0)
 
-    if msg.sender == self.owner:
-        self.exchange = addr
-        self.market_id = market_id
+    # Get user balance
+    balance = self.balances[_from].balance
+
+    # Make sure balance is above or equal to amount, and transfer was approved
+    if balance >= _value and _value <= self.approved_once[_from][msg.sender].value:
+        # Update balances
+        self.balances[_from].balance = balance - _value
+        self.balances[_to].balance += _value
+
+        # Reset approval
+        self.approved_once[_from][msg.sender].value = 0
+
+        log(type=CoinTransfer, _from, _to, _value)
+
         return(1)
     return(0)
 
+def coinBalance(_addr):
+    return(self.balances[msg.sender].balance)
+
+def coinBalanceOf(_addr):
+    return(self.balances[_addr].balance)
+
+# def approve():  # Not implemented
+
+def approveOnce(_addr, _maxValue):
+    self.approved_once[msg.sender][_addr].value = _maxValue
+    log(type=AddressApprovalOnce, msg.sender, _addr, _maxValue)
+    return(1)
+
+# def isApproved(_proxy):  # Not implemented
+
+def isApprovedFor(_target, _proxy):
+    value = self.approved_once[_target][_proxy].value
+    if value > 0:
+        return(value)
+    return(0)
+
+def unapprove(_addr):
+    self.approved_once[msg.sender][_addr].value = 0
+    log(type=AddressApprovalOnce, msg.sender, _addr, 0)
+    return(1)
+
+# Optional, only used to deploy on testnet
 def change_ownership(new_owner):
     if new_owner <= 0:
         return(0)

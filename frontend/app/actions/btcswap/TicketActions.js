@@ -42,7 +42,8 @@ var TicketActions = function() {
       this.flux.actions.ticket.ticketsLoaded();
 
     btcSwapClient.lookupTicket(id, function(ticket) {
-      ticket = this.flux.actions.ticket.setTicketFlags(ticket);
+      if (ticket && ticket.id)
+        ticket = this.flux.actions.ticket.setTicketFlags(ticket);
 
       this.dispatch(constants.ticket.LOAD_TICKET, ticket);
 
@@ -200,7 +201,7 @@ var TicketActions = function() {
         data = json.data;
         // TODO check scriptpubkeys, etc exist
         if (!data || !data.tx || !data.tx.vout || data.tx.vout.length < 2 || !data.tx.hex || !data.tx.blockhash) {
-          error = "Not enough data in BTC transaction, please wait until it is mined.";
+          error = "Not enough data in BTC transaction, please wait until it gets mined.";
           this.dispatch(constants.ticket.LOOKUP_TICKET_FAIL, {error: error});
           utils.error(error);
           return;

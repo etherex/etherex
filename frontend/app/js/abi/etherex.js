@@ -17,9 +17,9 @@ module.exports = [{
     "outputs": [{ "name": "out", "type": "int256" }]
 },
 {
-    "name": "deposit(int256,int256,int256)",
+    "name": "deposit(int256,int256)",
     "type": "function",
-    "inputs": [{ "name": "address", "type": "int256" }, { "name": "amount", "type": "int256" }, { "name": "market_id", "type": "int256" }],
+    "inputs": [{ "name": "amount", "type": "int256" }, { "name": "market_id", "type": "int256" }],
     "outputs": [{ "name": "out", "type": "int256" }]
 },
 {

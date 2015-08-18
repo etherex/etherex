@@ -141,6 +141,7 @@ var UserActions = function() {
     _client.sendSub(user, amount, payload.recipient, market, function(result) {
       if (this.flux.store('config').debug)
         utils.log("SEND_SUB_RESULT", result);
+      this.flux.actions.user.updateBalanceSub();
     }.bind(this), function(error) {
       this.dispatch(constants.user.SEND_SUB_FAIL, {error: error});
     }.bind(this));
@@ -159,6 +160,7 @@ var UserActions = function() {
     _client.depositSub(user, amount, market, function(result) {
       if (this.flux.store('config').debug)
         utils.log("DEPOSIT_RESULT", result);
+      this.flux.actions.user.updateBalanceSub();
     }.bind(this), function(error) {
       this.dispatch(constants.user.DEPOSIT_FAIL, {error: error});
     }.bind(this));
@@ -177,6 +179,7 @@ var UserActions = function() {
     _client.withdrawSub(user, amount, market, function(result) {
       if (this.flux.store('config').debug)
         utils.log("WITHDRAW_RESULT", result);
+      this.flux.actions.user.updateBalanceSub();
     }.bind(this), function(error) {
       this.dispatch(constants.user.WITHDRAW_FAIL, {error: error});
     }.bind(this));

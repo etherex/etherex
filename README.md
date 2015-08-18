@@ -97,7 +97,7 @@ Methods (with serpent type definitions):
   sell:[int256,int256,int256]:int256,
   trade:[int256,int256[]]:int256,
   cancel:[int256]:int256,
-  deposit:[int256,int256,int256]:int256,
+  deposit:[int256,int256]:int256,
   withdraw:[int256,int256]:int256,
   add_market:[int256,int256,int256,int256,int256,int256]:int256,
   get_last_market_id:[]:int256,
@@ -119,28 +119,28 @@ self.exchange.price(market_id)
 
 ### Add buy / sell trade
 ```
-self.exchange.buy(amount, price, market ID)
-self.exchange.sell(amount, price, market ID)
+self.exchange.buy(amount, price, market_id)
+self.exchange.sell(amount, price, market_id)
 ```
 
 ### Trade
 ```
-self.exchange.trade(max_amount, trade_IDs)
+self.exchange.trade(max_amount, trade_ids)
 ```
 
-### Deposit (subcurrency contracts only, [see below](#subcurrency-api))
+### Deposit
 ```
-self.exchange.deposit(address, amount, market_ID)
+self.exchange.deposit(amount, market_id)
 ```
 
 ### Withdraw
 ```
-self.exchange.withdraw(amount, market_ID)
+self.exchange.withdraw(amount, market_id)
 ```
 
 ### Cancel trade
 ```
-self.exchange.cancel(trade_ID)
+self.exchange.cancel(trade_id)
 ```
 
 ### Adding a market
@@ -185,94 +185,37 @@ New market IDs will be created as DAO creators add their subcurrency to the exch
 
 ### Subcurrency API
 
-**Subcurrency contracts need to support the exchange's `deposit` ABI call, implement a `transfer` method for withdrawals and a `balance` method for the UI to display the user's balance.**
+**Subcurrency contracts need to support the [Standardized Contract APIs](https://github.com/ethereum/wiki/wiki/Standardized_Contract_APIs), more specifically the `approveOnce` and `sendCoinFrom` methods for deposits, the `sendCoin` method for withdrawals and the `coinBalanceOf` method for the UI to display the user's balance.**
 
-It is a different approach than the [MetaCoin API](https://github.com/ethereum/cpp-ethereum/wiki/MetaCoin-API) which will not be used, as the `Approve API` is all-or-nothing and gives too much permissions to the exchange. The new procedure is explained below, and the sample [ETX](https://github.com/etherex/etherex/blob/master/contracts/etx.se) contract can be used as an example.
-
-Each subcurrency has to **notify** the exchange of each asset transfer from a user's address to the exchange's address. The amount of extra code necessary to support this feature is comparable if not smaller than with the other approach.
-
-#### Setting the exchange's address
-
-The first step a subcurrency has to take is to store the exchange's address for future comparison of recipients. This can be done during the initialization of the contract, however, adding an ABI call to update the address and `market_id` is highly recommended.
-
-```
-data owner
-data exchange
-data market_id
-
-def init():
-    self.owner = msg.sender
-...
-
-def set_exchange(addr, market_id):
-    if msg.sender == self.owner:
-        self.exchange = addr
-        self.market_id = market_id
-        return(1)
-    return(0)
-```
+See the example [ETX](https://github.com/etherex/etherex/blob/master/contracts/etx.se) contract for a Serpent implementation, or a [Standard Token](https://github.com/simondlr/Contract-Reactor/blob/master/example/app/contracts/Standard_Token.sol) in Solidity.
 
 After registering the subcurrency using the `add_market` ABI call, the subcurrency will receive a `market_id`. Since there are currently no return values to actual transactions, this `market_id` will need to be inspected from the exchange's contract storage or from the UI.
 
-#### Notifying the exchange of deposits
+#### Deposit support
+**IMPORTANT: The original `deposit` technique has been deprecated in favor of the [Standardized Contract APIs](https://github.com/ethereum/wiki/wiki/Standardized_Contract_APIs)**
 
-The second step has to be executed on each asset transfer. The gas costs of comparing the recipient to the exchange's address are minimal but a separate ABI call might be used later on, depending on how this approach will play out on the testnet. The relevant part below is the one under `# Notify exchange of deposit`, the top part being what can be considered standard subcurrency functionality. Notice the `extern` definition that will be used for the `deposit` method.
-
-```
-data balances[2^160](balance)
-extern exchange: [deposit:[int256,int256,int256]:int256]
-
-def transfer(recipient, amount):
-    # Prevent negative send from stealing funds
-    if recipient <= 0 or amount <= 0:
-        return(0)
-
-    # Get user balance
-    balance = self.balances[msg.sender].balance
-
-    # Make sure balance is above or equal to amount
-    if balance >= amount:
-
-        # Update balances
-        self.balances[msg.sender].balance = balance - amount
-        self.balances[recipient].balance += amount
-
-        # Notify exchange of deposit
-        if recipient == self.exchange:
-            ret = self.exchange.deposit(msg.sender, amount, self.market_id)
-            # Exchange returns our new balance as confirmation
-            if ret >= amount:
-                return(1)
-            # We return 2 as error code for notification failure
-            return(2)
-
-        return(1)
-    return(0)
-
-```
-
-**TODO**: Solidity examples.
+To support deposits to EtherEx, your subcurrency needs to implement the `approveOnce` and `sendCoinFrom` methods. The former allows a one-time transfer from the user's address by the exchange's contract, while the latter is called from the contract to effectively make that transfer when the user calls the exchange's new `deposit` method. This allows to securely send a subcurrency's tokens to the exchange's contract while updating the user's available balance at the exchange.
 
 #### Withdrawal support
 
-If your subcurrency's default method for transferring funds is also named `transfer` like the example above, with `recipient` and `amount` parameters (in that order), then there is nothing else you need to do to support withdrawals from EtherEx to a user's address. Otherwise, you'll need to implement that same `transfer` method with those two parameters, and "translate" that method call to yours, calling your other method with those parameters, in the order they're expected. You may also have to use `tx.origin` instead of `msg.sender` in your method as the latter will return your contract's address.
+If your subcurrency's default method for transferring funds is also named `sendCoin` like the standard examples above, with the `_value` and `_to` parameters (in that order), then there is nothing else you need to do to support withdrawals from EtherEx to a user's address. Otherwise, you'll need to implement that same `sendCoin` method with those two parameters, and "translate" that method call to yours, calling your other method with those parameters, in the order they're expected. You may also have to use `tx.origin` instead of `msg.sender` in your method as the latter will return your contract's address.
 
 ```
-def transfer(recipient, amount):
-    return(self.invertedtransfer(amount, recipient))
+def sendCoin(_value, _to):
+    return(self.invertedtransfer(_to, _value))
 ```
 
 #### Balance
 
-Subcurrency contracts also need to implement a `balance` method for the UI to display the user's balance in that contract (also called the subcurrency's wallet).
+Subcurrency contracts also need to implement a `coinBalanceOf` method for the UI to display the user's balance in that contract (also called the subcurrency's wallet).
 
 ```
-def balance(address):
-    return(self.balances[address].balance)
+def coinBalanceOf(_addr):
+    return(self.balances[_addr].balance)
 ```
 
 
-Notes
+Accounts
 -----
 * Your Ethereum address is used as your identity
 

@@ -58,9 +58,11 @@ var TxRow = React.createClass({
         </td>
         <td>
           <div className="text-right">
-            <FormattedMessage message={this.getIntlMessage('ether')}
-                              value={this.props.tx.total.value}
-                              unit={this.props.tx.total.unit} />
+            { this.props.tx.total.value ?
+                <FormattedMessage message={this.getIntlMessage('ether')}
+                                  value={this.props.tx.total.value}
+                                  unit={this.props.tx.total.unit} /> :
+                "N/A" }
           </div>
         </td>
         <td>
