@@ -566,7 +566,7 @@ class TestEtherEx(object):
                 profiling=1)
             assert ans['output'] == 1000000000
         except Exception as e:
-            logger.warning(e)
+            logger.warning("%s" % e)
             depositFailed = True
             pass
         logger.info("\n2nd Deposit profiling: %s" % ans)
