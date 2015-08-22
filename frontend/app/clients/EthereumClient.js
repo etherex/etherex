@@ -1036,9 +1036,9 @@ var EthereumClient = function(params) {
         }
 
         // TODO watch for AddressApprovalOnce when event is formalized as a standard
-        // Poll isApprovedFor meanwhile
-        var pollIsApprovedFor = function() {
-          subcontract.isApprovedFor.call(user.id, self.address, function(err, res) {
+        // Poll isApprovedOnceFor meanwhile
+        var pollIsApprovedOnceFor = function() {
+          subcontract.isApprovedOnceFor.call(user.id, self.address, function(err, res) {
             if (err) {
               failure(err);
               return;
@@ -1054,13 +1054,13 @@ var EthereumClient = function(params) {
                   failure(e);
                   return;
                 }
-                clearInterval(self.pollIsApprovedFor);
+                clearInterval(self.pollIsApprovedOnceFor);
                 success(r);
               });
             }
           });
         };
-        self.pollIsApprovedFor = setInterval(pollIsApprovedFor, 1000);
+        self.pollIsApprovedOnceFor = setInterval(pollIsApprovedOnceFor, 1000);
       });
     }
     catch(e) {

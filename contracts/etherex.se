@@ -16,6 +16,7 @@ data markets_ptr  # 0x3
 data trades_ptr  # 0x4
 
 data markets[2^160](id, name, contract, decimals, precision, minimum, category, last_price, owner, block, total_trades, last_trade, trade_ids[](id, next_id, prev_id))
+data markets_id[2^160](id)  # Reverse Market ID lookup
 data trades[2^160](id, type, market, amount, price, owner, block, refhash)
 data balances[][](available, trading)
 
@@ -29,20 +30,50 @@ event log_market(id)
 
 extern subcurrency: [sendCoin:[int256,int256]:int256, sendCoinFrom:[int256,int256,int256]:int256]
 
+# Trade types
+macro BID: 1
+macro ASK: 2
+
+# Field counts
 macro MARKET_FIELDS: 12
 macro TRADE_FIELDS: 8
 
+# Boolean success/failure
+macro SUCCESS: 1
+macro FAILURE: 0
+
+#
+# Error codes
+#
+
+# Trades
+macro MISSING_AMOUNT: 2
+macro MISSING_PRICE: 3
+macro MISSING_MARKET_ID: 4
+
+macro INSUFFICIENT_BALANCE: 11
+macro INSUFFICIENT_TRADE_AMOUNT: 12
+macro INSUFFICIENT_VALUE: 13
+
+macro TRADE_AMOUNT_MISMATCH: 14
+macro TRADE_ALREADY_EXISTS: 15
+
+macro SAME_BLOCK_TRADE_PROHIBITED: 16
+
+# TODO - Markets error codes
+
+# Function macros
 macro refund():
     if msg.value > 0:
         send(msg.sender, msg.value)
 
-macro check_arguments($amount, $price, $market_id):
+macro check_trade($amount, $price, $market_id):
     if not $amount:
-        return(2)
+        return(MISSING_AMOUNT)
     if not $price:
-        return(3)
+        return(MISSING_PRICE)
     if not $market_id:
-        return(4)
+        return(MISSING_MARKET_ID)
 
 macro save_trade($type, $amount, $price, $market_id):
     trade = [$type, $market_id, $amount, $price, msg.sender, block.number]
@@ -68,11 +99,11 @@ macro save_trade($type, $amount, $price, $market_id):
         self.markets[$market_id].total_trades += 1
 
         # Update available and trading amounts for asks
-        if $type == 2:
+        if $type == ASK:
             self.balances[msg.sender][$market_id].available -= $amount
             self.balances[msg.sender][$market_id].trading += $amount
     else:
-        return(15) // "Trade already exists"
+        return(TRADE_ALREADY_EXISTS)
 
     # Log transaction
     log(type=log_add_tx, $market_id, msg.sender, $type, $price, $amount, trade_id)
@@ -105,24 +136,23 @@ macro remove_trade($trade_id, $market_id):
     self.markets[$market_id].trade_ids[$trade_id].id = 0
     self.markets[$market_id].total_trades -= 1
 
+
 def init():
     self.created = block.timestamp  # Timestamp when this contract was created
-
 
 #
 # Get price by market ID
 #
 def price(market_id):
     refund()
-    price = self.markets[market_id].last_price
-    return(price)
+    return(self.markets[market_id].last_price)
 
 
 #
 # Buy / Sell actions
 #
 def buy(amount, price, market_id):
-    check_arguments(amount, price, market_id)
+    check_trade(amount, price, market_id)
 
     # Calculate ETH value
     value = ((amount * price) / (self.markets[market_id].precision * 10 ^ self.markets[market_id].decimals)) * 10 ^ 18
@@ -132,24 +162,24 @@ def buy(amount, price, market_id):
     #
     if msg.value < self.markets[market_id].minimum:
         refund()
-        return(12) // "Minimum ETH trade amount not met, minimum is %s, got %d" % (self.markets[market_id].minimum, msg.value)
+        return(INSUFFICIENT_TRADE_AMOUNT)
 
     # Check msg.value and value match
     if msg.value < value:
         refund()
-        return(13) // "Trade amount mismatch"
+        return(TRADE_AMOUNT_MISMATCH)
 
     # Refund excess value
     if msg.value > value:
         send(msg.sender, msg.value - value)
 
-    save_trade(1, amount, price, market_id)
+    save_trade(BID, amount, price, market_id)
 
-    return(0)
+    return(FAILURE)
 
 
 def sell(amount, price, market_id):
-    check_arguments(amount, price, market_id)
+    check_trade(amount, price, market_id)
 
     # Calculate ETH value
     value = ((amount * price) / (self.markets[market_id].precision * 10 ^ self.markets[market_id].decimals)) * 10 ^ 18
@@ -159,14 +189,14 @@ def sell(amount, price, market_id):
     #
     if value < self.markets[market_id].minimum:
         refund()
-        return(12) // "Minimum ETH trade amount not met, minimum is %s, got %d" % (self.markets[market_id].minimum, msg.value)
+        return(INSUFFICIENT_TRADE_AMOUNT)
 
     # Check balance of subcurrency
     balance = self.balances[msg.sender][market_id].available
     if balance >= amount:
-        save_trade(2, amount, price, market_id)
+        save_trade(ASK, amount, price, market_id)
 
-    return(0)
+    return(FAILURE)
 
 #
 # Trade
@@ -184,7 +214,7 @@ def trade(max_amount, trade_ids:arr):
 
         # Make sure the trade has been mined, obvious HFT prevention
         if block.number <= self.trades[trade_id].block:
-            return(14)
+            return(SAME_BLOCK_TRADE_PROHIBITED)
 
         # Get market
         market_id = self.trades[trade_id].market
@@ -200,7 +230,7 @@ def trade(max_amount, trade_ids:arr):
         owner = self.trades[trade_id].owner
 
         # Fill buy order
-        if type == 1:
+        if type == BID:
 
             # Get available balance
             balance = self.balances[msg.sender][market_id].available
@@ -217,7 +247,7 @@ def trade(max_amount, trade_ids:arr):
                 if value < minimum:
                     if value:
                         send(msg.sender, max_value)
-                    return(13)
+                    return(INSUFFICIENT_VALUE)
 
                 # Update trade amount or remove
                 if fill < amount:
@@ -235,9 +265,9 @@ def trade(max_amount, trade_ids:arr):
                 # Log transaction
                 log(type=log_fill_tx, market_id, msg.sender, owner, 2, price, fill, trade_id)
             else:
-                return(12)
+                return(INSUFFICIENT_BALANCE)
 
-        elif type == 2:
+        elif type == ASK:
 
             if max_value > 0:
 
@@ -245,7 +275,7 @@ def trade(max_amount, trade_ids:arr):
                 if max_value < minimum:
                     if max_value > 0:
                         send(msg.sender, max_value)
-                    return(13)
+                    return(INSUFFICIENT_VALUE)
 
                 # Calculate value of trade
                 tradevalue = ((amount * price) * 10 ^ 18) / (precision * 10 ^ decimals)
@@ -271,7 +301,7 @@ def trade(max_amount, trade_ids:arr):
                 # Log transaction
                 log(type=log_fill_tx, market_id, msg.sender, owner, 1, price, fill, trade_id)
             else:
-                return(12)
+                return(INSUFFICIENT_BALANCE)
 
         # Update market last price
         self.markets[market_id].last_price = price
@@ -290,7 +320,7 @@ def trade(max_amount, trade_ids:arr):
     if max_value:
         send(msg.sender, max_value)
 
-    return(1)
+    return(SUCCESS)
 
 #
 # Deposit - called from the user only, after calling approveOnce on the token
@@ -299,11 +329,11 @@ def deposit(amount, market_id):
     # Transfer funds to the exchange
     if self.markets[market_id].contract.sendCoinFrom(msg.sender, amount, self):
         balance = self.balances[msg.sender][market_id].available
-        newbalance = balance + amount
-        self.balances[msg.sender][market_id].available = newbalance
+        new_balance = balance + amount
+        self.balances[msg.sender][market_id].available = new_balance
         log(type=log_deposit, market_id, msg.sender, amount)
-        return(newbalance)
-    return(0)
+        return(new_balance)
+    return(FAILURE)
 
 #
 # Withdrawal - to subcurrency contracts only
@@ -312,10 +342,10 @@ def withdraw(amount, market_id):
     balance = self.balances[msg.sender][market_id].available
     if balance >= amount:
         self.balances[msg.sender][market_id].available = balance - amount
-        ret = self.markets[market_id].contract.sendCoin(amount, msg.sender)
+        result = self.markets[market_id].contract.sendCoin(amount, msg.sender)
         log(type=log_withdraw, market_id, msg.sender, amount)
-        return(ret)
-    return(0)
+        return(result)
+    return(FAILURE)
 
 #
 # Cancellation
@@ -340,21 +370,22 @@ def cancel(trade_id):
         remove_trade(trade_id, market_id)
 
         # Issue refunds
-        if type == 1:
+        if type == BID:
             # ETH refund
             value = ((amount * price) / (precision * 10 ^ decimals)) * 10 ^ 18
             send(msg.sender, value)
 
-        elif type == 2:
+        elif type == ASK:
             # Subcurrency refund
             self.balances[msg.sender][market_id].trading -= amount
             self.balances[msg.sender][market_id].available += amount
 
         # Log cancellation
         log(type=log_cancel, market_id, msg.sender, price, amount, trade_id)
-        return(1)
 
-    return(0)
+        return(SUCCESS)
+
+    return(FAILURE)
 
 #
 # Add market
@@ -379,17 +410,23 @@ def add_market(name, contract, decimals, precision, minimum, category):
     self.markets[id].owner = msg.sender
     self.markets[id].block = block.number
 
+    # Set reverse lookup ID
+    self.markets_id[contract].id = id
+
     # Set last market ID
     self.last_market = id
 
     # Log new market
     log(type=log_market, id)
 
-    return(1)
+    return(SUCCESS)
 
 #
 # Getters
 #
+def get_market_id(address):
+    return(self.markets_id[address].id)
+
 def get_last_market_id():
     return(self.last_market)
 
@@ -410,7 +447,7 @@ def get_market(id):
 
     if market:
         return(market:arr)
-    return([0]:arr)
+    return([FAILURE]:arr)
 
 def get_trade_ids(market_id):
     trades_count = self.markets[market_id].total_trades
@@ -425,7 +462,7 @@ def get_trade_ids(market_id):
 
     if trade_ids:
         return(trade_ids:arr)
-    return([0]:arr)
+    return([FAILURE]:arr)
 
 def get_trade(id):
     trade = array(TRADE_FIELDS)
@@ -441,7 +478,7 @@ def get_trade(id):
 
     if trade:
         return(trade:arr)
-    return([0]:arr)
+    return([FAILURE]:arr)
 
 def get_sub_balance(address, market_id):
     return([self.balances[address][market_id].available, self.balances[address][market_id].trading]:arr)

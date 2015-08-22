@@ -1,5 +1,5 @@
 from ethereum import tester
-from ethereum import utils
+# from ethereum import utils
 
 class TestEtxContract(object):
 
@@ -18,59 +18,49 @@ class TestEtxContract(object):
         assert self.c.coinBalanceOf(tester.a0) == 100000000000
         assert self.c.coinBalanceOf(tester.a1) == 0
 
-    def test_change_ownership_with_invalid_address_should_fail(self):
-        # Should succeed with valid address
-        assert self.c.change_ownership(tester.a1, sender=tester.k0) == 1
-        assert self.s.block.get_storage_data(self.c.address, 0) == utils.big_endian_to_int(tester.a1)
-
-        # Should then fail with invalid address
-        assert self.c.change_ownership(0, sender=tester.k1) == 0
-        assert self.c.change_ownership(-1000, sender=tester.k1) == 0
-        assert self.s.block.get_storage_data(self.c.address, 0) == utils.big_endian_to_int(tester.a1)
-
-        # Should succeed again with valid address
-        assert self.c.change_ownership(tester.a0, sender=tester.k1) == 1
-        assert self.s.block.get_storage_data(self.c.address, 0) == utils.big_endian_to_int(tester.a0)
-
-    # OBSOLETE
-    # def test_set_exchange_with_invalid_address_or_market_id_should_fail(self):
-    #     assert self.c.set_exchange(tester.a0, 1)
-    #     assert self.s.block.get_storage_data(self.c.address, 1) == utils.big_endian_to_int(tester.a0)
-    #
-    #     assert self.c.set_exchange(0xdeadbeef, 1, sender=tester.k0)
-    #     assert self.s.block.get_storage_data(self.c.address, 1) == 0xdeadbeef
-    #
-    #     assert self.c.set_exchange(0, 1, sender=tester.k0) == 0
-    #     assert self.c.set_exchange(1, 0, sender=tester.k0) == 0
-    #     assert self.s.block.get_storage_data(self.c.address, 1) == 0xdeadbeef
-
     def test_send_with_invalid_recipient_should_not_overwrite_internal_settings(self):
-        # assert self.c.set_exchange(0xdeadbeef, 999)
-
         assert self.c.sendCoin(1, 0) == 0
-        assert self.s.block.get_storage_data(self.c.address, 0) == utils.big_endian_to_int(tester.a0)
+        assert self.s.block.get_storage_data(self.c.address, 0) == 1410973349
+        # assert self.s.block.get_storage_data(self.c.address, 0) == utils.big_endian_to_int(tester.a0)
 
         assert self.c.sendCoin(1, -1000) == 0
-        # assert self.s.block.get_storage_data(self.c.address, 1) == 0xdeadbeef
-        # assert self.s.block.get_storage_data(self.c.address, 2) == 999
 
-    def test_approve_once_and_reset(self):
+    def test_approve_once_transfer_and_reset(self):
         assert self.c.approveOnce(tester.a1, 10000) == 1
-        assert self.c.isApprovedFor(tester.a0, tester.a1) == 10000
+        assert self.c.isApprovedOnceFor(tester.a0, tester.a1) == 10000
         assert self.c.sendCoinFrom(tester.a0, 10000, tester.a1, sender=tester.k1) == 1
         assert self.c.coinBalanceOf(tester.a1) == 10000
-        assert self.c.isApprovedFor(tester.a0, tester.a1) == 0
+        assert self.c.isApprovedOnceFor(tester.a0, tester.a1) == 0
 
     def test_approve_once_send_to_another(self):
         assert self.c.approveOnce(tester.a1, 10000) == 1
-        assert self.c.isApprovedFor(tester.a0, tester.a1) == 10000
+        assert self.c.isApprovedOnceFor(tester.a0, tester.a1) == 10000
         assert self.c.sendCoinFrom(tester.a0, 10000, tester.a2, sender=tester.k1) == 1
         assert self.c.coinBalanceOf(tester.a2) == 10000
+        assert self.c.isApprovedOnceFor(tester.a0, tester.a1) == 0
+
+    def test_approve_once_then_disapprove(self):
+        assert self.c.approveOnce(tester.a1, 10000) == 1
+        assert self.c.isApprovedOnceFor(tester.a0, tester.a1) == 10000
+        assert self.c.disapprove(tester.a1) == 1
+        assert self.c.isApprovedOnceFor(tester.a0, tester.a1) == 0
+        assert self.c.sendCoinFrom(tester.a0, 10000, tester.a2, sender=tester.k1) == 0
+
+    # Unused with exchange but implemented for completeness
+    def test_approve_and_reset(self):
+        assert self.c.approve(tester.a1) == 1
+        assert self.c.isApprovedFor(tester.a0, tester.a1) == 1
+        assert self.c.sendCoinFrom(tester.a0, 10000, tester.a1, sender=tester.k1) == 1
+        assert self.c.coinBalanceOf(tester.a1) == 10000
+        assert self.c.isApprovedFor(tester.a0, tester.a1) == 1
+        assert self.c.disapprove(tester.a1) == 1
         assert self.c.isApprovedFor(tester.a0, tester.a1) == 0
 
-    def test_approve_once_then_unapprove(self):
-        assert self.c.approveOnce(tester.a1, 10000) == 1
-        assert self.c.isApprovedFor(tester.a0, tester.a1) == 10000
-        assert self.c.unapprove(tester.a1) == 1
-        assert self.c.isApprovedFor(tester.a0, tester.a1) == 0
-        assert self.c.sendCoinFrom(tester.a0, 10000, tester.a2, sender=tester.k1) == 0
+    def test_approve_send_to_another(self):
+        assert self.c.approve(tester.a1) == 1
+        assert self.c.isApprovedFor(tester.a0, tester.a1) == 1
+        assert self.c.sendCoinFrom(tester.a0, 10000, tester.a2, sender=tester.k1) == 1
+        assert self.c.coinBalanceOf(tester.a2) == 10000
+        assert self.c.isApprovedFor(tester.a0, tester.a1) == 1
+        assert self.c.disapprove(tester.a1) == 1
+        assert self.c.isApprovedOnceFor(tester.a0, tester.a1) == 0

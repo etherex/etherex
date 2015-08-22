@@ -100,6 +100,7 @@ Methods (with serpent type definitions):
   deposit:[int256,int256]:int256,
   withdraw:[int256,int256]:int256,
   add_market:[int256,int256,int256,int256,int256,int256]:int256,
+  get_market_id:[int256]:int256,
   get_last_market_id:[]:int256,
   get_market:[int256]:int256[],
   get_trade:[int256]:int256[],
@@ -111,7 +112,7 @@ Methods (with serpent type definitions):
 
 ## Price API
 ```
-self.exchange.price(market_id)
+price(market_id)
 ```
 
 
@@ -119,33 +120,38 @@ self.exchange.price(market_id)
 
 ### Add buy / sell trade
 ```
-self.exchange.buy(amount, price, market_id)
-self.exchange.sell(amount, price, market_id)
+buy(amount, price, market_id)
+sell(amount, price, market_id)
 ```
 
 ### Trade
 ```
-self.exchange.trade(max_amount, trade_ids)
+trade(max_amount, trade_ids)
 ```
 
 ### Deposit
 ```
-self.exchange.deposit(amount, market_id)
+deposit(amount, market_id)
 ```
 
 ### Withdraw
 ```
-self.exchange.withdraw(amount, market_id)
+withdraw(amount, market_id)
 ```
 
 ### Cancel trade
 ```
-self.exchange.cancel(trade_id)
+cancel(trade_id)
 ```
 
 ### Adding a market
 ```
-self.exchange.add_market(currency_name, contract_address, decimal_precision, price_denominator, minimum_total, category)
+add_market(currency_name, contract_address, decimal_precision, price_denominator, minimum_total, category)
+```
+
+### Getting a market's ID
+```
+get_market_id(contract_address)
 ```
 
 #### Market names
@@ -174,7 +180,7 @@ When adding a subcurrency, set the minimum trade total high enough to make econo
 3 = Real-world assets
 4 = Fiat currencies
 ```
-EtherEx allows you to categorize your subcurrency into four main categories. Since everything is represented as subcurrencies, those categories are simply for convenience. If you have a DApp that has its own token, that would go in the regular subcurrency section `1`. If your token represents a fiat currency redeemable at a gateway, put it in `4`. If your token represents a real-world asset like gold or a car, put it in `3`. For other crypto-currencies like BTC, also redeemable at a gateway, put it in `2`.
+EtherEx allows you to categorize your subcurrency into four main categories. Since everything is represented as subcurrencies, those categories are simply for convenience. If you have a DApp that has its own token, that would go in the regular subcurrency section `1`. If your token represents a fiat currency redeemable at a gateway, add it to `4`. If your token represents a real-world asset like gold or a car, add it to `3`. For other crypto-currencies like BTC, also redeemable at a gateway, add it to `2`.
 
 #### Market IDs
 ```
@@ -189,7 +195,7 @@ New market IDs will be created as DAO creators add their subcurrency to the exch
 
 See the example [ETX](https://github.com/etherex/etherex/blob/master/contracts/etx.se) contract for a Serpent implementation, or a [Standard Token](https://github.com/simondlr/Contract-Reactor/blob/master/example/app/contracts/Standard_Token.sol) in Solidity.
 
-After registering the subcurrency using the `add_market` ABI call, the subcurrency will receive a `market_id`. Since there are currently no return values to actual transactions, this `market_id` will need to be inspected from the exchange's contract storage or from the UI.
+After registering the subcurrency using the `add_market` ABI call, the subcurrency will receive a `market_id`. You can retrieve the market ID with a call to `get_market_id(contract_address)`.
 
 #### Deposit support
 **IMPORTANT: The original `deposit` technique has been deprecated in favor of the [Standardized Contract APIs](https://github.com/ethereum/wiki/wiki/Standardized_Contract_APIs)**
