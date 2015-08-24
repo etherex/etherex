@@ -80,6 +80,14 @@ var MarketActions = function() {
       else
         this.dispatch(constants.market.UPDATE_MARKET, market);
 
+      // Watch Whisper messages
+      if (_client.hasWhisper())
+        _client.watchMessages(market.name, function(message) {
+          this.dispatch(constants.market.UPDATE_MESSAGES, message);
+        }.bind(this), function(error) {
+          this.dispatch(constants.market.UPDATE_MESSAGES_FAIL, {error: error});
+        }.bind(this));
+
     }.bind(this), function(error) {
       this.dispatch(constants.market.LOAD_MARKETS_FAIL, {error: error});
     }.bind(this));
@@ -241,6 +249,19 @@ var MarketActions = function() {
       favorite: favorite.favorite,
       favorites: favorites
     });
+  };
+
+  this.postMessage = function(message) {
+    var _client = this.flux.store('config').getEthereumClient();
+    var market = this.flux.store("MarketStore").getState().market;
+
+    _client.postMessage(market.name, message, function(result) {
+      if (this.flux.store('config').debug)
+        utils.log("POST", web3.toAscii(result.payload));
+    }.bind(this), function(error) {
+      if (this.flux.store('config').debug)
+        utils.error("POST", error);
+    }.bind(this));
   };
 };
 

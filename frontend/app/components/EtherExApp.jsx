@@ -20,6 +20,7 @@ var LastPrice = require("./LastPrice");
 var RangeSelect = require("./RangeSelect");
 var GraphPrice = require('./GraphPrice');
 var Network = require('./Network');
+var Chat = require('./Chat');
 
 var fixtures = require('../js/fixtures');
 var Favicon = require('react-favicon');
@@ -162,6 +163,7 @@ var EtherExApp = React.createClass({
                 />}
             </div>
           </div>
+          <Chat market={this.state.market.market} flux={this.state.flux} />
         </div>
         <footer className="navbar navbar-default navbar-fixed-bottom">
           <div className="container-fluid">

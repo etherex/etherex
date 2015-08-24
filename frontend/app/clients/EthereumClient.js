@@ -1,15 +1,9 @@
 var _ = require("lodash");
 var utils = require("../js/utils");
+var bigRat = require('big-rational');
 var fixtures = require("../js/fixtures");
 var abi = require("../js/abi");
 var web3 = require('web3');
-
-var bigRat = require('big-rational');
-
-// web3.padDecimal = function (string, chars) {
-//     string = web3.fromDecimal(string).substr(2);
-//     return Array(chars - string.length + 1).join("0") + string;
-// };
 
 var EthereumClient = function(params) {
   try {
@@ -55,6 +49,19 @@ var EthereumClient = function(params) {
 
     this.fromBlock = fromBlock;
     this.toBlock = toBlock;
+
+    web3.shh.newIdentity( function(error, result) {
+      if (error) {
+        if (this.debug)
+          utils.error("WHISPER", error);
+        this.identity = false;
+        return;
+      }
+      if (this.debug)
+        utils.log("IDENTITY", result);
+      if (result)
+        this.identity = result;
+    }.bind(this));
   }
   catch(e) {
     utils.error("web3 error: ", e);
@@ -1293,6 +1300,48 @@ var EthereumClient = function(params) {
     return unconfirmed;
   };
 
+  //
+  // Whisper chat
+  //
+  this.hasWhisper = function() {
+    return this.identity;
+  };
+
+  this.postMessage = function(market, message, success, failure) {
+    var post = {
+      from: this.identity,
+      topics: ['EtherEx', market],
+      payload: message,
+      priority: 100,
+      ttl: 120
+    };
+
+    web3.shh.post(post, function(error, result) {
+      if (error) {
+        utils.error(error);
+        failure(error);
+        return;
+      }
+      if (result)
+        success(post);
+      else
+        failure(result);
+    }.bind(this));
+  };
+
+  this.watchMessages = function(market, success, failure) {
+    this.filters.whisper = web3.shh.filter({
+      topics: ['EtherEx', market]
+    }).watch( function(error, result) {
+      if (error) {
+        utils.error(error);
+        failure(error);
+        return;
+      }
+      if (result)
+        success(result);
+    });
+  };
 };
 
 module.exports = EthereumClient;

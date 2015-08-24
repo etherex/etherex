@@ -60,6 +60,23 @@
   padding-top: 1px;
 }
 
+.chatbox {
+  bottom: 20px;
+  right: 0;
+  position: fixed;
+  z-index: 999;
+}
+
+.chatbox-messages {
+  height: 200px;
+  max-height: 200px;
+  overflow-y: scroll;
+}
+
+.chatbox .form-group {
+  margin-bottom: 0;
+}
+
 .alert h3 {
   margin-top: 5px;
 }

@@ -10,7 +10,7 @@ var utils = require("../js/utils");
 var MarketStore = Fluxxor.createStore({
 
     initialize: function(options) {
-        this.market = options.market || {txs: [], prices: [], data: []};
+        this.market = options.market || {txs: [], prices: [], data: [], messages: []};
         this.markets = options.markets || [];
         this.favorites = [];
         this.progress = 0;
@@ -36,7 +36,9 @@ var MarketStore = Fluxxor.createStore({
             constants.market.UPDATE_PRICES_DATA, this.onUpdatePricesData,
             constants.market.UPDATE_TRANSACTIONS, this.onUpdateTransactions,
             constants.market.RELOAD_TRANSACTIONS, this.onReloadTransactions,
-            constants.market.TOGGLE_FAVORITE, this.toggleFavorite
+            constants.market.TOGGLE_FAVORITE, this.toggleFavorite,
+            constants.market.UPDATE_MESSAGES, this.updateMessages,
+            constants.market.UPDATE_MESSAGES_FAIL, this.updateMessagesFail
         );
 
         this.setMaxListeners(1024); // prevent "possible EventEmitter memory leak detected"
@@ -50,7 +52,7 @@ var MarketStore = Fluxxor.createStore({
     },
 
     onLoadMarkets: function() {
-        this.market = {txs: [], prices: [], data: []};
+        this.market = {txs: [], prices: [], data: [], messages: []};
         this.markets = [];
         this.progress = 0;
         this.loading = true;
@@ -110,6 +112,7 @@ var MarketStore = Fluxxor.createStore({
         this.market.txs = [];
         this.market.data = [];
         this.market.prices = [];
+        this.market.messages = [];
 
         this.loading = false;
         this.error = null;
@@ -123,6 +126,7 @@ var MarketStore = Fluxxor.createStore({
         this.market.txs = [];
         this.market.data = [];
         this.market.prices = [];
+        this.market.messages = [];
         this.market.minTotal = bigRat(this.market.minimum).divide(fixtures.ether).valueOf();
         this.emit(constants.CHANGE_EVENT);
     },
@@ -272,6 +276,16 @@ var MarketStore = Fluxxor.createStore({
         this.markets[index].favorite = payload.favorite;
         this.favorites = payload.favorites;
 
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    updateMessages: function(payload) {
+        this.market.messages.push(payload);
+        this.emit(constants.CHANGE_EVENT);
+    },
+
+    updateMessagesFail: function(error) {
+        this.market.messages.push(error);
         this.emit(constants.CHANGE_EVENT);
     },
 
