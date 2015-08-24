@@ -191,7 +191,7 @@ New market IDs will be created as DAO creators add their subcurrency to the exch
 
 ### Subcurrency API
 
-**Subcurrency contracts need to support the [Standardized Contract APIs](https://github.com/ethereum/wiki/wiki/Standardized_Contract_APIs), more specifically the `approveOnce` and `sendCoinFrom` methods for deposits, the `sendCoin` method for withdrawals and the `coinBalanceOf` method for the UI to display the user's balance.**
+**Subcurrency contracts need to support the [Standardized Contract APIs](https://github.com/ethereum/wiki/wiki/Standardized_Contract_APIs), more specifically the `approveOnce`, `sendCoinFrom` and `isApprovedOnceFor` methods for deposits, the `sendCoin` method for withdrawals and the `coinBalanceOf` method for the UI to display the user's balance.**
 
 See the example [ETX](https://github.com/etherex/etherex/blob/master/contracts/etx.se) contract for a Serpent implementation, or a [Standard Token](https://github.com/simondlr/Contract-Reactor/blob/master/example/app/contracts/Standard_Token.sol) in Solidity.
 
