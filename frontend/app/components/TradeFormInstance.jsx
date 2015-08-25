@@ -368,7 +368,7 @@ var TradeFormInstance = React.createClass({
           min={this.props.market.market.amountPrecision} step={this.props.market.market.amountPrecision}
           onChange={this.handleChange}
           value={this.state.amount}
-          addonAfter={this.props.market.market.name}
+          addonAfter={(this.props.market.market.name ? this.props.market.market.name : "...")}
         />
 
         <Input type="number" ref="price" className="form-control medium" wrapperClassName="col-md-9"
@@ -377,7 +377,7 @@ var TradeFormInstance = React.createClass({
           min={this.props.market.market.pricePrecision} step={this.props.market.market.pricePrecision}
           onChange={this.handleChange}
           value={this.state.price}
-          addonAfter={this.props.market.market.name + "/ETH"}
+          addonAfter={(this.props.market.market.name ? this.props.market.market.name : "...") + "/ETH"}
          />
 
        <Input type="number" ref="total" className="form-control medium" wrapperClassName="col-md-9"
