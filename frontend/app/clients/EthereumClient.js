@@ -7,7 +7,12 @@ var web3 = require('web3');
 
 var EthereumClient = function(params) {
   try {
-    web3.setProvider(new web3.providers.HttpProvider('//' + params.host));
+    // use the environment's provider or fallback
+    if (global.web3 && global.web3.currentProvider) {
+      web3.setProvider(global.web3.currentProvider);
+    } else {
+      web3.setProvider(new web3.providers.HttpProvider('//' + params.host));
+    }
 
     var ContractABI = web3.eth.contract(abi.etherex);
     this.contract = ContractABI.at(params.address);
