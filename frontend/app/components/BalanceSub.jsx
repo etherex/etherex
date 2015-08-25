@@ -18,65 +18,83 @@ var BalanceSub = React.createClass({
 
     return (
       <div>
-        <div className="navbar col-lg-12 col-md-6 col-sm-6">
-          <OverlayTrigger trigger={['hover', 'focus']} placement='right' overlay={
-              <Popover>
-                { this.formatMessage(this.getIntlMessage('wallet.balance'), {
-                    currency: this.props.market.market.name,
-                    balance: balance
-                  })
-                }
-              </Popover>}>
-            <Button bsStyle="primary" bsSize="large" className="text-overflow btn-balance">
-              { this.props.si ?
-                utils.format(balance) :
-                <FormattedMessage
-                  message={this.getIntlMessage('wallet.sub')}
-                  balance={balance}
-                  currency={this.props.market.market.name} />
-              }
-            </Button>
-          </OverlayTrigger>
+        <div className="navbar col-md-12">
+          <div className="text-overflow">
+            <div className="text-light">Wallet</div>
+            <OverlayTrigger trigger={['hover', 'focus']} placement='left' overlay={
+                <Popover>
+                  { this.formatMessage(this.getIntlMessage('wallet.balance'), {
+                      currency: this.props.market.market.name,
+                      balance: balance
+                    })
+                  }
+                </Popover>}>
+                <h4>
+                  { this.props.si ?
+                    utils.format(balance) :
+                    <FormattedMessage
+                      message={this.getIntlMessage('wallet.sub')}
+                      balance={balance}
+                      currency={this.props.market.market.name} />
+                  }
+                </h4>
+            </OverlayTrigger>
+          </div>
         </div>
-        <div className="navbar col-lg-12 col-md-6 col-sm-6">
-          <OverlayTrigger trigger={['hover', 'focus']} placement='right' overlay={
-              <Popover>
-                { this.formatMessage(this.getIntlMessage('wallet.available'), {
-                    currency: this.props.market.market.name,
-                    balance: available
-                  })
-                }
-              </Popover>}>
-            <Button bsStyle="success" bsSize="large" className="text-overflow btn-balance">
-              { this.props.si ?
-                utils.format(available) :
+        <div className="navbar col-md-12">
+          <div className="text-overflow">
+            <div className="text-light">Available to trade</div>
+            <div>
+              <OverlayTrigger trigger={['hover', 'focus']} placement='left' overlay={
+                  <Popover>
+                    { this.formatMessage(this.getIntlMessage('wallet.available'), {
+                        currency: this.props.market.market.name,
+                        balance: available
+                      })
+                    }
+                  </Popover>}>
+                  <h4>
+                    { this.props.si ?
+                      utils.format(available) :
+                      <FormattedMessage
+                        message={this.getIntlMessage('wallet.sub')}
+                        balance={available}
+                        currency={this.props.market.market.name} />
+                    }
+                  </h4>
+              </OverlayTrigger>
+            </div>
+            <h4>
+              { this.props.user.user.balanceFormatted &&
                 <FormattedMessage
-                  message={this.getIntlMessage('wallet.sub')}
-                  balance={available}
-                  currency={this.props.market.market.name} />
-              }
-            </Button>
-          </OverlayTrigger>
+                  message={this.getIntlMessage('ether')}
+                  value={this.props.user.user.balanceFormatted.value}
+                  unit={this.props.user.user.balanceFormatted.unit} /> }
+            </h4>
+          </div>
         </div>
-        <div className="navbar col-lg-12 col-md-6 col-sm-6">
-          <OverlayTrigger trigger={['hover', 'focus']} placement='right' overlay={
-              <Popover>
-                { this.formatMessage(this.getIntlMessage('wallet.trading'), {
-                    currency: this.props.market.market.name,
-                    balance: trading
-                  })
-                }
-              </Popover>}>
-            <Button bsStyle="warning" bsSize="large" className="text-overflow btn-balance">
-              { this.props.si ?
-                utils.format(trading) :
-                <FormattedMessage
-                  message={this.getIntlMessage('wallet.sub')}
-                  balance={trading}
-                  currency={this.props.market.market.name} />
-              }
-            </Button>
-          </OverlayTrigger>
+        <div className="navbar col-md-12">
+          <div className="text-overflow">
+            <div className="text-light">In trades</div>
+            <OverlayTrigger trigger={['hover', 'focus']} placement='left' overlay={
+                <Popover>
+                  { this.formatMessage(this.getIntlMessage('wallet.trading'), {
+                      currency: this.props.market.market.name,
+                      balance: trading
+                    })
+                  }
+                </Popover>}>
+                <h4>
+                  { this.props.si ?
+                    utils.format(trading) :
+                    <FormattedMessage
+                      message={this.getIntlMessage('wallet.sub')}
+                      balance={trading}
+                      currency={this.props.market.market.name} />
+                  }
+                </h4>
+            </OverlayTrigger>
+          </div>
         </div>
       </div>
     );

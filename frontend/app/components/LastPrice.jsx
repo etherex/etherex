@@ -40,13 +40,12 @@ var LastPrice = React.createClass({
 
   render: function() {
     return (
-      <div onClick={this.props.toggleGraph}
-            className={"btn btn-lg btn-" + this.state.priceChange + " btn-lastprice text-overflow"}
-            title={this.state.lastPrice}>
-        <div className="visible-md visible-lg">
-          <span className="pull-right btn btn-primary btn-xs icon-chart-line"></span>
-        </div>
-        Last price: {this.state.lastPrice ? this.state.lastPrice + " " + (this.state.lastMarket ? this.state.lastMarket : "") + "/ETH" : "N/A"}
+      <div className="text-overflow" title={this.state.lastPrice}>
+        <b>Last price:</b>{' '}
+        <span className="text-orange">
+          { this.state.lastPrice }
+        </span> {(this.state.lastPrice && this.state.lastMarket) ? this.state.lastMarket + "/ETH" : "N/A" }
+        <i onClick={this.props.toggleGraph} className={"text-" + this.state.priceChange + " visible-md visible-lg btn btn-xs icon-chart-line"} />
       </div>
     );
   }

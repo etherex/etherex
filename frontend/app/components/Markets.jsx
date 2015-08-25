@@ -3,6 +3,7 @@ var React = require("react");
 var RangeSelect = require('./RangeSelect');
 var GraphPrice = require('./GraphPrice');
 var MarketList = require("./MarketList");
+var SubNavBar = require("./SubNavBar");
 
 var Markets = React.createClass({
 
@@ -31,6 +32,7 @@ var Markets = React.createClass({
   render: function() {
     return (
       <div>
+        <SubNavBar />
         <div className="container-fluid">
           <div className="row">
             {!this.props.market.error && (

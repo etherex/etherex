@@ -6,23 +6,248 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-#wrap {
-  padding-bottom: 50px;
+@text-light: rgb(163, 163, 163);
+@light: rgb(193, 193, 193);
+@lighter: rgb(230, 230, 230);
+@lightest: rgb(250, 250, 250);
+@orange: rgb(242, 76, 24);
+@purple: rgb(99, 102, 141);
+@purple-dark: rgb(94, 97, 136);
+@purple-light: rgb(104, 107, 146);
+
+html, body {
+  height: 100%;
+  min-height: 100%;
+}
+
+a {
+  color: @orange;
+}
+
+a:hover,
+a:focus {
+  color: @orange;
+}
+
+.full-height {
+  height: 100%;
+  min-height: 100%;
+}
+
+.flex-height {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  min-height: 100%;
+  width: 100%;
+}
+
+#side-nav li:first-child > a {
+  padding: 0;
+}
+
+#logo > a > span {
+  background: @orange url(assets/logo-ex-orange.jpg) no-repeat center;
+  background-size: 120px;
+  display: block;
+  height: 100px;
+  width: 100%;
+  margin: 0;
+}
+
+#top-bar {
+  background-color: #fff;
+  border-bottom: 1px rgb(246, 246, 246) solid;
+  height: 100px;
+}
+
+.theme-darkly #top-bar {
+  background-color: #222;
+}
+
+.theme-superhero #top-bar {
+  background-color: #2b3e50;
+}
+
+#top-bar a {
+  color: rgb(48, 43, 98);
+}
+
+#top-bar .nav a:hover,
+#top-bar .nav a:focus,
+#top-bar .nav a.active {
+  color: @orange;
+  background: transparent;
+}
+
+.sub-bar {
+  padding-top: 30px;
+  text-align: right;
+}
+
+.sub-bar h4 {
+  display: inline-block;
+  color: @orange;
+}
+@media (max-width: 991px) {
+  .sub-bar {
+    background-color: #fff;
+  }
+  .sub-bar .col-md-12 {
+    float: left;
+    text-align: center;
+    width: 33.33333333%;
+  }
+  #content:before {
+    width: 100% !important;
+  }
+}
+
+.top-bar-text {
+  line-height: 100px;
+}
+
+.top-bar-text i {
+  display: inline !important;
+}
+
+.top-bar-text .btn:hover {
+  color: rgb(19, 21, 37);
+}
+
+.theme-darkly #top-bar .nav a,
+.theme-superhero #top-bar .nav a {
+  color: #fff;
+}
+
+.top-btn {
+  border: 0;
+  margin-right: 10px;
+  margin-top: 28px;
+}
+
+.top-btn.pull-right {
+  margin-right: 0;
+}
+
+.top-btn-sm {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+}
+
+.top-btn-sm-demo {
+  position: absolute;
+  right: 6em;
+  top: 2px;
+}
+
+.top-link {
+  margin-top: 40px;
+}
+
+#side-bar {
+  background-color: rgb(19, 21, 37);
+}
+
+#side-nav {
+  background-color: rgb(22, 27, 48);
+  margin-bottom: 0;
+  padding-bottom: 30px;
+}
+
+#side-nav i {
+  display: inline-block;
+  width: 2em;
+}
+
+#side-nav a {
+  padding-left: 30px;
+}
+
+@media (max-width: 1199px) {
+  #side-nav a {
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 1023px) {
+  #side-nav a {
+    padding-left: 10px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 767px) {
+  #logo > a > span {
+    background-size: 60px;
+  }
+}
+
+#side-nav .nav > li > a:hover,
+#side-nav .nav > li > a:focus {
+  background: transparent;
+}
+
+#side-nav .nav > li:first-child {
+  margin-bottom: 30px;
+}
+
+#side-bar .network {
+  background-color: rgb(19, 21, 37);
+  border-color: rgb(19, 21, 37);
+  color: rgb(190, 203, 213);
+}
+
+#side-bar .network .panel-heading {
+  background-color: rgb(19, 21, 37);
+  border-color: rgb(19, 21, 37);
+  color: rgb(190, 203, 213);
+  text-transform: uppercase;
+}
+
+#side-bar .network .panel-body {
+  padding-top: 0;
+}
+
+#side-bar .network-label {
+  color: rgb(100, 107, 129);
+}
+
+#content:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: -1;
+  left: 0;
+  background-color: @lightest;
+  width: 83.33333333%;
+}
+
+.theme-darkly #content:before {
+  background-color: #464545;
+}
+
+.theme-superhero #content:before {
+  background-color: #4e5d6c;
+}
+
+.inner-content {
+  padding-top: 40px;
 }
 
 .navbar-collapse {
   overflow: hidden;
 }
 
-.navbar-fixed-bottom {
-  height: 40px;
-  min-height: 40px;
+.text-light {
+  color: @text-light;
 }
 
-.navbar-fixed-bottom .navbar-text {
-  color: #fff;
-  margin-bottom: 10.5px;
-  margin-top: 10.5px;
+.text-orange {
+  color: @orange;
 }
 
 .ellipsis {
@@ -39,6 +264,17 @@
   white-space: nowrap !important;
 }
 
+.btn-primary {
+  background-color: @purple;
+  border-color: @purple;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: @purple-dark;
+  border-color: @purple-dark;
+}
+
 .btn-balance {
   border: 0;
   padding-left: 15px;
@@ -51,17 +287,8 @@
   border: 0;
 }
 
-.btn-lastprice {
-  border: 0;
-  text-align: center;
-}
-
-.nav-market {
-  padding-top: 1px;
-}
-
 .chatbox {
-  bottom: 20px;
+  bottom: -20px;
   right: 0;
   position: fixed;
   z-index: 999;
@@ -86,8 +313,66 @@
   -webkit-margin-before: -1px;
 }
 
+.trade-form.panel-default,
+.trade-form .panel,
+.trade-form .panel-heading {
+  background-color: #fff;
+  border-color: #fff;
+  padding-top: 10px;
+}
+
+.trade-form .col-md-6:first-child {
+  border-right: 1px solid @lighter;
+  margin-right: -1px;
+}
+
+.form-control {
+  color: @orange;
+}
+
+.input-group .form-control {
+  border-right: 0;
+}
+
+/*
+.input-group-addon {
+  color: rgb(150, 150, 150);
+  background-color: transparent;
+  border: 2px solid #dce4ec;
+  border-left: 0;
+  position: relative;
+}
+
+.input-group-addon:before {
+  background-color: @lighter;
+  content: '';
+  height: 15px;
+  left: 0;
+  position: absolute;
+  top: 13px;
+  width: 1px;
+}
+*/
+
+.trade-list {
+  background-color: #fff;
+}
+
+.trade-list h4 {
+  margin-top: 15px;
+}
+
 table .btn-group a:not(.btn) {
   text-decoration: none;
+}
+
+thead > tr {
+  border-bottom: 1px solid @lighter;
+}
+
+th {
+  color: @light;
+  font-weight: normal;
 }
 
 th.trade-op,
@@ -110,11 +395,11 @@ tr.trade-pending:hover td {
 }
 
 tr.trade-filling td {
-  background-color: #3498db !important;
+  background-color: @purple !important; /* #3498db !important; */
   color: #fff;
 }
 tr.trade-filling:hover td {
-  background-color: #217dbb !important;
+  background-color: @purple-light !important; /* #217dbb !important; */
   color: #fff;
 }
 

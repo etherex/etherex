@@ -29,16 +29,20 @@ var TradeTable = React.createClass({
 
     return (
       <div>
-        <h4>{this.props.title}</h4>
+        <div className="container-fluid">
+          <h4 className="text-uppercase">{this.props.title}</h4>
+        </div>
         <Table condensed hover responsive striped>
           <thead>
             <tr>
               <th className="text-right"><FormattedMessage message={this.getIntlMessage('form.amount')} /></th>
-              <th className="text-right"><FormattedMessage message={this.getIntlMessage('form.market')} /></th>
+              <th className="text-center"><FormattedMessage message={this.getIntlMessage('form.market')} /></th>
               <th className="text-right"><FormattedMessage message={this.getIntlMessage('form.price')} /></th>
               <th className="text-right"><FormattedMessage message={this.getIntlMessage('form.total')} /></th>
-              <th className="text-center"><FormattedMessage message={this.getIntlMessage('by')} /></th>
-              <th className="text-center trade-op"></th>
+              <th className="text-center trade-op">
+                { !this.props.review &&
+                  <FormattedMessage message={this.getIntlMessage('form.' + (this.props.type == 2 ? 'buy' : 'sell'))} /> }
+              </th>
             </tr>
           </thead>
           <TransitionGroup transitionName="trades" component="tbody" enterTimeout={1000} leaveTimeout={1000}>

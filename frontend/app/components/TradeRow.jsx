@@ -6,6 +6,8 @@ var FormattedNumber = ReactIntl.FormattedNumber;
 
 var Button = require("react-bootstrap/lib/Button");
 var Glyphicon = require("react-bootstrap/lib/Glyphicon");
+var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
+var Popover = require('react-bootstrap/lib/Popover');
 
 var utils = require("../js/utils");
 
@@ -131,18 +133,20 @@ var TradeRow = React.createClass({
             <FormattedNumber value={this.props.trade.total} /> ETH
           </div>
         </td>
-        <td>
-          <div className="center-block ellipsis">
-            {this.props.trade.owner}
-          </div>
-        </td>
         <td className="trade-op">
           {!this.props.review &&
-            <div className="pull-right">
-              <Button className="btn-xs" onClick={this.openModal}>
-                <Glyphicon glyph={this.props.isOwn ? "remove" : "screenshot"} />
-              </Button>
-            </div>
+            <OverlayTrigger trigger={['hover', 'focus']} placement='right' overlay={
+              <Popover>
+                <div className="ellipsis">
+                  {this.props.trade.owner}
+                </div>
+              </Popover>}>
+              <div className="pull-right">
+                <Button className="btn-xs" onClick={this.openModal}>
+                  <Glyphicon glyph={this.props.isOwn ? "remove" : "screenshot"} />
+                </Button>
+              </div>
+            </OverlayTrigger>
           }
         </td>
       </tr>

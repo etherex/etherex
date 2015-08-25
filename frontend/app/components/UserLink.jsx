@@ -9,23 +9,11 @@ var UserLink = React.createClass({
       address: React.PropTypes.string.isRequired
   },
 
-  getInitialState() {
-    return {
-      shortId: this.props.address
-    };
-  },
-
-  componentWillReceiveProps(nextProps) {
-    this.setState({
-      shortId: nextProps.address.substr(0, 8)
-    });
-  },
-
   render() {
     return (
       <Link to="userDetails">
         { this.props.showIcon &&
-          <span className="glyphicon glyphicon-user"></span> } { this.state.shortId + '\u2026' }
+          <span className="glyphicon glyphicon-user"></span> } { this.props.address.substr(0, 8) + '\u2026' }
       </Link>
     );
   }

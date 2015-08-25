@@ -11,10 +11,12 @@ var TradeBuys = React.createClass({
   render: function() {
     return (
       <div className="col-md-6">
-        <TradeTable openModal={this.props.openModal} flux={this.props.flux}
-          title={<FormattedMessage message={this.getIntlMessage('trade.bids')} />}
-          type={1} trades={this.props.trades} tradeList={this.props.trades.tradeBuys}
-          market={this.props.market} user={this.props.user.user} />
+        <div className="trade-list">
+          <TradeTable openModal={this.props.openModal} flux={this.props.flux}
+            title={<FormattedMessage message={this.getIntlMessage('trade.bids')} />}
+            type={1} trades={this.props.trades} tradeList={this.props.trades.tradeBuys}
+            market={this.props.market} user={this.props.user.user} />
+        </div>
       </div>
     );
   }

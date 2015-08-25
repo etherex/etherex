@@ -7,6 +7,7 @@ var bigRat = require("big-rational");
 var fixtures = require("../js/fixtures");
 
 var Button = require('react-bootstrap/lib/Button');
+var Input = require('react-bootstrap/lib/Input');
 
 var SubDepositModal = require('./SubDepositModal');
 var ConfirmModal = require('./ConfirmModal');
@@ -26,7 +27,8 @@ var TradeFormInstance = React.createClass({
       isValid: false,
       showModal: false,
       showDepositModal: false,
-      depositAmount: null
+      depositAmount: null,
+      typeLabel: 'form.' + (this.props.type == 1 ? 'buy' : 'sell')
     };
   },
 
@@ -176,9 +178,9 @@ var TradeFormInstance = React.createClass({
     e.preventDefault();
 
     // TODO - proper back/forth handling
-    var price = this.refs.price.getDOMNode().value.trim();
-    var amount = this.refs.amount.getDOMNode().value.trim();
-    var total = parseFloat(this.refs.total.getDOMNode().value.trim());
+    var price = this.refs.price.getValue().trim();
+    var amount = this.refs.amount.getValue().trim();
+    var total = parseFloat(this.refs.total.getValue().trim());
     var precision = String(this.props.market.market.precision).length - 1;
 
     if (price && amount)
@@ -205,8 +207,8 @@ var TradeFormInstance = React.createClass({
   handleChangeTotal: function(e) {
     e.preventDefault();
 
-    var price = this.refs.price.getDOMNode().value.trim();
-    var total = this.refs.total.getDOMNode().value.trim();
+    var price = this.refs.price.getValue().trim();
+    var total = this.refs.total.getValue().trim();
     var amount = 0;
     var decimals = this.props.market.market.decimals;
 
@@ -348,10 +350,6 @@ var TradeFormInstance = React.createClass({
         market: this.props.market.market.id
       });
 
-    this.refs.amount.getDOMNode().value = '';
-    this.refs.price.getDOMNode().value = '';
-    this.refs.total.getDOMNode().value = '';
-
     this.setState({
       amount: null,
       price: null,
@@ -364,82 +362,67 @@ var TradeFormInstance = React.createClass({
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
         <input type="hidden" ref="market" value={this.props.market.market.id} />
-        <div className="form-group">
-          <label className="sr-only" forHtml="amount">
-            <FormattedMessage message={this.getIntlMessage('form.amount')} />
-          </label>
-          <div className="input-group">
-            <div className="input-group-addon">
-              <FormattedMessage message={this.getIntlMessage('form.amount')} />
-            </div>
-            <input type="number" ref="amount" className="form-control medium" placeholder={this.props.market.market.amountPrecision}
-                   min={this.props.market.market.amountPrecision} step={this.props.market.market.amountPrecision}
-                   onChange={this.handleChange}
-                   value={this.state.amount} />
-            <div className="input-group-addon">{this.props.market.market.name}</div>
-          </div>
-        </div>
-        <div className="form-group">
-          <label className="sr-only" forHtml="price">
-            <FormattedMessage message={this.getIntlMessage('form.price')} />
-          </label>
-          <div className="input-group">
-            <div className="input-group-addon">
-              <FormattedMessage message={this.getIntlMessage('form.price')} />
-            </div>
-            <input type="number" ref="price" className="form-control medium" placeholder={this.props.market.market.pricePrecision}
-                   min={this.props.market.market.pricePrecision} step={this.props.market.market.pricePrecision}
-                   onChange={this.handleChange}
-                   value={this.state.price} />
-            <div className="input-group-addon">
-              {this.props.market.market.name}/ETH
-            </div>
-          </div>
-        </div>
-        <div className="form-group">
-          <div className="input-group">
-            <div className="input-group-addon">Total</div>
-            <input type="number" ref="total" className="form-control medium" placeholder={this.props.market.market.minimumTotal}
-              min={this.props.market.market.minimumTotal} step={this.props.market.market.amountPrecision}
-              onChange={this.handleChangeTotal}
-              value={this.state.total} />
-            <div className="input-group-addon">
-              ETH
-            </div>
-          </div>
-        </div>
-        <div className="form-group">
-          <Button className={"btn-block" + (this.state.isValid ? " btn-primary" : "")} type="submit">
-            <FormattedMessage message={this.getIntlMessage('form.trade')} />
-          </Button>
+        <Input type="number" ref="amount" className="form-control medium" wrapperClassName="col-md-9"
+          label={<FormattedMessage message={this.getIntlMessage('form.amount')} />} labelClassName="col-md-3"
+          placeholder={this.props.market.market.amountPrecision}
+          min={this.props.market.market.amountPrecision} step={this.props.market.market.amountPrecision}
+          onChange={this.handleChange}
+          value={this.state.amount}
+          addonAfter={this.props.market.market.name}
+        />
 
-          <ConfirmModal
-            show={this.state.showModal}
-            onHide={this.closeConfirmModal}
-            message={this.props.trades.message}
-            note={this.props.trades.note}
-            estimate={this.props.trades.estimate}
-            tradeList={this.props.trades.filling}
-            user={this.props.user.user}
-            market={this.props.market}
-            flux={this.props.flux}
-            onSubmit={this.onSubmitForm}
-          />
+        <Input type="number" ref="price" className="form-control medium" wrapperClassName="col-md-9"
+          label={<FormattedMessage message={this.getIntlMessage('form.price')} />} labelClassName="col-md-3"
+          placeholder={this.props.market.market.lastPrice ? this.props.market.market.lastPrice : this.props.market.market.pricePrecision}
+          min={this.props.market.market.pricePrecision} step={this.props.market.market.pricePrecision}
+          onChange={this.handleChange}
+          value={this.state.price}
+          addonAfter={this.props.market.market.name + "/ETH"}
+         />
 
-          <SubDepositModal
-            show={this.state.showDepositModal}
-            onHide={this.closeDepositModal}
-            modalTitle={this.formatMessage(this.getIntlMessage('deposit.currency'), {
-              currency: this.props.market.market.name
-            })}
-            flux={this.props.flux}
-            user={this.props.user.user}
-            market={this.props.market.market}
-            amount={this.state.depositAmount}
-            setAlert={this.props.setAlert}
-            showAlert={this.props.showAlert}
-          />
+       <Input type="number" ref="total" className="form-control medium" wrapperClassName="col-md-9"
+          label={<FormattedMessage message={this.getIntlMessage('form.total')} />} labelClassName="col-md-3"
+          placeholder={this.props.market.market.minimumTotal}
+          min={this.props.market.market.minimumTotal} step={this.props.market.market.amountPrecision}
+          onChange={this.handleChangeTotal}
+          value={this.state.total}
+          addonAfter="ETH"
+        />
+
+        <div className="form-group">
+          <div className="col-md-12">
+            <Button className={"btn-block text-uppercase trade-form-btn" + (this.state.isValid ? " btn-primary" : "")} type="submit">
+              <FormattedMessage message={this.getIntlMessage(this.state.typeLabel)} />
+            </Button>
+          </div>
         </div>
+
+        <ConfirmModal
+          show={this.state.showModal}
+          onHide={this.closeConfirmModal}
+          message={this.props.trades.message}
+          note={this.props.trades.note}
+          estimate={this.props.trades.estimate}
+          tradeList={this.props.trades.filling}
+          user={this.props.user.user}
+          market={this.props.market}
+          flux={this.props.flux}
+          onSubmit={this.onSubmitForm}
+        />
+
+        <SubDepositModal
+          show={this.state.showDepositModal}
+          onHide={this.closeDepositModal}
+          modalTitle={this.formatMessage(this.getIntlMessage('deposit.currency'), {
+            currency: this.props.market.market.name
+          })}
+          flux={this.props.flux}
+          user={this.props.user.user}
+          market={this.props.market.market}
+          amount={this.state.depositAmount}
+          setAlert={this.props.setAlert}
+          showAlert={this.props.showAlert}
+        />
       </form>
     );
   }

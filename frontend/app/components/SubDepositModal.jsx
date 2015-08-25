@@ -3,6 +3,7 @@ var ReactIntl = require("react-intl");
 var IntlMixin = ReactIntl.IntlMixin;
 
 var Button = require('react-bootstrap/lib/Button');
+var Input = require('react-bootstrap/lib/Input');
 var Modal = require('react-bootstrap/lib/Modal');
 
 var ConfirmModal = require('./ConfirmModal');
@@ -70,7 +71,7 @@ var SubDepositModal = React.createClass({
     e.preventDefault();
     e.stopPropagation();
 
-    var amount = this.refs.amount ? parseFloat(this.refs.amount.getDOMNode().value.trim()) : 0;
+    var amount = this.refs.amount ? parseFloat(this.refs.amount.getValue().trim()) : 0;
 
     this.setState({
       amount: amount
@@ -118,8 +119,6 @@ var SubDepositModal = React.createClass({
       amount: this.state.amount
     });
 
-    this.refs.amount.getDOMNode().value = '';
-
     this.setState({
       amount: null,
       newDeposit: false
@@ -138,8 +137,11 @@ var SubDepositModal = React.createClass({
           <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
             <Modal.Body>
                   <label forHtml="amount">Amount</label>
-                  <input type="number" min="0.0001" step="0.00000001" className="form-control" placeholder="10.0000" ref="amount"
-                         onChange={this.handleChange} value={this.state.amount} />
+                  <Input type="number" className="form-control" ref="amount"
+                    placeholder="10.0000"
+                    min="0.0001" step="0.00000001"
+                    onChange={this.handleChange}
+                    value={this.state.amount} />
             </Modal.Body>
             <Modal.Footer>
                 <Button className={"btn-block" + (this.state.newDeposit ? " btn-primary" : "")} type="submit" key="deposit">Deposit</Button>

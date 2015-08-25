@@ -52,9 +52,9 @@ var TradeForm = React.createClass({
   render: function() {
     return (
     <div className="col-lg-10 col-lg-offset-1 col-md-12">
-      <div className="panel panel-default">
+      <div className="panel panel-default trade-form">
         <div className="panel-heading">
-          <div className="visible-md visible-lg">
+          <div className="visible-md visible-lg text-uppercase text-center">
             <h3 className="panel-title">{this.formatMessage(this.getIntlMessage('form.new'))}</h3>
           </div>
           <div className="visible-xs visible-sm text-center">
@@ -74,25 +74,23 @@ var TradeForm = React.createClass({
             <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
             <div className="visible-xs visible-sm">
               <div>
-                <div className="container-fluid">
-                  <TradeFormInstance ref="mobileform" mobile={true} type={this.state.type} flux={this.props.flux}
-                    market={this.props.market} trades={this.props.trades} user={this.props.user}
-                    setAlert={this.setAlert} showAlert={this.showAlert} />
-                </div>
+                <TradeFormInstance ref="mobileform" mobile={true} type={this.state.type} flux={this.props.flux}
+                  market={this.props.market} trades={this.props.trades} user={this.props.user}
+                  setAlert={this.setAlert} showAlert={this.showAlert} />
               </div>
             </div>
             <div className="visible-md visible-lg">
               <div className="col-md-6">
                 <div className="container-fluid">
-                  <h4 className="text-center" style={{marginTop: 0}}>{this.formatMessage(this.getIntlMessage('form.buy'))}</h4>
+                  <h4>{this.formatMessage(this.getIntlMessage('form.buy'))}</h4>
                   <TradeFormInstance ref="buyform" mobile={false} type={1} flux={this.props.flux}
                     market={this.props.market} trades={this.props.trades} user={this.props.user}
                     setAlert={this.setAlert} showAlert={this.showAlert} />
                 </div>
               </div>
               <div className="col-md-6">
-                <h4 className="text-center" style={{marginTop: 0}}>{this.formatMessage(this.getIntlMessage('form.sell'))}</h4>
                 <div className="container-fluid">
+                  <h4>{this.formatMessage(this.getIntlMessage('form.sell'))}</h4>
                   <TradeFormInstance ref="sellform" mobile={false} type={2} flux={this.props.flux}
                     market={this.props.market} trades={this.props.trades} user={this.props.user}
                     setAlert={this.setAlert} showAlert={this.showAlert} />

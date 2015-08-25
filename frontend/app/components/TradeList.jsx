@@ -62,7 +62,7 @@ var TradeList = React.createClass({
   render: function() {
     return (
       <div className="container-fluid">
-        <div className="row col-md-12">
+        <div className="row col-lg-10 col-lg-offset-1 col-md-12">
             <div style={{height: 22}}>
               {this.props.trades.loading &&
                 <ProgressBar active now={this.props.trades.percent} />}
@@ -90,8 +90,8 @@ var TradeList = React.createClass({
                 </div>
             }
           </div>
-          <div className="hidden-xs hidden-sm">
-            <div>
+          <div className="hidden-xs hidden-sm col-lg-10 col-lg-offset-1 col-md-12">
+            <div className="row">
               <TradeSells openModal={this.openModal} flux={this.props.flux}
                 trades={this.props.trades} market={this.props.market} user={this.props.user} />
               <TradeBuys openModal={this.openModal} flux={this.props.flux}

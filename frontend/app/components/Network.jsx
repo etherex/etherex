@@ -79,89 +79,91 @@ var Network = React.createClass({
     return (
       <div className="panel panel-default network">
         <div className="panel-heading clearfix">
-          <span className="pull-left">
+          <h4>
             <FormattedMessage message={this.getIntlMessage('network')} />
-          </span>
+          </h4>
         </div>
         <div className="panel-body">
-          <p className="client text-overflow">
-            <span>{ this.state.network.client }</span>
-          </p>
           <p className="host text-overflow">
-            HOST
-              <span className="pull-right">
-                { this.state.host }
-              </span>
+            <span className="network-label">Host</span>
+            <span className="pull-right">
+              { this.state.host }
+            </span>
           </p>
           <p className="peers">
-            PEERS
-              <span className="pull-right">{
-                this.state.network.peerCount ?
-                  <FormattedNumber value={this.state.network.peerCount} /> : 0 }
-              </span>
+            <span className="network-label">Peers</span>
+            <span className="pull-right">{
+              this.state.network.peerCount ?
+                <FormattedNumber value={this.state.network.peerCount} /> : 0 }
+            </span>
           </p>
           <p className="blocks">
-            BLOCKS
-              <span className="pull-right">{
-                this.state.network.blockNumber ?
-                  <FormattedNumber value={this.state.network.blockNumber} /> : '-' }
-              </span>
+            <span className="network-label">Blocks</span>
+            <span className="pull-right">{
+              this.state.network.blockNumber ?
+                <FormattedNumber value={this.state.network.blockNumber} /> : '-' }
+            </span>
           </p>
           <p className="miner">
-            MINER
-              <span className="pull-right">
-                { this.state.network.mining ?
-                    <FormattedMessage
-                      message={this.getIntlMessage('hashrate')}
-                      hashrate={this.state.network.hashrate} /> : 'off' }
-              </span>
+            <span className="network-label">Miner</span>
+            <span className="pull-right">
+              { this.state.network.mining ?
+                  <FormattedMessage
+                    message={this.getIntlMessage('hashrate')}
+                    hashrate={this.state.network.hashrate} /> : 'off' }
+            </span>
           </p>
           <p className="ether">
-            ETHER
-              <span className="pull-right">
-                { this.state.user.balance ?
-                  <span>
-                    <FormattedMessage message={this.getIntlMessage('ether')}
-                                      value={this.state.user.balanceFormatted.value}
-                                      unit={this.state.user.balanceFormatted.unit} />
-                  </span> : '-' }
-              </span>
+            <span className="network-label">Ether</span>
+            <span className="pull-right">
+              { this.state.user.balance ?
+                <span>
+                  <FormattedMessage message={this.getIntlMessage('ether')}
+                                    value={this.state.user.balanceFormatted.value}
+                                    unit={this.state.user.balanceFormatted.unit} />
+                </span> : '-' }
+            </span>
           </p>
           <p className="gas-price">
-            GAS PRICE
-              <span className="pull-right">
-                { this.state.gasPrice }
-              </span>
+            <span className="network-label">Gas price</span>
+            <span className="pull-right">
+              { this.state.gasPrice }
+            </span>
           </p>
           <p className="block-time">
-            BLOCK TIME
-              <span className="pull-right">
-                { this.state.blockTime ?
+            <span className="network-label">Block time</span>
+            <span className="pull-right">
+              { this.state.blockTime ?
+                  <FormattedMessage message={this.getIntlMessage('blocktime')}
+                                    time={this.state.blockTime} /> : '-' } /{' '}
+              <span className={'text-' + this.state.lastState}>
+                { this.state.lastBlock ?
+                  ( this.state.lastBlock < this.state.config.timeout ?
                     <FormattedMessage message={this.getIntlMessage('blocktime')}
-                                      time={this.state.blockTime} /> : '-' } /{' '}
-                <span className={'text-' + this.state.lastState}>
-                  { this.state.lastBlock ?
-                    ( this.state.lastBlock < this.state.config.timeout ?
-                      <FormattedMessage message={this.getIntlMessage('blocktime')}
-                                        time={this.state.lastBlock} /> :
-                      <FormattedRelative value={this.state.blockTimestamp * 1000} /> ) : '-' }
-                </span>
+                                      time={this.state.lastBlock} /> :
+                    <FormattedRelative value={this.state.blockTimestamp * 1000} /> ) : '-' }
               </span>
+            </span>
           </p>
           <p className="net-lag">
-            NETWORK LAG
-              <span className="pull-right">
-                { this.state.networkLag ?
-                  <FormattedMessage message={this.getIntlMessage('blocktime')}
-                                    time={this.state.networkLag} /> : '-' }
-              </span>
+            <span className="network-label">Network lag</span>
+            <span className="pull-right">
+              { this.state.networkLag ?
+                <FormattedMessage message={this.getIntlMessage('blocktime')}
+                                  time={this.state.networkLag} /> : '-' }
+            </span>
           </p>
           <p className="last-block">
-            LAST BLOCK
-              <span className="pull-right">
-                <FormattedDate
-                  value={this.state.blockTimestamp * 1000}
-                  format="long" /></span>
+            <span className="network-label">Last block</span>
+            <span className="pull-right">
+              <FormattedDate
+                value={this.state.blockTimestamp * 1000}
+                format="long" />
+            </span>
+          </p>
+          <p className="client text-overflow">
+            <span className="network-label">Client</span>
+            <span className="pull-right">{ this.state.network.client }</span>
           </p>
         </div>
       </div>

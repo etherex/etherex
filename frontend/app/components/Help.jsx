@@ -8,7 +8,7 @@ var Help = React.createClass({
         <section className="text-center">
           <h3>See the <a href="https://github.com/etherex/etherex#readme" target="_blank">GitHub readme</a> for documentation</h3>
           <h4>Or the <a href="https://etherex.org/faq" target="_blank">FAQ</a> on the <a href="https://etherex.org" target="_blank">website</a></h4>
-          <p>Complete DApp documention will be here soon.</p>
+          <p>Complete dApp documention will be here soon.</p>
         </section>
       </div>
     );

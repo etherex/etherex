@@ -4,6 +4,7 @@ var IntlMixin = ReactIntl.IntlMixin;
 var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Button = require('react-bootstrap/lib/Button');
+var Input = require('react-bootstrap/lib/Input');
 var ConfirmModal = require('./ConfirmModal');
 
 var SubWithdraw = React.createClass({
@@ -41,7 +42,7 @@ var SubWithdraw = React.createClass({
   validate: function(e, showAlerts) {
     e.preventDefault();
 
-    var amount = parseFloat(this.refs.amount.getDOMNode().value.trim());
+    var amount = parseFloat(this.refs.amount.getValue().trim());
 
     this.setState({
       amount: amount
@@ -62,9 +63,10 @@ var SubWithdraw = React.createClass({
     else {
       this.setState({
         newWithdrawal: true,
-        confirmMessage: <FormattedMessage message={this.getIntlMessage('withdraw.confirm')}
-                                          amount={amount}
-                                          currency={this.props.market.name} />
+        confirmMessage: <FormattedMessage
+                          message={this.getIntlMessage('withdraw.confirm')}
+                          amount={amount}
+                          currency={this.props.market.name} />
       });
 
       this.props.showAlert(false);
@@ -92,8 +94,6 @@ var SubWithdraw = React.createClass({
       amount: this.state.amount
     });
 
-    this.refs.amount.getDOMNode().value = '';
-
     this.setState({
       amount: null,
       newWithdrawal: false
@@ -103,21 +103,20 @@ var SubWithdraw = React.createClass({
   render: function() {
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
-        <div className="form-group">
-          <label className="sr-only" forHtml="amount">
-            <FormattedMessage message={this.getIntlMessage('form.amount')} />
-          </label>
-          <input ref="amount" type="number" className="form-control"
-            min={this.props.market.amountPrecision}
-            step={this.props.market.amountPrecision}
-            placeholder="10.0000"
-            onChange={this.handleChange} />
-        </div>
+        <Input type="number" ref="amount"
+          placeholder="10.0000"
+          label={<FormattedMessage message={this.getIntlMessage('form.amount')} />} labelClassName="sr-only"
+          min={this.props.market.amountPrecision}
+          step={this.props.market.amountPrecision}
+          onChange={this.handleChange}
+          value={this.state.amount} />
+
         <div className="form-group">
           <Button className={"btn-block" + (this.state.newWithdrawal ? " btn-primary" : "")} type="submit" key="withdraw">
             <FormattedMessage message={this.getIntlMessage('form.withdraw')} />
           </Button>
         </div>
+
         <ConfirmModal
           show={this.state.showModal}
           onHide={this.closeModal}

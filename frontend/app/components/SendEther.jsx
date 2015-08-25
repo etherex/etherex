@@ -5,6 +5,7 @@ var IntlMixin = ReactIntl.IntlMixin;
 var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Button = require('react-bootstrap/lib/Button');
+var Input = require('react-bootstrap/lib/Input');
 var ConfirmModal = require('./ConfirmModal');
 
 var fixtures = require("../js/fixtures");
@@ -15,7 +16,7 @@ var SubSend = React.createClass({
 
   getInitialState: function() {
     return {
-      amount: 0,
+      amount: null,
       recipient: null,
       newSend: false,
       showModal: false,
@@ -45,8 +46,8 @@ var SubSend = React.createClass({
   validate: function(e, showAlerts) {
     e.preventDefault();
 
-    var address = this.refs.address.getDOMNode().value.trim();
-    var amount = parseFloat(this.refs.amount.getDOMNode().value.trim());
+    var address = this.refs.address.getValue().trim();
+    var amount = parseFloat(this.refs.amount.getValue().trim());
 
     this.setState({
       recipient: address,
@@ -112,9 +113,6 @@ var SubSend = React.createClass({
 
     this.props.flux.actions.user.sendEther(payload);
 
-    this.refs.address.getDOMNode().value = '';
-    this.refs.amount.getDOMNode().value = '';
-
     this.setState({
         recipient: null,
         amount: null,
@@ -125,29 +123,26 @@ var SubSend = React.createClass({
   render: function() {
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
-        <div className="container-fluid row">
-          <div className="form-group">
-            <label className="sr-only" forHtml="address">
-              <FormattedMessage message={this.getIntlMessage('form.address')} />
-            </label>
-            <input ref="address" type="text" className="form-control"
-                   maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="0x"
-                   onChange={this.handleChange} />
-          </div>
-          <div className="form-group">
-            <label className="sr-only" forHtml="amount">
-              <FormattedMessage message={this.getIntlMessage('form.amount')} />
-            </label>
-            <input ref="amount" type="number" className="form-control"
-              min={1 / _.parseInt(fixtures.ether)} step={1 / _.parseInt(fixtures.ether)} placeholder="10.0000"
-              onChange={this.handleChange} />
-          </div>
-          <div className="form-group">
-            <Button className={"btn-block" + (this.state.newSend ? " btn-primary" : "")} type="submit" key="send">
-              <FormattedMessage message={this.getIntlMessage('send.send')} />
-            </Button>
-          </div>
+        <Input type="text" ref="address"
+          label={<FormattedMessage message={this.getIntlMessage('form.address')} />} labelClassName="sr-only"
+          placeholder="0x"
+          maxLength="42" pattern="0x[a-fA-F\d]+"
+          onChange={this.handleChange}
+          value={this.state.recipient} />
+
+        <Input type="number" ref="amount"
+          label={<FormattedMessage message={this.getIntlMessage('form.amount')} />} labelClassName="sr-only"
+          placeholder="10.0000"
+          min={1 / _.parseInt(fixtures.ether)} step={1 / _.parseInt(fixtures.ether)}
+          onChange={this.handleChange}
+          value={this.state.amount} />
+
+        <div className="form-group">
+          <Button className={"btn-block" + (this.state.newSend ? " btn-primary" : "")} type="submit" key="send">
+            <FormattedMessage message={this.getIntlMessage('send.send')} />
+          </Button>
         </div>
+
         <ConfirmModal
           show={this.state.showModal}
           onHide={this.closeModal}
