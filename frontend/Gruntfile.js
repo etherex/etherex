@@ -16,7 +16,11 @@ module.exports = function(grunt) {
             }
           }),
           new webpack.optimize.DedupePlugin(),
-          new webpack.optimize.UglifyJsPlugin()
+          new webpack.optimize.UglifyJsPlugin({
+            mangle: {
+              except: ["Array", "BigInteger", "Boolean", "Buffer", "ECPair", "Function", "Number", "Point", "Script"]
+            }
+          })
         )
       },
       "build-dev": {
