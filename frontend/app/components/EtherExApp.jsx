@@ -107,13 +107,22 @@ var EtherExApp = React.createClass({
               <div className="col-md-2" id="side-bar">
                 <div className="row">
                   <NavBar flux={this.state.flux} />
-                  { (this.state.market.error) &&
+                  { this.state.market.error &&
                     <div className="container-fluid">
                       <div className="alert alert-danger" role="alert">
                         <h5>
                           <FormattedMessage message={this.getIntlMessage('error')} />
                         </h5>
                         {this.state.market.error}
+                      </div>
+                    </div> }
+                  { this.state.user.error &&
+                    <div className="container-fluid">
+                      <div className="alert alert-danger" role="alert">
+                        <h4>
+                          <FormattedMessage message={this.getIntlMessage('error')} />
+                        </h4>
+                        {this.state.user.error}
                       </div>
                     </div> }
                   <div className="visible-lg">
@@ -140,18 +149,10 @@ var EtherExApp = React.createClass({
                     </div>
                     <div className="col-xs-1">
                       <div className="row">
-                        { (this.state.user.error) ?
-                        <div className="container-fluid">
-                          <div className="alert alert-danger" role="alert">
-                            <h4>
-                              <FormattedMessage message={this.getIntlMessage('error')} />
-                            </h4>
-                            {this.state.user.error}
-                          </div>
-                        </div> :
-                        <div className="top-btn pull-right">
-                          <MarketSelect flux={this.props.flux} market={this.state.market} user={this.state.user} />
-                        </div> }
+                        { !this.state.user.error &&
+                          <div className="top-btn pull-right">
+                            <MarketSelect flux={this.props.flux} market={this.state.market} user={this.state.user} />
+                          </div> }
                       </div>
                     </div>
                     <div className="col-xs-3">
@@ -175,7 +176,7 @@ var EtherExApp = React.createClass({
                   </div>
                 </div>
                 <div className="row visible-xs visible-sm sub-bar">
-                  { (!this.state.market.error) &&
+                  { !this.state.market.error &&
                     <BalanceSub
                       user={this.state.user}
                       market={this.state.market}
@@ -186,7 +187,7 @@ var EtherExApp = React.createClass({
                   <div className="col-md-10">
                     <div className="inner-content">
 
-                      { !this.state.market.error && this.state.showGraph &&
+                      { (!this.state.market.error && this.state.showGraph) &&
                         <div className="container-fluid">
                           <div className="row">
                             <RangeSelect flux={this.state.flux} />
@@ -209,22 +210,19 @@ var EtherExApp = React.createClass({
                     </div>
                   </div>
                   <div className="col-md-2 visible-md visible-lg sub-bar">
-                    { (!this.state.market.error) &&
+                    { !this.state.market.error &&
                       <BalanceSub
                         user={this.state.user}
                         market={this.state.market}
                         si={this.state.config.si} />
                     }
+                    <Chat market={this.state.market.market} flux={this.state.flux} />
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        {
-        // <Chat market={this.state.market.market} flux={this.state.flux} />
-        }
 
         <LoadingModal flux={ this.state.flux } network={ this.state.network } config={ this.state.config } theme={ this.state.theme } />
 

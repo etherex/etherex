@@ -67,7 +67,7 @@ var Chat = React.createClass({
       <div className={ (this.state.activeKey ? "col-xs-4" : "col-xs-2") + " chatbox"}>
         <Accordion activeKey={this.state.activeKey} onSelect={this.toggleActive}>
           <Panel header={
-              <span>{ this.props.market.name } whispers
+              <span>{ this.props.market.name } Whisper
                 { this.state.activeKey && <span className="pull-right"><Glyphicon glyph="remove" onClick={this.toggleActive} /></span> }
               </span>
             } bsStyle="primary" eventKey='1'>

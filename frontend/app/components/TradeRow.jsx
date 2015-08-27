@@ -103,6 +103,9 @@ var TradeRow = React.createClass({
 
   handleClick: function(e) {
     e.preventDefault();
+    if (this.props.review)
+        return;
+
     if (this.state.payload)
       this.props.flux.actions.trade.clickFill(this.state.payload);
   },

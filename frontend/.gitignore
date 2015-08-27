@@ -5,4 +5,6 @@ app/*.svg
 app/*.woff
 app/*.eot
 app/*.ttf
+app/*.jpg
+app/*.png
 .grunt/

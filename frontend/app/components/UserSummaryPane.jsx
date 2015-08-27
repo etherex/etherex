@@ -10,7 +10,9 @@ var MenuItem = require('react-bootstrap/lib/MenuItem');
 var UserSummaryPane = React.createClass({
   mixins: [IntlMixin],
 
-  handleChange: function(address) {
+  handleChange: function(e, address) {
+    e.preventDefault();
+
     this.props.flux.actions.user.switchAddress({
       address: address
     });

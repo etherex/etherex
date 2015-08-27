@@ -41,7 +41,9 @@ var TradeForm = React.createClass({
     this.refs.alerts.setState({alertVisible: show});
   },
 
-  handleType: function(key) {
+  handleType: function(e, key) {
+    e.preventDefault();
+
     this.setState({
       type: key,
       typename: this.refs.type.props.children[key - 1].props.children
@@ -61,9 +63,10 @@ var TradeForm = React.createClass({
             <div className="pull-left h4">{this.formatMessage(this.getIntlMessage('form.new'))}</div>
             <span className="panel-title">
               <label className="sr-only" forHtml="type">this.formatMessage(this.getIntlMessage('form.buyorsell'))</label>
-              <DropdownButton bsStyle="primary" bsSize="medium"
-                              ref="type" onSelect={this.handleType}
-                              key={this.state.type} title={this.state.typename}>
+              <DropdownButton bsStyle="primary" bsSize="medium" ref="type"
+                  onSelect={this.handleType}
+                  key={this.state.type}
+                  title={this.state.typename}>
                 <MenuItem key={1} eventKey={1}>Buy</MenuItem>
                 <MenuItem key={2} eventKey={2}>Sell</MenuItem>
               </DropdownButton>

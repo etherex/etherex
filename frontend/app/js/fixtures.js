@@ -41,6 +41,7 @@ var fixtures = {
   marketFields: 11,
   demo: {
     config: {
+      network: 0,
       rangeEnd: 2475
     },
     network: {
@@ -75,6 +76,7 @@ var fixtures = {
         "weekChange": "-",
         "monthChange": "-",
         "minTotal": 1,
+        "messages": [],
         "txs": [
           {
             "hash": "0x73a5c2732869c617ba47663ae611ec62c27f28043052e36ffcd506856112b8d8",
@@ -952,7 +954,8 @@ var fixtures = {
           "available": 7800,
           "trading": 2300,
           "dayClass": "text-danger",
-          "daySign": "-"
+          "daySign": "-",
+          "messages": []
         },
         {
           "id": 2,
@@ -976,7 +979,11 @@ var fixtures = {
           "weekChange": "-",
           "monthChange": "-",
           "available": 925500,
-          "trading": 75000
+          "trading": 75000,
+          "txs": [],
+          "data": [],
+          "prices": [],
+          "messages": []
         },
         {
           "id": 3,
@@ -1000,7 +1007,11 @@ var fixtures = {
           "weekChange": "-",
           "monthChange": "-",
           "available": 8450000,
-          "trading": 1550000
+          "trading": 1550000,
+          "txs": [],
+          "data": [],
+          "prices": [],
+          "messages": []
         }
       ],
       "favorites": [

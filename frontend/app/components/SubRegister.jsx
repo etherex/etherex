@@ -46,7 +46,9 @@ var SubRegister = React.createClass({
     this.setState({ showAlert: false});
   },
 
-  handleCategories: function(key) {
+  handleCategories: function(e, key) {
+    e.preventDefault();
+
     this.setState({
       category: key,
       categoryName: this.refs.category.props.children[key - 1].props.children

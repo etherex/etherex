@@ -77,7 +77,9 @@ var ConfigPane = React.createClass({
     });
   },
 
-  handleChangeTheme(theme) {
+  handleChangeTheme(e, theme) {
+    e.preventDefault();
+
     this.setState({
       theme: theme,
       newTheme: true

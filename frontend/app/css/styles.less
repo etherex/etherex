@@ -14,6 +14,8 @@
 @purple: rgb(99, 102, 141);
 @purple-dark: rgb(94, 97, 136);
 @purple-light: rgb(104, 107, 146);
+@primary-blue: rgb(22, 27, 48);
+@dark-blue: rgb(19, 21, 37);
 
 html, body {
   height: 100%;
@@ -148,11 +150,11 @@ a:focus {
 }
 
 #side-bar {
-  background-color: rgb(19, 21, 37);
+  background-color: @dark-blue;
 }
 
 #side-nav {
-  background-color: rgb(22, 27, 48);
+  background-color: @primary-blue;
   margin-bottom: 0;
   padding-bottom: 30px;
 }
@@ -289,8 +291,9 @@ a:focus {
 
 .chatbox {
   bottom: -20px;
-  right: 0;
+  right: 1px;
   position: fixed;
+  text-align: left;
   z-index: 999;
 }
 
@@ -324,10 +327,6 @@ a:focus {
 .trade-form .col-md-6:first-child {
   border-right: 1px solid @lighter;
   margin-right: -1px;
-}
-
-.form-control {
-  color: @orange;
 }
 
 .input-group .form-control {
@@ -418,6 +417,72 @@ tr.disabled td {
 
 
 /* Bootstrap overrides */
+.theme-flatly,
+.theme-flatly .text-primary,
+.theme-flatly legend,
+.theme-flatly output,
+.theme-flatly .form-control,
+.theme-flatly .btn-primary .badge,
+.theme-flatly .input-group-addon,
+.theme-flatly .nav-tabs > li.active > a,
+.theme-flatly .nav-tabs > li.active > a:hover,
+.theme-flatly .nav-tabs > li.active > a:focus,
+// .theme-flatly .nav-pills > li > a,
+.theme-flatly .list-group-item.active > .badge,
+.theme-flatly .nav-pills > .active > a > .badge,
+.theme-flatly .thumbnail .caption,
+.theme-flatly .panel-default > .panel-heading,
+.theme-flatly .panel-primary > .panel-heading .badge,
+.theme-flatly .navbar-default .badge,
+.theme-flatly .text-primary,
+.theme-flatly .text-primary:hover,
+.theme-flatly .panel-default .close,
+.theme-flatly .modal .close,
+.theme-flatly .popover {
+  color: @primary-blue;
+}
+
+.theme-flatly .form-control:focus {
+  color: @orange;
+}
+
+.theme-flatly .bg-primary,
+.theme-flatly .dropdown-menu > li > a:hover,
+.theme-flatly .dropdown-menu > li > a:focus,
+.theme-flatly .dropdown-menu > .active > a,
+.theme-flatly .dropdown-menu > .active > a:hover,
+.theme-flatly .dropdown-menu > .active > a:focus,
+.theme-flatly .nav-pills > li.active > a,
+.theme-flatly .nav-pills > li.active > a:hover,
+.theme-flatly .nav-pills > li.active > a:focus,
+.theme-flatly .navbar-default,
+.theme-flatly .label-primary,
+.theme-flatly .badge,
+.theme-flatly .progress-bar,
+.theme-flatly .panel-default > .panel-heading .badge {
+  background-color: @primary-blue;
+}
+
+.theme-flatly .panel-primary > .panel-heading,
+.theme-flatly .list-group-item.active,
+.theme-flatly .list-group-item.active:hover,
+.theme-flatly .list-group-item.active:focus {
+  background-color: @primary-blue;
+  border-color: @primary-blue;
+}
+
+.theme-flatly .panel-primary {
+  border-color: @primary-blue;
+}
+
+.theme-flatly .panel-primary > .panel-heading + .panel-collapse > .panel-body {
+  border-top-color: @primary-blue;
+}
+
+.theme-flatly .panel-primary > .panel-footer + .panel-collapse > .panel-body {
+  border-bottom-color: @primary-blue;
+}
+
 .theme-darkly a,
 .navbar a {
   color: #ccc; /*#0ce3ac;*/
@@ -428,6 +493,12 @@ tr.disabled td {
 .navbar a:hover,
 .navbar a:focus {
   color: #fff; /*#0ce3ac;*/
+  text-decoration: none;
+}
+
+.panel-title a:hover,
+.panel-title a:focus {
+  color: inherit;
   text-decoration: none;
 }
 
@@ -496,6 +567,7 @@ tr.disabled td {
 .trades-leave.trades-leave-active {
   opacity: 0.01;
 }
+
 
 /* Chart */
 .axis path,
