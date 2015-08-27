@@ -12,19 +12,15 @@ var Balance = React.createClass({
   render: function() {
     return (
       <div className="text-overflow">
-        <b>Balance:</b> <span className="text-orange">{ this.props.user.user.balanceSub }</span> { this.props.market.market.name }{' / '}
-        <OverlayTrigger trigger={['hover', 'focus']} placement='right' overlay={
+        <OverlayTrigger trigger={['hover', 'focus']} placement='bottom' overlay={
             <Popover>
               <div className="text-overflow">
-                { this.formatMessage(
-                    this.getIntlMessage('wallet.pending'), {
-                      currency: "ETH",
-                      balance: this.props.user.user.balance,
-                      pending: this.props.user.user.balancePending
-                    })
-                }
+                <span className="text-orange">{ this.props.user.user.balanceSub }</span> { this.props.market.market.name }{' / '}
+                <span className="text-light">{ this.props.user.user.balance } ETH</span>
               </div>
-            </Popover>}>
+            </Popover>} >
+          <span>
+            <b>Balance:</b> <span className="text-orange">{ this.props.user.user.balanceSub }</span> { this.props.market.market.name }{' / '}
             <span className="text-light">
               { this.props.user.user.balanceFormatted &&
                 <FormattedMessage
@@ -32,6 +28,7 @@ var Balance = React.createClass({
                   value={this.props.user.user.balanceFormatted.value}
                   unit={this.props.user.user.balanceFormatted.unit} /> }
             </span>
+          </span>
         </OverlayTrigger>
       </div>
     );

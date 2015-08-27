@@ -28,19 +28,19 @@ var BalanceSub = React.createClass({
                   })
                 }
               </Popover>}>
-              <h4>
-                { this.props.si ?
-                  utils.format(balance) :
-                  <FormattedMessage
-                    message={this.getIntlMessage('wallet.sub')}
-                    balance={balance}
-                    currency={this.props.market.market.name} />
-                }
-              </h4>
+            <h4>
+              { this.props.si ?
+                utils.format(balance) :
+                <FormattedMessage
+                  message={this.getIntlMessage('wallet.sub')}
+                  balance={balance}
+                  currency={this.props.market.market.name} />
+              }
+            </h4>
           </OverlayTrigger>
         </div>
         <div className="navbar col-md-12">
-          <div className="text-light">Available to trade</div>
+          <div className="text-light">Available <span className="hidden-xs">to trade</span></div>
           <div>
             <OverlayTrigger trigger={['hover', 'focus']} placement='left' overlay={
                 <Popover>
@@ -50,24 +50,37 @@ var BalanceSub = React.createClass({
                     })
                   }
                 </Popover>}>
-                <h4>
-                  { this.props.si ?
-                    utils.format(available) :
-                    <FormattedMessage
-                      message={this.getIntlMessage('wallet.sub')}
-                      balance={available}
-                      currency={this.props.market.market.name} />
-                  }
-                </h4>
+              <h4>
+                { this.props.si ?
+                  utils.format(available) :
+                  <FormattedMessage
+                    message={this.getIntlMessage('wallet.sub')}
+                    balance={available}
+                    currency={this.props.market.market.name} />
+                }
+              </h4>
             </OverlayTrigger>
           </div>
-          <h4>
-            { this.props.user.user.balanceFormatted &&
-              <FormattedMessage
-                message={this.getIntlMessage('ether')}
-                value={this.props.user.user.balanceFormatted.value}
-                unit={this.props.user.user.balanceFormatted.unit} /> }
-          </h4>
+          <OverlayTrigger trigger={['hover', 'focus']} placement='left' overlay={
+              <Popover>
+                <div className="text-overflow">
+                  { this.formatMessage(
+                      this.getIntlMessage('wallet.pending'), {
+                        currency: "ETH",
+                        balance: this.props.user.user.balance,
+                        pending: this.props.user.user.balancePending
+                      })
+                  }
+                </div>
+              </Popover>}>
+            <h4 className="hidden-xs">
+              { this.props.user.user.balanceFormatted &&
+                <FormattedMessage
+                  message={this.getIntlMessage('ether')}
+                  value={this.props.user.user.balanceFormatted.value}
+                  unit={this.props.user.user.balanceFormatted.unit} /> }
+            </h4>
+          </OverlayTrigger>
         </div>
         <div className="navbar col-md-12">
           <div className="text-light">In trades</div>
@@ -79,15 +92,15 @@ var BalanceSub = React.createClass({
                   })
                 }
               </Popover>}>
-              <h4>
-                { this.props.si ?
-                  utils.format(trading) :
-                  <FormattedMessage
-                    message={this.getIntlMessage('wallet.sub')}
-                    balance={trading}
-                    currency={this.props.market.market.name} />
-                }
-              </h4>
+            <h4>
+              { this.props.si ?
+                utils.format(trading) :
+                <FormattedMessage
+                  message={this.getIntlMessage('wallet.sub')}
+                  balance={trading}
+                  currency={this.props.market.market.name} />
+              }
+            </h4>
           </OverlayTrigger>
         </div>
       </div>

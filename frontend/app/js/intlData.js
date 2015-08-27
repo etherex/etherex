@@ -244,7 +244,7 @@ module.exports = {
       "not_found": "User not found",
       "summary": "User summary",
       "address": "Current address",
-      "switch": "Switch address",
+      "switch": "Use address",
       "sub": "Current {currency} balance",
       "balance": `{balance, number} {currency}
                   {pending, plural,

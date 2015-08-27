@@ -42,7 +42,7 @@ var UserSummaryPane = React.createClass({
               <tr>
                 <td>
                   <div className="btn row">
-                    <FormattedMessage message={this.getIntlMessage('user.summary')} />
+                    <FormattedMessage message={this.getIntlMessage('user.switch')} />
                   </div>
                 </td>
                 <td>
