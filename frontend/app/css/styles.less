@@ -72,13 +72,6 @@ a:focus {
   background-color: #2b3e50;
 }
 
-#top-bar .nav a:hover,
-#top-bar .nav a:focus,
-#top-bar .nav a.active {
-  color: @orange;
-  background: transparent;
-}
-
 .sub-bar {
   padding-top: 30px;
   text-align: right;
@@ -88,15 +81,18 @@ a:focus {
   display: inline-block;
   color: @orange;
 }
+
 @media (max-width: 991px) {
   .sub-bar {
     background-color: #fff;
   }
+
   .sub-bar .col-md-12 {
     float: left;
     text-align: center;
     width: 33.33333333%;
   }
+
   #content:before {
     width: 100% !important;
   }
@@ -149,6 +145,13 @@ a:focus {
   color: rgb(48, 43, 98);
 }
 
+.top-link a:hover,
+.top-link a:focus,
+.top-link a.active {
+  color: @orange;
+  text-decoration: none;
+}
+
 #side-bar {
   background-color: @dark-blue;
 }
@@ -172,18 +175,38 @@ a:focus {
   #side-nav a {
     padding-left: 0;
   }
+
+  .top-bar-text {
+    line-height: 50px;
+  }
 }
 
 @media (max-width: 1023px) {
   #side-nav a {
-    padding-left: 10px;
-    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 
 @media (max-width: 767px) {
+  .flex-height > div:first-child {
+    width: 70px;
+  }
+
+  .navbar-toggle {
+    display: block;
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
+    width: 43px;
+  }
+
   #logo > a > span {
     background-size: 60px;
+  }
+
+  #side-nav a {
+    text-align: center;
   }
 }
 

@@ -66,7 +66,7 @@ var UserSummaryPane = React.createClass({
                                       value={this.props.user.user.balanceFormatted.value}
                                       unit={this.props.user.user.balanceFormatted.unit} /> }
                   { this.props.user.user.balance &&
-                      <span> = <br/>
+                      <div>
                         { this.formatMessage(
                             this.getIntlMessage('user.balance'), {
                               currency: "wei",
@@ -74,7 +74,7 @@ var UserSummaryPane = React.createClass({
                               pending: this.props.user.user.balancePending
                             })
                         }
-                      </span>
+                      </div>
                   }
                 </td>
               </tr>

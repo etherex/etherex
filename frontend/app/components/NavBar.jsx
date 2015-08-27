@@ -23,22 +23,28 @@ var NavBar = React.createClass({
               <span title="#EtherEx" />
             </NavItemLink>
             <NavItemLink to="home">
-              <i className="glyphicon glyphicon-stats"></i> <FormattedMessage message={this.getIntlMessage('nav.trades')} />
+              <i className="glyphicon glyphicon-stats"></i>{' '}
+              <span className="hidden-xs"><FormattedMessage message={this.getIntlMessage('nav.trades')} /></span>
             </NavItemLink>
             <NavItemLink to="markets">
-              <i className="icon-chart-line"></i> <FormattedMessage message={this.getIntlMessage('nav.markets')} />
+              <i className="icon-chart-line"></i>{' '}
+              <span className="hidden-xs"><FormattedMessage message={this.getIntlMessage('nav.markets')} /></span>
             </NavItemLink>
             <NavItemLink to="btc">
-              <i className="icon-bitcoin"></i> BTC
+              <i className="icon-bitcoin"></i>{' '}
+              <span className="hidden-xs">BTC</span>
             </NavItemLink>
             <NavItemLink to="wallet">
-              <i className="icon-wallet"></i> <FormattedMessage message={this.getIntlMessage('nav.wallet')} />
+              <i className="icon-wallet"></i>{' '}
+              <span className="hidden-xs"><FormattedMessage message={this.getIntlMessage('nav.wallet')} /></span>
             </NavItemLink>
             <NavItemLink to="tools">
-              <i className="icon-cog-alt"></i> <FormattedMessage message={this.getIntlMessage('nav.tools')} />
+              <i className="icon-cog-alt"></i>{' '}
+              <span className="hidden-xs"><FormattedMessage message={this.getIntlMessage('nav.tools')} /></span>
             </NavItemLink>
             <NavItemLink to="help">
-              <i className="icon-help"></i> <FormattedMessage message={this.getIntlMessage('nav.help')} />
+              <i className="icon-help"></i>{' '}
+              <span className="hidden-xs"><FormattedMessage message={this.getIntlMessage('nav.help')} /></span>
             </NavItemLink>
           </Nav>
         </CollapsibleNav>

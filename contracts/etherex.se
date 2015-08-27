@@ -140,13 +140,13 @@ macro remove_trade($trade_id, $market_id):
 def init():
     self.created = block.timestamp  # Timestamp when this contract was created
 
+
 #
 # Get price by market ID
 #
 def price(market_id):
     refund()
     return(self.markets[market_id].last_price)
-
 
 #
 # Buy / Sell actions

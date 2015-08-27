@@ -133,21 +133,25 @@ var EtherExApp = React.createClass({
               <div className="col-md-10" id="content">
                 <div className="row">
                   <div id="top-bar">
-                    <div className="col-xs-3 col-xs-offset-1 top-bar-text">
+                    <div className="col-xs-6 col-md-7 col-xs-offset-1">
                       <div className="row">
-                        { (!this.state.market.error && !this.state.user.error) &&
-                          <LastPrice market={this.state.market.market} toggleGraph={this.onToggleGraph} /> }
+                        <div className="col-lg-6 top-bar-text">
+                          <div className="row">
+                            { (!this.state.market.error && !this.state.user.error) &&
+                              <LastPrice market={this.state.market.market} toggleGraph={this.onToggleGraph} /> }
+                          </div>
+                        </div>
+                        <div className="col-lg-6 top-bar-text">
+                          <div className="row">
+                            <Balance
+                              user={this.state.user}
+                              market={this.state.market}
+                              si={this.state.config.si} />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="col-xs-4 top-bar-text">
-                      <div className="row">
-                        <Balance
-                          user={this.state.user}
-                          market={this.state.market}
-                          si={this.state.config.si} />
-                      </div>
-                    </div>
-                    <div className="col-xs-1">
+                    <div className="col-xs-2 col-md-2">
                       <div className="row">
                         { !this.state.user.error &&
                           <div className="top-btn pull-right">
@@ -155,7 +159,7 @@ var EtherExApp = React.createClass({
                           </div> }
                       </div>
                     </div>
-                    <div className="col-xs-3">
+                    <div className="col-xs-3 col-md-2">
                       <div className="top-link text-right text-overflow">
                         <UserLink address={ this.state.user.user.id } showIcon={true} />
                       </div>
