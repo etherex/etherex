@@ -6,7 +6,6 @@ var TransitionGroup = require('../TransitionGroup');
 
 var Table = require("react-bootstrap/lib/Table");
 
-var Nav = require("./Nav");
 var TicketRow = require("./TicketRow");
 var TicketDetails = require("./TicketDetails");
 var Button = require('react-bootstrap/lib/Button');
@@ -14,6 +13,9 @@ var Modal = require('react-bootstrap/lib/Modal');
 var ConfirmModal = require('../ConfirmModal');
 var AlertModal = require('../AlertModal');
 // var utils = require('../js/utils');
+
+var Nav = require('./Nav');
+var Blocks = require('./Blocks');
 
 var Tickets = React.createClass({
   contextTypes: {
@@ -126,7 +128,8 @@ var Tickets = React.createClass({
 
     return (
       <div>
-        <Nav flux={this.props.flux} ticket={this.props.ticket} />
+        <Nav />
+        <Blocks flux={this.props.flux} ticket={this.props.ticket} />
 
         <Table condensed hover responsive striped>
           <thead>

@@ -11,7 +11,8 @@ var Input = require('react-bootstrap/lib/Input');
 var AlertModal = require('../AlertModal');
 var ConfirmModal = require('../ConfirmModal');
 
-var Nav = require("./Nav");
+var Nav = require('./Nav');
+var Blocks = require('./Blocks');
 
 var ClaimTicket = React.createClass({
   contextTypes: {
@@ -156,7 +157,8 @@ var ClaimTicket = React.createClass({
   render() {
     return (
       <div>
-        <Nav flux={this.props.flux} ticket={this.props.ticket} />
+        <Nav />
+        <Blocks flux={this.props.flux} ticket={this.props.ticket} />
 
         <div className="row">
           <div className="col-md-2">

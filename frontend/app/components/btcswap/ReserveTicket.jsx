@@ -11,7 +11,8 @@ var ConfirmModal = require('../ConfirmModal');
 var Popover = require('react-bootstrap/lib/Popover');
 var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
 
-var Nav = require("./Nav");
+var Nav = require('./Nav');
+var Blocks = require('./Blocks');
 
 var ReserveTicket = React.createClass({
   contextTypes: {
@@ -407,7 +408,8 @@ var ReserveTicket = React.createClass({
   render() {
     return (
       <div>
-        <Nav flux={this.props.flux} ticket={this.props.ticket} />
+        <Nav />
+        <Blocks flux={this.props.flux} ticket={this.props.ticket} />
 
         <div className="row">
           <div className="col-md-2">
@@ -493,28 +495,42 @@ var ReserveTicket = React.createClass({
                     addonAfter="%"
                     help="Optional ether fee to claimer." />
 
-                  <Button onClick={this.handleGenerateWallet}
-                    className={this.state.canGenerateWallet ? "btn-primary" : ""}
-                    disabled={!this.state.canGenerateWallet}
-                    style={{marginRight: 10}}>
-                      Generate wallet
-                  </Button>
-                  <Button onClick={this.handleCreateTransaction}
-                    className={this.state.canCreateTx ? "btn-primary" : ""}
-                    disabled={!this.state.canCreateTx}
-                    style={{marginRight: 10}}>
-                      Create transaction
-                  </Button>
-                  <Button onClick={this.confirmPropagation}
-                    className={(this.state.canPropagateTx && !this.state.ticket.reservable) ? "btn-primary" : ""}
-                    disabled={!this.state.canPropagateTx}
-                    style={{marginRight: 10}}>
-                      Broadcast transaction
-                  </Button>
-                  <Button onClick={this.confirmClearWallet}
-                    disabled={this.state.canGenerateWallet}>
-                      Clear
-                  </Button>
+                  <div className="col-md-6">
+                    <div className="container-fluid form-group">
+                      <Button onClick={this.handleGenerateWallet}
+                        className={(this.state.canGenerateWallet && "btn-primary") + " btn-block"}
+                        disabled={!this.state.canGenerateWallet} >
+                          <div className="text-overflow">Generate wallet</div>
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="container-fluid form-group">
+                      <Button onClick={this.handleCreateTransaction}
+                        className={(this.state.canCreateTx && "btn-primary") + " btn-block pull-right"}
+                        disabled={!this.state.canCreateTx} >
+                          <div className="text-overflow">Create transaction</div>
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="container-fluid form-group">
+                      <Button onClick={this.confirmClearWallet}
+                        className="btn-block"
+                        disabled={this.state.canGenerateWallet}>
+                          Clear
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="container-fluid form-group">
+                      <Button onClick={this.confirmPropagation}
+                        className={((this.state.canPropagateTx && !this.state.ticket.reservable) && "btn-primary") + " btn-block pull-right"}
+                        disabled={!this.state.canPropagateTx} >
+                          <div className="text-overflow">Broadcast transaction</div>
+                      </Button>
+                    </div>
+                  </div>
                 </form>
               </div>
             </div>

@@ -1,7 +1,9 @@
 // var _ = require('lodash');
 var React = require("react");
 var Link = require("react-router").Link;
-var Nav = require("./Nav");
+
+var Nav = require('./Nav');
+var Blocks = require('./Blocks');
 
 // var ButtonGroup = require('react-bootstrap/lib/ButtonGroup');
 // var Button = require('react-bootstrap/lib/Button');
@@ -12,7 +14,8 @@ var Help = React.createClass({
   render() {
     return (
       <div>
-        <Nav flux={this.props.flux} ticket={this.props.ticket} />
+        <Nav />
+        <Blocks flux={this.props.flux} ticket={this.props.ticket} />
 
         <div className="col-md-6 col-md-offset-3">
           <h3>Buying Ether</h3>

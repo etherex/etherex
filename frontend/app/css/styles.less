@@ -162,6 +162,13 @@ a:focus {
   padding-bottom: 30px;
 }
 
+#side-nav .navbar-nav,
+#side-nav .nav-stacked > li {
+  display: block;
+  float: none;
+  list-style: none;
+}
+
 #side-nav i {
   display: inline-block;
   width: 2em;
@@ -182,6 +189,10 @@ a:focus {
 }
 
 @media (max-width: 1023px) {
+  .flex-height > div:first-child {
+    min-width: 140px;
+  }
+
   #side-nav a {
     padding-left: 0;
     padding-right: 0;
@@ -190,7 +201,11 @@ a:focus {
 
 @media (max-width: 767px) {
   .flex-height > div:first-child {
-    width: 70px;
+    min-width: 44px;
+  }
+
+  #side-nav .navbar-nav {
+    margin-top: 0;
   }
 
   .navbar-toggle {
@@ -210,6 +225,9 @@ a:focus {
   }
 }
 
+#side-nav.navbar-default .navbar-nav > .active > a,
+#side-nav.navbar-default .navbar-nav > .active > a:hover,
+#side-nav.navbar-default .navbar-nav > .active > a:focus,
 #side-nav .nav > li > a:hover,
 #side-nav .nav > li > a:focus {
   background: transparent;
@@ -507,14 +525,21 @@ tr.disabled td {
 }
 
 .theme-darkly a,
-.navbar a {
+.navbar-default .navbar-nav > li > a {
   color: #ccc; /*#0ce3ac;*/
+}
+
+@media (min-width: 768px) {
+  .navbar-nav > li > a {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
 }
 
 .theme-darkly a:hover,
 .theme-darkly a:focus,
-.navbar a:hover,
-.navbar a:focus {
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
   color: #fff; /*#0ce3ac;*/
   text-decoration: none;
 }

@@ -7,7 +7,9 @@ var Button = require('react-bootstrap/lib/Button');
 var Input = require('react-bootstrap/lib/Input');
 var ConfirmModal = require('../ConfirmModal');
 var AlertDismissable = require('../AlertDismissable');
-var Nav = require("./Nav");
+
+var Nav = require('./Nav');
+var Blocks = require('./Blocks');
 
 var CreateTicket = React.createClass({
   contextTypes: {
@@ -121,7 +123,8 @@ var CreateTicket = React.createClass({
   render() {
     return (
       <div>
-        <Nav flux={this.props.flux} ticket={this.props.ticket} />
+        <Nav />
+        <Blocks flux={this.props.flux} ticket={this.props.ticket} />
 
         <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
 
