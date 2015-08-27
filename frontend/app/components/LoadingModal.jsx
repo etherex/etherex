@@ -178,7 +178,10 @@ var LoadingModal = React.createClass({
         <div>
           <p><FormattedMessage message={this.getIntlMessage('init.connect.explain')} /></p>
           <p className="navbar">
-            <Button onClick={ this.toggleInstallationHelp }>
+            <Button className="visible-xs" bsSize="xsmall" onClick={ this.toggleInstallationHelp }>
+              <FormattedMessage message={this.getIntlMessage('init.connect.assistance')} />
+            </Button>
+            <Button className="hidden-xs" onClick={ this.toggleInstallationHelp }>
               <FormattedMessage message={this.getIntlMessage('init.connect.assistance')} />
             </Button>
           </p>
