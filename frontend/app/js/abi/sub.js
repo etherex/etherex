@@ -23,7 +23,7 @@ module.exports = [{
     "outputs": [{ "name": "out", "type": "int256" }]
 },
 {
-    "name": "disapprove(int256)",
+    "name": "unapprove(int256)",
     "type": "function",
     "inputs": [{ "name": "_addr", "type": "int256" }],
     "outputs": [{ "name": "out", "type": "int256" }]
