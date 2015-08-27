@@ -416,7 +416,7 @@ var ReserveTicket = React.createClass({
             <div className="panel panel-default">
               <div className="panel-heading">
                 <h3 className="panel-title">
-                  Ticker ID lookup
+                  Lookup
                 </h3>
               </div>
               <div className="panel-body">

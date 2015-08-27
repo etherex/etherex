@@ -417,7 +417,7 @@ var TradeStore = Fluxxor.createStore({
       }
 
     // Set state for filling trades for fillTrades
-    this.type = payload.type;
+    // this.type = payload.type;
     this.price = payload.price;
     this.amount = payload.amount;
     this.total = payload.total;
@@ -438,11 +438,12 @@ var TradeStore = Fluxxor.createStore({
     var decimals = market.decimals;
     var precision = String(market.precision).length - 1;
     var amount = payload.amount.toFixed(decimals);
+
+    this.type = payload.type == 1 ? 2 : 1;
     this.amount = parseFloat(amount);
     this.price = payload.price;
     this.total = (amount * payload.price).toFixed(precision) || payload.total;
     this.newAmount = true;
-    this.type = payload.type == 1 ? 2 : 1;
 
     this.emit(constants.CHANGE_EVENT);
 

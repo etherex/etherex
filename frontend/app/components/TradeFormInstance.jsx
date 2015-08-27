@@ -43,13 +43,15 @@ var TradeFormInstance = React.createClass({
       this.setState({
         amount: parseFloat(nextProps.trades.amount),
         price: parseFloat(nextProps.trades.price),
-        total: parseFloat(nextProps.trades.total)
+        total: parseFloat(nextProps.trades.total),
+        typeLabel: 'form.' + (nextProps.type == 1 ? 'buy' : 'sell')
       });
       this.preValidate(nextProps.trades.type, nextProps.trades.amount, nextProps.trades.price, nextProps.trades.total);
     }
     else if (nextProps.trades.type != this.props.type) {
       this.setState({
-        isValid: false
+        isValid: false,
+        typeLabel: 'form.' + (nextProps.type == 1 ? 'buy' : 'sell')
       });
     }
   },

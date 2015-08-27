@@ -12,7 +12,7 @@ var Balance = React.createClass({
   render: function() {
     return (
       <div className="text-overflow">
-        <OverlayTrigger trigger={['hover', 'focus']} placement='bottom' overlay={
+        <OverlayTrigger trigger={['hover', 'click']} placement='bottom' rootClose={true} overlay={
             <Popover>
               <div className="text-overflow">
                 <span className="text-orange">{ this.props.user.user.balanceSub }</span> { this.props.market.market.name }{' / '}

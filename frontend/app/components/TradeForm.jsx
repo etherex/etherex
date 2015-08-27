@@ -60,17 +60,16 @@ var TradeForm = React.createClass({
             <h3 className="panel-title">{this.formatMessage(this.getIntlMessage('form.new'))}</h3>
           </div>
           <div className="visible-xs visible-sm text-center">
-            <div className="pull-left h4">{this.formatMessage(this.getIntlMessage('form.new'))}</div>
-            <span className="panel-title">
-              <label className="sr-only" forHtml="type">this.formatMessage(this.getIntlMessage('form.buyorsell'))</label>
-              <DropdownButton bsStyle="primary" bsSize="medium" ref="type"
-                  onSelect={this.handleType}
-                  key={this.state.type}
-                  title={this.state.typename}>
-                <MenuItem key={1} eventKey={1}>Buy</MenuItem>
-                <MenuItem key={2} eventKey={2}>Sell</MenuItem>
-              </DropdownButton>
-            </span>
+            <label className="sr-only" forHtml="type">this.formatMessage(this.getIntlMessage('form.buyorsell'))</label>
+            <DropdownButton bsStyle="primary" bsSize="small" ref="type"
+                className="pull-right"
+                onSelect={this.handleType}
+                key={this.state.type}
+                title={this.state.typename}>
+              <MenuItem key={1} eventKey={1}>Buy</MenuItem>
+              <MenuItem key={2} eventKey={2}>Sell</MenuItem>
+            </DropdownButton>
+            <h3 className="panel-title">{this.formatMessage(this.getIntlMessage('form.new'))}</h3>
           </div>
         </div>
         <div className="panel-body">

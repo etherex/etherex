@@ -39,10 +39,10 @@ class TestEtxContract(object):
         assert self.c.coinBalanceOf(tester.a2) == 10000
         assert self.c.isApprovedOnceFor(tester.a0, tester.a1) == 0
 
-    def test_approve_once_then_disapprove(self):
+    def test_approve_once_then_unapprove(self):
         assert self.c.approveOnce(tester.a1, 10000) == 1
         assert self.c.isApprovedOnceFor(tester.a0, tester.a1) == 10000
-        assert self.c.disapprove(tester.a1) == 1
+        assert self.c.unapprove(tester.a1) == 1
         assert self.c.isApprovedOnceFor(tester.a0, tester.a1) == 0
         assert self.c.sendCoinFrom(tester.a0, 10000, tester.a2, sender=tester.k1) == 0
 
@@ -53,7 +53,7 @@ class TestEtxContract(object):
         assert self.c.sendCoinFrom(tester.a0, 10000, tester.a1, sender=tester.k1) == 1
         assert self.c.coinBalanceOf(tester.a1) == 10000
         assert self.c.isApprovedFor(tester.a0, tester.a1) == 1
-        assert self.c.disapprove(tester.a1) == 1
+        assert self.c.unapprove(tester.a1) == 1
         assert self.c.isApprovedFor(tester.a0, tester.a1) == 0
 
     def test_approve_send_to_another(self):
@@ -62,5 +62,5 @@ class TestEtxContract(object):
         assert self.c.sendCoinFrom(tester.a0, 10000, tester.a2, sender=tester.k1) == 1
         assert self.c.coinBalanceOf(tester.a2) == 10000
         assert self.c.isApprovedFor(tester.a0, tester.a1) == 1
-        assert self.c.disapprove(tester.a1) == 1
+        assert self.c.unapprove(tester.a1) == 1
         assert self.c.isApprovedOnceFor(tester.a0, tester.a1) == 0

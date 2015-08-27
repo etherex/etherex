@@ -106,8 +106,8 @@ def isApprovedOnceFor(_target, _proxy):
         return(value)
     return(0)
 
-# Disapprove full and one-time custody of your account by _addr
-def disapprove(_addr):
+# Unapprove full and one-time custody of your account by _addr
+def unapprove(_addr):
     self.accounts[msg.sender].custodians[_addr].full = 0
     self.accounts[msg.sender].custodians[_addr].maxValue = 0
     log(type=AddressApproval, msg.sender, _addr, 0)

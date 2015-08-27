@@ -13,7 +13,7 @@ var Help = React.createClass({
 
   render() {
     return (
-      <div>
+      <div className="container-fluid row">
         <Nav />
         <Blocks flux={this.props.flux} ticket={this.props.ticket} />
 
@@ -26,13 +26,13 @@ var Help = React.createClass({
             </li>
             <li>
               Generate an intermediate BTC wallet in the Reserve section by
-              clicking on <b>Generate wallet</b> button.
+              clicking on the <b>Generate wallet</b> button.
             </li>
             <li>
               Send the total BTC amount of the ticket plus a 0.3mBTC miner fee
               to your intermediate address. You can still recover your bitcoins
               if you change your mind later on, at least until you broadcast
-              the transaction you'll generate on the next step.
+              the transaction you'll generate on step 5.
             </li>
             <li>Wait for at least 3 confirmations.</li>
             <li>
@@ -45,10 +45,13 @@ var Help = React.createClass({
               Click <b>Compute</b> to get a valid nonce. This can take up to a
               few minutes on slower computers.
             </li>
-            <li>Once you have a valid nonce, click <b>Reserve</b>.</li>
             <li>
-              Broadcast the signed Bitcoin Transaction to the Bitcoin network
-              by clicking on <b>Broadcast transaction</b>.
+              Once you have a valid nonce, click <b>Verify</b> to make sure
+              your nonce is valid, then click <b>Reserve</b>.</li>
+            <li>
+              After the ticket is successfully reserved, broadcast the signed
+              Bitcoin Transaction to the Bitcoin network by clicking on <b>Broadcast
+              transaction</b>.
             </li>
             <li>Wait for 6 confirmations.</li>
             <li>
