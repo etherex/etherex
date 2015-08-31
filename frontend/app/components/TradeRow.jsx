@@ -132,7 +132,7 @@ var TradeRow = React.createClass({
           </div>
         </td>
         <td>
-          <div className="text-right">
+          <div className="text-right text-overflow">
             <FormattedNumber value={this.props.trade.total} /> ETH
           </div>
         </td>
@@ -140,14 +140,17 @@ var TradeRow = React.createClass({
           {!this.props.review &&
             <OverlayTrigger trigger={['hover', 'focus']} placement='right' overlay={
               <Popover>
-                <div className="ellipsis">
-                  {this.props.trade.owner}
+                <div className="text-overflow">
+                  <b>ID:</b> {this.props.trade.id}
+                </div>
+                <div className="text-overflow">
+                  <b>By:</b> {this.props.trade.owner}
                 </div>
               </Popover>}>
               <div className="pull-right">
-                <Button className="btn-xs" onClick={this.openModal}>
+                <a className="btn-xs btn-block text-light" onClick={this.openModal}>
                   <Glyphicon glyph={this.props.isOwn ? "remove" : "screenshot"} />
-                </Button>
+                </a>
               </div>
             </OverlayTrigger>
           }

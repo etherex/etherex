@@ -12,7 +12,7 @@ var SubSend = React.createClass({
 
   getInitialState: function() {
     return {
-      amount: 0,
+      amount: null,
       recipient: null,
       newSend: false,
       showModal: false,

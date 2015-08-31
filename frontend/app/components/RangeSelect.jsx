@@ -100,15 +100,15 @@ var RangeSelect = React.createClass({
 
   render: function() {
     return (
-      <div className="container-fluid row">
+      <div>
         <form className="form-horizontal row" role="form">
-          <ButtonGroup className="col-xs-12 col-sm-8 col-lg-9" pullRight>
-            <Button className="col-xs-4 col-sm-2">
+          <ButtonGroup className="col-xs-7 col-sm-8 col-lg-9 range-scroller">
+            <Button bsSize="small" className="col-xs-4 col-sm-2">
               <div className="text-overflow">
                 # {utils.numeral(this.state.block, 0)}
               </div>
             </Button>
-            <Button className="col-xs-6 col-sm-8 col-md-9">
+            <Button bsSize="small" className="col-xs-6 col-sm-8 col-lg-9">
               <input
                 ref="range"
                 type="range"
@@ -120,13 +120,13 @@ var RangeSelect = React.createClass({
                 defaultValue={this.state.block}
                 />
             </Button>
-            <Button className={this.state.live + " btn-default col-xs-2 col-md-1"} value="live" onClick={this.handleRangeEnd}>live</Button>
+            <Button bsSize="small" className={this.state.live + " btn-default col-xs-2 col-lg-1"} value="live" onClick={this.handleRangeEnd}>live</Button>
           </ButtonGroup>
-          <ButtonGroup className="col-xs-12 col-sm-4 col-lg-3">
+          <ButtonGroup className="col-xs-5 col-sm-4 col-lg-3">
             <div className="pull-right">
-              <Button className={this.state.last15 + " btn-primary"} value={75} onClick={this.handleRange}>15m</Button>
-              <Button className={this.state.last30 + " btn-primary"} value={150} onClick={this.handleRange}>30m</Button>
-              <Button className={this.state.last60 + " btn-primary"} value={300} onClick={this.handleRange}>&nbsp;1h&nbsp;</Button>
+              <Button bsSize="small" className={this.state.last15} value={75} onClick={this.handleRange}>15m</Button>
+              <Button bsSize="small" className={this.state.last30} value={150} onClick={this.handleRange}>30m</Button>
+              <Button bsSize="small" className={this.state.last60} value={300} onClick={this.handleRange}>&nbsp;1h&nbsp;</Button>
             </div>
           </ButtonGroup>
         </form>

@@ -1,4 +1,3 @@
-var $ = require("jquery");
 var React = require("react");
 
 var d3 = require("d3");
@@ -12,7 +11,8 @@ var TechanChart = React.createClass({
 
     getInitialState: function() {
         return {
-            graph: null
+            graph: null,
+            stats: this.props.full && this.props.data.length > 33
         };
     },
 
@@ -23,13 +23,12 @@ var TechanChart = React.createClass({
         // if (!this.props.data)
         //     this.props.data = [{Date: new Date(0), Open: 0, High: 0, Low: 0, Close: 0, Volume: 0}];
 
-        var chart = this.refs.chart.getDOMNode();
-
-        var width = $(chart).parent().width();
+        var chart = React.findDOMNode(this.refs.chart);
+        var width = React.findDOMNode(this).offsetWidth;
 
         var dim = {
             width: width, height: this.props.height,
-            margin: { top: 20, right: 70, bottom: 30, left: 70 },
+            margin: { top: 10, right: 90, bottom: 30, left: 70 },
             ohlc: { height: this.props.full ? this.props.height * 0.62 : this.props.height - 40 },
             indicator: { height: this.props.height * 0.15, padding: 5 }
         };
@@ -44,11 +43,6 @@ var TechanChart = React.createClass({
                 .range([dim.indicator.top, dim.indicator.bottom]);
 
         // var parseDate = d3.time.format("%d-%b-%y").parse;
-
-        var zoom = d3.behavior.zoom()
-                .on("zoom", this.draw);
-
-        var zoomPercent = d3.behavior.zoom();
 
         var x = techan.scale.financetime()
                 .range([0, dim.plot.width]);
@@ -111,11 +105,11 @@ var TechanChart = React.createClass({
 
         var closeAnnotation = techan.plot.axisannotation()
                 .axis(yAxis)
-                .height(32)
-                .width(90)
+                .height(20)
+                .width(53)
                 .accessor(candlestick.accessor())
                 .format(d3.format(',.4fs'))
-                .translate([x(1) - 10, 0]);
+                .translate([x(1) + 30, 0]);
 
         var percentAxis = d3.svg.axis()
                 .scale(yPercent)
@@ -139,6 +133,7 @@ var TechanChart = React.createClass({
         var macdAnnotationLeft = null;
         var rsiAnnotation = null;
         var rsiAnnotationLeft = null;
+
         if (this.props.full) {
             var macdScale = d3.scale.linear()
                     .range([indicatorTop(0) + dim.indicator.height, indicatorTop(0)]);
@@ -245,7 +240,8 @@ var TechanChart = React.createClass({
 
         svg.append('text')
                 .attr("class", "symbol")
-                .attr("x", 20)
+                .attr("x", 10)
+                .attr("y", 10)
                 .text(this.props.market.name ? this.props.market.name + "/ETH" : "loading...");
 
         svg.append("g")
@@ -261,13 +257,13 @@ var TechanChart = React.createClass({
                 .attr("transform", "translate(" + x(1) + ",0)")
             .append("text")
                 .attr("transform", "rotate(-90)")
-                .attr("y", -12)
+                .attr("y", 40)
                 .attr("dy", ".71em")
                 .style("text-anchor", "end")
                 .text("Price");
 
         ohlcSelection.append("g")
-                .attr("class", "close annotation up");
+                .attr("class", "close annotation");
 
         ohlcSelection.append("g")
                 .attr("class", "volume")
@@ -330,22 +326,62 @@ var TechanChart = React.createClass({
                 .attr("class", "supstances analysis")
                 .attr("clip-path", "url(#ohlcClip)");
 
-        d3.select("button").on("click", this.reset);
+        // d3.select("button").on("click", this.reset);
 
         var accessor = candlestick.accessor(),
         indicatorPreRoll = 0;  // Don't show where indicators don't have data
 
         // TODO
         var trendlineData = [
-            { start: { date: new Date(2015, 1, 1), value: 0.245 }, end: { date: new Date(2015, 6, 1), value: 0.2525 } },
-            { start: { date: new Date(2015, 1, 1), value: 0.265 }, end: { date: new Date(2015, 6, 1), value: 0.2575 } }
+            { start: { date: new Date(2015, 1, 1), value: 0.245 }, end: { date: new Date(), value: 0.2525 } },
+            { start: { date: new Date(2015, 1, 1), value: 0.265 }, end: { date: new Date(), value: 0.2575 } }
         ];
 
         // TODO
         var supstanceData = [
-            { start: new Date(2015, 1, 1), end: new Date(2015, 6, 1), value: 0.275 },
-            { start: new Date(2015, 1, 1), end: new Date(2015, 6, 1), value: 0.25 }
+            { start: new Date(2015, 1, 1), end: new Date(), value: 0.275 },
+            { start: new Date(2015, 1, 1), end: new Date(), value: 0.25 }
         ];
+
+        this.refresh = function() {
+            zoomPercent.translate(zoom.translate());
+            zoomPercent.scale(zoom.scale());
+
+            svg.select("g.x.axis").call(xAxis);
+            svg.select("g.ohlc .axis").call(yAxis);
+            svg.select("g.volume.axis").call(volumeAxis);
+            svg.select("g.percent.axis").call(percentAxis);
+
+            if (this.state.stats && this.props.full) {
+              svg.select("g.macd .axis.right").call(macdAxis);
+              svg.select("g.rsi .axis.right").call(rsiAxis);
+              svg.select("g.macd .axis.left").call(macdAxisLeft);
+              svg.select("g.rsi .axis.left").call(rsiAxisLeft);
+            }
+
+            // We know the data does not change, a simple refresh that does not perform data joins will suffice.
+            svg.select("g.candlestick").call(candlestick.refresh);
+            svg.select("g.close.annotation").call(closeAnnotation.refresh);
+            svg.select("g.volume").call(volume.refresh);
+            svg.select("g .sma.ma-0").call(sma0.refresh);
+            svg.select("g .sma.ma-1").call(sma1.refresh);
+            svg.select("g .ema.ma-2").call(ema2.refresh);
+
+            if (this.state.stats && this.props.full) {
+              svg.select("g.macd .indicator-plot").call(macd.refresh);
+              svg.select("g.rsi .indicator-plot").call(rsi.refresh);
+              svg.select("g.crosshair.macd").call(macdCrosshair.refresh);
+              svg.select("g.crosshair.rsi").call(rsiCrosshair.refresh);
+            }
+
+            svg.select("g.crosshair.ohlc").call(ohlcCrosshair.refresh);
+            svg.select("g.trendlines").call(trendline.refresh);
+            svg.select("g.supstances").call(supstance.refresh);
+        }.bind(this);
+
+        var zoom = d3.behavior.zoom()
+                .on("zoom", this.refresh);
+        var zoomPercent = d3.behavior.zoom();
 
         this.mapData = function(data) {
             var mapped = data.map(function(d) {
@@ -363,120 +399,106 @@ var TechanChart = React.createClass({
 
         this.redraw = function(data) {
             x.domain(techan.scale.plot.time(data).domain());
-            y.domain(techan.scale.plot.ohlc(data.slice(indicatorPreRoll)).domain());
-
-            yPercent.domain(techan.scale.plot.percent(y, accessor(data[indicatorPreRoll])).domain());
+            y.domain(techan.scale.plot.ohlc(data).domain());
+            yPercent.domain(techan.scale.plot.percent(y, accessor(data[0])).domain());
             yVolume.domain(techan.scale.plot.volume(data).domain());
 
             var macdData = null;
             var rsiData = null;
-            if (data.length > 33 && this.props.full) {
+            if (this.state.stats && this.props.full) {
                 macdData = techan.indicator.macd()(data);
                 macdScale.domain(techan.scale.plot.macd(macdData).domain());
                 rsiData = techan.indicator.rsi()(data);
                 rsiScale.domain(techan.scale.plot.rsi(rsiData).domain());
             }
 
-            var zoomable = x.zoomable();
-            zoomable.domain([indicatorPreRoll, data.length]); // Zoom in a little to hide indicator preroll
+            var updown = 'stable';
+            if (data[data.length - 2] && data[data.length - 1]) {
+              var lastClose = data[data.length - 2].close;
+              var thisClose = data[data.length - 1].close;
+              updown = thisClose > lastClose ? 'up' : (thisClose === lastClose ? 'stable' : 'down');
+            }
 
             svg.select("g.candlestick").datum(data).call(candlestick);
-            svg.select("g.close.annotation").datum([data[data.length - 1]]).call(closeAnnotation);
+            svg.select("g.close.annotation").datum([data[data.length - 1]])
+              .attr("class", "close annotation " + updown)
+              .call(closeAnnotation).call(candlestick);
+            svg.select("g.close.annotation .data").attr("class", "hidden")
             svg.select("g.volume").datum(data).call(volume);
             svg.select("g.sma.ma-0").datum(techan.indicator.sma().period(10)(data)).call(sma0);
             svg.select("g.sma.ma-1").datum(techan.indicator.sma().period(20)(data)).call(sma1);
             svg.select("g.ema.ma-2").datum(techan.indicator.ema().period(50)(data)).call(ema2);
 
-            if (data.length > 33 && this.props.full) {
+            if (this.state.stats && this.props.full) {
                 svg.select("g.macd .indicator-plot").datum(macdData).call(macd);
                 svg.select("g.rsi .indicator-plot").datum(rsiData).call(rsi);
             }
 
             svg.select("g.crosshair.ohlc").call(ohlcCrosshair).call(zoom);
-            if (data.length > 33 && this.props.full) {
+            if (this.state.stats && this.props.full) {
                 svg.select("g.crosshair.macd").call(macdCrosshair).call(zoom);
                 svg.select("g.crosshair.rsi").call(rsiCrosshair).call(zoom);
             }
 
+            if (data.length > 2) {
+                trendlineData = [
+                    { start: { date: data[0].date, value: data[0].low }, end: { date: data[data.length - 2].date, value: data[data.length - 2].low } },
+                    { start: { date: data[1].date, value: data[1].high }, end: { date: data[data.length - 1].date, value: data[data.length - 1].high } }
+                ];
+                supstanceData = [
+                    { start: data[0].date, end: data[data.length - 1].date, value: data[data.length - 1].high },
+                    { start: data[0].date, end: data[data.length - 1].date, value: data[data.length - 2].low }
+                ];
+            }
             svg.select("g.trendlines").datum(trendlineData).call(trendline).call(trendline.drag);
             svg.select("g.supstances").datum(supstanceData).call(supstance).call(supstance.drag);
 
-            zoomPercent.translate(zoom.translate());
-            zoomPercent.scale(zoom.scale());
+            var zoomable = x.zoomable();
+            // zoomable.domain([30, data.length]); // Zoom in a little to hide indicator preroll
 
-            svg.select("g.x.axis").call(xAxis);
-            svg.select("g.ohlc .axis").call(yAxis);
-            svg.select("g.volume.axis").call(volumeAxis);
-            svg.select("g.percent.axis").call(percentAxis);
-
-            if (data.length > 33 && this.props.full) {
-                svg.select("g.macd .axis.right").call(macdAxis);
-                svg.select("g.rsi .axis.right").call(rsiAxis);
-
-                svg.select("g.macd .axis.left").call(macdAxisLeft);
-                svg.select("g.rsi .axis.left").call(rsiAxisLeft);
-            }
+            this.refresh();
 
             // Associate the zoom with the scale after a domain has been applied
             zoom.x(zoomable).y(y);
             zoomPercent.y(yPercent);
-        };
+        }.bind(this);
 
         this.reset = function() {
             zoom.scale(1);
             zoom.translate([0, 0]);
             this.refresh();
-        };
+        }.bind(this);
 
-        this.refresh = function() {
-            zoomPercent.translate(zoom.translate());
-            zoomPercent.scale(zoom.scale());
-
-            svg.select("g.x.axis").call(xAxis);
-            svg.select("g.ohlc .axis").call(yAxis);
-            svg.select("g.volume.axis").call(volumeAxis);
-            svg.select("g.percent.axis").call(percentAxis);
-            svg.select("g.macd .axis.right").call(macdAxis);
-            svg.select("g.rsi .axis.right").call(rsiAxis);
-
-            svg.select("g.macd .axis.left").call(macdAxisLeft);
-            svg.select("g.rsi .axis.left").call(rsiAxisLeft);
-
-            // We know the data does not change, a simple refresh that does not perform data joins will suffice.
-            svg.select("g.candlestick").call(candlestick.refresh);
-            svg.select("g.close.annotation").call(closeAnnotation.refresh);
-            svg.select("g.volume").call(volume.refresh);
-            svg.select("g .sma.ma-0").call(sma0.refresh);
-            svg.select("g .sma.ma-1").call(sma1.refresh);
-            svg.select("g .ema.ma-2").call(ema2.refresh);
-            svg.select("g.macd .indicator-plot").call(macd.refresh);
-            svg.select("g.rsi .indicator-plot").call(rsi.refresh);
-            svg.select("g.crosshair.ohlc").call(ohlcCrosshair.refresh);
-            svg.select("g.crosshair.macd").call(macdCrosshair.refresh);
-            svg.select("g.crosshair.rsi").call(rsiCrosshair.refresh);
-            svg.select("g.trendlines").call(trendline.refresh);
-            svg.select("g.supstances").call(supstance.refresh);
-        };
-
-        if (this.props.data.length > 3) {
+        if (this.props.data.length > 2) {
             var data = this.mapData(this.props.data);
             this.redraw(data);
         }
     },
 
-    componentWillReceiveProps: function(props) {
-        if (props.market.error)
+    componentWillReceiveProps: function(nextProps) {
+        if (nextProps.market.error)
             return;
 
-        if (!props.data.length)
+        if (!nextProps.data.length)
             return;
             // props.data = [{Date: new Date(), Open: 0, High: 0, Low: 0, Close: 0, Volume: 0}];
 
-        if (props.market.name)
-            $('text.symbol').text(props.market.name + "/ETH");
+        if (nextProps.data.length != this.props.data.length) {
+          if (nextProps.market.name)
+              $('text.symbol').text(nextProps.market.name + "/ETH");
 
-        var data = this.mapData(props.data);
-        this.redraw(data);
+          if (nextProps.data.length > 33)
+            this.setState({
+              stats: true
+            });
+          else
+            this.setState({
+              stats: false
+            });
+
+          var data = this.mapData(nextProps.data);
+          this.redraw(data);
+        }
     },
 
     // shouldComponentUpdate: function(props) {
@@ -485,7 +507,7 @@ var TechanChart = React.createClass({
 
     render: function() {
         return (
-            <div className="container-fluid chart-container">
+            <div className="chart-container">
                 <div ref="chart"></div>
             </div>
         );

@@ -29,7 +29,7 @@ module.exports = {
       { test: /\.js$/, include: /app/, loader: "babel"},
       { test: /\.jsx$/, include: /app/, loader: "babel"},
       { test: /\.json$/, loader: "json" },
-      { test: /\.woff$/, loader: "url?limit=10000&minetype=application/font-woff" },
+      { test: /\.woff|woff2$/, loader: "url?limit=10000&minetype=application/font-woff" },
       { test: /\.ttf$/, loader: "file" },
       { test: /\.eot$/, loader: "file" },
       { test: /\.svg$/, loader: "file" },

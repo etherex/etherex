@@ -174,7 +174,9 @@ var EtherExApp = React.createClass({
                         </OverlayTrigger> }
                       { this.state.config.demoMode &&
                         <div className="pull-right">
-                          <Button bsStyle="warning" bsSize="xsmall" className="top-btn-sm-demo" onClick={this.disableDemoMode}>DEMO MODE</Button>
+                          <Button bsStyle="warning" bsSize="xsmall" className="top-btn-sm-demo" onClick={this.disableDemoMode}>
+                            DEMO <span className="hidden-xs">MODE</span>
+                          </Button>
                         </div> }
                     </div>
                   </div>
