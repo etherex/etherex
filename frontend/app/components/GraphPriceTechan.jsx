@@ -28,7 +28,7 @@ var TechanChart = React.createClass({
 
         var dim = {
             width: width, height: this.props.height,
-            margin: { top: 10, right: 90, bottom: 30, left: 70 },
+            margin: { top: 10, right: 60, bottom: 30, left: 70 },
             ohlc: { height: this.props.full ? this.props.height * 0.62 : this.props.height - 40 },
             indicator: { height: this.props.height * 0.15, padding: 5 }
         };
@@ -105,11 +105,11 @@ var TechanChart = React.createClass({
 
         var closeAnnotation = techan.plot.axisannotation()
                 .axis(yAxis)
-                .height(20)
+                .height(18)
                 .width(53)
                 .accessor(candlestick.accessor())
                 .format(d3.format(',.4fs'))
-                .translate([x(1) + 30, 0]);
+                .translate([x(1), 0]);
 
         var percentAxis = d3.svg.axis()
                 .scale(yPercent)
@@ -257,7 +257,7 @@ var TechanChart = React.createClass({
                 .attr("transform", "translate(" + x(1) + ",0)");
 
         ohlcSelection.append("g")
-                .attr("class", "close annotation");
+                .attr("class", "closeAnnotation");
 
         ohlcSelection.append("g")
                 .attr("class", "volume")
@@ -355,7 +355,7 @@ var TechanChart = React.createClass({
 
             // We know the data does not change, a simple refresh that does not perform data joins will suffice.
             svg.select("g.candlestick").call(candlestick.refresh);
-            svg.select("g.close.annotation").call(closeAnnotation.refresh);
+            svg.select("g.closeAnnotation").call(closeAnnotation.refresh);
             svg.select("g.volume").call(volume.refresh);
             svg.select("g .sma.ma-0").call(sma0.refresh);
             svg.select("g .sma.ma-1").call(sma1.refresh);
@@ -414,10 +414,10 @@ var TechanChart = React.createClass({
             }
 
             svg.select("g.candlestick").datum(data).call(candlestick);
-            svg.select("g.close.annotation").datum([data[data.length - 1]])
-              .attr("class", "close annotation " + updown)
+            svg.select("g.closeAnnotation").datum([data[data.length - 1]])
+              .attr("class", "closeAnnotation " + updown)
               .call(closeAnnotation).call(candlestick);
-            svg.select("g.close.annotation .data").attr("class", "hidden")
+            svg.select("g.closeAnnotation .data").attr("class", "hidden")
             svg.select("g.volume").datum(data).call(volume);
             svg.select("g.sma.ma-0").datum(techan.indicator.sma().period(10)(data)).call(sma0);
             svg.select("g.sma.ma-1").datum(techan.indicator.sma().period(20)(data)).call(sma1);

@@ -294,8 +294,12 @@ a {
 }
 
 .range-select {
-  // height: 22px;
-  -webkit-margin-before: -1px;
+  margin-top: 2px;
+
+  input {
+    // height: 22px;
+    -webkit-margin-before: -1px;
+  }
 }
 
 .range-scroller {
@@ -676,20 +680,20 @@ path.candle.down {
     stroke: #E74C3C;
 }
 
-.close.annotation {
+.closeAnnotation {
   font-size: 15px;
-  opacity: 0.75;
+  opacity: 1;
 }
 
-.close.annotation.up path {
+.closeAnnotation.up path {
   fill: #18BC9C;
 }
 
-.close.annotation.down path {
+.closeAnnotation.down path {
   fill: #E74C3C;
 }
 
-.close.annotation.down text {
+.closeAnnotation.down text {
   fill: #fff;
   stroke: #fff;
   stroke-width: 0;
