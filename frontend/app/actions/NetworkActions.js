@@ -46,8 +46,9 @@ var NetworkActions = function() {
       this.flux.actions.network.initializeNetwork();
       this.flux.actions.network.updateBlockchain(false); // sync
 
-      // TODO Reload our filters
+      // Reload client
       this.flux.actions.config.updateEthereumClient();
+
       // Watch new blocks / reset filter
       // if (!ethereumClient.filters.blocks)
       ethereumClient.watchNewBlock(this.flux.actions.network.onNewBlock);
@@ -214,7 +215,11 @@ var NetworkActions = function() {
 
   this.reset = function() {
     var ethereumClient = this.flux.store('config').getEthereumClient();
+    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+
     ethereumClient.reset();
+    if (btcSwapClient)
+      btcSwapClient.reset();
 
     // Restart monitoring
     this.flux.actions.network.startMonitoring();

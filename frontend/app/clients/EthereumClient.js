@@ -69,7 +69,10 @@ var EthereumClient = function(params) {
     }.bind(this));
   }
   catch(e) {
-    utils.error("web3 error: ", e);
+    if (params.error)
+      params.error("web3", e);
+    else if (this.debug)
+      utils.error("web3", e);
   }
 
   this.isAvailable = function() {

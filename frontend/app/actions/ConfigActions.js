@@ -25,15 +25,6 @@ var ConfigActions = function() {
 
     var ethereumClient = new EthereumClient(clientParams);
 
-    // Check the client's network version
-    ethereumClient.getNetwork(function(network) {
-      if (debug)
-        utils.log("NETWORK ID", network);
-      this.dispatch(constants.config.UPDATE_CONFIG, {
-        network: network
-      });
-    }.bind(this));
-
     // Reload configs from client on first run
     if (!configState.ethereumClient && ethereumClient.isAvailable()) {
       var configs = {
@@ -45,6 +36,15 @@ var ConfigActions = function() {
       };
       if (debug)
         utils.log("CONFIGS", configs);
+
+      // Check the client's network version
+      ethereumClient.getNetwork(function(network) {
+        if (debug)
+          utils.log("NETWORK ID", network);
+        this.dispatch(constants.config.UPDATE_CONFIG, {
+          network: network
+        });
+      }.bind(this));
 
       // Load / set default configs in web3.db
       for (var key in configs) {

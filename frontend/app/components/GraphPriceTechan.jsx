@@ -246,7 +246,7 @@ var TechanChart = React.createClass({
 
         svg.append("g")
                 .attr("class", "x axis")
-                .attr("transform", "translate(0," + (dim.plot.height + 10) + ")");
+                .attr("transform", "translate(0," + dim.plot.height + ")");
 
         var ohlcSelection = svg.append("g")
                 .attr("class", "ohlc")
@@ -254,13 +254,7 @@ var TechanChart = React.createClass({
 
         ohlcSelection.append("g")
                 .attr("class", "axis")
-                .attr("transform", "translate(" + x(1) + ",0)")
-            .append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("y", 40)
-                .attr("dy", ".71em")
-                .style("text-anchor", "end")
-                .text("Price");
+                .attr("transform", "translate(" + x(1) + ",0)");
 
         ohlcSelection.append("g")
                 .attr("class", "close annotation");

@@ -74,7 +74,7 @@ var TicketRow = React.createClass({
         <td className="trade-op">
           <div className="center-block">
             { !this.props.review &&
-                <Button onClick={this.handleAction}>
+                <Button bsSize="xsmall" onClick={this.handleAction}>
                   { this.props.isOwn ? "Cancel" : (
                       (!this.props.ticket.claimer || (this.props.ticket.expiry > 1 && this.props.ticket.expiry < new Date().getTime() / 1000)) ?
                         "Reserve" : "Claim") }
