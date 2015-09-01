@@ -207,9 +207,7 @@ def trade(max_amount, trade_ids:arr):
 
     # Try to fulfill each trade passed
     t = 0
-    size = len(trade_ids)
-
-    while t < size:
+    while t < len(trade_ids):
         trade_id = trade_ids[t]
 
         # Make sure the trade has been mined, obvious HFT prevention
@@ -245,8 +243,7 @@ def trade(max_amount, trade_ids:arr):
 
                 # Check buy value
                 if value < minimum:
-                    if value:
-                        send(msg.sender, max_value)
+                    refund()
                     return(INSUFFICIENT_VALUE)
 
                 # Update trade amount or remove
@@ -278,13 +275,13 @@ def trade(max_amount, trade_ids:arr):
                     return(INSUFFICIENT_VALUE)
 
                 # Calculate value of trade
-                tradevalue = ((amount * price) * 10 ^ 18) / (precision * 10 ^ decimals)
+                trade_value = ((amount * price) * 10 ^ 18) / (precision * 10 ^ decimals)
 
                 # Determine fill value
-                value = min(max_value, tradevalue)
+                value = min(max_value, trade_value)
 
                 # Calculate fill amount, update trade amount or remove filled trade
-                if value < tradevalue:
+                if value < trade_value:
                     fill = ((value * (precision * 10 ^ decimals)) / price) / 10 ^ 18
                     self.trades[trade_id].amount -= fill
                 else:

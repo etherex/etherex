@@ -3,10 +3,12 @@ var ReactIntl = require('react-intl');
 var IntlMixin = ReactIntl.IntlMixin;
 var FormattedMessage = ReactIntl.FormattedMessage;
 
+var Tabs = require('react-bootstrap/lib/Tabs');
+var Tab = require('react-bootstrap/lib/Tab');
+
 var AlertDismissable = require('./AlertDismissable');
 
 var SendEther = require('./SendEther');
-
 var SubSend = require('./SubSend');
 var SubDeposit = require('./SubDeposit');
 var SubWithdraw = require('./SubWithdraw');
@@ -38,74 +40,101 @@ var Wallet = React.createClass({
     this.refs.alerts.setState({alertVisible: show});
   },
 
+  deposit() {
+    return (
+      <div className="panel panel-default">
+        <div className="panel-heading">
+          <h3 className="panel-title">
+            <FormattedMessage message={this.getIntlMessage('deposit.currency')} currency={this.props.market.market.name} />
+          </h3>
+        </div>
+        <div className="panel-body">
+          <div className="container-fluid">
+            <SubDeposit flux={this.props.flux} market={this.props.market.market} user={this.props.user.user}
+              setAlert={this.setAlert} showAlert={this.showAlert} />
+          </div>
+        </div>
+      </div>
+    );
+  },
+  withdraw() {
+    return (
+      <div className="panel panel-default">
+        <div className="panel-heading">
+          <h3 className="panel-title">
+            <FormattedMessage message={this.getIntlMessage('withdraw.currency')} currency={this.props.market.market.name} />
+          </h3>
+        </div>
+        <div className="panel-body">
+          <div className="container-fluid">
+            <SubWithdraw flux={this.props.flux} market={this.props.market.market} user={this.props.user.user}
+              setAlert={this.setAlert} showAlert={this.showAlert} />
+          </div>
+        </div>
+      </div>
+    );
+  },
+  transfer() {
+    return (
+      <div className="panel panel-default">
+        <div className="panel-heading">
+          <h3 className="panel-title">
+            <FormattedMessage message={this.getIntlMessage('send.currency')} currency={this.props.market.market.name} />
+          </h3>
+        </div>
+        <div className="panel-body">
+          <div className="container-fluid">
+            <SubSend flux={this.props.flux} market={this.props.market.market} user={this.props.user.user}
+              setAlert={this.setAlert} showAlert={this.showAlert} />
+          </div>
+        </div>
+      </div>
+    );
+  },
+  sendEther() {
+    return (
+      <div className="panel panel-default">
+        <div className="panel-heading">
+          <h3 className="panel-title">
+            <FormattedMessage message={this.getIntlMessage('send.currency')} currency="ETH" />
+          </h3>
+        </div>
+        <div className="panel-body">
+          <div className="container-fluid">
+            <SendEther flux={this.props.flux} user={this.props.user.user}
+              setAlert={this.setAlert} showAlert={this.showAlert} />
+          </div>
+        </div>
+      </div>
+    );
+  },
+
   render() {
     return (
       <div>
         <AlertDismissable ref="alerts" level={this.state.alertLevel} message={this.state.alertMessage} />
 
-        <div className="container-fluid">
-          <div className="col-md-6">
-            <div className="panel panel-default">
-              <div className="panel-heading">
-                <h3 className="panel-title">
-                  <FormattedMessage message={this.getIntlMessage('deposit.currency')} currency={this.props.market.market.name} />
-                </h3>
-              </div>
-              <div className="panel-body">
-                <div className="container-fluid">
-                  <SubDeposit flux={this.props.flux} market={this.props.market.market} user={this.props.user.user}
-                    setAlert={this.setAlert} showAlert={this.showAlert} />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="panel panel-default">
-              <div className="panel-heading">
-                <h3 className="panel-title">
-                  <FormattedMessage message={this.getIntlMessage('withdraw.currency')} currency={this.props.market.market.name} />
-                </h3>
-              </div>
-              <div className="panel-body">
-                <div className="container-fluid">
-                  <SubWithdraw flux={this.props.flux} market={this.props.market.market} user={this.props.user.user}
-                    setAlert={this.setAlert} showAlert={this.showAlert} />
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="hidden-xs hidden-sm">
+          <Tabs defaultActiveKey={1} position='left' tabWidth={3}>
+            <Tab eventKey={1} title={ this.formatMessage(this.getIntlMessage('deposit.currency'), {currency: this.props.market.market.name}) }>
+              { this.deposit() }
+            </Tab>
+            <Tab eventKey={2} title={ this.formatMessage(this.getIntlMessage('withdraw.currency'), {currency: this.props.market.market.name}) }>
+              { this.withdraw() }
+            </Tab>
+            <Tab eventKey={3} title={ this.formatMessage(this.getIntlMessage('send.currency'), {currency: this.props.market.market.name}) }>
+              { this.transfer() }
+            </Tab>
+            <Tab eventKey={4} title={ this.formatMessage(this.getIntlMessage('send.currency'), {currency: "ETH"}) }>
+              { this.sendEther() }
+            </Tab>
+          </Tabs>
         </div>
-        <div className="container-fluid">
-          <div className="col-md-6">
-            <div className="panel panel-default">
-              <div className="panel-heading">
-                <h3 className="panel-title">
-                  <FormattedMessage message={this.getIntlMessage('send.currency')} currency={this.props.market.market.name} />
-                </h3>
-              </div>
-              <div className="panel-body">
-                <div className="container-fluid">
-                  <SubSend flux={this.props.flux} market={this.props.market.market} user={this.props.user.user}
-                    setAlert={this.setAlert} showAlert={this.showAlert} />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="panel panel-default">
-              <div className="panel-heading">
-                <h3 className="panel-title">
-                  <FormattedMessage message={this.getIntlMessage('send.currency')} currency="ETH" />
-                </h3>
-              </div>
-              <div className="panel-body">
-                <div className="container-fluid">
-                  <SendEther flux={this.props.flux} user={this.props.user.user}
-                    setAlert={this.setAlert} showAlert={this.showAlert} />
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="visible-xs visible-sm">
+          { this.deposit() }
+          { this.withdraw() }
+          { this.transfer() }
+          { this.sendEther() }
         </div>
 
         <div className="container-fluid">

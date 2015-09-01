@@ -41,7 +41,7 @@ var SubDeposit = React.createClass({
   validate: function(e, showAlerts) {
     e.preventDefault();
 
-    var amount = parseFloat(this.refs.amount.getValue().trim());
+    var amount = this.refs.amount.getValue().trim();
 
     this.setState({
       amount: amount
@@ -50,7 +50,7 @@ var SubDeposit = React.createClass({
     if (!amount) {
       this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.empty')));
     }
-    else if (amount > this.props.user.balanceSub) {
+    else if (parseFloat(amount) > this.props.user.balanceSub) {
       this.props.setAlert('warning',
         this.formatMessage(this.getIntlMessage('deposit.not_enough'), {
           currency: this.props.market.name,

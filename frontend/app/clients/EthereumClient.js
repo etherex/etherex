@@ -38,7 +38,9 @@ var EthereumClient = function(params) {
       cancellations: {},
       adds: {},
       fills: {},
-      fillsOwn: {}
+      fillsOwn: {},
+      transfersIn: {},
+      transfersOut: {}
     };
     this.range = params.range;
     this.rangeEnd = params.rangeEnd;
@@ -263,7 +265,7 @@ var EthereumClient = function(params) {
       this.contract.get_last_market_id.call(function(error, result) {
         if (error) {
           utils.error(errorMsg, error);
-          failure(errorMsg + String(error));
+          failure(errorMsg + error.message);
           return;
         }
 
@@ -289,7 +291,7 @@ var EthereumClient = function(params) {
     try {
       this.contract.get_market.call(id, function(error, market) {
         if (error) {
-          failure("Error loading market " + id + ": " + String(error));
+          failure("Error loading market " + id + ": " + error.message);
           return;
         }
         // console.log("Market from ABI:", market);
@@ -355,9 +357,9 @@ var EthereumClient = function(params) {
   this.loadTradeIDs = function(market, success, failure) {
     try {
       // web3.eth.defaultBlock = 'pending';
-      this.contract.get_trade_ids.call(market.id, 'pending', function(error, tradeIDs) {
+      this.contract.get_trade_ids.call(market.id, 'latest', function(error, tradeIDs) {
         if (error) {
-          failure("Error loading trade IDs: " + String(error));
+          failure("Error loading trade IDs: " + error.message);
           utils.error(error);
           return;
         }
@@ -380,12 +382,12 @@ var EthereumClient = function(params) {
   };
 
   this.loadTrade = function(id, market, progress, success, failure) {
-    this.contract.get_trade.call(id, 'pending', function(error, trade) {
+    this.contract.get_trade.call(id, 'latest', function(error, trade) {
       if (error) {
         if (progress)
           progress();
         utils.error(error);
-        failure("Error loading trade: " + String(error));
+        failure("Error loading trade: " + error.message);
         return;
       }
 
@@ -495,7 +497,7 @@ var EthereumClient = function(params) {
       }).watch( function(error, log) {
         if (error) {
           utils.error(error);
-          failure("Error loading price: " + String(error));
+          failure("Error loading price: " + error.message);
           return;
         }
         if (this.debug)
@@ -548,6 +550,100 @@ var EthereumClient = function(params) {
 
     try {
       //
+      // Transfers
+      //
+      var SubContractABI = web3.eth.contract(abi.sub);
+      var subcontract = SubContractABI.at(market.address);
+
+      // In
+      if (_.has(this.filters.transfersIn, market.name))
+        this.filters.transfersIn[market.name].stopWatching();
+
+      this.filters.transfersIn[market.name] = subcontract.CoinTransfer({
+        to: user.id
+      }, {
+        fromBlock: this.fromBlock,
+        toBlock: this.toBlock
+      }).watch( function(error, log) {
+        if (error) {
+          failure("Error loading transfer: " + error.message);
+          return;
+        }
+
+        if (this.debug)
+          utils.log("NEW TRANSFER: ", log);
+
+        // Update user's sub balance for that market
+        var markets = this.flux.store("MarketStore").getState();
+        if (!markets.loading)
+          updateSubBalance(market);
+
+        // Update current market's deposits only
+        var currentMarket = this.flux.store("MarketStore").getState().market;
+        if (market.id != currentMarket.id)
+          return;
+
+        success({
+          hash: log.transactionHash,
+          type: 'transfer',
+          number: log.number,
+          block: log.blockNumber,
+          inout: 'in',
+          from: web3.fromDecimal(log.args.from),
+          to: web3.fromDecimal(log.args.to),
+          amount: log.args.value.valueOf(),
+          market: market.id,
+          price: false,
+          total: false,
+          details: '+'
+        });
+      }.bind(this));
+
+      // Out
+      if (_.has(this.filters.transfersOut, market.name))
+        this.filters.transfersOut[market.name].stopWatching();
+
+      this.filters.transfersOut[market.name] = subcontract.CoinTransfer({
+        from: user.id
+      }, {
+        fromBlock: this.fromBlock,
+        toBlock: this.toBlock
+      }).watch( function(error, log) {
+        if (error) {
+          failure("Error loading transfer: " + error.message);
+          return;
+        }
+
+        if (this.debug)
+          utils.log("NEW TRANSFER: ", log);
+
+        // Update user's sub balance for that market
+        var markets = this.flux.store("MarketStore").getState();
+        if (!markets.loading)
+          updateSubBalance(market);
+
+        // Update current market's deposits only
+        var currentMarket = this.flux.store("MarketStore").getState().market;
+        if (market.id != currentMarket.id)
+          return;
+
+        success({
+          hash: log.transactionHash,
+          type: 'transfer',
+          number: log.number,
+          block: log.blockNumber,
+          inout: 'out',
+          from: web3.fromDecimal(log.args.from),
+          to: web3.fromDecimal(log.args.to),
+          amount: log.args.value.valueOf(),
+          market: market.id,
+          price: false,
+          total: false,
+          details: '+'
+        });
+      }.bind(this));
+
+      //
       // Deposit
       //
       if (_.has(this.filters.deposits, market.name))
@@ -562,7 +658,7 @@ var EthereumClient = function(params) {
       }).watch( function(error, log) {
         if (error) {
           utils.error(error);
-          failure("Error loading deposit: " + String(error));
+          failure("Error loading deposit: " + error.message);
           return;
         }
 
@@ -610,7 +706,7 @@ var EthereumClient = function(params) {
       }).watch( function(error, log) {
         if (error) {
           utils.error(error);
-          failure("Error loading withdrawal: " + String(error));
+          failure("Error loading withdrawal: " + error.message);
           return;
         }
 
@@ -656,7 +752,7 @@ var EthereumClient = function(params) {
       }).watch( function(error, log) {
         if (error) {
           utils.error(error);
-          failure("Error loading cancellation: " + String(error));
+          failure("Error loading cancellation: " + error.message);
           return;
         }
 
@@ -719,7 +815,7 @@ var EthereumClient = function(params) {
       }).watch( function(error, log) {
         if (error) {
           utils.error(error);
-          failure("Error loading new trade: " + String(error));
+          failure("Error loading new trade: " + error.message);
           return;
         }
 
@@ -787,7 +883,7 @@ var EthereumClient = function(params) {
       }).watch( function(error, log) {
         if (error) {
           utils.error(error);
-          failure("Error loading filled trade: " + String(error));
+          failure("Error loading filled trade: " + error.message);
           return;
         }
 
@@ -853,7 +949,7 @@ var EthereumClient = function(params) {
       }).watch( function(error, log) {
         if (error) {
           utils.error(error);
-          failure("Error loading trade filled: " + String(error));
+          failure("Error loading trade filled: " + error.message);
           return;
         }
 
@@ -952,38 +1048,45 @@ var EthereumClient = function(params) {
     try {
       var SubContractABI = web3.eth.contract(abi.sub);
       var subcontract = SubContractABI.at(market.address);
-      var subBalance = subcontract.coinBalanceOf.call(address).toString();
 
-      this.contract.get_sub_balance.call(address, market.id, function(error, balances) {
+      subcontract.coinBalanceOf.call(address, function(error, result) {
         if (error) {
-          failure(error);
+          failure(error.message);
           return;
         }
+        var subBalance = result.toString();
 
-        var available = balances[0].toString();
-        var trading = balances[1].toString();
+        this.contract.get_sub_balance.call(address, market.id, function(err, balances) {
+          if (err) {
+            failure(err.message);
+            return;
+          }
 
-        if (!subBalance || subBalance == "0")
-          subBalance = 0;
-        if (!available || available == "0")
-          available = 0;
-        if (!trading || trading == "0")
-          trading = 0;
+          var available = balances[0].toString();
+          var trading = balances[1].toString();
 
-        if (!available && !trading && !subBalance) {
-          success(market, 0, 0, 0);
-          return;
-        }
+          if (!subBalance || subBalance == "0")
+            subBalance = 0;
+          if (!available || available == "0")
+            available = 0;
+          if (!trading || trading == "0")
+            trading = 0;
 
-        if (subBalance)
-          subBalance = bigRat(subBalance).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
-        if (available)
-          available = bigRat(available).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
-        if (trading)
-          trading = bigRat(trading).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
+          if (!available && !trading && !subBalance) {
+            success(market, 0, 0, 0);
+            return;
+          }
 
-        success(market, available, trading, subBalance);
-      });
+          if (subBalance)
+            subBalance = bigRat(subBalance).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
+          if (available)
+            available = bigRat(available).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
+          if (trading)
+            trading = bigRat(trading).divide(bigRat(String(Math.pow(10, market.decimals)))).valueOf();
+
+          success(market, available, trading, subBalance);
+        });
+      }.bind(this));
     }
     catch(e) {
       utils.error(e);
@@ -1001,9 +1104,17 @@ var EthereumClient = function(params) {
         to: recipient,
         value: amount
       };
-      var result = web3.eth.sendTransaction(options);
-
-      success(result);
+      web3.eth.sendTransaction(options, function(error, result) {
+        if (error) {
+          failure(error.message);
+          return;
+        }
+        if (!result) {
+          failure("No transaction hash, ETH transfer probably failed.");
+          return;
+        }
+        success(result);
+      });
     }
     catch(e) {
       failure(e.message);
@@ -1016,20 +1127,34 @@ var EthereumClient = function(params) {
   this.sendSub = function(user, amount, recipient, market, success, failure) {
     var SubContractABI = web3.eth.contract(abi.sub);
     var subcontract = SubContractABI.at(market.address);
+    var options = {
+      from: user.id,
+      to: market.address,
+      gas: "100000"
+    };
 
-    try {
-      var options = {
-        from: user.id,
-        to: market.address,
-        gas: "100000"
-      };
-      var result = subcontract.sendCoin.sendTransaction(amount, recipient, options);
+    subcontract.sendCoin.call(amount, recipient, options, function(error, result) {
+      if (error) {
+        failure(error.message);
+        return;
+      }
+      if (result.toNumber() <= 0) {
+        failure("Coin transfer would fail.");
+        return;
+      }
 
-      success(result);
-    }
-    catch(e) {
-      failure(e.message);
-    }
+      subcontract.sendCoin.sendTransaction(amount, recipient, options, function(err, res) {
+        if (err) {
+          failure(err.message);
+          return;
+        }
+        if (!res) {
+          failure("Got no transaction hash, sendCoin probably failed.");
+          return;
+        }
+        success(res);
+      });
+    });
   };
 
   this.depositSub = function(user, amount, market, success, failure) {
@@ -1084,19 +1209,34 @@ var EthereumClient = function(params) {
   };
 
   this.withdrawSub = function(user, amount, market, success, failure) {
-    try {
-      var options = {
-        from: user.id,
-        to: market.address,
-        gas: "150000"
-      };
-      var result = this.contract.withdraw.sendTransaction(amount, market.id, options);
+    var options = {
+      from: user.id,
+      to: market.address,
+      gas: "150000"
+    };
 
-      success(result);
-    }
-    catch(e) {
-      failure(e.message);
-    }
+    this.contract.withdraw.call(amount, market.id, options, function(error, result) {
+      if (error) {
+        failure(error.message);
+        return;
+      }
+      if (result.toNumber() <= 0) {
+        failure("Withdraw would fail with error code " + result.toNumber());
+        return;
+      }
+
+      this.contract.withdraw.sendTransaction(amount, market.id, options, function(err, res) {
+        if (err) {
+          failure(err.message);
+          return;
+        }
+        if (!res) {
+          failure("No transaction hash, withdraw probably failed.");
+          return;
+        }
+        success(res);
+      });
+    }.bind(this));
   };
 
   this.registerMarket = function(user, market, success, failure) {
@@ -1106,17 +1246,46 @@ var EthereumClient = function(params) {
         to: this.address,
         gas: "250000"
       };
-      var result = this.contract.add_market.sendTransaction(
+      this.contract.add_market.call(
         web3.fromAscii(market.name, 32),
         market.address,
         market.decimals,
         market.precision,
         market.minimum,
         market.category,
-        options
-      );
+        options,
+        function(error, result) {
+          if (error) {
+            failure(error.message);
+            return;
+          }
+          if (result.toNumber() <= 0) {
+            failure("Register market would fail with error code " + result.toNumber());
+            return;
+          }
 
-      success(result);
+          this.contract.add_market.sendTransaction(
+            web3.fromAscii(market.name, 32),
+            market.address,
+            market.decimals,
+            market.precision,
+            market.minimum,
+            market.category,
+            options,
+            function(err, res) {
+              if (err) {
+                failure(err.message);
+                return;
+              }
+              if (!res) {
+                failure("No transaction hash, register market probably failed.");
+                return;
+              }
+              success(res);
+            }
+          );
+        }.bind(this)
+      );
     }
     catch(e) {
       failure(e.message);
@@ -1137,17 +1306,56 @@ var EthereumClient = function(params) {
         gas: "350000"
       };
 
-      var result = false;
       if (trade.type == 1)
-        result = this.contract.buy.sendTransaction(amounts.amount, amounts.price, trade.market, options);
+        this.contract.buy.call(amounts.amount, amounts.price, trade.market, options, function(error, result) {
+          if (error) {
+            failure(error.message);
+            return;
+          }
+          var ret = result.toNumber();
+          if (ret >= 0 && ret <= 20) {
+            failure("Bid would fail with error code " + ret);
+            return;
+          }
+          this.contract.buy.sendTransaction(amounts.amount, amounts.price, trade.market, options, function(err, res) {
+            if (err) {
+              failure(err.message);
+              return;
+            }
+            if (!res) {
+              failure("No transaction hash, bid probably failed.");
+              return;
+            }
+            success(res);
+          });
+        }.bind(this));
       else if (trade.type == 2)
-        result = this.contract.sell.sendTransaction(amounts.amount, amounts.price, trade.market, options);
+        this.contract.sell.call(amounts.amount, amounts.price, trade.market, options, function(error, result) {
+          if (error) {
+            failure(error.message);
+            return;
+          }
+          var ret = result.toNumber();
+          if (ret >= 0 && ret <= 20) {
+            failure("Ask would fail with error code " + ret);
+            return;
+          }
+          this.contract.sell.sendTransaction(amounts.amount, amounts.price, trade.market, options, function(err, res) {
+            if (err) {
+              failure(err.message);
+              return;
+            }
+            if (!res) {
+              failure("No transaction hash, ask probably failed.");
+              return;
+            }
+            success(res);
+          });
+        }.bind(this));
       else {
         failure("Invalid trade type.");
         return;
       }
-
-      success(result);
     }
     catch(e) {
       failure(e.message);
@@ -1168,36 +1376,79 @@ var EthereumClient = function(params) {
     }
 
     var ids = _.pluck(trades, 'id');
-    var gas = ids.length * 250000;
+    var gas = ids.length * 150000;
+
+    var options = {
+      from: user.id,
+      to: this.address,
+      value: total > 0 ? total.toString() : "0",
+      gas: String(gas)
+    };
 
     try {
-      var result = this.contract.trade.sendTransaction(totalAmounts, ids, {
-        from: user.id,
-        to: this.address,
-        value: total > 0 ? total.toString() : "0",
-        gas: String(gas)
-      });
+      this.contract.trade.call(totalAmounts, ids, options, function(error, result) {
+        if (error) {
+          failure(error.message);
+          return;
+        }
+        var ret = result.toNumber();
 
-      success(result);
+        if (ret > 1 && ret <= 20) {
+          failure("Trade would fail with error code " + ret);
+          return;
+        }
+
+        this.contract.trade.sendTransaction(totalAmounts, ids, options, function(err, res) {
+          if (err) {
+            failure(err.message);
+            return;
+          }
+          if (!res) {
+            failure("No transaction hash, trade probably failed.");
+            return;
+          }
+          success(res);
+        });
+      }.bind(this));
     }
     catch(e) {
-      utils.error(e);
       failure(e.message);
     }
   };
 
   this.fillTrade = function(user, trade, market, success, failure) {
     var amounts = this.getAmounts(trade.amount, trade.price, market.decimals, market.precision);
+    var options = {
+      from: user.id,
+      gas: "150000",
+      to: this.address,
+      value: trade.type == "sells" ? amounts.total : "0"
+    };
 
     try {
-      var result = this.contract.trade.sendTransaction(amounts.amount, [trade.id], {
-        from: user.id,
-        gas: "250000",
-        to: this.address,
-        value: trade.type == "sells" ? amounts.total : "0"
-      });
+      this.contract.trade.call(amounts.amount, [trade.id], options, function(error, result) {
+        if (error) {
+          failure(error.message);
+          return;
+        }
+        var ret = result.toNumber();
+        if (ret > 1 && ret <= 20) {
+          failure("Trade would fail with error code " + ret);
+          return;
+        }
 
-      success(result);
+        this.contract.trade.sendTransaction(amounts.amount, [trade.id], options, function(err, res) {
+          if (err) {
+            failure(err.message);
+            return;
+          }
+          if (!res) {
+            failure("No transaction hash, trade probably failed.");
+            return;
+          }
+          success(res);
+        });
+      }.bind(this));
     }
     catch(e) {
       failure(e.message);
@@ -1205,15 +1456,36 @@ var EthereumClient = function(params) {
   };
 
   this.cancelTrade = function(user, trade, success, failure) {
-    try {
-      var result = this.contract.cancel.sendTransaction(trade.id, {
-        from: user.id,
-        value: "0",
-        to: this.address,
-        gas: "250000"
-      });
+    var options = {
+      from: user.id,
+      value: "0",
+      to: this.address,
+      gas: "250000"
+    };
 
-      success(result);
+    try {
+      this.contract.cancel.call(trade.id, options, function(error, result) {
+        if (error) {
+          failure(error.message);
+          return;
+        }
+        var ret = result.toNumber();
+        if (ret != 1) {
+          failure("Cancel would fail with error code " + ret);
+          return;
+        }
+        this.contract.cancel.sendTransaction(trade.id, options, function(err, res) {
+          if (err) {
+            failure(err.message);
+            return;
+          }
+          if (!res) {
+            failure("No transaction hash, cancel probably failed.");
+            return;
+          }
+          success(res);
+        });
+      });
     }
     catch(e) {
       failure(e.message);
@@ -1231,20 +1503,28 @@ var EthereumClient = function(params) {
         gas: "500000"
       };
 
-      var result = false;
       if (trade.type == 1)
-        result = this.contract.buy.estimateGas(amounts.amount, amounts.price, trade.market, options);
+        this.contract.buy.estimateGas(amounts.amount, amounts.price, trade.market, options, function(error, result) {
+          if (error) {
+            failure(error.message);
+            return;
+          }
+          success(result);
+        });
       else if (trade.type == 2)
-        result = this.contract.sell.estimateGas(amounts.amount, amounts.price, trade.market, options);
+        this.contract.sell.estimateGas(amounts.amount, amounts.price, trade.market, options, function(error, result) {
+          if (error) {
+            failure(error.message);
+            return;
+          }
+          success(result);
+        });
       else {
         failure("Invalid trade type.");
         return;
       }
-
-      success(result);
     }
     catch(e) {
-      utils.error(e);
       failure(e.message);
     }
   };
@@ -1264,19 +1544,23 @@ var EthereumClient = function(params) {
 
     var ids = _.pluck(trades, 'id');
     var gas = ids.length * 250000;
+    var options = {
+      from: user.id,
+      to: this.address,
+      value: total > 0 ? total.toString() : "0",
+      gas: String(gas)
+    };
 
     try {
-      var result = this.contract.trade.estimateGas(totalAmounts, ids, {
-        from: user.id,
-        to: this.address,
-        value: total > 0 ? total.toString() : "0",
-        gas: String(gas)
+      this.contract.trade.estimateGas(totalAmounts, ids, options, function(error, result) {
+        if (error) {
+          failure(error.message);
+          return;
+        }
+        success(result);
       });
-
-      success(result);
     }
     catch(e) {
-      utils.error(e);
       failure(e.message);
     }
   };

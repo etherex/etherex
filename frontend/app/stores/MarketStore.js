@@ -216,13 +216,13 @@ var MarketStore = Fluxxor.createStore({
           this.market.dayClass = 'text-danger';
           this.market.daySign = '-';
         }
-        this.market.dayChange = String(change) + ' %';
+        this.market.dayChange = String(Math.abs(change)) + ' %';
       }
       else
         this.market.dayChange = '-';
 
       if (week) {
-        change = ((last.Close - month.Close) / last.Close * 100).toFixed(2);
+        change = ((last.Close - week.Close) / last.Close * 100).toFixed(2);
         if (change >= 0) {
           this.market.weekClass = 'text-success';
           this.market.weekSign = '+';
@@ -231,7 +231,7 @@ var MarketStore = Fluxxor.createStore({
           this.market.weekClass = 'text-danger';
           this.market.weekSign = '-';
         }
-        this.market.weekChange = String(change) + ' %';
+        this.market.weekChange = String(Math.abs(change)) + ' %';
       }
       else
         this.market.weekChange = '-';
@@ -246,7 +246,7 @@ var MarketStore = Fluxxor.createStore({
           this.market.monthClass = 'text-danger';
           this.market.monthSign = '-';
         }
-        this.market.monthChange = String(change) + ' %';
+        this.market.monthChange = String(Math.abs(change)) + ' %';
       }
       else
         this.market.monthChange = '-';
@@ -260,9 +260,12 @@ var MarketStore = Fluxxor.createStore({
   },
 
   onUpdateTransactions: function(payload) {
-    // utils.log("TX", payload);
-    this.market.txs.push(payload);
-    // utils.log("TRANSACTIONS", this.market.txs);
+    var index = _.findIndex(this.market.txs, {'hash': payload.hash, 'type': payload.type, 'id': payload.id});
+    if (index != -1)
+      this.market.txs[index] = payload;
+    else
+      this.market.txs.push(payload);
+
     this.emit(constants.CHANGE_EVENT);
   },
 

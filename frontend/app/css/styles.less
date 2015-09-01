@@ -113,12 +113,14 @@ a {
   position: absolute;
   right: 2px;
   top: 2px;
-}
 
-.top-btn-sm-demo {
-  position: absolute;
-  right: 6em;
-  top: 2px;
+  .pull-right {
+    margin-right: 10px;
+  }
+
+  .pull-right:first-child {
+    margin-right: 0;
+  }
 }
 
 .top-btn-xs {
@@ -225,6 +227,11 @@ a {
 .inner-content {
   padding-top: 30px;
   padding-bottom: 30px;
+
+  .container {
+    margin-bottom: 30px;
+    width: 100%;
+  }
 }
 
 .navbar-collapse {
@@ -295,11 +302,6 @@ a {
 
 .range-select {
   margin-top: 2px;
-
-  input {
-    // height: 22px;
-    -webkit-margin-before: -1px;
-  }
 }
 
 .range-scroller {
@@ -329,6 +331,29 @@ a {
 
 .input-group .form-control {
   border-right: 0;
+}
+
+.form-control,
+input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+input[type="range"] {
+  background-color: transparent;
+
+  &:focus {
+    box-shadow: none;
+    outline: none;
+  }
+  &::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    background: @lighter;
+  }
+  &::-moz-range-track {
+    border: none;
+    background: @lighter;
+  }
 }
 
 /*
@@ -375,6 +400,11 @@ th {
 th.trade-op,
 td.trade-op {
   width: 1.5em;
+
+  a:hover,
+  a:focus {
+    color: @primary-blue;
+  }
 }
 
 tr.trade-new td {
@@ -427,6 +457,9 @@ tr.disabled td {
 @media (max-width: 1023px) {
   .flex-height > div:first-child {
     min-width: 140px;
+  }
+  .flex-height > div:last-child {
+    width: 100%;
   }
 
   #side-nav a {

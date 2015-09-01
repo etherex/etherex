@@ -31,6 +31,9 @@ var TradeList = React.createClass({
         this.handleFillTrade(trade);
       }.bind(this);
 
+    if (trade.owner != this.props.user.user.id)
+      this.props.flux.actions.trade.estimateFillTrades([trade]);
+
     this.setState({
       showModal: true,
       trade: trade,
@@ -108,6 +111,7 @@ var TradeList = React.createClass({
           user={this.props.user}
           market={this.props.market}
           trades={this.props.trades}
+          estimate={this.props.trades.estimate}
           tradeList={[this.state.trade]}
           message={this.state.message}
           onSubmit={this.state.submit}

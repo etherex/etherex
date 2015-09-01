@@ -140,7 +140,7 @@ module.exports = {
     },
     "confirm": {
       "required": "Confirmation required",
-      "estimate": "Gas cost estimate (probably wrong)",
+      "estimate": "Gas cost estimate",
       "no": "No",
       "yes": "Yes"
     },
@@ -212,7 +212,7 @@ module.exports = {
       "confirm": `Are you sure you want to {type, select,
                     buy {buy}
                     sell {sell}
-                  } {amount, number} {currency} at {price, number} {currency}/ETH for {total, number} ETH?`,
+                  } {amount, number} {currency} at {price, number} {currency}/ETH for a maximum of {total, number} ETH?`,
       "adding": `You will be adding a new trade of {amount, number} {currency}
                   at {price, number} {currency}/ETH for {total, number} ETH.`,
       "filling": `You will be filling
@@ -220,7 +220,7 @@ module.exports = {
                   for a total of {total, number} ETH
                   {left, plural,
                     =0 {}
-                    other {({balance, number} ETH left going in your pocket)}}.`,
+                    other {({balance, number} ETH left)}}.`,
       "also_adding": `You will also be adding a new trade of {amount, number} {currency}
                       at {price, number} {currency}/ETH for {total, number} ETH.`,
       "not_left": `Not enough left for a new trade with {amount, number} for {total, number} ETH.`,

@@ -365,7 +365,7 @@ var TradeFormInstance = React.createClass({
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
         <input type="hidden" ref="market" value={this.props.market.market.id} />
         <Input type="number" ref="amount" className="form-control medium" wrapperClassName="col-md-9"
-          label={<FormattedMessage message={this.getIntlMessage('form.amount')} />} labelClassName="col-md-3"
+          label={this.formatMessage(this.getIntlMessage('form.amount'))} labelClassName="col-md-3"
           placeholder={this.props.market.market.amountPrecision}
           min={this.props.market.market.amountPrecision} step={this.props.market.market.amountPrecision}
           onChange={this.handleChange}
@@ -374,7 +374,7 @@ var TradeFormInstance = React.createClass({
         />
 
         <Input type="number" ref="price" className="form-control medium" wrapperClassName="col-md-9"
-          label={<FormattedMessage message={this.getIntlMessage('form.price')} />} labelClassName="col-md-3"
+          label={this.formatMessage(this.getIntlMessage('form.price'))} labelClassName="col-md-3"
           placeholder={this.props.market.market.lastPrice ? this.props.market.market.lastPrice : this.props.market.market.pricePrecision}
           min={this.props.market.market.pricePrecision} step={this.props.market.market.pricePrecision}
           onChange={this.handleChange}
@@ -383,7 +383,7 @@ var TradeFormInstance = React.createClass({
          />
 
        <Input type="number" ref="total" className="form-control medium" wrapperClassName="col-md-9"
-          label={<FormattedMessage message={this.getIntlMessage('form.total')} />} labelClassName="col-md-3"
+          label={this.formatMessage(this.getIntlMessage('form.total'))} labelClassName="col-md-3"
           placeholder={this.props.market.market.minimumTotal}
           min={this.props.market.market.minimumTotal} step={this.props.market.market.amountPrecision}
           onChange={this.handleChangeTotal}

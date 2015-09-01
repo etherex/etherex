@@ -43,7 +43,7 @@ var SubSend = React.createClass({
     e.preventDefault();
 
     var address = this.refs.address.getValue().trim();
-    var amount = parseFloat(this.refs.amount.getValue().trim());
+    var amount = this.refs.amount.getValue().trim();
 
     this.setState({
       recipient: address,
@@ -56,11 +56,11 @@ var SubSend = React.createClass({
     else if (!amount) {
       this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.cheap')));
     }
-    else if (amount > this.props.user.balanceSub) {
+    else if (parseFloat(amount) > this.props.user.balanceSub) {
       this.props.setAlert('warning',
         this.formatMessage(this.getIntlMessage('sub.not_enough'), {
           currency: this.props.market.name,
-          balance: this.props.user.balanceSubAvailable
+          balance: this.props.user.balanceSub
         })
       );
     }

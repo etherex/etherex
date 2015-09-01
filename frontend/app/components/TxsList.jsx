@@ -16,13 +16,13 @@ var TxsList = React.createClass({
     return (
       <div>
         <div className="container-fluid row">
-          <div className="col-md-3 col-xs-6">
+          <div className="col-md-3 col-sm-4">
             <h3>{ this.props.title } {
                 this.props.market.loading &&
                   <span><FormattedMessage message={this.getIntlMessage('loading')} />...</span> }
             </h3>
           </div>
-          <div className="col-md-9 col-xs-6">
+          <div className="col-md-9 col-sm-8">
             <div>
               {this.props.market.loading ?
                 <ProgressBar active now={this.props.market.percent} style={{marginTop: 30}} /> :

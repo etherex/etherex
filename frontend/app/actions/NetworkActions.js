@@ -44,19 +44,17 @@ var NetworkActions = function() {
         ethereumStatus: constants.network.ETHEREUM_STATUS_CONNECTED
       });
       this.flux.actions.network.initializeNetwork();
-      this.flux.actions.network.updateBlockchain(false); // sync
+      this.flux.actions.network.updateBlockchainAge( function() {
+        // Reload client
+        this.flux.actions.config.updateEthereumClient();
 
-      // Reload client
-      this.flux.actions.config.updateEthereumClient();
-
-      // Watch new blocks / reset filter
-      // if (!ethereumClient.filters.blocks)
-      ethereumClient.watchNewBlock(this.flux.actions.network.onNewBlock);
+        // Watch new blocks / reset filter
+        ethereumClient.watchNewBlock(this.flux.actions.network.onNewBlock);
+      }.bind(this));
     }
 
     if (nowUp) {
-      this.flux.actions.network.updateBlockchain(true); // async
-      this.flux.actions.network.updatePeerCount();
+      this.flux.actions.network.updateBlockchain();
 
       var timeOut = this.flux.store('config').getState().timeout;
 
@@ -100,58 +98,52 @@ var NetworkActions = function() {
 
   // Sync method to update blockchain age
   // and async to update all blockchain and network infos
-  this.updateBlockchain = function (async) {
+  this.updateBlockchain = function () {
     var ethereumClient = this.flux.store('config').getEthereumClient();
-    if (async) {
-      ethereumClient.getBlock('latest', function(block) {
-        if (block.timestamp) {
-          var lastState = this.flux.store('network').getState();
-          var blockChainAge = new Date().getTime() / 1000 - block.timestamp;
-          var blockTime = lastState.blockTimestamp ? block.timestamp - lastState.blockTimestamp : 0;
 
-          this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, {
-            blockChainAge: blockChainAge
+    ethereumClient.getBlock('latest', function(block) {
+      if (block.timestamp) {
+        var lastState = this.flux.store('network').getState();
+        var blockChainAge = new Date().getTime() / 1000 - block.timestamp;
+        var blockTime = lastState.blockTimestamp ? block.timestamp - lastState.blockTimestamp : 0;
+
+        this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, {
+          blockChainAge: blockChainAge
+        });
+
+        // Update blockchain stats
+        if (block.number > lastState.blockNumber) {
+          this.dispatch(constants.network.UPDATE_NETWORK, {
+            blockNumber: block.number,
+            blockTimestamp: block.timestamp,
+            blockTime: blockTime ? blockTime : null,
+            networkLag: blockChainAge > 0 ? blockChainAge.toFixed(2) : null
           });
-
-          // Update blockchain stats
-          if (block.number > lastState.blockNumber) {
-            this.dispatch(constants.network.UPDATE_NETWORK, {
-              blockNumber: block.number,
-              blockTimestamp: block.timestamp,
-              blockTime: blockTime ? blockTime : null,
-              networkLag: blockChainAge > 0 ? blockChainAge.toFixed(2) : null
-            });
-
-            // Update network if block.number changed, meaning new blocks
-            // were imported without triggering onNewBlock
-            this.flux.actions.network.updateNetwork();
-          }
         }
-      }.bind(this));
-    }
-    else {
-      var block = ethereumClient.getBlock('latest');
+
+        this.flux.actions.network.updateNetwork();
+      }
+    }.bind(this));
+  };
+
+  this.updateBlockchainAge = function(success) {
+    var ethereumClient = this.flux.store('config').getEthereumClient();
+
+    ethereumClient.getBlock('latest', function(block) {
       if (block.timestamp) {
         var blockChainAge = (new Date().getTime() / 1000) - block.timestamp;
         this.dispatch(constants.network.UPDATE_BLOCK_CHAIN_AGE, {
           blockChainAge: blockChainAge
         });
       }
-    }
+      success(block);
+    }.bind(this));
   };
 
   this.updateClientInfo = function() {
     var ethereumClient = this.flux.store('config').getEthereumClient();
     ethereumClient.getClient(function(client) {
       this.dispatch(constants.network.UPDATE_NETWORK, { client: client });
-    }.bind(this));
-  };
-
-  this.updatePeerCount = function () {
-    var ethereumClient = this.flux.store('config').getEthereumClient();
-
-    ethereumClient.getPeerCount(function(peerCount) {
-      this.dispatch(constants.network.UPDATE_NETWORK, { peerCount: peerCount });
     }.bind(this));
   };
 
@@ -182,7 +174,7 @@ var NetworkActions = function() {
     if (this.flux.store('config').debug)
       utils.log("GOT BLOCK", log);
 
-    this.flux.actions.network.updateBlockchain(true);
+    this.flux.actions.network.updateBlockchain();
   };
 
   // TODO ???

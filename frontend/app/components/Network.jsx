@@ -84,7 +84,7 @@ var Network = React.createClass({
           </h4>
         </div>
         <div className="panel-body">
-          <p className="host text-overflow">
+          <p className="host">
             <span className="network-label">Host</span>
             <span className="pull-right">
               { this.state.host }
@@ -161,7 +161,7 @@ var Network = React.createClass({
                 format="long" />
             </span>
           </p>
-          <p className="client text-overflow">
+          <p className="client">
             <span className="network-label">Client</span>
             <span className="pull-right">{ this.state.network.client }</span>
           </p>

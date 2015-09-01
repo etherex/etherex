@@ -2,6 +2,7 @@ var _ = require("lodash");
 var React = require("react");
 
 var Button = require('react-bootstrap/lib/Button');
+var Input = require('react-bootstrap/lib/Input');
 var ConfirmModal = require('./ConfirmModal');
 var AlertModal = require('./AlertModal');
 
@@ -69,12 +70,19 @@ var SubRegister = React.createClass({
   validate: function(e, showAlert) {
     e.preventDefault();
 
-    var code = this.refs.code.getDOMNode().value.trim();
-    var address = this.refs.address.getDOMNode().value.trim();
-    var minimum = parseFloat(this.refs.minimum.getDOMNode().value.trim());
-    var decimals = _.parseInt(this.refs.decimals.getDOMNode().value.trim());
-    var precision = parseFloat(this.refs.precision.getDOMNode().value.trim());
+    var code = this.refs.code.getValue().trim();
+    var address = this.refs.address.getValue().trim();
+    var minimum = this.refs.minimum.getValue().trim();
+    var decimals = this.refs.decimals.getValue().trim();
+    var precision = bigRat(this.refs.precision.getValue()).toDecimal(18);
     var category = this.state.category;
+
+    if (precision != '0')
+      precision = bigRat(precision).lesser(0.01) ?
+        bigRat(1).divide(Math.pow(10, precision.length - (precision.slice(-2) == '11' ? 4 : 2))).toDecimal(18) :
+        "0.01";
+    else
+      precision = null;
 
     this.setState({
       code: code,
@@ -133,17 +141,11 @@ var SubRegister = React.createClass({
     this.props.flux.actions.market.registerMarket({
         name: this.state.code,
         address: "0x" + this.state.address,
-        minimum: bigRat(this.state.minimum).multiply(fixtures.ether).toDecimal(),
+        minimum: bigRat(this.state.minimum).multiply(fixtures.ether).ceil().toDecimal(),
         decimals: String(this.state.decimals),
-        precision: bigRat(this.state.precision).multiply(fixtures.precision).toDecimal(),
+        precision: String(Math.pow(10, this.state.precision.length - 2)),
         category: String(this.state.category)
     });
-
-    this.refs.code.getDOMNode().value = '';
-    this.refs.address.getDOMNode().value = '';
-    this.refs.minimum.getDOMNode().value = '';
-    this.refs.decimals.getDOMNode().value = '';
-    this.refs.precision.getDOMNode().value = '';
 
     this.setState({
         code: null,
@@ -167,28 +169,47 @@ var SubRegister = React.createClass({
             }
           </DropdownButton>
         </div>
+
+        <Input type="text" ref="code"
+          label="Subcurrency code"
+          pattern="[A-Z]{3,4}"
+          placeholder="ETX"
+          value={ this.state.code }
+          onChange={this.handleChange} />
+
+        <Input type="text" ref="address"
+          label="Contract address"
+          maxLength="42" pattern="0x[a-fA-F\d]+"
+          placeholder="0x"
+          value={ this.state.address }
+          onChange={this.handleChange} />
+
+        <Input type="number" ref="minimum"
+          label="Minimum ETH amount"
+          min="1" step="1"
+          placeholder="10"
+          value={ this.state.minimum }
+          onChange={this.handleChange} />
+
+        <Input type="number" ref="decimals"
+          label="Decimals"
+          min="0" step="1"
+          placeholder="4"
+          value={ this.state.decimals }
+          onChange={this.handleChange} />
+
+        <Input type="number" ref="precision"
+          label="Price precision"
+          min={this.state.precision ? bigRat(this.state.precision).divide(10).toDecimal(18) : "0.00000001"}
+          step={this.state.precision ? bigRat(this.state.precision).divide(10).toDecimal(18) : "0.00000001"}
+          placeholder="0.00000001"
+          value={ this.state.precision }
+          onChange={this.handleChange} />
+
         <div className="form-group">
-          <label forHtml="code">Subcurrency code</label>
-          <input type="text" className="form-control" pattern="[A-Z]{3,4}" placeholder="ETX" ref="code" onChange={this.handleChange}/>
-        </div>
-        <div className="form-group">
-          <label forHtml="address">Contract address</label>
-          <input type="text" className="form-control" maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="0x" ref="address" onChange={this.handleChange}/>
-        </div>
-        <div className="form-group">
-          <label forHtml="minimum">Minimum ETH amount</label>
-          <input type="number" min="1" step="1" className="form-control medium" placeholder="10" ref="minimum" onChange={this.handleChange}/>
-        </div>
-        <div className="form-group">
-          <label forHtml="decimals">Decimals</label>
-          <input type="number" min="0" step="1" className="form-control medium" placeholder="4" ref="decimals" onChange={this.handleChange}/>
-        </div>
-        <div className="form-group">
-          <label forHtml="precision">Price precision</label>
-          <input type="number" min="0.00000001" step="0.00000001" className="form-control medium" placeholder="0.00000001" ref="precision" onChange={this.handleChange} />
-        </div>
-        <div className="form-group">
-            <Button className={"btn-block" + (this.state.newReg ? " btn-primary" : "")} type="submit" key="register">Register</Button>
+          <Button className={"btn-block" + (this.state.newReg ? " btn-primary" : "")} type="submit" key="register">
+            Register
+          </Button>
         </div>
 
         <ConfirmModal

@@ -102,7 +102,7 @@ var RangeSelect = React.createClass({
     return (
       <div>
         <form className="form-horizontal row" role="form">
-          <ButtonGroup className="col-xs-7 col-sm-8 col-lg-9 range-scroller">
+          <ButtonGroup className="col-xs-12 col-sm-8 col-lg-9 range-scroller">
             <Button bsSize="small" className="col-xs-4 col-sm-2">
               <div className="text-overflow">
                 # {utils.numeral(this.state.block, 0)}
@@ -122,7 +122,7 @@ var RangeSelect = React.createClass({
             </Button>
             <Button bsSize="small" className={this.state.live + " btn-default col-xs-2 col-lg-1"} value="live" onClick={this.handleRangeEnd}>live</Button>
           </ButtonGroup>
-          <ButtonGroup className="col-xs-5 col-sm-4 col-lg-3">
+          <ButtonGroup className="col-xs-12 col-sm-4 col-lg-3">
             <div className="pull-right">
               <Button bsSize="small" className={this.state.last15} value={75} onClick={this.handleRange}>15m</Button>
               <Button bsSize="small" className={this.state.last30} value={150} onClick={this.handleRange}>30m</Button>

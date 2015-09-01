@@ -163,21 +163,23 @@ var EtherExApp = React.createClass({
                       <div className="top-link text-right text-overflow">
                         <UserLink address={ this.state.user.user.id } showIcon={true} />
                       </div>
-                      { this.state.config.network != 1 &&
-                        <OverlayTrigger trigger={['click']} placement='bottom' rootClose={true} overlay={
-                          <Popover>
-                            Network ID { this.state.config.network }
-                          </Popover>}>
+                      <div className="top-btn-sm">
+                        { (this.state.config.network != 1 && !this.state.config.demoMode) &&
+                          <OverlayTrigger trigger={['click']} placement='bottom' rootClose={true} overlay={
+                            <Popover>
+                              Network ID { this.state.config.network }
+                            </Popover>}>
+                            <div className="pull-right">
+                              <Button bsStyle="warning" bsSize="xsmall">TESTNET</Button>
+                            </div>
+                          </OverlayTrigger> }
+                        { this.state.config.demoMode &&
                           <div className="pull-right">
-                            <Button bsStyle="warning" bsSize="xsmall" className="top-btn-sm">TESTNET</Button>
-                          </div>
-                        </OverlayTrigger> }
-                      { this.state.config.demoMode &&
-                        <div className="pull-right">
-                          <Button bsStyle="warning" bsSize="xsmall" className="top-btn-sm-demo" onClick={this.disableDemoMode}>
-                            DEMO <span className="hidden-xs">MODE</span>
-                          </Button>
-                        </div> }
+                            <Button bsStyle="warning" bsSize="xsmall" onClick={this.disableDemoMode}>
+                              DEMO
+                            </Button>
+                          </div> }
+                      </div>
                     </div>
                   </div>
                 </div>

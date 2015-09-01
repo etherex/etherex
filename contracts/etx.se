@@ -53,13 +53,15 @@ def sendCoinFrom(_from, _value, _to):
     balance = self.accounts[_from].balance
 
     # Make sure balance is above or equal to amount, and transfer is approved
-    if balance >= _value and (self.accounts[_from].custodians[msg.sender].full or _value <= self.accounts[_from].custodians[msg.sender].maxValue):
+    maxValue = self.accounts[_from].custodians[msg.sender].maxValue
+    if balance >= _value and (self.accounts[_from].custodians[msg.sender].full or _value <= maxValue):
         # Update balances
         self.accounts[_from].balance = balance - _value
         self.accounts[_to].balance += _value
 
         # Reset approveOnce
-        self.accounts[_from].custodians[msg.sender].maxValue = 0
+        if maxValue:
+            self.accounts[_from].custodians[msg.sender].maxValue = 0
 
         log(type=CoinTransfer, _from, _to, _value)
 

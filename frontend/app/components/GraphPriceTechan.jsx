@@ -478,8 +478,10 @@ var TechanChart = React.createClass({
             // props.data = [{Date: new Date(), Open: 0, High: 0, Low: 0, Close: 0, Volume: 0}];
 
         if (nextProps.data.length != this.props.data.length) {
-          if (nextProps.market.name)
-              $('text.symbol').text(nextProps.market.name + "/ETH");
+          if (nextProps.market.name) {
+            var svg = d3.select(React.findDOMNode(this.refs.chart));
+            svg.select('text.symbol').text(nextProps.market.name + "/ETH");
+          }
 
           if (nextProps.data.length > 33)
             this.setState({

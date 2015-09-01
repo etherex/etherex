@@ -35,7 +35,7 @@ var TxsTable = React.createClass({
   render: function() {
     var txsRows = _.sortBy(this.props.txs, 'block').map(function (tx) {
       return (
-        <TxRow key={tx.hash} tx={tx} market={this.state.market} user={this.props.user} />
+        <TxRow key={tx.type + '-' + tx.hash + '-' + tx.id} tx={tx} market={this.state.market} user={this.props.user} />
       );
     }.bind(this));
     txsRows.reverse();

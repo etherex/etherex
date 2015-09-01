@@ -47,7 +47,7 @@ var SubSend = React.createClass({
     e.preventDefault();
 
     var address = this.refs.address.getValue().trim();
-    var amount = parseFloat(this.refs.amount.getValue().trim());
+    var amount = this.refs.amount.getValue().trim();
 
     this.setState({
       recipient: address,
@@ -60,7 +60,7 @@ var SubSend = React.createClass({
     else if (!amount) {
       this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.cheap')));
     }
-    else if (amount > this.props.user.balanceWei) {
+    else if (parseFloat(amount) > this.props.user.balance) {
       this.props.setAlert('warning', this.formatMessage(
         this.getIntlMessage('sub.not_enough'), {
           currency: "ETH",
@@ -108,7 +108,7 @@ var SubSend = React.createClass({
 
     var payload = {
         recipient: this.state.recipient,
-        amount: bigRat(this.state.amount).multiply(fixtures.ether).toDecimal()
+        amount: bigRat(this.state.amount).multiply(fixtures.ether).ceil().toDecimal()
     };
 
     this.props.flux.actions.user.sendEther(payload);

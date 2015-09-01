@@ -42,7 +42,7 @@ var SubWithdraw = React.createClass({
   validate: function(e, showAlerts) {
     e.preventDefault();
 
-    var amount = parseFloat(this.refs.amount.getValue().trim());
+    var amount = this.refs.amount.getValue().trim();
 
     this.setState({
       amount: amount
@@ -51,7 +51,7 @@ var SubWithdraw = React.createClass({
     if (!amount) {
       this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('withdraw.empty')));
     }
-    else if (amount > this.props.user.balanceSubAvailable) {
+    else if (parseFloat(amount) > this.props.user.balanceSubAvailable) {
       this.props.setAlert('warning',
         this.formatMessage(this.getIntlMessage('withdraw.not_enough'), {
           currency: this.props.market.name,

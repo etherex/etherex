@@ -6,6 +6,7 @@ var FormattedMessage = ReactIntl.FormattedMessage;
 
 var DropdownButton = require('react-bootstrap/lib/DropdownButton');
 var MenuItem = require('react-bootstrap/lib/MenuItem');
+var Table = require("react-bootstrap/lib/Table");
 
 var UserSummaryPane = React.createClass({
   mixins: [IntlMixin],
@@ -27,7 +28,7 @@ var UserSummaryPane = React.createClass({
           </h3>
         </div>
         <div className="panel-body">
-          <table className="table table-condensed table-striped">
+          <Table condensed hover responsive striped>
             <tbody>
               <tr>
                 <td><FormattedMessage message={this.getIntlMessage('user.address')} /></td>
@@ -41,15 +42,13 @@ var UserSummaryPane = React.createClass({
               </tr>
               <tr>
                 <td>
-                  <div className="btn row">
-                    <FormattedMessage message={this.getIntlMessage('user.switch')} />
-                  </div>
+                  <FormattedMessage message={this.getIntlMessage('user.switch')} />
                 </td>
                 <td>
                   <DropdownButton ref="switchaddress"
                     onSelect={this.handleChange}
                     key={'switchaddress'}
-                    title={this.props.user.user.id} pullLeft className="row">
+                    title={this.props.user.user.id} pullLeft>
                       {this.props.user.user.addresses ?
                         this.props.user.user.addresses.map(function(address) {
                           return <MenuItem key={address} eventKey={address}>{address}</MenuItem>;
@@ -104,7 +103,7 @@ var UserSummaryPane = React.createClass({
                 </td>
               </tr>
             </tbody>
-          </table>
+          </Table>
         </div>
       </div>
     );

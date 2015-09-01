@@ -3,6 +3,7 @@ app/app.js
 app/app.js.map
 app/*.svg
 app/*.woff
+app/*.woff2
 app/*.eot
 app/*.ttf
 app/*.jpg
