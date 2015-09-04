@@ -42,7 +42,11 @@ var LoadingModal = React.createClass({
     var launchStep = (
       <FormattedMessage
         message={this.getIntlMessage('init.install.start')}
-        geth={<pre className="small">geth --rpc --rpccorsdomain { this.state.host } --unlock 0</pre>} />
+        geth={
+          <div>
+            <pre className="small">geth --rpc --rpccorsdomain { this.state.host }</pre>
+            Optionally add <samp>--unlock {"<YourAddress>"}</samp> to unlock an account.
+          </div>} />
     );
     this.setState({
       launchStep: launchStep

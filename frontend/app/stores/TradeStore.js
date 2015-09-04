@@ -80,6 +80,7 @@ var TradeStore = Fluxxor.createStore({
 
   onLoadDemoData: function(payload) {
     _.merge(this, payload);
+    this.refreshTrades();
     this.emit(constants.CHANGE_EVENT);
   },
 

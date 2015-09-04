@@ -119,9 +119,9 @@ var EtherExApp = React.createClass({
                   { this.state.user.error &&
                     <div className="container-fluid">
                       <div className="alert alert-danger" role="alert">
-                        <h4>
+                        <h5>
                           <FormattedMessage message={this.getIntlMessage('error')} />
-                        </h4>
+                        </h5>
                         {this.state.user.error}
                       </div>
                     </div> }

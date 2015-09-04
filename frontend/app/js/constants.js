@@ -1,7 +1,7 @@
 var keyMirror = require('react/lib/keyMirror');
 
 module.exports = {
-    SECONDS_PER_BLOCK: 12,
+    SECONDS_PER_BLOCK: 15,
     CHANGE_EVENT: "change",
     config: keyMirror({
         UPDATE_ETHEREUM_CLIENT_SUCCESS: null,
