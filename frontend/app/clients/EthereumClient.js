@@ -129,7 +129,7 @@ var EthereumClient = function(params) {
 
   this.reset = function() {
     try {
-      web3.reset();
+      web3.reset(true);
     }
     catch (e) {
       utils.error(e);
@@ -314,7 +314,7 @@ var EthereumClient = function(params) {
 
         var SubContractABI = web3.eth.contract(abi.sub);
         var subcontract = SubContractABI.at(address);
-        var balance = subcontract.coinBalanceOf.call(user.id).toString();
+        var balance = subcontract.balanceOf.call(user.id).toString();
 
         var favorite = false;
         if (favorites && _.indexOf(favorites, id) >= 0)
@@ -559,7 +559,7 @@ var EthereumClient = function(params) {
       if (_.has(this.filters.transfersIn, market.name))
         this.filters.transfersIn[market.name].stopWatching();
 
-      this.filters.transfersIn[market.name] = subcontract.CoinTransfer({
+      this.filters.transfersIn[market.name] = subcontract.Transfer({
         to: user.id
       }, {
         fromBlock: this.fromBlock,
@@ -603,7 +603,7 @@ var EthereumClient = function(params) {
       if (_.has(this.filters.transfersOut, market.name))
         this.filters.transfersOut[market.name].stopWatching();
 
-      this.filters.transfersOut[market.name] = subcontract.CoinTransfer({
+      this.filters.transfersOut[market.name] = subcontract.Transfer({
         from: user.id
       }, {
         fromBlock: this.fromBlock,
@@ -1049,7 +1049,7 @@ var EthereumClient = function(params) {
       var SubContractABI = web3.eth.contract(abi.sub);
       var subcontract = SubContractABI.at(market.address);
 
-      subcontract.coinBalanceOf.call(address, function(error, result) {
+      subcontract.balanceOf.call(address, function(error, result) {
         if (error) {
           failure(error.message);
           return;
@@ -1133,7 +1133,7 @@ var EthereumClient = function(params) {
       gas: "100000"
     };
 
-    subcontract.sendCoin.call(amount, recipient, options, function(error, result) {
+    subcontract.transfer.call(amount, recipient, options, function(error, result) {
       if (error) {
         failure(error.message);
         return;
@@ -1143,7 +1143,7 @@ var EthereumClient = function(params) {
         return;
       }
 
-      subcontract.sendCoin.sendTransaction(amount, recipient, options, function(err, res) {
+      subcontract.transfer.sendTransaction(amount, recipient, options, function(err, res) {
         if (err) {
           failure(err.message);
           return;

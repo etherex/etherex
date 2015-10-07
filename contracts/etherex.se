@@ -28,7 +28,7 @@ event log_withdraw(market:indexed, sender:indexed, amount)
 event log_cancel(market:indexed, sender, price, amount, tradeid)
 event log_market(id)
 
-extern subcurrency: [sendCoin:[int256,int256]:int256, sendCoinFrom:[int256,int256,int256]:int256]
+extern subcurrency: [transfer:[int256,int256]:int256, transferFrom:[int256,int256,int256]:int256]
 
 # Trade types
 macro BID: 1
@@ -324,7 +324,7 @@ def trade(max_amount, trade_ids:arr):
 #
 def deposit(amount, market_id):
     # Transfer funds to the exchange
-    if self.markets[market_id].contract.sendCoinFrom(msg.sender, amount, self):
+    if self.markets[market_id].contract.transferFrom(msg.sender, amount, self):
         balance = self.balances[msg.sender][market_id].available
         new_balance = balance + amount
         self.balances[msg.sender][market_id].available = new_balance
@@ -339,7 +339,7 @@ def withdraw(amount, market_id):
     balance = self.balances[msg.sender][market_id].available
     if balance >= amount:
         self.balances[msg.sender][market_id].available = balance - amount
-        result = self.markets[market_id].contract.sendCoin(amount, msg.sender)
+        result = self.markets[market_id].contract.transfer(amount, msg.sender)
         log(type=log_withdraw, market_id, msg.sender, amount)
         return(result)
     return(FAILURE)

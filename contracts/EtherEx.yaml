@@ -88,50 +88,12 @@
       retry: 60
       wait: True
 
-
-# Change sub-currencies' ownership - testnet only
--
-  transact:
-    SetETXOwner:
-      to: $ETX
-      sig: change_ownership:[int256]:int256
-      data:
-        - $zg
-      retry: 30
-    SetCAKOwner:
-      to: $CAK
-      sig: change_ownership:[int256]:int256
-      data:
-        - $zg
-      retry: 30
-    SetMIDOwner:
-      to: $MID
-      sig: change_ownership:[int256]:int256
-      data:
-        - $zg
-      retry: 30
-      wait: True
-
-# Fill up
-# -
-#   transact:
-#     ZG:
-#       to: $zg
-#       value: 1000000000000000000000
-#     CAK:
-#       to: $caktux
-#       value: 1000000000000000000000
-#     MID:
-#       to: $mids
-#       value: 1000000000000000000000
-#       wait: True
-
 # Transfer ETXs
 -
   transact:
     ZGetx:
       to: $ETX
-      sig: sendCoin:[int256,int256]:int256
+      sig: transfer:[int256,int256]:int256
       data:
         - 10000000000
         - $zg
@@ -141,7 +103,7 @@
   transact:
     CAKetx:
       to: $ETX
-      sig: sendCoin:[int256,int256]:int256
+      sig: transfer:[int256,int256]:int256
       data:
         - 10000000000
         - $caktux
@@ -151,7 +113,7 @@
   transact:
     MIDetx:
       to: $ETX
-      sig: sendCoin:[int256,int256]:int256
+      sig: transfer:[int256,int256]:int256
       data:
         - 10000000000
         - $mids
@@ -163,7 +125,7 @@
   transact:
     ZGcak:
       to: $CAK
-      sig: sendCoin:[int256,int256]:int256
+      sig: transfer:[int256,int256]:int256
       data:
         - 5000000000
         - $zg
@@ -173,7 +135,7 @@
   transact:
     CAKcak:
       to: $CAK
-      sig: sendCoin:[int256,int256]:int256
+      sig: transfer:[int256,int256]:int256
       data:
         - 50000000000
         - $caktux
@@ -183,7 +145,7 @@
   transact:
     MIDcak:
       to: $CAK
-      sig: sendCoin:[int256,int256]:int256
+      sig: transfer:[int256,int256]:int256
       data:
         - 5000000000
         - $mids
@@ -195,7 +157,7 @@
   transact:
     ZGetx:
       to: $MID
-      sig: sendCoin:[int256,int256]:int256
+      sig: transfer:[int256,int256]:int256
       data:
         - 5000000000
         - $zg
@@ -205,7 +167,7 @@
   transact:
     CAKetx:
       to: $MID
-      sig: sendCoin:[int256,int256]:int256
+      sig: transfer:[int256,int256]:int256
       data:
         - 5000000000
         - $caktux
@@ -215,7 +177,7 @@
   transact:
     MIDetx:
       to: $MID
-      sig: sendCoin:[int256,int256]:int256
+      sig: transfer:[int256,int256]:int256
       data:
         - 50000000000
         - $mids

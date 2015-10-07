@@ -12,7 +12,7 @@
 data created
 data accounts[2^160](balance, custodians[2^160](full, maxValue))
 
-event CoinTransfer(from:indexed, to:indexed, value)
+event Transfer(from:indexed, to:indexed, value)
 event AddressApproval(address:indexed, proxy:indexed, result)
 event AddressApprovalOnce(address:indexed, proxy:indexed, value)
 
@@ -24,7 +24,7 @@ def init():
     self.created = block.timestamp
     self.accounts[msg.sender].balance = 1000000 * 10 ** 5
 
-def sendCoin(_value, _to):
+def transfer(_value, _to):
     # Prevent negative send from stealing funds
     if _to <= 0 or _value <= 0:
         return(FAILURE)
@@ -39,12 +39,12 @@ def sendCoin(_value, _to):
         self.accounts[msg.sender].balance = balance - _value
         self.accounts[_to].balance += _value
 
-        log(type=CoinTransfer, msg.sender, _to, _value)
+        log(type=Transfer, msg.sender, _to, _value)
 
         return(SUCCESS)
     return(FAILURE)
 
-def sendCoinFrom(_from, _value, _to):
+def transferFrom(_from, _value, _to):
     # Prevent negative send from stealing funds
     if _from <= 0 or _value <= 0 or _to <= 0:
         return(FAILURE)
@@ -63,15 +63,15 @@ def sendCoinFrom(_from, _value, _to):
         if maxValue:
             self.accounts[_from].custodians[msg.sender].maxValue = 0
 
-        log(type=CoinTransfer, _from, _to, _value)
+        log(type=Transfer, _from, _to, _value)
 
         return(SUCCESS)
     return(FAILURE)
 
-def coinBalance(_addr):
+def balance(_addr):
     return(self.accounts[msg.sender].balance)
 
-def coinBalanceOf(_addr):
+def balanceOf(_addr):
     return(self.accounts[_addr].balance)
 
 def approve(_addr):  # Implemented but unused and untested

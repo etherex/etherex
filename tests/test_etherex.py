@@ -98,8 +98,8 @@ class TestEtherEx(object):
         assert self._storage(self.contract, "0x") is not None
         assert self._storage(self.contract, "0x01") is None
 
-        assert self.etx_contract.coinBalanceOf(self.ALICE['address']) == 1000000 * 10 ** 5
-        assert self.bob_contract.coinBalanceOf(self.ALICE['address']) == 1000000 * 10 ** 5
+        assert self.etx_contract.balanceOf(self.ALICE['address']) == 1000000 * 10 ** 5
+        assert self.bob_contract.balanceOf(self.ALICE['address']) == 1000000 * 10 ** 5
 
     def test_initialize(self, block=None):
         # NameReg Alice
@@ -176,15 +176,15 @@ class TestEtherEx(object):
         self.test_initialize()
 
         # Send 1000 to Bob
-        ans = self.etx_contract.sendCoin(1000 * 10 ** 5, self.BOB['address'])
+        ans = self.etx_contract.transfer(1000 * 10 ** 5, self.BOB['address'])
         assert ans == SUCCESS
 
         # Alice has 1000 less
-        ans = self.etx_contract.coinBalanceOf(self.ALICE['address'])
+        ans = self.etx_contract.balanceOf(self.ALICE['address'])
         assert ans == 1000000 * 10 ** 5 - 1000 * 10 ** 5
 
         # Bob has 1000
-        ans = self.etx_contract.coinBalanceOf(self.BOB['address'])
+        ans = self.etx_contract.balanceOf(self.BOB['address'])
         assert ans == 1000 * 10 ** 5
 
         # assert self._storage(self.etx_contract, int(self.ALICE['address'], 16)) == self.xhex(1000000 - 1000)
@@ -193,23 +193,23 @@ class TestEtherEx(object):
     def test_bob_to_charlie_fail(self):
         self.test_initialize()
 
-        ans = self.etx_contract.sendCoin(1000 * 10 ** 5, self.CHARLIE['address'], sender=self.BOB['key'])
+        ans = self.etx_contract.transfer(1000 * 10 ** 5, self.CHARLIE['address'], sender=self.BOB['key'])
         assert ans == FAILURE
 
     def test_alice_to_bob_to_charlie(self):
         self.test_initialize()
 
         # Send 1000 to Bob
-        ans = self.etx_contract.sendCoin(1000 * 10 ** 5, self.BOB['address'], profiling=1)
+        ans = self.etx_contract.transfer(1000 * 10 ** 5, self.BOB['address'], profiling=1)
         assert ans['output'] == 1
         logger.info("\nTransfer profiling: %s" % ans)
 
         # Bob sends 250 to Charlie
-        ans = self.etx_contract.sendCoin(250 * 10 ** 5, self.CHARLIE['address'], sender=self.BOB['key'])
+        ans = self.etx_contract.transfer(250 * 10 ** 5, self.CHARLIE['address'], sender=self.BOB['key'])
         assert ans == SUCCESS
 
         # Charlie now has 250
-        ans = self.etx_contract.coinBalanceOf(self.CHARLIE['address'])
+        ans = self.etx_contract.balanceOf(self.CHARLIE['address'])
         assert ans == 250 * 10 ** 5
 
     #
@@ -218,7 +218,7 @@ class TestEtherEx(object):
     def test_sub_balance(self):
         self.test_initialize()
 
-        ans = self.etx_contract.coinBalanceOf(self.ALICE['address'])
+        ans = self.etx_contract.balanceOf(self.ALICE['address'])
         assert ans == 1000000 * 10 ** 5
 
     def test_deposit_to_exchange(self, init=True):
@@ -251,11 +251,11 @@ class TestEtherEx(object):
         assert ans == FAILURE
 
         # Alice has 10,000 less
-        ans = self.etx_contract.coinBalanceOf(self.ALICE['address'])
+        ans = self.etx_contract.balanceOf(self.ALICE['address'])
         assert ans == 1000000 * 10 ** 5 - 10000 * 10 ** 5
 
         # Exchange has 10,000
-        ans = self.etx_contract.coinBalanceOf(self.contract.address)
+        ans = self.etx_contract.balanceOf(self.contract.address)
         assert ans == 10000 * 10 ** 5
 
         # Alice has 10,000 in the exchange
@@ -534,7 +534,7 @@ class TestEtherEx(object):
 
     def test_transfer_to_bob_and_deposit(self):
         # Load BOB with ETX from ALICE
-        ans = self.etx_contract.sendCoin(10000 * 10 ** 5, self.BOB['address'])
+        ans = self.etx_contract.transfer(10000 * 10 ** 5, self.BOB['address'])
         assert ans == 1
 
         # Get BOB's balance

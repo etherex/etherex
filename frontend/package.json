@@ -67,20 +67,20 @@
     "bootswatch": "^3.3.5",
     "btc-swap": "etherex/btc-swap",
     "d3": "^3.5.6",
-    "fluxxor": "^1.7.1",
+    "fluxxor": "^1.7.3",
     "intl": "^1.0.0",
     "intl-locales-supported": "^1.0.0",
     "lodash": "^3.10.1",
     "numeral": "^1.5.3",
     "react": "^0.13.3",
-    "react-bootstrap": "=0.25.0",
+    "react-bootstrap": "^0.26.1",
     "react-favicon-etherex": "caktux/react-favicon",
     "react-intl": "^1.2.0",
-    "react-router": "^0.13.3",
-    "react-router-bootstrap": "^0.18.1",
+    "react-router": "^1.0.0-rc1",
+    "react-router-bootstrap": "^0.19.0",
     "si-prefix": "^0.1.0",
     "techan": "caktux/techan.js",
     "ua-parser-js": "^0.7.9",
-    "web3": "^0.12.2"
+    "web3": "^0.13.0"
   }
 }
