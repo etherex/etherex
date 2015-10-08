@@ -92,7 +92,7 @@ var MarketStore = Fluxxor.createStore({
   },
 
   onLoadMarketsSuccess: function() {
-    if (this.flux.store('config').debug)
+    if (this.flux.stores.config.debug)
       utils.log("MARKETS LOADED: ", this.markets);
 
     if (!this.market.id) {

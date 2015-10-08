@@ -9,10 +9,10 @@ var utils = require("../../js/utils");
 var TicketActions = function() {
 
   this.loadTicketIDs = function(init) {
-    if (this.flux.store('config').debug)
+    if (this.flux.stores.config.debug)
       console.count("loadTicketIDs triggered");
 
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.getTicketIDs(function(ticketIDs) {
       this.dispatch(constants.ticket.LOAD_TICKET_IDS, ticketIDs);
@@ -24,7 +24,7 @@ var TicketActions = function() {
   };
 
   this.loadTickets = function(ticketIDs) {
-    if (this.flux.store('config').debug)
+    if (this.flux.stores.config.debug)
       console.count("loadTickets triggered");
 
     // Put tickets in loading state
@@ -35,7 +35,7 @@ var TicketActions = function() {
   };
 
   this.loadTicket = function(id) {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     var tickets = this.flux.store("TicketStore").getState();
     if (tickets.error)
@@ -54,7 +54,7 @@ var TicketActions = function() {
   };
 
   this.updateTicket = function(id) {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.lookupTicket(id, function(ticket) {
       if (ticket.id)
@@ -89,10 +89,10 @@ var TicketActions = function() {
   };
 
   this.ticketsLoaded = function() {
-    if (this.flux.store('config').debug)
+    if (this.flux.stores.config.debug)
       console.count("ticketsLoaded triggered");
 
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     // Watch tickets
     btcSwapClient.watchTickets(function(ticketEvent, ticketId) {
@@ -112,7 +112,7 @@ var TicketActions = function() {
   };
 
   this.setTicketFlags = function(ticket) {
-    var userState = this.flux.store('UserStore').getState();
+    var userState = this.flux.stores.UserStore.getState();
 
     var formattedAmount = utils.formatEther(ticket.amount);
 
@@ -137,10 +137,10 @@ var TicketActions = function() {
   };
 
   this.lookupTicket = function(id) {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.lookupTicket(id, function(ticket) {
-      if (this.flux.store('config').debug)
+      if (this.flux.stores.config.debug)
         utils.log('Ticket: ', ticket);
 
       if (!ticket || !ticket.id) {
@@ -291,7 +291,7 @@ var TicketActions = function() {
 
         var txIndex = _.indexOf(data.tx, ticket.txHash);
 
-        var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+        var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
         var merkleProof = btcSwapClient.merkleProof(data.tx, txIndex);
 
@@ -312,10 +312,10 @@ var TicketActions = function() {
   };
 
   this.createTicket = function(btcAddress, numEther, btcTotal) {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.createTicket(btcAddress, numEther, btcTotal, function(result) {
-      if (this.flux.store('config').debug)
+      if (this.flux.stores.config.debug)
         utils.log('createTicket tx result:', result);
 
       var ticket = {
@@ -327,11 +327,11 @@ var TicketActions = function() {
         expiry: 1,
         pendingHash: result,
         status: 'pending',
-        owner: this.flux.store('UserStore').user.id
+        owner: this.flux.stores.UserStore.user.id
       };
       this.dispatch(constants.ticket.CREATE_TICKET, ticket);
     }.bind(this), function(pendingHash, ticket) {
-      if (this.flux.store('config').debug) {
+      if (this.flux.stores.config.debug) {
         utils.log('createTicket completed for ticket #', ticket.id);
         utils.log('pendingHash was', pendingHash);
       }
@@ -347,16 +347,16 @@ var TicketActions = function() {
   };
 
   this.cancelTicket = function(id) {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.cancelTicket(id, function(ticketId, txHash) {
-      if (this.flux.store('config').debug) {
+      if (this.flux.stores.config.debug) {
         utils.log('cancelTicket success for ticket #', ticketId);
         utils.log('cancelTicket tx result:', txHash);
       }
       this.dispatch(constants.ticket.CANCEL_TICKET, ticketId);
     }.bind(this), function(cancelledId) {
-      if (this.flux.store('config').debug)
+      if (this.flux.stores.config.debug)
         utils.log('cancelTicket completed for ticket #', cancelledId);
 
       // Let global watch remove ticket...
@@ -368,7 +368,7 @@ var TicketActions = function() {
   };
 
   this.generateWallet = function() {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.generateWallet(function(wallet) {
       this.dispatch(constants.ticket.UPDATE_WALLET, wallet);
@@ -379,7 +379,7 @@ var TicketActions = function() {
   };
 
   this.importWallet = function(key) {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.importWallet(key, function(wallet) {
       this.dispatch(constants.ticket.UPDATE_WALLET, wallet);
@@ -394,9 +394,9 @@ var TicketActions = function() {
   };
 
   this.createTransaction = function(recipient, amount, fee) {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
-    var wallet = this.flux.store('TicketStore').wallet;
-    var user = this.flux.store('UserStore').user;
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
+    var wallet = this.flux.stores.TicketStore.wallet;
+    var user = this.flux.stores.UserStore.user;
 
     btcSwapClient.createTransaction(wallet, recipient, amount, fee, user.id.substr(2), function(tx) {
       this.dispatch(constants.ticket.UPDATE_TX, tx);
@@ -407,7 +407,7 @@ var TicketActions = function() {
   };
 
   this.propagateTransaction = function(txHex) {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.propagateTransaction(txHex, function(result) {
       this.dispatch(constants.ticket.PROPAGATE_TX, result);
@@ -418,15 +418,15 @@ var TicketActions = function() {
   };
 
   this.reserveTicket = function(id, txHash, powNonce) {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.reserveTicket(id, txHash, powNonce, function(result) {
-      if (this.flux.store('config').debug)
+      if (this.flux.stores.config.debug)
         utils.log('reserveTicket result: ', result);
 
       this.dispatch(constants.ticket.RESERVE_TICKET, id);
     }.bind(this), function(reservedTicket) {
-      if (this.flux.store('config').debug)
+      if (this.flux.stores.config.debug)
         utils.log('reserveTicket completed for ticket #', reservedTicket.id);
 
       // Let global watch update ticket...
@@ -438,15 +438,15 @@ var TicketActions = function() {
   };
 
   this.claimTicket = function(id, txHex, txHash, txIndex, merkleSibling, txBlockHash) {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.claimTicket(id, txHex, txHash, txIndex, merkleSibling, txBlockHash, function(result) {
-      if (this.flux.store('config').debug)
+      if (this.flux.stores.config.debug)
         utils.log('claimTicket result: ', result);
 
       this.dispatch(constants.ticket.CLAIM_TICKET, id);
     }.bind(this), function(claimedId) {
-      if (this.flux.store('config').debug)
+      if (this.flux.stores.config.debug)
         utils.log('claimedTicket completed for ticket #', claimedId);
 
       // Let global watch remove ticket...
@@ -458,7 +458,7 @@ var TicketActions = function() {
   };
 
   this.computePoW = function(id, txHash) {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.computePoW(id, txHash, function(result) {
       this.dispatch(constants.ticket.UPDATE_POW, result);
@@ -469,7 +469,7 @@ var TicketActions = function() {
   };
 
   this.verifyPoW = function(id, txHash, nonce) {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.verifyPoW(id, txHash, nonce, function(result) {
       this.dispatch(constants.ticket.VERIFY_POW, result);
@@ -480,7 +480,7 @@ var TicketActions = function() {
   };
 
   this.getBlockchainHead = function() {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.getBlockchainHead(function(result) {
       this.dispatch(constants.ticket.UPDATE_BTC_HEAD, {btcHead: result});
@@ -491,7 +491,7 @@ var TicketActions = function() {
   };
 
   this.getLastBlockHeight = function() {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     btcSwapClient.getLastBlockHeight(function(result) {
       // Check actual latest block height from 'https://btc.blockr.io/api/v1/block/info/last'
@@ -549,8 +549,8 @@ var TicketActions = function() {
   };
 
   this.updateBlockHeader = function() {
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
-    var ticketState = this.flux.store('TicketStore').getState();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
+    var ticketState = this.flux.stores.TicketStore.getState();
     var blocksBehind = ticketState.btcBehind;
 
     if (!blocksBehind) {
@@ -590,7 +590,7 @@ var TicketActions = function() {
 
         var blockData = json.data;
 
-        if (this.flux.store('config').debug)
+        if (this.flux.stores.config.debug)
           utils.log("BTC_BLOCK_HASH", blockData.hash);
 
         btcSwapClient.storeBlockHeader(blockData.hash, function(result) {
@@ -600,7 +600,7 @@ var TicketActions = function() {
 
             // Loop to next block
             setTimeout(function() {
-              if (this.flux.store('TicketStore').getState().btcHeight <= result)
+              if (this.flux.stores.TicketStore.getState().btcHeight <= result)
                 this.flux.actions.ticket.updateBlockHeader();
             }.bind(this), 1000);
           }

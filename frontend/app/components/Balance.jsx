@@ -13,7 +13,7 @@ var Balance = React.createClass({
     return (
       <div className="text-overflow">
         <OverlayTrigger trigger={['hover', 'click']} placement='bottom' rootClose={true} overlay={
-            <Popover>
+            <Popover id="popover-balance">
               <div className="text-overflow">
                 <span className="text-orange">{ this.props.user.user.balanceSub }</span> { this.props.market.market.name }{' / '}
                 <span className="text-light">{ this.props.user.user.balance } ETH</span>

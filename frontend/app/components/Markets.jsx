@@ -6,30 +6,28 @@ var MarketList = require("./MarketList");
 var SubNavBar = require("./SubNavBar");
 
 var Markets = React.createClass({
-
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-
-  getInitialState: function () {
+  getInitialState() {
+    var path = this.props.routes[1].path;
     return {
       showGraph: false,
-      category: this.context.router.getCurrentRoutes()[1].name
+      category: path.slice(path.lastIndexOf('/') + 1, path.length)
     };
   },
 
-  componentDidMount: function() {
+  componentDidMount() {
     this.props.disableGraph();
   },
 
-  componentWillReceiveProps: function(nextProps) {
-    if (nextProps)
+  componentWillReceiveProps(nextProps) {
+    if (nextProps) {
+      var path = nextProps.routes[1].path;
       this.setState({
-        category: this.context.router.getCurrentRoutes()[1].name
+        category: path.slice(path.lastIndexOf('/') + 1, path.length)
       });
+    }
   },
 
-  render: function() {
+  render() {
     return (
       <div>
         <SubNavBar />

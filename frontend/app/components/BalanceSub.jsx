@@ -21,7 +21,7 @@ var BalanceSub = React.createClass({
         <div className="navbar col-md-12">
           <div className="text-light">Wallet</div>
           <OverlayTrigger trigger={['hover', 'click']} placement='left' rootClose={true} overlay={
-              <Popover>
+              <Popover id="balance-sub-popover">
                 { this.formatMessage(this.getIntlMessage('wallet.balance'), {
                     currency: this.props.market.market.name,
                     balance: balance
@@ -43,7 +43,7 @@ var BalanceSub = React.createClass({
           <div className="text-light">Available <span className="hidden-xs">to trade</span></div>
           <div>
             <OverlayTrigger trigger={['hover', 'click']} placement='left' rootClose={true} overlay={
-                <Popover>
+                <Popover id="balance-available-popover">
                   { this.formatMessage(this.getIntlMessage('wallet.available'), {
                       currency: this.props.market.market.name,
                       balance: available
@@ -62,7 +62,7 @@ var BalanceSub = React.createClass({
             </OverlayTrigger>
           </div>
           <OverlayTrigger trigger={['hover', 'click']} placement='left' rootClose={true} overlay={
-              <Popover>
+              <Popover id="balance-pending-popover">
                 <div className="text-overflow">
                   { this.formatMessage(
                       this.getIntlMessage('wallet.pending'), {
@@ -85,7 +85,7 @@ var BalanceSub = React.createClass({
         <div className="navbar col-md-12">
           <div className="text-light">In trades</div>
           <OverlayTrigger trigger={['hover', 'click']} placement='left' rootClose={true} overlay={
-              <Popover>
+              <Popover id="balance-trading-popover">
                 { this.formatMessage(this.getIntlMessage('wallet.trading'), {
                     currency: this.props.market.market.name,
                     balance: trading

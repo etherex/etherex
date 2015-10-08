@@ -45,7 +45,8 @@ var UserSummaryPane = React.createClass({
                   <FormattedMessage message={this.getIntlMessage('user.switch')} />
                 </td>
                 <td>
-                  <DropdownButton ref="switchaddress"
+                  <DropdownButton id="switch-address-dropdown"
+                    ref="switchaddress"
                     onSelect={this.handleChange}
                     key={'switchaddress'}
                     title={this.props.user.user.id} pullLeft>

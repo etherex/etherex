@@ -115,9 +115,9 @@ var CreateTicket = React.createClass({
         isValid: false
     });
 
-    setTimeout(function() {
-      this.context.router.transitionTo('ticket', {ticketId: '-'});
-    }.bind(this), 300);
+    // setTimeout(function() {
+    //   this.context.router.transitionTo('ticket', {ticketId: '-'});
+    // }.bind(this), 300);
   },
 
   render() {

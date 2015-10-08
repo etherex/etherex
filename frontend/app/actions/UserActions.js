@@ -6,7 +6,7 @@ var constants = require("../js/constants");
 var UserActions = function() {
 
   this.loadAddresses = function(init) {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     this.dispatch(constants.user.LOAD_ADDRESSES);
 
@@ -56,7 +56,7 @@ var UserActions = function() {
   };
 
   this.switchAddress = function(payload) {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
     _client.putHex('EtherEx', 'primary', payload.address);
 
     this.dispatch(constants.user.SWITCH_ADDRESS, payload);
@@ -71,7 +71,7 @@ var UserActions = function() {
   };
 
   this.updateBalance = function() {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     var user = this.flux.store("UserStore").getState().user;
 
@@ -86,10 +86,10 @@ var UserActions = function() {
   };
 
   this.updateBalanceSub = function(market) {
-    if (this.flux.store('config').debug)
+    if (this.flux.stores.config.debug)
       console.count("updateBalanceSub triggered");
 
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     var user = this.flux.store("UserStore").getState().user;
 
@@ -113,14 +113,14 @@ var UserActions = function() {
   };
 
   this.sendEther = function(payload) {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     var user = this.flux.store("UserStore").getState().user;
 
     this.dispatch(constants.user.SEND_ETHER, payload);
 
     _client.sendEther(user, payload.amount, payload.recipient, function(result) {
-      if (this.flux.store('config').debug)
+      if (this.flux.stores.config.debug)
         utils.log("SEND_ETHER_RESULT", result);
       this.flux.actions.user.updateBalance();
     }.bind(this), function(error) {
@@ -129,7 +129,7 @@ var UserActions = function() {
   };
 
   this.sendSub = function(payload) {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     var user = this.flux.store("UserStore").getState().user;
     var market = this.flux.store("MarketStore").getState().market;
@@ -139,7 +139,7 @@ var UserActions = function() {
     this.dispatch(constants.user.SEND_SUB, { amount: amount });
 
     _client.sendSub(user, amount, payload.recipient, market, function(result) {
-      if (this.flux.store('config').debug)
+      if (this.flux.stores.config.debug)
         utils.log("SEND_SUB_RESULT", result);
       this.flux.actions.user.updateBalanceSub();
     }.bind(this), function(error) {
@@ -148,7 +148,7 @@ var UserActions = function() {
   };
 
   this.depositSub = function(payload) {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     var user = this.flux.store("UserStore").getState().user;
     var market = this.flux.store("MarketStore").getState().market;
@@ -158,7 +158,7 @@ var UserActions = function() {
     this.dispatch(constants.user.DEPOSIT, { amount: amount });
 
     _client.depositSub(user, amount, market, function(result) {
-      if (this.flux.store('config').debug)
+      if (this.flux.stores.config.debug)
         utils.log("DEPOSIT_RESULT", result);
       this.flux.actions.user.updateBalanceSub();
     }.bind(this), function(error) {
@@ -167,7 +167,7 @@ var UserActions = function() {
   };
 
   this.withdrawSub = function(payload) {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     var user = this.flux.store("UserStore").getState().user;
     var market = this.flux.store("MarketStore").getState().market;
@@ -177,7 +177,7 @@ var UserActions = function() {
     this.dispatch(constants.user.WITHDRAW, { amount: amount });
 
     _client.withdrawSub(user, amount, market, function(result) {
-      if (this.flux.store('config').debug)
+      if (this.flux.stores.config.debug)
         utils.log("WITHDRAW_RESULT", result);
       this.flux.actions.user.updateBalanceSub();
     }.bind(this), function(error) {

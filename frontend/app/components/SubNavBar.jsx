@@ -4,52 +4,37 @@ var ReactIntl = require('react-intl');
 var IntlMixin = ReactIntl.IntlMixin;
 var FormattedMessage = ReactIntl.FormattedMessage;
 
-var Nav = require('react-bootstrap').Nav;
-var NavItemLink = require('react-router-bootstrap').NavItemLink;
+var Link = require('react-router/lib/Link');
+var Nav = require('react-bootstrap/lib/Nav');
 
 var fixtures = require('../js/fixtures');
 
 var SubNavBar = React.createClass({
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-
   mixins: [IntlMixin],
-
-  getInitialState() {
-    var marketSections = _.pluck(fixtures.categories, 'key');
-    marketSections.push('markets');
-
-    return {
-      category: this.context.router.getCurrentRoutes()[1].name,
-      marketSections: marketSections
-    };
-  },
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps) {
-      var category = this.context.router.getCurrentRoutes()[1].name;
-      this.setState({
-        category: category
-      });
-    }
-  },
 
   render() {
     return (
       <Nav bsStyle="pills" className="navbar" role="navigation" aria-label="Secondary" justified>
-        <NavItemLink to="subs">
-          <i className="icon-chart-pie"></i> <FormattedMessage message={this.getIntlMessage('sections.sub')} />
-        </NavItemLink>
-        <NavItemLink to="xchain">
-          <i className="icon-bitcoin"></i> <FormattedMessage message={this.getIntlMessage('sections.xchain')} />
-        </NavItemLink>
-        <NavItemLink to="assets">
-          <i className="icon-diamond"></i> <FormattedMessage message={this.getIntlMessage('sections.assets')} />
-        </NavItemLink>
-        <NavItemLink to="currencies">
-          <i className="icon-money"></i> <FormattedMessage message={this.getIntlMessage('sections.currencies')} />
-        </NavItemLink>
+        <li>
+          <Link to="/markets/subs" activeClassName="active">
+            <i className="icon-chart-pie"></i> <FormattedMessage message={this.getIntlMessage('sections.sub')} />
+          </Link>
+        </li>
+        <li>
+          <Link to="/markets/xchain" activeClassName="active">
+            <i className="icon-bitcoin"></i> <FormattedMessage message={this.getIntlMessage('sections.xchain')} />
+          </Link>
+        </li>
+        <li>
+          <Link to="/markets/assets" activeClassName="active">
+            <i className="icon-diamond"></i> <FormattedMessage message={this.getIntlMessage('sections.assets')} />
+          </Link>
+        </li>
+        <li>
+          <Link to="/markets/currencies" activeClassName="active">
+            <i className="icon-money"></i> <FormattedMessage message={this.getIntlMessage('sections.currencies')} />
+          </Link>
+        </li>
       </Nav>
     );
   }

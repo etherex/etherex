@@ -1,6 +1,6 @@
 var localesSupported = require('intl-locales-supported');
 var i18n = {
-    locales: ['en-US']
+  locales: ['en-US']
 };
 
 if (window.Intl) {
@@ -21,30 +21,20 @@ if (window.Intl) {
   require("intl/locale-data/jsonp/en-US");
 }
 
-var React = require("react/addons");
+// Load Intl data
+var intlData = require('./js/intlData');
+
 var Fluxxor = require("fluxxor");
-var Router = require("react-router");
-var Route = Router.Route;
-var NotFoundRoute = Router.NotFoundRoute;
-var DefaultRoute = Router.DefaultRoute;
+var React = require("react/addons");
+var ReactRouter = require('react-router');
+var Router = ReactRouter.Router;
+var Route = ReactRouter.Route;
+var IndexRoute = ReactRouter.IndexRoute;
+var Link = ReactRouter.Link;
 
 var EtherExApp = require("./components/EtherExApp");
 
 var Placeholder = require("./components/Placeholder");
-
-var ConfigStore = require("./stores/ConfigStore");
-var NetworkStore = require("./stores/NetworkStore");
-var UserStore = require("./stores/UserStore");
-var TradeStore = require("./stores/TradeStore");
-var MarketStore = require("./stores/MarketStore");
-var TicketStore = require("./stores/btcswap/TicketStore");
-
-var ConfigActions = require("./actions/ConfigActions");
-var NetworkActions = require("./actions/NetworkActions");
-var UserActions = require("./actions/UserActions");
-var TradeActions = require("./actions/TradeActions");
-var MarketActions = require("./actions/MarketActions");
-var TicketActions = require("./actions/btcswap/TicketActions");
 
 var Trades = require("./components/Trades");
 var Markets = require("./components/Markets");
@@ -63,10 +53,19 @@ var BtcHelp = require("./components/btcswap/Help");
 require("./css/fonts.css");
 require("./css/icons.css");
 
-// Load Intl data
-var intlData = require('./js/intlData');
+var ConfigStore = require("./stores/ConfigStore");
+var NetworkStore = require("./stores/NetworkStore");
+var UserStore = require("./stores/UserStore");
+var TradeStore = require("./stores/TradeStore");
+var MarketStore = require("./stores/MarketStore");
+var TicketStore = require("./stores/btcswap/TicketStore");
 
-// var Redirect = Router.Redirect;
+var ConfigActions = require("./actions/ConfigActions");
+var NetworkActions = require("./actions/NetworkActions");
+var UserActions = require("./actions/UserActions");
+var TradeActions = require("./actions/TradeActions");
+var MarketActions = require("./actions/MarketActions");
+var TicketActions = require("./actions/btcswap/TicketActions");
 
 var stores = {
   config: new ConfigStore(),
@@ -88,38 +87,69 @@ var actions = {
 
 var flux = new Fluxxor.Flux(stores, actions);
 
+var createFluxComponent = function (Component, props) {
+  return <Component {...props} flux={flux} />;
+};
+
 flux.setDispatchInterceptor(function(action, dispatch) {
   React.addons.batchedUpdates(function() {
     dispatch(action);
   });
 });
 
+class ContextRouter extends Router {
+  static get childContextTypes() {
+    return {
+      locales: React.PropTypes.oneOfType([
+        React.PropTypes.string,
+        React.PropTypes.array
+      ]),
+      formats : React.PropTypes.object,
+      messages: React.PropTypes.object
+    }
+  }
+
+  getChildContext() {
+    var intl = intlData || {};
+    var locales = i18n.locales || {};
+    var context = {};
+    context.locales = i18n.locales;
+    context.formats = intlData.formats || {};
+    context.messages= intlData.messages || {};
+
+    return context;
+  }
+}
+
+// Opt-out of fugly _k in query string
+import createHistory from 'history/lib/createHashHistory';
+var history = createHistory({
+  queryKey: false
+});
+
 var routes = (
-  <Route name="app" handler={EtherExApp}>
-    <DefaultRoute handler={Trades} title="Home" />
-    <Route name="home" path="/" handler={Trades} title="Trades" />
-    <Route name="tradeDetails" path="/trade/:tradeId" handler={Placeholder} title="Trade details" />
-    <Route name="markets" path="/markets" handler={Markets} title="Markets" />
-    <Route name="subs" path="/markets/subs" handler={Markets} title="Subs" />
-    <Route name="xchain" path="/markets/xchain" handler={Markets} title="X-Chain" />
-    <Route name="assets" path="/markets/assets" handler={Markets} title="Assets" />
-    <Route name="currencies" path="/markets/currencies" handler={Markets} title="Currencies" />
-    <Route name="btc" path="/btc" handler={Tickets} title="BTC" />
-    <Route path="/btc/ticket" handler={Tickets} title="BTC">
-      <Route name="ticket" path="/btc/ticket/:ticketId" handler={Tickets} title="BTC" />
+  <ContextRouter history={history} createElement={createFluxComponent}>
+    <Route path="/" component={EtherExApp}>
+      <IndexRoute component={Trades} />
+      <Route path="trades" component={Trades} />
+      <Route path="markets" component={Markets} />
+      <Route path="markets/subs" component={Markets} />
+      <Route path="markets/xchain" component={Markets} />
+      <Route path="markets/assets" component={Markets} />
+      <Route path="markets/currencies" component={Markets} />
+      <Route path="btc/buy" component={Tickets} />
+      <Route path="btc/sell" component={CreateTicket} />
+      <Route path="btc/reserve" component={ReserveTicket} />
+      <Route path="btc/claim" component={ClaimTicket} />
+      <Route path="btc/help" component={BtcHelp} />
+      <Route path="btc/tickets/:ticketId" component={Tickets} />
+      <Route path="wallet" component={Wallet} />
+      <Route path="tools" component={Tools} />
+      <Route path="help" component={Help} />
+      <Route path="user" component={UserDetails} />
+      <Route path="*" component={Placeholder} />
     </Route>
-    <Route name="sell" path="/btc/sell" handler={CreateTicket} title="Sell" />
-    <Route name="reserve" path="/btc/reserve" handler={ReserveTicket} title="Reserve" />
-    <Route name="claim" path="/btc/claim" handler={ClaimTicket} title="Claim" />
-    <Route name="btc-help" path="/btc/help" handler={BtcHelp} title="Help" />
-    <Route name="wallet" path="/wallet" handler={Wallet} title="Wallet" />
-    <Route name="tools" path="/tools" handler={Tools} title="Tools" />
-    <Route name="help" path="/help" handler={Help} title="Help" />
-    <Route name="userDetails" path="/user" handler={UserDetails} title="User details" />
-    <NotFoundRoute name="notfound" handler={Placeholder} title="User or Trade ID not found" />
-  </Route>
+  </ContextRouter>
 );
 
-Router.run(routes, function (Handler) {
-  React.render(<Handler flux={flux} locales={i18n.locales} {...intlData} />, document.body);
-});
+React.render(routes, document.body);

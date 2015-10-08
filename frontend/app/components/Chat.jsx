@@ -47,7 +47,7 @@ var Chat = React.createClass({
 
   handleSend(e) {
     e.preventDefault();
-    var ethereumClient = this.props.flux.store('config').getEthereumClient();
+    var ethereumClient = this.props.flux.stores.config.getEthereumClient();
     if (ethereumClient.hasWhisper())
       this.props.flux.actions.market.postMessage(this.state.message);
     else

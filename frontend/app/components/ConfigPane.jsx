@@ -36,7 +36,7 @@ var ConfigPane = React.createClass({
   },
 
   componentWillReceiveProps(nextProps) {
-    var config = nextProps.flux.store('config');
+    var config = nextProps.flux.stores.config;
     if (config.si != this.state.si)
       this.setState({
         si: config.si
@@ -184,7 +184,7 @@ var ConfigPane = React.createClass({
 
           <form className="form-horizontal" role="form" onSubmit={this.handleUpdateTheme} >
             <Input label="Theme" labelClassName='col-sm-3' wrapperClassName='col-sm-9 wrapper'>
-              <DropdownButton ref="theme" title={this.state.themes[this.state.theme]} onSelect={this.handleChangeTheme}>
+              <DropdownButton id="theme-dropdown" ref="theme" title={this.state.themes[this.state.theme]} onSelect={this.handleChangeTheme}>
                 <MenuItem key={"flatly"} eventKey={"flatly"}>Flatly</MenuItem>
                 <MenuItem key={"darkly"} eventKey={"darkly"}>Darkly</MenuItem>
                 <MenuItem key={"superhero"} eventKey={"superhero"}>Superhero</MenuItem>

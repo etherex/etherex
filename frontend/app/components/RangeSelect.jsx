@@ -10,7 +10,7 @@ var RangeSelect = React.createClass({
   getInitialState: function () {
     var configState = this.props.flux.store("config");
     return {
-      block: configState.rangeEnd ? configState.rangeEnd : this.props.flux.store('network').blockNumber,
+      block: configState.rangeEnd ? configState.rangeEnd : this.props.flux.stores.network.blockNumber,
       range: 75,
       live: configState.rangeEnd ? "" : "active",
       last15: configState.range == 75 ? "active" : "",
@@ -20,11 +20,11 @@ var RangeSelect = React.createClass({
   },
 
   componentWillReceiveProps: function(nextProps) {
-    var rangeEnd = nextProps.flux.store('config').rangeEnd;
+    var rangeEnd = nextProps.flux.stores.config.rangeEnd;
     if (!rangeEnd && this.state.live === "active") {
-      this.refs.range.getDOMNode().defaultValue = nextProps.flux.store('network').blockNumber;
+      this.refs.range.getDOMNode().defaultValue = nextProps.flux.stores.network.blockNumber;
       this.setState({
-        block: nextProps.flux.store('network').blockNumber
+        block: nextProps.flux.stores.network.blockNumber
       });
     }
     else if (rangeEnd) {
@@ -74,7 +74,7 @@ var RangeSelect = React.createClass({
   handleRangeEnd: function(e) {
     e.preventDefault();
 
-    var block = this.props.flux.store('network').blockNumber;
+    var block = this.props.flux.stores.network.blockNumber;
     var value = null;
     if (e.target.value == "live")
       value = block;
@@ -115,7 +115,7 @@ var RangeSelect = React.createClass({
                 className="range-select"
                 onChange={this.handleRangeEnd}
                 min={this.state.range}
-                max={this.props.flux.store('network').blockNumber}
+                max={this.props.flux.stores.network.blockNumber}
                 step={75}
                 defaultValue={this.state.block}
                 />

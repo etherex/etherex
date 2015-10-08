@@ -965,7 +965,7 @@ var EthereumClient = function(params) {
         if (!markets.loading && this.toBlock == 'latest') {
           updateSubBalance(market);
 
-          var alerts = this.flux.store('config').alertCount;
+          var alerts = this.flux.stores.config.alertCount;
           this.flux.actions.config.updateAlertCount(alerts + 1);
         }
 
@@ -1376,7 +1376,7 @@ var EthereumClient = function(params) {
     }
 
     var ids = _.pluck(trades, 'id');
-    var gas = ids.length * 150000;
+    var gas = ids.length * 200000;
 
     var options = {
       from: user.id,

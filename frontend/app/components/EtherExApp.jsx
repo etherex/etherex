@@ -5,9 +5,6 @@ var ReactIntl = require('react-intl');
 var IntlMixin = ReactIntl.IntlMixin;
 var FormattedMessage = ReactIntl.FormattedMessage;
 
-var Router = require("react-router");
-var RouteHandler = Router.RouteHandler;
-
 var StoreWatchMixin = Fluxxor.StoreWatchMixin;
 
 var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
@@ -30,10 +27,6 @@ var fixtures = require('../js/fixtures');
 var Favicon = require('react-favicon');
 
 var EtherExApp = React.createClass({
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-
   mixins: [IntlMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore", "TicketStore")],
 
   getInitialState() {
@@ -59,12 +52,12 @@ var EtherExApp = React.createClass({
   },
 
   componentDidMount() {
-    this.state.flux.actions.config.initializeState();
+    this.props.flux.actions.config.initializeState();
   },
 
   componentWillReceiveProps(nextProps) {
     if (nextProps) {
-      var category = this.context.router.getCurrentRoutes()[1].name;
+      var category = nextProps.routes[1].path;
       this.setState({
         category: category
       });
@@ -74,12 +67,12 @@ var EtherExApp = React.createClass({
   getStateFromFlux() {
     return {
       flux: this.props.flux,
-      config: this.props.flux.store('config').getState(),
-      network: this.props.flux.store('network').getState(),
-      user: this.props.flux.store("UserStore").getState(),
-      trades: this.props.flux.store("TradeStore").getState(),
-      market: this.props.flux.store("MarketStore").getState(),
-      ticket: this.props.flux.store("TicketStore").getState()
+      config: this.props.flux.stores.config.getState(),
+      network: this.props.flux.stores.network.getState(),
+      user: this.props.flux.stores.UserStore.getState(),
+      trades: this.props.flux.stores.TradeStore.getState(),
+      market: this.props.flux.stores.MarketStore.getState(),
+      ticket: this.props.flux.stores.TicketStore.getState()
     };
   },
 
@@ -95,7 +88,7 @@ var EtherExApp = React.createClass({
   },
 
   disableDemoMode() {
-    this.props.flux.actions.config.updateDemoMode(false);
+    this.state.flux.actions.config.updateDemoMode(false);
   },
 
   render() {
@@ -126,7 +119,7 @@ var EtherExApp = React.createClass({
                       </div>
                     </div> }
                   <div className="visible-lg">
-                    <Network flux={this.props.flux} />
+                    <Network flux={this.state.flux} />
                   </div>
                 </div>
               </div>
@@ -155,7 +148,7 @@ var EtherExApp = React.createClass({
                       <div className="row">
                         { !this.state.user.error &&
                           <div className="top-btn pull-right">
-                            <MarketSelect flux={this.props.flux} market={this.state.market} user={this.state.user} />
+                            <MarketSelect flux={this.state.flux} market={this.state.market} user={this.state.user} />
                           </div> }
                       </div>
                     </div>
@@ -166,7 +159,7 @@ var EtherExApp = React.createClass({
                       <div className="top-btn-sm">
                         { (this.state.config.network != 1 && !this.state.config.demoMode) &&
                           <OverlayTrigger trigger={['click']} placement='bottom' rootClose={true} overlay={
-                            <Popover>
+                            <Popover id="network-id-popover">
                               Network ID { this.state.config.network }
                             </Popover>}>
                             <div className="pull-right">
@@ -204,16 +197,16 @@ var EtherExApp = React.createClass({
                         </div> }
 
                       { (!this.state.market.error && !this.state.user.error) &&
-                        <RouteHandler
-                          flux={this.state.flux}
-                          config={this.state.config}
-                          network={this.state.network}
-                          market={this.state.market}
-                          trades={this.state.trades}
-                          user={this.state.user}
-                          ticket={this.state.ticket}
-                          disableGraph={this.onDisableGraph}
-                        />
+                        React.cloneElement(this.props.children, {
+                          flux: this.state.flux,
+                          config: this.state.config,
+                          network: this.state.network,
+                          market: this.state.market,
+                          trades: this.state.trades,
+                          user: this.state.user,
+                          ticket: this.state.ticket,
+                          disableGraph: this.onDisableGraph
+                        })
                       }
                     </div>
                   </div>
@@ -224,7 +217,7 @@ var EtherExApp = React.createClass({
                         market={this.state.market}
                         si={this.state.config.si} />
                     }
-                    <Chat market={this.state.market.market} flux={this.state.flux} />
+                    <Chat market={this.state.market.market} flux={this.props.flux} />
                   </div>
                 </div>
               </div>

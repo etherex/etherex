@@ -42,12 +42,12 @@ var Network = React.createClass({
   },
 
   getStateFromFlux() {
-    var networkState = this.props.flux.store('network').getState();
+    var networkState = this.props.flux.stores.network.getState();
     return {
-      user: this.props.flux.store('UserStore').getState().user,
-      config: this.props.flux.store('config').getState(),
+      user: this.props.flux.stores.UserStore.getState().user,
+      config: this.props.flux.stores.config.getState(),
       network: networkState,
-      host: this.props.flux.store('config').getState().host,
+      host: this.props.flux.stores.config.getState().host,
       blockTimestamp: networkState.blockTimestamp,
       blockTime: parseInt(networkState.blockTime),
       networkLag: networkState.networkLag

@@ -10,7 +10,7 @@ var EthereumClient = require('../clients/EthereumClient');
 var ConfigActions = function() {
 
   this.updateEthereumClient = function () {
-    var configState = this.flux.store('config').getState();
+    var configState = this.flux.stores.config.getState();
     var debug = configState.debug;
 
     var clientParams = {
@@ -102,15 +102,15 @@ var ConfigActions = function() {
   };
 
   this.updateBtcSwapClient = function() {
-    var configState = this.flux.store('config').getState();
-    var userState = this.flux.store('UserStore').getState();
+    var configState = this.flux.stores.config.getState();
+    var userState = this.flux.stores.UserStore.getState();
 
     var btcSwap = new BtcSwap({
       address: configState.btcSwapAddress,
       host: configState.host,
       from: userState.user.id,
       testnet: configState.network === 1 ? false : true,
-      debug: this.flux.store('config').debug
+      debug: this.flux.stores.config.debug
     });
 
     this.dispatch(constants.config.UPDATE_BTC_SWAP_CLIENT, {
@@ -119,7 +119,7 @@ var ConfigActions = function() {
   };
 
   this.forceLoad = function() {
-    var timeout = _.parseInt(this.flux.store('network').blockChainAge + 300);
+    var timeout = _.parseInt(this.flux.stores.network.blockChainAge + 300);
     this.dispatch(constants.config.UPDATE_CONFIG, {
       timeout: timeout
     });
@@ -134,7 +134,7 @@ var ConfigActions = function() {
   this.updateConfig = function(payload) {
     this.dispatch(constants.config.UPDATE_CONFIG, payload);
 
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     if (payload.timeout)
       _client.putHex('EtherEx', 'timeout', web3.fromDecimal(payload.timeout));
@@ -161,7 +161,7 @@ var ConfigActions = function() {
           React.addons.Perf.start();
       }
       else {
-        var prevHandler = this.flux.store('config').getState().handler;
+        var prevHandler = this.flux.stores.config.getState().handler;
         this.dispatch(constants.config.UPDATE_CONFIG, {
           debugHandler: null
         });
@@ -180,7 +180,7 @@ var ConfigActions = function() {
     this.dispatch(constants.config.UPDATE_CONFIG, {
       address: payload.address
     });
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
     _client.putHex('EtherEx', 'address', payload.address);
 
     this.flux.actions.config.updateEthereumClient();
@@ -215,7 +215,7 @@ var ConfigActions = function() {
     this.dispatch(constants.config.UPDATE_CONFIG, {
       range: range
     });
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
     _client.putHex('EtherEx', 'range', web3.fromDecimal(range));
 
     this.flux.actions.config.updateEthereumClient();
@@ -229,7 +229,7 @@ var ConfigActions = function() {
     this.dispatch(constants.config.UPDATE_CONFIG, {
       rangeEnd: rangeEnd
     });
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
     _client.putHex('EtherEx', 'rangeEnd', web3.fromDecimal(rangeEnd));
 
     this.flux.actions.config.updateEthereumClient();

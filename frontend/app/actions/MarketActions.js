@@ -6,10 +6,10 @@ var web3 = require("web3");
 var MarketActions = function() {
 
   this.initializeMarkets = function() {
-    if (this.flux.store('config').debug)
+    if (this.flux.stores.config.debug)
       console.count("Initializing markets");
 
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     // Get last market ID
     _client.getLastMarketID( function(lastMarketID) {
@@ -51,10 +51,10 @@ var MarketActions = function() {
   };
 
   this.loadMarket = function(id, init) {
-    if (init && this.flux.store('config').debug)
+    if (init && this.flux.stores.config.debug)
       console.count("loadMarket triggered");
 
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     var user = this.flux.store("UserStore").getState().user;
     var state = this.flux.store("MarketStore").getState();
@@ -94,7 +94,7 @@ var MarketActions = function() {
   };
 
   this.updateMarket = function() {
-    if (this.flux.store('config').debug)
+    if (this.flux.stores.config.debug)
       console.count("updateMarket triggered");
 
     var id = this.flux.store("MarketStore").getState().market.id;
@@ -102,7 +102,7 @@ var MarketActions = function() {
   };
 
   this.marketsLoaded = function(init) {
-    if (init && this.flux.store('config').debug)
+    if (init && this.flux.stores.config.debug)
       utils.log("Markets", "loaded");
 
     this.dispatch(constants.market.LOAD_MARKETS_SUCCESS);
@@ -122,7 +122,7 @@ var MarketActions = function() {
   };
 
   this.loadMarketBalances = function(market) {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
     var user = this.flux.store("UserStore").getState().user;
 
     _client.updateBalanceSub(market, user.id, function(_market, available, trading, balance) {
@@ -166,7 +166,7 @@ var MarketActions = function() {
   };
 
   this.switchMarket = function(market) {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     this.dispatch(constants.market.CHANGE_MARKET, market);
 
@@ -187,7 +187,7 @@ var MarketActions = function() {
   };
 
   this.registerMarket = function(market) {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     // console.log("REGISTER_MARKET", market);
     _client.registerMarket(market, function(id) {
@@ -198,7 +198,7 @@ var MarketActions = function() {
   };
 
   this.reloadPrices = function() {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     this.dispatch(constants.market.RELOAD_PRICES);
 
@@ -216,7 +216,7 @@ var MarketActions = function() {
   };
 
   this.reloadTransactions = function() {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
     this.dispatch(constants.market.RELOAD_TRANSACTIONS);
 
@@ -232,9 +232,9 @@ var MarketActions = function() {
   };
 
   this.toggleFavorite = function(favorite) {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
 
-    var favorites = this.flux.store('MarketStore').getState().favorites;
+    var favorites = this.flux.stores.MarketStore.getState().favorites;
 
     // Store favorites in client DB
     if (favorite.favorite === true)
@@ -252,14 +252,14 @@ var MarketActions = function() {
   };
 
   this.postMessage = function(message) {
-    var _client = this.flux.store('config').getEthereumClient();
+    var _client = this.flux.stores.config.getEthereumClient();
     var market = this.flux.store("MarketStore").getState().market;
 
     _client.postMessage(market.name, message, function(result) {
-      if (this.flux.store('config').debug)
+      if (this.flux.stores.config.debug)
         utils.log("POST", web3.toAscii(result.payload));
     }.bind(this), function(error) {
-      if (this.flux.store('config').debug)
+      if (this.flux.stores.config.debug)
         utils.error("POST", error);
     }.bind(this));
   };

@@ -61,13 +61,15 @@ var TradeForm = React.createClass({
           </div>
           <div className="visible-xs visible-sm text-center">
             <label className="sr-only" forHtml="type">this.formatMessage(this.getIntlMessage('form.buyorsell'))</label>
-            <DropdownButton bsStyle="primary" bsSize="small" ref="type"
-                className="pull-right"
-                onSelect={this.handleType}
-                key={this.state.type}
-                title={this.state.typename}>
-              <MenuItem key={1} eventKey={1}>Buy</MenuItem>
-              <MenuItem key={2} eventKey={2}>Sell</MenuItem>
+            <DropdownButton id="trade-type-dropdown"
+              ref="type"
+              bsStyle="primary" bsSize="small"
+              className="pull-right"
+              onSelect={this.handleType}
+              key={this.state.type}
+              title={this.state.typename}>
+                <MenuItem key={1} eventKey={1}>Buy</MenuItem>
+                <MenuItem key={2} eventKey={2}>Sell</MenuItem>
             </DropdownButton>
             <h3 className="panel-title">{this.formatMessage(this.getIntlMessage('form.new'))}</h3>
           </div>

@@ -32,7 +32,7 @@ var Blocks = React.createClass({
         <div className="panel-group row">
           { this.props.ticket &&
             <OverlayTrigger trigger={['click']} placement='left' rootClose={true} overlay={
-              <Popover bsSize="large">
+              <Popover id="btc-hash-popover" bsSize="large">
                 <p className="text-overflow">BTC block # { this.formatNumber(this.props.ticket.btcHeight) }</p>
                 <p className="text-overflow">BTC block hash: <samp>{ this.props.ticket.btcHead }</samp></p>
                 <p className="text-overflow">Real BTC block # { this.props.ticket.btcRealHeight }</p>
@@ -50,7 +50,7 @@ var Blocks = React.createClass({
             </OverlayTrigger> }
           { (this.props.ticket && this.props.ticket.btcBehind) &&
             <OverlayTrigger trigger={['hover', 'focus']} placement='left' overlay={
-              <Popover>
+              <Popover id="btc-behind-popover">
                 { this.formatMessage(this.getIntlMessage('btc.behind'), {
                     behind: this.props.ticket.btcBehind
                   }) }

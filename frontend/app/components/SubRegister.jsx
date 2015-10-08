@@ -161,12 +161,16 @@ var SubRegister = React.createClass({
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
         <div className="form-group">
-          <DropdownButton ref="category" key={1} onSelect={this.handleCategories} title={this.state.categoryName}>
-            {
-              fixtures.categories.map(function(category) {
-                return <MenuItem key={category.id} eventKey={category.id}>{category.name}</MenuItem>;
-              })
-            }
+          <DropdownButton id="category-dropdown"
+            ref="category"
+            key={1}
+            onSelect={this.handleCategories}
+            title={this.state.categoryName}>
+              {
+                fixtures.categories.map(function(category) {
+                  return <MenuItem key={category.id} eventKey={category.id}>{category.name}</MenuItem>;
+                })
+              }
           </DropdownButton>
         </div>
 

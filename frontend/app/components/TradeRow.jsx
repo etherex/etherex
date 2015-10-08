@@ -139,7 +139,7 @@ var TradeRow = React.createClass({
         <td className="trade-op">
           {!this.props.review &&
             <OverlayTrigger trigger={['hover', 'focus']} placement='right' overlay={
-              <Popover>
+              <Popover id={"trade-id-" + this.props.trade.id}>
                 <div className="text-overflow">
                   <b>ID:</b> {this.props.trade.id}
                 </div>

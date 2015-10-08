@@ -17,7 +17,7 @@ var TradeList = React.createClass({
   },
 
   componentDidMount: function() {
-    if (this.props.flux.store('config').debug && React.addons.Perf) {
+    if (this.props.flux.stores.config.debug && React.addons.Perf) {
       var measurements = React.addons.Perf.stop();
       React.addons.Perf.printInclusive(measurements);
       utils.debug("Inclusive", "^");

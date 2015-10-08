@@ -170,9 +170,11 @@ a {
   &.navbar-default .navbar-nav > .active > a,
   &.navbar-default .navbar-nav > .active > a:hover,
   &.navbar-default .navbar-nav > .active > a:focus,
+  &.navbar-default .navbar-nav > li > a.active,
   .nav > li > a:hover,
   .nav > li > a:focus {
     background: transparent;
+    color: #fff;
   }
 
   .nav > li:first-child {
@@ -554,12 +556,16 @@ tr.disabled td {
 .theme-flatly .nav-pills > li.active > a,
 .theme-flatly .nav-pills > li.active > a:hover,
 .theme-flatly .nav-pills > li.active > a:focus,
+.theme-flatly .nav-pills > li > a.active,
+.theme-flatly .nav-pills > li > a.active:hover,
+.theme-flatly .nav-pills > li > a.active:focus,
 .theme-flatly .navbar-default,
 .theme-flatly .label-primary,
 .theme-flatly .badge,
 .theme-flatly .progress-bar,
 .theme-flatly .panel-default > .panel-heading .badge {
   background-color: @primary-blue;
+  color: #fff;
 }
 
 .theme-flatly .panel-primary > .panel-heading,

@@ -18,10 +18,6 @@ var Nav = require('./Nav');
 var Blocks = require('./Blocks');
 
 var Tickets = React.createClass({
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-
   mixins: [IntlMixin],
 
   getInitialState() {
@@ -103,15 +99,15 @@ var Tickets = React.createClass({
         this.props.flux.actions.ticket.cancelTicket(ticket.id);
       else if (!ticket.claimer || ticket.reservable) {
         this.props.flux.actions.ticket.lookupTicket(ticket.id);
-        setTimeout(function() {
-          this.context.router.transitionTo('reserve');
-        }.bind(this), 300);
+        // setTimeout(function() {
+        //   this.context.router.transitionTo('reserve');
+        // }.bind(this), 300);
       }
       else {
         this.props.flux.actions.ticket.lookupTicket(ticket.id);
-        setTimeout(function() {
-          this.context.router.transitionTo('claim');
-        }.bind(this), 300);
+        // setTimeout(function() {
+        //   this.context.router.transitionTo('claim');
+        // }.bind(this), 300);
       }
   },
 

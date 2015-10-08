@@ -3,51 +3,41 @@ var ReactIntl = require('react-intl');
 var IntlMixin = ReactIntl.IntlMixin;
 var FormattedMessage = ReactIntl.FormattedMessage;
 
-var Nav = require('react-bootstrap').Nav;
-var NavItemLink = require('react-router-bootstrap').NavItemLink;
+var Link = require('react-router/lib/Link');
+var Nav = require('react-bootstrap/lib/Nav');
 var Glyphicon = require("react-bootstrap").Glyphicon;
 
 var BtcNav = React.createClass({
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-
   mixins: [IntlMixin],
-
-  getInitialState() {
-    return {
-      section: this.context.router.getCurrentRoutes()[1].name,
-      updatingBtcHeaders: false
-    };
-  },
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps) {
-      var section = this.context.router.getCurrentRoutes()[1].name;
-      this.setState({
-        section: section
-      });
-    }
-  },
 
   render() {
     return (
       <Nav bsStyle="pills" className="panel-group" role="navigation" aria-label="Secondary" justified>
-        <NavItemLink to="btc">
-          <Glyphicon glyph="download" /> <FormattedMessage message={this.getIntlMessage('form.buy')} /> ether
-        </NavItemLink>
-        <NavItemLink to="sell">
-          <Glyphicon glyph="upload" /> <FormattedMessage message={this.getIntlMessage('form.sell')} /> ether
-        </NavItemLink>
-        <NavItemLink to="reserve">
-          <Glyphicon glyph="ok" /> Reserve
-        </NavItemLink>
-        <NavItemLink to="claim">
-          <Glyphicon glyph="download-alt" /> Claim
-        </NavItemLink>
-        <NavItemLink to="btc-help">
-          <Glyphicon glyph="question-sign" /> <FormattedMessage message={this.getIntlMessage('nav.help')} />
-        </NavItemLink>
+        <li>
+          <Link to="/btc/buy" activeClassName="active">
+            <Glyphicon glyph="download" /> <FormattedMessage message={this.getIntlMessage('form.buy')} /> ether
+          </Link>
+        </li>
+        <li>
+          <Link to="/btc/sell" activeClassName="active">
+            <Glyphicon glyph="upload" /> <FormattedMessage message={this.getIntlMessage('form.sell')} /> ether
+          </Link>
+        </li>
+        <li>
+          <Link to="/btc/reserve" activeClassName="active">
+            <Glyphicon glyph="ok" /> Reserve
+          </Link>
+        </li>
+        <li>
+          <Link to="/btc/claim" activeClassName="active">
+            <Glyphicon glyph="download-alt" /> Claim
+          </Link>
+        </li>
+        <li>
+          <Link to="/btc/help" activeClassName="active">
+            <Glyphicon glyph="question-sign" /> <FormattedMessage message={this.getIntlMessage('nav.help')} />
+          </Link>
+        </li>
       </Nav>
     );
   }

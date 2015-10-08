@@ -460,7 +460,7 @@ var ReserveTicket = React.createClass({
               <div className="panel-body">
                 <form role="form" className="form-horizontal">
                   <OverlayTrigger trigger={['hover', 'focus']} placement='top' overlay={
-                    <Popover>
+                    <Popover id="btc-total-popover">
                       Send the total BTC amount to this address. Make sure you also include
                       a 0.3mBTC fee for the outgoing BTC transaction.
                     </Popover>}>
@@ -471,7 +471,7 @@ var ReserveTicket = React.createClass({
                   </OverlayTrigger>
 
                   <OverlayTrigger trigger={['hover', 'focus']} placement='top' overlay={
-                    <Popover>
+                    <Popover id="btc-wallet-popover">
                       This is your intermediate BTC wallet key. Make sure you back it up
                       if you do send funds to this wallet.
                     </Popover>}>
@@ -591,7 +591,7 @@ var ReserveTicket = React.createClass({
               <div className="panel-body">
                 <form role="form" className="form-horizontal">
                   <OverlayTrigger trigger={['hover', 'focus']} placement='top' overlay={
-                    <Popover>
+                    <Popover id="btc-import-popover">
                       Import a previous intermediate BTC wallet key.
                     </Popover>}>
                     <Input type="password" ref="key" label="Key"

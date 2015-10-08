@@ -11,14 +11,14 @@ var NetworkActions = function() {
    * an error dialog can be displayed.
    */
   this.checkNetwork = function() {
-    var demoMode = this.flux.store('config').demoMode;
+    var demoMode = this.flux.stores.config.demoMode;
     if (demoMode) {
       this.flux.actions.network.stopMonitoring();
       return;
     }
 
-    var ethereumClient = this.flux.store('config').getEthereumClient();
-    var networkState = this.flux.store('network').getState();
+    var ethereumClient = this.flux.stores.config.getEthereumClient();
+    var networkState = this.flux.stores.network.getState();
 
     var nowUp = ethereumClient.isAvailable();
 
@@ -56,7 +56,7 @@ var NetworkActions = function() {
     if (nowUp) {
       this.flux.actions.network.updateBlockchain();
 
-      var timeOut = this.flux.store('config').getState().timeout;
+      var timeOut = this.flux.stores.config.getState().timeout;
 
       if (networkState.blockChainAge > timeOut) {
 
@@ -99,11 +99,11 @@ var NetworkActions = function() {
   // Sync method to update blockchain age
   // and async to update all blockchain and network infos
   this.updateBlockchain = function () {
-    var ethereumClient = this.flux.store('config').getEthereumClient();
+    var ethereumClient = this.flux.stores.config.getEthereumClient();
 
     ethereumClient.getBlock('latest', function(block) {
       if (block.timestamp) {
-        var lastState = this.flux.store('network').getState();
+        var lastState = this.flux.stores.network.getState();
         var blockChainAge = new Date().getTime() / 1000 - block.timestamp;
         var blockTime = lastState.blockTimestamp ? block.timestamp - lastState.blockTimestamp : 0;
 
@@ -127,7 +127,7 @@ var NetworkActions = function() {
   };
 
   this.updateBlockchainAge = function(success) {
-    var ethereumClient = this.flux.store('config').getEthereumClient();
+    var ethereumClient = this.flux.stores.config.getEthereumClient();
 
     ethereumClient.getBlock('latest', function(block) {
       if (block.timestamp) {
@@ -141,20 +141,20 @@ var NetworkActions = function() {
   };
 
   this.updateClientInfo = function() {
-    var ethereumClient = this.flux.store('config').getEthereumClient();
+    var ethereumClient = this.flux.stores.config.getEthereumClient();
     ethereumClient.getClient(function(client) {
       this.dispatch(constants.network.UPDATE_NETWORK, { client: client });
     }.bind(this));
   };
 
   this.updateNetwork = function () {
-    var ethereumClient = this.flux.store('config').getEthereumClient();
+    var ethereumClient = this.flux.stores.config.getEthereumClient();
 
     ethereumClient.getPeerCount(function(peerCount) {
       this.dispatch(constants.network.UPDATE_NETWORK, { peerCount: peerCount });
     }.bind(this));
 
-    if (this.flux.store('network').getState().ready) {
+    if (this.flux.stores.network.getState().ready) {
       ethereumClient.getGasPrice(function(gasPrice) {
         this.dispatch(constants.network.UPDATE_NETWORK, { gasPrice: gasPrice });
       }.bind(this));
@@ -171,7 +171,7 @@ var NetworkActions = function() {
    * Update data that should change over time in the UI.
    */
   this.onNewBlock = function (error, log) {
-    if (this.flux.store('config').debug)
+    if (this.flux.stores.config.debug)
       utils.log("GOT BLOCK", log);
 
     this.flux.actions.network.updateBlockchain();
@@ -183,7 +183,7 @@ var NetworkActions = function() {
   // };
 
   this.startMonitoring = function () {
-    var networkState = this.flux.store('network').getState();
+    var networkState = this.flux.stores.network.getState();
 
     if (!networkState.isMonitoring) {
       this.dispatch(constants.network.UPDATE_IS_MONITORING_BLOCKS, {
@@ -196,7 +196,7 @@ var NetworkActions = function() {
   };
 
   this.stopMonitoring = function () {
-    var networkState = this.flux.store('network').getState();
+    var networkState = this.flux.stores.network.getState();
 
     if (networkState.isMonitoring) {
       this.dispatch(constants.network.UPDATE_IS_MONITORING_BLOCKS, {
@@ -206,8 +206,8 @@ var NetworkActions = function() {
   };
 
   this.reset = function() {
-    var ethereumClient = this.flux.store('config').getEthereumClient();
-    var btcSwapClient = this.flux.store('config').getBtcSwapClient();
+    var ethereumClient = this.flux.stores.config.getEthereumClient();
+    var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
     ethereumClient.reset();
     if (btcSwapClient)
