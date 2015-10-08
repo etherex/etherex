@@ -11,7 +11,7 @@ var UserLink = React.createClass({
 
   render() {
     return (
-      <Link to="userDetails">
+      <Link to="/user">
         { this.props.showIcon &&
           <span className="glyphicon glyphicon-user"></span> } { this.props.address.substr(0, 8) + '\u2026' }
       </Link>
