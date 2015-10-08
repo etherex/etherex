@@ -1485,7 +1485,7 @@ var EthereumClient = function(params) {
           }
           success(res);
         });
-      });
+      }.bind(this));
     }
     catch(e) {
       failure(e.message);
