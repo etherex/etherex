@@ -107,8 +107,13 @@ var ConfigPane = React.createClass({
     });
   },
 
-  handleChange: function(e) {
+  handleChangeAddress: function(e) {
     e.preventDefault();
+
+    this.setState({
+      address: this.refs.address.getValue()
+    });
+
     this.validate(e);
   },
 
@@ -169,7 +174,9 @@ var ConfigPane = React.createClass({
       address: this.state.address
     });
 
-    this.refs.address.getDOMNode().value = '';
+    this.setState({
+      address: null
+    });
   },
 
   render: function() {
@@ -201,8 +208,11 @@ var ConfigPane = React.createClass({
               value={this.props.address} readOnly hasFeedback />
 
             <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.new')} />}
+              ref="address"
               labelClassName='col-sm-3' wrapperClassName='col-sm-9'
-              maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="Address" ref="address" onChange={this.handleChange}/>
+              maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="Address"
+              onChange={this.handleChangeAddress}
+              value={this.state.address} />
             <Input wrapperClassName="col-sm-9 col-sm-offset-3">
               <Button className={"btn-block" + (this.state.newAddress ? " btn-primary" : "")} type="submit">
                 <FormattedMessage message={this.getIntlMessage('config.update')} />

@@ -2,7 +2,8 @@ var _ = require("lodash");
 var web3 = require('web3');
 var BtcSwap = require("btc-swap");
 var utils = require('../js/utils');
-var React = require("react/addons");
+var React = require("react");
+var Perf = require("react-addons-perf");
 var fixtures = require('../js/fixtures');
 var constants = require('../js/constants');
 var EthereumClient = require('../clients/EthereumClient');
@@ -157,8 +158,8 @@ var ConfigActions = function() {
         });
         this.flux.on("dispatch", handler);
 
-        if (React.addons.Perf)
-          React.addons.Perf.start();
+        if (Perf)
+          Perf.start();
       }
       else {
         var prevHandler = this.flux.stores.config.getState().handler;

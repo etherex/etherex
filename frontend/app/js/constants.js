@@ -1,4 +1,4 @@
-var keyMirror = require('react/lib/keyMirror');
+var keyMirror = require('keymirror');
 
 module.exports = {
     SECONDS_PER_BLOCK: 15,

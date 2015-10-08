@@ -1,4 +1,5 @@
 var React = require("react");
+var Perf = require("react-addons-perf");
 var utils = require("../js/utils");
 
 var AlertDismissable = require('./AlertDismissable');
@@ -17,13 +18,13 @@ var TradeList = React.createClass({
   },
 
   componentDidMount: function() {
-    if (this.props.flux.stores.config.debug && React.addons.Perf) {
-      var measurements = React.addons.Perf.stop();
-      React.addons.Perf.printInclusive(measurements);
+    if (this.props.flux.stores.config.debug && Perf) {
+      var measurements = Perf.stop();
+      Perf.printInclusive(measurements);
       utils.debug("Inclusive", "^");
-      React.addons.Perf.printExclusive(measurements);
+      Perf.printExclusive(measurements);
       utils.debug("Exclusive", "^");
-      React.addons.Perf.printWasted(measurements);
+      Perf.printWasted(measurements);
       utils.debug("Wasted", "^");
     }
   },

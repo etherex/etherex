@@ -22,13 +22,13 @@ var RangeSelect = React.createClass({
   componentWillReceiveProps: function(nextProps) {
     var rangeEnd = nextProps.flux.stores.config.rangeEnd;
     if (!rangeEnd && this.state.live === "active") {
-      this.refs.range.getDOMNode().defaultValue = nextProps.flux.stores.network.blockNumber;
+      this.refs.range.defaultValue = nextProps.flux.stores.network.blockNumber;
       this.setState({
         block: nextProps.flux.stores.network.blockNumber
       });
     }
     else if (rangeEnd) {
-      this.refs.range.getDOMNode().value = rangeEnd;
+      this.refs.range.value = rangeEnd;
       this.setState({
         block: rangeEnd,
         live: ''
@@ -82,7 +82,7 @@ var RangeSelect = React.createClass({
       value = _.parseInt(e.target.value);
 
     if (value >= block - 25) {
-      this.refs.range.getDOMNode().value = block;
+      this.refs.range.value = block;
       this.setState({
         block: block,
         live: "active"

@@ -1,5 +1,5 @@
 var React = require("react");
-
+var ReactDOM = require("react-dom");
 var d3 = require("d3");
 var techan = require("techan");
 
@@ -23,8 +23,8 @@ var TechanChart = React.createClass({
         // if (!this.props.data)
         //     this.props.data = [{Date: new Date(0), Open: 0, High: 0, Low: 0, Close: 0, Volume: 0}];
 
-        var chart = React.findDOMNode(this.refs.chart);
-        var width = React.findDOMNode(this).offsetWidth;
+        var chart = ReactDOM.findDOMNode(this.refs.chart);
+        var width = ReactDOM.findDOMNode(this).offsetWidth;
 
         var dim = {
             width: width, height: this.props.height,
@@ -479,7 +479,7 @@ var TechanChart = React.createClass({
 
         if (nextProps.data.length != this.props.data.length) {
           if (nextProps.market.name) {
-            var svg = d3.select(React.findDOMNode(this.refs.chart));
+            var svg = d3.select(ReactDOM.findDOMNode(this.refs.chart));
             svg.select('text.symbol').text(nextProps.market.name + "/ETH");
           }
 

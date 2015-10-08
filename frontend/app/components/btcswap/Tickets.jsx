@@ -28,6 +28,7 @@ var Tickets = React.createClass({
       showModal: false,
       showConfirmModal: false,
       message: null,
+      note: null,
       submit: null
     };
   },
@@ -35,7 +36,7 @@ var Tickets = React.createClass({
   componentDidMount() {
     // TODO smooth / less hackish scroll to ticketId
     if (this.props.params.ticketId && this.refs["ticket-" + this.props.params.ticketId]) {
-      var ticketOffset = this.refs["ticket-" + this.props.params.ticketId].getDOMNode().offsetTop;
+      var ticketOffset = this.refs["ticket-" + this.props.params.ticketId].offsetTop;
       window.scroll(0, ticketOffset);
     }
   },
@@ -56,9 +57,10 @@ var Tickets = React.createClass({
         "Are you sure you want to cancel this ticket?" :
         <div>
           { (!ticket.claimer || (ticket.expiry > 1 && ticket.expiry < new Date().getTime() / 1000)) ?
-              "Reserve ticket #" + ticket.id + "?" : "Claim ticket #" + ticket.id + "?" }
-          <TicketDetails ticket={ticket} />
+              <p>{`Reserve ticket #${ticket.id}?`}</p> :
+              <p>{`Claim ticket #${ticket.id}?`}</p> }
         </div>,
+      note: <TicketDetails ticket={ticket} />,
       submit: function() { this.handleAction(ticket); }.bind(this)
     });
   },
@@ -99,15 +101,11 @@ var Tickets = React.createClass({
         this.props.flux.actions.ticket.cancelTicket(ticket.id);
       else if (!ticket.claimer || ticket.reservable) {
         this.props.flux.actions.ticket.lookupTicket(ticket.id);
-        // setTimeout(function() {
-        //   this.context.router.transitionTo('reserve');
-        // }.bind(this), 300);
+        this.props.history.pushState(null, '/btc/reserve', null);
       }
       else {
         this.props.flux.actions.ticket.lookupTicket(ticket.id);
-        // setTimeout(function() {
-        //   this.context.router.transitionTo('claim');
-        // }.bind(this), 300);
+        this.props.history.pushState(null, '/btc/claim', null);
       }
   },
 
@@ -157,6 +155,7 @@ var Tickets = React.createClass({
           show={this.state.showConfirmModal}
           onHide={this.closeConfirmModal}
           message={this.state.message}
+          note={this.state.note}
           onSubmit={this.state.submit}
         />
 
@@ -165,7 +164,7 @@ var Tickets = React.createClass({
             <Modal.Title>Ticket details</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <big><p>{this.state.message}</p></big>
+            { this.state.message }
           </Modal.Body>
           <Modal.Footer>
               <Button onClick={this.closeModal} bsStyle="primary">Close</Button>

@@ -25,7 +25,8 @@ if (window.Intl) {
 var intlData = require('./js/intlData');
 
 var Fluxxor = require("fluxxor");
-var React = require("react/addons");
+var React = require("react");
+var ReactDOM = require("react-dom");
 var ReactRouter = require('react-router');
 var Router = ReactRouter.Router;
 var Route = ReactRouter.Route;
@@ -92,7 +93,7 @@ var createFluxComponent = function (Component, props) {
 };
 
 flux.setDispatchInterceptor(function(action, dispatch) {
-  React.addons.batchedUpdates(function() {
+  ReactDOM.unstable_batchedUpdates(function() {
     dispatch(action);
   });
 });
@@ -152,4 +153,4 @@ var routes = (
   </ContextRouter>
 );
 
-React.render(routes, document.body);
+ReactDOM.render(routes, document.getElementById('app'));

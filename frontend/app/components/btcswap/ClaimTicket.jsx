@@ -239,9 +239,7 @@ var ClaimTicket = React.createClass({
 
             <div className="col-md-8">
               <h5>Merkle Proof</h5>
-              <p>
-                <pre>{ this.state.ticket.merkleProofStr }</pre>
-              </p>
+              <pre>{ this.state.ticket.merkleProofStr }</pre>
               <Button className={ this.state.ticket.claimable ? "btn-primary" : ""}
                 disabled={!this.state.ticket.claimable || !this.state.ticket.merkleProofStr}
                 onClick={this.confirmClaim}>
