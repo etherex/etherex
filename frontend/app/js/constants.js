@@ -99,7 +99,9 @@ module.exports = {
         UPDATE_TRANSACTIONS: null,
         TOGGLE_FAVORITE: null,
         UPDATE_MESSAGES: null,
-        UPDATE_MESSAGES_FAIL: null
+        UPDATE_MESSAGES_FAIL: null,
+        REGISTER_MARKET: null,
+        REGISTER_MARKET_FAIL: null
     }),
     ticket: keyMirror({
         LOAD_TICKETS: null,

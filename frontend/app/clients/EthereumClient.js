@@ -298,14 +298,14 @@ var EthereumClient = function(params) {
 
         // var id = _.parseInt(market[0].toString());
         var name = web3.toAscii(web3.fromDecimal(market[1].toString()));
-        var address = web3.fromDecimal(market[2]);
+        var address = "0x" + utils.padLeft(web3.fromDecimal(market[2]).slice(2), 40);
         var decimals = _.parseInt(market[3].toString());
         var precision = _.parseInt(market[4].toString());
         var minimum = _.parseInt(market[5].toString());
         var lastPrice = null;
         if (market[6] != 1)
             lastPrice = parseFloat(bigRat(market[6].toString()).divide(bigRat(Math.pow(10, market[4].toString().length - 1))).toDecimal());
-        var owner = web3.fromDecimal(market[7]);
+        var owner = "0x" + utils.padLeft(web3.fromDecimal(market[7]).slice(2), 40);
         var block = _.parseInt(market[8].toString());
         var totalTrades = _.parseInt(market[9].toString());
         var category = _.parseInt(market[10].toString());
@@ -1244,7 +1244,7 @@ var EthereumClient = function(params) {
       var options = {
         from: user.id,
         to: this.address,
-        gas: "250000"
+        gas: "300000"
       };
       this.contract.add_market.call(
         web3.fromAscii(market.name, 32),

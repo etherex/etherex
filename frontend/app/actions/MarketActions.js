@@ -189,8 +189,9 @@ var MarketActions = function() {
   this.registerMarket = function(market) {
     var _client = this.flux.stores.config.getEthereumClient();
 
-    // console.log("REGISTER_MARKET", market);
-    _client.registerMarket(market, function(id) {
+    var user = this.flux.store("UserStore").getState().user;
+
+    _client.registerMarket(user, market, function(id) {
       this.dispatch(constants.market.REGISTER_MARKET, id);
     }.bind(this), function(error) {
       this.dispatch(constants.market.REGISTER_MARKET_FAIL, {error: error});

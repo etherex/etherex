@@ -89,6 +89,14 @@ var utils = {
     return numeral(n).format('0,0.' + this.repeat('0', p));
   },
 
+  padLeft(string, chars, sign) {
+    return new Array(chars - string.length + 1).join(sign ? sign : "0") + string;
+  },
+
+  padRight(string, chars, sign) {
+    return string + (new Array(chars - string.length + 1).join(sign ? sign : "0"));
+  },
+
   repeat(str, num) {
     return new Array(num + 1).join(str);
   },

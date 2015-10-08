@@ -38,7 +38,9 @@ var MarketStore = Fluxxor.createStore({
       constants.market.RELOAD_TRANSACTIONS, this.onReloadTransactions,
       constants.market.TOGGLE_FAVORITE, this.toggleFavorite,
       constants.market.UPDATE_MESSAGES, this.updateMessages,
-      constants.market.UPDATE_MESSAGES_FAIL, this.updateMessagesFail
+      constants.market.UPDATE_MESSAGES_FAIL, this.updateMessagesFail,
+      constants.market.REGISTER_MARKET, this.registerMarket,
+      constants.market.REGISTER_MARKET_FAIL, this.registerMarketFail
     );
 
     this.setMaxListeners(1024); // prevent "possible EventEmitter memory leak detected"
@@ -290,6 +292,14 @@ var MarketStore = Fluxxor.createStore({
   updateMessagesFail: function(error) {
     this.market.messages.push(error);
     this.emit(constants.CHANGE_EVENT);
+  },
+
+  registerMarket: function(txHash) {
+    utils.log("MARKET REGISTRATION TX HASH", txHash);
+  },
+
+  registerMarketFail: function(error) {
+    utils.error("MARKET NOT REGISTERED", error);
   },
 
   getState: function() {
