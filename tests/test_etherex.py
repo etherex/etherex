@@ -15,16 +15,6 @@ logger = logging.getLogger(__name__)
 # DEBUG
 tester.disable_logging()
 logger.setLevel("INFO")
-logging.getLogger('eth.pb').setLevel('INFO')
-logging.getLogger('eth.pb.msg').setLevel('INFO')
-logging.getLogger('eth.pb.msg.state').setLevel('INFO')
-logging.getLogger('eth.pb.tx').setLevel('INFO')
-logging.getLogger('eth.vm').setLevel('INFO')
-logging.getLogger('eth.vm.op').setLevel('INFO')
-logging.getLogger('eth.vm.exit').setLevel('INFO')
-logging.getLogger('eth.chain.tx').setLevel('INFO')
-logging.getLogger('transactions.py').setLevel('INFO')
-logging.getLogger('eth.msg').setLevel('INFO')
 
 # Boolean success/failure
 SUCCESS = 1
@@ -706,8 +696,10 @@ class TestEtherEx(object):
         snapshot = self.state.snapshot()
         self.state.mine(1)
 
+        fill_amount = 500 * 10 ** 5
+
         ans = self.contract.trade(
-            500 * 10 ** 5,
+            fill_amount,
             [49800558551364658298467690253710486242473574128865389798518930174170604985043L],
             sender=self.BOB['key'],
             value=125 * 10 ** 18,
@@ -717,6 +709,12 @@ class TestEtherEx(object):
 
         ans = self.contract.get_trade(49800558551364658298467690253710486242473574128865389798518930174170604985043L)
         assert ans == [0, 0, 0, 0, 0, 0, 0, 0]
+
+        ans = self.contract.get_sub_balance(self.BOB['address'], 1)
+        assert ans == [fill_amount, 0]
+
+        ans = self.contract.get_sub_balance(self.ALICE['address'], 1)
+        assert ans == [820000000, 130000000]
 
         if revert:
             self.state.revert(snapshot)
@@ -762,6 +760,9 @@ class TestEtherEx(object):
 
         ans = self.contract.get_sub_balance(self.BOB['address'], 1)
         assert ans == [balance_from_transfer - fill_amount, 0]
+
+        ans = self.contract.get_sub_balance(self.ALICE['address'], 1)
+        assert ans == [1000000000, 180000000]
 
         ans = self.state.block.get_balance(self.BOB['address'])
         assert ans > 1000449999999999999000000L

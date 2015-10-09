@@ -289,7 +289,7 @@ def trade(max_amount, trade_ids:arr):
                     remove_trade(trade_id, market_id)
 
                 # Update balances
-                self.balances[self][market_id].trading -= fill
+                self.balances[owner][market_id].trading -= fill
                 self.balances[msg.sender][market_id].available += fill
 
                 # Transfer ETH
