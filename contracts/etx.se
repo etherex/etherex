@@ -6,10 +6,12 @@
 # of the MIT license.  See the LICENSE file for details.
 
 #
-# Example ETX subcurrency
+# ETX subcurrency
 #
 
-data created
+data creator
+data exchange
+data total
 data accounts[2^160](balance, custodians[2^160](full, maxValue))
 
 event Transfer(from:indexed, to:indexed, value)
@@ -20,9 +22,46 @@ event AddressApprovalOnce(address:indexed, proxy:indexed, value)
 macro SUCCESS: 1
 macro FAILURE: 0
 
+macro MINIMUM_VALUE_NOT_MET: 2
+
 def init():
-    self.created = block.timestamp
-    self.accounts[msg.sender].balance = 1000000 * 10 ** 5
+    self.creator = msg.sender
+
+# Set exchange contract address for ETX issuance
+def setExchange(_address):
+    if _address <= 0:
+        return(FAILURE)
+
+    if msg.sender == self.creator or msg.sender == self.exchange:
+        self.exchange = _address
+        return(SUCCESS)
+
+    return(FAILURE)
+
+# Issue ETX
+def issue(_value, _address):
+    if msg.sender == self.exchange:
+        self.total += _value
+        self.accounts[_address].balance += _value
+        return(SUCCESS)
+    return(FAILURE)
+
+def reward(_amount):
+    balance = self.accounts[msg.sender].balance
+
+    if balance < _amount:
+        return(FAILURE)
+
+    share = (balance * 10 ^ 18) / self.total
+    value = (self.balance * share) / 10 ^ 18
+
+    if value > 10 ^ 18:
+        self.accounts[msg.sender].balance -= _amount
+        self.total -= _amount
+        send(msg.sender, value)
+        return(value)
+
+    return(MINIMUM_VALUE_NOT_MET)
 
 def transfer(_value, _to):
     # Prevent negative send from stealing funds

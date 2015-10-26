@@ -9,11 +9,7 @@
 # EtherEx
 #
 
-data created  # 0x
-data last_market  # 0x1
-
-data markets_ptr  # 0x3
-data trades_ptr  # 0x4
+data last_market
 
 data markets[2^160](id, name, contract, decimals, precision, minimum, category, last_price, owner, block, total_trades, last_trade, trade_ids[](id, next_id, prev_id))
 data markets_id[2^160](id)  # Reverse Market ID lookup
@@ -28,7 +24,7 @@ event log_withdraw(market:indexed, sender:indexed, amount)
 event log_cancel(market:indexed, sender, price, amount, tradeid)
 event log_market(id)
 
-extern subcurrency: [transfer:[int256,int256]:int256, transferFrom:[int256,int256,int256]:int256]
+extern subcurrency: [transfer:[int256,int256]:int256, transferFrom:[int256,int256,int256]:int256, issue:[int256,int256]:int256]
 
 # Trade types
 macro BID: 1
@@ -37,6 +33,9 @@ macro ASK: 2
 # Field counts
 macro MARKET_FIELDS: 12
 macro TRADE_FIELDS: 8
+
+# Fixed taker fee
+macro FEE_PER_TRADE: 200000 * tx.gasprice
 
 # Boolean success/failure
 macro SUCCESS: 1
@@ -137,10 +136,6 @@ macro remove_trade($trade_id, $market_id):
     self.markets[$market_id].total_trades -= 1
 
 
-def init():
-    self.created = block.timestamp  # Timestamp when this contract was created
-
-
 #
 # Get price by market ID
 #
@@ -202,113 +197,125 @@ def sell(amount, price, market_id):
 # Trade
 #
 def trade(max_amount, trade_ids:arr):
+    trades_count = len(trade_ids)
+    fee = trades_count * FEE_PER_TRADE
+
     # Set max_value from initial msg.value
-    max_value = msg.value
+    max_value = msg.value - fee
 
     # Try to fulfill each trade passed
     t = 0
-    while t < len(trade_ids):
+    while t < trades_count:
         trade_id = trade_ids[t]
 
-        # Make sure the trade has been mined, obvious HFT prevention
-        if block.number <= self.trades[trade_id].block:
-            return(SAME_BLOCK_TRADE_PROHIBITED)
+        # Make sure trade exists
+        if self.trades[trade_id].id:
 
-        # Get market
-        market_id = self.trades[trade_id].market
-        contract = self.markets[market_id].contract
-        decimals = self.markets[market_id].decimals
-        precision = self.markets[market_id].precision
-        minimum = self.markets[market_id].minimum
+            # Make sure the trade has been mined, obvious HFT prevention
+            if block.number <= self.trades[trade_id].block:
+                return(SAME_BLOCK_TRADE_PROHIBITED)
 
-        # Get trade
-        type = self.trades[trade_id].type
-        amount = self.trades[trade_id].amount
-        price = self.trades[trade_id].price
-        owner = self.trades[trade_id].owner
+            # Get market
+            market_id = self.trades[trade_id].market
+            contract = self.markets[market_id].contract
+            decimals = self.markets[market_id].decimals
+            precision = self.markets[market_id].precision
+            minimum = self.markets[market_id].minimum
 
-        # Fill buy order
-        if type == BID:
+            # Get trade
+            type = self.trades[trade_id].type
+            amount = self.trades[trade_id].amount
+            price = self.trades[trade_id].price
+            owner = self.trades[trade_id].owner
 
-            # Get available balance
-            balance = self.balances[msg.sender][market_id].available
+            # Fill buy order
+            if type == BID:
+                # Get available balance
+                balance = self.balances[msg.sender][market_id].available
 
-            if balance > 0:
+                if balance > 0:
+                    # Determine fill amount
+                    fill = min(amount, min(balance, max_amount))
 
-                # Determine fill amount
-                fill = min(amount, min(balance, max_amount))
+                    # Calculate value
+                    value = ((fill * price) * 10 ^ 18) / (precision * 10 ^ decimals)
 
-                # Calculate value
-                value = ((fill * price) * 10 ^ 18) / (precision * 10 ^ decimals)
+                    # Check buy value
+                    if value < minimum:
+                        refund()
+                        return(INSUFFICIENT_VALUE)
 
-                # Check buy value
-                if value < minimum:
-                    refund()
-                    return(INSUFFICIENT_VALUE)
+                    # Send ETH fee to ETX contract
+                    send(self.markets[1].contract, FEE_PER_TRADE)
 
-                # Update trade amount or remove
-                if fill < amount:
-                    self.trades[trade_id].amount -= fill
+                    # Update trade amount or remove
+                    if fill < amount:
+                        self.trades[trade_id].amount -= fill
+                    else:
+                        remove_trade(trade_id, market_id)
+
+                    # Update balances
+                    self.balances[msg.sender][market_id].available -= fill
+                    self.balances[owner][market_id].available += fill
+
+                    # Transfer ETH
+                    send(msg.sender, value)
+
+                    # Log transaction
+                    log(type=log_fill_tx, market_id, msg.sender, owner, 2, price, fill, trade_id)
                 else:
-                    remove_trade(trade_id, market_id)
+                    return(INSUFFICIENT_BALANCE)
 
-                # Update balances
-                self.balances[msg.sender][market_id].available -= fill
-                self.balances[owner][market_id].available += fill
+            elif type == ASK:
+                if max_value > 0:
+                    # Check sell value
+                    if max_value < minimum:
+                        if max_value > 0:
+                            send(msg.sender, max_value)
+                        return(INSUFFICIENT_VALUE)
 
-                # Transfer ETH
-                send(msg.sender, value)
+                    # Send fee to ETX contract
+                    send(self.markets[1].contract, FEE_PER_TRADE)
 
-                # Log transaction
-                log(type=log_fill_tx, market_id, msg.sender, owner, 2, price, fill, trade_id)
-            else:
-                return(INSUFFICIENT_BALANCE)
+                    # Calculate value of trade
+                    trade_value = ((amount * price) * 10 ^ 18) / (precision * 10 ^ decimals)
 
-        elif type == ASK:
+                    # Determine fill value
+                    value = min(max_value, trade_value)
 
-            if max_value > 0:
+                    # Calculate fill amount, update trade amount or remove filled trade
+                    if value < trade_value:
+                        fill = ((value * (precision * 10 ^ decimals)) / price) / 10 ^ 18
+                        self.trades[trade_id].amount -= fill
+                    else:
+                        fill = amount
+                        remove_trade(trade_id, market_id)
 
-                # Check sell value
-                if max_value < minimum:
-                    if max_value > 0:
-                        send(msg.sender, max_value)
-                    return(INSUFFICIENT_VALUE)
+                    # Update balances
+                    self.balances[owner][market_id].trading -= fill
+                    self.balances[msg.sender][market_id].available += fill
 
-                # Calculate value of trade
-                trade_value = ((amount * price) * 10 ^ 18) / (precision * 10 ^ decimals)
+                    # Transfer ETH
+                    send(owner, value)
 
-                # Determine fill value
-                value = min(max_value, trade_value)
-
-                # Calculate fill amount, update trade amount or remove filled trade
-                if value < trade_value:
-                    fill = ((value * (precision * 10 ^ decimals)) / price) / 10 ^ 18
-                    self.trades[trade_id].amount -= fill
+                    # Log transaction
+                    log(type=log_fill_tx, market_id, msg.sender, owner, 1, price, fill, trade_id)
                 else:
-                    fill = amount
-                    remove_trade(trade_id, market_id)
+                    return(INSUFFICIENT_BALANCE)
 
-                # Update balances
-                self.balances[owner][market_id].trading -= fill
-                self.balances[msg.sender][market_id].available += fill
+            # Update market last price
+            self.markets[market_id].last_price = price
 
-                # Transfer ETH
-                send(owner, value)
+            # Log price, fill amount, type and timestamp
+            log(type=log_price, market_id, type, price, fill, block.timestamp)
 
-                # Log transaction
-                log(type=log_fill_tx, market_id, msg.sender, owner, 1, price, fill, trade_id)
-            else:
-                return(INSUFFICIENT_BALANCE)
+            # Update max_amount and max_value
+            max_amount -= fill
+            max_value -= value
 
-        # Update market last price
-        self.markets[market_id].last_price = price
-
-        # Log price, fill amount, type and timestamp
-        log(type=log_price, market_id, type, price, fill, block.timestamp)
-
-        # Update max_amount and max_value
-        max_amount -= fill
-        max_value -= value
+            # Issue 1 ETX per ETH to maker and taker
+            self.markets[1].contract.issue(value / 10 ** 13, owner)
+            self.markets[1].contract.issue(value / 10 ** 13, msg.sender)
 
         # Next trade
         t += 1
@@ -366,10 +373,12 @@ def cancel(trade_id):
         # Clear the trade first
         remove_trade(trade_id, market_id)
 
+        # Determine trade value
+        value = ((amount * price) / (precision * 10 ^ decimals)) * 10 ^ 18
+
         # Issue refunds
         if type == BID:
             # ETH refund
-            value = ((amount * price) / (precision * 10 ^ decimals)) * 10 ^ 18
             send(msg.sender, value)
 
         elif type == ASK:
@@ -390,10 +399,6 @@ def cancel(trade_id):
 def add_market(name, contract, decimals, precision, minimum, category):
     # Get the next market ID
     id = self.last_market + 1
-
-    # Set markets pointer
-    if id == 1:
-        self.markets_ptr = ref(self.markets[1].id)
 
     # TODO - Check data...
     self.markets[id].id = id

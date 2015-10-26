@@ -6,8 +6,8 @@
 # Set some variables.
 -
   set:
-    zg: "0xe68faeeff09f46b87e83e13cef47275ebaa34349"
-    caktux: "0xd5623514f22d7569a13126e91c2eaff5b8df8479"
+    zg: "0x743587bb23be672148f941ce23b1f09fd8fc92a6"
+    caktux: "0x239eb5afa5b1da814a3ccb60e79de1f933f1b470"
     mids: "0x2ad9e5d8960882c07b96e2a21d5a39ab082e7368"
 
 # Deploy contracts
@@ -27,6 +27,13 @@
       retry: 60
       wait: True
 -
+  transact:
+    setExchange:
+      to: $ETX
+      sig: setExchange:[int256,int256]:int256
+      data:
+        - $EtherEx
+-
   deploy:
     CAK:
       contract: etx.se
@@ -34,12 +41,26 @@
       retry: 60
       wait: True
 -
+  transact:
+    setExchange:
+      to: $ETX
+      sig: setExchange:[int256,int256]:int256
+      data:
+        - $EtherEx
+-
   deploy:
     MID:
       contract: etx.se
       gas: 1500000
       retry: 60
       wait: True
+-
+  transact:
+    setExchange:
+      to: $ETX
+      sig: setExchange:[int256,int256]:int256
+      data:
+        - $EtherEx
 
 # Register subcurrencies on the exchange
 -

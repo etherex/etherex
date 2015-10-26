@@ -34,6 +34,8 @@ TRADE_ALREADY_EXISTS = 15
 
 SAME_BLOCK_TRADE_PROHIBITED = 16
 
+FEE_PER_TRADE = 200000
+
 
 class TestEtherEx(object):
 
@@ -71,8 +73,15 @@ class TestEtherEx(object):
 
         self.contract = self.state.abi_contract(self.etherex, gas=3000000)
 
-        self.etx_contract = self.state.abi_contract(self.etx)
-        self.bob_contract = self.state.abi_contract(self.bob)
+        self.etx_contract = self.state.abi_contract(self.etx, endowment=10 ** 21, sender=tester.k3)
+        assert self.etx_contract.setExchange(tester.a3, sender=tester.k3) == 1
+        assert self.etx_contract.issue(1000000 * 10 ** 5, tester.a0, sender=tester.k3) == 1
+        assert self.etx_contract.setExchange(self.contract.address, sender=tester.k3) == 1
+
+        self.bob_contract = self.state.abi_contract(self.bob, endowment=10 ** 21, sender=tester.k4)
+        assert self.bob_contract.setExchange(tester.a4, sender=tester.k4) == 1
+        assert self.bob_contract.issue(1000000 * 10 ** 5, tester.a0, sender=tester.k4) == 1
+        assert self.bob_contract.setExchange(self.contract.address, sender=tester.k4) == 1
 
         # TODO Test Solidity Standard Token
         # self.standard_contract = self.state.abi_contract(open(self.standard).read(), language='solidity')
@@ -85,8 +94,7 @@ class TestEtherEx(object):
 
     # Tests
     def test_creation(self):
-        assert self._storage(self.contract, "0x") is not None
-        assert self._storage(self.contract, "0x01") is None
+        assert self._storage(self.contract, "0x") is None
 
         assert self.etx_contract.balanceOf(self.ALICE['address']) == 1000000 * 10 ** 5
         assert self.bob_contract.balanceOf(self.ALICE['address']) == 1000000 * 10 ** 5
@@ -149,7 +157,7 @@ class TestEtherEx(object):
         assert ans == [
             1,
             4543576,
-            584202455294917676171628316407181071088652546483L,
+            623629443112573850082355318437672870999946689283L,
             5,
             100000000,
             1000000000000000000,
@@ -429,7 +437,7 @@ class TestEtherEx(object):
             25000000L,
             745948140856946866108753121277737810491401257713L,
             0L,
-            -43661844752590979300431051011371330267999218421176783949151853302739548924860L]
+            -43661844752590979300431051011371330267999218421176783949151853302739548924863L]
 
     def test_trade_already_exists(self):
         self.test_add_buy_trades()
@@ -702,7 +710,7 @@ class TestEtherEx(object):
             fill_amount,
             [49800558551364658298467690253710486242473574128865389798518930174170604985043L],
             sender=self.BOB['key'],
-            value=125 * 10 ** 18,
+            value=125 * 10 ** 18 + FEE_PER_TRADE,
             profiling=1)
         assert ans['output'] == 1
         logger.info("\nFill sell profiling: %s" % ans)
@@ -734,6 +742,15 @@ class TestEtherEx(object):
             23490291715255176443338864873375620519154876621682055163056454432194948412040L]
         self.state.revert(snapshot)
 
+    def test_etx_issuance_after_first_sell(self):
+        self.test_add_buy_trades()
+        snapshot = self.test_fulfill_first_sell(False)
+
+        assert self.etx_contract.balanceOf(self.BOB['address']) == 125 * 10 ** 5
+        assert self.etx_contract.balanceOf(self.ALICE['address']) == 990125 * 10 ** 5
+
+        self.state.revert(snapshot)
+
     def test_fulfill_multiple_trades(self, revert=True):
         self.test_add_buy_trades()
         self.test_add_sell_trades(False)
@@ -754,6 +771,7 @@ class TestEtherEx(object):
                 -35168633768494065610302920664120686116555617894816459733689825088489895266148L,
                 38936224262371094519907212029104196662516973526369593745812124922634258039407L],
             sender=self.BOB['key'],
+            value=3 * FEE_PER_TRADE,
             profiling=1)
         assert ans['output'] == 1
         logger.info("\nFill multiple profiling: %s" % ans)
@@ -781,6 +799,16 @@ class TestEtherEx(object):
             -11872296793322400290999375245896441639313038086627719556596606178564438289113L,
             -34362698062012420373581910342777892308255636544894323695139344222373572831032L,
             49800558551364658298467690253710486242473574128865389798518930174170604985043L]
+        self.state.revert(snapshot)
+
+    def test_etx_issuance_and_total_after_multiple_trades(self):
+        snapshot = self.test_fulfill_multiple_trades(False)
+
+        assert self.etx_contract.balanceOf(self.BOB['address']) == (125 + 150 + 175) * 10 ** 5
+        assert self.etx_contract.balanceOf(self.ALICE['address']) == (980000 + 125 + 150 + 175) * 10 ** 5
+
+        assert self.state.block.get_balance(self.etx_contract.address) == 10 ** 21 + 3 * FEE_PER_TRADE
+
         self.state.revert(snapshot)
 
     def test_partial_fill_multiple_trades(self, revert=True):
