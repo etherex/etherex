@@ -1,6 +1,7 @@
 EtherEx
 =======
-[![Build Status](https://travis-ci.org/etherex/etherex.svg?branch=master)](https://travis-ci.org/etherex/etherex) [![SlackIn](http://slack.etherex.org/badge.svg)](http://slack.etherex.org) [![Join the chat at https://gitter.im/etherex/etherex](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/etherex/etherex?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/etherex/etherex.svg?branch=master)](https://travis-ci.org/etherex/etherex)
+[![Dependency Status](https://david-dm.org/etherex/etherex.svg?path=frontend)](https://david-dm.org/etherex/etherex?path=frontend) [![SlackIn](http://slack.etherex.org/badge.svg)](http://slack.etherex.org) [![Join the chat at https://gitter.im/etherex/etherex](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/etherex/etherex?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Decentralized exchange built on Ethereum.
 
@@ -23,7 +24,6 @@ Components
 Requirements
 ------------
 * [Serpent](https://github.com/ethereum/serpent) compiler by Vitalik Buterin
-* [cpp-ethereum](https://github.com/ethereum/cpp-ethereum) client by Gavin Wood
 * [go-ethereum](https://github.com/ethereum/go-ethereum) client by Jeffrey Wilcke
 * [pyethereum](https://github.com/ethereum/pyethereum) Python Ethereum client (tests only)
 * [PyEPM](https://github.com/etherex/pyepm) for deployment
