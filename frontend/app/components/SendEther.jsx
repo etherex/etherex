@@ -1,8 +1,6 @@
 var _ = require('lodash');
 var React = require("react");
-var ReactIntl = require("react-intl");
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {injectIntl, FormattedMessage} from 'react-intl';
 
 var Button = require('react-bootstrap/lib/Button');
 var Input = require('react-bootstrap/lib/Input');
@@ -11,9 +9,7 @@ var ConfirmModal = require('./ConfirmModal');
 var fixtures = require("../js/fixtures");
 var bigRat = require("big-rational");
 
-var SubSend = React.createClass({
-  mixins: [IntlMixin],
-
+var SubSend = injectIntl(React.createClass({
   getInitialState: function() {
     return {
       amount: null,
@@ -55,14 +51,13 @@ var SubSend = React.createClass({
     });
 
     if (!address || !amount) {
-      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.empty')));
+      this.props.setAlert('warning', this.props.intl.formatMessage({id: 'form.empty'}));
     }
     else if (!amount) {
-      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.cheap')));
+      this.props.setAlert('warning', this.props.intl.formatMessage({id: 'form.cheap'}));
     }
     else if (parseFloat(amount) > this.props.user.balance) {
-      this.props.setAlert('warning', this.formatMessage(
-        this.getIntlMessage('sub.not_enough'), {
+      this.props.setAlert('warning', this.props.intl.formatMessage({id: 'sub.not_enough'}, {
           currency: "ETH",
           balance: this.props.user.balance
         })
@@ -70,7 +65,7 @@ var SubSend = React.createClass({
     }
     else if (address.length != 42) {
       this.props.setAlert('warning',
-        this.formatMessage(this.getIntlMessage('address.size'), {
+        this.props.intl.formatMessage({id: 'address.size'}, {
           size: (address.length < 42 ? "short" : "long")
         })
       );
@@ -78,11 +73,13 @@ var SubSend = React.createClass({
     else {
       this.setState({
         newSend: true,
-        confirmMessage: <FormattedMessage
-                          message={this.getIntlMessage('sub.send')}
-                          amount={this.state.amount}
-                          currency="ETH"
-                          recipient={this.state.recipient} />
+        confirmMessage:
+          <FormattedMessage id='sub.send' values={{
+              amount: this.state.amount,
+              currency: "ETH",
+              recipient: this.state.recipient
+            }}
+          />
       });
 
       this.props.showAlert(false);
@@ -124,14 +121,14 @@ var SubSend = React.createClass({
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
         <Input type="text" ref="address"
-          label={<FormattedMessage message={this.getIntlMessage('form.address')} />} labelClassName="sr-only"
+          label={<FormattedMessage id='form.address' />} labelClassName="sr-only"
           placeholder="0x"
           maxLength="42" pattern="0x[a-fA-F\d]+"
           onChange={this.handleChange}
           value={this.state.recipient} />
 
         <Input type="number" ref="amount"
-          label={<FormattedMessage message={this.getIntlMessage('form.amount')} />} labelClassName="sr-only"
+          label={<FormattedMessage id='form.amount' />} labelClassName="sr-only"
           placeholder="10.0000"
           min={1 / _.parseInt(fixtures.ether)} step={1 / _.parseInt(fixtures.ether)}
           onChange={this.handleChange}
@@ -139,7 +136,7 @@ var SubSend = React.createClass({
 
         <div className="form-group">
           <Button className={"btn-block" + (this.state.newSend ? " btn-primary" : "")} type="submit" key="send">
-            <FormattedMessage message={this.getIntlMessage('send.send')} />
+            <FormattedMessage id='send.send' />
           </Button>
         </div>
 
@@ -153,6 +150,6 @@ var SubSend = React.createClass({
       </form>
     );
   }
-});
+}));
 
 module.exports = SubSend;

@@ -5,7 +5,7 @@ var fixtures = {
   addresses: {
       // nameregs: ["0xb46312830127306cd3de3b84dbdb51899613719d", "0xda7ce79725418f4f6e13bf5f520c89cec5f6a974"],
       etherex: "0x77045e71a7a2c50903d88e564cd72fab11e82051",
-      btcswap: "0x67da7f80a6842e9e6cf0378227bce5693156f659"
+      btcswap: "0x757eb378cd038b7100ba612360fdabd1f4ffdb91"
   },
   categories: [
     {

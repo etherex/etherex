@@ -1,15 +1,11 @@
 var React = require("react");
-var ReactIntl = require("react-intl");
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {injectIntl, FormattedMessage} from 'react-intl';
 
 var Button = require('react-bootstrap/lib/Button');
 var Input = require('react-bootstrap/lib/Input');
 var ConfirmModal = require('./ConfirmModal');
 
-var SubDeposit = React.createClass({
-  mixins: [IntlMixin],
-
+var SubDeposit = injectIntl(React.createClass({
   getInitialState: function() {
     return {
       amount: null,
@@ -48,11 +44,11 @@ var SubDeposit = React.createClass({
     });
 
     if (!amount) {
-      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.empty')));
+      this.props.setAlert('warning', this.props.intl.formatMessage({id: 'form.empty'}));
     }
     else if (parseFloat(amount) > this.props.user.balanceSub) {
       this.props.setAlert('warning',
-        this.formatMessage(this.getIntlMessage('deposit.not_enough'), {
+        this.props.intl.formatMessage({id: 'deposit.not_enough'}, {
           currency: this.props.market.name,
           balance: this.props.user.balanceSub,
           amount: amount
@@ -62,10 +58,12 @@ var SubDeposit = React.createClass({
     else {
       this.setState({
         newDeposit: true,
-        confirmMessage: <FormattedMessage
-                          message={this.getIntlMessage('deposit.confirm')}
-                          amount={amount}
-                          currency={this.props.market.name} />
+        confirmMessage:
+          <FormattedMessage id='deposit.confirm' values={{
+              amount: amount,
+              currency: this.props.market.name
+            }}
+          />
       });
 
       this.props.showAlert(false);
@@ -103,7 +101,7 @@ var SubDeposit = React.createClass({
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
         <Input type="number" className="form-control" ref="amount"
-          label={<FormattedMessage message={this.getIntlMessage('form.amount')} />} labelClassName="sr-only"
+          label={<FormattedMessage id='form.amount' />} labelClassName="sr-only"
           min={this.props.market.amountPrecision}
           step={this.props.market.amountPrecision}
           placeholder="10.0000"
@@ -111,7 +109,7 @@ var SubDeposit = React.createClass({
           value={this.state.amount} />
         <div className="form-group">
           <Button className={"btn-block" + (this.state.newDeposit ? " btn-primary" : "")} type="submit">
-            <FormattedMessage message={this.getIntlMessage('form.deposit')} />
+            <FormattedMessage id='form.deposit' />
           </Button>
         </div>
         <ConfirmModal
@@ -124,6 +122,6 @@ var SubDeposit = React.createClass({
       </form>
     );
   }
-});
+}));
 
 module.exports = SubDeposit;

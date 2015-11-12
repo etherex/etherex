@@ -1,7 +1,5 @@
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {injectIntl, FormattedMessage} from 'react-intl';
 
 var Button = require('react-bootstrap/lib/Button');
 var Input = require('react-bootstrap/lib/Input');
@@ -12,12 +10,6 @@ var Nav = require('./Nav');
 var Blocks = require('./Blocks');
 
 var CreateTicket = React.createClass({
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-
-  mixins: [IntlMixin],
-
   getInitialState() {
     return {
       isValid: false,
@@ -59,18 +51,20 @@ var CreateTicket = React.createClass({
     });
 
     if (!amount || !btc || !address) {
-      this.setAlert('warning', this.formatMessage(this.getIntlMessage('form.empty')));
+      this.setAlert('warning', this.props.intlformatMessage({id: 'form.empty'}));
     }
     else {
       this.setState({
         isValid: true,
-        confirmMessage: <FormattedMessage
-                          message={this.getIntlMessage('btc.sell')}
-                          amount={this.state.amount}
-                          unit="ETH"
-                          total={this.state.btc}
-                          price={this.state.price}
-                          address=<samp>{this.state.address}</samp> />
+        confirmMessage: <FormattedMessage id='btc.sell'
+                          values={{
+                            amount: this.state.amount,
+                            unit: "ETH",
+                            total: this.state.btc,
+                            price: this.state.price,
+                            address: this.state.address
+                          }}
+                        />
       });
 
       this.showAlert(false);

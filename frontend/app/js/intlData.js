@@ -188,7 +188,16 @@ module.exports = {
     },
     "sub": {
       "send": "Are you sure you want to send {amount, number} {currency} to {recipient}?",
-      "not_enough": "Not enough {currency} available to send, got {balance, number}"
+      "not_enough": "Not enough {currency} available to send, got {balance, number}",
+      "register": "Subcurrency registration",
+      "code": "Subcurrency code",
+      "contract": "Contract address",
+      "minimum": "Minimum ETH amount",
+      "decimals": "Decimals",
+      "precision": "Price precision",
+      "confirm": `Are you sure you want to register {code} at address {address}
+        in the {category} section, with a minimum trade amount of {minimum} ETH,
+        {decimals} decimals to the subcurrency and a price precision of {precision} ?`
     },
     "withdraw": {
       "currency": "Withdraw {currency}",

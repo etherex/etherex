@@ -1,8 +1,6 @@
 var _ = require('lodash');
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {injectIntl, FormattedMessage} from 'react-intl';
 
 var Button = require('react-bootstrap/lib/Button');
 var Input = require('react-bootstrap/lib/Input');
@@ -14,13 +12,7 @@ var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
 var Nav = require('./Nav');
 var Blocks = require('./Blocks');
 
-var ReserveTicket = React.createClass({
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-
-  mixins: [IntlMixin],
-
+var ReserveTicket = injectIntl(React.createClass({
   getInitialState() {
     return {
       lookingUp: false,
@@ -202,19 +194,22 @@ var ReserveTicket = React.createClass({
     });
 
     if (!txHash || !nonce) {
-      this.setAlert('warning', this.formatMessage(this.getIntlMessage('form.empty')));
+      this.setAlert('warning', this.props.intl.formatMessage({id: 'form.empty'}));
     }
     else {
       this.setState({
         isValid: true,
         onConfirm: this.handleReserve,
-        confirmMessage: <FormattedMessage message={this.getIntlMessage('btc.reserve')}
-                          id={this.state.ticket.id}
-                          amount={this.state.ticket.formattedAmount.value}
-                          unit={this.state.ticket.formattedAmount.unit}
-                          total={this.state.ticket.total}
-                          price={this.state.ticket.price}
-                          address=<samp>{this.state.ticket.address}</samp> />
+        confirmMessage: <FormattedMessage id='btc.reserve'
+                          values={{
+                            id: this.state.ticket.id,
+                            amount: this.state.ticket.formattedAmount.value,
+                            unit: this.state.ticket.formattedAmount.unit,
+                            total: this.state.ticket.total,
+                            price: this.state.ticket.price,
+                            address: this.state.ticket.address
+                          }}
+                        />
       });
 
       this.showAlert(false);
@@ -630,6 +625,6 @@ var ReserveTicket = React.createClass({
       </div>
     );
   }
-});
+}));
 
 module.exports = ReserveTicket;

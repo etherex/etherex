@@ -1,5 +1,6 @@
 var _ = require("lodash");
 var React = require("react");
+import {injectIntl, FormattedMessage} from 'react-intl';
 
 var Button = require('react-bootstrap/lib/Button');
 var Input = require('react-bootstrap/lib/Input');
@@ -12,8 +13,7 @@ var bigRat = require("big-rational");
 var DropdownButton = require('react-bootstrap/lib/DropdownButton');
 var MenuItem = require('react-bootstrap/lib/MenuItem');
 
-var SubRegister = React.createClass({
-
+var SubRegister = injectIntl(React.createClass({
   getInitialState: function() {
     return {
       code: null,
@@ -100,7 +100,7 @@ var SubRegister = React.createClass({
         !decimals ||
         !precision ||
         !category)
-      message = "Fill it up mate!";
+      message = this.props.intl.formatMessage({id: 'form.empty'});
     else if (code == 'ETH' || this.props.address == address)
       message = "Nice try.";
     else if (code.length < 3 || code.length > 4)
@@ -175,35 +175,35 @@ var SubRegister = React.createClass({
         </div>
 
         <Input type="text" ref="code"
-          label="Subcurrency code"
+          label={this.props.intl.formatMessage({id: 'sub.code'})}
           pattern="[A-Z]{3,4}"
           placeholder="ETX"
           value={ this.state.code }
           onChange={this.handleChange} />
 
         <Input type="text" ref="address"
-          label="Contract address"
+          label={this.props.intl.formatMessage({id: 'sub.contract'})}
           maxLength="42" pattern="0x[a-fA-F\d]+"
           placeholder="0x"
           value={ this.state.address }
           onChange={this.handleChange} />
 
         <Input type="number" ref="minimum"
-          label="Minimum ETH amount"
+          label={this.props.intl.formatMessage({id: 'sub.minimum'})}
           min="1" step="1"
           placeholder="10"
           value={ this.state.minimum }
           onChange={this.handleChange} />
 
         <Input type="number" ref="decimals"
-          label="Decimals"
+          label={this.props.intl.formatMessage({id: 'sub.decimals'})}
           min="0" step="1"
           placeholder="4"
           value={ this.state.decimals }
           onChange={this.handleChange} />
 
         <Input type="number" ref="precision"
-          label="Price precision"
+          label={this.props.intl.formatMessage({id: 'sub.precision'})}
           min={this.state.precision ? bigRat(this.state.precision).divide(10).toDecimal(18) : "0.00000001"}
           step={this.state.precision ? bigRat(this.state.precision).divide(10).toDecimal(18) : "0.00000001"}
           placeholder="0.00000001"
@@ -220,13 +220,15 @@ var SubRegister = React.createClass({
           show={this.state.showModal}
           onHide={this.closeModal}
           message={
-            "Are you sure you want to register " +
-              this.state.code +
-              " at address " + this.state.address +
-              " in the " + this.state.categoryName + " section," +
-              " with a minimum trade amount of " + this.state.minimum + " ETH, " +
-              this.state.decimals + " decimals to the subcurrency and a" +
-              " price precision of " + this.state.precision + " ?"}
+            this.props.intl.formatMessage({id: 'sub.confirm'}, {
+              code: this.state.code,
+              address: this.state.address,
+              category: this.state.categoryName,
+              minimum: this.state.minimum,
+              decimals: this.state.decimals,
+              precision: this.state.precision
+            })
+          }
           flux={this.props.flux}
           onSubmit={this.onSubmitForm} />
 
@@ -239,6 +241,6 @@ var SubRegister = React.createClass({
       </form>
     );
   }
-});
+}));
 
 module.exports = SubRegister;

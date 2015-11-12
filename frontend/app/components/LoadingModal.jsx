@@ -1,9 +1,5 @@
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedHTMLMessage = ReactIntl.FormattedHTMLMessage;
-var FormattedRelative = ReactIntl.FormattedRelative;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {FormattedMessage, FormattedHTMLMessage, FormattedRelative} from 'react-intl';
 
 var ReactBootstrap = require('react-bootstrap');
 var ProgressBar = ReactBootstrap.ProgressBar;
@@ -15,8 +11,6 @@ var UAParser = require('ua-parser-js');
 
 // Modal prompt for loading exceptions
 var LoadingModal = React.createClass({
-  mixins: [IntlMixin],
-
   getInitialState() {
     return {
       isModalOpen: false,
@@ -41,51 +35,63 @@ var LoadingModal = React.createClass({
 
     var launchStep = (
       <FormattedMessage
-        message={this.getIntlMessage('init.install.start')}
-        geth={
-          <div>
-            <pre className="small">geth --rpc --rpccorsdomain { this.state.host }</pre>
-            Optionally add <samp>--unlock {"<YourAddress>"}</samp> to unlock an account.
-          </div>} />
+        id='init.install.start'
+        values={{
+          geth:
+            <div>
+              <pre className="small">geth --rpc --rpccorsdomain { this.state.host }</pre>
+              Optionally add <samp>--unlock {"<YourAddress>"}</samp> to unlock an account.
+            </div>
+        }}
+      />
     );
     this.setState({
       launchStep: launchStep
     });
 
     if (this.state.os === 'Mac OS') {
-      steps.push(<FormattedHTMLMessage message={this.getIntlMessage('init.install.OSX.brew')} />);
-      steps.push(<pre className="small"><FormattedHTMLMessage message={this.getIntlMessage('init.install.OSX.install')} /></pre>);
+      steps.push(<FormattedHTMLMessage id='init.install.OSX.brew' />);
+      steps.push(<pre className="small"><FormattedHTMLMessage id='init.install.OSX.install' /></pre>);
     } else if (this.state.os == 'Windows') {
-      steps.push(<FormattedHTMLMessage message={this.getIntlMessage('init.install.Win.install')} />);
+      steps.push(<FormattedHTMLMessage id='init.install.Win.install' />);
     } else if (this.state.os == 'Ubuntu') {
-      steps.push(<pre className="small"><FormattedMessage message={this.getIntlMessage('init.install.Ubuntu.PPA')} /></pre>);
+      steps.push(<pre className="small"><FormattedMessage id='init.install.Ubuntu.PPA' /></pre>);
     } else {
-      steps.push(<FormattedHTMLMessage message={this.getIntlMessage('init.install.Others.build')} />);
+      steps.push(<FormattedHTMLMessage id='init.install.Others.build' />);
     }
 
     steps.push(<FormattedMessage
-                message={this.getIntlMessage('init.install.account')}
-                geth={<pre className="small">geth account new</pre>} />);
+                id='init.install.account'
+                values={{
+                  geth: <pre className="small">geth account new</pre>
+                }}
+              />);
     steps.push(launchStep);
 
     if (this.state.os == 'Mac OS')
       steps.push(<FormattedHTMLMessage
-                    message={this.getIntlMessage('init.install.OSX.link')}
-                    wiki={"https://github.com/ethereum/go-ethereum/wiki/Installation-Instructions-for-Mac"}
-                    brew={"https://github.com/ethereum/homebrew-ethereum"}
-                    />);
+                    id='init.install.OSX.link'
+                    values={{
+                      wiki: "https://github.com/ethereum/go-ethereum/wiki/Installation-Instructions-for-Mac",
+                      brew: "https://github.com/ethereum/homebrew-ethereum"
+                    }}
+                  />);
     else if (this.state.os == 'Ubuntu')
       steps.push(<FormattedHTMLMessage
-                    message={this.getIntlMessage('init.install.Ubuntu.link')}
-                    wiki={"https://github.com/ethereum/go-ethereum/wiki/Installation-Instructions-for-Ubuntu"}
-                    ppa={"https://launchpad.net/~ethereum/+archive/ubuntu/ethereum/+packages"}
-                    />);
+                    id='init.install.Ubuntu.link'
+                    values={{
+                      wiki: "https://github.com/ethereum/go-ethereum/wiki/Installation-Instructions-for-Ubuntu",
+                      ppa: "https://launchpad.net/~ethereum/+archive/ubuntu/ethereum/+packages"
+                    }}
+                  />);
     else if (this.state.os == 'Windows')
       steps.push(<FormattedHTMLMessage
-                    message={this.getIntlMessage('init.install.Win.link')}
-                    wiki={"https://github.com/ethereum/go-ethereum/wiki/Installation-instructions-for-Windows"}
-                    choco={"https://chocolatey.org/packages/geth-stable"}
-                    />);
+                    id='init.install.Win.link'
+                    values={{
+                      wiki: "https://github.com/ethereum/go-ethereum/wiki/Installation-instructions-for-Windows",
+                      choco: "https://chocolatey.org/packages/geth-stable"
+                    }}
+                  />);
 
     var installSteps = steps.map(function(step, i) {
       return <li key={i}>{ step }</li>;
@@ -94,7 +100,7 @@ var LoadingModal = React.createClass({
     var help = (
       <div className="installation-help">
         <p className="row">
-          <h4><FormattedHTMLMessage message={this.getIntlMessage('init.install.title')} /></h4>
+          <h4><FormattedHTMLMessage id='init.install.title' /></h4>
           <ol>
             { installSteps }
           </ol>
@@ -125,7 +131,7 @@ var LoadingModal = React.createClass({
       var lastBlockAge = nextProps.network.blockChainAge;
 
       if (!nextProps.network.blockTimestamp)
-        lastBlockAge = <FormattedMessage message={this.getIntlMessage('init.block.genesis')} />;
+        lastBlockAge = <FormattedMessage id='init.block.genesis' />;
       else
         lastBlockAge = <FormattedRelative value={nextProps.network.blockTimestamp * 1000} />;
 
@@ -159,17 +165,17 @@ var LoadingModal = React.createClass({
 
     if (nextProps.config.ethereumClientFailed) {
       // EtherEx client failed to load
-      modalHeader = <FormattedMessage message={this.getIntlMessage('init.failed.header')} />;
+      modalHeader = <FormattedMessage id='init.failed.header' />;
       modalBody = (
           <div className="modal-body clearfix">
-            <p><FormattedMessage message={this.getIntlMessage('init.failed.explain')} /></p>
-            <p><FormattedMessage message={this.getIntlMessage('init.failed.assistance')} /></p>
+            <p><FormattedMessage id='init.failed.explain' /></p>
+            <p><FormattedMessage id='init.failed.assistance' /></p>
           </div>
       );
       modalFooter = (
           <div className="modal-footer">
               <Button className="pull-right start-demo-mode" onClick={ this.startDemoMode }>
-                <FormattedMessage message={this.getIntlMessage('demo.proceed')} />
+                <FormattedMessage id='demo.proceed' />
               </Button>
           </div>
       );
@@ -177,23 +183,23 @@ var LoadingModal = React.createClass({
 
     } else if (nextProps.network.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED) {
       // No ethereum client detected
-      modalHeader = <FormattedMessage message={this.getIntlMessage('init.connect.failed')} />;
+      modalHeader = <FormattedMessage id='init.connect.failed' />;
       modalBody = (
         <div>
-          <p><FormattedMessage message={this.getIntlMessage('init.connect.explain')} /></p>
+          <p><FormattedMessage id='init.connect.explain' /></p>
           <p className="navbar">
             <Button className="visible-xs" bsSize="xsmall" onClick={ this.toggleInstallationHelp }>
-              <FormattedMessage message={this.getIntlMessage('init.connect.assistance')} />
+              <FormattedMessage id='init.connect.assistance' />
             </Button>
             <Button className="hidden-xs" onClick={ this.toggleInstallationHelp }>
-              <FormattedMessage message={this.getIntlMessage('init.connect.assistance')} />
+              <FormattedMessage id='init.connect.assistance' />
             </Button>
           </p>
         </div>
       );
       modalFooter = (
         <Button className="pull-right start-demo-mode" onClick={ this.startDemoMode }>
-          <FormattedMessage message={this.getIntlMessage('demo.proceed')} />
+          <FormattedMessage id='demo.proceed' />
         </Button>
       );
       modalSize = 'medium';
@@ -203,31 +209,40 @@ var LoadingModal = React.createClass({
       modalHeader = null;
       modalBody = (
         <div>
-          <h4><FormattedMessage message={this.getIntlMessage('init.loading')} /></h4>
+          <h4><FormattedMessage id='init.loading' /></h4>
           { nextProps.network.ready ?
-            <p><FormattedMessage message={this.getIntlMessage('init.ready')} /></p> :
+            <p><FormattedMessage id='init.ready' /></p> :
             <p>
               <FormattedHTMLMessage
-                message={this.getIntlMessage('init.not_ready')}
-                peers={nextProps.network.peerCount} />
+                id='init.not_ready'
+                values={{
+                  peers: nextProps.network.peerCount
+                }}
+              />
             </p>
           }
           <ProgressBar active bsStyle={nextProps.network.ready ? 'success' : 'default'} now={this.state.percentLoaded} />
           <p>
             <FormattedMessage
-              message={this.getIntlMessage('init.block.age')}
-              age={this.state.lastBlockAge} />
+              id='init.block.age'
+              values={{
+                age: this.state.lastBlockAge
+              }}
+            />
           </p>
           <p>
             <FormattedMessage
-              message={this.getIntlMessage('init.block.left')}
-              left={parseInt(this.state.blocksLeft)} />
+              id='init.block.left'
+              values={{
+                left: parseInt(this.state.blocksLeft)
+              }}
+            />
           </p>
         </div>
       );
       modalFooter = !nextProps.network.ready &&
                       <Button className="pull-right" onClick={ this.forceLoad }>
-                        <FormattedMessage message={this.getIntlMessage('init.force')} />
+                        <FormattedMessage id='init.force' />
                       </Button>;
       modalSize = 'small';
 

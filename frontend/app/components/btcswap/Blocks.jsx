@@ -1,15 +1,11 @@
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedNumber = ReactIntl.FormattedNumber;
+import {injectIntl, FormattedNumber} from 'react-intl';
 
 var Button = require('react-bootstrap').Button;
 var Popover = require('react-bootstrap').Popover;
 var OverlayTrigger = require('react-bootstrap').OverlayTrigger;
 
-var Blocks = React.createClass({
-  mixins: [IntlMixin],
-
+var Blocks = injectIntl(React.createClass({
   getInitialState: function () {
     return {
       updatingBtcHeaders: false
@@ -33,13 +29,13 @@ var Blocks = React.createClass({
           { this.props.ticket &&
             <OverlayTrigger trigger={['click']} placement='left' rootClose={true} overlay={
               <Popover id="btc-hash-popover" bsSize="large">
-                <p className="text-overflow">BTC block # { this.formatNumber(this.props.ticket.btcHeight) }</p>
+                <p className="text-overflow">BTC block # { this.props.intl.formatNumber(this.props.ticket.btcHeight) }</p>
                 <p className="text-overflow">BTC block hash: <samp>{ this.props.ticket.btcHead }</samp></p>
                 <p className="text-overflow">Real BTC block # { this.props.ticket.btcRealHeight }</p>
                 <p className="text-overflow">Real BTC block hash: <samp>{ this.props.ticket.btcRealHead }</samp></p>
                 { this.props.ticket.btcBehind &&
                   <div>
-                    { this.formatMessage(this.getIntlMessage('btc.behind'), {
+                    { this.props.intl.formatMessage({id: 'btc.behind'}, {
                         behind: this.props.ticket.btcBehind
                       }) }
                   </div> }
@@ -51,7 +47,7 @@ var Blocks = React.createClass({
           { (this.props.ticket && this.props.ticket.btcBehind) &&
             <OverlayTrigger trigger={['hover', 'focus']} placement='left' overlay={
               <Popover id="btc-behind-popover">
-                { this.formatMessage(this.getIntlMessage('btc.behind'), {
+                { this.props.intl.formatMessage({id: 'btc.behind'}, {
                     behind: this.props.ticket.btcBehind
                   }) }
               </Popover>}>
@@ -65,6 +61,6 @@ var Blocks = React.createClass({
       </div>
     );
   }
-});
+}));
 
 module.exports = Blocks;

@@ -1,17 +1,13 @@
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
-var FormattedNumber = ReactIntl.FormattedNumber;
+import {injectIntl, FormattedMessage, FormattedNumber} from 'react-intl';
+
 var Button = require('react-bootstrap/lib/Button');
 var Popover = require('react-bootstrap/lib/Popover');
 var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
 
 var bigRat = require("big-rational");
 
-var TxRow = React.createClass({
-  mixins: [IntlMixin],
-
+var TxRow = injectIntl(React.createClass({
   render: function() {
     var amount = bigRat(this.props.tx.amount).divide(Math.pow(10, this.props.market.decimals)).valueOf();
     return (
@@ -44,9 +40,11 @@ var TxRow = React.createClass({
         </td>
         <td>
           <div className="text-right">
-            <FormattedMessage message={this.getIntlMessage('ether')}
-                              value={amount}
-                              unit={this.props.market.name} />
+            <FormattedMessage id='ether' values={{
+                value: amount,
+                unit: this.props.market.name
+              }}
+            />
           </div>
         </td>
         <td>
@@ -59,9 +57,11 @@ var TxRow = React.createClass({
         <td>
           <div className="text-right">
             { this.props.tx.total.value ?
-                <FormattedMessage message={this.getIntlMessage('ether')}
-                                  value={this.props.tx.total.value}
-                                  unit={this.props.tx.total.unit} /> :
+                <FormattedMessage id='ether' values={{
+                    value: this.props.tx.total.value,
+                    unit: this.props.tx.total.unit
+                  }}
+                /> :
                 "N/A" }
           </div>
         </td>
@@ -69,17 +69,17 @@ var TxRow = React.createClass({
           <OverlayTrigger trigger={['click']} placement='left' rootClose={true} overlay={
               <Popover id={this.props.tx.hash + "-details"} bsSize="large">
                 <div className="help-block">
-                { this.formatMessage(this.getIntlMessage('txs.hash')) }
+                  { this.props.intl.formatMessage({id: 'txs.hash'}) }
                   <div className="text-overflow">
                     <code>{ this.props.tx.hash }</code>
                   </div>
                 </div>
                 { this.props.tx.id &&
                   <div className="help-block">
-                    { this.formatMessage(this.getIntlMessage('txs.id')) }
-                      <div className="text-overflow">
-                        <code>{ this.props.tx.id }</code>
-                      </div>
+                    { this.props.intl.formatMessage({id: 'txs.id'}) }
+                    <div className="text-overflow">
+                      <code>{ this.props.tx.id }</code>
+                    </div>
                   </div> }
               </Popover>}>
             <div className="text-center">
@@ -92,6 +92,6 @@ var TxRow = React.createClass({
       </tr>
     );
   }
-});
+}));
 
 module.exports = TxRow;

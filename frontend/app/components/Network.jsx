@@ -1,17 +1,12 @@
 var React = require('react');
-var ReactIntl = require("react-intl");
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedDate = ReactIntl.FormattedDate;
-var FormattedNumber = ReactIntl.FormattedNumber;
-var FormattedMessage = ReactIntl.FormattedMessage;
-var FormattedRelative = ReactIntl.FormattedRelative;
+import {injectIntl, FormattedDate, FormattedNumber, FormattedMessage, FormattedRelative} from 'react-intl';
 var Fluxxor = require("fluxxor");
 var StoreWatchMixin = Fluxxor.StoreWatchMixin;
 
 var utils = require('../js/utils');
 
-var Network = React.createClass({
-  mixins: [IntlMixin, StoreWatchMixin('config', 'network', 'UserStore')],
+var Network = injectIntl(React.createClass({
+  mixins: [StoreWatchMixin('config', 'network', 'UserStore')],
 
   getInitialState() {
     return {
@@ -27,7 +22,7 @@ var Network = React.createClass({
     var formattedGasPrice = '-';
     if (this.state.network.gasPrice) {
       var gasPrice = utils.formatEther(this.state.network.gasPrice);
-      formattedGasPrice = <span>{ this.formatNumber(gasPrice.value) } { gasPrice.unit }</span>;
+      formattedGasPrice = <span>{ this.props.intl.formatNumber(gasPrice.value) } { gasPrice.unit }</span>;
       this.setState({
         gasPrice: formattedGasPrice
       });
@@ -80,7 +75,7 @@ var Network = React.createClass({
       <div className="panel panel-default network">
         <div className="panel-heading clearfix">
           <h4>
-            <FormattedMessage message={this.getIntlMessage('network')} />
+            <FormattedMessage id='network' />
           </h4>
         </div>
         <div className="panel-body">
@@ -109,8 +104,10 @@ var Network = React.createClass({
             <span className="pull-right">
               { this.state.network.mining ?
                   <FormattedMessage
-                    message={this.getIntlMessage('hashrate')}
-                    hashrate={this.state.network.hashrate} /> : 'off' }
+                    id='hashrate' values={{
+                      hashrate: this.state.network.hashrate
+                    }}
+                  /> : 'off' }
             </span>
           </p>
           <p className="ether">
@@ -118,9 +115,11 @@ var Network = React.createClass({
             <span className="pull-right">
               { this.state.user.balance ?
                 <span>
-                  <FormattedMessage message={this.getIntlMessage('ether')}
-                                    value={this.state.user.balanceFormatted.value}
-                                    unit={this.state.user.balanceFormatted.unit} />
+                  <FormattedMessage id='ether' values={{
+                      value: this.state.user.balanceFormatted.value,
+                      unit: this.state.user.balanceFormatted.unit
+                    }}
+                  />
                 </span> : '-' }
             </span>
           </p>
@@ -134,13 +133,11 @@ var Network = React.createClass({
             <span className="network-label">Block time</span>
             <span className="pull-right">
               { this.state.blockTime ?
-                  <FormattedMessage message={this.getIntlMessage('blocktime')}
-                                    time={this.state.blockTime} /> : '-' } /{' '}
+                  <FormattedMessage id='blocktime' values={{time: this.state.blockTime}} /> : '-' } /{' '}
               <span className={'text-' + this.state.lastState}>
                 { this.state.lastBlock ?
                   ( this.state.lastBlock < this.state.config.timeout ?
-                    <FormattedMessage message={this.getIntlMessage('blocktime')}
-                                      time={this.state.lastBlock} /> :
+                    <FormattedMessage id='blocktime' values={{time: this.state.lastBlock}} /> :
                     <FormattedRelative value={this.state.blockTimestamp * 1000} /> ) : '-' }
               </span>
             </span>
@@ -149,8 +146,7 @@ var Network = React.createClass({
             <span className="network-label">Network lag</span>
             <span className="pull-right">
               { this.state.networkLag ?
-                <FormattedMessage message={this.getIntlMessage('blocktime')}
-                                  time={this.state.networkLag} /> : '-' }
+                <FormattedMessage id='blocktime' values={{time: this.state.networkLag}} /> : '-' }
             </span>
           </p>
           <p className="last-block">
@@ -169,6 +165,6 @@ var Network = React.createClass({
       </div>
     );
   }
-});
+}));
 
 module.exports = Network;

@@ -1,17 +1,14 @@
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {injectIntl, FormattedMessage} from 'react-intl';
 
 var utils = require("../js/utils");
 var Button = require('react-bootstrap/lib/Button');
 var Popover = require('react-bootstrap/lib/Popover');
 var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
 
-var BalanceSub = React.createClass({
-  mixins: [IntlMixin],
-
+var BalanceSub = injectIntl(React.createClass({
   render: function() {
+    var formatMessage = this.props.intl.formatMessage;
     var available = this.props.user.user.balanceSubAvailable;
     var trading = this.props.user.user.balanceSubTrading;
     var balance = this.props.user.user.balanceSub;
@@ -22,7 +19,7 @@ var BalanceSub = React.createClass({
           <div className="text-light">Wallet</div>
           <OverlayTrigger trigger={['hover', 'click']} placement='left' rootClose={true} overlay={
               <Popover id="balance-sub-popover">
-                { this.formatMessage(this.getIntlMessage('wallet.balance'), {
+                { formatMessage({id: 'wallet.balance'}, {
                     currency: this.props.market.market.name,
                     balance: balance
                   })
@@ -32,9 +29,12 @@ var BalanceSub = React.createClass({
               { this.props.si ?
                 utils.format(balance) :
                 <FormattedMessage
-                  message={this.getIntlMessage('wallet.sub')}
-                  balance={balance}
-                  currency={this.props.market.market.name} />
+                  id='wallet.sub'
+                  values={{
+                    balance: balance,
+                    currency: this.props.market.market.name
+                  }}
+                />
               }
             </h4>
           </OverlayTrigger>
@@ -44,7 +44,7 @@ var BalanceSub = React.createClass({
           <div>
             <OverlayTrigger trigger={['hover', 'click']} placement='left' rootClose={true} overlay={
                 <Popover id="balance-available-popover">
-                  { this.formatMessage(this.getIntlMessage('wallet.available'), {
+                  { formatMessage({id: 'wallet.available'}, {
                       currency: this.props.market.market.name,
                       balance: available
                     })
@@ -54,9 +54,12 @@ var BalanceSub = React.createClass({
                 { this.props.si ?
                   utils.format(available) :
                   <FormattedMessage
-                    message={this.getIntlMessage('wallet.sub')}
-                    balance={available}
-                    currency={this.props.market.market.name} />
+                    id='wallet.sub'
+                    values={{
+                      balance: available,
+                      currency: this.props.market.market.name
+                    }}
+                  />
                 }
               </h4>
             </OverlayTrigger>
@@ -64,21 +67,24 @@ var BalanceSub = React.createClass({
           <OverlayTrigger trigger={['hover', 'click']} placement='left' rootClose={true} overlay={
               <Popover id="balance-pending-popover">
                 <div className="text-overflow">
-                  { this.formatMessage(
-                      this.getIntlMessage('wallet.pending'), {
-                        currency: "ETH",
-                        balance: this.props.user.user.balance,
-                        pending: this.props.user.user.balancePending
-                      })
+                  { formatMessage({id: 'wallet.pending'}, {
+                      currency: "ETH",
+                      balance: this.props.user.user.balance,
+                      pending: this.props.user.user.balancePending
+                    })
                   }
                 </div>
               </Popover>}>
             <h4 className="hidden-xs">
               { this.props.user.user.balanceFormatted &&
                 <FormattedMessage
-                  message={this.getIntlMessage('ether')}
-                  value={this.props.user.user.balanceFormatted.value}
-                  unit={this.props.user.user.balanceFormatted.unit} /> }
+                  id='ether'
+                  values={{
+                    value: this.props.user.user.balanceFormatted.value,
+                    unit: this.props.user.user.balanceFormatted.unit
+                  }}
+                />
+              }
             </h4>
           </OverlayTrigger>
         </div>
@@ -86,7 +92,7 @@ var BalanceSub = React.createClass({
           <div className="text-light">In trades</div>
           <OverlayTrigger trigger={['hover', 'click']} placement='left' rootClose={true} overlay={
               <Popover id="balance-trading-popover">
-                { this.formatMessage(this.getIntlMessage('wallet.trading'), {
+                { formatMessage({id: 'wallet.trading'}, {
                     currency: this.props.market.market.name,
                     balance: trading
                   })
@@ -96,9 +102,12 @@ var BalanceSub = React.createClass({
               { this.props.si ?
                 utils.format(trading) :
                 <FormattedMessage
-                  message={this.getIntlMessage('wallet.sub')}
-                  balance={trading}
-                  currency={this.props.market.market.name} />
+                  id='wallet.sub'
+                  values={{
+                    balance: trading,
+                    currency: this.props.market.market.name
+                  }}
+                />
               }
             </h4>
           </OverlayTrigger>
@@ -106,6 +115,6 @@ var BalanceSub = React.createClass({
       </div>
     );
   }
-});
+}));
 
 module.exports = BalanceSub;

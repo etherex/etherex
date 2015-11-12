@@ -1,4 +1,6 @@
 var React = require("react");
+import {FormattedMessage} from 'react-intl';
+
 var Perf = require("react-addons-perf");
 var utils = require("../js/utils");
 
@@ -50,7 +52,7 @@ var TradeList = React.createClass({
         <div className="col-md-4">
           <div className="panel panel-default">
             <div className="panel-heading">
-              <h3 className="panel-title">Subcurrency registration</h3>
+              <h3 className="panel-title"><FormattedMessage id="sub.register" /></h3>
             </div>
             <div className="panel-body">
               <div className="container-fluid">

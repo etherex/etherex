@@ -1,15 +1,11 @@
 var _ = require('lodash');
 var React = require("react");
-var ReactIntl = require("react-intl");
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {FormattedMessage} from 'react-intl';
 
 var UserSummaryPane = require("./UserSummaryPane");
 var TradeList = require("./TradeList");
 
 var UserDetails = React.createClass({
-  mixins: [IntlMixin],
-
   isYours() {
     return (
       this.props.user &&
@@ -24,7 +20,7 @@ var UserDetails = React.createClass({
     if (this.isYours()) {
       own.tradeBuys = _.filter(this.props.trades.tradeBuys, {'owner': this.props.user.user.id});
       own.tradeSells = _.filter(this.props.trades.tradeSells, {'owner': this.props.user.user.id});
-      own.title = <FormattedMessage message={this.getIntlMessage('form.yours')} />;
+      own.title = <FormattedMessage id='form.yours' />;
       this.props.user.user.own = true;
     }
 
@@ -38,7 +34,7 @@ var UserDetails = React.createClass({
       );
     } else {
       return (
-        <h3><FormattedMessage message={this.getIntlMessage('user.not_found')} /></h3>
+        <h3><FormattedMessage id='user.not_found' /></h3>
       );
     }
   }

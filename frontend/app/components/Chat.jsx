@@ -1,7 +1,6 @@
 var _ = require("lodash");
 var React = require("react");
-var ReactIntl = require("react-intl");
-var FormattedTime = ReactIntl.FormattedTime;
+import {FormattedTime} from 'react-intl';
 
 var Accordion = require('react-bootstrap/lib/Accordion');
 var Glyphicon = require("react-bootstrap/lib/Glyphicon");
