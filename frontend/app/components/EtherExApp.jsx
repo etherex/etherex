@@ -1,9 +1,29 @@
+var localesSupported = require('intl-locales-supported');
+var i18n = {
+  locales: ['en-US']
+};
+
+if (window.Intl) {
+  // Determine if the built-in `Intl` has the locale data we need.
+  if (!localesSupported(i18n.locales)) {
+    // `Intl` exists, but it doesn't have the data we need, so load the
+    // polyfill and replace the constructors with need with the polyfill's.
+    window.IntlPolyfill = require('intl/dist/Intl').IntlPolyfill;
+    window.Intl.NumberFormat = window.IntlPolyfill.NumberFormat;
+    window.Intl.DateTimeFormat = window.IntlPolyfill.DateTimeFormat;
+  }
+} else {
+  // No `Intl`, so use and load the polyfill.
+  window.Intl = require("intl/dist/Intl").Intl;
+  window.IntlPolyfill = require("intl/dist/Intl").IntlPolyfill;
+  window.Intl.NumberFormat = window.IntlPolyfill.NumberFormat;
+  window.Intl.DateTimeFormat = window.IntlPolyfill.DateTimeFormat;
+  require("intl/locale-data/jsonp/en-US");
+}
+
 var _ = require("lodash");
 var React = require("react");
 var Fluxxor = require("fluxxor");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
 
 var StoreWatchMixin = Fluxxor.StoreWatchMixin;
 
@@ -26,8 +46,14 @@ var Chat = require('./Chat');
 var fixtures = require('../js/fixtures');
 var Favicon = require('react-favicon');
 
+// Load Intl data
+var flatten = require('flat');
+var intlData = require('../js/intlData');
+var messages = flatten(intlData.messages);
+import {IntlProvider, injectIntl, FormattedMessage} from 'react-intl';
+
 var EtherExApp = React.createClass({
-  mixins: [IntlMixin, StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore", "TicketStore")],
+  mixins: [StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore", "TicketStore")],
 
   getInitialState() {
     return {
@@ -93,142 +119,144 @@ var EtherExApp = React.createClass({
 
   render() {
     return (
-      <div id="wrap" className={"theme-" + this.state.theme + " full-height"}>
-        <div className="container-fluid full-height" ref="container">
-          <div className="row full-height">
-            <div className="flex-height">
-              <div className="col-md-2" id="side-bar">
-                <div className="row">
-                  <NavBar flux={this.state.flux} />
-                  { this.state.market.error &&
-                    <div className="container-fluid">
-                      <div className="alert alert-danger" role="alert">
-                        <h5>
-                          <FormattedMessage message={this.getIntlMessage('error')} />
-                        </h5>
-                        {this.state.market.error}
-                      </div>
-                    </div> }
-                  { this.state.user.error &&
-                    <div className="container-fluid">
-                      <div className="alert alert-danger" role="alert">
-                        <h5>
-                          <FormattedMessage message={this.getIntlMessage('error')} />
-                        </h5>
-                        {this.state.user.error}
-                      </div>
-                    </div> }
-                  <div className="visible-lg">
-                    <Network flux={this.state.flux} />
+      <IntlProvider locale={i18n.locales[0]} messages={messages} formats={intlData.formats}>
+        <div id="wrap" className={"theme-" + this.state.theme + " full-height"}>
+          <div className="container-fluid full-height" ref="container">
+            <div className="row full-height">
+              <div className="flex-height">
+                <div className="col-md-2" id="side-bar">
+                  <div className="row">
+                    <NavBar flux={this.state.flux} />
+                    { this.state.market.error &&
+                      <div className="container-fluid">
+                        <div className="alert alert-danger" role="alert">
+                          <h5>
+                            <FormattedMessage id='error' />
+                          </h5>
+                          {this.state.market.error}
+                        </div>
+                      </div> }
+                    { this.state.user.error &&
+                      <div className="container-fluid">
+                        <div className="alert alert-danger" role="alert">
+                          <h5>
+                            <FormattedMessage id='error' />
+                          </h5>
+                          {this.state.user.error}
+                        </div>
+                      </div> }
+                    <div className="visible-lg">
+                      <Network flux={this.state.flux} />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="col-md-10" id="content">
-                <div className="row">
-                  <div id="top-bar">
-                    <div className="col-xs-6 col-md-7 col-xs-offset-1">
-                      <div className="row">
-                        <div className="col-lg-6 top-bar-text">
-                          <div className="row">
-                            { (!this.state.market.error && !this.state.user.error) &&
-                              <LastPrice market={this.state.market.market} toggleGraph={this.onToggleGraph} /> }
-                          </div>
-                        </div>
-                        <div className="col-lg-6 top-bar-text">
-                          <div className="row">
-                            <Balance
-                              user={this.state.user}
-                              market={this.state.market}
-                              si={this.state.config.si} />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-xs-2 col-md-2">
-                      <div className="row">
-                        { !this.state.user.error &&
-                          <div className="top-btn pull-right">
-                            <MarketSelect flux={this.state.flux} market={this.state.market} user={this.state.user} />
-                          </div> }
-                      </div>
-                    </div>
-                    <div className="col-xs-3 col-md-2">
-                      <div className="top-link text-right text-overflow">
-                        <UserLink address={ this.state.user.user.id } showIcon={true} />
-                      </div>
-                      <div className="top-btn-sm">
-                        { (this.state.config.network != 1 && !this.state.config.demoMode) &&
-                          <OverlayTrigger trigger={['click']} placement='bottom' rootClose={true} overlay={
-                            <Popover id="network-id-popover">
-                              Network ID { this.state.config.network }
-                            </Popover>}>
-                            <div className="pull-right">
-                              <Button bsStyle="warning" bsSize="xsmall">TESTNET</Button>
+                <div className="col-md-10" id="content">
+                  <div className="row">
+                    <div id="top-bar">
+                      <div className="col-xs-6 col-md-7 col-xs-offset-1">
+                        <div className="row">
+                          <div className="col-lg-6 top-bar-text">
+                            <div className="row">
+                              { (!this.state.market.error && !this.state.user.error) &&
+                                <LastPrice market={this.state.market.market} toggleGraph={this.onToggleGraph} /> }
                             </div>
-                          </OverlayTrigger> }
-                        { this.state.config.demoMode &&
-                          <div className="pull-right">
-                            <Button bsStyle="warning" bsSize="xsmall" onClick={this.disableDemoMode}>
-                              DEMO
-                            </Button>
-                          </div> }
+                          </div>
+                          <div className="col-lg-6 top-bar-text">
+                            <div className="row">
+                              <Balance
+                                user={this.state.user}
+                                market={this.state.market}
+                                si={this.state.config.si} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-xs-2 col-md-2">
+                        <div className="row">
+                          { !this.state.user.error &&
+                            <div className="top-btn pull-right">
+                              <MarketSelect flux={this.state.flux} market={this.state.market} user={this.state.user} />
+                            </div> }
+                        </div>
+                      </div>
+                      <div className="col-xs-3 col-md-2">
+                        <div className="top-link text-right text-overflow">
+                          <UserLink address={ this.state.user.user.id } showIcon={true} />
+                        </div>
+                        <div className="top-btn-sm">
+                          { (this.state.config.network != 1 && !this.state.config.demoMode) &&
+                            <OverlayTrigger trigger={['click']} placement='bottom' rootClose={true} overlay={
+                              <Popover id="network-id-popover">
+                                Network ID { this.state.config.network }
+                              </Popover>}>
+                              <div className="pull-right">
+                                <Button bsStyle="warning" bsSize="xsmall">TESTNET</Button>
+                              </div>
+                            </OverlayTrigger> }
+                          { this.state.config.demoMode &&
+                            <div className="pull-right">
+                              <Button bsStyle="warning" bsSize="xsmall" onClick={this.disableDemoMode}>
+                                DEMO
+                              </Button>
+                            </div> }
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="row visible-xs visible-sm sub-bar">
-                  { !this.state.market.error &&
-                    <BalanceSub
-                      user={this.state.user}
-                      market={this.state.market}
-                      si={this.state.config.si} />
-                  }
-                </div>
-                <div className="row">
-                  <div className="col-md-10">
-                    <div className="inner-content">
-
-                      { (!this.state.market.error && this.state.showGraph) &&
-                        <div className="container-fluid">
-                          <div className="row">
-                            <RangeSelect flux={this.state.flux} />
-                            <GraphPrice market={this.state.market} height={320} full={false} />
-                          </div>
-                        </div> }
-
-                      { (!this.state.market.error && !this.state.user.error) &&
-                        React.cloneElement(this.props.children, {
-                          flux: this.state.flux,
-                          config: this.state.config,
-                          network: this.state.network,
-                          market: this.state.market,
-                          trades: this.state.trades,
-                          user: this.state.user,
-                          ticket: this.state.ticket,
-                          disableGraph: this.onDisableGraph
-                        })
-                      }
-                    </div>
-                  </div>
-                  <div className="col-md-2 visible-md visible-lg sub-bar">
+                  <div className="row visible-xs visible-sm sub-bar">
                     { !this.state.market.error &&
                       <BalanceSub
                         user={this.state.user}
                         market={this.state.market}
                         si={this.state.config.si} />
                     }
-                    <Chat market={this.state.market.market} flux={this.props.flux} />
+                  </div>
+                  <div className="row">
+                    <div className="col-md-10">
+                      <div className="inner-content">
+
+                        { (!this.state.market.error && this.state.showGraph) &&
+                          <div className="container-fluid">
+                            <div className="row">
+                              <RangeSelect flux={this.state.flux} />
+                              <GraphPrice market={this.state.market} height={320} full={false} />
+                            </div>
+                          </div> }
+
+                        { (!this.state.market.error && !this.state.user.error) &&
+                          React.cloneElement(this.props.children, {
+                            flux: this.state.flux,
+                            config: this.state.config,
+                            network: this.state.network,
+                            market: this.state.market,
+                            trades: this.state.trades,
+                            user: this.state.user,
+                            ticket: this.state.ticket,
+                            disableGraph: this.onDisableGraph
+                          })
+                        }
+                      </div>
+                    </div>
+                    <div className="col-md-2 visible-md visible-lg sub-bar">
+                      { !this.state.market.error &&
+                        <BalanceSub
+                          user={this.state.user}
+                          market={this.state.market}
+                          si={this.state.config.si} />
+                      }
+                      <Chat market={this.state.market.market} flux={this.props.flux} />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+          <LoadingModal flux={ this.state.flux } network={ this.state.network } config={ this.state.config } theme={ this.state.theme } />
+
+          <Favicon url={fixtures.favicon} animated={false} alertCount={ this.state.config.alertCount } />
         </div>
-
-        <LoadingModal flux={ this.state.flux } network={ this.state.network } config={ this.state.config } theme={ this.state.theme } />
-
-        <Favicon url={fixtures.favicon} animated={false} alertCount={ this.state.config.alertCount } />
-      </div>
+      </IntlProvider>
     );
   }
 });

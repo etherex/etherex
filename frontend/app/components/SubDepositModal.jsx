@@ -1,6 +1,5 @@
 var React = require("react");
-var ReactIntl = require("react-intl");
-var IntlMixin = ReactIntl.IntlMixin;
+import {injectIntl} from 'react-intl';
 
 var Button = require('react-bootstrap/lib/Button');
 var Input = require('react-bootstrap/lib/Input');
@@ -8,8 +7,7 @@ var Modal = require('react-bootstrap/lib/Modal');
 
 var ConfirmModal = require('./ConfirmModal');
 
-var SubDepositModal = React.createClass({
-  mixins: [IntlMixin],
+var SubDepositModal = injectIntl(React.createClass({
 
   getInitialState: function() {
     return {
@@ -78,13 +76,14 @@ var SubDepositModal = React.createClass({
     });
 
     if (!amount)
-      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.empty')));
+      this.props.setAlert('warning', this.props.intl.formatMessage({id: 'form.empty'}));
     else if (amount > this.props.user.balanceSub)
-      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('deposit.not_enough'), {
-                                        currency: this.props.market.name,
-                                        balance: this.props.user.balanceSub,
-                                        amount: amount
-                                      }));
+      this.props.setAlert('warning', this.props.intl.formatMessage({id: 'deposit.not_enough'}, {
+          currency: this.props.market.name,
+          balance: this.props.user.balanceSub,
+          amount: amount
+        })
+      );
     else {
       this.setState({
         newDeposit: true
@@ -151,16 +150,17 @@ var SubDepositModal = React.createClass({
         <ConfirmModal
           show={this.state.showConfirmModal}
           onHide={this.closeConfirmModal}
-          message={this.formatMessage(this.getIntlMessage('deposit.confirm'), {
-                      amount: this.state.amount,
-                      currency: this.props.market.name
-                    }) }
+          message={this.props.intl.formatMessage({id: 'deposit.confirm'}, {
+              amount: this.state.amount,
+              currency: this.props.market.name
+            })
+          }
           flux={this.props.flux}
           onSubmit={this.onSubmitForm}
         />
       </div>
     );
   }
-});
+}));
 
 module.exports = SubDepositModal;

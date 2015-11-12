@@ -1,28 +1,3 @@
-var localesSupported = require('intl-locales-supported');
-var i18n = {
-  locales: ['en-US']
-};
-
-if (window.Intl) {
-  // Determine if the built-in `Intl` has the locale data we need.
-  if (!localesSupported(i18n.locales)) {
-    // `Intl` exists, but it doesn't have the data we need, so load the
-    // polyfill and replace the constructors with need with the polyfill's.
-    window.IntlPolyfill = require('intl/dist/Intl').IntlPolyfill;
-    window.Intl.NumberFormat = window.IntlPolyfill.NumberFormat;
-    window.Intl.DateTimeFormat = window.IntlPolyfill.DateTimeFormat;
-  }
-} else {
-  // No `Intl`, so use and load the polyfill.
-  window.Intl = require("intl/dist/Intl").Intl;
-  window.IntlPolyfill = require("intl/dist/Intl").IntlPolyfill;
-  window.Intl.NumberFormat = window.IntlPolyfill.NumberFormat;
-  window.Intl.DateTimeFormat = window.IntlPolyfill.DateTimeFormat;
-  require("intl/locale-data/jsonp/en-US");
-}
-
-// Load Intl data
-var intlData = require('./js/intlData');
 
 var Fluxxor = require("fluxxor");
 var React = require("react");
@@ -98,30 +73,6 @@ flux.setDispatchInterceptor(function(action, dispatch) {
   });
 });
 
-class ContextRouter extends Router {
-  static get childContextTypes() {
-    return {
-      locales: React.PropTypes.oneOfType([
-        React.PropTypes.string,
-        React.PropTypes.array
-      ]),
-      formats : React.PropTypes.object,
-      messages: React.PropTypes.object
-    }
-  }
-
-  getChildContext() {
-    var intl = intlData || {};
-    var locales = i18n.locales || {};
-    var context = {};
-    context.locales = i18n.locales;
-    context.formats = intlData.formats || {};
-    context.messages= intlData.messages || {};
-
-    return context;
-  }
-}
-
 // Opt-out of fugly _k in query string
 import createHistory from 'history/lib/createHashHistory';
 var history = createHistory({
@@ -129,7 +80,7 @@ var history = createHistory({
 });
 
 var routes = (
-  <ContextRouter history={history} createElement={createFluxComponent}>
+  <Router history={history} createElement={createFluxComponent}>
     <Route path="/" component={EtherExApp}>
       <IndexRoute component={Trades} />
       <Route path="trades" component={Trades} />
@@ -150,7 +101,7 @@ var routes = (
       <Route path="user" component={UserDetails} />
       <Route path="*" component={Placeholder} />
     </Route>
-  </ContextRouter>
+  </Router>
 );
 
 ReactDOM.render(routes, document.getElementById('app'));

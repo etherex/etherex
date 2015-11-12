@@ -3,7 +3,8 @@ var utils = require("../js/utils");
 var bigRat = require('big-rational');
 var fixtures = require("../js/fixtures");
 var abi = require("../js/abi");
-var web3 = require('web3');
+var Web3 = require('web3');
+var web3 = new Web3();
 
 var EthereumClient = function(params) {
   try {
@@ -153,7 +154,7 @@ var EthereumClient = function(params) {
   };
 
   this.getClient = function(callback) {
-    web3.version.getClient(function(error, result) {
+    web3.version.getNode(function(error, result) {
       if (error) {
         utils.error(error);
       } else {

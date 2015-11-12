@@ -1,7 +1,5 @@
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {FormattedMessage} from 'react-intl';
 
 var AlertDismissable = require('./AlertDismissable');
 
@@ -10,8 +8,6 @@ var ProgressBar = require('react-bootstrap/lib/ProgressBar');
 var MarketTable = require('./MarketTable');
 
 var MarketList = React.createClass({
-  mixins: [IntlMixin],
-
   render: function() {
     return (
       <div>
@@ -20,7 +16,7 @@ var MarketList = React.createClass({
           { this.props.title ?
               <h3>{this.props.title} {
                 this.props.market.loading &&
-                  <span><FormattedMessage message={this.getIntlMessage('loading')} />...</span>}</h3> : "" }
+                  <span><FormattedMessage id='loading' />...</span>}</h3> : "" }
           </div>
           <div className="col-md-9 col-xs-6">
           { (this.props.market.loading && this.props.config.percentLoaded < 100) &&

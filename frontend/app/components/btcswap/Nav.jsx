@@ -1,26 +1,22 @@
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {FormattedMessage} from 'react-intl';
 
 var Link = require('react-router/lib/Link');
 var Nav = require('react-bootstrap/lib/Nav');
 var Glyphicon = require("react-bootstrap").Glyphicon;
 
 var BtcNav = React.createClass({
-  mixins: [IntlMixin],
-
   render() {
     return (
       <Nav bsStyle="pills" className="panel-group" role="navigation" aria-label="Secondary" justified>
         <li>
           <Link to="/btc/buy" activeClassName="active">
-            <Glyphicon glyph="download" /> <FormattedMessage message={this.getIntlMessage('form.buy')} /> ether
+            <Glyphicon glyph="download" /> <FormattedMessage id='form.buy' /> ether
           </Link>
         </li>
         <li>
           <Link to="/btc/sell" activeClassName="active">
-            <Glyphicon glyph="upload" /> <FormattedMessage message={this.getIntlMessage('form.sell')} /> ether
+            <Glyphicon glyph="upload" /> <FormattedMessage id='form.sell' /> ether
           </Link>
         </li>
         <li>
@@ -35,7 +31,7 @@ var BtcNav = React.createClass({
         </li>
         <li>
           <Link to="/btc/help" activeClassName="active">
-            <Glyphicon glyph="question-sign" /> <FormattedMessage message={this.getIntlMessage('nav.help')} />
+            <Glyphicon glyph="question-sign" /> <FormattedMessage id='nav.help' />
           </Link>
         </li>
       </Nav>

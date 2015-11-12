@@ -1,5 +1,6 @@
 var _ = require("lodash");
-var web3 = require('web3');
+var Web3 = require('web3');
+var web3 = new Web3();
 var BtcSwap = require("btc-swap");
 var utils = require('../js/utils');
 var React = require("react");

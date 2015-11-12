@@ -1,7 +1,5 @@
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {injectIntl, FormattedMessage} from 'react-intl';
 
 var Tabs = require('react-bootstrap/lib/Tabs');
 var Tab = require('react-bootstrap/lib/Tab');
@@ -15,9 +13,7 @@ var SubWithdraw = require('./SubWithdraw');
 
 var TxsList = require("./TxsList");
 
-var Wallet = React.createClass({
-  mixins: [IntlMixin],
-
+var Wallet = injectIntl(React.createClass({
   getInitialState() {
     return {
       alertLevel: 'info',
@@ -45,7 +41,7 @@ var Wallet = React.createClass({
       <div className="panel panel-default">
         <div className="panel-heading">
           <h3 className="panel-title">
-            <FormattedMessage message={this.getIntlMessage('deposit.currency')} currency={this.props.market.market.name} />
+            <FormattedMessage id='deposit.currency' values={{currency: this.props.market.market.name}} />
           </h3>
         </div>
         <div className="panel-body">
@@ -62,7 +58,7 @@ var Wallet = React.createClass({
       <div className="panel panel-default">
         <div className="panel-heading">
           <h3 className="panel-title">
-            <FormattedMessage message={this.getIntlMessage('withdraw.currency')} currency={this.props.market.market.name} />
+            <FormattedMessage id='withdraw.currency' values={{currency: this.props.market.market.name}} />
           </h3>
         </div>
         <div className="panel-body">
@@ -79,7 +75,7 @@ var Wallet = React.createClass({
       <div className="panel panel-default">
         <div className="panel-heading">
           <h3 className="panel-title">
-            <FormattedMessage message={this.getIntlMessage('send.currency')} currency={this.props.market.market.name} />
+            <FormattedMessage id='send.currency' values={{currency: this.props.market.market.name}} />
           </h3>
         </div>
         <div className="panel-body">
@@ -96,7 +92,7 @@ var Wallet = React.createClass({
       <div className="panel panel-default">
         <div className="panel-heading">
           <h3 className="panel-title">
-            <FormattedMessage message={this.getIntlMessage('send.currency')} currency="ETH" />
+            <FormattedMessage id='send.currency' values={{currency: "ETH"}} />
           </h3>
         </div>
         <div className="panel-body">
@@ -116,16 +112,16 @@ var Wallet = React.createClass({
 
         <div className="hidden-xs hidden-sm">
           <Tabs defaultActiveKey={1} position='left' tabWidth={3}>
-            <Tab eventKey={1} title={ this.formatMessage(this.getIntlMessage('deposit.currency'), {currency: this.props.market.market.name}) }>
+            <Tab eventKey={1} title={ this.props.intl.formatMessage({id: 'deposit.currency'}, {currency: this.props.market.market.name}) }>
               { this.deposit() }
             </Tab>
-            <Tab eventKey={2} title={ this.formatMessage(this.getIntlMessage('withdraw.currency'), {currency: this.props.market.market.name}) }>
+            <Tab eventKey={2} title={ this.props.intl.formatMessage({id: 'withdraw.currency'}, {currency: this.props.market.market.name}) }>
               { this.withdraw() }
             </Tab>
-            <Tab eventKey={3} title={ this.formatMessage(this.getIntlMessage('send.currency'), {currency: this.props.market.market.name}) }>
+            <Tab eventKey={3} title={ this.props.intl.formatMessage({id: 'send.currency'}, {currency: this.props.market.market.name}) }>
               { this.transfer() }
             </Tab>
-            <Tab eventKey={4} title={ this.formatMessage(this.getIntlMessage('send.currency'), {currency: "ETH"}) }>
+            <Tab eventKey={4} title={ this.props.intl.formatMessage({id: 'send.currency'}, {currency: "ETH"}) }>
               { this.sendEther() }
             </Tab>
           </Tabs>
@@ -148,6 +144,6 @@ var Wallet = React.createClass({
     );
   }
 
-});
+}));
 
 module.exports = Wallet;

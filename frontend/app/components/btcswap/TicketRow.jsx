@@ -1,18 +1,12 @@
 // var _ = require('lodash');
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedDate = ReactIntl.FormattedDate;
-var FormattedNumber = ReactIntl.FormattedNumber;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {injectIntl, FormattedMessage, FormattedDate, FormattedNumber} from 'react-intl';
 
 var Button = require("react-bootstrap/lib/Button");
 
 var utils = require("../../js/utils");
 
-var TicketRow = React.createClass({
-  mixins: [IntlMixin],
-
+var TicketRow = injectIntl(React.createClass({
   handleClick(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -39,14 +33,18 @@ var TicketRow = React.createClass({
         </td>
         <td>
           <div className="text-right">
-            <FormattedMessage message={this.getIntlMessage('ether')} value={totalEther.value} unit={totalEther.unit} />
+            <FormattedMessage id='ether' values={{
+                value: totalEther.value,
+                unit: totalEther.unit
+              }}
+            />
           </div>
         </td>
         <td>
           <div className="text-right">
             {
               utils.numeral(this.props.ticket.price, 8)
-              // <FormattedMessage message={this.getIntlMessage('price')} price={this.props.ticket.price} currency="BTC" />
+              // <FormattedMessage id='price' values={{price: this.props.ticket.price, currency: "BTC"}} />
             }
           </div>
         </td>
@@ -84,6 +82,6 @@ var TicketRow = React.createClass({
       </tr>
     );
   }
-});
+}));
 
 module.exports = TicketRow;

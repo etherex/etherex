@@ -1,6 +1,5 @@
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
+import {injectIntl} from 'react-intl';
 
 var AlertDismissable = require('./AlertDismissable');
 var ProgressBar = require('react-bootstrap/lib/ProgressBar');
@@ -10,9 +9,7 @@ var TradeBuys = require('./TradeListBuys');
 var TradeSells = require('./TradeListSells');
 
 
-var TradeList = React.createClass({
-  mixins: [IntlMixin],
-
+var TradeList = injectIntl(React.createClass({
   getInitialState: function() {
     return {
       showModal: false,
@@ -38,8 +35,8 @@ var TradeList = React.createClass({
       showModal: true,
       trade: trade,
       message: trade.owner == this.props.user.user.id ?
-        this.formatMessage(this.getIntlMessage('trade.cancel')) :
-        this.formatMessage(this.getIntlMessage('trade.confirm'), {
+        this.props.intl.formatMessage({id: 'trade.cancel'}) :
+        this.props.intl.formatMessage({id: 'trade.confirm'}, {
           type: trade.type == "buys" ? "sell" : "buy",
           amount: trade.amount,
           price: trade.price,
@@ -119,6 +116,6 @@ var TradeList = React.createClass({
       </div>
     );
   }
-});
+}));
 
 module.exports = TradeList;

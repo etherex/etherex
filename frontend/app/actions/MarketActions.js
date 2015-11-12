@@ -1,7 +1,8 @@
 var _ = require("lodash");
 var utils = require("../js/utils");
 var constants = require("../js/constants");
-var web3 = require("web3");
+var Web3 = require('web3');
+var web3 = new Web3();
 
 var MarketActions = function() {
 

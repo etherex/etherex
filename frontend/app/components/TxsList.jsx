@@ -1,7 +1,5 @@
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {FormattedMessage} from 'react-intl';
 
 var AlertDismissable = require('./AlertDismissable');
 
@@ -10,8 +8,6 @@ var RangeSelect = require('./RangeSelect');
 var TxsTable = require('./TxsTable');
 
 var TxsList = React.createClass({
-  mixins: [IntlMixin],
-
   render: function() {
     return (
       <div>
@@ -19,7 +15,7 @@ var TxsList = React.createClass({
           <div className="col-md-3 col-sm-4">
             <h3>{ this.props.title } {
                 this.props.market.loading &&
-                  <span><FormattedMessage message={this.getIntlMessage('loading')} />...</span> }
+                  <span><FormattedMessage id='loading' />...</span> }
             </h3>
           </div>
           <div className="col-md-9 col-sm-8">

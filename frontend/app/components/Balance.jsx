@@ -1,14 +1,10 @@
 var React = require("react");
-var ReactIntl = require("react-intl");
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {FormattedMessage} from 'react-intl';
 
 var Popover = require('react-bootstrap/lib/Popover');
 var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
 
 var Balance = React.createClass({
-  mixins: [IntlMixin],
-
   render: function() {
     return (
       <div className="text-overflow">
@@ -24,9 +20,12 @@ var Balance = React.createClass({
             <span className="text-light">
               { this.props.user.user.balanceFormatted &&
                 <FormattedMessage
-                  message={this.getIntlMessage('ether')}
-                  value={this.props.user.user.balanceFormatted.value}
-                  unit={this.props.user.user.balanceFormatted.unit} /> }
+                  id='ether'
+                  values={{
+                    value: this.props.user.user.balanceFormatted.value,
+                    unit: this.props.user.user.balanceFormatted.unit
+                  }}
+                /> }
             </span>
           </span>
         </OverlayTrigger>

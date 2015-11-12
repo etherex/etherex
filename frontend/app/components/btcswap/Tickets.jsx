@@ -1,7 +1,7 @@
 // var _ = require('lodash');
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
+// import {injectIntl, FormattedMessage} from 'react-intl';
+
 var TransitionGroup = require('../TransitionGroup');
 
 var Table = require("react-bootstrap/lib/Table");
@@ -18,8 +18,6 @@ var Nav = require('./Nav');
 var Blocks = require('./Blocks');
 
 var Tickets = React.createClass({
-  mixins: [IntlMixin],
-
   getInitialState() {
     return {
       alertLevel: 'info',

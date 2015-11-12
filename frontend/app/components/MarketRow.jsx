@@ -1,10 +1,6 @@
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
 
 var MarketRow = React.createClass({
-  mixins: [IntlMixin],
-
   handleClick: function(e) {
     e.preventDefault();
 

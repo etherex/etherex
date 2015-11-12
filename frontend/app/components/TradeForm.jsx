@@ -1,6 +1,5 @@
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
+import {injectIntl} from 'react-intl';
 
 var DropdownButton = require('react-bootstrap/lib/DropdownButton');
 var MenuItem = require('react-bootstrap/lib/MenuItem');
@@ -8,13 +7,11 @@ var MenuItem = require('react-bootstrap/lib/MenuItem');
 var AlertDismissable = require('./AlertDismissable');
 var TradeFormInstance = require("./TradeFormInstance");
 
-var TradeForm = React.createClass({
-  mixins: [IntlMixin],
-
+var TradeForm = injectIntl(React.createClass({
   getInitialState: function() {
     return {
       type: 1,
-      typename: this.formatMessage(this.getIntlMessage('form.buy')),
+      typename: this.props.intl.formatMessage({id:'form.buy'}),
       alertLevel: 'info',
       alertMessage: ''
     };
@@ -25,8 +22,8 @@ var TradeForm = React.createClass({
       this.setState({
         type: nextProps.trades.type,
         typename: nextProps.trades.type == 1 ?
-          this.formatMessage(this.getIntlMessage('form.buy')) :
-          this.formatMessage(this.getIntlMessage('form.sell'))
+          this.props.intl.formatMessage({id: 'form.buy'}) :
+          this.props.intl.formatMessage({id: 'form.sell'})
       });
   },
 
@@ -52,16 +49,18 @@ var TradeForm = React.createClass({
   },
 
   render: function() {
+    var formatMessage = this.props.intl.formatMessage;
     return (
     <div className="col-lg-10 col-lg-offset-1 col-md-12">
       <div className="panel panel-default trade-form">
         <div className="panel-heading">
           <div className="visible-md visible-lg text-uppercase text-center">
-            <h3 className="panel-title">{this.formatMessage(this.getIntlMessage('form.new'))}</h3>
+            <h3 className="panel-title">{formatMessage({id:'form.new'})}</h3>
           </div>
           <div className="visible-xs visible-sm text-center">
-            <label className="sr-only" forHtml="type">this.formatMessage(this.getIntlMessage('form.buyorsell'))</label>
+            <label className="sr-only" forHtml="type">{formatMessage({id:'form.buyorsell'})}</label>
             <DropdownButton id="trade-type-dropdown"
+              title="Buy or Sell"
               ref="type"
               bsStyle="primary" bsSize="small"
               className="pull-right"
@@ -71,7 +70,7 @@ var TradeForm = React.createClass({
                 <MenuItem key={1} eventKey={1}>Buy</MenuItem>
                 <MenuItem key={2} eventKey={2}>Sell</MenuItem>
             </DropdownButton>
-            <h3 className="panel-title">{this.formatMessage(this.getIntlMessage('form.new'))}</h3>
+            <h3 className="panel-title">{formatMessage({id:'form.new'})}</h3>
           </div>
         </div>
         <div className="panel-body">
@@ -86,7 +85,7 @@ var TradeForm = React.createClass({
             <div className="visible-md visible-lg">
               <div className="col-md-6">
                 <div className="container-fluid">
-                  <h4>{this.formatMessage(this.getIntlMessage('form.buy'))}</h4>
+                  <h4>{formatMessage({id:'form.buy'})}</h4>
                   <TradeFormInstance ref="buyform" mobile={false} type={1} flux={this.props.flux}
                     market={this.props.market} trades={this.props.trades} user={this.props.user}
                     setAlert={this.setAlert} showAlert={this.showAlert} />
@@ -94,7 +93,7 @@ var TradeForm = React.createClass({
               </div>
               <div className="col-md-6">
                 <div className="container-fluid">
-                  <h4>{this.formatMessage(this.getIntlMessage('form.sell'))}</h4>
+                  <h4>{formatMessage({id:'form.sell'})}</h4>
                   <TradeFormInstance ref="sellform" mobile={false} type={2} flux={this.props.flux}
                     market={this.props.market} trades={this.props.trades} user={this.props.user}
                     setAlert={this.setAlert} showAlert={this.showAlert} />
@@ -106,6 +105,6 @@ var TradeForm = React.createClass({
     </div>
     );
   }
-});
+}));
 
 module.exports = TradeForm;

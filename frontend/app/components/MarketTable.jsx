@@ -1,18 +1,13 @@
 var _ = require("lodash");
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
-var FormattedHTMLMessage = ReactIntl.FormattedHTMLMessage;
+import {injectIntl, FormattedMessage, FormattedHTMLMessage} from 'react-intl';
 
 var Table = require("react-bootstrap/lib/Table");
 var MarketRow = require("./MarketRow");
 
 var fixtures = require("../js/fixtures");
 
-var MarketTable = React.createClass({
-  mixins: [IntlMixin],
-
+var MarketTable = injectIntl(React.createClass({
   getInitialState: function() {
     return {
       markets: []
@@ -42,26 +37,22 @@ var MarketTable = React.createClass({
     // <tbody onDragOver={this.dragOver}>
 
     var marketRows = this.state.markets.map(function (market) {
-      var price = this.formatMessage(
-        this.getIntlMessage('price'), {
+      var price = this.props.intl.formatMessage({id: 'price'}, {
           price: market.lastPrice,
           currency: market.name
         }
       );
-      var available = this.formatMessage(
-          this.getIntlMessage('wallet.sub'), {
+      var available = this.props.intl.formatMessage({id: 'wallet.sub'}, {
             currency: market.name,
             balance: market.available
           }
       );
-      var trading = this.formatMessage(
-          this.getIntlMessage('wallet.sub'), {
+      var trading = this.props.intl.formatMessage({id: 'wallet.sub'}, {
             currency: market.name,
             balance: market.trading
           }
       );
-      var balance = this.formatMessage(
-          this.getIntlMessage('wallet.sub'), {
+      var balance = this.props.intl.formatMessage({id: 'wallet.sub'}, {
             currency: market.name,
             balance: market.balance
           }
@@ -83,25 +74,25 @@ var MarketTable = React.createClass({
           <thead>
             <tr>
               <th className="text-center">
-                <FormattedMessage message={this.getIntlMessage('market.favorite')} />
+                <FormattedMessage id='market.favorite' />
               </th>
               <th className="text-right">
-                <FormattedMessage message={this.getIntlMessage('market.pair')} />
+                <FormattedMessage id='market.pair' />
               </th>
               <th className="text-center">
-                <FormattedHTMLMessage message={this.getIntlMessage('market.change')} />
+                <FormattedHTMLMessage id='market.change' />
               </th>
               <th className="text-right">
-                <FormattedMessage message={this.getIntlMessage('last')} />
+                <FormattedMessage id='last' />
               </th>
               <th className="text-right">
-                <FormattedMessage message={this.getIntlMessage('available')} />
+                <FormattedMessage id='available' />
               </th>
               <th className="text-right">
-                <FormattedMessage message={this.getIntlMessage('trading')} />
+                <FormattedMessage id='trading' />
               </th>
               <th className="text-right">
-                <FormattedMessage message={this.getIntlMessage('balance')} />
+                <FormattedMessage id='balance' />
               </th>
             </tr>
           </thead>
@@ -194,6 +185,6 @@ var MarketTable = React.createClass({
   //         parent.insertBefore(this.getPlaceholder(), targetRow);
   //     }
   // },
-});
+}));
 
 module.exports = MarketTable;

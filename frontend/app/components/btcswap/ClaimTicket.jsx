@@ -1,10 +1,6 @@
 var _ = require('lodash');
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedDate = ReactIntl.FormattedDate;
-var FormattedRelative = ReactIntl.FormattedRelative;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {injectIntl, FormattedMessage, FormattedDate, FormattedRelative} from 'react-intl';
 
 var Button = require('react-bootstrap/lib/Button');
 var Input = require('react-bootstrap/lib/Input');
@@ -14,13 +10,7 @@ var ConfirmModal = require('../ConfirmModal');
 var Nav = require('./Nav');
 var Blocks = require('./Blocks');
 
-var ClaimTicket = React.createClass({
-  contextTypes: {
-    router: React.PropTypes.func
-  },
-
-  mixins: [IntlMixin],
-
+var ClaimTicket = injectIntl(React.createClass({
   getInitialState() {
     var ticket = this.props.ticket.ticket ? this.props.ticket.ticket : null;
     return {
@@ -116,13 +106,16 @@ var ClaimTicket = React.createClass({
   confirmClaim: function() {
     this.setState({
       showModal: true,
-      confirmMessage: <FormattedMessage message={this.getIntlMessage('btc.claim')}
-                        id={this.state.ticket.id}
-                        amount={this.state.ticket.formattedAmount.value}
-                        unit={this.state.ticket.formattedAmount.unit}
-                        total={this.state.ticket.total}
-                        price={this.state.ticket.price}
-                        address=<samp>{this.state.ticket.address}</samp> />
+      confirmMessage: <FormattedMessage id='btc.claim'
+                        values={{
+                          id: this.state.ticket.id,
+                          amount: this.state.ticket.formattedAmount.value,
+                          unit: this.state.ticket.formattedAmount.unit,
+                          total: this.state.ticket.total,
+                          price: this.state.ticket.price,
+                          address: this.state.ticket.address
+                        }}
+                      />
     });
   },
 
@@ -268,6 +261,6 @@ var ClaimTicket = React.createClass({
       </div>
     );
   }
-});
+}));
 
 module.exports = ClaimTicket;

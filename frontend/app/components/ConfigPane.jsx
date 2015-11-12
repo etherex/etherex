@@ -1,7 +1,5 @@
 var React = require("react");
-var ReactIntl = require("react-intl");
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {injectIntl, FormattedMessage} from 'react-intl';
 
 var DropdownButton = require('react-bootstrap/lib/DropdownButton');
 var MenuItem = require('react-bootstrap/lib/MenuItem');
@@ -10,9 +8,7 @@ var Alert = require('react-bootstrap/lib/Alert');
 var Input = require('react-bootstrap/lib/Input');
 var ConfirmModal = require('./ConfirmModal');
 
-var ConfigPane = React.createClass({
-  mixins: [IntlMixin],
-
+var ConfigPane = injectIntl(React.createClass({
   getInitialState: function() {
     var configState = this.props.flux.store("config").getState();
     return {
@@ -131,19 +127,18 @@ var ConfigPane = React.createClass({
     });
 
     if (!address) {
-      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.empty')));
+      this.props.setAlert('warning', this.prop.intl.formatMessage({id: 'form.empty'}));
     }
     else if (address.length != 42) {
       this.props.setAlert('warning',
-        this.formatMessage(this.getIntlMessage('address.size'), {
+        this.props.intl.formatMessage({id: 'address.size'}, {
           size: (address.length < 42 ? "short" : "long")
         })
       );
     }
     else {
       this.setState({
-        message: this.formatMessage(
-          this.getIntlMessage('config.address'), {
+        message: this.props.intl.formatMessage({id: 'config.address'}, {
             address: this.state.address
           }),
         newAddress: true
@@ -184,7 +179,7 @@ var ConfigPane = React.createClass({
       <div className="panel panel-default">
         <div className="panel-heading">
           <h3 className="panel-title">
-            <FormattedMessage message={this.getIntlMessage('config.title')} />
+            <FormattedMessage id='config.title' />
           </h3>
         </div>
         <div className="panel-body">
@@ -197,17 +192,17 @@ var ConfigPane = React.createClass({
                 <MenuItem key={"superhero"} eventKey={"superhero"}>Superhero</MenuItem>
               </DropdownButton>
               <Button style={{marginLeft: 10}} className={this.state.newTheme && " btn-primary"} type="submit">
-                <FormattedMessage message={this.getIntlMessage('config.refresh')} />
+                <FormattedMessage id='config.refresh' />
               </Button>
             </Input>
           </form>
 
           <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
-            <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.current')} />}
+            <Input type='text' label={<FormattedMessage id='config.current' />}
               labelClassName='col-sm-3' wrapperClassName='col-sm-9'
               value={this.props.address} readOnly hasFeedback />
 
-            <Input type='text' label={<FormattedMessage message={this.getIntlMessage('config.new')} />}
+            <Input type='text' label={<FormattedMessage id='config.new' />}
               ref="address"
               labelClassName='col-sm-3' wrapperClassName='col-sm-9'
               maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="Address"
@@ -215,14 +210,14 @@ var ConfigPane = React.createClass({
               value={this.state.address} />
             <Input wrapperClassName="col-sm-9 col-sm-offset-3">
               <Button className={"btn-block" + (this.state.newAddress ? " btn-primary" : "")} type="submit">
-                <FormattedMessage message={this.getIntlMessage('config.update')} />
+                <FormattedMessage id='config.update' />
               </Button>
             </Input>
           </form>
 
           <form className="form-horizontal" role="form" onSubmit={this.handleTimeout} >
             <Input ref="timeout" type="number" min="1" step="1"
-              label={<FormattedMessage message={this.getIntlMessage('config.timeout')} />}
+              label={<FormattedMessage id='config.timeout' />}
               labelClassName='col-sm-3' wrapperClassName='col-sm-9'
               value={this.state.timeout} onChange={this.handleChangeTimeout} />
             <Input wrapperClassName="col-sm-9 col-sm-offset-3">
@@ -230,22 +225,22 @@ var ConfigPane = React.createClass({
                 onClick={this.handleTimeout}
                 wrapperClassName="col-sm-9 col-sm-offset-3"
                 className={this.state.timeoutUpdated ? "btn-primary" : ""} >
-                <FormattedMessage message={this.getIntlMessage('config.update')} />
+                <FormattedMessage id='config.update' />
               </Button>
             </Input>
           </form>
 
-          <Input type='checkbox' ref='si' label={<FormattedMessage message={this.getIntlMessage('config.si')} />}
+          <Input type='checkbox' ref='si' label={<FormattedMessage id='config.si' />}
             wrapperClassName="col-sm-9 col-sm-offset-3"
             checked={this.state.si} onChange={this.toggleSI} />
 
-          <Input type='checkbox' ref='debug' label={<FormattedMessage message={this.getIntlMessage('config.debug_mode')} />}
+          <Input type='checkbox' ref='debug' label={<FormattedMessage id='config.debug_mode' />}
             wrapperClassName="col-sm-9 col-sm-offset-3"
             checked={this.state.debug} onChange={this.toggleDebug}
             help={
               <Alert bsStyle='warning' className='text-black'>
-                <b><FormattedMessage message={this.getIntlMessage('form.warning')} /></b>{' '}
-                <FormattedMessage message={this.getIntlMessage('config.debug_warning')} />
+                <b><FormattedMessage id='form.warning' /></b>{' '}
+                <FormattedMessage id='config.debug_warning' />
               </Alert>} />
         </div>
         <ConfirmModal
@@ -258,6 +253,6 @@ var ConfigPane = React.createClass({
       </div>
     );
   }
-});
+}));
 
 module.exports = ConfigPane;

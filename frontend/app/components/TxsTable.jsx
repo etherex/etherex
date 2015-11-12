@@ -1,16 +1,13 @@
 var _ = require("lodash");
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {FormattedMessage} from 'react-intl';
+
 var TransitionGroup = require('./TransitionGroup');
 
 var Table = require("react-bootstrap/lib/Table");
 var TxRow = require("./TxRow");
 
 var TxsTable = React.createClass({
-  mixins: [IntlMixin],
-
   getInitialState: function() {
     var index = _.findIndex(this.props.market.markets, {'id': this.props.market.market.id});
     var market = this.props.market.markets[index];
@@ -46,14 +43,14 @@ var TxsTable = React.createClass({
         <Table condensed hover responsive striped>
           <thead>
             <tr>
-              <th className="text-center"><FormattedMessage message={this.getIntlMessage('txs.block')} /></th>
-              <th className="text-center"><FormattedMessage message={this.getIntlMessage('txs.inout')} /></th>
-              <th className="text-center"><FormattedMessage message={this.getIntlMessage('txs.type')} /></th>
-              <th className="text-center"><FormattedMessage message={this.getIntlMessage('txs.fromto')} /></th>
-              <th className="text-right"><FormattedMessage message={this.getIntlMessage('txs.amount')} /></th>
-              <th className="text-right"><FormattedMessage message={this.getIntlMessage('txs.price')} /></th>
-              <th className="text-right"><FormattedMessage message={this.getIntlMessage('txs.totaleth')} /></th>
-              <th className="text-center"><FormattedMessage message={this.getIntlMessage('txs.details')} /></th>
+              <th className="text-center"><FormattedMessage id='txs.block' /></th>
+              <th className="text-center"><FormattedMessage id='txs.inout' /></th>
+              <th className="text-center"><FormattedMessage id='txs.type' /></th>
+              <th className="text-center"><FormattedMessage id='txs.fromto' /></th>
+              <th className="text-right"><FormattedMessage id='txs.amount' /></th>
+              <th className="text-right"><FormattedMessage id='txs.price' /></th>
+              <th className="text-right"><FormattedMessage id='txs.totaleth' /></th>
+              <th className="text-center"><FormattedMessage id='txs.details' /></th>
             </tr>
           </thead>
           <TransitionGroup transitionName="trades" component="tbody" enterTimeout={1000} leaveTimeout={1000}>

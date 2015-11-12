@@ -1,7 +1,5 @@
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {injectIntl, FormattedMessage} from 'react-intl';
 
 var bigRat = require("big-rational");
 var fixtures = require("../js/fixtures");
@@ -12,9 +10,7 @@ var Input = require('react-bootstrap/lib/Input');
 var SubDepositModal = require('./SubDepositModal');
 var ConfirmModal = require('./ConfirmModal');
 
-var TradeFormInstance = React.createClass({
-  mixins: [IntlMixin],
-
+var TradeFormInstance = injectIntl(React.createClass({
   getInitialState: function() {
     return {
       amount: null,
@@ -122,7 +118,7 @@ var TradeFormInstance = React.createClass({
     if (this.isValid(type, price, amount, total)) {
 
       // Dialog messages and notes
-      message = this.formatMessage(this.getIntlMessage('trade.confirm'), {
+      message = this.props.intl.formatMessage({id: 'trade.confirm'}, {
         type: (type == 1 ? "buy" : "sell"),
         amount: amount,
         price: price,
@@ -132,13 +128,13 @@ var TradeFormInstance = React.createClass({
 
       // How many filling
       note = (!this.props.trades.filling.length ?
-        this.formatMessage(this.getIntlMessage('trade.adding'), {
+        this.props.intl.formatMessage({id: 'trade.adding'}, {
           amount: this.props.trades.amountLeft,
           currency: this.props.market.market.name,
           price: price,
           total: this.props.trades.amountLeft * price
         }) :
-        this.formatMessage(this.getIntlMessage('trade.filling'), {
+        this.props.intl.formatMessage({id: 'trade.filling'}, {
           numTrades: this.props.trades.filling.length,
           total: total - this.props.trades.available,
           left: this.props.trades.available,
@@ -147,7 +143,7 @@ var TradeFormInstance = React.createClass({
 
       // Is also adding
         (this.isAlsoAdding(totalLeft) ?
-          this.formatMessage(this.getIntlMessage('trade.also_adding'), {
+          this.props.intl.formatMessage({id: 'trade.also_adding'}, {
             amount: this.props.trades.amountLeft,
             currency: this.props.market.market.name,
             price: price,
@@ -156,7 +152,7 @@ var TradeFormInstance = React.createClass({
 
       // Not enough left to add also
         (this.isNotEnoughToAdd(totalLeft) ?
-             this.formatMessage(this.getIntlMessage('trade.not_left'), {
+             this.props.intl.formatMessage({id: 'trade.not_left'}, {
                amount: this.props.trades.amountLeft,
                currency: this.props.market.market.name,
                price: price,
@@ -282,20 +278,20 @@ var TradeFormInstance = React.createClass({
     });
 
     if (this.isEmpty(amount, price, total)) {
-      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('form.empty')));
+      this.props.setAlert('warning', this.props.intl.formatMessage({id: 'form.empty'}));
     }
     else if (this.isNotMinimum(total)) {
-      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('trade.minimum'), {
+      this.props.setAlert('warning', this.props.intl.formatMessage({id: 'trade.minimum'}, {
         minimum: this.props.market.market.minTotal
       }));
     }
     else if (this.isNotEnoughTotal(total)) {
-      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('trade.not_total'), {
+      this.props.setAlert('warning', this.props.intl.formatMessage({id: 'trade.not_total'}, {
         minimum: total
       }));
     }
     else if (this.isNotEnough(amount)) {
-      this.props.setAlert('warning', this.formatMessage(this.getIntlMessage('trade.not_enough'), {
+      this.props.setAlert('warning', this.props.intl.formatMessage({id: 'trade.not_enough'}, {
         currency: this.props.market.market.name,
         amount: amount
       }));
@@ -361,11 +357,12 @@ var TradeFormInstance = React.createClass({
   },
 
   render: function() {
+    var formatMessage = this.props.intl.formatMessage;
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
         <input type="hidden" ref="market" value={this.props.market.market.id} />
         <Input type="number" ref="amount" className="form-control medium" wrapperClassName="col-md-9"
-          label={this.formatMessage(this.getIntlMessage('form.amount'))} labelClassName="col-md-3"
+          label={formatMessage({id: 'form.amount'})} labelClassName="col-md-3"
           placeholder={this.props.market.market.amountPrecision}
           min={this.props.market.market.amountPrecision} step={this.props.market.market.amountPrecision}
           onChange={this.handleChange}
@@ -374,7 +371,7 @@ var TradeFormInstance = React.createClass({
         />
 
         <Input type="number" ref="price" className="form-control medium" wrapperClassName="col-md-9"
-          label={this.formatMessage(this.getIntlMessage('form.price'))} labelClassName="col-md-3"
+          label={formatMessage({id: 'form.price'})} labelClassName="col-md-3"
           placeholder={this.props.market.market.lastPrice ? this.props.market.market.lastPrice : this.props.market.market.pricePrecision}
           min={this.props.market.market.pricePrecision} step={this.props.market.market.pricePrecision}
           onChange={this.handleChange}
@@ -383,7 +380,7 @@ var TradeFormInstance = React.createClass({
          />
 
        <Input type="number" ref="total" className="form-control medium" wrapperClassName="col-md-9"
-          label={this.formatMessage(this.getIntlMessage('form.total'))} labelClassName="col-md-3"
+          label={formatMessage({id: 'form.total'})} labelClassName="col-md-3"
           placeholder={this.props.market.market.minimumTotal}
           min={this.props.market.market.minimumTotal} step={this.props.market.market.amountPrecision}
           onChange={this.handleChangeTotal}
@@ -394,7 +391,7 @@ var TradeFormInstance = React.createClass({
         <div className="form-group">
           <div className="col-md-12">
             <Button className={"btn-block text-uppercase trade-form-btn" + (this.state.isValid ? " btn-primary" : "")} type="submit">
-              <FormattedMessage message={this.getIntlMessage(this.state.typeLabel)} />
+              <FormattedMessage id={this.state.typeLabel} />
             </Button>
           </div>
         </div>
@@ -415,7 +412,7 @@ var TradeFormInstance = React.createClass({
         <SubDepositModal
           show={this.state.showDepositModal}
           onHide={this.closeDepositModal}
-          modalTitle={this.formatMessage(this.getIntlMessage('deposit.currency'), {
+          modalTitle={formatMessage({id: 'deposit.currency'}, {
             currency: this.props.market.market.name
           })}
           flux={this.props.flux}
@@ -428,6 +425,6 @@ var TradeFormInstance = React.createClass({
       </form>
     );
   }
-});
+}));
 
 module.exports = TradeFormInstance;

@@ -1,8 +1,7 @@
 var _ = require('lodash');
 var React = require("react");
-var ReactIntl = require('react-intl');
-var IntlMixin = ReactIntl.IntlMixin;
-var FormattedMessage = ReactIntl.FormattedMessage;
+import {FormattedMessage} from 'react-intl';
+
 // var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 var TransitionGroup = require('./TransitionGroup');
 
@@ -10,8 +9,6 @@ var Table = require("react-bootstrap/lib/Table");
 var TradeRow = require("./TradeRow");
 
 var TradeTable = React.createClass({
-  mixins: [IntlMixin],
-
   render: function() {
     var index = _.findIndex(this.props.market.markets, {'id': this.props.market.market.id});
     var market = this.props.market.markets[index];
@@ -35,13 +32,13 @@ var TradeTable = React.createClass({
         <Table condensed hover responsive striped>
           <thead>
             <tr>
-              <th className="text-right"><FormattedMessage message={this.getIntlMessage('form.amount')} /></th>
-              <th className="text-center"><FormattedMessage message={this.getIntlMessage('form.market')} /></th>
-              <th className="text-right"><FormattedMessage message={this.getIntlMessage('form.price')} /></th>
-              <th className="text-right"><FormattedMessage message={this.getIntlMessage('form.total')} /></th>
+              <th className="text-right"><FormattedMessage id='form.amount' /></th>
+              <th className="text-center"><FormattedMessage id='form.market' /></th>
+              <th className="text-right"><FormattedMessage id='form.price' /></th>
+              <th className="text-right"><FormattedMessage id='form.total' /></th>
               <th className="text-center trade-op">
                 { !this.props.review &&
-                  <FormattedMessage message={this.getIntlMessage('form.' + (this.props.type == 2 ? 'buy' : 'sell'))} /> }
+                  <FormattedMessage id={'form.' + (this.props.type == 2 ? 'buy' : 'sell')} /> }
               </th>
             </tr>
           </thead>
