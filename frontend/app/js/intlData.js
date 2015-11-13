@@ -274,7 +274,8 @@ module.exports = {
       "behind": `BTC relay headers are behind by
                 {behind, plural,
                   =1 {# block}
-                  other {# blocks}}`
+                  other {# blocks}}`,
+      "update": "Update block headers"
     },
     "hashrate": "{hashrate, number} H/s"
   }

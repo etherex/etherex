@@ -1,5 +1,5 @@
 var React = require("react");
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, FormattedNumber} from 'react-intl';
 
 var Popover = require('react-bootstrap/lib/Popover');
 var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
@@ -11,12 +11,16 @@ var Balance = React.createClass({
         <OverlayTrigger trigger={['hover', 'click']} placement='bottom' rootClose={true} overlay={
             <Popover id="popover-balance">
               <div className="text-overflow">
-                <span className="text-orange">{ this.props.user.user.balanceSub }</span> { this.props.market.market.name }{' / '}
+                <span className="text-orange">
+                  <FormattedNumber value={ this.props.user.user.balanceSub } />
+                </span> { this.props.market.market.name }{' / '}
                 <span className="text-light">{ this.props.user.user.balance } ETH</span>
               </div>
             </Popover>} >
           <span>
-            <b>Balance:</b> <span className="text-orange">{ this.props.user.user.balanceSub }</span> { this.props.market.market.name }{' / '}
+            <b><FormattedMessage id='balance' />:</b> <span className="text-orange">
+              <FormattedNumber value={ this.props.user.user.balanceSub } />
+            </span> { this.props.market.market.name }{' / '}
             <span className="text-light">
               { this.props.user.user.balanceFormatted &&
                 <FormattedMessage

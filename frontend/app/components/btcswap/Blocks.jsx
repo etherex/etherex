@@ -1,5 +1,5 @@
 var React = require("react");
-import {injectIntl, FormattedNumber} from 'react-intl';
+import {injectIntl, FormattedNumber, FormattedMessage} from 'react-intl';
 
 var Button = require('react-bootstrap').Button;
 var Popover = require('react-bootstrap').Popover;
@@ -31,7 +31,7 @@ var Blocks = injectIntl(React.createClass({
               <Popover id="btc-hash-popover" bsSize="large">
                 <p className="text-overflow">BTC block # { this.props.intl.formatNumber(this.props.ticket.btcHeight) }</p>
                 <p className="text-overflow">BTC block hash: <samp>{ this.props.ticket.btcHead }</samp></p>
-                <p className="text-overflow">Real BTC block # { this.props.ticket.btcRealHeight }</p>
+                <p className="text-overflow">Real BTC block # { this.props.intl.formatNumber(this.props.ticket.btcRealHeight) }</p>
                 <p className="text-overflow">Real BTC block hash: <samp>{ this.props.ticket.btcRealHead }</samp></p>
                 { this.props.ticket.btcBehind &&
                   <div>
@@ -54,7 +54,7 @@ var Blocks = injectIntl(React.createClass({
               <Button className="btn-balance pull-right" style={{marginRight: 10}} bsStyle="warning"
                 disabled={this.state.updatingBtcHeaders || !!this.props.ticket.btcUpdating}
                 onClick={this.handleUpdateBlockHeader}>
-                  Update block header
+                  <FormattedMessage id='btc.update' />
               </Button>
             </OverlayTrigger> }
         </div>
