@@ -39,7 +39,7 @@ var LoadingModal = React.createClass({
         values={{
           geth:
             <div>
-              <pre className="small">geth --rpc --rpccorsdomain { this.state.host }</pre>
+              <pre className="small">geth --testnet --rpc --rpccorsdomain { this.state.host }</pre>
               Optionally add <samp>--unlock {"<YourAddress>"}</samp> to unlock an account.
             </div>
         }}

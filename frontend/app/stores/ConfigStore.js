@@ -18,7 +18,7 @@ var ConfigStore = Fluxxor.createStore({
     this.range = 75; // max 300 blocks / ~ 1 hour
     this.rangeEnd = 0;
     this.si = false;
-    this.timeout = 120;
+    this.timeout = 300;
     this.alertCount = null;
 
     this.bindActions(

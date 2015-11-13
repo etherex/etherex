@@ -16,7 +16,7 @@ var TradeTable = React.createClass({
       return (
         <TradeRow
           flux={this.props.flux} key={trade.id} count={i} type={this.props.type}
-          isOwn={trade.owner === this.props.user.id} user={this.props.user}
+          isOwn={trade.owner === this.props.user.id} listOwn={this.props.listOwn} user={this.props.user}
           trade={trade} trades={this.props.trades} tradeList={this.props.tradeList}
           market={market} markets={this.props.market}
           openModal={this.props.openModal}

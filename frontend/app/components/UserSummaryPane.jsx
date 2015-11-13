@@ -56,13 +56,13 @@ var UserSummaryPane = injectIntl(React.createClass({
               <tr>
                 <td><FormattedMessage id='balance' /></td>
                 <td>
-                  { !this.props.user.loading &&
+                  { (!this.props.user.loading && this.props.user.user.balanceFormatted.value) &&
                     <FormattedMessage id='ether' values={{
                         value: this.props.user.user.balanceFormatted.value,
                         unit: this.props.user.user.balanceFormatted.unit
                       }}
                     /> }
-                  { this.props.user.user.balance &&
+                  { this.props.user.user.balanceWei &&
                       <div>
                         {
                           this.props.intl.formatMessage({id: 'user.balance'}, {

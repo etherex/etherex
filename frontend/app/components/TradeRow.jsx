@@ -109,7 +109,7 @@ var TradeRow = React.createClass({
   render: function() {
     return (
       <tr className={"trade-" + (!this.props.review ? this.props.trade.status : "review") +
-                                ((this.props.isOwn && !this.props.user.own) ? " disabled" : "")}
+                                ((this.props.isOwn && !this.props.listOwn) ? " disabled" : "")}
           onMouseEnter={this.handleHover} onMouseLeave={this.handleHoverOut}
           onClick={this.handleClick} onFocus={this.handleClick}>
         <td>

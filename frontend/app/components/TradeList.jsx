@@ -78,24 +78,24 @@ var TradeList = injectIntl(React.createClass({
               (this.props.trades.type == 1) ?
                 <div>
                   <TradeSells openModal={this.openModal} flux={this.props.flux}
-                    trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                    trades={this.props.trades} market={this.props.market} user={this.props.user} listOwn={this.props.listOwn} />
                   <TradeBuys openModal={this.openModal} flux={this.props.flux}
-                    trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                    trades={this.props.trades} market={this.props.market} user={this.props.user} listOwn={this.props.listOwn} />
                 </div> :
                 <div>
                     <TradeBuys openModal={this.openModal} flux={this.props.flux}
-                      trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                      trades={this.props.trades} market={this.props.market} user={this.props.user} listOwn={this.props.listOwn} />
                     <TradeSells openModal={this.openModal} flux={this.props.flux}
-                      trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                      trades={this.props.trades} market={this.props.market} user={this.props.user} listOwn={this.props.listOwn} />
                 </div>
             }
           </div>
           <div className="hidden-xs hidden-sm col-lg-10 col-lg-offset-1 col-md-12">
             <div className="row">
               <TradeSells openModal={this.openModal} flux={this.props.flux}
-                trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                trades={this.props.trades} market={this.props.market} user={this.props.user} listOwn={this.props.listOwn} />
               <TradeBuys openModal={this.openModal} flux={this.props.flux}
-                trades={this.props.trades} market={this.props.market} user={this.props.user} />
+                trades={this.props.trades} market={this.props.market} user={this.props.user} listOwn={this.props.listOwn} />
             </div>
           </div>
         </div>
