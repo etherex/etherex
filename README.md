@@ -204,11 +204,11 @@ To support deposits to EtherEx, your subcurrency needs to implement the `approve
 
 #### Withdrawal support
 
-If your subcurrency's default method for transferring funds is also named `sendCoin` like the standard examples above, with the `_value` and `_to` parameters (in that order), then there is nothing else you need to do to support withdrawals from EtherEx to a user's address. Otherwise, you'll need to implement that same `sendCoin` method with those two parameters, and "translate" that method call to yours, calling your other method with those parameters, in the order they're expected. You may also have to use `tx.origin` instead of `msg.sender` in your method as the latter will return your contract's address.
+If your subcurrency's default method for transferring funds is also named `sendCoin` like the standard examples above, with the `_to` and `_value` parameters (in that order), then there is nothing else you need to do to support withdrawals from EtherEx to a user's address. Otherwise, you'll need to implement that same `sendCoin` method with those two parameters, and "translate" that method call to yours, calling your other method with those parameters, in the order they're expected. You may also have to use `tx.origin` instead of `msg.sender` in your method as the latter will return your contract's address.
 
 ```
-def sendCoin(_value, _to):
-    return(self.invertedtransfer(_to, _value))
+def transfer(_to, _value):
+    return(self.invertedtransfer(_value, _to))
 ```
 
 #### Balance

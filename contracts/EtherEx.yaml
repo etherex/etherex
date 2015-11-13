@@ -95,8 +95,8 @@
       to: $ETX
       sig: transfer:[int256,int256]:int256
       data:
-        - 10000000000
         - $zg
+        - 10000000000
       retry: 30
       wait: True
 -
@@ -105,8 +105,8 @@
       to: $ETX
       sig: transfer:[int256,int256]:int256
       data:
-        - 10000000000
         - $caktux
+        - 10000000000
       retry: 30
       wait: True
 -
@@ -115,8 +115,8 @@
       to: $ETX
       sig: transfer:[int256,int256]:int256
       data:
-        - 10000000000
         - $mids
+        - 10000000000
       retry: 30
       wait: True
 
@@ -127,8 +127,8 @@
       to: $CAK
       sig: transfer:[int256,int256]:int256
       data:
-        - 5000000000
         - $zg
+        - 5000000000
       retry: 30
       wait: True
 -
@@ -137,8 +137,8 @@
       to: $CAK
       sig: transfer:[int256,int256]:int256
       data:
-        - 50000000000
         - $caktux
+        - 50000000000
       retry: 30
       wait: True
 -
@@ -147,8 +147,8 @@
       to: $CAK
       sig: transfer:[int256,int256]:int256
       data:
-        - 5000000000
         - $mids
+        - 5000000000
       retry: 30
       wait: True
 
@@ -159,8 +159,8 @@
       to: $MID
       sig: transfer:[int256,int256]:int256
       data:
-        - 5000000000
         - $zg
+        - 5000000000
       retry: 30
       wait: True
 -
@@ -169,8 +169,8 @@
       to: $MID
       sig: transfer:[int256,int256]:int256
       data:
-        - 5000000000
         - $caktux
+        - 5000000000
       retry: 30
       wait: True
 -
@@ -179,8 +179,8 @@
       to: $MID
       sig: transfer:[int256,int256]:int256
       data:
-        - 50000000000
         - $mids
+        - 50000000000
       retry: 30
       wait: True
 

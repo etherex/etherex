@@ -24,7 +24,7 @@ def init():
     self.created = block.timestamp
     self.accounts[msg.sender].balance = 1000000 * 10 ** 5
 
-def transfer(_value, _to):
+def transfer(_to, _value):
     # Prevent negative send from stealing funds
     if _to <= 0 or _value <= 0:
         return(FAILURE)
@@ -44,7 +44,7 @@ def transfer(_value, _to):
         return(SUCCESS)
     return(FAILURE)
 
-def transferFrom(_from, _value, _to):
+def transferFrom(_from, _to, _value):
     # Prevent negative send from stealing funds
     if _from <= 0 or _value <= 0 or _to <= 0:
         return(FAILURE)
@@ -68,15 +68,15 @@ def transferFrom(_from, _value, _to):
         return(SUCCESS)
     return(FAILURE)
 
-def balance(_addr):
+def balance():
     return(self.accounts[msg.sender].balance)
 
-def balanceOf(_addr):
-    return(self.accounts[_addr].balance)
+def balanceOf(_address):
+    return(self.accounts[_address].balance)
 
-def approve(_addr):  # Implemented but unused and untested
-    self.accounts[msg.sender].custodians[_addr].full = 1
-    log(type=AddressApproval, msg.sender, _addr, 1)
+def approve(_address):  # Implemented but unused and untested
+    self.accounts[msg.sender].custodians[_address].full = 1
+    log(type=AddressApproval, msg.sender, _address, 1)
     return(SUCCESS)
 
 # Returns whether _proxy is allowed full custody of your account
@@ -87,10 +87,10 @@ def isApproved(_proxy):
 def isApprovedFor(_target, _proxy):
     return(self.accounts[_target].custodians[_proxy].full)
 
-# Approve _addr once for a transfer of _maxValue
-def approveOnce(_addr, _maxValue):
-    self.accounts[msg.sender].custodians[_addr].maxValue = _maxValue
-    log(type=AddressApprovalOnce, msg.sender, _addr, _maxValue)
+# Approve _address once for a transfer of _maxValue
+def approveOnce(_address, _maxValue):
+    self.accounts[msg.sender].custodians[_address].maxValue = _maxValue
+    log(type=AddressApprovalOnce, msg.sender, _address, _maxValue)
     return(1)
 
 # Verify _proxy is approved to make a one-time transfer, if so returns _maxValue
@@ -108,10 +108,10 @@ def isApprovedOnceFor(_target, _proxy):
         return(value)
     return(0)
 
-# Unapprove full and one-time custody of your account by _addr
-def unapprove(_addr):
-    self.accounts[msg.sender].custodians[_addr].full = 0
-    self.accounts[msg.sender].custodians[_addr].maxValue = 0
-    log(type=AddressApproval, msg.sender, _addr, 0)
-    log(type=AddressApprovalOnce, msg.sender, _addr, 0)
+# Unapprove full and one-time custody of your account by _address
+def unapprove(_address):
+    self.accounts[msg.sender].custodians[_address].full = 0
+    self.accounts[msg.sender].custodians[_address].maxValue = 0
+    log(type=AddressApproval, msg.sender, _address, 0)
+    log(type=AddressApprovalOnce, msg.sender, _address, 0)
     return(SUCCESS)

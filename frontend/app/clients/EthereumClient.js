@@ -1134,7 +1134,7 @@ var EthereumClient = function(params) {
       gas: "100000"
     };
 
-    subcontract.transfer.call(amount, recipient, options, function(error, result) {
+    subcontract.transfer.call(recipient, amount, options, function(error, result) {
       if (error) {
         failure(error.message);
         return;
@@ -1144,7 +1144,7 @@ var EthereumClient = function(params) {
         return;
       }
 
-      subcontract.transfer.sendTransaction(amount, recipient, options, function(err, res) {
+      subcontract.transfer.sendTransaction(recipient, amount, options, function(err, res) {
         if (err) {
           failure(err.message);
           return;
