@@ -52,9 +52,9 @@ var Chat = React.createClass({
     else
       this.setState({
         showModal: true,
-        modalMessage: <div>
-          Whisper is not enabled on this node. Start <samp>geth</samp> with:<p><pre>--shh --rpcapi "db,eth,net,web3,shh"</pre></p>
-        </div>
+        modalMessage: <p>
+          Whisper is not enabled on this node. Start <samp>geth</samp> with: <pre>--shh --rpcapi "db,eth,net,web3,shh"</pre>
+        </p>
       });
     this.setState({
       message: null

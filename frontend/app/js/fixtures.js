@@ -4,8 +4,8 @@ var fixtures = {
   ether: "1000000000000000000",
   addresses: {
       // nameregs: ["0xb46312830127306cd3de3b84dbdb51899613719d", "0xda7ce79725418f4f6e13bf5f520c89cec5f6a974"],
-      etherex: "0x77045e71a7a2c50903d88e564cd72fab11e82051",
-      btcswap: "0x757eb378cd038b7100ba612360fdabd1f4ffdb91"
+      etherex: "0x8bf459cd1e70102b5b6d28eb897600c1faa4c505",
+      btcswap: "0xe8b8eec80ac6a1faecff38ff2d7f37fc14e934ac"
   },
   categories: [
     {
