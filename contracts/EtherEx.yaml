@@ -6,8 +6,8 @@
 # Set some variables.
 -
   set:
-    zg: "0xe68faeeff09f46b87e83e13cef47275ebaa34349"
-    caktux: "0xd5623514f22d7569a13126e91c2eaff5b8df8479"
+    zg: "0x239eb5afa5b1da814a3ccb60e79de1f933f1b470"
+    caktux: "0x884b9f474007cfffeb80b8622de4ed22ece6df93"
     mids: "0x2ad9e5d8960882c07b96e2a21d5a39ab082e7368"
 
 # Deploy contracts
