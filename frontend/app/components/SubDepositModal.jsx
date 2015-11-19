@@ -1,15 +1,12 @@
-var React = require("react");
+import React from 'react';
 import {injectIntl} from 'react-intl';
+import {Button, Input, Modal} from 'react-bootstrap';
 
-var Button = require('react-bootstrap/lib/Button');
-var Input = require('react-bootstrap/lib/Input');
-var Modal = require('react-bootstrap/lib/Modal');
+import ConfirmModal from './ConfirmModal';
 
-var ConfirmModal = require('./ConfirmModal');
+let SubDepositModal = injectIntl(React.createClass({
 
-var SubDepositModal = injectIntl(React.createClass({
-
-  getInitialState: function() {
+  getInitialState() {
     return {
       amount: null,
       newDeposit: false,
@@ -19,39 +16,39 @@ var SubDepositModal = injectIntl(React.createClass({
     };
   },
 
-  componentDidMount: function() {
+  componentDidMount() {
     this.validate(new Event('validate'));
   },
 
-  componentWillReceiveProps: function(nextProps) {
+  componentWillReceiveProps(nextProps) {
     if (!this.state.amountChanged)
       this.setState({
         amount: nextProps.amount
       });
   },
 
-  onHide: function(e) {
+  onHide(e) {
     e.preventDefault();
     if (!this.state.showConfirmModal)
       this.setState({ amountChanged: false });
     this.props.onHide();
   },
 
-  openConfirmModal: function() {
+  openConfirmModal() {
     this.props.onHide();
     this.setState({
       showConfirmModal: true
     });
   },
 
-  closeConfirmModal: function() {
+  closeConfirmModal() {
     this.setState({
       amountChanged: false,
       showConfirmModal: false
     });
   },
 
-  handleChange: function(e) {
+  handleChange(e) {
     e.preventDefault();
     this.setState({
       amountChanged: true
@@ -59,13 +56,13 @@ var SubDepositModal = injectIntl(React.createClass({
     this.validate(e);
   },
 
-  handleValidation: function(e) {
+  handleValidation(e) {
     e.preventDefault();
     if (this.validate(e, true))
       this.openConfirmModal();
   },
 
-  validate: function(e, showAlerts) {
+  validate(e, showAlerts) {
     e.preventDefault();
     e.stopPropagation();
 
@@ -106,7 +103,7 @@ var SubDepositModal = injectIntl(React.createClass({
     return false;
   },
 
-  onSubmitForm: function(e, el) {
+  onSubmitForm(e, el) {
     e.preventDefault();
 
     if (!this.validate(e, el)) {
@@ -126,7 +123,7 @@ var SubDepositModal = injectIntl(React.createClass({
     this.props.onHide();
   },
 
-  render: function() {
+  render() {
     return (
       <div>
         <Modal {...this.props} animation={true} enforceFocus={false}>

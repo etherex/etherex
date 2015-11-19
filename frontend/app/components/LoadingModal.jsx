@@ -1,13 +1,9 @@
-var React = require("react");
+import React from 'react';
 import {FormattedMessage, FormattedHTMLMessage, FormattedRelative} from 'react-intl';
+import {ProgressBar, Modal, Button} from 'react-bootstrap';
 
-var ReactBootstrap = require('react-bootstrap');
-var ProgressBar = ReactBootstrap.ProgressBar;
-var Modal = ReactBootstrap.Modal;
-var Button = ReactBootstrap.Button;
-
-var constants = require('../js/constants');
-var UAParser = require('ua-parser-js');
+import constants from '../js/constants';
+import UAParser from 'ua-parser-js';
 
 // Modal prompt for loading exceptions
 var LoadingModal = React.createClass({
@@ -20,7 +16,7 @@ var LoadingModal = React.createClass({
       lastBlockAge: 0,
       percentLoaded: 0,
       modalHeader: null,
-      modalBody: <ProgressBar active bsStyle={this.props.network.ready ? 'success' : 'default'} style={{marginTop: 25}} now={100} />,
+      modalBody: <ProgressBar active bsStyle={this.props.network.ready ? 'success' : null} style={{marginTop: 25}} now={100} />,
       modalFooter: false,
       modalSize: 'small',
       host: window.location.origin,
@@ -179,7 +175,7 @@ var LoadingModal = React.createClass({
               </Button>
           </div>
       );
-      modalSize = 'medium';
+      modalSize = null;
 
     } else if (nextProps.network.ethereumStatus === constants.network.ETHEREUM_STATUS_FAILED) {
       // No ethereum client detected
@@ -202,7 +198,7 @@ var LoadingModal = React.createClass({
           <FormattedMessage id='demo.proceed' />
         </Button>
       );
-      modalSize = 'medium';
+      modalSize = null;
 
     } else if (this.state.isLoading) {
       // Blockchain is syncing
@@ -221,7 +217,7 @@ var LoadingModal = React.createClass({
               />
             </p>
           }
-          <ProgressBar active bsStyle={nextProps.network.ready ? 'success' : 'default'} now={this.state.percentLoaded} />
+          <ProgressBar active bsStyle={nextProps.network.ready ? 'success' : null} now={this.state.percentLoaded} />
           <p>
             <FormattedMessage
               id='init.block.age'

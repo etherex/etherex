@@ -250,11 +250,12 @@ module.exports = {
       "id": "Trade ID"
     },
     "user": {
+      "account": "My Account",
+      "balances": "Balances",
       "not_found": "User not found",
-      "summary": "User summary",
       "address": "Current address",
-      "switch": "Use address",
-      "sub": "Current {currency} balance",
+      "total": "Total value (ETH)",
+      "trades": "Open trades",
       "balance": `{balance, number} {currency}
                   {pending, plural,
                     =0 {}

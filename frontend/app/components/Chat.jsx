@@ -86,7 +86,7 @@ var Chat = React.createClass({
               <div className="container-fluid">
                 <Input type="text" ref="message" value={ this.state.message } onChange={this.handleChange} />
               </div>
-              <Button type="submit" bsStyle="primary" bsSize="medium" className="hidden pull-right">Send</Button>
+              <Button type="submit" bsStyle="primary" className="hidden pull-right">Send</Button>
             </form>
           </Panel>
         </Accordion>

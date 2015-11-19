@@ -1,47 +1,41 @@
+import Fluxxor from 'fluxxor';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {Router, Route, IndexRoute} from 'react-router';
 
-var Fluxxor = require("fluxxor");
-var React = require("react");
-var ReactDOM = require("react-dom");
-var ReactRouter = require('react-router');
-var Router = ReactRouter.Router;
-var Route = ReactRouter.Route;
-var IndexRoute = ReactRouter.IndexRoute;
-var Link = ReactRouter.Link;
+import EtherExApp from './components/EtherExApp';
 
-var EtherExApp = require("./components/EtherExApp");
+import Trades from './components/Trades';
+import Markets from './components/Markets';
+import UserDetails from './components/UserDetails';
+import Wallet from './components/Wallet';
+import Tools from './components/Tools';
+import Help from './components/Help';
+import Placeholder from './components/Placeholder';
 
-var Placeholder = require("./components/Placeholder");
-
-var Trades = require("./components/Trades");
-var Markets = require("./components/Markets");
-var UserDetails = require("./components/UserDetails");
-var Wallet = require("./components/Wallet");
-var Tools = require("./components/Tools");
-var Help = require("./components/Help");
-
-var Tickets = require("./components/btcswap/Tickets");
-var CreateTicket = require("./components/btcswap/CreateTicket");
-var ReserveTicket = require("./components/btcswap/ReserveTicket");
-var ClaimTicket = require("./components/btcswap/ClaimTicket");
-var BtcHelp = require("./components/btcswap/Help");
+import Tickets from './components/btcswap/Tickets';
+import CreateTicket from './components/btcswap/CreateTicket';
+import ReserveTicket from './components/btcswap/ReserveTicket';
+import ClaimTicket from './components/btcswap/ClaimTicket';
+import BtcHelp from './components/btcswap/Help';
 
 // Load fonts and icons
 require("./css/fonts.css");
 require("./css/icons.css");
 
-var ConfigStore = require("./stores/ConfigStore");
-var NetworkStore = require("./stores/NetworkStore");
-var UserStore = require("./stores/UserStore");
-var TradeStore = require("./stores/TradeStore");
-var MarketStore = require("./stores/MarketStore");
-var TicketStore = require("./stores/btcswap/TicketStore");
+import ConfigStore from './stores/ConfigStore';
+import NetworkStore from './stores/NetworkStore';
+import UserStore from './stores/UserStore';
+import TradeStore from './stores/TradeStore';
+import MarketStore from './stores/MarketStore';
+import TicketStore from './stores/btcswap/TicketStore';
 
-var ConfigActions = require("./actions/ConfigActions");
-var NetworkActions = require("./actions/NetworkActions");
-var UserActions = require("./actions/UserActions");
-var TradeActions = require("./actions/TradeActions");
-var MarketActions = require("./actions/MarketActions");
-var TicketActions = require("./actions/btcswap/TicketActions");
+import ConfigActions from './actions/ConfigActions';
+import NetworkActions from './actions/NetworkActions';
+import UserActions from './actions/UserActions';
+import TradeActions from './actions/TradeActions';
+import MarketActions from './actions/MarketActions';
+import TicketActions from './actions/btcswap/TicketActions';
 
 var stores = {
   config: new ConfigStore(),
