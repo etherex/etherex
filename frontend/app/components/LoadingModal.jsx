@@ -95,12 +95,12 @@ var LoadingModal = React.createClass({
 
     var help = (
       <div className="installation-help">
-        <p className="row">
+        <div>
           <h4><FormattedHTMLMessage id='init.install.title' /></h4>
           <ol>
             { installSteps }
           </ol>
-        </p>
+        </div>
       </div>
     );
 

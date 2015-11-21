@@ -53,6 +53,7 @@ module.exports = {
       "not_ready": `The Ethereum block chain is not current and
                     {peers, plural,
                       =0 {we're looking for peers}
+                      =1 {is fetching blocks from # peer}
                       other {is fetching blocks from # peers}}.`,
       "force": "Load anyway",
       "failed": {

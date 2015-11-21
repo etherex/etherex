@@ -12,11 +12,15 @@ let UserBalances = React.createClass({
         </div>
         <div className="panel-body">
           <div className="account-row underline clearfix">
-            ETH
-            <div className="pull-right clearfix">
-              <FormattedNumber value={ this.props.user.balance } />
+            <div className="clearfix">
+              <div className="pull-left">
+                ETH
+              </div>
+              <div className="pull-right">
+                <FormattedNumber value={ this.props.user.balance } />
+              </div>
             </div>
-            <div className="pull-right clearfix text-light">
+            <div className="pull-right text-light">
               (<FormattedNumber value={ this.props.user.balanceWei } /> wei)
             </div>
           </div>
