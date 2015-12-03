@@ -193,20 +193,20 @@ New market IDs will be created as DAO creators add their subcurrency to the exch
 
 ### Subcurrency API
 
-**Subcurrency contracts need to support the [Standardized Contract APIs](https://github.com/ethereum/wiki/wiki/Standardized_Contract_APIs), more specifically the `approveOnce`, `sendCoinFrom` and `isApprovedOnceFor` methods for deposits, the `sendCoin` method for withdrawals and the `coinBalanceOf` method for the UI to display the user's balance.**
+**Subcurrency contracts need to support the [Standardized Contract APIs](https://github.com/ethereum/wiki/wiki/Standardized_Contract_APIs) (see [current Draft](https://github.com/ethereum/EIPs/issues/20)), more specifically the `approve`, `transferFrom` and `allowance` methods for deposits, the `transfer` method for withdrawals and the `balanceOf` method for the UI to display the user's balance.**
 
-See the example [ETX](https://github.com/etherex/etherex/blob/master/contracts/etx.se) contract for a Serpent implementation, or a [Standard Token](https://github.com/simondlr/Contract-Reactor/blob/master/example/app/contracts/Standard_Token.sol) in Solidity.
+See the example [ETX](https://github.com/etherex/etherex/blob/master/contracts/etx.se) contract for a Serpent implementation, or a [Standard Token](https://github.com/ConsenSys/Tokens/blob/master/Token_Contracts/contracts/Standard_Token.sol) in Solidity.
 
 After registering the subcurrency using the `add_market` ABI call, the subcurrency will receive a `market_id`. You can retrieve the market ID with a call to `get_market_id(contract_address)`.
 
 #### Deposit support
 **IMPORTANT: The original `deposit` technique has been deprecated in favor of the [Standardized Contract APIs](https://github.com/ethereum/wiki/wiki/Standardized_Contract_APIs)**
 
-To support deposits to EtherEx, your subcurrency needs to implement the `approveOnce` and `sendCoinFrom` methods. The former allows a one-time transfer from the user's address by the exchange's contract, while the latter is called from the contract to effectively make that transfer when the user calls the exchange's new `deposit` method. This allows to securely send a subcurrency's tokens to the exchange's contract while updating the user's available balance at the exchange.
+To support deposits to EtherEx, your subcurrency needs to implement the `approve` and `transferFrom` methods. The former allows a one-time transfer from the user's address by the exchange's contract, while the latter is called from the contract to effectively make that transfer when the user calls the exchange's new `deposit` method. This allows to securely send a subcurrency's tokens to the exchange's contract while updating the user's available balance at the exchange.
 
 #### Withdrawal support
 
-If your subcurrency's default method for transferring funds is also named `sendCoin` like the standard examples above, with the `_to` and `_value` parameters (in that order), then there is nothing else you need to do to support withdrawals from EtherEx to a user's address. Otherwise, you'll need to implement that same `sendCoin` method with those two parameters, and "translate" that method call to yours, calling your other method with those parameters, in the order they're expected. You may also have to use `tx.origin` instead of `msg.sender` in your method as the latter will return your contract's address.
+If your subcurrency's default method for transferring funds is also named `transfer` like the standard examples above, with the `_to` and `_value` parameters (in that order), then there is nothing else you need to do to support withdrawals from EtherEx to a user's address. Otherwise, you'll need to implement that same `transfer` method with those two parameters, and "translate" that method call to yours, calling your other method with those parameters, in the order they're expected. You may also have to use `tx.origin` instead of `msg.sender` in your method as the latter will return your contract's address.
 
 ```
 def transfer(_to, _value):
@@ -215,10 +215,10 @@ def transfer(_to, _value):
 
 #### Balance
 
-Subcurrency contracts also need to implement a `coinBalanceOf` method for the UI to display the user's balance in that contract (also called the subcurrency's wallet).
+Subcurrency contracts also need to implement a `balanceOf` method for the UI to display the user's balance in that contract (also called the subcurrency's wallet).
 
 ```
-def coinBalanceOf(_addr):
+def balanceOf(_addr):
     return(self.balances[_addr].balance)
 ```
 

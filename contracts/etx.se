@@ -10,11 +10,11 @@
 #
 
 data created
-data accounts[2^160](balance, custodians[2^160](full, maxValue))
+data accounts[2^160](balance, custodians[2^160](maxValue))
 
-event Transfer(from:indexed, to:indexed, value)
-event AddressApproval(address:indexed, proxy:indexed, result)
-event AddressApprovalOnce(address:indexed, proxy:indexed, value)
+event Transfer(_from:indexed, _to:indexed, _value)
+event Approved(_owner:indexed, _spender:indexed, _value)
+event Unapproved(_owner:indexed, _spender:indexed)
 
 # Boolean success/failure
 macro SUCCESS: 1
@@ -53,15 +53,13 @@ def transferFrom(_from, _to, _value):
     balance = self.accounts[_from].balance
 
     # Make sure balance is above or equal to amount, and transfer is approved
-    maxValue = self.accounts[_from].custodians[msg.sender].maxValue
-    if balance >= _value and (self.accounts[_from].custodians[msg.sender].full or _value <= maxValue):
+    if balance >= _value and _value <= self.accounts[_from].custodians[msg.sender].maxValue:
         # Update balances
         self.accounts[_from].balance = balance - _value
         self.accounts[_to].balance += _value
 
-        # Reset approveOnce
-        if maxValue:
-            self.accounts[_from].custodians[msg.sender].maxValue = 0
+        # Update approval
+        self.accounts[_from].custodians[msg.sender].maxValue -= _value
 
         log(type=Transfer, _from, _to, _value)
 
@@ -74,44 +72,20 @@ def balance():
 def balanceOf(_address):
     return(self.accounts[_address].balance)
 
-def approve(_address):  # Implemented but unused and untested
-    self.accounts[msg.sender].custodians[_address].full = 1
-    log(type=AddressApproval, msg.sender, _address, 1)
+def approve(_spender, _value):
+    if _spender <= 0 or _value <= 0:
+        return(FAILURE)
+    approvedValue = self.accounts[msg.sender].custodians[_spender].maxValue + _value
+    self.accounts[msg.sender].custodians[_spender].maxValue = approvedValue
+    log(type=Approved, msg.sender, _spender, approvedValue)
     return(SUCCESS)
 
-# Returns whether _proxy is allowed full custody of your account
-def isApproved(_proxy):
-    return(self.accounts[msg.sender].custodians[_proxy].full)
-
-# Returns whether _proxy is allowed full custody of _target account
-def isApprovedFor(_target, _proxy):
-    return(self.accounts[_target].custodians[_proxy].full)
-
-# Approve _address once for a transfer of _maxValue
-def approveOnce(_address, _maxValue):
-    self.accounts[msg.sender].custodians[_address].maxValue = _maxValue
-    log(type=AddressApprovalOnce, msg.sender, _address, _maxValue)
-    return(1)
-
-# Verify _proxy is approved to make a one-time transfer, if so returns _maxValue
-def isApprovedOnce(_proxy):
-    value = self.accounts[msg.sender].custodians[_proxy].maxValue
-    if value > 0:
-        return(value)
-    return(0)
-
-# Verify _proxy is approved to make a one-time transfer for _target address,
-# if so returns _maxValue
-def isApprovedOnceFor(_target, _proxy):
-    value = self.accounts[_target].custodians[_proxy].maxValue
-    if value > 0:
-        return(value)
-    return(0)
+# Returns the amount which _spender is still allowed to direct debit from _address
+def allowance(_address, _spender):
+    return(self.accounts[_address].custodians[_spender].maxValue)
 
 # Unapprove full and one-time custody of your account by _address
-def unapprove(_address):
-    self.accounts[msg.sender].custodians[_address].full = 0
-    self.accounts[msg.sender].custodians[_address].maxValue = 0
-    log(type=AddressApproval, msg.sender, _address, 0)
-    log(type=AddressApprovalOnce, msg.sender, _address, 0)
+def unapprove(_spender):
+    self.accounts[msg.sender].custodians[_spender].maxValue = 0
+    log(type=Unapproved, msg.sender, _spender)
     return(SUCCESS)

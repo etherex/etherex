@@ -1163,23 +1163,27 @@ var EthereumClient = function(params) {
     var SubContractABI = web3.eth.contract(abi.sub);
     var subcontract = SubContractABI.at(market.address);
 
-    // Use token's approveOnce to authorize deposit
+    // Use token's approval to authorize deposit
     try {
       var options = {
         from: user.id,
         to: market.address,
         gas: "100000"
       };
-      subcontract.approveOnce.sendTransaction(self.address, amount, options, function(error, result) {
+      subcontract.approve.sendTransaction(self.address, amount, options, function(error, result) {
         if (error) {
           failure(error);
           return;
         }
+        if (!result) {
+          failure("Missing transaction hash from approval.");
+          return;
+        }
 
-        // TODO watch for AddressApprovalOnce when event is formalized as a standard
-        // Poll isApprovedOnceFor meanwhile
-        var pollIsApprovedOnceFor = function() {
-          subcontract.isApprovedOnceFor.call(user.id, self.address, function(err, res) {
+        // TODO watch for Approved when event is formalized as a standard
+        // Poll allowance meanwhile
+        var pollAllowance = function() {
+          subcontract.allowance.call(user.id, self.address, function(err, res) {
             if (err) {
               failure(err);
               return;
@@ -1195,13 +1199,13 @@ var EthereumClient = function(params) {
                   failure(e);
                   return;
                 }
-                clearInterval(self.pollIsApprovedOnceFor);
+                clearInterval(self.pollAllowance);
                 success(r);
               });
             }
           });
         };
-        self.pollIsApprovedOnceFor = setInterval(pollIsApprovedOnceFor, 1000);
+        self.pollAllowance = setInterval(pollAllowance, 1000);
       });
     }
     catch(e) {
@@ -1619,7 +1623,7 @@ var EthereumClient = function(params) {
         success(post);
       else
         failure(result);
-    }.bind(this));
+    });
   };
 
   this.watchMessages = function(market, success, failure) {

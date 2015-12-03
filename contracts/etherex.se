@@ -320,7 +320,7 @@ def trade(max_amount, trade_ids:arr):
     return(SUCCESS)
 
 #
-# Deposit - called from the user only, after calling approveOnce on the token
+# Deposit - called from the user only, after calling "approve" on the token
 #
 def deposit(amount, market_id):
     # Transfer funds to the exchange

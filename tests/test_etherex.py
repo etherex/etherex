@@ -216,7 +216,7 @@ class TestEtherEx(object):
             self.test_initialize()
 
         # Approve deposit of 10,000
-        ans = self.etx_contract.approveOnce(
+        ans = self.etx_contract.approve(
             self.contract.address,
             10000 * 10 ** 5,
             profiling=1)
@@ -224,7 +224,7 @@ class TestEtherEx(object):
         logger.info("\napproveOnce profiling: %s" % ans)
 
         # Verify exchange is approved for a transfer
-        ans = self.etx_contract.isApprovedOnceFor(
+        ans = self.etx_contract.allowance(
             self.ALICE['address'],
             self.contract.address)
         assert ans == 10000 * 10 ** 5
@@ -235,7 +235,7 @@ class TestEtherEx(object):
         logger.info("\nDeposit profiling: %s" % ans)
 
         # Verify exchange is no longer approved for a transfer
-        ans = self.etx_contract.isApprovedOnceFor(
+        ans = self.etx_contract.allowance(
             self.ALICE['address'],
             self.contract.address)
         assert ans == FAILURE
@@ -532,13 +532,13 @@ class TestEtherEx(object):
         assert balance == 10 ** 24
 
         # Approve deposit of 10,000
-        ans = self.etx_contract.approveOnce(
+        ans = self.etx_contract.approve(
             self.contract.address,
             10000 * 10 ** 5,
             sender=self.BOB['key'])
 
         # Verify exchange is approved for a transfer
-        ans = self.etx_contract.isApprovedOnceFor(
+        ans = self.etx_contract.allowance(
             self.BOB['address'],
             self.contract.address)
         assert ans == 10000 * 10 ** 5
@@ -563,7 +563,7 @@ class TestEtherEx(object):
 
         # Verify exchange is no longer approved for a transfer
         if not depositFailed:
-            ans = self.etx_contract.isApprovedOnceFor(
+            ans = self.etx_contract.allowance(
                 self.BOB['address'],
                 self.contract.address)
             assert ans == 0
@@ -574,7 +574,7 @@ class TestEtherEx(object):
                 "amount": 10000 * 10 ** 5
             }]
         else:
-            ans = self.etx_contract.isApprovedOnceFor(
+            ans = self.etx_contract.allowance(
                 self.BOB['address'],
                 self.contract.address)
             assert ans == 1000000000
