@@ -1,13 +1,13 @@
-var _ = require("lodash");
-var React = require("react");
+import _ from 'lodash';
+import React from 'react';
 import {injectIntl, FormattedMessage, FormattedHTMLMessage} from 'react-intl';
+import {Table} from 'react-bootstrap';
 
-var Table = require("react-bootstrap/lib/Table");
-var MarketRow = require("./MarketRow");
+import MarketRow from './MarketRow';
 
-var fixtures = require("../js/fixtures");
+let fixtures = require("../js/fixtures");
 
-var MarketTable = injectIntl(React.createClass({
+let MarketTable = injectIntl(React.createClass({
   getInitialState: function() {
     return {
       markets: []

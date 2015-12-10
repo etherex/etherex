@@ -1,15 +1,10 @@
-// var _ = require('lodash');
-var React = require("react");
-var Link = require("react-router").Link;
+import React from 'react';
+import {Link} from 'react-router';
 
-var Nav = require('./Nav');
-var Blocks = require('./Blocks');
+import Nav from './Nav';
+import Blocks from './Blocks';
 
-// var ButtonGroup = require('react-bootstrap/lib/ButtonGroup');
-// var Button = require('react-bootstrap/lib/Button');
-// var utils = require('../js/utils');
-
-var Help = React.createClass({
+let Help = React.createClass({
 
   render() {
     return (

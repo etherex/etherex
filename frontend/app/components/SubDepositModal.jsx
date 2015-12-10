@@ -5,7 +5,6 @@ import {Button, Input, Modal} from 'react-bootstrap';
 import ConfirmModal from './ConfirmModal';
 
 let SubDepositModal = injectIntl(React.createClass({
-
   getInitialState() {
     return {
       amount: null,

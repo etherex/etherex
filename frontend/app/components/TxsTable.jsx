@@ -1,13 +1,12 @@
-var _ = require("lodash");
-var React = require("react");
+import _ from 'lodash';
+import React from 'react';
 import {FormattedMessage} from 'react-intl';
+import {Table} from 'react-bootstrap';
 
-var TransitionGroup = require('./TransitionGroup');
+import TransitionGroup from './TransitionGroup';
+import TxRow from './TxRow';
 
-var Table = require("react-bootstrap/lib/Table");
-var TxRow = require("./TxRow");
-
-var TxsTable = React.createClass({
+let TxsTable = React.createClass({
   getInitialState: function() {
     var index = _.findIndex(this.props.market.markets, {'id': this.props.market.market.id});
     var market = this.props.market.markets[index];

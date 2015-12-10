@@ -1,10 +1,10 @@
-var React = require("react");
-var ReactDOM = require("react-dom");
-var d3 = require("d3");
-var techan = require("techan");
+import React from 'react';
+import ReactDOM from 'react-dom';
+import d3 from 'd3';
 
-var TechanChart = React.createClass({
+let techan = require("techan");
 
+let TechanChart = React.createClass({
     propTypes: {
         data: React.PropTypes.array
     },
@@ -322,8 +322,8 @@ var TechanChart = React.createClass({
 
         // d3.select("button").on("click", this.reset);
 
-        var accessor = candlestick.accessor(),
-        indicatorPreRoll = 0;  // Don't show where indicators don't have data
+        var accessor = candlestick.accessor();
+        // var indicatorPreRoll = 0;  // Don't show where indicators don't have data
 
         // TODO
         var trendlineData = [
@@ -336,6 +336,9 @@ var TechanChart = React.createClass({
             { start: new Date(2015, 1, 1), end: new Date(), value: 0.275 },
             { start: new Date(2015, 1, 1), end: new Date(), value: 0.25 }
         ];
+
+        var zoom = d3.behavior.zoom().on("zoom", this.refresh);
+        var zoomPercent = d3.behavior.zoom();
 
         this.refresh = function() {
             zoomPercent.translate(zoom.translate());
@@ -372,10 +375,6 @@ var TechanChart = React.createClass({
             svg.select("g.trendlines").call(trendline.refresh);
             svg.select("g.supstances").call(supstance.refresh);
         }.bind(this);
-
-        var zoom = d3.behavior.zoom()
-                .on("zoom", this.refresh);
-        var zoomPercent = d3.behavior.zoom();
 
         this.mapData = function(data) {
             var mapped = data.map(function(d) {
@@ -417,7 +416,7 @@ var TechanChart = React.createClass({
             svg.select("g.closeAnnotation").datum([data[data.length - 1]])
               .attr("class", "closeAnnotation " + updown)
               .call(closeAnnotation).call(candlestick);
-            svg.select("g.closeAnnotation .data").attr("class", "hidden")
+            svg.select("g.closeAnnotation .data").attr("class", "hidden");
             svg.select("g.volume").datum(data).call(volume);
             svg.select("g.sma.ma-0").datum(techan.indicator.sma().period(10)(data)).call(sma0);
             svg.select("g.sma.ma-1").datum(techan.indicator.sma().period(20)(data)).call(sma1);

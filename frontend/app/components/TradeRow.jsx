@@ -1,15 +1,11 @@
-var _ = require('lodash');
-var React = require("react");
+import _ from 'lodash';
+import React from 'react';
 import {FormattedNumber} from 'react-intl';
+import {Button, Glyphicon, Popover, OverlayTrigger} from 'react-bootstrap';
 
-var Button = require("react-bootstrap/lib/Button");
-var Glyphicon = require("react-bootstrap/lib/Glyphicon");
-var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
-var Popover = require('react-bootstrap/lib/Popover');
+import utils from '../js/utils';
 
-var utils = require("../js/utils");
-
-var TradeRow = React.createClass({
+let TradeRow = React.createClass({
   getInitialState: function() {
     return {
       payload: {},

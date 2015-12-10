@@ -7,10 +7,11 @@ var ConfigStore = Fluxxor.createStore({
   initialize: function () {
     this.host = process.env.RPC_HOST || fixtures.host;
     this.address = fixtures.addresses.etherex;
-    this.network = 0; // default to testnet
+    this.network = 2; // default to testnet
     this.ethereumClient = null;
     this.btcSwapAddress = fixtures.addresses.btcswap;
     this.btcSwapClient = null;
+    this.storeBlockFee = 10000000000000000; // 0.01 ETH =~ storing 1 block
     this.debug = false;
     this.debugHandler = null;
     this.demoMode = false;
@@ -39,6 +40,7 @@ var ConfigStore = Fluxxor.createStore({
       ethereumClient: this.ethereumClient,
       btcSwapAddress: this.btcSwapAddress,
       btcSwapClient: this.btcSwapClient,
+      storeBlockFee: this.storeBlockFee,
       debug: this.debug,
       debugHandler: this.debugHandler,
       demoMode: this.demoMode,

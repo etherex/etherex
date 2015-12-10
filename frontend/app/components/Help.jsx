@@ -1,6 +1,6 @@
-var React = require("react");
+import React from 'react';
 
-var Help = React.createClass({
+let Help = React.createClass({
   render: function() {
     return (
       <div className="container-fluid">

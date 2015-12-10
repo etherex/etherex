@@ -4,8 +4,7 @@ import assign from 'react/lib/Object.assign';
 
 function noop() {}
 
-var Clipboard = React.createClass({
-
+let Clipboard = React.createClass({
   propTypes: {
     value : React.PropTypes.string.isRequired,
     className : React.PropTypes.string,

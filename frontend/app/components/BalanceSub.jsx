@@ -1,12 +1,10 @@
-var React = require("react");
+import React from 'react';
 import {injectIntl, FormattedMessage} from 'react-intl';
+import {Popover, OverlayTrigger} from 'react-bootstrap';
 
-var utils = require("../js/utils");
-var Button = require('react-bootstrap/lib/Button');
-var Popover = require('react-bootstrap/lib/Popover');
-var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
+import utils from '../js/utils';
 
-var BalanceSub = injectIntl(React.createClass({
+let BalanceSub = injectIntl(React.createClass({
   render: function() {
     var formatMessage = this.props.intl.formatMessage;
     var available = this.props.user.user.balanceSubAvailable;

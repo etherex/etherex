@@ -3,8 +3,8 @@ var Fluxxor = require("fluxxor");
 
 var constants = require("../js/constants");
 var fixtures = require("../js/fixtures");
-var utils = require("../js/utils");
-var bigRat = require("big-rational");
+import utils from '../js/utils';
+import bigRat from 'big-rational';
 
 var UserStore = Fluxxor.createStore({
 

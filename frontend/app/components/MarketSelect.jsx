@@ -1,10 +1,8 @@
-var _ = require("lodash");
-var React = require("react");
+import _ from 'lodash';
+import React from 'react';
+import {DropdownButton, MenuItem} from 'react-bootstrap';
 
-var DropdownButton = require('react-bootstrap/lib/DropdownButton');
-var MenuItem = require('react-bootstrap/lib/MenuItem');
-
-var MarketSelect = React.createClass({
+let MarketSelect = React.createClass({
   getInitialState() {
     return {
       items: [],

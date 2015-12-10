@@ -1,9 +1,9 @@
-var React = require("react");
+import React from 'react';
 
-var TradeForm = require("./TradeForm");
-var TradeList = require("./TradeList");
+import TradeForm from './TradeForm';
+import TradeList from './TradeList';
 
-var Trades = React.createClass({
+let Trades = React.createClass({
   render: function() {
     return (
       <div className="row">

@@ -1,6 +1,6 @@
-var React = require("react");
+import React from 'react';
 
-var MarketRow = React.createClass({
+let MarketRow = React.createClass({
   handleClick: function(e) {
     e.preventDefault();
 

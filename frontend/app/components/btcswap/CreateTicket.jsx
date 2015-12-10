@@ -1,15 +1,14 @@
-var React = require("react");
+import React from 'react';
 import {injectIntl, FormattedMessage} from 'react-intl';
+import {Button, Input} from 'react-bootstrap';
 
-var Button = require('react-bootstrap/lib/Button');
-var Input = require('react-bootstrap/lib/Input');
-var ConfirmModal = require('../ConfirmModal');
-var AlertDismissable = require('../AlertDismissable');
+import ConfirmModal from '../ConfirmModal';
+import AlertDismissable from '../AlertDismissable';
 
-var Nav = require('./Nav');
-var Blocks = require('./Blocks');
+import Nav from './Nav';
+import Blocks from './Blocks';
 
-var CreateTicket = React.createClass({
+let CreateTicket = injectIntl(React.createClass({
   getInitialState() {
     return {
       isValid: false,
@@ -173,6 +172,6 @@ var CreateTicket = React.createClass({
       </div>
     );
   }
-});
+}));
 
 module.exports = CreateTicket;

@@ -1,11 +1,11 @@
 var _ = require("lodash");
 var Fluxxor = require("fluxxor");
 
-var bigRat = require("big-rational");
+import bigRat from 'big-rational';
 
 var constants = require("../js/constants");
 var fixtures = require("../js/fixtures");
-var utils = require("../js/utils");
+import utils from '../js/utils';
 
 var MarketStore = Fluxxor.createStore({
 

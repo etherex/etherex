@@ -1,14 +1,13 @@
-var _ = require('lodash');
-var React = require("react");
+import _ from 'lodash';
+import React from 'react';
 import {FormattedMessage} from 'react-intl';
+import {Table} from 'react-bootstrap';
 
 // var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
-var TransitionGroup = require('./TransitionGroup');
+import TransitionGroup from './TransitionGroup';
+import TradeRow from './TradeRow';
 
-var Table = require("react-bootstrap/lib/Table");
-var TradeRow = require("./TradeRow");
-
-var TradeTable = React.createClass({
+let TradeTable = React.createClass({
   render: function() {
     var index = _.findIndex(this.props.market.markets, {'id': this.props.market.market.id});
     var market = this.props.market.markets[index];

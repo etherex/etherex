@@ -1,18 +1,15 @@
-var _ = require('lodash');
-var React = require("react");
+import _ from 'lodash';
+import React from 'react';
 import {injectIntl, FormattedMessage} from 'react-intl';
+import {Button, Input, Popover, OverlayTrigger} from 'react-bootstrap';
 
-var Button = require('react-bootstrap/lib/Button');
-var Input = require('react-bootstrap/lib/Input');
-var AlertModal = require('../AlertModal');
-var ConfirmModal = require('../ConfirmModal');
-var Popover = require('react-bootstrap/lib/Popover');
-var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
+import AlertModal from '../AlertModal';
+import ConfirmModal from '../ConfirmModal';
 
-var Nav = require('./Nav');
-var Blocks = require('./Blocks');
+import Nav from './Nav';
+import Blocks from './Blocks';
 
-var ReserveTicket = injectIntl(React.createClass({
+let ReserveTicket = injectIntl(React.createClass({
   getInitialState() {
     return {
       lookingUp: false,
@@ -441,6 +438,7 @@ var ReserveTicket = injectIntl(React.createClass({
                 <p className="text-overflow">Total BTC: <b>{ this.state.ticket.total ? this.state.ticket.total + " BTC" : "" }</b></p>
                 <p className="text-overflow">Total with fee: <b>{ this.state.ticket.totalWithFee ? this.state.ticket.totalWithFee + " BTC" : "" }</b></p>
                 <p className="text-overflow">Bitcoin Address: <b>{ this.state.ticket.address }</b></p>
+                <p className="text-overflow">Block validation fee: <b>{ this.state.ticket.formattedBlockFee.value } { this.state.ticket.formattedBlockFee.unit }</b></p>
               </div>
             </div>
           </div>

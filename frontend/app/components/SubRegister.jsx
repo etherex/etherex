@@ -1,19 +1,15 @@
-var _ = require("lodash");
-var React = require("react");
+import _ from 'lodash';
+import React from 'react';
 import {injectIntl, FormattedMessage} from 'react-intl';
+import {Button, Input, DropdownButton, MenuItem} from 'react-bootstrap';
+import bigRat from 'big-rational';
 
-var Button = require('react-bootstrap/lib/Button');
-var Input = require('react-bootstrap/lib/Input');
-var ConfirmModal = require('./ConfirmModal');
-var AlertModal = require('./AlertModal');
+import ConfirmModal from './ConfirmModal';
+import AlertModal from './AlertModal';
 
-var fixtures = require("../js/fixtures");
-var bigRat = require("big-rational");
+let fixtures = require("../js/fixtures");
 
-var DropdownButton = require('react-bootstrap/lib/DropdownButton');
-var MenuItem = require('react-bootstrap/lib/MenuItem');
-
-var SubRegister = injectIntl(React.createClass({
+let SubRegister = injectIntl(React.createClass({
   getInitialState: function() {
     return {
       code: null,

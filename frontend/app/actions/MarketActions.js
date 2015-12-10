@@ -1,5 +1,5 @@
-var _ = require("lodash");
-var utils = require("../js/utils");
+import _ from 'lodash';
+import utils from '../js/utils';
 var constants = require("../js/constants");
 var Web3 = require('web3');
 var web3 = new Web3();

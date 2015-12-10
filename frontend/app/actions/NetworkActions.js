@@ -1,5 +1,5 @@
 var constants = require('../js/constants');
-var utils = require('../js/utils');
+import utils from '../js/utils';
 
 var NetworkActions = function() {
   /**

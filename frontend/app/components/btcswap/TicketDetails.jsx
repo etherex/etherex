@@ -1,9 +1,8 @@
-var React = require("react");
+import React from 'react';
 
-// var Button = require('react-bootstrap/lib/Button');
-var utils = require('../../js/utils');
+import utils from '../../js/utils';
 
-var TicketDetails = React.createClass({
+let TicketDetails = React.createClass({
   render() {
     var amount = utils.formatEther(this.props.ticket.amount);
     return (

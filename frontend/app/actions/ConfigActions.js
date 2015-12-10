@@ -1,9 +1,9 @@
-var _ = require("lodash");
+import _ from 'lodash';
+
 var Web3 = require('web3');
 var web3 = new Web3();
 var BtcSwap = require("btc-swap");
-var utils = require('../js/utils');
-var React = require("react");
+import utils from '../js/utils';
 var Perf = require("react-addons-perf");
 var fixtures = require('../js/fixtures');
 var constants = require('../js/constants');
@@ -33,6 +33,7 @@ var ConfigActions = function() {
         'range': configState.range,
         'rangeEnd': configState.rangeEnd,
         'si': configState.si,
+        'storeBlockFee': configState.storeBlockFee,
         'timeout': configState.timeout,
         'debug': debug
       };
@@ -67,9 +68,10 @@ var ConfigActions = function() {
         init: true
       });
 
-      // Update SI and timeout configs
+      // Update SI, storeBlockFee, timeout and debug configs
       this.dispatch(constants.config.UPDATE_CONFIG, {
         si: configs.si,
+        storeBlockFee: configs.storeBlockFee,
         timeout: configs.timeout,
         debug: configs.debug
       });

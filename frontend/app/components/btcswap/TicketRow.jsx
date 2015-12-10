@@ -1,12 +1,10 @@
-// var _ = require('lodash');
-var React = require("react");
+import React from 'react';
 import {injectIntl, FormattedMessage, FormattedDate, FormattedNumber} from 'react-intl';
+import {Button} from 'react-bootstrap';
 
-var Button = require("react-bootstrap/lib/Button");
+import utils from '../../js/utils';
 
-var utils = require("../../js/utils");
-
-var TicketRow = injectIntl(React.createClass({
+let TicketRow = injectIntl(React.createClass({
   handleClick(e) {
     e.preventDefault();
     e.stopPropagation();

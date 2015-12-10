@@ -1,5 +1,7 @@
-var _ = require("lodash");
-var Fluxxor = require("fluxxor");
+import _ from 'lodash';
+import Fluxxor from 'fluxxor';
+
+import utils from '../../js/utils';
 
 var constants = require("../../js/constants");
 
@@ -24,6 +26,8 @@ var TicketStore = Fluxxor.createStore({
       nonce: null,
       feeAmount: null,
       formattedFee: {value: null, unit: null},
+      blockFee: null,
+      formattedBlockFee: {value: null, unit: null},
       expiry: null,
       claimer: null,
       merkleProof: null,
@@ -42,6 +46,8 @@ var TicketStore = Fluxxor.createStore({
     this.btcRealHeight = 0;
     this.btcBehind = false;
     this.btcUpdating = false;
+    this.blockFee = null;
+    this.formattedBlockFee = { value: null, unit: null };
     this.percent = 0;
     this.progress = 0;
     this.estimate = 0;
@@ -73,6 +79,7 @@ var TicketStore = Fluxxor.createStore({
       constants.ticket.UPDATE_BTC_HEIGHT, this.onUpdateBtcHeight,
       constants.ticket.UPDATE_BTC_HEIGHT_FAIL, this.onTicketsFail,
       constants.ticket.UPDATE_BTC_HEADER, this.onUpdateBtcHeader,
+      constants.ticket.UPDATE_BLOCK_FEE, this.onUpdateBlockFee,
       constants.ticket.PROPAGATE_TX, this.onPropagateTransaction,
       constants.ticket.CREATE_TICKET, this.onCreateTicket,
       constants.ticket.CREATE_TICKET_SUCCESS, this.onCreateTicketSuccess,
@@ -333,6 +340,12 @@ var TicketStore = Fluxxor.createStore({
     this.emit(constants.CHANGE_EVENT);
   },
 
+  onUpdateBlockFee: function(payload) {
+    this.blockFee = payload.blockFee;
+    this.formattedBlockFee = payload.formattedBlockFee;
+    this.emit(constants.CHANGE_EVENT);
+  },
+
   onCloseAlert: function() {
     this.error = null;
     this.message = null;
@@ -367,6 +380,8 @@ var TicketStore = Fluxxor.createStore({
       btcRealHeight: this.btcRealHeight,
       btcBehind: this.btcBehind,
       btcUpdating: this.btcUpdating,
+      blockFee: this.blockFee,
+      formattedBlockFee: this.formattedBlockFee,
       estimate: this.estimate,
       message: this.message,
       note: this.note

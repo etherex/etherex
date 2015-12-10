@@ -6,7 +6,7 @@ import constants from '../js/constants';
 import UAParser from 'ua-parser-js';
 
 // Modal prompt for loading exceptions
-var LoadingModal = React.createClass({
+let LoadingModal = React.createClass({
   getInitialState() {
     return {
       isModalOpen: false,

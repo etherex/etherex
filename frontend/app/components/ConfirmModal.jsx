@@ -1,11 +1,10 @@
-var React = require("react");
+import React from 'react';
 import {injectIntl} from 'react-intl';
+import {Button, Modal} from 'react-bootstrap';
 
-var Button = require('react-bootstrap/lib/Button');
-var Modal = require('react-bootstrap/lib/Modal');
-var TradeTable = require("./TradeTable");
+import TradeTable from './TradeTable';
 
-var ConfirmModal = injectIntl(React.createClass({
+let ConfirmModal = injectIntl(React.createClass({
   getInitialState() {
     return {
       tradeTable: null

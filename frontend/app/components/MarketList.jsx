@@ -1,13 +1,11 @@
-var React = require("react");
+import React from 'react';
 import {FormattedMessage} from 'react-intl';
+import {ProgressBar} from 'react-bootstrap';
 
-var AlertDismissable = require('./AlertDismissable');
+import AlertDismissable from './AlertDismissable';
+import MarketTable from './MarketTable';
 
-var ProgressBar = require('react-bootstrap/lib/ProgressBar');
-
-var MarketTable = require('./MarketTable');
-
-var MarketList = React.createClass({
+let MarketList = React.createClass({
   render: function() {
     return (
       <div>

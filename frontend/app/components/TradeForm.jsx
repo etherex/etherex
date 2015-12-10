@@ -5,7 +5,7 @@ import {DropdownButton, MenuItem} from 'react-bootstrap';
 import AlertDismissable from './AlertDismissable';
 import TradeFormInstance from './TradeFormInstance';
 
-var TradeForm = injectIntl(React.createClass({
+let TradeForm = injectIntl(React.createClass({
   getInitialState() {
     return {
       type: 1,

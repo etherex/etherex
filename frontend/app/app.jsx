@@ -19,10 +19,6 @@ import ReserveTicket from './components/btcswap/ReserveTicket';
 import ClaimTicket from './components/btcswap/ClaimTicket';
 import BtcHelp from './components/btcswap/Help';
 
-// Load fonts and icons
-require("./css/fonts.css");
-require("./css/icons.css");
-
 import ConfigStore from './stores/ConfigStore';
 import NetworkStore from './stores/NetworkStore';
 import UserStore from './stores/UserStore';
@@ -37,7 +33,11 @@ import TradeActions from './actions/TradeActions';
 import MarketActions from './actions/MarketActions';
 import TicketActions from './actions/btcswap/TicketActions';
 
-var stores = {
+// Load fonts and icons
+require("./css/fonts.css");
+require("./css/icons.css");
+
+let stores = {
   config: new ConfigStore(),
   network: new NetworkStore(),
   UserStore: new UserStore(),
@@ -46,7 +46,7 @@ var stores = {
   TicketStore: new TicketStore()
 };
 
-var actions = {
+let actions = {
   config: new ConfigActions(),
   network: new NetworkActions(),
   user: new UserActions(),
@@ -55,9 +55,9 @@ var actions = {
   ticket: new TicketActions()
 };
 
-var flux = new Fluxxor.Flux(stores, actions);
+let flux = new Fluxxor.Flux(stores, actions);
 
-var createFluxComponent = function (Component, props) {
+let createFluxComponent = function (Component, props) {
   return <Component {...props} flux={flux} />;
 };
 
@@ -69,11 +69,11 @@ flux.setDispatchInterceptor(function(action, dispatch) {
 
 // Opt-out of fugly _k in query string
 import createHistory from 'history/lib/createHashHistory';
-var history = createHistory({
+let history = createHistory({
   queryKey: false
 });
 
-var routes = (
+let routes = (
   <Router history={history} createElement={createFluxComponent}>
     <Route path="/" component={EtherExApp}>
       <IndexRoute component={Trades} />

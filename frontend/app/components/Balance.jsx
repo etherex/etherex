@@ -1,10 +1,8 @@
-var React = require("react");
+import React from 'react';
 import {FormattedMessage, FormattedNumber} from 'react-intl';
+import {Popover, OverlayTrigger} from 'react-bootstrap';
 
-var Popover = require('react-bootstrap/lib/Popover');
-var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
-
-var Balance = React.createClass({
+let Balance = React.createClass({
   render: function() {
     return (
       <div className="text-overflow">

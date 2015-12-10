@@ -168,6 +168,8 @@ module.exports = {
       "title": "Configuration",
       "current": "EtherEx address",
       "new": "New address",
+      "blockfee": "BTC relay block fee",
+      "blockfeehelp": "Amount of wei you would charge to other users for the BTC block headers you would successfully store to btcrelay.",
       "timeout": "Network timeout (seconds)",
       "update": "Update",
       "refresh": "Refresh",

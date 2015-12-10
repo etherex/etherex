@@ -1,13 +1,12 @@
-var React = require("react");
+import React from 'react';
 import {FormattedMessage} from 'react-intl';
+import {ProgressBar} from 'react-bootstrap';
 
-var AlertDismissable = require('./AlertDismissable');
+import AlertDismissable from './AlertDismissable';
+import RangeSelect from './RangeSelect';
+import TxsTable from './TxsTable';
 
-var ProgressBar = require('react-bootstrap/lib/ProgressBar');
-var RangeSelect = require('./RangeSelect');
-var TxsTable = require('./TxsTable');
-
-var TxsList = React.createClass({
+let TxsList = React.createClass({
   render: function() {
     return (
       <div>

@@ -1,7 +1,7 @@
 var _ = require("lodash");
 var constants = require("../js/constants");
-var utils = require("../js/utils");
-var bigRat = require("big-rational");
+import utils from '../js/utils';
+import bigRat from 'big-rational';
 
 var TradeActions = function() {
 

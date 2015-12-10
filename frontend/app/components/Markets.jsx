@@ -1,11 +1,11 @@
-var React = require("react");
+import React from 'react';
 
-var RangeSelect = require('./RangeSelect');
-var GraphPrice = require('./GraphPrice');
-var MarketList = require("./MarketList");
-var SubNavBar = require("./SubNavBar");
+import RangeSelect from './RangeSelect';
+import GraphPrice from './GraphPrice';
+import MarketList from './MarketList';
+import SubNavBar from './SubNavBar';
 
-var Markets = React.createClass({
+let Markets = React.createClass({
   getInitialState() {
     var path = this.props.routes[1].path;
     return {

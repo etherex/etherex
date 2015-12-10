@@ -1,6 +1,6 @@
 {
   "name": "EtherEx",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "description": "EtherEx frontend",
   "main": "app/app.jsx",
   "scripts": {
@@ -81,7 +81,6 @@
     "react-addons-transition-group": "^0.14.3",
     "react-bootstrap": "^0.28.1",
     "react-dom": "^0.14.3",
-    "react-favicon-etherex": "caktux/react-favicon",
     "react-intl": "^2.0.0-beta1",
     "react-qr": "0.0.2",
     "react-router": "^1.0.0",

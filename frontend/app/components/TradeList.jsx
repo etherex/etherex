@@ -1,15 +1,13 @@
-var React = require("react");
+import React from 'react';
 import {injectIntl} from 'react-intl';
+import {ProgressBar} from 'react-bootstrap';
 
-var AlertDismissable = require('./AlertDismissable');
-var ProgressBar = require('react-bootstrap/lib/ProgressBar');
+import AlertDismissable from './AlertDismissable';
+import ConfirmModal from './ConfirmModal';
+import TradeBuys from './TradeListBuys';
+import TradeSells from './TradeListSells';
 
-var ConfirmModal = require('./ConfirmModal');
-var TradeBuys = require('./TradeListBuys');
-var TradeSells = require('./TradeListSells');
-
-
-var TradeList = injectIntl(React.createClass({
+let TradeList = injectIntl(React.createClass({
   getInitialState: function() {
     return {
       showModal: false,

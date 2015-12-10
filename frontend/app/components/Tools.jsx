@@ -1,16 +1,15 @@
-var React = require("react");
+import React from 'react';
 import {FormattedMessage} from 'react-intl';
+import Perf from 'react-addons-perf';
 
-var Perf = require("react-addons-perf");
-var utils = require("../js/utils");
+import AlertDismissable from './AlertDismissable';
+import Network from './Network';
+import ConfigPane from './ConfigPane';
+import SubRegister from './SubRegister';
 
-var AlertDismissable = require('./AlertDismissable');
+import utils from '../js/utils';
 
-var Network = require('./Network');
-var ConfigPane = require("./ConfigPane");
-var SubRegister = require('./SubRegister');
-
-var TradeList = React.createClass({
+let TradeList = React.createClass({
 
   getInitialState: function() {
     return {

@@ -1,5 +1,28 @@
-var localesSupported = require('intl-locales-supported');
-var i18n = {
+import _ from 'lodash';
+import React from 'react';
+import {StoreWatchMixin} from 'fluxxor';
+import {IntlProvider, FormattedMessage} from 'react-intl';
+import {OverlayTrigger, Popover, Button} from 'react-bootstrap';
+import flatten from 'flat';
+
+import Favicon from './Favicon';
+import LoadingModal from './LoadingModal';
+import NavBar from './NavBar';
+import UserLink from './UserLink';
+import Balance from './Balance';
+import BalanceSub from './BalanceSub';
+import MarketSelect from './MarketSelect';
+import LastPrice from './LastPrice';
+import RangeSelect from './RangeSelect';
+import GraphPrice from './GraphPrice';
+import Network from './Network';
+import Chat from './Chat';
+
+let fixtures = require('../js/fixtures');
+
+// Load Intl data
+let localesSupported = require('intl-locales-supported');
+let i18n = {
   locales: ['en-US']
 };
 
@@ -21,35 +44,11 @@ if (window.Intl) {
   require("intl/locale-data/jsonp/en-US");
 }
 
-import _ from 'lodash';
-import React from 'react';
-import {StoreWatchMixin} from 'fluxxor';
+let intlData = require('../js/intlData');
+let messages = flatten(intlData.messages);
 
-import {OverlayTrigger, Popover, Button} from 'react-bootstrap';
 
-import LoadingModal from './LoadingModal';
-import NavBar from './NavBar';
-import UserLink from './UserLink';
-import Balance from './Balance';
-import BalanceSub from './BalanceSub';
-import MarketSelect from './MarketSelect';
-import LastPrice from './LastPrice';
-import RangeSelect from './RangeSelect';
-import GraphPrice from './GraphPrice';
-import Network from './Network';
-import Chat from './Chat';
-
-var fixtures = require('../js/fixtures');
-
-import Favicon from 'react-favicon';
-
-// Load Intl data
-var flatten = require('flat');
-var intlData = require('../js/intlData');
-var messages = flatten(intlData.messages);
-import {IntlProvider, FormattedMessage} from 'react-intl';
-
-var EtherExApp = React.createClass({
+let EtherExApp = React.createClass({
   mixins: [StoreWatchMixin("config", "network", "UserStore", "MarketStore", "TradeStore", "TicketStore")],
 
   getInitialState() {

@@ -1,9 +1,9 @@
-var React = require("react");
+import React from 'react';
 import {FormattedMessage} from 'react-intl';
 
-var TradeTable = require('./TradeTable');
+import TradeTable from './TradeTable';
 
-var TradeSells = React.createClass({
+let TradeSells = React.createClass({
   render: function() {
     return (
       <div className="col-md-6">

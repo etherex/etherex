@@ -1,9 +1,11 @@
 import React from 'react';
-import {DropdownButton, MenuItem, Input, FormControls} from 'react-bootstrap';
 import {injectIntl, FormattedMessage, FormattedNumber} from 'react-intl';
-import QRCode from 'react-qr';
-import Clipboard from './Clipboard';
+import {DropdownButton, MenuItem, Input, FormControls} from 'react-bootstrap';
 import UAParser from 'ua-parser-js';
+import QRCode from 'react-qr';
+
+import Clipboard from './Clipboard';
+
 import utils from '../js/utils';
 
 let UserAddress = injectIntl(React.createClass({

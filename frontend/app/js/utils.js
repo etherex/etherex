@@ -1,6 +1,6 @@
 var crypto = require('crypto');
 var units = require('./units');
-var bigRat = require('big-rational');
+import bigRat from 'big-rational';
 var numeral = require("numeral");
 var si = require("si-prefix");
 
