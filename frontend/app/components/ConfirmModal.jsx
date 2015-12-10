@@ -43,13 +43,13 @@ let ConfirmModal = injectIntl(React.createClass({
         </Modal.Header>
         <form onSubmit={this.onHide}>
           <Modal.Body>
-            <big><p>{this.props.message}</p></big>
+            <div className="p"><big>{this.props.message}</big></div>
 
-            {(this.props.note) &&
-              <p>{this.props.note}</p>}
+            { (this.props.note) &&
+              <div className="p">{this.props.note}</div> }
 
-            {(this.props.estimate) &&
-              <p>{formatMessage({id: 'confirm.estimate'})}: {this.props.estimate}</p>}
+            { (this.props.estimate) &&
+              <div className="p">{formatMessage({id: 'confirm.estimate'})}: {this.props.estimate}</div> }
 
             {this.state.tradeTable}
           </Modal.Body>
