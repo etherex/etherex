@@ -1,4 +1,4 @@
-var _ = require("lodash");
+import _ from 'lodash';
 import utils from '../js/utils';
 import bigRat from 'big-rational';
 var fixtures = require("../js/fixtures");
