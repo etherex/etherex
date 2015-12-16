@@ -260,7 +260,7 @@ def trade(max_amount, trade_ids:arr):
                 send(msg.sender, value)
 
                 # Log transaction
-                log(type=log_fill_tx, market_id, msg.sender, owner, 2, price, fill, trade_id)
+                log(type=log_fill_tx, market_id, msg.sender, owner, ASK, price, fill, trade_id)
             else:
                 return(INSUFFICIENT_BALANCE)
 
@@ -296,7 +296,7 @@ def trade(max_amount, trade_ids:arr):
                 send(owner, value)
 
                 # Log transaction
-                log(type=log_fill_tx, market_id, msg.sender, owner, 1, price, fill, trade_id)
+                log(type=log_fill_tx, market_id, msg.sender, owner, BID, price, fill, trade_id)
             else:
                 return(INSUFFICIENT_BALANCE)
 
