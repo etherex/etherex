@@ -1,11 +1,10 @@
-var React = require('react');
+import React from 'react';
+import {StoreWatchMixin} from 'fluxxor';
 import {injectIntl, FormattedDate, FormattedNumber, FormattedMessage, FormattedRelative} from 'react-intl';
-var Fluxxor = require("fluxxor");
-var StoreWatchMixin = Fluxxor.StoreWatchMixin;
 
-var utils = require('../js/utils');
+import utils from '../js/utils';
 
-var Network = injectIntl(React.createClass({
+let Network = injectIntl(React.createClass({
   mixins: [StoreWatchMixin('config', 'network', 'UserStore')],
 
   getInitialState() {

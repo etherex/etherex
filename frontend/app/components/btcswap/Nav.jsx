@@ -1,11 +1,9 @@
-var React = require("react");
+import React from 'react';
+import {Link} from 'react-router';
 import {FormattedMessage} from 'react-intl';
+import {Nav, Glyphicon} from 'react-bootstrap';
 
-var Link = require('react-router/lib/Link');
-var Nav = require('react-bootstrap/lib/Nav');
-var Glyphicon = require("react-bootstrap").Glyphicon;
-
-var BtcNav = React.createClass({
+let BtcNav = React.createClass({
   render() {
     return (
       <Nav bsStyle="pills" className="panel-group" role="navigation" aria-label="Secondary" justified>

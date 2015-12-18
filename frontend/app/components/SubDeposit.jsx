@@ -1,11 +1,10 @@
-var React = require("react");
+import React from 'react';
 import {injectIntl, FormattedMessage} from 'react-intl';
+import {Button, Input} from 'react-bootstrap';
 
-var Button = require('react-bootstrap/lib/Button');
-var Input = require('react-bootstrap/lib/Input');
-var ConfirmModal = require('./ConfirmModal');
+import ConfirmModal from './ConfirmModal';
 
-var SubDeposit = injectIntl(React.createClass({
+let SubDeposit = injectIntl(React.createClass({
   getInitialState: function() {
     return {
       amount: null,

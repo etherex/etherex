@@ -128,6 +128,7 @@ module.exports = {
         UPDATE_BTC_HEIGHT: null,
         UPDATE_BTC_HEIGHT_FAIL: null,
         UPDATE_BTC_HEADER: null,
+        UPDATE_BLOCK_FEE: null,
         UPDATE_POW: null,
         PROPAGATE_TX: null,
         CREATE_TICKET: null,

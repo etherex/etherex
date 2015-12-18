@@ -1,6 +1,6 @@
-var _ = require("lodash");
-var utils = require("../js/utils");
-var bigRat = require('big-rational');
+import _ from 'lodash';
+import utils from '../js/utils';
+import bigRat from 'big-rational';
 var fixtures = require("../js/fixtures");
 var abi = require("../js/abi");
 var Web3 = require('web3');
@@ -561,7 +561,7 @@ var EthereumClient = function(params) {
         this.filters.transfersIn[market.name].stopWatching();
 
       this.filters.transfersIn[market.name] = subcontract.Transfer({
-        to: user.id
+        _to: user.id
       }, {
         fromBlock: this.fromBlock,
         toBlock: this.toBlock
@@ -590,9 +590,9 @@ var EthereumClient = function(params) {
           number: log.number,
           block: log.blockNumber,
           inout: 'in',
-          from: web3.fromDecimal(log.args.from),
-          to: web3.fromDecimal(log.args.to),
-          amount: log.args.value.valueOf(),
+          from: web3.fromDecimal(log.args._from),
+          to: web3.fromDecimal(log.args._to),
+          amount: log.args._value.valueOf(),
           market: market.id,
           price: false,
           total: false,
@@ -605,7 +605,7 @@ var EthereumClient = function(params) {
         this.filters.transfersOut[market.name].stopWatching();
 
       this.filters.transfersOut[market.name] = subcontract.Transfer({
-        from: user.id
+        _from: user.id
       }, {
         fromBlock: this.fromBlock,
         toBlock: this.toBlock
@@ -634,9 +634,9 @@ var EthereumClient = function(params) {
           number: log.number,
           block: log.blockNumber,
           inout: 'out',
-          from: web3.fromDecimal(log.args.from),
-          to: web3.fromDecimal(log.args.to),
-          amount: log.args.value.valueOf(),
+          from: web3.fromDecimal(log.args._from),
+          to: web3.fromDecimal(log.args._to),
+          amount: log.args._value.valueOf(),
           market: market.id,
           price: false,
           total: false,
@@ -1134,7 +1134,7 @@ var EthereumClient = function(params) {
       gas: "100000"
     };
 
-    subcontract.transfer.call(amount, recipient, options, function(error, result) {
+    subcontract.transfer.call(recipient, amount, options, function(error, result) {
       if (error) {
         failure(error.message);
         return;
@@ -1144,7 +1144,7 @@ var EthereumClient = function(params) {
         return;
       }
 
-      subcontract.transfer.sendTransaction(amount, recipient, options, function(err, res) {
+      subcontract.transfer.sendTransaction(recipient, amount, options, function(err, res) {
         if (err) {
           failure(err.message);
           return;
@@ -1163,23 +1163,27 @@ var EthereumClient = function(params) {
     var SubContractABI = web3.eth.contract(abi.sub);
     var subcontract = SubContractABI.at(market.address);
 
-    // Use token's approveOnce to authorize deposit
+    // Use token's approval to authorize deposit
     try {
       var options = {
         from: user.id,
         to: market.address,
         gas: "100000"
       };
-      subcontract.approveOnce.sendTransaction(self.address, amount, options, function(error, result) {
+      subcontract.approve.sendTransaction(self.address, amount, options, function(error, result) {
         if (error) {
           failure(error);
           return;
         }
+        if (!result) {
+          failure("Missing transaction hash from approval.");
+          return;
+        }
 
-        // TODO watch for AddressApprovalOnce when event is formalized as a standard
-        // Poll isApprovedOnceFor meanwhile
-        var pollIsApprovedOnceFor = function() {
-          subcontract.isApprovedOnceFor.call(user.id, self.address, function(err, res) {
+        // TODO watch for Approved when event is formalized as a standard
+        // Poll allowance meanwhile
+        var pollAllowance = function() {
+          subcontract.allowance.call(user.id, self.address, function(err, res) {
             if (err) {
               failure(err);
               return;
@@ -1195,13 +1199,13 @@ var EthereumClient = function(params) {
                   failure(e);
                   return;
                 }
-                clearInterval(self.pollIsApprovedOnceFor);
+                clearInterval(self.pollAllowance);
                 success(r);
               });
             }
           });
         };
-        self.pollIsApprovedOnceFor = setInterval(pollIsApprovedOnceFor, 1000);
+        self.pollAllowance = setInterval(pollAllowance, 1000);
       });
     }
     catch(e) {
@@ -1619,7 +1623,7 @@ var EthereumClient = function(params) {
         success(post);
       else
         failure(result);
-    }.bind(this));
+    });
   };
 
   this.watchMessages = function(market, success, failure) {

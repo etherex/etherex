@@ -1,6 +1,6 @@
-var React = require("react");
+import React from 'react';
 
-var Placeholder = React.createClass({
+let Placeholder = React.createClass({
   render: function() {
     return (
       <div>

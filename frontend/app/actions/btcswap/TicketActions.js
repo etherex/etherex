@@ -1,12 +1,13 @@
-var _ = require("lodash");
-var https = require('https');
-var bigRat = require('big-rational');
+import _ from 'lodash';
+import https from 'https';
+import bigRat from 'big-rational';
 
-var constants = require("../../js/constants");
-var fixtures = require("../../js/fixtures");
-var utils = require("../../js/utils");
+import utils from '../../js/utils';
 
-var TicketActions = function() {
+let constants = require("../../js/constants");
+let fixtures = require("../../js/fixtures");
+
+let TicketActions = function() {
 
   this.loadTicketIDs = function(init) {
     if (this.flux.stores.config.debug)
@@ -114,8 +115,6 @@ var TicketActions = function() {
   this.setTicketFlags = function(ticket) {
     var userState = this.flux.stores.UserStore.getState();
 
-    var formattedAmount = utils.formatEther(ticket.amount);
-
     var reservable = false;
     if (!ticket.claimer ||
         (ticket.expiry > 1 && ticket.expiry < new Date().getTime() / 1000)) {
@@ -129,9 +128,11 @@ var TicketActions = function() {
     if (!reservable && ticket.claimer == userState.user.id.substr(2))
       claimable = true;
 
-    ticket.formattedAmount = formattedAmount;
+    ticket.formattedAmount = utils.formatEther(ticket.amount);
     ticket.reservable = reservable;
     ticket.claimable = claimable;
+    ticket.blockFee = null;
+    ticket.formattedBlockFee = {value: null, unit: null};
 
     return ticket;
   };
@@ -151,6 +152,8 @@ var TicketActions = function() {
           formattedAmount: {value: null, unit: null},
           price: null,
           total: null,
+          blockFee: null,
+          formattedBlockFee: {value: null, unit: null},
           reservable: false,
           expiry: 1
         };
@@ -298,6 +301,14 @@ var TicketActions = function() {
         ticket.merkleProof = merkleProof;
         ticket.merkleProofStr = JSON.stringify(merkleProof);
 
+        // Get btcrelay block validation fee for ticket.blockHash
+        btcSwapClient.getFeeAmount("0x" + ticket.blockHash, function(fee) {
+          ticket.blockFee = fee;
+          ticket.formattedBlockFee = utils.formatEther(fee);
+          this.dispatch(constants.ticket.LOOKUP_TICKET, ticket);
+        }.bind(this), function(error) {
+          utils.error(error);
+        }.bind(this));
       }.bind(this));
     }.bind(this));
 
@@ -437,17 +448,17 @@ var TicketActions = function() {
     }.bind(this));
   };
 
-  this.claimTicket = function(id, txHex, txHash, txIndex, merkleSibling, txBlockHash) {
+  this.claimTicket = function(id, txHex, txHash, txIndex, merkleSibling, txBlockHash, feeWei) {
     var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
 
-    btcSwapClient.claimTicket(id, txHex, txHash, txIndex, merkleSibling, txBlockHash, function(result) {
+    btcSwapClient.claimTicket(id, txHex, txHash, txIndex, merkleSibling, txBlockHash, feeWei, function(result) {
       if (this.flux.stores.config.debug)
         utils.log('claimTicket result: ', result);
 
       this.dispatch(constants.ticket.CLAIM_TICKET, id);
     }.bind(this), function(claimedId) {
       if (this.flux.stores.config.debug)
-        utils.log('claimedTicket completed for ticket #', claimedId);
+        utils.log('claimTicket completed for ticket #', claimedId);
 
       // Let global watch remove ticket...
       this.dispatch(constants.ticket.CLAIM_TICKET_SUCCESS, claimedId);
@@ -484,6 +495,15 @@ var TicketActions = function() {
 
     btcSwapClient.getBlockchainHead(function(result) {
       this.dispatch(constants.ticket.UPDATE_BTC_HEAD, {btcHead: result});
+
+      btcSwapClient.getFeeAmount("0x" + result, function(fee) {
+        this.dispatch(constants.ticket.UPDATE_BLOCK_FEE, {
+          blockFee: fee,
+          formattedBlockFee: utils.formatEther(fee)
+        });
+      }.bind(this), function(error) {
+        utils.error(error);
+      }.bind(this));
     }.bind(this), function(error) {
       utils.error(error);
       this.dispatch(constants.ticket.UPDATE_BTC_HEAD_FAIL, {error: error});
@@ -551,6 +571,7 @@ var TicketActions = function() {
   this.updateBlockHeader = function() {
     var btcSwapClient = this.flux.stores.config.getBtcSwapClient();
     var ticketState = this.flux.stores.TicketStore.getState();
+    var feeWei = this.flux.stores.config.storeBlockFee;
     var blocksBehind = ticketState.btcBehind;
 
     if (!blocksBehind) {
@@ -593,7 +614,7 @@ var TicketActions = function() {
         if (this.flux.stores.config.debug)
           utils.log("BTC_BLOCK_HASH", blockData.hash);
 
-        btcSwapClient.storeBlockHeader(blockData.hash, function(result) {
+        btcSwapClient.storeBlockWithFee(blockData.hash, feeWei, function(result) {
           if (result === blockData.nb) {
             this.dispatch(constants.ticket.UPDATE_BTC_HEIGHT, {btcHeight: result});
             this.dispatch(constants.ticket.UPDATE_BTC_HEAD, {btcRealHead: blockData.hash});

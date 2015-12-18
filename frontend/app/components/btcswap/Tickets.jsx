@@ -1,21 +1,14 @@
-// var _ = require('lodash');
-var React = require("react");
-// import {injectIntl, FormattedMessage} from 'react-intl';
+import React from 'react';
+import {Table, Button, Modal} from 'react-bootstrap';
 
-var TransitionGroup = require('../TransitionGroup');
+import AlertModal from '../AlertModal';
+import ConfirmModal from '../ConfirmModal';
+import TransitionGroup from '../TransitionGroup';
 
-var Table = require("react-bootstrap/lib/Table");
-
-var TicketRow = require("./TicketRow");
-var TicketDetails = require("./TicketDetails");
-var Button = require('react-bootstrap/lib/Button');
-var Modal = require('react-bootstrap/lib/Modal');
-var ConfirmModal = require('../ConfirmModal');
-var AlertModal = require('../AlertModal');
-// var utils = require('../js/utils');
-
-var Nav = require('./Nav');
-var Blocks = require('./Blocks');
+import Nav from './Nav';
+import Blocks from './Blocks';
+import TicketRow from './TicketRow';
+import TicketDetails from './TicketDetails';
 
 var Tickets = React.createClass({
   getInitialState() {

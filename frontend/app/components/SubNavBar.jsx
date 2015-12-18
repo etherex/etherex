@@ -1,13 +1,12 @@
-var _ = require("lodash");
-var React = require("react");
+import _ from 'lodash';
+import React from 'react';
+import {Link} from 'react-router';
 import {FormattedMessage} from 'react-intl';
+import {Nav} from 'react-bootstrap';
 
-var Link = require('react-router/lib/Link');
-var Nav = require('react-bootstrap/lib/Nav');
+let fixtures = require('../js/fixtures');
 
-var fixtures = require('../js/fixtures');
-
-var SubNavBar = React.createClass({
+let SubNavBar = React.createClass({
   render() {
     return (
       <Nav bsStyle="pills" className="navbar" role="navigation" aria-label="Secondary" justified>

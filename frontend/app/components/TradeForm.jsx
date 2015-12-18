@@ -1,14 +1,12 @@
-var React = require("react");
+import React from 'react';
 import {injectIntl} from 'react-intl';
+import {DropdownButton, MenuItem} from 'react-bootstrap';
 
-var DropdownButton = require('react-bootstrap/lib/DropdownButton');
-var MenuItem = require('react-bootstrap/lib/MenuItem');
+import AlertDismissable from './AlertDismissable';
+import TradeFormInstance from './TradeFormInstance';
 
-var AlertDismissable = require('./AlertDismissable');
-var TradeFormInstance = require("./TradeFormInstance");
-
-var TradeForm = injectIntl(React.createClass({
-  getInitialState: function() {
+let TradeForm = injectIntl(React.createClass({
+  getInitialState() {
     return {
       type: 1,
       typename: this.props.intl.formatMessage({id:'form.buy'}),
@@ -17,7 +15,7 @@ var TradeForm = injectIntl(React.createClass({
     };
   },
 
-  componentWillReceiveProps: function(nextProps) {
+  componentWillReceiveProps(nextProps) {
     if (nextProps.trades.newAmount && nextProps.trades.type != this.props.type)
       this.setState({
         type: nextProps.trades.type,
@@ -27,18 +25,18 @@ var TradeForm = injectIntl(React.createClass({
       });
   },
 
-  setAlert: function(alertLevel, alertMessage) {
+  setAlert(alertLevel, alertMessage) {
     this.setState({
       alertLevel: alertLevel,
       alertMessage: alertMessage
     });
   },
 
-  showAlert: function(show) {
+  showAlert(show) {
     this.refs.alerts.setState({alertVisible: show});
   },
 
-  handleType: function(e, key) {
+  handleType(e, key) {
     e.preventDefault();
 
     this.setState({
@@ -48,7 +46,7 @@ var TradeForm = injectIntl(React.createClass({
     this.props.flux.actions.trade.switchType(key);
   },
 
-  render: function() {
+  render() {
     var formatMessage = this.props.intl.formatMessage;
     return (
     <div className="col-lg-10 col-lg-offset-1 col-md-12">

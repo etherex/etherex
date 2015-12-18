@@ -14,9 +14,9 @@
  * addons and under the Apache 2.0 License.
  */
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var ReactTransitionGroup = require('react-addons-transition-group');
+import React from 'react';
+import ReactDOM from 'react-dom';
+import ReactTransitionGroup from 'react-addons-transition-group';
 
 var TICK = 17;
 
@@ -117,7 +117,7 @@ var removeClass = function (element, className) {
     return element;
 };
 
-var TimeoutTransitionGroupChild = React.createClass({
+let TransitionGroupChild = React.createClass({
     transition: function(animationType, finishCallback) {
         var node = ReactDOM.findDOMNode(this);
         var className = this.props.name + '-' + animationType;
@@ -203,7 +203,7 @@ var TimeoutTransitionGroupChild = React.createClass({
     }
 });
 
-var TimeoutTransitionGroup = React.createClass({
+let TransitionGroup = React.createClass({
     propTypes: {
         enterTimeout: React.PropTypes.number.isRequired,
         leaveTimeout: React.PropTypes.number.isRequired,
@@ -221,14 +221,14 @@ var TimeoutTransitionGroup = React.createClass({
 
     _wrapChild: function(child) {
         return (
-            <TimeoutTransitionGroupChild
+            <TransitionGroupChild
                     enterTimeout={this.props.enterTimeout}
                     leaveTimeout={this.props.leaveTimeout}
                     name={this.props.transitionName}
                     enter={this.props.transitionEnter}
                     leave={this.props.transitionLeave}>
                 {child}
-            </TimeoutTransitionGroupChild>
+            </TransitionGroupChild>
         );
     },
 
@@ -241,4 +241,4 @@ var TimeoutTransitionGroup = React.createClass({
     }
 });
 
-module.exports = TimeoutTransitionGroup;
+module.exports = TransitionGroup;

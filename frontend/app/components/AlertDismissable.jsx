@@ -1,8 +1,7 @@
-var React = require("react");
-var Alert = require('react-bootstrap/lib/Alert');
-var Button = require('react-bootstrap/lib/Button');
+import React from 'react';
+import {Alert, Button} from 'react-bootstrap';
 
-var AlertDismissable = React.createClass({
+let AlertDismissable = React.createClass({
   getInitialState: function() {
     return {
       alertVisible: !this.props.show ? false : true

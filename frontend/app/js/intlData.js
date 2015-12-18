@@ -53,6 +53,7 @@ module.exports = {
       "not_ready": `The Ethereum block chain is not current and
                     {peers, plural,
                       =0 {we're looking for peers}
+                      =1 {is fetching blocks from # peer}
                       other {is fetching blocks from # peers}}.`,
       "force": "Load anyway",
       "failed": {
@@ -167,6 +168,8 @@ module.exports = {
       "title": "Configuration",
       "current": "EtherEx address",
       "new": "New address",
+      "blockfee": "BTC relay block fee",
+      "blockfeehelp": "Amount of wei you would charge to other users for the BTC block headers you would successfully store to btcrelay.",
       "timeout": "Network timeout (seconds)",
       "update": "Update",
       "refresh": "Refresh",
@@ -250,11 +253,12 @@ module.exports = {
       "id": "Trade ID"
     },
     "user": {
+      "account": "My Account",
+      "balances": "Balances",
       "not_found": "User not found",
-      "summary": "User summary",
       "address": "Current address",
-      "switch": "Use address",
-      "sub": "Current {currency} balance",
+      "total": "Total value (ETH)",
+      "trades": "Open trades",
       "balance": `{balance, number} {currency}
                   {pending, plural,
                     =0 {}
@@ -274,7 +278,8 @@ module.exports = {
       "behind": `BTC relay headers are behind by
                 {behind, plural,
                   =1 {# block}
-                  other {# blocks}}`
+                  other {# blocks}}`,
+      "update": "Update block headers"
     },
     "hashrate": "{hashrate, number} H/s"
   }

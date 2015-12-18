@@ -1,42 +1,71 @@
-var _ = require('lodash');
-var React = require("react");
+import _ from 'lodash';
+import React from 'react';
 import {FormattedMessage} from 'react-intl';
 
-var UserSummaryPane = require("./UserSummaryPane");
-var TradeList = require("./TradeList");
+import UserBalances from './UserBalances';
+import UserAddress from './UserAddress';
+import TradeList from './TradeList';
 
-var UserDetails = React.createClass({
-  isYours() {
+let UserDetails = React.createClass({
+  getInitialState() {
+    return {
+      own: false
+    };
+  },
+
+  componentDidMount() {
+    this.componentWillReceiveProps(this.props);
+  },
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.user.user.id) {
+      var own = {tradeBuys: [], tradeSells: []};
+      if (this.isYours(nextProps)) {
+        own.tradeBuys = _.filter(nextProps.trades.tradeBuys, {'owner': nextProps.user.user.id});
+        own.tradeSells = _.filter(nextProps.trades.tradeSells, {'owner': nextProps.user.user.id});
+        own.title = <FormattedMessage id='form.yours' />;
+      }
+      this.setState({
+        own: own
+      });
+    }
+    else
+      this.setState({
+        own: false
+      });
+  },
+
+  isYours(nextProps) {
     return (
-      this.props.user &&
-      this.props.trades &&
-      (this.props.trades.tradeBuys.length > 0) ||
-      (this.props.trades.tradeSells.length > 0)
+      nextProps.user &&
+      nextProps.trades &&
+      (nextProps.trades.tradeBuys.length > 0) ||
+      (nextProps.trades.tradeSells.length > 0)
     );
   },
 
-  render: function() {
-    var own = {tradeBuys: [], tradeSells: []};
-    if (this.isYours()) {
-      own.tradeBuys = _.filter(this.props.trades.tradeBuys, {'owner': this.props.user.user.id});
-      own.tradeSells = _.filter(this.props.trades.tradeSells, {'owner': this.props.user.user.id});
-      own.title = <FormattedMessage id='form.yours' />;
-      this.props.user.user.own = true;
-    }
-
-    if (this.props.user.user.id) {
-      return (
-        <div className="container-fluid row">
-          <UserSummaryPane flux={this.props.flux} user={this.props.user} market={this.props.market.market} trades={own} />
-          {(own.tradeBuys && own.tradeSells) &&
-            <TradeList flux={this.props.flux} market={this.props.market} trades={own} user={this.props.user} />}
+  render() {
+    return (
+      <div className="row">
+        <div className="col-lg-10 col-lg-offset-1 col-md-12">
+          <h4 className="page-title">
+            <FormattedMessage id='user.account' />
+          </h4>
+          { this.state.own ?
+            <div className="row">
+              <div className="col-md-5">
+                <UserBalances flux={this.props.flux} user={this.props.user.user} market={this.props.market.market} />
+              </div>
+              <div className="col-md-7">
+                <UserAddress flux={this.props.flux} user={this.props.user.user} market={this.props.market.market} trades={this.state.own} />
+              </div>
+            </div> :
+            <h5><FormattedMessage id='user.not_found' /></h5> }
         </div>
-      );
-    } else {
-      return (
-        <h3><FormattedMessage id='user.not_found' /></h3>
-      );
-    }
+        { this.state.own &&
+          <TradeList flux={this.props.flux} market={this.props.market} trades={this.state.own} user={this.props.user} listOwn={true} /> }
+      </div>
+    );
   }
 });
 

@@ -1,19 +1,15 @@
-var React = require("react");
+import React from 'react';
 import {injectIntl, FormattedMessage} from 'react-intl';
+import {Tabs, Tab} from 'react-bootstrap';
 
-var Tabs = require('react-bootstrap/lib/Tabs');
-var Tab = require('react-bootstrap/lib/Tab');
+import AlertDismissable from './AlertDismissable';
+import SendEther from './SendEther';
+import SubSend from './SubSend';
+import SubDeposit from './SubDeposit';
+import SubWithdraw from './SubWithdraw';
+import TxsList from './TxsList';
 
-var AlertDismissable = require('./AlertDismissable');
-
-var SendEther = require('./SendEther');
-var SubSend = require('./SubSend');
-var SubDeposit = require('./SubDeposit');
-var SubWithdraw = require('./SubWithdraw');
-
-var TxsList = require("./TxsList");
-
-var Wallet = injectIntl(React.createClass({
+let Wallet = injectIntl(React.createClass({
   getInitialState() {
     return {
       alertLevel: 'info',

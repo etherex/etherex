@@ -3,8 +3,8 @@ var Fluxxor = require("fluxxor");
 
 var constants = require("../js/constants");
 var fixtures = require("../js/fixtures");
-var utils = require("../js/utils");
-var bigRat = require("big-rational");
+import utils from '../js/utils';
+import bigRat from 'big-rational';
 
 var UserStore = Fluxxor.createStore({
 
@@ -13,7 +13,8 @@ var UserStore = Fluxxor.createStore({
       loading: true,
       id: 'loading...',
       balance: 0,
-      balanceFormatted: 0,
+      balanceFormatted: {value: 0, unit: 'ether'},
+      balanceWei: 0,
       balancePending: 0,
       balanceSub: 0,
       balanceSubAvailable: 0,

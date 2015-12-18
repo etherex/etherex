@@ -1,11 +1,9 @@
-var React = require("react");
+import React from 'react';
+import {Link} from 'react-router';
 import {injectIntl, FormattedMessage} from 'react-intl';
+import {Nav, Navbar} from 'react-bootstrap';
 
-var Link = require('react-router/lib/Link');
-var Nav = require('react-bootstrap/lib/Nav');
-var Navbar = require('react-bootstrap/lib/Navbar');
-
-var NavBar = injectIntl(React.createClass({
+let NavBar = injectIntl(React.createClass({
   render() {
     return (
       <Navbar id="side-nav" role="navigation" aria-label="Primary" fluid>

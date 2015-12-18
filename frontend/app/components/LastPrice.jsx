@@ -1,9 +1,8 @@
-var React = require("react");
+import React from 'react';
 
-var utils = require("../js/utils");
+import utils from '../js/utils';
 
-var LastPrice = React.createClass({
-
+let LastPrice = React.createClass({
   getInitialState: function () {
     return {
       lastMarket: null,

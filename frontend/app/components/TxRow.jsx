@@ -1,13 +1,9 @@
-var React = require("react");
+import React from 'react';
 import {injectIntl, FormattedMessage, FormattedNumber} from 'react-intl';
+import {Button, Popover, OverlayTrigger} from 'react-bootstrap';
+import bigRat from 'big-rational';
 
-var Button = require('react-bootstrap/lib/Button');
-var Popover = require('react-bootstrap/lib/Popover');
-var OverlayTrigger = require('react-bootstrap/lib/OverlayTrigger');
-
-var bigRat = require("big-rational");
-
-var TxRow = injectIntl(React.createClass({
+let TxRow = injectIntl(React.createClass({
   render: function() {
     var amount = bigRat(this.props.tx.amount).divide(Math.pow(10, this.props.market.decimals)).valueOf();
     return (

@@ -262,7 +262,7 @@ def trade(max_amount, trade_ids:arr):
                     send(msg.sender, value)
 
                     # Log transaction
-                    log(type=log_fill_tx, market_id, msg.sender, owner, 2, price, fill, trade_id)
+                    log(type=log_fill_tx, market_id, msg.sender, owner, ASK, price, fill, trade_id)
                 else:
                     return(INSUFFICIENT_BALANCE)
 
@@ -299,7 +299,7 @@ def trade(max_amount, trade_ids:arr):
                     send(owner, value)
 
                     # Log transaction
-                    log(type=log_fill_tx, market_id, msg.sender, owner, 1, price, fill, trade_id)
+                    log(type=log_fill_tx, market_id, msg.sender, owner, BID, price, fill, trade_id)
                 else:
                     return(INSUFFICIENT_BALANCE)
 
@@ -327,11 +327,11 @@ def trade(max_amount, trade_ids:arr):
     return(SUCCESS)
 
 #
-# Deposit - called from the user only, after calling approveOnce on the token
+# Deposit - called from the user only, after calling "approve" on the token
 #
 def deposit(amount, market_id):
     # Transfer funds to the exchange
-    if self.markets[market_id].contract.transferFrom(msg.sender, amount, self):
+    if self.markets[market_id].contract.transferFrom(msg.sender, self, amount):
         balance = self.balances[msg.sender][market_id].available
         new_balance = balance + amount
         self.balances[msg.sender][market_id].available = new_balance
@@ -346,7 +346,7 @@ def withdraw(amount, market_id):
     balance = self.balances[msg.sender][market_id].available
     if balance >= amount:
         self.balances[msg.sender][market_id].available = balance - amount
-        result = self.markets[market_id].contract.transfer(amount, msg.sender)
+        result = self.markets[market_id].contract.transfer(msg.sender, amount)
         log(type=log_withdraw, market_id, msg.sender, amount)
         return(result)
     return(FAILURE)

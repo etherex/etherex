@@ -1,14 +1,10 @@
-var React = require("react");
+import React from 'react';
 import {injectIntl, FormattedMessage} from 'react-intl';
+import {DropdownButton, MenuItem, Button, Alert, Input} from 'react-bootstrap';
 
-var DropdownButton = require('react-bootstrap/lib/DropdownButton');
-var MenuItem = require('react-bootstrap/lib/MenuItem');
-var Button = require('react-bootstrap/lib/Button');
-var Alert = require('react-bootstrap/lib/Alert');
-var Input = require('react-bootstrap/lib/Input');
-var ConfirmModal = require('./ConfirmModal');
+import ConfirmModal from './ConfirmModal';
 
-var ConfigPane = injectIntl(React.createClass({
+let ConfigPane = injectIntl(React.createClass({
   getInitialState: function() {
     var configState = this.props.flux.store("config").getState();
     return {
@@ -26,6 +22,8 @@ var ConfigPane = injectIntl(React.createClass({
         'superhero': 'Superhero'
       },
       newTheme: false,
+      blockFee: configState.storeBlockFee,
+      blockFeeUpdated: false,
       showModal: false,
       handler: false
     };
@@ -86,6 +84,21 @@ var ConfigPane = injectIntl(React.createClass({
     e.preventDefault();
     localStorage.theme = this.state.theme;
     window.location.reload();
+  },
+
+  handleChangeBlockFee(e) {
+    e.preventDefault();
+    var blockFee = this.refs.blockfee.getValue();
+    this.setState({ blockFee: blockFee, blockFeeUpdated: true });
+  },
+
+  handleUpdateBlockFee: function(e) {
+    e.preventDefault();
+    var blockFee = this.refs.blockfee.getValue();
+    this.setState({ blockFee: blockFee, blockFeeUpdated: false });
+    this.props.flux.actions.config.updateConfig({
+      storeBlockFee: blockFee
+    });
   },
 
   handleChangeTimeout(e) {
@@ -210,6 +223,22 @@ var ConfigPane = injectIntl(React.createClass({
               value={this.state.address} />
             <Input wrapperClassName="col-sm-9 col-sm-offset-3">
               <Button className={"btn-block" + (this.state.newAddress ? " btn-primary" : "")} type="submit">
+                <FormattedMessage id='config.update' />
+              </Button>
+            </Input>
+          </form>
+
+          <form className="form-horizontal" role="form" onSubmit={this.handleUpdateBlockFee} >
+            <Input ref="blockfee" type="number" min="1" step="1"
+              label={<FormattedMessage id='config.blockfee' />}
+              labelClassName='col-sm-3' wrapperClassName='col-sm-9'
+              help={<FormattedMessage id='config.blockfeehelp' />}
+              value={this.state.blockFee} onChange={this.handleChangeBlockFee} />
+            <Input wrapperClassName="col-sm-9 col-sm-offset-3">
+              <Button
+                onClick={this.handleUpdateBlockFee}
+                wrapperClassName="col-sm-9 col-sm-offset-3"
+                className={this.state.blockFeeUpdated ? "btn-primary" : ""} >
                 <FormattedMessage id='config.update' />
               </Button>
             </Input>

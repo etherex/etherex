@@ -174,7 +174,7 @@ class TestEtherEx(object):
         self.test_initialize()
 
         # Send 1000 to Bob
-        ans = self.etx_contract.transfer(1000 * 10 ** 5, self.BOB['address'])
+        ans = self.etx_contract.transfer(self.BOB['address'], 1000 * 10 ** 5)
         assert ans == SUCCESS
 
         # Alice has 1000 less
@@ -191,19 +191,19 @@ class TestEtherEx(object):
     def test_bob_to_charlie_fail(self):
         self.test_initialize()
 
-        ans = self.etx_contract.transfer(1000 * 10 ** 5, self.CHARLIE['address'], sender=self.BOB['key'])
+        ans = self.etx_contract.transfer(self.CHARLIE['address'], 1000 * 10 ** 5, sender=self.BOB['key'])
         assert ans == FAILURE
 
     def test_alice_to_bob_to_charlie(self):
         self.test_initialize()
 
         # Send 1000 to Bob
-        ans = self.etx_contract.transfer(1000 * 10 ** 5, self.BOB['address'], profiling=1)
+        ans = self.etx_contract.transfer(self.BOB['address'], 1000 * 10 ** 5, profiling=1)
         assert ans['output'] == 1
         logger.info("\nTransfer profiling: %s" % ans)
 
         # Bob sends 250 to Charlie
-        ans = self.etx_contract.transfer(250 * 10 ** 5, self.CHARLIE['address'], sender=self.BOB['key'])
+        ans = self.etx_contract.transfer(self.CHARLIE['address'], 250 * 10 ** 5, sender=self.BOB['key'])
         assert ans == SUCCESS
 
         # Charlie now has 250
@@ -224,7 +224,7 @@ class TestEtherEx(object):
             self.test_initialize()
 
         # Approve deposit of 10,000
-        ans = self.etx_contract.approveOnce(
+        ans = self.etx_contract.approve(
             self.contract.address,
             10000 * 10 ** 5,
             profiling=1)
@@ -232,7 +232,7 @@ class TestEtherEx(object):
         logger.info("\napproveOnce profiling: %s" % ans)
 
         # Verify exchange is approved for a transfer
-        ans = self.etx_contract.isApprovedOnceFor(
+        ans = self.etx_contract.allowance(
             self.ALICE['address'],
             self.contract.address)
         assert ans == 10000 * 10 ** 5
@@ -243,7 +243,7 @@ class TestEtherEx(object):
         logger.info("\nDeposit profiling: %s" % ans)
 
         # Verify exchange is no longer approved for a transfer
-        ans = self.etx_contract.isApprovedOnceFor(
+        ans = self.etx_contract.allowance(
             self.ALICE['address'],
             self.contract.address)
         assert ans == FAILURE
@@ -532,7 +532,7 @@ class TestEtherEx(object):
 
     def test_transfer_to_bob_and_deposit(self):
         # Load BOB with ETX from ALICE
-        ans = self.etx_contract.transfer(10000 * 10 ** 5, self.BOB['address'])
+        ans = self.etx_contract.transfer(self.BOB['address'], 10000 * 10 ** 5)
         assert ans == 1
 
         # Get BOB's balance
@@ -540,13 +540,13 @@ class TestEtherEx(object):
         assert balance == 10 ** 24
 
         # Approve deposit of 10,000
-        ans = self.etx_contract.approveOnce(
+        ans = self.etx_contract.approve(
             self.contract.address,
             10000 * 10 ** 5,
             sender=self.BOB['key'])
 
         # Verify exchange is approved for a transfer
-        ans = self.etx_contract.isApprovedOnceFor(
+        ans = self.etx_contract.allowance(
             self.BOB['address'],
             self.contract.address)
         assert ans == 10000 * 10 ** 5
@@ -571,7 +571,7 @@ class TestEtherEx(object):
 
         # Verify exchange is no longer approved for a transfer
         if not depositFailed:
-            ans = self.etx_contract.isApprovedOnceFor(
+            ans = self.etx_contract.allowance(
                 self.BOB['address'],
                 self.contract.address)
             assert ans == 0
@@ -582,7 +582,7 @@ class TestEtherEx(object):
                 "amount": 10000 * 10 ** 5
             }]
         else:
-            ans = self.etx_contract.isApprovedOnceFor(
+            ans = self.etx_contract.allowance(
                 self.BOB['address'],
                 self.contract.address)
             assert ans == 1000000000

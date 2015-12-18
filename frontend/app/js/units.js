@@ -1,4 +1,4 @@
-var bigRat = require('big-rational');
+import bigRat from 'big-rational';
 
 var units = {
   "Uether": bigRat("1000000000000000000000000000000000000000000000000000000"),

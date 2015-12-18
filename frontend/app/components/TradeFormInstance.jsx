@@ -1,16 +1,14 @@
-var React = require("react");
+import React from 'react';
 import {injectIntl, FormattedMessage} from 'react-intl';
+import {Button, Input} from 'react-bootstrap';
+import bigRat from 'big-rational';
 
-var bigRat = require("big-rational");
-var fixtures = require("../js/fixtures");
+import SubDepositModal from './SubDepositModal';
+import ConfirmModal from './ConfirmModal';
 
-var Button = require('react-bootstrap/lib/Button');
-var Input = require('react-bootstrap/lib/Input');
+let fixtures = require("../js/fixtures");
 
-var SubDepositModal = require('./SubDepositModal');
-var ConfirmModal = require('./ConfirmModal');
-
-var TradeFormInstance = injectIntl(React.createClass({
+let TradeFormInstance = injectIntl(React.createClass({
   getInitialState: function() {
     return {
       amount: null,

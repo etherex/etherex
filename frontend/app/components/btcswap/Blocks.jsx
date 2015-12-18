@@ -1,11 +1,8 @@
-var React = require("react");
-import {injectIntl, FormattedNumber} from 'react-intl';
+import React from 'react';
+import {injectIntl, FormattedNumber, FormattedMessage} from 'react-intl';
+import {Button, Popover, OverlayTrigger} from 'react-bootstrap';
 
-var Button = require('react-bootstrap').Button;
-var Popover = require('react-bootstrap').Popover;
-var OverlayTrigger = require('react-bootstrap').OverlayTrigger;
-
-var Blocks = injectIntl(React.createClass({
+let Blocks = injectIntl(React.createClass({
   getInitialState: function () {
     return {
       updatingBtcHeaders: false
@@ -31,7 +28,8 @@ var Blocks = injectIntl(React.createClass({
               <Popover id="btc-hash-popover" bsSize="large">
                 <p className="text-overflow">BTC block # { this.props.intl.formatNumber(this.props.ticket.btcHeight) }</p>
                 <p className="text-overflow">BTC block hash: <samp>{ this.props.ticket.btcHead }</samp></p>
-                <p className="text-overflow">Real BTC block # { this.props.ticket.btcRealHeight }</p>
+                <p className="text-overflow">Block validation fee: <b>{ this.props.ticket.formattedBlockFee.value } { this.props.ticket.formattedBlockFee.unit }</b></p>
+                <p className="text-overflow">Real BTC block # { this.props.intl.formatNumber(this.props.ticket.btcRealHeight) }</p>
                 <p className="text-overflow">Real BTC block hash: <samp>{ this.props.ticket.btcRealHead }</samp></p>
                 { this.props.ticket.btcBehind &&
                   <div>
@@ -54,7 +52,7 @@ var Blocks = injectIntl(React.createClass({
               <Button className="btn-balance pull-right" style={{marginRight: 10}} bsStyle="warning"
                 disabled={this.state.updatingBtcHeaders || !!this.props.ticket.btcUpdating}
                 onClick={this.handleUpdateBlockHeader}>
-                  Update block header
+                  <FormattedMessage id='btc.update' />
               </Button>
             </OverlayTrigger> }
         </div>

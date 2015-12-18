@@ -1,7 +1,8 @@
-var React = require("react");
-var Chart = require("./GraphPriceTechan");
+import React from 'react';
 
-var GraphPrice = React.createClass({
+let Chart = require("./GraphPriceTechan");
+
+let GraphPrice = React.createClass({
   render: function() {
     return (
       <div className="navbar">

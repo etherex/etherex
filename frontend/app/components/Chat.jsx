@@ -1,16 +1,9 @@
-var _ = require("lodash");
-var React = require("react");
+import _ from 'lodash';
+import React from 'react';
 import {FormattedTime} from 'react-intl';
+import {Accordion, Glyphicon, Button, Modal, Panel, Input, Well} from 'react-bootstrap';
 
-var Accordion = require('react-bootstrap/lib/Accordion');
-var Glyphicon = require("react-bootstrap/lib/Glyphicon");
-var Button = require('react-bootstrap/lib/Button');
-var Modal = require('react-bootstrap/lib/Modal');
-var Panel = require('react-bootstrap/lib/Panel');
-var Input = require('react-bootstrap/lib/Input');
-var Well = require('react-bootstrap/lib/Well');
-
-var Chat = React.createClass({
+let Chat = React.createClass({
   getInitialState() {
     return {
       activeKey: null,
@@ -52,9 +45,9 @@ var Chat = React.createClass({
     else
       this.setState({
         showModal: true,
-        modalMessage: <div>
-          Whisper is not enabled on this node. Start <samp>geth</samp> with:<p><pre>--shh --rpcapi "db,eth,net,web3,shh"</pre></p>
-        </div>
+        modalMessage: <p>
+          Whisper is not enabled on this node. Start <samp>geth</samp> with: <pre>--shh --rpcapi "db,eth,net,web3,shh"</pre>
+        </p>
       });
     this.setState({
       message: null
@@ -86,7 +79,7 @@ var Chat = React.createClass({
               <div className="container-fluid">
                 <Input type="text" ref="message" value={ this.state.message } onChange={this.handleChange} />
               </div>
-              <Button type="submit" bsStyle="primary" bsSize="medium" className="hidden pull-right">Send</Button>
+              <Button type="submit" bsStyle="primary" className="hidden pull-right">Send</Button>
             </form>
           </Panel>
         </Accordion>

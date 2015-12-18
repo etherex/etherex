@@ -1,12 +1,10 @@
-var _ = require('lodash');
-var React = require("react");
+import _ from 'lodash';
+import React from 'react';
+import {ButtonGroup, Button} from 'react-bootstrap';
 
-var ButtonGroup = require('react-bootstrap/lib/ButtonGroup');
-var Button = require('react-bootstrap/lib/Button');
-var utils = require('../js/utils');
+import utils from '../js/utils';
 
-var RangeSelect = React.createClass({
-
+let RangeSelect = React.createClass({
   getInitialState: function () {
     var configState = this.props.flux.store("config");
     return {

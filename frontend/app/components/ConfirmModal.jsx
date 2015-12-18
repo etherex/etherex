@@ -1,11 +1,10 @@
-var React = require("react");
+import React from 'react';
 import {injectIntl} from 'react-intl';
+import {Button, Modal} from 'react-bootstrap';
 
-var Button = require('react-bootstrap/lib/Button');
-var Modal = require('react-bootstrap/lib/Modal');
-var TradeTable = require("./TradeTable");
+import TradeTable from './TradeTable';
 
-var ConfirmModal = injectIntl(React.createClass({
+let ConfirmModal = injectIntl(React.createClass({
   getInitialState() {
     return {
       tradeTable: null
@@ -44,13 +43,13 @@ var ConfirmModal = injectIntl(React.createClass({
         </Modal.Header>
         <form onSubmit={this.onHide}>
           <Modal.Body>
-            <big><p>{this.props.message}</p></big>
+            <div className="p"><big>{this.props.message}</big></div>
 
-            {(this.props.note) &&
-              <p>{this.props.note}</p>}
+            { (this.props.note) &&
+              <div className="p">{this.props.note}</div> }
 
-            {(this.props.estimate) &&
-              <p>{formatMessage({id: 'confirm.estimate'})}: {this.props.estimate}</p>}
+            { (this.props.estimate) &&
+              <div className="p">{formatMessage({id: 'confirm.estimate'})}: {this.props.estimate}</div> }
 
             {this.state.tradeTable}
           </Modal.Body>

@@ -1,81 +1,194 @@
-module.exports = [{
-    "name": "approve(int256)",
-    "type": "function",
-    "inputs": [{ "name": "_addr", "type": "int256" }],
-    "outputs": [{ "name": "out", "type": "int256" }]
-},
-{
-    "name": "approveOnce(int256,int256)",
-    "type": "function",
-    "inputs": [{ "name": "_addr", "type": "int256" }, { "name": "_maxValue", "type": "int256" }],
-    "outputs": [{ "name": "out", "type": "int256" }]
-},
-{
-    "name": "balance(int256)",
-    "type": "function",
-    "inputs": [{ "name": "_addr", "type": "int256" }],
-    "outputs": [{ "name": "out", "type": "int256" }]
-},
-{
-    "name": "balanceOf(int256)",
-    "type": "function",
-    "inputs": [{ "name": "_addr", "type": "int256" }],
-    "outputs": [{ "name": "out", "type": "int256" }]
-},
-{
-    "name": "unapprove(int256)",
-    "type": "function",
-    "inputs": [{ "name": "_addr", "type": "int256" }],
-    "outputs": [{ "name": "out", "type": "int256" }]
-},
-{
-    "name": "isApproved(int256)",
-    "type": "function",
-    "inputs": [{ "name": "_proxy", "type": "int256" }],
-    "outputs": [{ "name": "out", "type": "int256" }]
-},
-{
-    "name": "isApprovedFor(int256,int256)",
-    "type": "function",
-    "inputs": [{ "name": "_target", "type": "int256" }, { "name": "_proxy", "type": "int256" }],
-    "outputs": [{ "name": "out", "type": "int256" }]
-},
-{
-    "name": "isApprovedOnce(int256)",
-    "type": "function",
-    "inputs": [{ "name": "_proxy", "type": "int256" }],
-    "outputs": [{ "name": "out", "type": "int256" }]
-},
-{
-    "name": "isApprovedOnceFor(int256,int256)",
-    "type": "function",
-    "inputs": [{ "name": "_target", "type": "int256" }, { "name": "_proxy", "type": "int256" }],
-    "outputs": [{ "name": "out", "type": "int256" }]
-},
-{
-    "name": "transfer(int256,int256)",
-    "type": "function",
-    "inputs": [{ "name": "_value", "type": "int256" }, { "name": "_to", "type": "int256" }],
-    "outputs": [{ "name": "out", "type": "int256" }]
-},
-{
-    "name": "transferFrom(int256,int256,int256)",
-    "type": "function",
-    "inputs": [{ "name": "_from", "type": "int256" }, { "name": "_value", "type": "int256" }, { "name": "_to", "type": "int256" }],
-    "outputs": [{ "name": "out", "type": "int256" }]
-},
-{
-    "name": "AddressApproval(int256,int256,int256)",
-    "type": "event",
-    "inputs": [{ "name": "address", "type": "int256", "indexed": true }, { "name": "proxy", "type": "int256", "indexed": true }, { "name": "result", "type": "int256", "indexed": false }]
-},
-{
-    "name": "AddressApprovalOnce(int256,int256,int256)",
-    "type": "event",
-    "inputs": [{ "name": "address", "type": "int256", "indexed": true }, { "name": "proxy", "type": "int256", "indexed": true }, { "name": "value", "type": "int256", "indexed": false }]
-},
-{
-    "name": "Transfer(int256,int256,int256)",
-    "type": "event",
-    "inputs": [{ "name": "from", "type": "int256", "indexed": true }, { "name": "to", "type": "int256", "indexed": true }, { "name": "value", "type": "int256", "indexed": false }]
-}];
+module.exports = [
+    {
+        "constant": false,
+        "type": "function",
+        "name": "allowance(int256,int256)",
+        "outputs": [
+            {
+                "type": "int256",
+                "name": "out"
+            }
+        ],
+        "inputs": [
+            {
+                "type": "int256",
+                "name": "_address"
+            },
+            {
+                "type": "int256",
+                "name": "_spender"
+            }
+        ]
+    },
+    {
+        "constant": false,
+        "type": "function",
+        "name": "approve(int256,int256)",
+        "outputs": [
+            {
+                "type": "int256",
+                "name": "out"
+            }
+        ],
+        "inputs": [
+            {
+                "type": "int256",
+                "name": "_spender"
+            },
+            {
+                "type": "int256",
+                "name": "_value"
+            }
+        ]
+    },
+    {
+        "constant": false,
+        "type": "function",
+        "name": "balance()",
+        "outputs": [
+            {
+                "type": "int256",
+                "name": "out"
+            }
+        ],
+        "inputs": []
+    },
+    {
+        "constant": false,
+        "type": "function",
+        "name": "balanceOf(int256)",
+        "outputs": [
+            {
+                "type": "int256",
+                "name": "out"
+            }
+        ],
+        "inputs": [
+            {
+                "type": "int256",
+                "name": "_address"
+            }
+        ]
+    },
+    {
+        "constant": false,
+        "type": "function",
+        "name": "transfer(int256,int256)",
+        "outputs": [
+            {
+                "type": "int256",
+                "name": "out"
+            }
+        ],
+        "inputs": [
+            {
+                "type": "int256",
+                "name": "_to"
+            },
+            {
+                "type": "int256",
+                "name": "_value"
+            }
+        ]
+    },
+    {
+        "constant": false,
+        "type": "function",
+        "name": "transferFrom(int256,int256,int256)",
+        "outputs": [
+            {
+                "type": "int256",
+                "name": "out"
+            }
+        ],
+        "inputs": [
+            {
+                "type": "int256",
+                "name": "_from"
+            },
+            {
+                "type": "int256",
+                "name": "_to"
+            },
+            {
+                "type": "int256",
+                "name": "_value"
+            }
+        ]
+    },
+    {
+        "constant": false,
+        "type": "function",
+        "name": "unapprove(int256)",
+        "outputs": [
+            {
+                "type": "int256",
+                "name": "out"
+            }
+        ],
+        "inputs": [
+            {
+                "type": "int256",
+                "name": "_spender"
+            }
+        ]
+    },
+    {
+        "inputs": [
+            {
+                "indexed": true,
+                "type": "int256",
+                "name": "_owner"
+            },
+            {
+                "indexed": true,
+                "type": "int256",
+                "name": "_spender"
+            },
+            {
+                "indexed": false,
+                "type": "int256",
+                "name": "_value"
+            }
+        ],
+        "type": "event",
+        "name": "Approved(int256,int256,int256)"
+    },
+    {
+        "inputs": [
+            {
+                "indexed": true,
+                "type": "int256",
+                "name": "_from"
+            },
+            {
+                "indexed": true,
+                "type": "int256",
+                "name": "_to"
+            },
+            {
+                "indexed": false,
+                "type": "int256",
+                "name": "_value"
+            }
+        ],
+        "type": "event",
+        "name": "Transfer(int256,int256,int256)"
+    },
+    {
+        "inputs": [
+            {
+                "indexed": true,
+                "type": "int256",
+                "name": "_owner"
+            },
+            {
+                "indexed": true,
+                "type": "int256",
+                "name": "_spender"
+            }
+        ],
+        "type": "event",
+        "name": "Unapproved(int256,int256)"
+    }
+];

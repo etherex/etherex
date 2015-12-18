@@ -1,10 +1,7 @@
-var React = require("react");
+import React from 'react';
+import {Link} from 'react-router';
 
-var Router = require("react-router");
-var Link = Router.Link;
-
-var UserLink = React.createClass({
-
+let UserLink = React.createClass({
   propTypes: {
       address: React.PropTypes.string.isRequired
   },

@@ -1,9 +1,9 @@
-var React = require("react");
+import React from 'react';
 import {FormattedMessage} from 'react-intl';
 
-var TradeTable = require('./TradeTable');
+import TradeTable from './TradeTable';
 
-var TradeSells = React.createClass({
+let TradeSells = React.createClass({
   render: function() {
     return (
       <div className="col-md-6">
@@ -11,7 +11,7 @@ var TradeSells = React.createClass({
           <TradeTable openModal={this.props.openModal} flux={this.props.flux}
             title={<FormattedMessage id='trade.asks' />}
             type={2} trades={this.props.trades} tradeList={this.props.trades.tradeSells}
-            market={this.props.market} user={this.props.user.user} />
+            market={this.props.market} user={this.props.user.user} listOwn={this.props.listOwn} />
         </div>
       </div>
     );

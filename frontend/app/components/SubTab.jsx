@@ -1,11 +1,8 @@
-var React = require("react");
-var Router = require("react-router");
-var Link = Router.Link;
-var ActiveState = Router.State;
+import React from 'react';
+import {Link, State} from 'react-router';
 
-var SubTab = React.createClass({
-
-  mixins: [ ActiveState ],
+let SubTab = React.createClass({
+  mixins: [ State ],
 
   render: function() {
     var active = this.isActive(this.props.to, this.props.params, this.props.query);

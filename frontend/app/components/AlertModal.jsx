@@ -1,11 +1,7 @@
-var React = require("react");
+import React from 'react';
+import {Alert, Modal, Button} from 'react-bootstrap';
 
-var Alert = require('react-bootstrap/lib/Alert');
-var Modal = require('react-bootstrap/lib/Modal');
-var Button = require('react-bootstrap/lib/Button');
-
-var AlertModal = React.createClass({
-
+let AlertModal = React.createClass({
   onHide: function(e) {
     e.preventDefault();
     this.props.onHide();

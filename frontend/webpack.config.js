@@ -26,7 +26,7 @@ module.exports = {
       { test: /\.css$/, loader: "style!css" },
       { test: /\.less$/, loader: "style!css!less" },
       { test: /\.jsx$/, loader: "react-hot" },
-      { test: /\.js$/, include: /app/, loader: "babel"},
+      { test: /\.js$/, include: /app/, loader: "babel", query: { presets: ["es2015"] }},
       { test: /\.jsx$/, include: /app/, loader: "babel", query: { presets: ["react", "es2015"] }},
       { test: /\.json$/, loader: "json" },
       { test: /\.woff|woff2$/, loader: "url?limit=10000&minetype=application/font-woff" },
