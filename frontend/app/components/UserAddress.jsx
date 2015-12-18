@@ -42,7 +42,7 @@ let UserAddress = injectIntl(React.createClass({
               labelClassName='col-sm-3' wrapperClassName='col-sm-9'
               help={`Press ${this.state.ctrl}-C to copy to clipboard`}>
               <DropdownButton id="address-dropdown" ref="switchaddress" key={'switchaddress'}
-                title={this.props.user.id}
+                title={this.props.user.id.substr(0, 24) + '\u2026'}
                 onSelect={this.handleChange}>
                   {this.props.user.addresses ?
                     this.props.user.addresses.map( function(address) {

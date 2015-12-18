@@ -561,7 +561,7 @@ var EthereumClient = function(params) {
         this.filters.transfersIn[market.name].stopWatching();
 
       this.filters.transfersIn[market.name] = subcontract.Transfer({
-        to: user.id
+        _to: user.id
       }, {
         fromBlock: this.fromBlock,
         toBlock: this.toBlock
@@ -590,9 +590,9 @@ var EthereumClient = function(params) {
           number: log.number,
           block: log.blockNumber,
           inout: 'in',
-          from: web3.fromDecimal(log.args.from),
-          to: web3.fromDecimal(log.args.to),
-          amount: log.args.value.valueOf(),
+          from: web3.fromDecimal(log.args._from),
+          to: web3.fromDecimal(log.args._to),
+          amount: log.args._value.valueOf(),
           market: market.id,
           price: false,
           total: false,
@@ -605,7 +605,7 @@ var EthereumClient = function(params) {
         this.filters.transfersOut[market.name].stopWatching();
 
       this.filters.transfersOut[market.name] = subcontract.Transfer({
-        from: user.id
+        _from: user.id
       }, {
         fromBlock: this.fromBlock,
         toBlock: this.toBlock
@@ -634,9 +634,9 @@ var EthereumClient = function(params) {
           number: log.number,
           block: log.blockNumber,
           inout: 'out',
-          from: web3.fromDecimal(log.args.from),
-          to: web3.fromDecimal(log.args.to),
-          amount: log.args.value.valueOf(),
+          from: web3.fromDecimal(log.args._from),
+          to: web3.fromDecimal(log.args._to),
+          amount: log.args._value.valueOf(),
           market: market.id,
           price: false,
           total: false,
