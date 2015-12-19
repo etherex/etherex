@@ -36,6 +36,7 @@ macro TRADE_FIELDS: 8
 
 # Fixed taker fee
 macro FEE_PER_TRADE: 200000 * tx.gasprice
+macro ETX: 100000
 
 # Boolean success/failure
 macro SUCCESS: 1
@@ -313,9 +314,9 @@ def trade(max_amount, trade_ids:arr):
             max_amount -= fill
             max_value -= value
 
-            # Issue 1 ETX per ETH to maker and taker
-            self.markets[1].contract.issue(value / 10 ** 13, owner)
-            self.markets[1].contract.issue(value / 10 ** 13, msg.sender)
+            # Issue 1 ETX to maker and taker
+            self.markets[1].contract.issue(ETX, owner)
+            self.markets[1].contract.issue(ETX, msg.sender)
 
         # Next trade
         t += 1

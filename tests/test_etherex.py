@@ -229,7 +229,7 @@ class TestEtherEx(object):
             10000 * 10 ** 5,
             profiling=1)
         assert ans['output'] == 1
-        logger.info("\napproveOnce profiling: %s" % ans)
+        logger.info("\napprove profiling: %s" % ans)
 
         # Verify exchange is approved for a transfer
         ans = self.etx_contract.allowance(
@@ -746,8 +746,17 @@ class TestEtherEx(object):
         self.test_add_buy_trades()
         snapshot = self.test_fulfill_first_sell(False)
 
-        assert self.etx_contract.balanceOf(self.BOB['address']) == 125 * 10 ** 5
-        assert self.etx_contract.balanceOf(self.ALICE['address']) == 990125 * 10 ** 5
+        # If issuing 1 ETX per ETH...
+        # assert self.etx_contract.balanceOf(self.BOB['address']) == 125 * 10 ** 5
+        # assert self.etx_contract.balanceOf(self.ALICE['address']) == 990125 * 10 ** 5
+
+        # 1 ETX
+        assert self.etx_contract.balanceOf(self.BOB['address']) == 10 ** 5
+        # Initial issuance - 10,000 deposit + 1 ETX
+        assert self.etx_contract.balanceOf(self.ALICE['address']) == (990000 * 10 ** 5) + 10 ** 5
+
+        # ETX contract's ETH balance: initial endowment + FEE_PER_TRADE
+        assert self.state.block.get_balance(self.etx_contract.address) == 10 ** 21 + FEE_PER_TRADE
 
         self.state.revert(snapshot)
 
@@ -804,9 +813,16 @@ class TestEtherEx(object):
     def test_etx_issuance_and_total_after_multiple_trades(self):
         snapshot = self.test_fulfill_multiple_trades(False)
 
-        assert self.etx_contract.balanceOf(self.BOB['address']) == (125 + 150 + 175) * 10 ** 5
-        assert self.etx_contract.balanceOf(self.ALICE['address']) == (980000 + 125 + 150 + 175) * 10 ** 5
+        # If issuing 1 ETX per ETH...
+        # assert self.etx_contract.balanceOf(self.BOB['address']) == (125 + 150 + 175) * 10 ** 5
+        # assert self.etx_contract.balanceOf(self.ALICE['address']) == (980000 + 125 + 150 + 175) * 10 ** 5
 
+        # 3 ETX
+        assert self.etx_contract.balanceOf(self.BOB['address']) == 3 * 10 ** 5
+        # Initial issuance - 10,000 deposit - 10,000 transfer to BOB + 3 ETX
+        assert self.etx_contract.balanceOf(self.ALICE['address']) == (980000 * 10 ** 5) + 3 * 10 ** 5
+
+        # ETX contract's ETH balance: initial endowment + 3 * FEE_PER_TRADE
         assert self.state.block.get_balance(self.etx_contract.address) == 10 ** 21 + 3 * FEE_PER_TRADE
 
         self.state.revert(snapshot)
