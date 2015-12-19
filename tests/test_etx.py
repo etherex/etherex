@@ -1,4 +1,11 @@
 from ethereum import tester
+import logging
+
+logger = logging.getLogger(__name__)
+
+# DEBUG
+tester.disable_logging()
+logger.setLevel("INFO")
 
 class TestEtxContract(object):
 
@@ -9,29 +16,31 @@ class TestEtxContract(object):
         cls.c = cls.s.abi_contract(cls.CONTRACT, endowment=10 ** 21)
         assert cls.s.block.get_balance(cls.c.address.encode('hex')) == 10 ** 21
         cls.snapshot = cls.s.snapshot()
-        cls.initialBalance = 1000000 * 10 ** 5
+        cls.initialIssuance = 1000000 * 10 ** 5
 
     def setup_method(self, method):
         self.s.revert(self.snapshot)
 
     def initial_issuance(self):
         assert self.c.setExchange(tester.a0) == 1
-        assert self.c.issue(self.initialBalance, tester.a0) == 1
+        assert self.c.issue(self.initialIssuance, tester.a0) == 1
+        assert self.c.totalSupply() == self.initialIssuance
 
     def test_issue_and_reward(self):
         self.initial_issuance()
 
         assert self.c.issue(5000 * 10 ** 5, tester.a1) == 1
         assert self.c.balanceOf(tester.a1) == 5000 * 10 ** 5
-        assert self.s.block.get_storage_data(self.c.address, 2) == self.initialBalance + 5000 * 10 ** 5
+        assert self.c.totalSupply() == self.initialIssuance + 5000 * 10 ** 5
 
         assert self.s.block.get_balance(tester.a1.encode('hex')) == 10 ** 24
         reward = self.c.reward(5000 * 10 ** 5, sender=tester.k1, profiling=1)
-        print reward
+        logger.info("Reward: %s" % reward)
+
         assert reward['output'] == 4975124378109452000L
         diff = (10 ** 24 + reward['output'] - reward['gas']) - self.s.block.get_balance(tester.a1.encode('hex'))
         assert diff < 1000 and diff > -1000  # account for wrong gas profiling
-        assert self.s.block.get_storage_data(self.c.address, 2) == self.initialBalance
+        assert self.c.totalSupply() == self.initialIssuance
         assert self.c.balanceOf(tester.a1) == 0
 
     def test_issue_and_burn_fail(self):
@@ -43,7 +52,7 @@ class TestEtxContract(object):
         # Issue 10,000
         assert self.c.issue(10000 * 10 ** 5, tester.a1) == 1
         assert self.c.balanceOf(tester.a1) == 10000 * 10 ** 5
-        assert self.s.block.get_storage_data(self.c.address, 2) == self.initialBalance + 10000 * 10 ** 5
+        assert self.c.totalSupply() == self.initialIssuance + 10000 * 10 ** 5
 
         # Fail to get reward for 10,001
         assert self.c.reward(10001 * 10 ** 5, sender=tester.k1) == 0
@@ -51,7 +60,7 @@ class TestEtxContract(object):
     def test_negative_send_should_fail(self):
         self.initial_issuance()
         assert self.c.transfer(-1000, tester.a0, sender=tester.k1) == 0
-        assert self.c.balanceOf(tester.a0) == self.initialBalance
+        assert self.c.balanceOf(tester.a0) == self.initialIssuance
         assert self.c.balanceOf(tester.a1) == 0
 
     def test_set_exchange_with_invalid_address_should_fail(self):
@@ -69,7 +78,7 @@ class TestEtxContract(object):
 
         assert self.c.transfer(1, -1000) == 0
         assert self.s.block.get_storage_data(self.c.address, 1) == 0xdeadbeef
-        assert self.s.block.get_storage_data(self.c.address, 2) == 0
+        assert self.c.totalSupply() == 0
 
     def test_simple_transfer_without_balance_should_fail(self):
         assert self.c.transfer(tester.a2, 1, sender=tester.k1) == 0
@@ -95,11 +104,11 @@ class TestEtxContract(object):
         assert self.c.allowance(tester.a0, tester.a1) == 20000
         assert self.c.transferFrom(tester.a0, tester.a1, 10000, sender=tester.k1) == 1
         assert self.c.balanceOf(tester.a1) == 10000
-        assert self.c.balanceOf(tester.a0) == self.initialBalance - 10000
+        assert self.c.balanceOf(tester.a0) == self.initialIssuance - 10000
         assert self.c.allowance(tester.a0, tester.a1) == 10000
         assert self.c.transferFrom(tester.a0, tester.a1, 10000, sender=tester.k1) == 1
         assert self.c.balanceOf(tester.a1) == 20000
-        assert self.c.balanceOf(tester.a0) == self.initialBalance - 20000
+        assert self.c.balanceOf(tester.a0) == self.initialIssuance - 20000
         assert self.c.allowance(tester.a0, tester.a1) == 0
 
     def test_approve_send_to_another(self):

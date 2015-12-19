@@ -111,6 +111,9 @@ def balance():
 def balanceOf(_address):
     return(self.accounts[_address].balance)
 
+def totalSupply():
+    return(self.total)
+
 def approve(_spender, _value):
     if _spender <= 0 or _value <= 0:
         return(FAILURE)
