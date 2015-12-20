@@ -30,9 +30,11 @@
   transact:
     setExchange:
       to: $ETX
-      sig: setExchange:[int256,int256]:int256
+      sig: setExchange:[int256]:int256
       data:
         - $EtherEx
+      retry: 60
+      wait: True
 -
   deploy:
     CAK:
@@ -44,9 +46,11 @@
   transact:
     setExchange:
       to: $ETX
-      sig: setExchange:[int256,int256]:int256
+      sig: setExchange:[int256]:int256
       data:
         - $EtherEx
+      retry: 60
+      wait: True
 -
   deploy:
     MID:
@@ -58,9 +62,11 @@
   transact:
     setExchange:
       to: $ETX
-      sig: setExchange:[int256,int256]:int256
+      sig: setExchange:[int256]:int256
       data:
         - $EtherEx
+      retry: 60
+      wait: True
 
 # Register subcurrencies on the exchange
 -
@@ -109,7 +115,7 @@
       retry: 60
       wait: True
 
-# Transfer ETXs
+# Transfer ETX
 -
   transact:
     ZGetx:
@@ -141,7 +147,7 @@
       retry: 30
       wait: True
 
-# Transfer CAKs
+# Transfer CAK
 -
   transact:
     ZGcak:
@@ -173,7 +179,7 @@
       retry: 30
       wait: True
 
-# Transfer MIDs
+# Transfer MID
 -
   transact:
     ZGetx:
@@ -209,9 +215,9 @@
 # Deposit into exchange
 -
   transact:
-    approveOnceETX:
+    approveETX:
       to: $ETX
-      sig: approveOnce:[int256,int256]:int256
+      sig: approve:[int256,int256]:int256
       gas: 100000
       data:
         - $EtherEx
@@ -231,9 +237,9 @@
       wait: True
 -
   transact:
-    approveOnceCAK:
+    approveCAK:
       to: $CAK
-      sig: approveOnce:[int256,int256]:int256
+      sig: approve:[int256,int256]:int256
       gas: 100000
       data:
         - $EtherEx
@@ -253,9 +259,9 @@
       wait: True
 -
   transact:
-    approveOnceMID:
+    approveMID:
       to: $MID
-      sig: approveOnce:[int256,int256]:int256
+      sig: approve:[int256,int256]:int256
       gas: 100000
       data:
         - $EtherEx

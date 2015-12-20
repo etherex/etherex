@@ -792,7 +792,7 @@ class TestEtherEx(object):
         assert ans == [1000000000, 180000000]
 
         ans = self.state.block.get_balance(self.BOB['address'])
-        assert ans > 1000449999999999999000000L
+        assert ans > 1000450000000000000000000L - (3 * FEE_PER_TRADE) - (3 * 120000)
         assert ans < 1000450000000000000000000L
 
         if revert:

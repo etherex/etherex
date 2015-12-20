@@ -26,6 +26,7 @@ macro MINIMUM_VALUE_NOT_MET: 2
 
 def init():
     self.creator = msg.sender
+    self.accounts[msg.sender].balance = 100000000000
 
 # Set exchange contract address for ETX issuance
 def setExchange(_address):

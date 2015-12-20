@@ -1367,10 +1367,11 @@ var EthereumClient = function(params) {
     }
   };
 
-  this.fillTrades = function(user, trades, market, success, failure) {
+  this.fillTrades = function(user, trades, market, gasPrice, success, failure) {
     var total = bigRat(0);
     var totalAmounts = bigRat(0);
 
+    // Calculate total ETH (for asks) and token amounts
     for (var i = trades.length - 1; i >= 0; i--) {
       var amounts = this.getAmounts(trades[i].amount, trades[i].price, market.decimals, market.precision);
 
@@ -1380,13 +1381,16 @@ var EthereumClient = function(params) {
       totalAmounts += bigRat(amounts.amount);
     }
 
+    // Calculate taker's ETH fee
+    total += bigRat(fixtures.takerFee).multiply(gasPrice).multiply(trades.length);
+
     var ids = _.pluck(trades, 'id');
     var gas = ids.length * 200000;
 
     var options = {
       from: user.id,
       to: this.address,
-      value: total > 0 ? total.toString() : "0",
+      value: total.toString(),
       gas: String(gas)
     };
 
@@ -1421,13 +1425,17 @@ var EthereumClient = function(params) {
     }
   };
 
-  this.fillTrade = function(user, trade, market, success, failure) {
+  this.fillTrade = function(user, trade, market, gasPrice, success, failure) {
     var amounts = this.getAmounts(trade.amount, trade.price, market.decimals, market.precision);
+
+    // Calculate taker's ETH fee
+    var feeTotal = bigRat(fixtures.takerFee).multiply(gasPrice);
+
     var options = {
       from: user.id,
-      gas: "150000",
+      gas: "200000",
       to: this.address,
-      value: trade.type == "sells" ? amounts.total : "0"
+      value: trade.type == "sells" ? bigRat(amounts.total).add(feeTotal).toDecimal() : feeTotal.toDecimal()
     };
 
     try {

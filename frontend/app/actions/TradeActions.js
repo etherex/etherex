@@ -1,7 +1,9 @@
-var _ = require("lodash");
-var constants = require("../js/constants");
+import _ from 'lodash';
 import utils from '../js/utils';
 import bigRat from 'big-rational';
+
+var fixtures = require("../js/fixtures");
+var constants = require("../js/constants");
 
 var TradeActions = function() {
 
@@ -198,8 +200,9 @@ var TradeActions = function() {
 
     var user = this.flux.store("UserStore").getState().user;
     var market = this.flux.store("MarketStore").getState().market;
+    var gasPrice = this.flux.stores.network.getState().gasPrice.toString();
 
-    _client.fillTrades(user, trades, market, function(result) {
+    _client.fillTrades(user, trades, market, gasPrice, function(result) {
       if (this.flux.stores.config.debug)
         utils.log("FILL_TRADES_RESULT", result);
 
@@ -227,8 +230,9 @@ var TradeActions = function() {
 
     var user = this.flux.store("UserStore").getState().user;
     var market = this.flux.store("MarketStore").getState().market;
+    var gasPrice = this.flux.stores.network.getState().gasPrice.toString();
 
-    _client.fillTrade(user, trade, market, function(result) {
+    _client.fillTrade(user, trade, market, gasPrice, function(result) {
       if (this.flux.stores.config.debug)
         utils.log("FILL_TRADE_RESULT", result);
 
@@ -263,13 +267,13 @@ var TradeActions = function() {
       if (this.flux.stores.config.debug)
         utils.log("ESTIMATE RESULT", result);
 
-      var gasprice = this.flux.stores.network.getState().gasPrice;
+      var gasPrice = this.flux.stores.network.getState().gasPrice;
       if (this.flux.stores.config.debug)
-        utils.log("GASPRICE", gasprice);
+        utils.log("GASPRICE", gasPrice);
 
       var estimate = "N/A";
-      if (result && gasprice) {
-        var total = bigRat(gasprice.toString()).multiply(result);
+      if (result && gasPrice) {
+        var total = bigRat(gasPrice.toString()).multiply(result);
         estimate = utils.formatBalance(total) + " (" + utils.numeral(result, 0) + " gas)";
       }
       this.dispatch(constants.trade.ESTIMATE_GAS_ADD, {estimate: estimate});
@@ -290,13 +294,17 @@ var TradeActions = function() {
       if (this.flux.stores.config.debug)
         utils.log("ESTIMATE RESULT", result);
 
-      var gasprice = this.flux.stores.network.getState().gasPrice;
+      var gasPrice = this.flux.stores.network.getState().gasPrice;
       if (this.flux.stores.config.debug)
-        utils.log("GASPRICE", gasprice);
+        utils.log("GASPRICE", gasPrice);
+
       var estimate = "N/A";
-      if (result && gasprice) {
-        var total = bigRat(gasprice.toString()).multiply(result);
-        estimate = utils.formatBalance(total) + " (" + utils.format(result, 0) + " gas)";
+      if (result && gasPrice) {
+        var total = bigRat(gasPrice.toString()).multiply(result);
+        var feeTotal = bigRat(gasPrice.toString()).multiply(fixtures.takerFee).multiply(trades.length);
+        estimate = utils.formatBalance(total) + " (" + utils.format(result, 0) +
+                   " gas), taker fee: " + utils.formatBalance(feeTotal) +
+                   ", reward: " + trades.length + " ETX";
       }
       this.dispatch(constants.trade.ESTIMATE_GAS_FILL, {estimate: estimate});
     }.bind(this), function(error) {
