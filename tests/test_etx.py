@@ -38,8 +38,9 @@ class TestEtxContract(object):
         logger.info("Reward: %s" % reward)
 
         assert reward['output'] == 4975124378109452000L
-        diff = (10 ** 24 + reward['output'] - reward['gas']) - self.s.block.get_balance(tester.a1.encode('hex'))
-        assert diff < 1000 and diff > -1000  # account for wrong gas profiling
+        # account for wrong gas profiling
+        assert self.s.block.get_balance(tester.a1.encode('hex')) < 10 ** 24 + reward['output']
+        assert self.s.block.get_balance(tester.a1.encode('hex')) > 10 ** 24 + reward['output'] - (reward['gas'] + 30000)
         assert self.c.totalSupply() == self.initialIssuance
         assert self.c.balanceOf(tester.a1) == 0
 
