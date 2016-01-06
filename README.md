@@ -103,6 +103,7 @@ Methods (with serpent type definitions):
   withdraw:[int256,int256]:int256,
   add_market:[int256,int256,int256,int256,int256,int256]:int256,
   get_market_id:[int256]:int256,
+  get_market_id_by_name:[int256]:int256,
   get_last_market_id:[]:int256,
   get_market:[int256]:int256[],
   get_trade:[int256]:int256[],
@@ -151,9 +152,14 @@ cancel(trade_id)
 add_market(currency_name, contract_address, decimal_precision, price_denominator, minimum_total, category)
 ```
 
-### Getting a market's ID
+### Getting a market's ID by contract address
 ```
 get_market_id(contract_address)
+```
+
+### Getting a market's ID by name
+```
+get_market_id_by_name(name)
 ```
 
 #### Market names

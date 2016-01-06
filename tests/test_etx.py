@@ -100,7 +100,7 @@ class TestEtxContract(object):
         self.initial_issuance()
         assert self.c.approve(tester.a1, 10000) == 1
         assert self.c.allowance(tester.a0, tester.a1) == 10000
-        assert self.c.approve(tester.a1, 10000) == 1
+        assert self.c.approve(tester.a1, 20000) == 1
         assert self.c.allowance(tester.a0, tester.a1) == 20000
         assert self.c.transferFrom(tester.a0, tester.a1, 10000, sender=tester.k1) == 1
         assert self.c.balanceOf(tester.a1) == 10000
@@ -123,6 +123,6 @@ class TestEtxContract(object):
         self.initial_issuance()
         assert self.c.approve(tester.a1, 10000) == 1
         assert self.c.allowance(tester.a0, tester.a1) == 10000
-        assert self.c.unapprove(tester.a1) == 1
+        assert self.c.approve(tester.a1, 0) == 1
         assert self.c.allowance(tester.a0, tester.a1) == 0
         assert self.c.transferFrom(tester.a0, tester.a2, 10000, sender=tester.k1) == 0

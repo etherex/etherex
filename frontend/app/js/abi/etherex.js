@@ -148,6 +148,23 @@ module.exports = [
     {
         "constant": false,
         "type": "function",
+        "name": "get_market_id_by_name(int256)",
+        "outputs": [
+            {
+                "type": "int256",
+                "name": "out"
+            }
+        ],
+        "inputs": [
+            {
+                "type": "int256",
+                "name": "name"
+            }
+        ]
+    },
+    {
+        "constant": false,
+        "type": "function",
         "name": "get_sub_balance(int256,int256)",
         "outputs": [
             {
