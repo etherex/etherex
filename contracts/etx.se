@@ -13,8 +13,7 @@ data created
 data accounts[2^160](balance, custodians[2^160](maxValue))
 
 event Transfer(_from:indexed, _to:indexed, _value)
-event Approved(_owner:indexed, _spender:indexed, _value)
-event Unapproved(_owner:indexed, _spender:indexed)
+event Approval(_owner:indexed, _spender:indexed, _value)
 
 # Boolean success/failure
 macro SUCCESS: 1
@@ -73,19 +72,12 @@ def balanceOf(_address):
     return(self.accounts[_address].balance)
 
 def approve(_spender, _value):
-    if _spender <= 0 or _value <= 0:
+    if _spender <= 0 or _value < 0:
         return(FAILURE)
-    approvedValue = self.accounts[msg.sender].custodians[_spender].maxValue + _value
-    self.accounts[msg.sender].custodians[_spender].maxValue = approvedValue
-    log(type=Approved, msg.sender, _spender, approvedValue)
+    self.accounts[msg.sender].custodians[_spender].maxValue = _value
+    log(type=Approval, msg.sender, _spender, _value)
     return(SUCCESS)
 
-# Returns the amount which _spender is still allowed to direct debit from _address
+# Returns the amount which _spender is still allowed to transfer from _address
 def allowance(_address, _spender):
     return(self.accounts[_address].custodians[_spender].maxValue)
-
-# Unapprove full and one-time custody of your account by _address
-def unapprove(_spender):
-    self.accounts[msg.sender].custodians[_spender].maxValue = 0
-    log(type=Unapproved, msg.sender, _spender)
-    return(SUCCESS)

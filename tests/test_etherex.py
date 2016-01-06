@@ -25,15 +25,27 @@ MISSING_AMOUNT = 2
 MISSING_PRICE = 3
 MISSING_MARKET_ID = 4
 
-INSUFFICIENT_BALANCE = 11
-INSUFFICIENT_TRADE_AMOUNT = 12
-INSUFFICIENT_VALUE = 13
+INSUFFICIENT_BALANCE = 10
+INSUFFICIENT_TRADE_AMOUNT = 11
+INSUFFICIENT_VALUE = 12
 
-TRADE_AMOUNT_MISMATCH = 14
-TRADE_ALREADY_EXISTS = 15
+TRADE_AMOUNT_MISMATCH = 20
+TRADE_ALREADY_EXISTS = 21
+TRADE_SAME_BLOCK_PROHIBITED = 22
 
-SAME_BLOCK_TRADE_PROHIBITED = 16
+MARKET_NAME_INVALID = 30
+MARKET_NAME_ALREADY_EXISTS = 31
+MARKET_CONTRACT_INVALID = 32
+MARKET_CATEGORY_INVALID = 33
+MARKET_DECIMALS_INVALID = 34
+MARKET_PRECISION_INVALID = 35
+MARKET_MINIMUM_INVALID = 36
 
+MARKET_NONSTANDARD_ALLOWANCE = 40
+MARKET_NONSTANDARD_APPROVE = 41
+MARKET_NONSTANDARD_BALANCEOF = 42
+MARKET_NONSTANDARD_TRANSFER = 43
+MARKET_NONSTANDARD_TRANSFERFROM = 44
 
 class TestEtherEx(object):
 
@@ -49,6 +61,8 @@ class TestEtherEx(object):
     # standard = 'contracts/Standard_Token.sol'  # TODO
     etx = 'contracts/etx.se'
     bob = 'contracts/etx.se'
+
+    initialIssuance = 1000000 * 10 ** 5
 
     # Utilities
     def hex_pad(self, x):
@@ -85,11 +99,8 @@ class TestEtherEx(object):
 
     # Tests
     def test_creation(self):
-        assert self._storage(self.contract, "0x") is not None
-        assert self._storage(self.contract, "0x01") is None
-
-        assert self.etx_contract.balanceOf(self.ALICE['address']) == 1000000 * 10 ** 5
-        assert self.bob_contract.balanceOf(self.ALICE['address']) == 1000000 * 10 ** 5
+        assert self.etx_contract.balanceOf(self.ALICE['address']) == self.initialIssuance
+        assert self.bob_contract.balanceOf(self.ALICE['address']) == self.initialIssuance
 
     def test_initialize(self, block=None):
         # NameReg Alice
@@ -171,7 +182,7 @@ class TestEtherEx(object):
 
         # Alice has 1000 less
         ans = self.etx_contract.balanceOf(self.ALICE['address'])
-        assert ans == 1000000 * 10 ** 5 - 1000 * 10 ** 5
+        assert ans == self.initialIssuance - 1000 * 10 ** 5
 
         # Bob has 1000
         ans = self.etx_contract.balanceOf(self.BOB['address'])
@@ -209,7 +220,7 @@ class TestEtherEx(object):
         self.test_initialize()
 
         ans = self.etx_contract.balanceOf(self.ALICE['address'])
-        assert ans == 1000000 * 10 ** 5
+        assert ans == self.initialIssuance
 
     def test_deposit_to_exchange(self, init=True):
         if init:
@@ -221,7 +232,7 @@ class TestEtherEx(object):
             10000 * 10 ** 5,
             profiling=1)
         assert ans['output'] == 1
-        logger.info("\napproveOnce profiling: %s" % ans)
+        logger.info("\napprove profiling: %s" % ans)
 
         # Verify exchange is approved for a transfer
         ans = self.etx_contract.allowance(
@@ -242,7 +253,7 @@ class TestEtherEx(object):
 
         # Alice has 10,000 less
         ans = self.etx_contract.balanceOf(self.ALICE['address'])
-        assert ans == 1000000 * 10 ** 5 - 10000 * 10 ** 5
+        assert ans == self.initialIssuance - 10000 * 10 ** 5
 
         # Exchange has 10,000
         ans = self.etx_contract.balanceOf(self.contract.address)
@@ -260,10 +271,11 @@ class TestEtherEx(object):
         self.test_deposit_to_exchange()
 
         assert o == [
+            None,  # Token contract events returning None...
             {
                 '_event_type': 'log_market', 'id': 1
             },
-            None,  # Token contract events returning None...
+            None,
             None,
             {
                 "_event_type": "log_deposit",
@@ -376,19 +388,180 @@ class TestEtherEx(object):
         self.test_initialize()
 
         ans = self.contract.buy(500 * 10 ** 5, int(0.25 * 10 ** 8), 1, value=10 ** 17)
-        assert ans == 12
+        assert ans == INSUFFICIENT_TRADE_AMOUNT
 
     def test_insufficient_sell_trade(self):
         self.test_initialize()
 
         ans = self.contract.sell(500 * 10 ** 5, int(0.25 * 10 ** 2), 1)
-        assert ans == 12
+        assert ans == INSUFFICIENT_TRADE_AMOUNT
 
     def test_insufficient_mismatch_buy_trade(self):
         self.test_initialize()
 
         ans = self.contract.buy(500 * 10 ** 5, int(0.25 * 10 ** 8), 1, sender=self.BOB['key'], value=124 * 10 ** 18)
-        assert ans == 14
+        assert ans == TRADE_AMOUNT_MISMATCH
+
+    # TODO tests for MARKET_* error codes
+    def test_market_name_invalid(self):
+        ans = self.contract.add_market(
+            -1,
+            self.etx_contract.address,
+            5,
+            10 ** 8,
+            10 ** 18,
+            1)
+        assert ans == MARKET_NAME_INVALID
+
+    def test_market_name_already_exists(self):
+        ans = self.contract.add_market(
+            "ETX",
+            self.etx_contract.address,
+            5,
+            10 ** 8,
+            10 ** 18,
+            1)
+        assert ans == SUCCESS
+
+        ans = self.contract.add_market(
+            "ETX",
+            self.etx_contract.address,
+            5,
+            10 ** 8,
+            10 ** 18,
+            1)
+        assert ans == MARKET_NAME_ALREADY_EXISTS
+
+    def test_market_contract_invalid(self):
+        ans = self.contract.add_market(
+            "ETX",
+            0,
+            5,
+            10 ** 8,
+            10 ** 18,
+            1)
+        assert ans == MARKET_CONTRACT_INVALID
+
+    def test_market_category_invalid(self):
+        ans = self.contract.add_market(
+            "ETX",
+            self.etx_contract.address,
+            5,
+            10 ** 8,
+            10 ** 18,
+            -1)
+        assert ans == MARKET_CATEGORY_INVALID
+
+    def test_market_decimals_invalid(self):
+        ans = self.contract.add_market(
+            "ETX",
+            self.etx_contract.address,
+            -1,
+            10 ** 8,
+            10 ** 18,
+            1)
+        assert ans == MARKET_DECIMALS_INVALID
+
+    def test_market_precision_invalid(self):
+        ans = self.contract.add_market(
+            "ETX",
+            self.etx_contract.address,
+            5,
+            -1,
+            10 ** 18,
+            1)
+        assert ans == MARKET_PRECISION_INVALID
+
+    def test_market_minimum_invalid(self):
+        ans = self.contract.add_market(
+            "ETX",
+            self.etx_contract.address,
+            5,
+            10 ** 8,
+            -1,
+            1)
+        assert ans == MARKET_MINIMUM_INVALID
+
+    def test_market_nonstandard_allowance(self):
+        code = """
+def allowance(_address, _spender):
+    return(-1)
+"""
+        nonstandard_contract = self.state.abi_contract(code)
+        ans = self.contract.add_market(
+            "NON",
+            nonstandard_contract.address,
+            5,
+            10 ** 8,
+            10 ** 18,
+            1)
+        assert ans == MARKET_NONSTANDARD_ALLOWANCE
+
+    def test_market_nonstandard_approve(self):
+        code = """
+def approve(_spender, _value):
+    return(-1)
+"""
+        nonstandard_contract = self.state.abi_contract(code)
+        ans = self.contract.add_market(
+            "NON",
+            nonstandard_contract.address,
+            5,
+            10 ** 8,
+            10 ** 18,
+            1)
+        assert ans == MARKET_NONSTANDARD_APPROVE
+
+    def test_market_nonstandard_balanceof(self):
+        code = """
+def balanceOf(_address):
+    return(-1)
+def approve(_spender, _value):
+    return(1)
+"""
+        nonstandard_contract = self.state.abi_contract(code)
+        ans = self.contract.add_market(
+            "NON",
+            nonstandard_contract.address,
+            5,
+            10 ** 8,
+            10 ** 18,
+            1)
+        assert ans == MARKET_NONSTANDARD_BALANCEOF
+
+    def test_market_nonstandard_transfer(self):
+        code = """
+def transfer(_to, _value):
+    return(-1)
+def approve(_spender, _value):
+    return(1)
+"""
+        nonstandard_contract = self.state.abi_contract(code)
+        ans = self.contract.add_market(
+            "NON",
+            nonstandard_contract.address,
+            5,
+            10 ** 8,
+            10 ** 18,
+            1)
+        assert ans == MARKET_NONSTANDARD_TRANSFER
+
+    def test_market_nonstandard_transferfrom(self):
+        code = """
+def transferFrom(_from, _to, _value):
+    return(-1)
+def approve(_spender, _value):
+    return(1)
+"""
+        nonstandard_contract = self.state.abi_contract(code)
+        ans = self.contract.add_market(
+            "NON",
+            nonstandard_contract.address,
+            5,
+            10 ** 8,
+            10 ** 18,
+            1)
+        assert ans == MARKET_NONSTANDARD_TRANSFERFROM
 
     #
     # Trades
@@ -429,13 +602,13 @@ class TestEtherEx(object):
             25000000L,
             745948140856946866108753121277737810491401257713L,
             0L,
-            -43661844752590979300431051011371330267999218421176783949151853302739548924860L]
+            -43661844752590979300431051009909828630668315502973099116435570283083616381888L]
 
     def test_trade_already_exists(self):
         self.test_add_buy_trades()
 
         ans = self.contract.buy(500 * 10 ** 5, int(0.25 * 10 ** 8), 1, value=125 * 10 ** 18)
-        assert ans == 15
+        assert ans == TRADE_ALREADY_EXISTS
 
     def test_add_sell_trades(self, init=True):
         self.test_deposit_to_exchange(init)
@@ -497,7 +670,7 @@ class TestEtherEx(object):
             500 * 10 ** 5,
             [23490291715255176443338864873375620519154876621682055163056454432194948412040L],
             sender=self.BOB['key'])
-        assert ans == 16
+        assert ans == TRADE_SAME_BLOCK_PROHIBITED
 
     def test_fulfill_first_buy_fail(self):
         self.test_add_buy_trades()
@@ -508,7 +681,7 @@ class TestEtherEx(object):
             500 * 10 ** 5,
             [23490291715255176443338864873375620519154876621682055163056454432194948412040L],
             sender=self.BOB['key'])
-        assert ans == 11
+        assert ans == INSUFFICIENT_BALANCE
         self.state.revert(snapshot)
 
     def test_fulfill_first_sell_fail(self):
@@ -519,7 +692,7 @@ class TestEtherEx(object):
         ans = self.contract.trade(
             500 * 10 ** 5,
             [49800558551364658298467690253710486242473574128865389798518930174170604985043L])
-        assert ans == 11
+        assert ans == INSUFFICIENT_BALANCE
         self.state.revert(snapshot)
 
     def test_transfer_to_bob_and_deposit(self):
@@ -588,9 +761,11 @@ class TestEtherEx(object):
         snapshot = self.state.snapshot()
         self.state.mine(1)
 
+        fill_amount = 500 * 10 ** 5
+
         # Fill first trade
         ans = self.contract.trade(
-            500 * 10 ** 5,
+            fill_amount,
             [23490291715255176443338864873375620519154876621682055163056454432194948412040L],
             sender=self.BOB['key'],
             profiling=1)
@@ -600,11 +775,41 @@ class TestEtherEx(object):
         ans = self.contract.get_trade(23490291715255176443338864873375620519154876621682055163056454432194948412040L)
         assert ans == [0, 0, 0, 0, 0, 0, 0, 0]
 
+        ans = self.contract.get_sub_balance(self.BOB['address'], 1)
+        assert ans == [10000 * 10 ** 5 - fill_amount, 0]
+
+        ans = self.contract.get_sub_balance(self.ALICE['address'], 1)
+        assert ans == [fill_amount, 0]
+
         if revert:
             self.state.revert(snapshot)
         else:
             return snapshot
-        # TODO - proper balance assertions
+
+    def test_fulfill_first_buy_value_fail(self):
+        self.test_add_buy_trades()
+        self.test_transfer_to_bob_and_deposit()
+        snapshot = self.state.snapshot()
+        self.state.mine(1)
+
+        fill_amount = 1 * 10 ** 5
+
+        # Fill first trade
+        ans = self.contract.trade(
+            fill_amount,
+            [23490291715255176443338864873375620519154876621682055163056454432194948412040L],
+            sender=self.BOB['key'],
+            profiling=1)
+        assert ans['output'] == INSUFFICIENT_VALUE
+        logger.info("\nFill buy profiling: %s" % ans)
+
+        ans = self.contract.get_sub_balance(self.BOB['address'], 1)
+        assert ans == [10000 * 10 ** 5, 0]
+
+        ans = self.contract.get_sub_balance(self.ALICE['address'], 1)
+        assert ans == [0, 0]
+
+        self.state.revert(snapshot)
 
     def test_get_trade_ids_after_first_buy(self):
         snapshot = self.test_fulfill_first_buy(False)
@@ -636,6 +841,7 @@ class TestEtherEx(object):
         last_timestamp = self.state.block.timestamp
 
         assert o == [
+            None,  # Token contract events returning None...
             {
                 '_event_type': 'log_market', 'id': 1
             }, {
@@ -663,7 +869,7 @@ class TestEtherEx(object):
                 'amount': 70000000,
                 'tradeid': 38936224262371094519907212029104196662516973526369593745812124922634258039407L
             },
-            None,  # Token contract events returning None...
+            None,
             None,
             None,
             {
@@ -720,6 +926,30 @@ class TestEtherEx(object):
             self.state.revert(snapshot)
         else:
             return snapshot
+
+    def test_fulfill_first_sell_value_fail(self):
+        self.test_add_sell_trades(True)
+        snapshot = self.state.snapshot()
+        self.state.mine(1)
+
+        fill_amount = 500 * 10 ** 5
+
+        ans = self.contract.trade(
+            fill_amount,
+            [49800558551364658298467690253710486242473574128865389798518930174170604985043L],
+            sender=self.BOB['key'],
+            value=10 ** 17,
+            profiling=1)
+        assert ans['output'] == INSUFFICIENT_VALUE
+        logger.info("\nFill sell profiling: %s" % ans)
+
+        ans = self.contract.get_sub_balance(self.BOB['address'], 1)
+        assert ans == [0, 0]
+
+        ans = self.contract.get_sub_balance(self.ALICE['address'], 1)
+        assert ans == [820000000, 180000000]
+
+        self.state.revert(snapshot)
 
     def test_get_trade_ids_after_first_sell(self):
         self.test_add_buy_trades()

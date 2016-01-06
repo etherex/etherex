@@ -117,23 +117,6 @@ module.exports = [
         ]
     },
     {
-        "constant": false,
-        "type": "function",
-        "name": "unapprove(int256)",
-        "outputs": [
-            {
-                "type": "int256",
-                "name": "out"
-            }
-        ],
-        "inputs": [
-            {
-                "type": "int256",
-                "name": "_spender"
-            }
-        ]
-    },
-    {
         "inputs": [
             {
                 "indexed": true,
@@ -152,7 +135,7 @@ module.exports = [
             }
         ],
         "type": "event",
-        "name": "Approved(int256,int256,int256)"
+        "name": "Approval(int256,int256,int256)"
     },
     {
         "inputs": [
@@ -174,21 +157,5 @@ module.exports = [
         ],
         "type": "event",
         "name": "Transfer(int256,int256,int256)"
-    },
-    {
-        "inputs": [
-            {
-                "indexed": true,
-                "type": "int256",
-                "name": "_owner"
-            },
-            {
-                "indexed": true,
-                "type": "int256",
-                "name": "_spender"
-            }
-        ],
-        "type": "event",
-        "name": "Unapproved(int256,int256)"
     }
 ];

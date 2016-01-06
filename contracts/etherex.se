@@ -9,16 +9,12 @@
 # EtherEx
 #
 
-data created  # 0x
-data last_market  # 0x1
-
-data markets_ptr  # 0x3
-data trades_ptr  # 0x4
-
 data markets[2^160](id, name, contract, decimals, precision, minimum, category, last_price, owner, block, total_trades, last_trade, trade_ids[](id, next_id, prev_id))
-data markets_id[2^160](id)  # Reverse Market ID lookup
+data markets_id[2^160](id)  # Reverse Market ID lookup by contract address
+data markets_name[2^160](id)  # Reverse Market ID lookup by name
 data trades[2^160](id, type, market, amount, price, owner, block, refhash)
 data balances[][](available, trading)
+data last_market
 
 event log_price(market:indexed, type, price, amount, timestamp)
 event log_add_tx(market:indexed, sender, type, price, amount, tradeid)
@@ -28,7 +24,8 @@ event log_withdraw(market:indexed, sender:indexed, amount)
 event log_cancel(market:indexed, sender, price, amount, tradeid)
 event log_market(id)
 
-extern subcurrency: [transfer:[int256,int256]:int256, transferFrom:[int256,int256,int256]:int256]
+extern subcurrency: [allowance:[int256,int256]:int256, approve:[int256,int256]:int256, balance:[]:int256, balanceOf:[int256]:int256, transfer:[int256,int256]:int256, transferFrom:[int256,int256,int256]:int256]
+
 
 # Trade types
 macro BID: 1
@@ -42,6 +39,7 @@ macro TRADE_FIELDS: 8
 macro SUCCESS: 1
 macro FAILURE: 0
 
+
 #
 # Error codes
 #
@@ -51,28 +49,41 @@ macro MISSING_AMOUNT: 2
 macro MISSING_PRICE: 3
 macro MISSING_MARKET_ID: 4
 
-macro INSUFFICIENT_BALANCE: 11
-macro INSUFFICIENT_TRADE_AMOUNT: 12
-macro INSUFFICIENT_VALUE: 13
+macro INSUFFICIENT_BALANCE: 10
+macro INSUFFICIENT_TRADE_AMOUNT: 11
+macro INSUFFICIENT_VALUE: 12
 
-macro TRADE_AMOUNT_MISMATCH: 14
-macro TRADE_ALREADY_EXISTS: 15
+macro TRADE_AMOUNT_MISMATCH: 20
+macro TRADE_ALREADY_EXISTS: 21
+macro TRADE_SAME_BLOCK_PROHIBITED: 22
 
-macro SAME_BLOCK_TRADE_PROHIBITED: 16
+macro MARKET_NAME_INVALID: 30
+macro MARKET_NAME_ALREADY_EXISTS: 31
+macro MARKET_CONTRACT_INVALID: 32
+macro MARKET_CATEGORY_INVALID: 33
+macro MARKET_DECIMALS_INVALID: 34
+macro MARKET_PRECISION_INVALID: 35
+macro MARKET_MINIMUM_INVALID: 36
 
-# TODO - Markets error codes
+macro MARKET_NONSTANDARD_ALLOWANCE: 40
+macro MARKET_NONSTANDARD_APPROVE: 41
+macro MARKET_NONSTANDARD_BALANCEOF: 42
+macro MARKET_NONSTANDARD_TRANSFER: 43
+macro MARKET_NONSTANDARD_TRANSFERFROM: 44
 
+#
 # Function macros
+#
 macro refund():
     if msg.value > 0:
         send(msg.sender, msg.value)
 
 macro check_trade($amount, $price, $market_id):
-    if not $amount:
+    if amount <= 0:
         return(MISSING_AMOUNT)
-    if not $price:
+    if price <= 0:
         return(MISSING_PRICE)
-    if not $market_id:
+    if market_id <= 0:
         return(MISSING_MARKET_ID)
 
 macro save_trade($type, $amount, $price, $market_id):
@@ -135,10 +146,6 @@ macro remove_trade($trade_id, $market_id):
         self.markets[$market_id].trade_ids[$trade_id].prev_id = 0
     self.markets[$market_id].trade_ids[$trade_id].id = 0
     self.markets[$market_id].total_trades -= 1
-
-
-def init():
-    self.created = block.timestamp  # Timestamp when this contract was created
 
 
 #
@@ -212,7 +219,7 @@ def trade(max_amount, trade_ids:arr):
 
         # Make sure the trade has been mined, obvious HFT prevention
         if block.number <= self.trades[trade_id].block:
-            return(SAME_BLOCK_TRADE_PROHIBITED)
+            return(TRADE_SAME_BLOCK_PROHIBITED)
 
         # Get market
         market_id = self.trades[trade_id].market
@@ -243,7 +250,8 @@ def trade(max_amount, trade_ids:arr):
 
                 # Check buy value
                 if value < minimum:
-                    refund()
+                    if max_value > 0:
+                        send(msg.sender, max_value)
                     return(INSUFFICIENT_VALUE)
 
                 # Update trade amount or remove
@@ -391,11 +399,33 @@ def add_market(name, contract, decimals, precision, minimum, category):
     # Get the next market ID
     id = self.last_market + 1
 
-    # Set markets pointer
-    if id == 1:
-        self.markets_ptr = ref(self.markets[1].id)
+    if name <= 0:
+        return MARKET_NAME_INVALID
+    if self.markets_name[name].id:
+        return MARKET_NAME_ALREADY_EXISTS
+    if contract <= 0:
+        return MARKET_CONTRACT_INVALID
+    if category < 0:
+        return MARKET_CATEGORY_INVALID
+    if decimals < 0:
+        return MARKET_DECIMALS_INVALID
+    if precision < 0:
+        return MARKET_PRECISION_INVALID
+    if minimum < 0:
+        return MARKET_MINIMUM_INVALID
 
-    # TODO - Check data...
+    # Check Standard Token support
+    if contract.allowance(msg.sender, self) != 0:
+        return MARKET_NONSTANDARD_ALLOWANCE
+    if contract.approve(self, 0) != 1:
+        return MARKET_NONSTANDARD_APPROVE
+    if contract.balanceOf(self) != 0:
+        return MARKET_NONSTANDARD_BALANCEOF
+    if contract.transfer(msg.sender, 0) != 0:
+        return MARKET_NONSTANDARD_TRANSFER
+    if contract.transferFrom(self, msg.sender, 0) != 0:
+        return MARKET_NONSTANDARD_TRANSFERFROM
+
     self.markets[id].id = id
     self.markets[id].name = name
     self.markets[id].contract = contract
@@ -409,6 +439,7 @@ def add_market(name, contract, decimals, precision, minimum, category):
 
     # Set reverse lookup ID
     self.markets_id[contract].id = id
+    self.markets_name[name].id = id
 
     # Set last market ID
     self.last_market = id
@@ -423,6 +454,9 @@ def add_market(name, contract, decimals, precision, minimum, category):
 #
 def get_market_id(address):
     return(self.markets_id[address].id)
+
+def get_market_id_by_name(name):
+    return(self.markets_name[name].id)
 
 def get_last_market_id():
     return(self.last_market)

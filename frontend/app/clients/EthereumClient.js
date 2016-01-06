@@ -1180,7 +1180,7 @@ var EthereumClient = function(params) {
           return;
         }
 
-        // TODO watch for Approved when event is formalized as a standard
+        // TODO watch for Approval event when formalized as a standard
         // Poll allowance meanwhile
         var pollAllowance = function() {
           subcontract.allowance.call(user.id, self.address, function(err, res) {
