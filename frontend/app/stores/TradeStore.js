@@ -265,7 +265,7 @@ var TradeStore = Fluxxor.createStore({
   },
 
   onFillTrades: function (payload) {
-    var ids = _.pluck(payload, 'id');
+    var ids = _.map(payload, 'id');
 
     for (var i = ids.length - 1; i >= 0; i--) {
       var index = _.findIndex((payload[i].type == "buys") ? this.trades.buys : this.trades.sells, {'id': ids[i]} );

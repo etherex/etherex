@@ -165,8 +165,8 @@ var MarketStore = Fluxxor.createStore({
     if (currentPrices.length) {
       var previous = {};
       this.market.data = _.map(_.groupBy(currentPrices.reverse(), 'timestamp'), function(logs) {
-        var prices = _.pluck(logs, 'price');
-        var volumes = _.pluck(logs, 'amount');
+        var prices = _.map(logs, 'price');
+        var volumes = _.map(logs, 'amount');
         var high = _.max(prices);
         var low = _.min(prices);
         var volume = _.reduce(volumes, function(sum, vol) {

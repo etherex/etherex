@@ -46,13 +46,13 @@ let TradeRow = React.createClass({
     var totalAmount = 0;
     var totalValue = 0;
 
-    totalAmount = _.reduce(_.pluck(trades, 'amount'), function(sum, num) {
+    totalAmount = _.reduce(_.map(trades, 'amount'), function(sum, num) {
       return parseFloat(sum) + parseFloat(num);
     });
     if (!totalAmount)
       return;
 
-    totalValue = _.reduce(_.pluck(trades, 'total'), function(sum, num) {
+    totalValue = _.reduce(_.map(trades, 'total'), function(sum, num) {
       return parseFloat(sum) + parseFloat(num);
     });
     if (!totalValue)

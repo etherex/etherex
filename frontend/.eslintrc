@@ -1,7 +1,10 @@
 {
-  "ecmaFeatures": {
-    "jsx": true,
-    "modules": true
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "sourceType": "module"
   },
   "env": {
     "browser": true,
@@ -12,17 +15,24 @@
   "plugins": [
     "react"
   ],
+  "settings": {
+    "react": {
+      "pragma": "React"
+    }
+  },
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
   "rules": {
     "curly": 0,
     "eqeqeq": 0,
     "new-cap": 0,
     "quotes": 0,
+    "jsx-quotes": 1,
     "strict": 0,
     "no-underscore-dangle": 0,
     "react/display-name": 0,
-    "react/jsx-boolean-value": 1,
+    "react/jsx-boolean-value": 0,
     "react/jsx-no-undef": 1,
-    "react/jsx-quotes": 1,
+    "react/jsx-quotes": 0,
     "react/jsx-sort-prop-types": 0,
     "react/jsx-sort-props": 0,
     "react/jsx-uses-react": 1,

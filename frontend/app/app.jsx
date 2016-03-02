@@ -1,7 +1,8 @@
 import Fluxxor from 'fluxxor';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Router, Route, IndexRoute} from 'react-router';
+import {Router, Route, IndexRoute, useRouterHistory } from 'react-router';
+import { createHashHistory } from 'history';
 
 import EtherExApp from './components/EtherExApp';
 
@@ -68,13 +69,10 @@ flux.setDispatchInterceptor(function(action, dispatch) {
 });
 
 // Opt-out of fugly _k in query string
-import createHistory from 'history/lib/createHashHistory';
-let history = createHistory({
-  queryKey: false
-});
+const appHistory = useRouterHistory(createHashHistory)({ queryKey: false })
 
 let routes = (
-  <Router history={history} createElement={createFluxComponent}>
+  <Router history={appHistory} createElement={createFluxComponent}>
     <Route path="/" component={EtherExApp}>
       <IndexRoute component={Trades} />
       <Route path="trades" component={Trades} />

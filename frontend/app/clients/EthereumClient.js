@@ -1380,7 +1380,7 @@ var EthereumClient = function(params) {
       totalAmounts += bigRat(amounts.amount);
     }
 
-    var ids = _.pluck(trades, 'id');
+    var ids = _.map(trades, 'id');
     var gas = ids.length * 200000;
 
     var options = {
@@ -1547,7 +1547,7 @@ var EthereumClient = function(params) {
       totalAmounts += bigRat(amounts.amount);
     }
 
-    var ids = _.pluck(trades, 'id');
+    var ids = _.map(trades, 'id');
     var gas = ids.length * 250000;
     var options = {
       from: user.id,

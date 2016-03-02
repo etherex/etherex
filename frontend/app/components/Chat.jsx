@@ -16,7 +16,7 @@ let Chat = React.createClass({
 
   componentWillReceiveProps(nextProps) {
     this.setState({
-      messages: _.sortByOrder(nextProps.market.messages, 'sent', 'desc')
+      messages: _.orderBy(nextProps.market.messages, 'sent', 'desc')
     });
   },
 
@@ -62,7 +62,7 @@ let Chat = React.createClass({
               <span>{ this.props.market.name } Whisper
                 { this.state.activeKey && <span className="pull-right"><Glyphicon glyph="remove" onClick={this.toggleActive} /></span> }
               </span>
-            } bsStyle="primary" eventKey='1'>
+            } bsStyle="primary" eventKey="1">
             <Well bsSize="small" className="chatbox-messages">
               { this.state.messages.map( function(message, i) {
                   if (!message.error)

@@ -99,7 +99,7 @@ let EtherExApp = React.createClass({
   },
 
   onToggleGraph() {
-    var marketSections = _.pluck(fixtures.categories, 'key');
+    var marketSections = _.map(fixtures.categories, 'key');
     marketSections.push('markets');
     if (!_.includes(marketSections, this.state.category))
       this.setState({ showGraph: !this.state.showGraph });

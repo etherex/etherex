@@ -870,7 +870,7 @@ var fixtures = {
             "Low": 0.43001,
             "Open": 0.7046,
             "Volume": 502.33392
-          },
+          }
         ],
         "prices": [
           {
