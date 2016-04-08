@@ -58,7 +58,6 @@ let TradeForm = injectIntl(React.createClass({
           <div className="visible-xs visible-sm text-center">
             <label className="sr-only" forHtml="type">{formatMessage({id:'form.buyorsell'})}</label>
             <DropdownButton id="trade-type-dropdown"
-              title="Buy or Sell"
               ref="type"
               bsStyle="primary" bsSize="small"
               className="pull-right"

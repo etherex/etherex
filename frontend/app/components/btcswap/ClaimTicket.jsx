@@ -105,7 +105,7 @@ let ClaimTicket = injectIntl(React.createClass({
   confirmClaim: function() {
     this.setState({
       showModal: true,
-      confirmMessage: <FormattedMessage id='btc.claim'
+      confirmMessage: <FormattedMessage id="btc.claim"
                         values={{
                           id: this.state.ticket.id,
                           amount: this.state.ticket.formattedAmount.value,

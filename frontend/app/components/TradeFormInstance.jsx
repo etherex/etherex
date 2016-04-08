@@ -358,7 +358,7 @@ let TradeFormInstance = injectIntl(React.createClass({
     var formatMessage = this.props.intl.formatMessage;
     return (
       <form className="form-horizontal" role="form" onSubmit={this.handleValidation}>
-        <input type="hidden" ref="market" value={this.props.market.market.id} />
+        <input type="hidden" ref="market" value={this.props.market.market.id || ""} />
         <Input type="number" ref="amount" className="form-control medium" wrapperClassName="col-md-9"
           label={formatMessage({id: 'form.amount'})} labelClassName="col-md-3"
           placeholder={this.props.market.market.amountPrecision}

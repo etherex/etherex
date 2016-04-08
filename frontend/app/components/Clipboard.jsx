@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import assign from 'react/lib/Object.assign';
 
 function noop() {}
 
@@ -40,10 +39,6 @@ let Clipboard = React.createClass({
     document.removeEventListener("keyup", this.handleKeyUp, false);
   },
 
-  render: function() {
-    return React.createElement("textarea", assign({}, this.props, { readOnly: true, onCopy : this.handleCopy }));
-  },
-
   handleCopy : function(e) {
     this.props.onCopy(e);
   },
@@ -61,9 +56,13 @@ let Clipboard = React.createClass({
     element.select();
   },
 
-  handleKeyUp : function(e) {
+  handleKeyUp: function() {
     var element = ReactDOM.findDOMNode(this);
     element.blur();
+  },
+
+  render: function() {
+    return React.createElement("textarea", Object.assign({}, this.props, { readOnly: true, onCopy : this.handleCopy }));
   }
 
 });
