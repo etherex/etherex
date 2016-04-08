@@ -1,10 +1,7 @@
-import _ from 'lodash';
 import React from 'react';
 import {Link} from 'react-router';
 import {FormattedMessage} from 'react-intl';
 import {Nav} from 'react-bootstrap';
-
-let fixtures = require('../js/fixtures');
 
 let SubNavBar = React.createClass({
   render() {

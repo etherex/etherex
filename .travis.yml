@@ -1,6 +1,6 @@
-language: python
-python:
-  - 2.7
+language: node_js
+node_js:
+  - "5"
 before_install:
   - cd frontend && npm install
   - npm install -g grunt-cli
@@ -11,7 +11,7 @@ script:
   - py.test -vvrs
   - flake8
 after_script:
-  - cd frontend && grunt jshint
+  - cd frontend && grunt eslint
 notifications:
   irc:
     channels:

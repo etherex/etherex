@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
 import {FormattedNumber} from 'react-intl';
-import {Button, Glyphicon, Popover, OverlayTrigger} from 'react-bootstrap';
+import {Glyphicon, Popover, OverlayTrigger} from 'react-bootstrap';
 
 import utils from '../js/utils';
 

@@ -1,8 +1,6 @@
 import _ from 'lodash';
 import Fluxxor from 'fluxxor';
 
-import utils from '../../js/utils';
-
 var constants = require("../../js/constants");
 
 var TicketStore = Fluxxor.createStore({

@@ -67,7 +67,9 @@ var Favicon = React.createClass({
 
         // remove existing favicons
         var links = head.getElementsByTagName('link');
-        for (var i = links.length; --i >= 0; /\bicon\b/i.test(links[i].getAttribute('rel')) && head.removeChild(links[i])) {}
+        for (var i = links.length; --i >= 0; /\bicon\b/i.test(links[i].getAttribute('rel'))) {
+          head.removeChild(links[i]);
+        }
 
         head.appendChild(linkEl);
       }

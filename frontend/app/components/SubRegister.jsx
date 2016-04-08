@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React from 'react';
-import {injectIntl, FormattedMessage} from 'react-intl';
+import {injectIntl} from 'react-intl';
 import {Button, Input, DropdownButton, MenuItem} from 'react-bootstrap';
 import bigRat from 'big-rational';
 
