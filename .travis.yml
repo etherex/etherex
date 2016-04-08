@@ -5,8 +5,8 @@ before_install:
   - cd frontend && npm install
   - npm install -g grunt-cli
 install:
-  - cd .. && pip install -r dev_requirements.txt
-  - pip install -e .
+  - cd .. && pip install --user -r dev_requirements.txt
+  - pip install --user -e .
 script:
   - py.test -vvrs
   - flake8
