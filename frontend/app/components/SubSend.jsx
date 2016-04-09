@@ -121,7 +121,7 @@ let SubSend = injectIntl(React.createClass({
           label={<FormattedMessage id='form.recipient' />} labelClassName="sr-only"
           maxLength="42" pattern="0x[a-fA-F\d]+"
           onChange={this.handleChange}
-          value={this.state.recipient} />
+          value={this.state.recipient || ""} />
 
         <Input type="number" ref="amount"
           label={<FormattedMessage id='form.amount' />} labelClassName="sr-only"
@@ -129,7 +129,7 @@ let SubSend = injectIntl(React.createClass({
           step={this.props.market.amountPrecision}
           placeholder="10.0000"
           onChange={this.handleChange}
-          value={this.state.amount} />
+          value={this.state.amount || ""} />
 
         <div className="form-group">
           <Button className={"btn-block" + (this.state.newSend ? " btn-primary" : "")} type="submit" key="send">

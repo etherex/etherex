@@ -174,28 +174,28 @@ let SubRegister = injectIntl(React.createClass({
           label={this.props.intl.formatMessage({id: 'sub.code'})}
           pattern="[A-Z]{3,4}"
           placeholder="ETX"
-          value={ this.state.code }
+          value={ this.state.code || "" }
           onChange={this.handleChange} />
 
         <Input type="text" ref="address"
           label={this.props.intl.formatMessage({id: 'sub.contract'})}
           maxLength="42" pattern="0x[a-fA-F\d]+"
           placeholder="0x"
-          value={ this.state.address }
+          value={ this.state.address || "" }
           onChange={this.handleChange} />
 
         <Input type="number" ref="minimum"
           label={this.props.intl.formatMessage({id: 'sub.minimum'})}
           min="1" step="1"
           placeholder="10"
-          value={ this.state.minimum }
+          value={ this.state.minimum || "" }
           onChange={this.handleChange} />
 
         <Input type="number" ref="decimals"
           label={this.props.intl.formatMessage({id: 'sub.decimals'})}
           min="0" step="1"
           placeholder="4"
-          value={ this.state.decimals }
+          value={ this.state.decimals || "" }
           onChange={this.handleChange} />
 
         <Input type="number" ref="precision"
@@ -203,7 +203,7 @@ let SubRegister = injectIntl(React.createClass({
           min={this.state.precision ? bigRat(this.state.precision).divide(10).toDecimal(18) : "0.00000001"}
           step={this.state.precision ? bigRat(this.state.precision).divide(10).toDecimal(18) : "0.00000001"}
           placeholder="0.00000001"
-          value={ this.state.precision }
+          value={ this.state.precision || "" }
           onChange={this.handleChange} />
 
         <div className="form-group">

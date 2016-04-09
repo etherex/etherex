@@ -105,7 +105,7 @@ let SubDeposit = injectIntl(React.createClass({
           step={this.props.market.amountPrecision}
           placeholder="10.0000"
           onChange={this.handleChange}
-          value={this.state.amount} />
+          value={this.state.amount || ""} />
         <div className="form-group">
           <Button className={"btn-block" + (this.state.newDeposit ? " btn-primary" : "")} type="submit">
             <FormattedMessage id='form.deposit' />

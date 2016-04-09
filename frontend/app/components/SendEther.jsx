@@ -124,14 +124,14 @@ let SubSend = injectIntl(React.createClass({
           placeholder="0x"
           maxLength="42" pattern="0x[a-fA-F\d]+"
           onChange={this.handleChange}
-          value={this.state.recipient} />
+          value={this.state.recipient || ""} />
 
         <Input type="number" ref="amount"
           label={<FormattedMessage id='form.amount' />} labelClassName="sr-only"
           placeholder="10.0000"
           min={1 / _.parseInt(fixtures.ether)} step={1 / _.parseInt(fixtures.ether)}
           onChange={this.handleChange}
-          value={this.state.amount} />
+          value={this.state.amount || ""} />
 
         <div className="form-group">
           <Button className={"btn-block" + (this.state.newSend ? " btn-primary" : "")} type="submit" key="send">

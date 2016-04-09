@@ -213,14 +213,14 @@ let ConfigPane = injectIntl(React.createClass({
           <form className="form-horizontal" role="form" onSubmit={this.handleValidation} >
             <Input type='text' label={<FormattedMessage id='config.current' />}
               labelClassName='col-sm-3' wrapperClassName='col-sm-9'
-              value={this.props.address} readOnly hasFeedback />
+              value={this.props.address || ""} readOnly hasFeedback />
 
             <Input type='text' label={<FormattedMessage id='config.new' />}
               ref="address"
               labelClassName='col-sm-3' wrapperClassName='col-sm-9'
               maxLength="42" pattern="0x[a-fA-F\d]+" placeholder="Address"
               onChange={this.handleChangeAddress}
-              value={this.state.address} />
+              value={this.state.address || ""} />
             <Input wrapperClassName="col-sm-9 col-sm-offset-3">
               <Button className={"btn-block" + (this.state.newAddress ? " btn-primary" : "")} type="submit">
                 <FormattedMessage id='config.update' />
@@ -233,7 +233,7 @@ let ConfigPane = injectIntl(React.createClass({
               label={<FormattedMessage id='config.blockfee' />}
               labelClassName='col-sm-3' wrapperClassName='col-sm-9'
               help={<FormattedMessage id='config.blockfeehelp' />}
-              value={this.state.blockFee} onChange={this.handleChangeBlockFee} />
+              value={this.state.blockFee || ""} onChange={this.handleChangeBlockFee} />
             <Input wrapperClassName="col-sm-9 col-sm-offset-3">
               <Button
                 onClick={this.handleUpdateBlockFee}
@@ -248,7 +248,7 @@ let ConfigPane = injectIntl(React.createClass({
             <Input ref="timeout" type="number" min="1" step="1"
               label={<FormattedMessage id='config.timeout' />}
               labelClassName='col-sm-3' wrapperClassName='col-sm-9'
-              value={this.state.timeout} onChange={this.handleChangeTimeout} />
+              value={this.state.timeout || ""} onChange={this.handleChangeTimeout} />
             <Input wrapperClassName="col-sm-9 col-sm-offset-3">
               <Button
                 onClick={this.handleTimeout}

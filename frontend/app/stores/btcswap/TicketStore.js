@@ -188,7 +188,7 @@ var TicketStore = Fluxxor.createStore({
 
     // Remove tickets that are no longer in our ticketIDs
     this.tickets = _.filter(this.tickets, function(ticket) {
-      return _.contains(this.ticketIDs, ticket.id);
+      return _.includes(this.ticketIDs, ticket.id);
     }.bind(this));
 
     this.emit(constants.CHANGE_EVENT);

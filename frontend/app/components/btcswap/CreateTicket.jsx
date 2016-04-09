@@ -132,24 +132,24 @@ let CreateTicket = injectIntl(React.createClass({
               <form role="form" onSubmit={this.handleValidation}>
                 <Input type="text" ref="address" label="Bitcoin address" className="form-control"
                   minLength="26" maxLength="35" pattern="[13m][a-km-zA-HJ-NP-Z1-9]{25,34}"
-                  value={this.state.address}
+                  value={this.state.address || ""}
                   onChange={this.handleChange}
                   help="Address where you want to receive bitcoins" />
 
                 <Input type="number" ref="amount" label="Ether amount" className="form-control"
                   min="0.000000000000000001" step="0.000000000000000001"
-                  value={this.state.amount}
+                  value={this.state.amount || ""}
                   onChange={this.handleChange}
                   help="How many ETH you are offering for BTC" />
 
                 <Input type="number" ref="btc" label="Bitcoin amount" className="form-control"
                   min="0.00000001" step="0.00000001"
-                  value={this.state.btc}
+                  value={this.state.btc || ""}
                   onChange={this.handleChange}
                   help="Total amount of BTC you are offering for your ETH" />
 
                 <Input type="number" ref="price" label="Price ETH/BTC" className="form-control" readOnly
-                  value={this.state.price}
+                  value={this.state.price || ""}
                   help="Effectively how many BTC you are asking for each ETH" />
 
                 <Button className={"btn-block" + (this.state.isValid ? " btn-primary" : "")}

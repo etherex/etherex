@@ -172,10 +172,10 @@ var TradeStore = Fluxxor.createStore({
 
     // Remove trades that are no longer in our tradeIDs
     this.trades.buys = _.filter(this.trades.buys, function(trade) {
-      return _.contains(this.tradeIDs, trade.id);
+      return _.includes(this.tradeIDs, trade.id);
     }.bind(this));
     this.trades.sells = _.filter(this.trades.sells, function(trade) {
-      return _.contains(this.tradeIDs, trade.id);
+      return _.includes(this.tradeIDs, trade.id);
     }.bind(this));
 
     this.emit(constants.CHANGE_EVENT);

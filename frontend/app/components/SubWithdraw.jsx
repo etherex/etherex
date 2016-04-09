@@ -106,7 +106,7 @@ let SubWithdraw = injectIntl(React.createClass({
           min={this.props.market.amountPrecision}
           step={this.props.market.amountPrecision}
           onChange={this.handleChange}
-          value={this.state.amount} />
+          value={this.state.amount || ""} />
 
         <div className="form-group">
           <Button className={"btn-block" + (this.state.newWithdrawal ? " btn-primary" : "")} type="submit" key="withdraw">

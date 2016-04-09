@@ -77,7 +77,7 @@ let Chat = React.createClass({
             </Well>
             <form className="form-horizontal" onSubmit={this.handleSend}>
               <div className="container-fluid">
-                <Input type="text" ref="message" value={ this.state.message } onChange={this.handleChange} />
+                <Input type="text" ref="message" value={ this.state.message || "" } onChange={this.handleChange} />
               </div>
               <Button type="submit" bsStyle="primary" className="hidden pull-right">Send</Button>
             </form>

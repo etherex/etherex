@@ -136,7 +136,7 @@ let SubDepositModal = injectIntl(React.createClass({
                     placeholder="10.0000"
                     min="0.0001" step="0.00000001"
                     onChange={this.handleChange}
-                    value={this.state.amount} />
+                    value={this.state.amount || ""} />
             </Modal.Body>
             <Modal.Footer>
                 <Button className={"btn-block" + (this.state.newDeposit ? " btn-primary" : "")} type="submit" key="deposit">Deposit</Button>

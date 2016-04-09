@@ -165,7 +165,7 @@ let ClaimTicket = injectIntl(React.createClass({
                 <form role="form" onSubmit={this.handleLookup}>
                   <Input type="number" className="form-control" ref="ticketId" label="Ticket ID"
                     min={1} step={1}
-                    value={this.state.ticketId}
+                    value={this.state.ticketId || ""}
                     onChange={this.handleChange}/>
                   <Button type="submit" disabled={this.state.lookingUp}>
                     Lookup

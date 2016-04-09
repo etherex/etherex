@@ -415,7 +415,7 @@ let ReserveTicket = injectIntl(React.createClass({
                 <form role="form" onSubmit={this.handleLookup}>
                   <Input type="number" className="form-control" ref="ticketId" label="Ticket ID"
                     min={1} step={1}
-                    value={this.state.ticketId}
+                    value={this.state.ticketId || ""}
                     onChange={this.handleChangeTicket}/>
                   <Button type="submit" disabled={this.state.lookingUp}>
                     Lookup
@@ -460,7 +460,7 @@ let ReserveTicket = injectIntl(React.createClass({
                     <Input type="text" label="Address"
                       labelClassName="col-md-3" wrapperClassName="col-md-9"
                       readOnly
-                      value={ this.props.ticket.wallet.address } />
+                      value={ this.props.ticket.wallet.address || "" } />
                   </OverlayTrigger>
 
                   <OverlayTrigger trigger={['hover', 'focus']} placement='top' overlay={
@@ -472,14 +472,14 @@ let ReserveTicket = injectIntl(React.createClass({
                       labelClassName="col-md-3" wrapperClassName="col-md-9"
                       buttonAfter={ this.keyButton() }
                       readOnly
-                      value={ this.props.ticket.wallet.key } />
+                      value={ this.props.ticket.wallet.key || "" } />
                     { /* TODO export feature instead... */}
                   </OverlayTrigger>
 
                   <Input type="textarea" label="Raw BTC transaction"
                     labelClassName="col-md-3" wrapperClassName="col-md-9"
                     readOnly
-                    value={this.props.ticket.wallet.tx ? this.props.ticket.wallet.tx.hex : ''} />
+                    value={this.props.ticket.wallet.tx ? this.props.ticket.wallet.tx.hex : ""} />
 
                   <Input type="number" ref="fee" label="Ether fee to claimer"
                     labelClassName="col-md-3" wrapperClassName="col-md-9"
@@ -543,12 +543,13 @@ let ReserveTicket = injectIntl(React.createClass({
                     labelClassName="col-md-3" wrapperClassName="col-md-9"
                     maxLength={64} pattern="[a-fA-F0-9]{64}"
                     disabled={!this.state.canSetTxHash}
-                    value={this.state.ticket.txHash || this.state.txHash}
+                    value={(this.state.ticket.txHash || this.state.txHash) || ""}
                     onChange={this.handleChange} />
 
                   <Input type="text" ref="nonce" label="Proof of Work"
                     labelClassName="col-md-3" wrapperClassName="col-md-4"
-                    value={this.state.ticket.nonce} readOnly />
+                    value={this.state.ticket.nonce || ""}
+                    readOnly />
 
                   <Input wrapperClassName="col-sm-9 col-sm-offset-3">
                     <Button onClick={this.handleCompute}
@@ -590,7 +591,7 @@ let ReserveTicket = injectIntl(React.createClass({
                     <Input type="password" ref="key" label="Key"
                       labelClassName="col-md-3" wrapperClassName="col-md-9"
                       disabled={!!this.props.ticket.wallet.key}
-                      value={ this.state.key } />
+                      value={ this.state.key || "" } />
                   </OverlayTrigger>
 
                   <Input wrapperClassName="col-md-9 col-md-offset-3">

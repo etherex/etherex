@@ -364,7 +364,7 @@ let TradeFormInstance = injectIntl(React.createClass({
           placeholder={this.props.market.market.amountPrecision}
           min={this.props.market.market.amountPrecision} step={this.props.market.market.amountPrecision}
           onChange={this.handleChange}
-          value={this.state.amount}
+          value={this.state.amount || ""}
           addonAfter={(this.props.market.market.name ? this.props.market.market.name : "...")}
         />
 
@@ -373,7 +373,7 @@ let TradeFormInstance = injectIntl(React.createClass({
           placeholder={this.props.market.market.lastPrice ? this.props.market.market.lastPrice : this.props.market.market.pricePrecision}
           min={this.props.market.market.pricePrecision} step={this.props.market.market.pricePrecision}
           onChange={this.handleChange}
-          value={this.state.price}
+          value={this.state.price || ""}
           addonAfter={(this.props.market.market.name ? this.props.market.market.name : "...") + "/ETH"}
          />
 
@@ -382,7 +382,7 @@ let TradeFormInstance = injectIntl(React.createClass({
           placeholder={this.props.market.market.minimumTotal}
           min={this.props.market.market.minimumTotal} step={this.props.market.market.amountPrecision}
           onChange={this.handleChangeTotal}
-          value={this.state.total}
+          value={this.state.total || ""}
           addonAfter="ETH"
         />
 
