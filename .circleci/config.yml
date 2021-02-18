@@ -1,55 +1,7 @@
-# Orb 'circleci/node@3.0.0' resolved to 'circleci/node@3.0.0'
-version: 2
-jobs:
-  node/test:
-    docker:
-    - image: cimg/node:13.11.0
-    steps:
-    - checkout
-    - run:
-        command: |
-          if [ ! -f "package.json" ]; then
-            echo
-            echo "---"
-            echo "Unable to find your package.json file. Did you forget to set the app-dir parameter?"
-            echo "---"
-            echo
-            echo "Current directory: $(pwd)"
-            echo
-            echo
-            echo "List directory: "
-            echo
-            ls
-            exit 1
-          fi
-        name: Checking for package.json.
-        working_directory: ~/project
-    - restore_cache:
-        keys:
-        - node-deps-v1-{{ .Branch }}-{{ checksum "~/project/package-lock.json" }}
-    - run:
-        command: "if [[ ! -z \"\" ]]; then\n  echo \"Running override package installation command:\"\n  \nelse\n  npm ci\nfi\n"
-        name: Installing NPM packages
-        working_directory: ~/project
-    - save_cache:
-        key: node-deps-v1-{{ .Branch }}-{{ checksum "~/project/package-lock.json" }}
-        paths:
-        - ~/.npm
-    - run:
-        command: npm run test
-        name: Run NPM Tests
-        working_directory: ~/project
+version: 2.1
+orbs:
+  node: circleci/node@3.0.0
 workflows:
   node-tests:
     jobs:
-    - node/test
-  version: 2
-
-# Original config.yml file:
-# version: 2.1
-# orbs:
-#   node: circleci/node@3.0.0
-# workflows:
-#   node-tests:
-#     jobs:
-#       - node/test
+      - node/test
